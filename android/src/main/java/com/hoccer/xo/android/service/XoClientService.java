@@ -8,6 +8,7 @@ import android.media.MediaScannerConnection;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -52,19 +53,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class XoClientService extends Service {
 
-    /**
-     * Delay after which new activities send their first keepalive (seconds)
-     */
-    public static final int SERVICE_KEEPALIVE_PING_DELAY = 60;
-    /**
-     * Interval at which activities send keepalives to the client service (seconds)
-     */
-    public static final int SERVICE_KEEPALIVE_PING_INTERVAL = 600;
-    /**
-     * Timeout after which the client service terminates automatically (seconds)
-     */
-    public static final int SERVICE_KEEPALIVE_TIMEOUT = 1800;
-
     public static final String CONTACT_DELIMETER = ", ";
 
     private static final Logger LOG = Logger.getLogger(XoClientService.class);
@@ -95,15 +83,7 @@ public class XoClientService extends Service {
      */
     XoAndroidClient mClient;
 
-    /**
-     * Reference to latest auto-shutdown future
-     */
-    ScheduledFuture<?> mShutdownFuture;
-
-    /**
-     * All service connections
-     */
-    ArrayList<Connection> mConnections;
+    XoClientServiceBinder mBinder = new XoClientServiceBinder();
 
     /**
      * Preferences containing service configuration
@@ -128,7 +108,7 @@ public class XoClientService extends Service {
     /**
      * Previous state of connectivity
      */
-    boolean mCurrentConnectionState = false;
+    boolean mCurrentConnectionState;
 
     /**
      * Type of previous connection
@@ -159,9 +139,6 @@ public class XoClientService extends Service {
         super.onCreate();
 
         mExecutor = XoApplication.getExecutor();
-
-        mConnections = new ArrayList<Connection>();
-
         mClient = XoApplication.getXoClient();
 
         if (mClientListener == null) {
@@ -251,23 +228,7 @@ public class XoClientService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        LOG.debug("onBind(" + intent.toString() + ")");
-
-        if (!mClient.isActivated()) {
-            mClient.activate();
-        }
-
-        Connection newConnection = new Connection(intent);
-
-        mConnections.add(newConnection);
-
-        return newConnection;
-    }
-
-    @Override
-    public boolean onUnbind(Intent intent) {
-        LOG.debug("onUnbind(" + intent.toString() + ")");
-        return super.onUnbind(intent);
+        return mBinder;
     }
 
     private void configureAutoTransfers() {
@@ -309,12 +270,6 @@ public class XoClientService extends Service {
                         Integer.toString(DEFAULT_IMAGE_UPLOAD_ENCODING_QUALITY));
                 mClient.setImageUploadEncodingQuality(Integer.parseInt(imageQuality));
             }
-        }
-    }
-
-    private void wakeClient() {
-        if (mCurrentConnectionState) {
-            mClient.wake();
         }
     }
 
@@ -396,33 +351,6 @@ public class XoClientService extends Service {
                 mClient.unregisterGcm();
                 GCMRegistrar.setRegisteredOnServer(this, false);
             }
-        }
-    }
-
-    private void doShutdown() {
-        LOG.info("shutting down");
-
-        stopSelf();
-    }
-
-    private void scheduleShutdown() {
-        shutdownShutdown();
-        mShutdownFuture = mExecutor.schedule(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        LOG.debug("keep-alive timeout");
-                        doShutdown();
-                    }
-                },
-                SERVICE_KEEPALIVE_TIMEOUT, TimeUnit.SECONDS
-        );
-    }
-
-    private void shutdownShutdown() {
-        if (mShutdownFuture != null) {
-            mShutdownFuture.cancel(false);
-            mShutdownFuture = null;
         }
     }
 
@@ -829,37 +757,6 @@ public class XoClientService extends Service {
         }
     }
 
-    public class Connection extends IXoClientService.Stub {
-
-        int mId;
-
-        Intent mBindIntent;
-
-        Connection(Intent bindIntent) {
-            mId = ID_COUNTER.incrementAndGet();
-            mBindIntent = bindIntent;
-            LOG.debug("[" + mId + "] connected");
-        }
-
-        @Override
-        public void keepAlive() throws RemoteException {
-            LOG.debug("[" + mId + "] keepAlive()");
-            scheduleShutdown();
-        }
-
-        @Override
-        public void wake() throws RemoteException {
-            LOG.debug("[" + mId + "] wake()");
-            wakeClient();
-        }
-
-        @Override
-        public void reconnect() throws RemoteException {
-            LOG.debug("[" + mId + "] reconnect()");
-            mClient.reconnect("client request");
-        }
-    }
-
     private class ContactUnseenMessageHolder {
         private final TalkClientContact mContact;
         private final List<TalkClientMessage> mUnseenMessages;
@@ -882,6 +779,12 @@ public class XoClientService extends Service {
         @Override
         public void onReceive(Context arg0, Intent intent) {
             mCurrentConversationContactId = intent.getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
+        }
+    }
+
+    public class XoClientServiceBinder extends Binder {
+        public XoClientService getService() {
+            return XoClientService.this;
         }
     }
 }

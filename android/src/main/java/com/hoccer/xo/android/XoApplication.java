@@ -16,6 +16,7 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.credentialtransfer.SrpChangeListener;
 import com.hoccer.xo.android.nearby.EnvironmentUpdater;
+import com.hoccer.xo.android.service.XoClientService;
 import com.hoccer.xo.android.task.StartupTasks;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -195,6 +196,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         // add srp secret change listener
         sClient.registerStateListener(new SrpChangeListener(this));
 
+
         // create sound pool instance
         sSoundPool = new XoSoundPool(this);
 
@@ -205,6 +207,11 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
         sStartupTasks = new StartupTasks(this);
         sStartupTasks.executeRegisteredTasks();
+
+        sClient.wake();
+
+        Intent serviceIntent = new Intent(this, XoClientService.class);
+        startService(serviceIntent);
     }
 
     @Override

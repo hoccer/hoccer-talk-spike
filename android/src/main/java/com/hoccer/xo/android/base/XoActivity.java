@@ -11,7 +11,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
-import android.os.*;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
@@ -36,8 +39,6 @@ import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.content.ContentSelection;
 import com.hoccer.xo.android.content.selector.ImageSelector;
 import com.hoccer.xo.android.fragment.DeviceContactsInvitationFragment;
-import com.hoccer.xo.android.service.IXoClientService;
-import com.hoccer.xo.android.service.XoClientService;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
@@ -53,13 +54,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 /**
- * Base class for our activities
- * These activites continually keep the background service which
- * we use for connection retention alive by calling it via RPC.
+ * Base class for our activities.
  */
 public abstract class XoActivity extends FragmentActivity {
 
@@ -72,21 +69,6 @@ public abstract class XoActivity extends FragmentActivity {
      * Executor for background tasks
      */
     ScheduledExecutorService mBackgroundExecutor;
-
-    /**
-     * RPC interface to service (null when not connected)
-     */
-    IXoClientService mService;
-
-    /**
-     * Service connection object managing mService
-     */
-    ServiceConnection mServiceConnection;
-
-    /**
-     * Timer for keepalive calls to the service
-     */
-    ScheduledFuture<?> mKeepAliveTimer;
 
     /**
      * Talk client database
@@ -128,10 +110,6 @@ public abstract class XoActivity extends FragmentActivity {
         return mBackgroundExecutor;
     }
 
-    public IXoClientService getService() {
-        return mService;
-    }
-
     public void registerXoFragment(IXoFragment fragment) {
         mTalkFragments.add(fragment);
     }
@@ -146,7 +124,7 @@ public abstract class XoActivity extends FragmentActivity {
             return;
         }
 
-        ((XoApplication)getApplication()).stayActiveInBackground();
+        ((XoApplication) getApplication()).stayActiveInBackground();
         try {
             startActivity(intent);
         } catch (ActivityNotFoundException e) {
@@ -161,7 +139,7 @@ public abstract class XoActivity extends FragmentActivity {
             return;
         }
 
-        ((XoApplication)getApplication()).stayActiveInBackground();
+        ((XoApplication) getApplication()).stayActiveInBackground();
         try {
             startActivityForResult(intent, requestCode);
         } catch (ActivityNotFoundException e) {
@@ -253,14 +231,7 @@ public abstract class XoActivity extends FragmentActivity {
         super.onResume();
 
         checkForCrashesIfEnabled();
-
-        // start the backend service and bind to it
-        Intent serviceIntent = new Intent(getApplicationContext(), XoClientService.class);
-        startService(serviceIntent);
-        mServiceConnection = new MainServiceConnection();
-        bindService(serviceIntent, mServiceConnection, BIND_IMPORTANT);
         checkKeys();
-
         getXoClient().registerAlertListener(mAlertListener);
     }
 
@@ -363,19 +334,6 @@ public abstract class XoActivity extends FragmentActivity {
     protected void onPause() {
         LOG.debug("onPause()");
         super.onPause();
-
-        // stop keeping the service alive
-        shutdownKeepAlive();
-
-        // drop reference to service binder
-        if (mService != null) {
-            mService = null;
-        }
-        // unbind service connection
-        if (mServiceConnection != null) {
-            unbindService(mServiceConnection);
-            mServiceConnection = null;
-        }
 
         getXoClient().unregisterAlertListener(mAlertListener);
     }
@@ -529,60 +487,8 @@ public abstract class XoActivity extends FragmentActivity {
         }
     }
 
-    /**
-     * Schedule regular keep-alive calls to the service
-     */
-    private void scheduleKeepAlive() {
-        shutdownKeepAlive();
-        mKeepAliveTimer = mBackgroundExecutor.scheduleAtFixedRate(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mService != null) {
-                            try {
-                                mService.keepAlive();
-                            } catch (RemoteException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                },
-                XoClientService.SERVICE_KEEPALIVE_PING_DELAY,
-                XoClientService.SERVICE_KEEPALIVE_PING_INTERVAL,
-                TimeUnit.SECONDS
-        );
-    }
-
-    /**
-     * Stop sending keep-alive calls to the service
-     */
-    private void shutdownKeepAlive() {
-        if (mKeepAliveTimer != null) {
-            mKeepAliveTimer.cancel(false);
-            mKeepAliveTimer = null;
-        }
-    }
-
-    public IXoClientService getXoService() {
-        return mService;
-    }
-
     public XoClientDatabase getXoDatabase() {
         return mDatabase;
-    }
-
-//    public ConversationAdapter makeConversationAdapter() {
-//        return new ConversationAdapter(this);
-//    }
-
-    public void wakeClient() {
-        if (mService != null) {
-            try {
-                mService.wake();
-            } catch (RemoteException e) {
-                LOG.error("remote error", e);
-            }
-        }
     }
 
     public void showContactProfile(TalkClientContact contact) {
@@ -683,43 +589,12 @@ public abstract class XoActivity extends FragmentActivity {
     }
 
     /**
-     * Connection to our backend service
-     */
-    public class MainServiceConnection implements ServiceConnection {
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            LOG.debug("onServiceConnected()");
-            mService = (IXoClientService) service;
-            scheduleKeepAlive();
-            try {
-                mService.wake();
-            } catch (RemoteException e) {
-                LOG.error("remote error", e);
-            }
-            for (IXoFragment fragment : mTalkFragments) {
-                fragment.onServiceConnected();
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            LOG.debug("onServiceDisconnected()");
-            shutdownKeepAlive();
-            mService = null;
-            for (IXoFragment fragment : mTalkFragments) {
-                fragment.onServiceDisconnected();
-            }
-        }
-    }
-
-    /**
      * This class is an implementation of IXoAlertListener which displays alerts inside an AlertDialog.
      * Links and other data inside the message text are tappable.
      */
     public class XoAlertListener implements IXoAlertListener {
 
-        private Context mContext;
+        private final Context mContext;
 
         XoAlertListener(Context context) {
             mContext = context;

@@ -31,10 +31,6 @@ public abstract class XoListFragment extends ListFragment implements IXoFragment
         return mActivity.getXoDatabase();
     }
 
-    public IXoClientService getXoService() {
-        return mActivity.getXoService();
-    }
-
     public void runOnUiThread(Runnable runnable) {
         mActivity.runOnUiThread(runnable);
     }
