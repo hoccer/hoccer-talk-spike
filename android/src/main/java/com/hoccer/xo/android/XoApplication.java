@@ -210,13 +210,16 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
         sClient.wake();
 
-        Intent serviceIntent = new Intent(this, XoClientService.class);
-        startService(serviceIntent);
+        Intent xoClientServiceIntent = new Intent(this, XoClientService.class);
+        startService(xoClientServiceIntent);
     }
 
     @Override
     public void onTerminate() {
         super.onTerminate();
+
+        Intent xoClientServiceIntent = new Intent(this, XoClientService.class);
+        stopService(xoClientServiceIntent);
 
         mBackgroundManager.unregisterListener(this);
 
