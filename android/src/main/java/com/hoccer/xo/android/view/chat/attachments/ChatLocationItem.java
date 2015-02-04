@@ -12,12 +12,13 @@ import com.artcom.hoccer.R;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.maps.model.LatLng;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
+import org.apache.log4j.Logger;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -25,6 +26,8 @@ import java.io.InputStream;
 
 
 public class ChatLocationItem extends ChatMessageItem {
+
+    private final static Logger LOG = Logger.getLogger(ChatLocationItem.class);
 
     public ChatLocationItem(Context context, TalkClientMessage message) {
         super(context, message);
@@ -42,8 +45,8 @@ public class ChatLocationItem extends ChatMessageItem {
     }
 
     @Override
-    protected void displayAttachment(final IContentObject contentObject) {
-        super.displayAttachment(contentObject);
+    protected void displayAttachment(final XoTransfer attachment) {
+        super.displayAttachment(attachment);
 
         // add view lazily
         if (mContentWrapper.getChildCount() == 0) {
@@ -70,14 +73,8 @@ public class ChatLocationItem extends ChatMessageItem {
         locationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (contentObject.isContentAvailable()) {
-                    Uri uri;
-                    if (contentObject.getContentUrl() != null) {
-                        uri = Uri.parse(contentObject.getContentUrl());
-                    } else {
-                        uri = UriUtils.getAbsoluteFileUri(contentObject.getFilePath());
-                    }
-
+                if (attachment.isContentAvailable()) {
+                    Uri uri = UriUtils.getAbsoluteFileUri(attachment.getFilePath());
                     LatLng location = loadGeoJson(uri);
                     if (location != null) {
                         String label = "Received Location";
@@ -91,7 +88,7 @@ public class ChatLocationItem extends ChatMessageItem {
         });
     }
 
-    private LatLng loadGeoJson(Uri uri) {
+    private static LatLng loadGeoJson(Uri uri) {
         LatLng result = null;
         try {
             InputStream is = new FileInputStream(uri.getPath());

@@ -13,7 +13,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.talk.model.TalkGroupPresence;
 import com.hoccer.talk.model.TalkRelationship;
@@ -22,7 +22,6 @@ import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupContactsAdapter;
-import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.dialog.GroupManageDialog;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.UriUtils;
@@ -64,7 +63,7 @@ public class GroupProfileFragment extends ProfileFragment
 
     private TalkClientContact mGroup;
 
-    private IContentObject mAvatarToSet;
+    private SelectedContent mAvatarToSet;
 
     private Menu mOptionsMenu;
 
@@ -519,7 +518,7 @@ public class GroupProfileFragment extends ProfileFragment
 
     private void enterAvatarEditMode() {
         if (mGroup.isEditable()) {
-            if (mGroup.getAvatarContentUrl() != null) {
+            if (mGroup.getAvatarFilePath() != null) {
                 XoDialogs.showRadioSingleChoiceDialog("AvatarSelection",
                         R.string.dialog_avatar_options_title,
                         new String[]{
@@ -548,8 +547,8 @@ public class GroupProfileFragment extends ProfileFragment
     }
 
     @Override
-    public void onAvatarSelected(IContentObject contentObject) {
-        mAvatarToSet = contentObject;
+    public void onAvatarSelected(SelectedContent content) {
+        mAvatarToSet = content;
     }
 
     @Override
@@ -561,10 +560,11 @@ public class GroupProfileFragment extends ProfileFragment
         }
     }
 
-    private void updateAvatar(final IContentObject avatar) {
+    private void updateAvatar(final SelectedContent avatar) {
         if (avatar != null) {
             LOG.debug("creating avatar upload");
-            TalkClientUpload upload = SelectedContent.createAvatarUpload(avatar);
+            TalkClientUpload upload = new TalkClientUpload();
+            upload.initializeAsAvatar(avatar);
             try {
                 getXoDatabase().saveClientUpload(upload);
                 getXoClient().setGroupAvatar(mGroup, upload);

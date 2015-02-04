@@ -28,8 +28,11 @@ import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.util.ContactOperations;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.artcom.hoccer.R;
+import com.hoccer.xo.android.util.UriUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
@@ -54,7 +57,7 @@ public class AttachmentListFragment extends SearchableListFragment {
     private SectionedListAdapter mResultsAdapter;
     private ContactSearchResultAdapter mSearchContactsAdapter;
     private AttachmentSearchResultAdapter mSearchAttachmentAdapter;
-    private TalkClientContact mFilterContact = null;
+    private TalkClientContact mFilterContact;
     private XoClientDatabase mDatabase;
     private ActionMode mCurrentActionMode;
 
@@ -243,7 +246,7 @@ public class AttachmentListFragment extends SearchableListFragment {
 
     private void retrieveCollectionAndAddSelectedAttachments(Integer mediaCollectionId) {
         List<XoTransfer> selectedItems = mAttachmentAdapter.getSelectedItems();
-        if(selectedItems.size() > 0) {
+        if(!selectedItems.isEmpty()) {
             try {
                 TalkClientMediaCollection mediaCollection = mDatabase.findMediaCollectionById(mediaCollectionId);
                 List<String> addedFilenames = new ArrayList<String>();
@@ -262,7 +265,10 @@ public class AttachmentListFragment extends SearchableListFragment {
         List<XoTransfer> selectedObjects = mAttachmentAdapter.getSelectedItems();
         for(XoTransfer item : selectedObjects) {
             try {
-                XoApplication.getXoClient().getDatabase().deleteTransferAndUpdateMessage(item, getResources().getString(R.string.deleted_attachment));
+                for(XoTransfer transfer : XoApplication.getXoClient().getDatabase().findTransfersByFilePath(item.getFilePath())) {
+                    XoApplication.getXoClient().getDatabase().deleteTransferAndUpdateMessage(transfer, getResources().getString(R.string.deleted_attachment));
+                }
+                FileUtils.deleteQuietly(new File(UriUtils.getAbsoluteFileUri(item.getFilePath()).getPath()));
             } catch (SQLException e) {
                 LOG.error(e);
             }
@@ -270,7 +276,6 @@ public class AttachmentListFragment extends SearchableListFragment {
     }
 
     private class ListInteractionHandler implements AdapterView.OnItemClickListener, AbsListView.MultiChoiceModeListener {
-
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Object selectedItem = getListAdapter().getItem(position);

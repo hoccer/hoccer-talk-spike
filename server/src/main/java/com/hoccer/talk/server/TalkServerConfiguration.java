@@ -185,11 +185,6 @@ public class TalkServerConfiguration {
                 PropertyTypes.STRING,
                 "http://localhost:8081/download/"),
 
-        // INVITATIONS
-        INVITATION_ALLOWED_URI_SCHEMES(PROPERTY_PREFIX + ".invitation.allowed.uri.schemes",
-                PropertyTypes.STRING,
-                "hxo, hxod, hcr, hcrd"),
-
         // MISC
         SUPPORT_TAG(PROPERTY_PREFIX + ".support.tag",
                 PropertyTypes.STRING,
@@ -310,8 +305,6 @@ public class TalkServerConfiguration {
         builder.append(MessageFormat.format("\n   * filecache control url:                ''{0}''", this.getFilecacheControlUrl()));
         builder.append(MessageFormat.format("\n   * filecache upload base url:            ''{0}''", this.getFilecacheUploadBase()));
         builder.append(MessageFormat.format("\n   * filecache download base url:          ''{0}''", this.getFilecacheDownloadBase()));
-        builder.append(                      "\n - Invitation Configuration:");
-        builder.append(MessageFormat.format("\n   * allowed invitation URI schemes:     {0}", this.getAllowedInviteUriSchemes()));
         builder.append(                     "\n - Other:");
         builder.append(MessageFormat.format("\n   * support tag:                          ''{0}''", this.getSupportTag()));
         builder.append(                     "\n - Threads:");
@@ -476,11 +469,6 @@ public class TalkServerConfiguration {
 
     public void setFilecacheDownloadBase(String mFilecacheDownloadBase) {
         ConfigurableProperties.FILECACHE_DOWNLOAD_BASE.setValue(mFilecacheDownloadBase);
-    }
-
-    public List<String> getAllowedInviteUriSchemes() {
-        String schemesString = (String) ConfigurableProperties.INVITATION_ALLOWED_URI_SCHEMES.value;
-        return Arrays.asList(schemesString.replace(" ", "").split(","));
     }
 
     public String getSupportTag() {

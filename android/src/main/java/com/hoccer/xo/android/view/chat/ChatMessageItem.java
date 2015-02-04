@@ -3,7 +3,6 @@ package com.hoccer.xo.android.view.chat;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Build;
 import android.text.format.DateUtils;
 import android.util.TypedValue;
@@ -20,23 +19,18 @@ import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentState;
-import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
-import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferHandler;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferListener;
 import com.hoccer.xo.android.view.chat.attachments.ChatItemType;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
-import java.io.File;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -46,12 +40,12 @@ import java.util.Date;
  */
 public class ChatMessageItem implements AttachmentTransferListener {
 
-    protected Logger LOG = Logger.getLogger(getClass());
+    private final static Logger LOG = Logger.getLogger(ChatMessageItem.class);
 
     protected Context mContext;
     protected AttachmentTransferHandler mAttachmentTransferHandler;
     protected TalkClientMessage mMessage;
-    protected IContentObject mContentObject;
+    protected XoTransfer mAttachment;
     protected ContentRegistry mContentRegistry;
 
     protected TextView mMessageText;
@@ -77,8 +71,8 @@ public class ChatMessageItem implements AttachmentTransferListener {
         mMessage = message;
     }
 
-    public IContentObject getContent() {
-        return mContentObject;
+    public XoTransfer getAttachment() {
+        return mAttachment;
     }
 
     /**
@@ -428,30 +422,30 @@ public class ChatMessageItem implements AttachmentTransferListener {
         mContentTransferProgress = (RelativeLayout) mAttachmentView.findViewById(R.id.rl_content_transfer_progress);
         mContentTransferControl = (AttachmentTransferControlView) mContentTransferProgress.findViewById(R.id.atcv_content_transfer_control);
         mContentDescription = (TextView) mContentTransferProgress.findViewById(R.id.tv_content_description_text);
-        IContentObject contentObject = mMessage.getAttachmentUpload();
-        if (contentObject == null) {
-            contentObject = mMessage.getAttachmentDownload();
+        XoTransfer attachment = mMessage.getAttachmentUpload();
+        if (attachment == null) {
+            attachment = mMessage.getAttachmentDownload();
         }
-        mContentObject = contentObject;
+        mAttachment = attachment;
 
         mAttachmentView.setBackgroundDrawable(bubbleForMessageAttachment(mMessage));
 
         setContentDescription();
 
-        if (shouldDisplayTransferControl(getTransferState(mContentObject))) {
+        if (shouldDisplayTransferControl(getTransferState(mAttachment))) {
             mContentTransferProgress.setVisibility(View.VISIBLE);
             mContentWrapper.setVisibility(View.GONE);
 
             // create handler for a pending attachment transfer
             if (mAttachmentTransferHandler == null) {
-                mAttachmentTransferHandler = new AttachmentTransferHandler(mContentTransferControl, contentObject, this);
+                mAttachmentTransferHandler = new AttachmentTransferHandler(mContentTransferControl, attachment, this);
             }
 
-            ((XoTransfer) contentObject).registerTransferListener(mAttachmentTransferHandler);
-            mContentTransferControl.setOnClickListener(new AttachmentTransferHandler(mContentTransferControl, contentObject, this));
+            attachment.registerTransferListener(mAttachmentTransferHandler);
+            mContentTransferControl.setOnClickListener(new AttachmentTransferHandler(mContentTransferControl, attachment, this));
 
         } else {
-            displayAttachment(contentObject);
+            displayAttachment(attachment);
         }
 
         // hide message text field when empty - there is still an attachment to display
@@ -463,8 +457,8 @@ public class ChatMessageItem implements AttachmentTransferListener {
     }
 
     private void setContentDescription() {
-        mContentDescription.setText(ContentRegistry.getContentDescription(mContentObject));
-        if (mContentObject.getContentState() == ContentState.DOWNLOAD_ON_HOLD) {
+        mContentDescription.setText(ContentRegistry.getContentDescription(mAttachment));
+        if (mAttachment.getContentState() == ContentState.DOWNLOAD_ON_HOLD) {
             mContentDescription.setVisibility(View.INVISIBLE);
         } else {
             mContentDescription.setVisibility(View.VISIBLE);
@@ -494,9 +488,9 @@ public class ChatMessageItem implements AttachmentTransferListener {
      * <p/>
      * Subtypes will have to overwrite this method to configure the attachment layout.
      *
-     * @param contentObject The IContentObject to display
+     * @param transfer The XoTransfer to display
      */
-    protected void displayAttachment(IContentObject contentObject) {
+    protected void displayAttachment(XoTransfer transfer) {
         mContentTransferProgress.setVisibility(View.GONE);
         mContentTransferControl.setOnClickListener(null);
         mContentWrapper.setVisibility(View.VISIBLE);
@@ -513,7 +507,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
         return !(state == ContentState.SELECTED || state == ContentState.UPLOAD_COMPLETE || state == ContentState.DOWNLOAD_COMPLETE);
     }
 
-    protected ContentState getTransferState(IContentObject object) {
+    protected ContentState getTransferState(XoTransfer object) {
         XoTransferAgent agent = XoApplication.getXoClient().getTransferAgent();
         ContentState state = object.getContentState();
         if (object instanceof TalkClientDownload) {
@@ -558,38 +552,8 @@ public class ChatMessageItem implements AttachmentTransferListener {
     }
 
     @Override
-    public void onAttachmentTransferComplete(IContentObject contentObject) {
-        // check for previously cached files and replace them with the original
-        if (contentObject instanceof TalkClientUpload) {
-            TalkClientUpload upload = (TalkClientUpload) contentObject;
-            if (upload.getFilePath() != null && upload.getFilePath().contains(XoApplication.getCacheStorage().getPath())) {
-                FileUtils.deleteQuietly(new File(upload.getFilePath()));
-
-                Uri contentUri = Uri.parse(upload.getContentUrl());
-                Uri fileUri = UriUtils.getFileUriByContentUri(mContext, contentUri);
-                if(fileUri != null) {
-                    upload.setContentDataUrl(makeRelative(fileUri.getPath()));
-                } else {
-                    upload.setContentDataUrl(null);
-                }
-
-                try {
-                    XoApplication.getXoClient().getDatabase().saveClientUpload(upload);
-                } catch (SQLException e) {
-                    LOG.error("Error updating upload with original file path.");
-                }
-            }
-        }
-        displayAttachment(contentObject);
-    }
-
-    private static String makeRelative(String filePath) {
-        String externalStorageDirectory = XoApplication.getExternalStorage().getAbsolutePath();
-        if (filePath.startsWith(externalStorageDirectory)) {
-            return filePath.substring(externalStorageDirectory.length() + 1);
-        } else {
-            return filePath;
-        }
+    public void onAttachmentTransferComplete(XoTransfer attachment) {
+        displayAttachment(attachment);
     }
 
     @Override

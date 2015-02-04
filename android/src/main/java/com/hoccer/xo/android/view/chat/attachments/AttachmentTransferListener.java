@@ -1,9 +1,8 @@
 package com.hoccer.xo.android.view.chat.attachments;
 
 
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.client.XoTransfer;
 
 public interface AttachmentTransferListener {
-
-    public void onAttachmentTransferComplete(IContentObject contentObject);
+    public void onAttachmentTransferComplete(XoTransfer attachment);
 }

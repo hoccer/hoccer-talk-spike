@@ -17,10 +17,10 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.widget.RemoteViews;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
 import com.hoccer.xo.android.content.MediaMetaData;
@@ -47,7 +47,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     private boolean mPaused;
     private boolean mStopped = true;
 
-    private IContentObject mCurrentItem;
+    private XoTransfer mCurrentItem;
 
     private PendingIntent mPlayStateTogglePendingIntent;
     private final IBinder mBinder = new MediaPlayerBinder();
@@ -59,7 +59,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     private final MediaPlaylistController mPlaylistController = new MediaPlaylistController();
 
     @Override
-    public void onCurrentItemChanged(IContentObject newItem) {
+    public void onCurrentItemChanged(XoTransfer newItem) {
         if (newItem != null) {
             playNewTrack(mPlaylistController.getCurrentItem());
         } else {
@@ -294,7 +294,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         }
     }
 
-    private void resetAndPrepareMediaPlayer(IContentObject item) {
+    private void resetAndPrepareMediaPlayer(XoTransfer item) {
         try {
             mMediaPlayer.reset();
             mMediaPlayer.setDataSource(UriUtils.getAbsoluteFileUri(item.getFilePath()).getPath());
@@ -308,7 +308,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         return mPlaylistController.size();
     }
 
-    public void playItemInPlaylist(IContentObject item, MediaPlaylist playlist) {
+    public void playItemInPlaylist(XoTransfer item, MediaPlaylist playlist) {
         boolean isCurrentMediaItem = item.equals(mCurrentItem);
         boolean isCurrentlyPlaying = isCurrentMediaItem && !mPaused && !mStopped;
         boolean isCurrentlyPaused = isCurrentMediaItem && mPaused;
@@ -332,7 +332,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         play(mPlaylistController.getCurrentItem());
     }
 
-    private void play(final IContentObject item) {
+    private void play(final XoTransfer item) {
         if (mMediaPlayer == null) {
             createMediaPlayerAndPlay(item);
         } else {
@@ -355,7 +355,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         }
     }
 
-    private void createMediaPlayerAndPlay(final IContentObject item) {
+    private void createMediaPlayerAndPlay(final XoTransfer item) {
         createMediaPlayer();
         mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
@@ -366,7 +366,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         resetAndPrepareMediaPlayer(item);
     }
 
-    private void playNewTrack(IContentObject item) {
+    private void playNewTrack(XoTransfer item) {
         if (mMediaPlayer != null) {
             mMediaPlayer.release();
             mMediaPlayer = null;
@@ -474,7 +474,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         return result;
     }
 
-    public IContentObject getCurrentMediaItem() {
+    public XoTransfer getCurrentMediaItem() {
         return mCurrentItem;
     }
 

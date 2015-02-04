@@ -2,7 +2,6 @@ package com.hoccer.xo.android.content;
 
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
-import com.hoccer.talk.content.IContentObject;
 
 import java.util.Iterator;
 
@@ -50,7 +49,7 @@ public class MediaCollectionPlaylist extends MediaPlaylist {
     }
 
     @Override
-    public IContentObject getItem(int index) {
+    public XoTransfer getItem(int index) {
         return mCollection.getItem(index);
     }
 
@@ -60,9 +59,9 @@ public class MediaCollectionPlaylist extends MediaPlaylist {
     }
 
     @Override
-    public boolean hasItem(IContentObject item) {
-        XoTransfer transfer = (XoTransfer)item;
-        if(transfer != null) {
+    public boolean hasItem(XoTransfer item) {
+        XoTransfer transfer = item;
+        if (transfer != null) {
             return mCollection.hasItem(transfer);
         } else {
             return false;
@@ -70,9 +69,9 @@ public class MediaCollectionPlaylist extends MediaPlaylist {
     }
 
     @Override
-    public int indexOf(IContentObject item) {
-        XoTransfer transfer = (XoTransfer)item;
-        if(transfer != null) {
+    public int indexOf(XoTransfer item) {
+        XoTransfer transfer = item;
+        if (transfer != null) {
             return mCollection.indexOf(transfer);
         } else {
             return -1;
@@ -80,8 +79,8 @@ public class MediaCollectionPlaylist extends MediaPlaylist {
     }
 
     @Override
-    public Iterator<IContentObject> iterator() {
-        return new Iterator<IContentObject>() {
+    public Iterator<XoTransfer> iterator() {
+        return new Iterator<XoTransfer>() {
             private Iterator<XoTransfer> mIterator = mCollection.iterator();
 
             @Override
@@ -90,7 +89,7 @@ public class MediaCollectionPlaylist extends MediaPlaylist {
             }
 
             @Override
-            public IContentObject next() {
+            public XoTransfer next() {
                 return mIterator.next();
             }
 

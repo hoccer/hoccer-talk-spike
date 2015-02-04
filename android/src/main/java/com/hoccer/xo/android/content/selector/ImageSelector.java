@@ -8,8 +8,8 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import org.apache.log4j.Logger;
 
@@ -53,7 +53,7 @@ public class ImageSelector implements IContentSelector {
         }
 
         Uri selectedContent = intent.getData();
-        IContentCreator creator = findContentObjectCreator(selectedContent);
+        IContentCreator creator = findContentCreator(selectedContent);
         if (creator == null) {
             LOG.warn("No IContentCreator found for url '" + selectedContent + "'");
             return null;
@@ -70,12 +70,12 @@ public class ImageSelector implements IContentSelector {
         mIcon = icon;
     }
 
-    protected static IContentCreator findContentObjectCreator(Uri selectedContent) {
+    protected static IContentCreator findContentCreator(Uri selectedContent) {
         String contentString = selectedContent.toString();
         if (isPicasaContent(contentString)) {
-            return new PicasaContentObjectCreator();
+            return new PicasaContentCreator();
         } else if (isFileContent(contentString)) {
-            return new ImageFileContentObjectCreator();
+            return new ImageFileContentCreator();
         }
 
         return null;

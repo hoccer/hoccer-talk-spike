@@ -3,6 +3,8 @@ package com.hoccer.webclient.backend;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.content.ContentMediaType;
+import com.hoccer.talk.content.SelectedFile;
 import com.hoccer.talk.model.TalkEnvironment;
 import com.hoccer.webclient.backend.client.ClientDatabase;
 import com.hoccer.webclient.backend.client.ClientHost;
@@ -39,11 +41,16 @@ public class WebClientBackend implements IXoStateListener {
 
         mClient = new XoClient(mClientHost, mConfiguration);
         mClient.getSelfContact().getSelf().setRegistrationName(mConfiguration.getContactName());
+
+        String workingDir = System.getProperty("user.dir");
+
         mClient.setEncryptedDownloadDirectory(mConfiguration.getEncAttachmentDir());
-        mClient.setAttachmentDirectory(mConfiguration.getDecAttachmentDir());
+        mClient.setRelativeAttachmentDirectory(mConfiguration.getDecAttachmentDir());
+        mClient.setAttachmentDirectory(workingDir + File.separator + mClient.getRelativeAttachmentDirectory());
+        mClient.setExternalStorageDirectory(workingDir);
 
         // create and register client event handler
-        mTransferListener = new TransferListener(mClient);
+        mTransferListener = new TransferListener(mClient, mConfiguration);
         mClient.registerTransferListener(mTransferListener);
         mClient.registerStateListener(this);
 
@@ -75,46 +82,34 @@ public class WebClientBackend implements IXoStateListener {
     }
 
     private void uploadAvatar() {
-        // only proceed if a custom avatar file is set
-        String avatarFile = mConfiguration.getAvatarFile();
-        if (avatarFile.isEmpty()) {
+        String filePath = mConfiguration.getAvatarFile();
+        if (filePath.isEmpty()) {
             return;
         }
 
-        // retrieve length of file
-        int length;
-        File file = new File(avatarFile);
-
-        if(!file.exists()) {
-            LOG.error("The given avatar file does not exist: " + avatarFile);
+        File file = new File(filePath);
+        if (!file.exists()) {
+            LOG.error("The given avatar file does not exist: " + filePath);
             return;
         }
-        length = (int)file.length();
 
-        // retrieve absolute file path
         String absoluteFilePath;
         try {
             absoluteFilePath = file.getCanonicalPath();
         } catch(IOException e) {
-            LOG.error("Could not retrieve absolute avatar image file path: " + avatarFile, e);
+            LOG.error("Could not retrieve absolute avatar image file path: " + filePath, e);
             return;
         }
 
-        // prepare image upload
         TalkClientUpload upload = new TalkClientUpload();
-        upload.initializeAsAvatar(
-                absoluteFilePath,
-                absoluteFilePath,
-                "image/jpeg",
-                length);
+        upload.initializeAsAvatar(new SelectedFile(absoluteFilePath, "image/jpeg", ContentMediaType.IMAGE));
 
-        // upload and register avatar
         try {
             mClient.getDatabase().saveClientUpload(upload);
             mClient.setClientAvatar(upload);
             mAvatarUploaded = true;
         } catch (SQLException e) {
-            LOG.error("Avatar could not be set: " + avatarFile, e);
+            LOG.error("Avatar could not be set: " + filePath, e);
         }
     }
 

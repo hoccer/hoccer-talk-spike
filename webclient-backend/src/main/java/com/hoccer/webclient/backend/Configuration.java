@@ -32,6 +32,8 @@ public class Configuration extends XoDefaultClientConfiguration {
     private String mDecAttDir = "decrypted_attachments";
     private String mDatabaseDir = "database";
 
+    private boolean mShouldApproveAllDownloads = false;
+
     @Override
     public String getServerUri() {
         return mServerUri;
@@ -73,6 +75,10 @@ public class Configuration extends XoDefaultClientConfiguration {
         return mLongitude;
     }
 
+    public boolean shouldApproveAllDownloads() {
+        return mShouldApproveAllDownloads;
+    }
+
     public Configuration(String configFile) {
         if (configFile != null) {
             LOG.info("Loading configuration from property file: '" + configFile + "'");
@@ -101,20 +107,22 @@ public class Configuration extends XoDefaultClientConfiguration {
         mDatabaseDir = properties.getProperty("client.database_dir", mDatabaseDir);
         mLatitude = Double.valueOf(properties.getProperty("client.latitude", Double.toString(mLatitude)));
         mLongitude = Double.valueOf(properties.getProperty("client.longitude", Double.toString(mLongitude)));
+        mShouldApproveAllDownloads = Boolean.valueOf(properties.getProperty("client.approve_all_downloads", Boolean.toString(mShouldApproveAllDownloads)));
     }
 
     public void report() {
         LOG.info("Current configuration:" +
             MessageFormat.format("\n  TalkServer URI:              ''{0}''", mServerUri) +
             MessageFormat.format("\n  Trusted Certificate File:    ''{0}''", mTrustedCertFile) +
-            MessageFormat.format("\n  Backend Port:                ''{0}''", Integer.toString(mBackendPort)) +
+            MessageFormat.format("\n  Backend Port:                {0}", Integer.toString(mBackendPort)) +
             MessageFormat.format("\n  Contact Name:                ''{0}''", mContactName) +
             MessageFormat.format("\n  Avatar File:                 ''{0}''", mAvatarFile) +
             MessageFormat.format("\n  Encrypted Attachment Folder: ''{0}''", mEncAttDir) +
             MessageFormat.format("\n  Decrypted Attachment Folder: ''{0}''", mDecAttDir) +
             MessageFormat.format("\n  Database Folder:             ''{0}''", mDatabaseDir) +
-            MessageFormat.format("\n  Latitude:                    ''{0}''", Double.toString(mLatitude)) +
-            MessageFormat.format("\n  Longitude:                   ''{0}''", Double.toString(mLongitude)) +
+            MessageFormat.format("\n  Latitude:                    {0}", Double.toString(mLatitude)) +
+            MessageFormat.format("\n  Longitude:                   {0}", Double.toString(mLongitude)) +
+            MessageFormat.format("\n  Approve All Downloads:       {0}", Boolean.toString(mShouldApproveAllDownloads)) +
             "\n-------------------------------------------------------------------------");
     }
 }

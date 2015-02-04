@@ -26,10 +26,15 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ChatsActivity;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.UriUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
+import java.io.File;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -488,7 +493,7 @@ public class XoClientService extends Service {
         }
 
         // if we have no messages cancel notification
-        if (unseenMessages.size() == 0) {
+        if (unseenMessages.isEmpty()) {
             mNotificationManager.cancel(NotificationId.UNSEEN_MESSAGES);
             return;
         }
@@ -541,7 +546,7 @@ public class XoClientService extends Service {
         }
 
         // if we have no messages after culling cancel notification
-        if (contactsMap.size() == 0) {
+        if (contactsMap.isEmpty()) {
             mNotificationManager.cancel(NotificationId.UNSEEN_MESSAGES);
             return;
         }
@@ -706,9 +711,6 @@ public class XoClientService extends Service {
             IXoTransferListenerOld,
             MediaScannerConnection.OnScanCompletedListener {
 
-        Hashtable<String, TalkClientDownload> mScanningDownloads
-                = new Hashtable<String, TalkClientDownload>();
-
         @Override
         public void onClientStateChange(XoClient client, int state) {
             LOG.debug("onClientStateChange(" + XoClient.stateToString(state) + ")");
@@ -742,15 +744,15 @@ public class XoClientService extends Service {
 
         @Override
         public void onDownloadFinished(TalkClientDownload download) {
-            if (download.isAttachment() && download.isContentAvailable() && download.getContentUrl() == null) {
+            if (download.isAttachment()) {
                 Uri downloadUri = UriUtils.getAbsoluteFileUri(download.getFilePath());
-                String[] path = new String[]{downloadUri.getPath()};
-                String[] ctype = new String[]{download.getContentType()};
-                LOG.debug("requesting media scan of " + ctype[0] + " at " + path[0]);
-                mScanningDownloads.put(path[0], download);
+                String[] filePathes = new String[]{downloadUri.getPath()};
+                String[] mimeTypes = new String[]{download.getMimeType()};
+
+                LOG.debug("requesting media scan of " + mimeTypes[0] + " at " + filePathes[0]);
                 MediaScannerConnection.scanFile(
                         XoClientService.this,
-                        path, ctype, this
+                        filePathes, mimeTypes, this
                 );
             }
         }
@@ -765,7 +767,19 @@ public class XoClientService extends Service {
         public void onUploadProgress(TalkClientUpload upload) {}
 
         @Override
-        public void onUploadFinished(TalkClientUpload upload) {}
+        public void onUploadFinished(TalkClientUpload upload) {
+            // delete tempCompressed files now
+            String temporaryFilePath = upload.getTempCompressedFilePath();
+            if (temporaryFilePath != null) {
+                try {
+                    upload.setTempCompressedFilePath(null);
+                    XoApplication.getXoClient().getDatabase().saveClientUpload(upload);
+                    FileUtils.deleteQuietly(new File(temporaryFilePath));
+                } catch (SQLException e) {
+                    LOG.error("Error updating upload with original file path.");
+                }
+            }
+        }
 
         @Override
         public void onUploadFailed(TalkClientUpload upload) {}
@@ -774,22 +788,11 @@ public class XoClientService extends Service {
         public void onUploadStateChanged(TalkClientUpload upload) {}
 
         @Override
-        public void onScanCompleted(String path, Uri uri) {
-            if (uri != null) {
-                LOG.debug("media scan of " + path + " completed - uri " + uri);
-                TalkClientDownload download = mScanningDownloads.get(path);
-                if (download != null) {
-                    download.provideContentUrl(mClient.getTransferAgent(), uri.toString());
-                }
-
-                // send an intent
-                Intent intent = new Intent();
-                intent.setAction(IntentHelper.ACTION_MEDIA_DOWNLOAD_SCANNED);
-                intent.putExtra(IntentHelper.EXTRA_MEDIA_URI, uri.toString());
-                sendBroadcast(intent);
-            }
-            
-            mScanningDownloads.remove(path);
+        public void onScanCompleted(String filePath, Uri contentUri) {
+            Intent intent = new Intent();
+            intent.setAction(IntentHelper.ACTION_DOWNLOAD_SCANNED);
+            intent.putExtra(IntentHelper.EXTRA_ATTACHMENT_FILE_URI, UriUtils.getAbsoluteFileUri(filePath));
+            sendBroadcast(intent);
         }
 
         @Override
@@ -862,8 +865,8 @@ public class XoClientService extends Service {
     }
 
     private class ContactUnseenMessageHolder {
-        private TalkClientContact mContact;
-        private List<TalkClientMessage> mUnseenMessages;
+        private final TalkClientContact mContact;
+        private final List<TalkClientMessage> mUnseenMessages;
 
         public ContactUnseenMessageHolder(TalkClientContact contact) {
             mContact = contact;

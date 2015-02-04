@@ -7,5 +7,5 @@ public interface IXoTransferListener extends IProgressListener {
 
     public void onStateChanged(IXoTransferState state);
 
-    public void onProgressUpdated(int progress, int contentLength);
+    public void onProgressUpdated(long progress, long contentLength);
 }

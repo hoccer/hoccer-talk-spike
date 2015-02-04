@@ -4,9 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.content.ContentMediaType;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.activity.MapsLocationActivity;
-import com.hoccer.xo.android.content.SelectedContent;
+import com.hoccer.xo.android.content.SelectedLocation;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 
 public class LocationSelector implements IContentSelector {
@@ -41,14 +41,8 @@ public class LocationSelector implements IContentSelector {
             return null;
         }
 
-        SelectedContent content = null;
-        if (intent.hasExtra(MapsLocationActivity.EXTRA_GEOJSON)) {
-            String json = intent.getStringExtra(MapsLocationActivity.EXTRA_GEOJSON);
-            content = new SelectedContent(json.getBytes());
-            content.setContentMediaType(ContentMediaType.LOCATION);
-            content.setContentType("application/json");
-        }
-        return content;
+        String json = intent.getStringExtra(MapsLocationActivity.EXTRA_GEOJSON);
+        return new SelectedLocation(json.getBytes());
     }
 
     @Override
