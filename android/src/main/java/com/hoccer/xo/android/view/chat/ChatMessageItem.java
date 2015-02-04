@@ -25,7 +25,7 @@ import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.ContentRegistry;
-import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
@@ -309,10 +309,10 @@ public class ChatMessageItem implements AttachmentTransferListener {
             if (TalkDelivery.isFailureState(currentState)) {
                 background = mContext.getResources().getDrawable(R.drawable.chat_bubble_error_outgoing);
             } else {
-                background = ColorSchemeManager.createInkedDrawable(R.drawable.chat_bubble_outgoing, R.color.message_outgoing_background);
+                background = ColoredDrawable.create(R.drawable.chat_bubble_outgoing, R.color.message_outgoing_background);
             }
         } else {
-            background = ColorSchemeManager.createInkedDrawable(R.drawable.chat_bubble_outgoing, R.color.message_outgoing_background);
+            background = ColoredDrawable.create(R.drawable.chat_bubble_outgoing, R.color.message_outgoing_background);
         }
 
         return background;
@@ -325,10 +325,10 @@ public class ChatMessageItem implements AttachmentTransferListener {
             if (TalkDelivery.isFailureState(currentState)) {
                 background = mContext.getResources().getDrawable(R.drawable.chat_bubble_error_incoming);
             } else {
-                background = ColorSchemeManager.createInkedDrawable(R.drawable.chat_bubble_incoming, R.color.message_incoming_background);
+                background = ColoredDrawable.create(R.drawable.chat_bubble_incoming, R.color.message_incoming_background);
             }
         } else {
-            background = ColorSchemeManager.createInkedDrawable(R.drawable.chat_bubble_incoming, R.color.message_incoming_background);
+            background = ColoredDrawable.create(R.drawable.chat_bubble_incoming, R.color.message_incoming_background);
         }
 
         return background;
@@ -477,13 +477,13 @@ public class ChatMessageItem implements AttachmentTransferListener {
             if (clientMessage.getIncomingDelivery().isFailure()) {
                 bubbleForMessage = mContext.getResources().getDrawable(R.drawable.chat_bubble_error_incoming);
             } else {
-                bubbleForMessage = ColorSchemeManager.createInkedDrawable(R.drawable.chat_bubble_incoming, R.color.message_incoming_background);
+                bubbleForMessage = ColoredDrawable.create(R.drawable.chat_bubble_incoming, R.color.message_incoming_background);
             }
         } else {
             if (clientMessage.getOutgoingDelivery().isFailure()) {
                 bubbleForMessage = mContext.getResources().getDrawable(R.drawable.chat_bubble_error_outgoing);
             } else {
-                bubbleForMessage = ColorSchemeManager.createInkedDrawable(R.drawable.chat_bubble_outgoing, R.color.message_outgoing_background);
+                bubbleForMessage = ColoredDrawable.create(R.drawable.chat_bubble_outgoing, R.color.message_outgoing_background);
             }
         }
         return bubbleForMessage;

@@ -9,7 +9,7 @@ import android.provider.MediaStore;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.content.SelectedContent;
-import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.hoccer.xo.android.util.UriUtils;
 
 public class AudioSelector implements IContentSelector {
@@ -19,7 +19,7 @@ public class AudioSelector implements IContentSelector {
 
     public AudioSelector(Context context) {
         mName = context.getResources().getString(R.string.content_music);
-        mIcon = ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_attachment_select_media, R.color.primary);
+        mIcon = ColoredDrawable.getFromCache(R.drawable.ic_attachment_select_media, R.color.primary);
     }
 
     @Override

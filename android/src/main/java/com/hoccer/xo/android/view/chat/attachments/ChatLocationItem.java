@@ -15,7 +15,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 
@@ -61,9 +61,9 @@ public class ChatLocationItem extends ChatMessageItem {
         locationTitleView.setTextColor(textColor);
 
         if (mMessage.isIncoming()) {
-            locationButton.setBackgroundDrawable(ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_light_location, R.color.attachment_incoming));
+            locationButton.setBackgroundDrawable(ColoredDrawable.getFromCache(R.drawable.ic_light_location, R.color.attachment_incoming));
         } else {
-            locationButton.setBackgroundDrawable(ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_light_location, R.color.attachment_outgoing));
+            locationButton.setBackgroundDrawable(ColoredDrawable.getFromCache(R.drawable.ic_light_location, R.color.attachment_outgoing));
         }
 
 

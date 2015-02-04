@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 
 public class DataSelector implements IContentSelector {
 
@@ -14,7 +14,7 @@ public class DataSelector implements IContentSelector {
 
     public DataSelector(Context context) {
         mName = context.getResources().getString(R.string.content_data);
-        mIcon = ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_attachment_select_data, R.color.primary);
+        mIcon = ColoredDrawable.getFromCache(R.drawable.ic_attachment_select_data, R.color.primary);
     }
 
     @Override

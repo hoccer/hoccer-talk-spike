@@ -14,7 +14,7 @@ import com.hoccer.talk.content.ContentDisposition;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import ezvcard.Ezvcard;
@@ -67,9 +67,9 @@ public class ChatContactItem extends ChatMessageItem {
         contactDescription.setTextColor(textColor);
 
         if (mMessage.isIncoming()) {
-            showButton.setBackgroundDrawable(ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_light_contact, R.color.attachment_incoming));
+            showButton.setBackgroundDrawable(ColoredDrawable.getFromCache(R.drawable.ic_light_contact, R.color.attachment_incoming));
         } else {
-            showButton.setBackgroundDrawable(ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_light_contact, R.color.attachment_outgoing));
+            showButton.setBackgroundDrawable(ColoredDrawable.getFromCache(R.drawable.ic_light_contact, R.color.attachment_outgoing));
         }
         importButton.setBackgroundDrawable(showButton.getBackground());
 

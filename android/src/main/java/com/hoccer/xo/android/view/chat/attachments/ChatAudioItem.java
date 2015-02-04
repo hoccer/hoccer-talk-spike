@@ -17,7 +17,7 @@ import com.hoccer.xo.android.content.MediaPlaylist;
 import com.hoccer.xo.android.content.SingleItemPlaylist;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
-import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
@@ -128,17 +128,17 @@ public class ChatAudioItem extends ChatMessageItem {
 
     private void setPlayButton(){
         if (mMessage.isIncoming()) {
-            mPlayPauseButton.setBackgroundDrawable(ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_light_play, R.color.attachment_incoming));
+            mPlayPauseButton.setBackgroundDrawable(ColoredDrawable.getFromCache(R.drawable.ic_light_play, R.color.attachment_incoming));
         } else {
-            mPlayPauseButton.setBackgroundDrawable(ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_light_play, R.color.attachment_outgoing));
+            mPlayPauseButton.setBackgroundDrawable(ColoredDrawable.getFromCache(R.drawable.ic_light_play, R.color.attachment_outgoing));
         }
     }
 
     private void setPauseButton(){
         if (mMessage.isIncoming()) {
-            mPlayPauseButton.setBackgroundDrawable(ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_light_pause, R.color.attachment_incoming));
+            mPlayPauseButton.setBackgroundDrawable(ColoredDrawable.getFromCache(R.drawable.ic_light_pause, R.color.attachment_incoming));
         } else {
-            mPlayPauseButton.setBackgroundDrawable(ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_light_pause, R.color.attachment_outgoing));
+            mPlayPauseButton.setBackgroundDrawable(ColoredDrawable.getFromCache(R.drawable.ic_light_pause, R.color.attachment_outgoing));
         }
     }
 

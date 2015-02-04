@@ -13,7 +13,7 @@ import android.widget.Toast;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.content.SelectedContent;
-import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.util.UriUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -36,7 +36,7 @@ public class CaptureSelector implements IContentSelector {
     public CaptureSelector(Context context) {
         mContext = context;
         mName = context.getResources().getString(R.string.content_capture);
-        mIcon = ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_attachment_select_video, R.color.primary);
+        mIcon = ColoredDrawable.getFromCache(R.drawable.ic_attachment_select_video, R.color.primary);
     }
 
     @Override

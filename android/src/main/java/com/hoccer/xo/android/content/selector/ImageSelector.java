@@ -10,7 +10,7 @@ import android.provider.MediaStore;
 import com.artcom.hoccer.R;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.content.SelectedContent;
-import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -24,7 +24,7 @@ public class ImageSelector implements IContentSelector {
 
     public ImageSelector(Context context) {
         mName = context.getResources().getString(R.string.content_images);
-        mIcon = ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_attachment_select_image, R.color.primary);
+        mIcon = ColoredDrawable.getFromCache(R.drawable.ic_attachment_select_image, R.color.primary);
     }
 
     @Override

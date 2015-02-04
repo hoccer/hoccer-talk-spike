@@ -8,7 +8,7 @@ import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.activity.MultiImagePickerActivity;
 import com.hoccer.xo.android.content.selector.IContentCreator;
 import com.hoccer.xo.android.content.selector.ImageSelector;
-import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ public class MultiImageSelector extends ImageSelector {
     public MultiImageSelector(Context context) {
         super(context);
         setName(context.getResources().getString(R.string.content_multi_images));
-        setIcon(ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_attachment_select_image, R.color.primary));
+        setIcon(ColoredDrawable.getFromCache(R.drawable.ic_attachment_select_image, R.color.primary));
     }
 
     @Override
