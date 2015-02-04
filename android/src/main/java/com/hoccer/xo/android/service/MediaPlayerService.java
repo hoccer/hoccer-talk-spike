@@ -35,10 +35,11 @@ import java.util.List;
 
 public class MediaPlayerService extends Service implements MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener, MediaPlaylistController.Listener {
 
+    private static final Logger LOG = Logger.getLogger(MediaPlayerService.class);
+
     public static final int UNDEFINED_CONTACT_ID = -1;
 
     private static final String UPDATE_PLAYSTATE_ACTION = "com.hoccer.xo.android.content.audio.UPDATE_PLAYSTATE_ACTION";
-    private static final Logger LOG = Logger.getLogger(MediaPlayerService.class);
 
     private AudioManager mAudioManager;
     private MediaPlayer mMediaPlayer;
@@ -86,6 +87,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
 
     @Override
     public void onCreate() {
+        LOG.debug("onCreate()");
         super.onCreate();
 
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
@@ -96,12 +98,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         createPlayStateTogglePendingIntent();
         registerPlayStateToggleIntentFilter();
 
-        createAppFocusTracker();
         createHeadsetHandlerReceiver();
     }
 
     private void createHeadsetHandlerReceiver() {
-
         mHeadsetStateBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -126,62 +126,14 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        mPlaylistController.unregisterListener(this);
+
         if (mHeadsetStateBroadcastReceiver != null) {
             unregisterReceiver(mHeadsetStateBroadcastReceiver);
         }
 
         reset();
-    }
-
-    private void createAppFocusTracker() {
-
-        new Thread(new Runnable() {
-            public void run() {
-                while (true) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    if (isApplicationKilled(getApplicationContext())) {
-                        stopSelf();
-                    } else {
-                        if (isApplicationSentToBackground(getApplicationContext())) {
-                            if (!isPaused() && !isStopped()) {
-                                createNotification();
-                                updateNotification();
-                            }
-                        } else {
-                            removeNotification();
-                        }
-                    }
-                }
-            }
-        }).start();
-    }
-
-    private boolean isApplicationKilled(Context context) {
-        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RecentTaskInfo> runningTasks = am.getRecentTasks(1000, ActivityManager.RECENT_IGNORE_UNAVAILABLE);
-        for (ActivityManager.RecentTaskInfo info : runningTasks) {
-            if (info.baseIntent.getComponent().getPackageName().equalsIgnoreCase(getApplication().getPackageName())) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static boolean isApplicationSentToBackground(Context context) {
-        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningTaskInfo> tasks = am.getRunningTasks(1);
-        if (!tasks.isEmpty()) {
-            ComponentName topActivity = tasks.get(0).topActivity;
-            if (!topActivity.getPackageName().equals(context.getPackageName())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private void createBroadcastReceiver() {
