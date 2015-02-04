@@ -34,7 +34,6 @@ public class MediaPlayerServiceConnector {
         disconnect();
 
         Intent serviceIntent = new Intent(mContext, MediaPlayerService.class);
-        mContext.startService(serviceIntent);
         bindMediaPlayerService(serviceIntent);
     }
 
@@ -45,9 +44,8 @@ public class MediaPlayerServiceConnector {
         mListener = listener;
 
         Intent serviceIntent = new Intent(mContext, MediaPlayerService.class);
-        mContext.startService(serviceIntent);
-        createMediaPlayerBroadcastReceiver();
         bindMediaPlayerService(serviceIntent);
+        createMediaPlayerBroadcastReceiver();
     }
 
     public void connect(String intent, Listener listener) {
@@ -57,9 +55,8 @@ public class MediaPlayerServiceConnector {
         mListener = listener;
 
         Intent serviceIntent = new Intent(mContext, MediaPlayerService.class);
-        mContext.startService(serviceIntent);
-        createMediaPlayerBroadcastReceiver();
         bindMediaPlayerService(serviceIntent);
+        createMediaPlayerBroadcastReceiver();
     }
 
     public void disconnect() {
