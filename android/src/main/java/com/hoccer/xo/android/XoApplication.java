@@ -249,9 +249,9 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
     public static void ensureDirectory(File directory) {
         if (!directory.exists()) {
-            sLog.info("creating directory " + directory.toString());
+            sLog.info("creating directory " + directory);
             if (!directory.mkdirs()) {
-                sLog.info("Error creating directory " + directory.toString());
+                sLog.info("Error creating directory " + directory);
             }
         }
     }
@@ -260,13 +260,13 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         if (directory.exists()) {
             File noMedia = new File(directory, ".nomedia");
             if (!noMedia.exists()) {
-                sLog.info("creating noMedia marker " + noMedia.toString());
+                sLog.info("creating noMedia marker " + noMedia);
                 try {
                     if (!noMedia.createNewFile()) {
-                        sLog.info("Error creating directory " + noMedia.toString());
+                        sLog.info("Error creating directory " + noMedia);
                     }
                 } catch (IOException e) {
-                    sLog.error("error creating " + noMedia.toString(), e);
+                    sLog.error("error creating " + noMedia, e);
                 }
             }
         }
