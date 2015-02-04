@@ -4,7 +4,6 @@ import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.model.TalkGroupMembership;
-import com.hoccer.talk.model.TalkGroupPresence;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.security.Security;
@@ -39,7 +38,7 @@ public class TestHelper {
 
             client.wake();
 
-            await(clientName + " reaches active state").untilCall(to(client).getState(), equalTo(XoClient.STATE_ACTIVE));
+            await(clientName + " reaches active state").untilCall(to(client).getState(), equalTo(XoClient.STATE_READY));
             clients.put(clientName, client);
         }
 
@@ -50,8 +49,8 @@ public class TestHelper {
         for (Map.Entry<String, XoClient> entry : clients.entrySet()) {
             XoClient client = entry.getValue();
             assertNotNull(client);
-            client.deactivate();
-            await(entry.getKey() + " is inactive").untilCall(to(client).getState(), equalTo(XoClient.STATE_INACTIVE));
+            client.disconnect();
+            await(entry.getKey() + " is inactive").untilCall(to(client).getState(), equalTo(XoClient.STATE_DISCONNECTED));
         }
     }
 

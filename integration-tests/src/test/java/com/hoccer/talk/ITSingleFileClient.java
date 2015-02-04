@@ -42,7 +42,7 @@ public class ITSingleFileClient extends IntegrationTest {
         // create client
         final XoClient c = TestHelper.createTalkClient(talkServer);
         c.wake();
-        await().untilCall(to(c).getState(), equalTo(XoClient.STATE_ACTIVE));
+        await().untilCall(to(c).getState(), equalTo(XoClient.STATE_READY));
 
         // upload file
         final TalkClientUpload upload = new TalkClientUpload();
@@ -56,8 +56,8 @@ public class ITSingleFileClient extends IntegrationTest {
         await().untilCall(to(c.getTransferAgent()).isUploadActive(upload), is(false));
 
         // test disconnecting
-        c.deactivate();
-        await().untilCall(to(c).getState(), equalTo(XoClient.STATE_INACTIVE));
+        c.disconnect();
+        await().untilCall(to(c).getState(), equalTo(XoClient.STATE_DISCONNECTED));
     }
 }
 

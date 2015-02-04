@@ -450,7 +450,7 @@ public class XoClientService extends Service {
     private void handleConnectivityChange(NetworkInfo activeNetwork) {
         if (activeNetwork == null) {
             LOG.debug("connectivity change: no connectivity");
-            mClient.deactivate();
+            mClient.disconnect();
             mCurrentConnectionState = false;
             mCurrentConnectionType = -1;
         } else {
@@ -460,16 +460,16 @@ public class XoClientService extends Service {
 
             int previousState = mClient.getState();
             if (activeNetwork.isConnected()) {
-                if (previousState <= XoClient.STATE_INACTIVE) {
+                if (previousState <= XoClient.STATE_DISCONNECTED) {
                     mClient.activate();
                 }
             } else if (activeNetwork.isConnectedOrConnecting()) {
-                if (previousState <= XoClient.STATE_INACTIVE) {
+                if (previousState <= XoClient.STATE_DISCONNECTED) {
                     mClient.activate();
                 }
             } else {
-                if (previousState > XoClient.STATE_INACTIVE) {
-                    mClient.deactivate();
+                if (previousState > XoClient.STATE_DISCONNECTED) {
+                    mClient.disconnect();
                 }
             }
 
@@ -714,7 +714,7 @@ public class XoClientService extends Service {
         @Override
         public void onClientStateChange(XoClient client, int state) {
             LOG.debug("onClientStateChange(" + XoClient.stateToString(state) + ")");
-            if (state == XoClient.STATE_ACTIVE) {
+            if (state == XoClient.STATE_READY) {
                 mExecutor.execute(new Runnable() {
                     @Override
                     public void run() {

@@ -59,7 +59,7 @@ public class TalkToolClient {
         if (mNearbyUpdater != null) {
             resetNearbyUpdater();
         }
-        mClient.deactivate();
+        mClient.disconnect();
     }
 
     public void wake() {
