@@ -402,10 +402,6 @@ public class XoClientService extends Service {
     private void doShutdown() {
         LOG.info("shutting down");
 
-        if (mClient.isActivated()) {
-            mClient.deactivateNow();
-        }
-
         stopSelf();
     }
 

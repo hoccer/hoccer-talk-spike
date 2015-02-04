@@ -213,12 +213,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
         mBackgroundManager.unregisterListener(this);
 
-        sLog.info("deactivating client");
-        if (sClient != null) {
-            sClient.deactivateNow();
-            sClient = null;
-        }
-
         sLog.info("removing uncaught exception handler");
         if (mPreviousHandler != null) {
             Thread.setDefaultUncaughtExceptionHandler(mPreviousHandler);

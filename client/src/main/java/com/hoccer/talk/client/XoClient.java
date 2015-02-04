@@ -605,18 +605,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     /**
-     * Blocking version of the deactivation call
-     */
-    public void deactivateNow() {
-        LOG.debug("client: deactivateNow()");
-        mAutoDisconnectFuture.cancel(true);
-        mLoginFuture.cancel(true);
-        mConnectFuture.cancel(true);
-        mDisconnectFuture.cancel(true);
-        mState = STATE_INACTIVE;
-    }
-
-    /**
      * delete old key pair and create a new one
      */
     public void regenerateKeyPair() throws SQLException {
