@@ -39,6 +39,10 @@ public class ApplicationBackgroundManager implements Application.ActivityLifecyc
         listeners.remove(listener);
     }
 
+    public boolean getInBackground() {
+        return mInBackground;
+    }
+
     @Override
     public void onActivityResumed(Activity activity) {
         if (mBackgroundTransition != null) {
