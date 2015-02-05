@@ -297,6 +297,10 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         return null;
     }
 
+    public ApplicationBackgroundManager getBackgroundManager() {
+        return mBackgroundManager;
+    }
+
     public static void reinitializeXoClient() {
         if (sClient != null) {
             sClient.initialize(sClientHost);
