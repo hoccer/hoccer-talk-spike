@@ -12,6 +12,7 @@ import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.talk.content.ContentMediaType;
+import com.hoccer.xo.android.MediaPlayer;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.ContactSelectionActivity;
@@ -25,7 +26,6 @@ import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.MediaPlaylist;
 import com.hoccer.xo.android.content.SingleItemPlaylist;
 import com.hoccer.xo.android.content.UserPlaylist;
-import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
 import com.hoccer.xo.android.util.ContactOperations;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.UriUtils;
@@ -48,8 +48,6 @@ public class AttachmentListFragment extends SearchableListFragment {
     public static final int SELECT_CONTACT_REQUEST = 2;
 
     private final static Logger LOG = Logger.getLogger(AttachmentListFragment.class);
-
-    private MediaPlayerServiceConnector mMediaPlayerServiceConnector;
 
     private AttachmentListAdapter mAttachmentAdapter;
     private SectionedListAdapter mResultsAdapter;
@@ -82,8 +80,6 @@ public class AttachmentListFragment extends SearchableListFragment {
 
         mSearchContactsAdapter = new ContactSearchResultAdapter((XoActivity) getActivity());
         mSearchContactsAdapter.onCreate();
-
-        mMediaPlayerServiceConnector = new MediaPlayerServiceConnector(getActivity());
     }
 
     @Override
@@ -121,8 +117,6 @@ public class AttachmentListFragment extends SearchableListFragment {
         } else {
             getActivity().getActionBar().setTitle(R.string.content_audio_caption);
         }
-
-        mMediaPlayerServiceConnector.connect();
     }
 
     @Override
@@ -135,7 +129,6 @@ public class AttachmentListFragment extends SearchableListFragment {
     public void onPause() {
         super.onPause();
         setListAdapter(null);
-        mMediaPlayerServiceConnector.disconnect();
     }
 
     @Override
@@ -256,26 +249,24 @@ public class AttachmentListFragment extends SearchableListFragment {
     private class ListInteractionHandler implements AdapterView.OnItemClickListener, AbsListView.MultiChoiceModeListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            if (mMediaPlayerServiceConnector.getService() != null) {
-                Object selectedItem = getListAdapter().getItem(position);
+            Object selectedItem = getListAdapter().getItem(position);
 
-                if (selectedItem instanceof XoTransfer) {
-                    XoTransfer transfer = (XoTransfer) selectedItem;
+            if (selectedItem instanceof XoTransfer) {
+                XoTransfer transfer = (XoTransfer) selectedItem;
 
-                    MediaPlaylist playlist = isSearchModeEnabled() ?
-                            new SingleItemPlaylist(mDatabase, transfer) :
-                            new UserPlaylist(mDatabase, mAttachmentAdapter.getContact());
+                MediaPlaylist playlist = isSearchModeEnabled() ?
+                        new SingleItemPlaylist(mDatabase, transfer) :
+                        new UserPlaylist(mDatabase, mAttachmentAdapter.getContact());
 
-                    mMediaPlayerServiceConnector.getService().playItemInPlaylist(transfer, playlist);
-                    getActivity().startActivity(new Intent(getActivity(), FullscreenPlayerActivity.class));
-                } else if (selectedItem instanceof TalkClientContact) {
-                    leaveSearchMode();
-                    mFilterContact = (TalkClientContact) selectedItem;
-                    mAttachmentAdapter.setContact((TalkClientContact) selectedItem);
-                    final String newActionBarTitle = getResources().getString(R.string.content_audio_by_contact_caption,
-                            mFilterContact.getNickname());
-                    getActivity().getActionBar().setTitle(newActionBarTitle);
-                }
+                MediaPlayer.get().playItemInPlaylist(transfer, playlist);
+                getActivity().startActivity(new Intent(getActivity(), FullscreenPlayerActivity.class));
+            } else if (selectedItem instanceof TalkClientContact) {
+                leaveSearchMode();
+                mFilterContact = (TalkClientContact) selectedItem;
+                mAttachmentAdapter.setContact((TalkClientContact) selectedItem);
+                final String newActionBarTitle = getResources().getString(R.string.content_audio_by_contact_caption,
+                        mFilterContact.getNickname());
+                getActivity().getActionBar().setTitle(newActionBarTitle);
             }
         }
 

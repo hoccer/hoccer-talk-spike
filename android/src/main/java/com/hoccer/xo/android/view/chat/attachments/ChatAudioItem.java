@@ -12,27 +12,23 @@ import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
+import com.hoccer.xo.android.MediaPlayer;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.content.MediaPlaylist;
 import com.hoccer.xo.android.content.SingleItemPlaylist;
-import com.hoccer.xo.android.service.MediaPlayerService;
-import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
 import com.hoccer.xo.android.util.ColorSchemeManager;
-import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 
 
-public class ChatAudioItem extends ChatMessageItem {
+public class ChatAudioItem extends ChatMessageItem implements MediaPlayer.IMediaPlayerListener {
 
     private ImageButton mPlayPauseButton;
-    private final MediaPlayerServiceConnector mMediaPlayerServiceConnector;
     private boolean mIsPlayable;
 
     public ChatAudioItem(Context context, TalkClientMessage message) {
         super(context, message);
-        mMediaPlayerServiceConnector = new MediaPlayerServiceConnector(context);
     }
 
     @Override
@@ -83,7 +79,7 @@ public class ChatAudioItem extends ChatMessageItem {
             public void onClick(View view) {
                 if (mIsPlayable) {
                     if (isActive()) {
-                        pausePlaying();
+                        MediaPlayer.get().pause();
                     } else {
                         startPlaying();
                     }
@@ -98,29 +94,20 @@ public class ChatAudioItem extends ChatMessageItem {
             }
         });
 
-        mIsPlayable = mAttachment != null;
+        mIsPlayable = true;
         updatePlayPauseView();
 
-        initializeMediaPlayerService();
+        MediaPlayer.get().registerListener(this);
     }
 
     @Override
     public void detachView() {
-        mMediaPlayerServiceConnector.disconnect();
-    }
-
-    private void pausePlaying() {
-        if (mMediaPlayerServiceConnector.isConnected()) {
-            mMediaPlayerServiceConnector.getService().pause();
-        }
+        MediaPlayer.get().unregisterListener(this);
     }
 
     private void startPlaying() {
-        if (mMediaPlayerServiceConnector.isConnected()) {
-            MediaPlayerService service = mMediaPlayerServiceConnector.getService();
-            MediaPlaylist playlist = new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), mAttachment);
-            service.playItemInPlaylist(mAttachment, playlist);
-        }
+        MediaPlaylist playlist = new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), mAttachment);
+        MediaPlayer.get().playItemInPlaylist(mAttachment, playlist);
     }
 
     private void setPlayButton() {
@@ -144,32 +131,15 @@ public class ChatAudioItem extends ChatMessageItem {
     }
 
     public boolean isActive() {
-        boolean isActive = false;
-        if (mAttachment != null && mMediaPlayerServiceConnector.isConnected()) {
-            MediaPlayerService service = mMediaPlayerServiceConnector.getService();
-            isActive = !service.isPaused() && !service.isStopped() && mAttachment.equals(service.getCurrentMediaItem());
-        }
-
-        return isActive;
+        MediaPlayer mediaPlayer = MediaPlayer.get();
+        return !mediaPlayer.isPaused() && !mediaPlayer.isStopped() && mAttachment.equals(mediaPlayer.getCurrentMediaItem());
     }
 
-    private void initializeMediaPlayerService() {
-        mMediaPlayerServiceConnector.connect(
-                IntentHelper.ACTION_PLAYER_STATE_CHANGED,
-                new MediaPlayerServiceConnector.Listener() {
-                    @Override
-                    public void onConnected(MediaPlayerService service) {
-                        updatePlayPauseView();
-                    }
-
-                    @Override
-                    public void onDisconnected() {
-                    }
-
-                    @Override
-                    public void onAction(String action, MediaPlayerService service) {
-                        updatePlayPauseView();
-                    }
-                });
+    @Override
+    public void onStateChanged() {
+        updatePlayPauseView();
     }
+
+    @Override
+    public void onTrackChanged() {}
 }
