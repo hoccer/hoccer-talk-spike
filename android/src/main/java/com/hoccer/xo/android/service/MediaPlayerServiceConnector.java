@@ -37,17 +37,6 @@ public class MediaPlayerServiceConnector {
         bindMediaPlayerService(serviceIntent);
     }
 
-    public void connect(Listener listener) {
-        disconnect();
-
-        mIntent = IntentHelper.ACTION_PLAYER_STATE_CHANGED;
-        mListener = listener;
-
-        Intent serviceIntent = new Intent(mContext, MediaPlayerService.class);
-        bindMediaPlayerService(serviceIntent);
-        createMediaPlayerBroadcastReceiver();
-    }
-
     public void connect(String intent, Listener listener) {
         disconnect();
 
@@ -56,6 +45,7 @@ public class MediaPlayerServiceConnector {
 
         Intent serviceIntent = new Intent(mContext, MediaPlayerService.class);
         bindMediaPlayerService(serviceIntent);
+
         createMediaPlayerBroadcastReceiver();
     }
 
