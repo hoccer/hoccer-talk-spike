@@ -14,6 +14,7 @@ public class FaqTutorialActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mWebView = new WebView(this);
+        mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.setWebViewClient(new WebViewClient() {
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
                 Toast.makeText(FaqTutorialActivity.this, description, Toast.LENGTH_SHORT).show();
