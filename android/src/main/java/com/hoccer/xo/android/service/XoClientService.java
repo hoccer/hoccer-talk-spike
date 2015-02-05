@@ -1,6 +1,9 @@
 package com.hoccer.xo.android.service;
 
-import android.app.*;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.Service;
 import android.content.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -507,21 +510,11 @@ public class XoClientService extends Service {
             ContactUnseenMessageHolder holder = contactsMap.values().iterator().next();
             TalkClientContact contact = holder.getContact();
 
-            Intent messagingIntent = new Intent(this, ChatsActivity.class);
-            messagingIntent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contact.getClientContactId());
+            Intent intent = new Intent(this, ChatsActivity.class);
+            intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contact.getClientContactId());
 
             // make a pending intent with correct back-stack
-            PendingIntent pendingIntent;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                pendingIntent =
-                        TaskStackBuilder.create(this)
-                                .addParentStack(ChatsActivity.class)
-                                .addNextIntentWithParentStack(messagingIntent)
-                                .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-            } else {
-                pendingIntent = PendingIntent
-                        .getActivity(this, 0, messagingIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            }
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             // add the intent to the notification
             builder.setContentIntent(pendingIntent);
@@ -538,17 +531,8 @@ public class XoClientService extends Service {
             }
         } else {
             // create pending intent
-            Intent contactsIntent = new Intent(this, ChatsActivity.class);
-            PendingIntent pendingIntent;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                pendingIntent =
-                        TaskStackBuilder.create(this)
-                                .addNextIntent(contactsIntent)
-                                .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-            } else {
-                pendingIntent = PendingIntent
-                        .getActivity(this, 0, contactsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            }
+            Intent intent = new Intent(this, ChatsActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             builder.setContentIntent(pendingIntent);
 
             // concatenate contact names
@@ -582,22 +566,9 @@ public class XoClientService extends Service {
     }
 
     private void createPushMessageNotification(String message) {
-        // create intent
-        Intent pushMessageIntent = new Intent(this, ChatsActivity.class);
-        pushMessageIntent.putExtra(IntentHelper.EXTRA_PUSH_MESSAGE, message);
-
-        // make a pending intent with correct back-stack
-        PendingIntent pendingIntent;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            pendingIntent =
-                    TaskStackBuilder.create(this)
-                            .addParentStack(ChatsActivity.class)
-                            .addNextIntentWithParentStack(pushMessageIntent)
-                            .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-        } else {
-            pendingIntent = PendingIntent
-                    .getActivity(this, 0, pushMessageIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        }
+        Intent intent = new Intent(this, ChatsActivity.class);
+        intent.putExtra(IntentHelper.EXTRA_PUSH_MESSAGE, message);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Notification notification = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_notification)
@@ -608,7 +579,6 @@ public class XoClientService extends Service {
                 .setContentText(message)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
                 .build();
-
 
         mNotificationManager.notify(NotificationId.PUSH_MESSAGE, notification);
     }

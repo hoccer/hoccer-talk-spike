@@ -11,6 +11,8 @@ import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.content.SelectedContent;
+import com.hoccer.xo.android.MediaPlayer;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
@@ -52,7 +54,10 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        MediaPlayer.create((XoApplication)getApplication());
+
         super.onCreate(savedInstanceState);
+
         initActionBar();
         handleIntent(getIntent());
     }
@@ -69,6 +74,12 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     protected void onPause() {
         super.onPause();
         unregisterListeners();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        MediaPlayer.get().removeNotification();
     }
 
     @Override

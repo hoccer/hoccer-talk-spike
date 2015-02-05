@@ -44,10 +44,6 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
 
     private final List<IMediaPlayerListener> mListener = new ArrayList<IMediaPlayerListener>();
 
-    public static MediaPlayer get() {
-        return sInstance;
-    }
-
     private static final String UPDATE_PLAYSTATE_ACTION = "com.hoccer.xo.android.content.audio.UPDATE_PLAYSTATE_ACTION";
 
     private final AudioManager mAudioManager;
@@ -85,7 +81,19 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
         }
     };
 
-    public MediaPlayer(XoApplication application) {
+    public static MediaPlayer create(XoApplication application) {
+        if(sInstance == null) {
+            sInstance = new MediaPlayer(application);
+        }
+
+        return sInstance;
+    }
+
+    public static MediaPlayer get() {
+        return sInstance;
+    }
+
+    private MediaPlayer(XoApplication application) {
         mXoApplication = application;
         mPlaylistController.registerListener(this);
         mAudioManager = (AudioManager) mXoApplication.getSystemService(Context.AUDIO_SERVICE);
@@ -94,8 +102,6 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
 
         registerHeadsetHandlerReceiver();
         registerUpdatePlayStateReceiver();
-
-        sInstance = this;
 
         mXoApplication.getBackgroundManager().registerListener(this);
     }
@@ -165,13 +171,8 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
     };
 
     private Notification buildNotification() {
-        Intent resultIntent = new Intent(mXoApplication, FullscreenPlayerActivity.class);
-
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(mXoApplication)
-                .addParentStack(FullscreenPlayerActivity.class)
-                .addNextIntent(resultIntent);
-
-        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent intent = new Intent(mXoApplication, FullscreenPlayerActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(mXoApplication, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         updateRemoteViewButton();
         updateRemoteViewMetaData();
@@ -181,7 +182,7 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
                 .setContent(mRemoteViews)
                 .setAutoCancel(false)
                 .setOngoing(true)
-                .setContentIntent(resultPendingIntent);
+                .setContentIntent(pendingIntent);
         return mBuilder.build();
     }
 
@@ -333,7 +334,7 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
         mStopped = true;
         mPlaylistController.reset();
 
-        mNotificationManager.cancel(NotificationId.MUSIC_PLAYER);
+        removeNotification();
 
         invokePlayStateChanged();
     }
@@ -452,6 +453,10 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
 
     @Override
     public void onBecameForeground() {
+        removeNotification();
+    }
+
+    public void removeNotification() {
         mNotificationManager.cancel(NotificationId.MUSIC_PLAYER);
     }
 

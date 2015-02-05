@@ -212,8 +212,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
         Intent xoClientServiceIntent = new Intent(this, XoClientService.class);
         startService(xoClientServiceIntent);
-
-        new MediaPlayer(this);
     }
 
     @Override
