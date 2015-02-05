@@ -16,6 +16,7 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.credentialtransfer.SrpChangeListener;
 import com.hoccer.xo.android.nearby.EnvironmentUpdater;
+import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.service.XoClientService;
 import com.hoccer.xo.android.task.StartupTasks;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -212,28 +213,9 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
         Intent xoClientServiceIntent = new Intent(this, XoClientService.class);
         startService(xoClientServiceIntent);
-    }
 
-    @Override
-    public void onTerminate() {
-        super.onTerminate();
-
-        Intent xoClientServiceIntent = new Intent(this, XoClientService.class);
-        stopService(xoClientServiceIntent);
-
-        mBackgroundManager.unregisterListener(this);
-
-        sLog.info("removing uncaught exception handler");
-        if (mPreviousHandler != null) {
-            Thread.setDefaultUncaughtExceptionHandler(mPreviousHandler);
-            mPreviousHandler = null;
-        }
-
-        sLog.info("shutting down executor");
-        if (sExecutor != null) {
-            sExecutor.shutdownNow();
-            sExecutor = null;
-        }
+        Intent mediaPlayerServiceIntent = new Intent(this, MediaPlayerService.class);
+        startService(mediaPlayerServiceIntent);
     }
 
     @Override
