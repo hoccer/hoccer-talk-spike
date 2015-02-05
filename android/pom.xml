@@ -204,8 +204,8 @@
     <!-- Can be overridden by calling `mvn -Dlabel=LABEL -Denvironment=ENVIRONMENT` -->
     <label>hoccer</label>
     <label.path>${project.basedir}/label/${label}</label.path>
-    <label.environment>development</label.environment>
-    <label.environment.path>${label.path}/environments/${label.environment}</label.environment.path>
+    <environment>development</environment>
+    <environment.path>${label.path}/environments/${environment}</environment.path>
 
     <!-- Can be overridden by calling `mvn -Dapk.sign=false` -->
     <apk.sign>true</apk.sign>
@@ -231,8 +231,8 @@
 
   <build>
     <filters>
-      <filter>${label.environment.path}/build.properties</filter>
-      <filter>${label.environment.path}/assets/configuration.properties</filter>
+      <filter>${environment.path}/build.properties</filter>
+      <filter>${environment.path}/assets/configuration.properties</filter>
     </filters>
 
     <resources>
@@ -245,7 +245,7 @@
         </includes>
       </resource>
       <resource>
-        <directory>${label.environment.path}/assets/</directory>
+        <directory>${environment.path}/assets/</directory>
         <targetPath>${project.build.directory}/assets</targetPath>
       </resource>
       <resource>
@@ -262,7 +262,7 @@
       </resource>
     </resources>
 
-    <finalName>${label}-android-${project.version}-${label.environment}-${apk.sign.postfix}</finalName>
+    <finalName>${label}-android-${project.version}-${environment}-${apk.sign.postfix}</finalName>
 
     <plugins>
       <plugin>
@@ -277,7 +277,7 @@
             </goals>
             <configuration>
               <files>
-                <file>${label.environment.path}/build.properties</file>
+                <file>${environment.path}/build.properties</file>
               </files>
             </configuration>
           </execution>
@@ -298,7 +298,7 @@
           <resourceDirectory>${project.basedir}/res</resourceDirectory>
           <resourceOverlayDirectories>
             <directory>${project.build.directory}/generated-resources</directory>
-            <directory>${label.environment.path}/res</directory>
+            <directory>${environment.path}/res</directory>
             <directory>${label.path}/res</directory>
             <directory>${project.build.directory}/res</directory>
           </resourceOverlayDirectories>
@@ -318,7 +318,7 @@
           </dex>
           <proguard>
             <configs>
-              <config>${label.environment.path}/proguard.cfg</config>
+              <config>${environment.path}/proguard.cfg</config>
               <config>${project.basedir}/proguard.cfg</config>
               <config>${env.ANDROID_HOME}/tools/proguard/proguard-android.txt</config>
             </configs>
