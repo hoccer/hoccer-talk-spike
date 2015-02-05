@@ -1,10 +1,12 @@
 package com.hoccer.xo.android.service;
 
-import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.*;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.media.MediaPlayer;
@@ -21,6 +23,7 @@ import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.xo.android.ApplicationBackgroundManager;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
 import com.hoccer.xo.android.content.MediaMetaData;
@@ -31,33 +34,59 @@ import com.hoccer.xo.android.util.UriUtils;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
-import java.util.List;
 
-public class MediaPlayerService extends Service implements MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener, MediaPlaylistController.Listener {
+public class MediaPlayerService extends Service implements MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener, MediaPlaylistController.Listener, ApplicationBackgroundManager.Listener {
 
     private static final Logger LOG = Logger.getLogger(MediaPlayerService.class);
 
     public static final int UNDEFINED_CONTACT_ID = -1;
 
+    private static MediaPlayerService sInstance;
+
+    public static MediaPlayerService get() {
+        return sInstance;
+    }
+
     private static final String UPDATE_PLAYSTATE_ACTION = "com.hoccer.xo.android.content.audio.UPDATE_PLAYSTATE_ACTION";
 
     private AudioManager mAudioManager;
     private MediaPlayer mMediaPlayer;
-    private NotificationCompat.Builder mBuilder;
 
     private boolean mPaused;
     private boolean mStopped = true;
 
     private XoTransfer mCurrentItem;
 
-    private PendingIntent mPlayStateTogglePendingIntent;
     private final IBinder mBinder = new MediaPlayerBinder();
-    private RemoteViews mNotificationViews;
+    private RemoteViews mRemoteViews;
 
     private LocalBroadcastManager mLocalBroadcastManager;
-    private BroadcastReceiver mReceiver;
-    private BroadcastReceiver mHeadsetStateBroadcastReceiver;
     private final MediaPlaylistController mPlaylistController = new MediaPlaylistController();
+
+    private final BroadcastReceiver mHeadsetActionReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(AudioManager.ACTION_AUDIO_BECOMING_NOISY)) {
+                int headSetState = intent.getIntExtra("state", 0);
+                if (headSetState == 0) {
+                    if (mMediaPlayer != null && !isStopped()) {
+                        pause();
+                    }
+                }
+            }
+        }
+    };
+
+    private final BroadcastReceiver mPlaystateActionReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (isPaused()) {
+                play(mCurrentItem);
+            } else {
+                pause();
+            }
+        }
+    };
 
     @Override
     public void onCurrentItemChanged(XoTransfer newItem) {
@@ -93,73 +122,52 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
         mPlaylistController.registerListener(this);
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        mRemoteViews = createRemoteViews();
 
-        createBroadcastReceiver();
-        createPlayStateTogglePendingIntent();
-        registerPlayStateToggleIntentFilter();
+        registerHeadsetHandlerReceiver();
+        registerUpdatePlayStateReceiver();
 
-        createHeadsetHandlerReceiver();
+        sInstance = this;
+
+        ((XoApplication) getApplication()).getBackgroundManager().registerListener(this);
     }
 
-    private void createHeadsetHandlerReceiver() {
-        mHeadsetStateBroadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return START_NOT_STICKY;
+    }
 
-                if (intent.getAction().equals(android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY)) {
+    private RemoteViews createRemoteViews() {
+        Intent updatePlayStateIntent = new Intent(UPDATE_PLAYSTATE_ACTION);
+        PendingIntent updatePlayStatePendingIntent = PendingIntent.getBroadcast(this, 0, updatePlayStateIntent, 0);
 
-                    int headSetState = intent.getIntExtra("state", 0);
+        RemoteViews views = new RemoteViews(getPackageName(), R.layout.view_audioplayer_notification);
+        views.setOnClickPendingIntent(R.id.btn_play_pause, updatePlayStatePendingIntent);
+        return views;
+    }
 
-                    if (headSetState == 0) {
-                        if (mMediaPlayer != null && !isStopped()) {
-                            pause();
-                        }
-                    }
-                }
-            }
-        };
-
+    private void registerHeadsetHandlerReceiver() {
         IntentFilter receiverFilter = new IntentFilter(android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY);
-        registerReceiver(mHeadsetStateBroadcastReceiver, receiverFilter);
+        registerReceiver(mHeadsetActionReceiver, receiverFilter);
+    }
+
+    private void registerUpdatePlayStateReceiver() {
+        IntentFilter updatePlayStateIntent = new IntentFilter(UPDATE_PLAYSTATE_ACTION);
+        registerReceiver(mPlaystateActionReceiver, updatePlayStateIntent);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
 
+        ((XoApplication) getApplication()).getBackgroundManager().unregisterListener(this);
+        unregisterReceiver(mHeadsetActionReceiver);
+        unregisterReceiver(mPlaystateActionReceiver);
+
         mPlaylistController.unregisterListener(this);
-
-        if (mHeadsetStateBroadcastReceiver != null) {
-            unregisterReceiver(mHeadsetStateBroadcastReceiver);
-        }
-
         reset();
     }
 
-    private void createBroadcastReceiver() {
-        mReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals(UPDATE_PLAYSTATE_ACTION)) {
-                    if (isPaused()) {
-                        play(mCurrentItem);
-                    } else {
-                        pause();
-                    }
-                }
-            }
-        };
-    }
-
-    private void createPlayStateTogglePendingIntent() {
-        Intent nextIntent = new Intent(UPDATE_PLAYSTATE_ACTION);
-        mPlayStateTogglePendingIntent = PendingIntent.getBroadcast(this, 0, nextIntent, 0);
-    }
-
-    private void registerPlayStateToggleIntentFilter() {
-        IntentFilter filter = new IntentFilter(UPDATE_PLAYSTATE_ACTION);
-        registerReceiver(mReceiver, filter);
-    }
 
     private void createMediaPlayer() {
         mMediaPlayer = new MediaPlayer();
@@ -186,17 +194,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         }
     };
 
-    private void updateNotification() {
-        if (!mPaused) {
-            mNotificationViews.setImageViewResource(R.id.btn_play_pause, R.drawable.ic_dark_content_pause);
-        } else {
-            mNotificationViews.setImageViewResource(R.id.btn_play_pause, R.drawable.ic_dark_content_play);
-        }
-        mBuilder.setContent(mNotificationViews);
-        startForeground(NotificationId.MUSIC_PLAYER, mBuilder.build());
-    }
 
-    private void createNotification() {
+    private Notification buildNotification() {
         Intent resultIntent = new Intent(this, FullscreenPlayerActivity.class);
 
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this)
@@ -205,43 +204,44 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
 
         PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        mNotificationViews = createNotificationViews();
+        updateRemoteViewButton();
+        updateRemoteViewMetaData();
 
-        mBuilder = new NotificationCompat.Builder(this)
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_notification_music)
-                .setContent(mNotificationViews)
+                .setContent(mRemoteViews)
                 .setAutoCancel(false)
                 .setOngoing(true)
                 .setContentIntent(resultPendingIntent);
-
-        mBuilder.setPriority(Notification.PRIORITY_MAX);
+        return mBuilder.build();
     }
 
-    private RemoteViews createNotificationViews() {
-        RemoteViews views = new RemoteViews(getPackageName(), R.layout.view_audioplayer_notification);
-        views.setOnClickPendingIntent(R.id.btn_play_pause, mPlayStateTogglePendingIntent);
-        updateMetaDataView(views);
-        return views;
+    private void updateRemoteViewButton() {
+        if (!mPaused) {
+            mRemoteViews.setImageViewResource(R.id.btn_play_pause, R.drawable.ic_dark_content_pause);
+        } else {
+            mRemoteViews.setImageViewResource(R.id.btn_play_pause, R.drawable.ic_dark_content_play);
+        }
     }
 
-    private void updateMetaDataView(RemoteViews views) {
+    private void updateRemoteViewMetaData() {
         MediaMetaData metaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(mCurrentItem.getFilePath()).getPath());
         if (metaData != null) {
             String metaDataTitle = metaData.getTitle();
             String metaDataArtist = metaData.getArtist();
             if (metaDataTitle != null && !metaDataTitle.isEmpty()) {
-                views.setViewVisibility(R.id.filename_text, View.GONE);
-                views.setTextViewText(R.id.media_metadata_title_text, metaDataTitle);
+                mRemoteViews.setViewVisibility(R.id.filename_text, View.GONE);
+                mRemoteViews.setTextViewText(R.id.media_metadata_title_text, metaDataTitle);
             }
             if (metaDataArtist != null && !metaDataArtist.isEmpty()) {
-                views.setTextViewText(R.id.media_metadata_artist_text, metaDataArtist);
+                mRemoteViews.setTextViewText(R.id.media_metadata_artist_text, metaDataArtist);
             }
 
-            views.setViewVisibility(R.id.media_metadata_layout, View.VISIBLE);
+            mRemoteViews.setViewVisibility(R.id.media_metadata_layout, View.VISIBLE);
         } else {
-            views.setViewVisibility(R.id.filename_text, View.VISIBLE);
-            views.setViewVisibility(R.id.media_metadata_layout, View.GONE);
-            views.setTextViewText(R.id.filename_text, mCurrentItem.getFilePath());
+            mRemoteViews.setViewVisibility(R.id.filename_text, View.VISIBLE);
+            mRemoteViews.setViewVisibility(R.id.media_metadata_layout, View.GONE);
+            mRemoteViews.setTextViewText(R.id.filename_text, mCurrentItem.getFilePath());
         }
     }
 
@@ -296,9 +296,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
                     mCurrentItem = item;
                     broadcastTrackChanged();
                 }
-                if (isNotificationActive()) {
-                    updateNotification();
+
+                ApplicationBackgroundManager backgroundManager = ((XoApplication) getApplication()).getBackgroundManager();
+                if (backgroundManager.getInBackground()) {
+                    startForeground(NotificationId.MUSIC_PLAYER, buildNotification());
                 }
+
                 broadcastPlayStateChanged();
             } else {
                 LOG.debug("Audio focus request not granted");
@@ -342,9 +345,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
 
         mPaused = true;
         mStopped = false;
-        if (isNotificationActive()) {
-            updateNotification();
+
+        ApplicationBackgroundManager backgroundManager = ((XoApplication) getApplication()).getBackgroundManager();
+        if (backgroundManager.getInBackground()) {
+            startForeground(NotificationId.MUSIC_PLAYER, buildNotification());
         }
+
         broadcastPlayStateChanged();
     }
 
@@ -357,14 +363,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         mPaused = false;
         mStopped = true;
         mPlaylistController.reset();
-        if (isNotificationActive()) {
-            removeNotification();
-        }
-        broadcastPlayStateChanged();
-    }
 
-    private boolean isNotificationActive() {
-        return mNotificationViews != null;
+        stopForeground(true);
+
+        broadcastPlayStateChanged();
     }
 
     public void setSeekPosition(final int position) {
@@ -480,7 +482,20 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     @Override
+    public void onBecameForeground() {
+        stopForeground(true);
+    }
+
+    @Override
+    public void onBecameBackground() {
+        if (!mPaused && !mStopped) {
+            startForeground(NotificationId.MUSIC_PLAYER, buildNotification());
+        }
+    }
+
+    @Override
     public IBinder onBind(Intent intent) {
+        LOG.debug("onBind()");
         return mBinder;
     }
 
@@ -492,10 +507,5 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     private void broadcastTrackChanged() {
         Intent intent = new Intent(IntentHelper.ACTION_PLAYER_TRACK_CHANGED);
         mLocalBroadcastManager.sendBroadcast(intent);
-    }
-
-    private void removeNotification() {
-        stopForeground(true);
-        mNotificationViews = null;
     }
 }
