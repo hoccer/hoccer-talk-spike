@@ -1,9 +1,7 @@
 package com.hoccer.xo.android.view.chat.attachments;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
@@ -25,7 +23,6 @@ import com.hoccer.xo.android.view.chat.ChatMessageItem;
 public class ChatAudioItem extends ChatMessageItem implements MediaPlayer.Listener {
 
     private ImageButton mPlayPauseButton;
-    private boolean mIsPlayable;
 
     public ChatAudioItem(Context context, TalkClientMessage message) {
         super(context, message);
@@ -77,27 +74,26 @@ public class ChatAudioItem extends ChatMessageItem implements MediaPlayer.Listen
         mPlayPauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mIsPlayable) {
-                    if (isActive()) {
-                        MediaPlayer.get().pause();
-                    } else {
-                        startPlaying();
-                    }
+                if (isActive()) {
+                    pause();
                 } else {
-                    AlertDialog alertDialog = new AlertDialog.Builder(mContext).create();
-                    alertDialog.setMessage(mContext.getResources().getString(R.string.content_not_supported_audio_msg));
-                    alertDialog.setTitle(mContext.getString(R.string.content_not_supported_audio_title));
-                    DialogInterface.OnClickListener nullListener = null;
-                    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK", nullListener);
-                    alertDialog.show();
+                    play();
                 }
             }
         });
 
-        mIsPlayable = true;
         updatePlayPauseView();
 
         MediaPlayer.get().registerListener(this);
+    }
+
+    public static void pause() {
+        MediaPlayer.get().pause();
+    }
+
+    private void play() {
+        MediaPlaylist playlist = new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), mAttachment);
+        MediaPlayer.get().playItemInPlaylist(mAttachment, playlist);
     }
 
     @Override
@@ -105,10 +101,6 @@ public class ChatAudioItem extends ChatMessageItem implements MediaPlayer.Listen
         MediaPlayer.get().unregisterListener(this);
     }
 
-    private void startPlaying() {
-        MediaPlaylist playlist = new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), mAttachment);
-        MediaPlayer.get().playItemInPlaylist(mAttachment, playlist);
-    }
 
     private void setPlayButton() {
         mPlayPauseButton.setBackgroundDrawable(null);

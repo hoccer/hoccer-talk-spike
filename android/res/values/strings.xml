@@ -157,9 +157,6 @@
     <string name="content_data">Data</string>
     <string name="content_clipboard">Clipboard</string>
 
-    <string name="content_not_supported_audio_title">Unsupported Format</string>
-    <string name="content_not_supported_audio_msg">This audio attachment cannot be played back.</string>
-
     <!-- FullscreenPlayer -->
     <string name="deleted_contact_name">Removed Contact</string>
 
