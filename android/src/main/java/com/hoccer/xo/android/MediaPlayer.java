@@ -162,10 +162,12 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
 
             if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
                 LOG.debug("AUDIOFOCUS_LOSS_TRANSIENT");
+                pause();
             } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
                 LOG.debug("AUDIOFOCUS_GAIN");
             } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
                 LOG.debug("AUDIOFOCUS_LOSS");
+                pause();
             } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
                 LOG.debug("AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK");
             }
