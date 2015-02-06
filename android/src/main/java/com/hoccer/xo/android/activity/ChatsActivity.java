@@ -12,7 +12,6 @@ import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.MediaPlayer;
-import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
@@ -56,7 +55,8 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        initActionBar();
+        mContactsMenuItemActionProvider = new ContactsMenuItemActionProvider(this);
+
         handleIntent(getIntent());
     }
 
@@ -125,10 +125,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
             performTokenPairing(mPairingToken);
             mPairingToken = null;
         }
-    }
-
-    private void initActionBar() {
-        mContactsMenuItemActionProvider = new ContactsMenuItemActionProvider(this);
     }
 
     private void showProfileIfClientIsNotRegistered() {
