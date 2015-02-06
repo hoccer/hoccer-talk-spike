@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.IXoMessageListener;
 import com.hoccer.talk.client.IXoTransferListenerOld;
@@ -16,9 +17,9 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
 import com.hoccer.talk.model.TalkGroupMembership;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
-import com.artcom.hoccer.R;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -50,7 +51,7 @@ public class NearbyChatListAdapter extends BaseAdapter implements IXoContactList
         super();
         mDatabase = db;
         mXoActivity = xoActivity;
-        mExecutor = mXoActivity.getBackgroundExecutor();
+        mExecutor = XoApplication.get().getExecutor();
     }
 
     @Override

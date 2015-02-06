@@ -10,6 +10,7 @@ import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentMediaType;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
@@ -232,7 +233,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
     }
 
     protected void markMessageAsSeen(final TalkClientMessage message) {
-        mActivity.getBackgroundExecutor().execute(new Runnable() {
+        XoApplication.get().getExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 getXoClient().markAsSeen(message);
@@ -270,7 +271,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
                 @Override
                 public void run() {
                     ChatMessageItem messageItem = getItemForMessage(message);
-                    if(!mChatMessageItems.contains(messageItem)) {
+                    if (!mChatMessageItems.contains(messageItem)) {
                         mChatMessageItems.add(messageItem);
                         notifyDataSetChanged();
 

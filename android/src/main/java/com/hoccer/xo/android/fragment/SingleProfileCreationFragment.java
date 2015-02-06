@@ -162,7 +162,7 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
 
     private void uploadAvatar(final SelectedContent avatar) {
         if (avatar != null) {
-            XoApplication.getExecutor().execute(new Runnable() {
+            XoApplication.get().getExecutor().execute(new Runnable() {
                 @Override
                 public void run() {
                     LOG.debug("creating avatar upload");

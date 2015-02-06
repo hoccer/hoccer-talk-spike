@@ -135,7 +135,7 @@ public class XoClientService extends Service {
         LOG.debug("onCreate()");
         super.onCreate();
 
-        mExecutor = XoApplication.getExecutor();
+        mExecutor = XoApplication.get().getExecutor();
         mClient = XoApplication.getXoClient();
 
         if (mClientListener == null) {

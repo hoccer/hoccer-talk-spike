@@ -253,7 +253,7 @@ public class SingleProfileFragment extends ProfileFragment
 
     private void updateAvatar(final SelectedContent avatar) {
         if (avatar != null) {
-            XoApplication.getExecutor().execute(new Runnable() {
+            XoApplication.get().getExecutor().execute(new Runnable() {
                 @Override
                 public void run() {
                     LOG.debug("creating avatar upload");

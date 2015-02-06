@@ -12,6 +12,7 @@ import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.MediaPlayer;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
@@ -205,7 +206,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     }
 
     private void performTokenPairing(final String token) {
-        getBackgroundExecutor().execute(new Runnable() {
+        XoApplication.get().getExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 getXoClient().performTokenPairing(token, ChatsActivity.this);

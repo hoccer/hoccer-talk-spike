@@ -337,7 +337,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         mNearbyEnabled = false;
     }
 
-    public static ScheduledExecutorService getExecutor() {
+    public ScheduledExecutorService getExecutor() {
         return sExecutor;
     }
 

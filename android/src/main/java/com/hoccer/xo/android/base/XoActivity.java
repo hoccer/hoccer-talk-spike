@@ -66,11 +66,6 @@ public abstract class XoActivity extends FragmentActivity {
     public final static int REQUEST_CROP_AVATAR = 24;
 
     /**
-     * Executor for background tasks
-     */
-    ScheduledExecutorService mBackgroundExecutor;
-
-    /**
      * Talk client database
      */
     XoClientDatabase mDatabase;
@@ -104,10 +99,6 @@ public abstract class XoActivity extends FragmentActivity {
 
     public XoSoundPool getXoSoundPool() {
         return XoApplication.getXoSoundPool();
-    }
-
-    public ScheduledExecutorService getBackgroundExecutor() {
-        return mBackgroundExecutor;
     }
 
     public void registerXoFragment(IXoFragment fragment) {
@@ -182,9 +173,6 @@ public abstract class XoActivity extends FragmentActivity {
 
         // set up database connection
         mDatabase = XoApplication.getXoClient().getDatabase();
-
-        // get the background executor
-        mBackgroundExecutor = XoApplication.getExecutor();
 
         // set layout
         setContentView(getLayoutResource());
