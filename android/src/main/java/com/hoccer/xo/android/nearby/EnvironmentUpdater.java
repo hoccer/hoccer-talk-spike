@@ -28,6 +28,8 @@ public class EnvironmentUpdater {
     private final LocationManager mLocationManager;
     private final WifiManager mWifiManager;
 
+    private final LocationChangedListener mGPSLocationListener = new LocationChangedListener();
+    private final LocationChangedListener mNetworkLocationListener = new LocationChangedListener();
 
     public EnvironmentUpdater(Context context, XoClient client) {
         mClient = client;
@@ -119,7 +121,7 @@ public class EnvironmentUpdater {
         return environment;
     }
 
-    private final LocationListener mGPSLocationListener = new LocationListener() {
+    private class LocationChangedListener implements LocationListener {
 
         @Override
         public void onLocationChanged(Location location) {
@@ -134,22 +136,5 @@ public class EnvironmentUpdater {
 
         @Override
         public void onProviderDisabled(String provider) {}
-    };
-
-    private final LocationListener mNetworkLocationListener = new LocationListener() {
-
-        @Override
-        public void onLocationChanged(Location location) {
-            sendEnvironmentUpdate();
-        }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {}
-
-        @Override
-        public void onProviderEnabled(String provider) {}
-
-        @Override
-        public void onProviderDisabled(String provider) {}
-    };
+    }
 }
