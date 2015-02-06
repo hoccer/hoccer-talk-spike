@@ -407,7 +407,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     public boolean isIdle() {
-        int timeout = mClientConfiguration.getBackgroundDisconnectTimeout();
+        int timeout = mClientConfiguration.getBackgroundDisconnectTimeoutSeconds();
 
         if (timeout > 0) {
             return (System.currentTimeMillis() - mLastActivity) > (timeout * 1000);
@@ -1343,7 +1343,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     private void scheduleIdle() {
         shutdownIdle();
 
-        int timeout = mClientConfiguration.getBackgroundDisconnectTimeout();
+        int timeout = mClientConfiguration.getBackgroundDisconnectTimeoutSeconds();
 
         if (mState > STATE_CONNECTING && timeout > 0) {
             mAutoDisconnectFuture = mExecutor.schedule(new Runnable() {

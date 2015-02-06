@@ -441,7 +441,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         if (!mStayActiveInBackground) {
             sClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
 
-            final int timeout = sConfiguration.getBackgroundNearbyTimeout();
+            final int timeout = sConfiguration.getBackgroundNearbyTimeoutSeconds();
             mNearbyTimeout = new Runnable() {
                 @Override
                 public void run() {
