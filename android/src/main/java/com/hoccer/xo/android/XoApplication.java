@@ -59,7 +59,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     private static final int CLIENT_THREAD_COUNT = 100;
 
     // global executor for client background activity (initialized in onCreate)
-    private static ScheduledExecutorService sExecutor;
+    private ScheduledExecutorService mExecutor;
 
     // global executor for incoming connections
     private static ScheduledExecutorService sIncomingExecutor;
@@ -135,8 +135,8 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         Thread.setDefaultUncaughtExceptionHandler(this);
 
         // log storage roots
-        sLog.info("internal storage at " + sInternalStorage.toString());
-        sLog.info("external storage at " + sExternalStorage.toString());
+        sLog.info("internal storage at " + sInternalStorage);
+        sLog.info("external storage at " + sExternalStorage);
 
         // initialize version information
         XoVersion.initialize(this);
@@ -183,7 +183,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         ThreadFactoryBuilder tfb = new ThreadFactoryBuilder();
         tfb.setNameFormat("client-%d");
         tfb.setUncaughtExceptionHandler(this);
-        sExecutor = Executors.newScheduledThreadPool(CLIENT_THREAD_COUNT, tfb.build());
+        mExecutor = Executors.newScheduledThreadPool(CLIENT_THREAD_COUNT, tfb.build());
         ThreadFactoryBuilder tfb2 = new ThreadFactoryBuilder();
         tfb2.setNameFormat("receiving client-%d");
         tfb2.setUncaughtExceptionHandler(this);
@@ -333,12 +333,13 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     }
 
     public void stopNearbySession() {
+        sClient.unregisterStateListener(mClientStateListener);
         mEnvironmentUpdater.stop();
         mNearbyEnabled = false;
     }
 
     public ScheduledExecutorService getExecutor() {
-        return sExecutor;
+        return mExecutor;
     }
 
     public static XoAndroidClient getXoClient() {
