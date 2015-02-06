@@ -236,29 +236,13 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
             if (mContact != null) {
                 mItems = new ArrayList<XoTransfer>(XoApplication.getXoClient().getDatabase().findClientDownloadsByMediaTypeAndContactId(mMediaType, mContact.getClientContactId()));
             } else {
-                List<XoTransfer> items = XoApplication.getXoClient().getDatabase().findTransfersByMediaType(mMediaType);
-                mItems = filterDuplicateFiles(items);
+                mItems = XoApplication.getXoClient().getDatabase().findTransfersByMediaTypeDistinct(mMediaType);
             }
         } catch (SQLException e) {
             LOG.error(e);
         }
 
         refreshView();
-    }
-
-    private static List<XoTransfer> filterDuplicateFiles(List<XoTransfer> transfers) {
-        List<XoTransfer> filteredTransfers = new ArrayList<XoTransfer>();
-        HashSet<String> filePathes = new HashSet<String>();
-
-        for (int i = transfers.size() - 1; i >= 0; i--) {
-            XoTransfer transfer = transfers.get(i);
-            if (!filePathes.contains(transfer.getFilePath())) {
-                filteredTransfers.add(0, transfer);
-                filePathes.add(transfer.getFilePath());
-            }
-        }
-
-        return filteredTransfers;
     }
 
     private boolean shouldItemBeAdded(XoTransfer transfer) {

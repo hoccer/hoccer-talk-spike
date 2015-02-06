@@ -418,6 +418,8 @@ public class MediaPlaylistTest {
 
     //////// Helpers ////////
 
+    private static int mFilePathCounter = 0;
+
     private TalkClientDownload createAudioDownloadWithUser(TalkClientContact user) {
         // create download
         TalkClientDownload result = new TalkClientDownload();
@@ -428,6 +430,10 @@ public class MediaPlaylistTest {
             Field mediaTypeField = downloadClass.getDeclaredField("mediaType");
             mediaTypeField.setAccessible(true);
             mediaTypeField.set(result, ContentMediaType.AUDIO);
+
+            Field dataFileField = downloadClass.getDeclaredField("dataFile");
+            dataFileField.setAccessible(true);
+            dataFileField.set(result, "filePath_" + mFilePathCounter++);
 
             // save first to set valid downloadId
             mDatabase.saveClientDownload(result);
