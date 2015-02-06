@@ -28,7 +28,7 @@ import java.io.File;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
-public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.ArtworkRetrieverListener, MediaPlayer.IMediaPlayerListener {
+public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.ArtworkRetrieverListener, MediaPlayer.Listener {
 
     static final Logger LOG = Logger.getLogger(FullscreenPlayerFragment.class);
 

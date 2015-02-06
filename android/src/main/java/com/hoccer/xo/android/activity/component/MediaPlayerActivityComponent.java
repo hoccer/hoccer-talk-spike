@@ -13,7 +13,7 @@ import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
 /**
  * Adds and manages the media icon in the actionbar based on the current MediaPlayer state.
  */
-public class MediaPlayerActivityComponent extends ActivityComponent implements MediaPlayer.IMediaPlayerListener {
+public class MediaPlayerActivityComponent extends ActivityComponent implements MediaPlayer.Listener {
 
     private Menu mMenu;
 

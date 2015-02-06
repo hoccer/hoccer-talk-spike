@@ -41,7 +41,7 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
     private final Context mContext;
     private final NotificationManager mNotificationManager;
 
-    private final List<IMediaPlayerListener> mListener = new ArrayList<IMediaPlayerListener>();
+    private final List<Listener> mListener = new ArrayList<Listener>();
 
     private static final String UPDATE_PLAYSTATE_ACTION = "com.hoccer.xo.android.content.audio.UPDATE_PLAYSTATE_ACTION";
 
@@ -55,6 +55,12 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
     private XoTransfer mCurrentItem;
     private final RemoteViews mRemoteViews;
     private final MediaPlaylistController mPlaylistController = new MediaPlaylistController();
+
+    public interface Listener {
+        void onStateChanged();
+
+        void onTrackChanged();
+    }
 
     private final BroadcastReceiver mHeadsetActionReceiver = new BroadcastReceiver() {
         @Override
@@ -82,7 +88,7 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
     };
 
     public static MediaPlayer get() {
-        if(sInstance == null) {
+        if (sInstance == null) {
             sInstance = new MediaPlayer();
         }
         return sInstance;
@@ -454,6 +460,7 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
         mNotificationManager.cancel(NotificationId.MUSIC_PLAYER);
     }
 
+
     @Override
     public void onBecameBackground() {
         if (!mPaused && !mStopped) {
@@ -461,28 +468,22 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
         }
     }
 
-    public interface IMediaPlayerListener {
-        void onStateChanged();
-
-        void onTrackChanged();
-    }
-
-    public void registerListener(IMediaPlayerListener listener) {
+    public void registerListener(Listener listener) {
         mListener.add(listener);
     }
 
-    public void unregisterListener(IMediaPlayerListener listener) {
+    public void unregisterListener(Listener listener) {
         mListener.remove(listener);
     }
 
     private void notifyPlayStateChanged() {
-        for (IMediaPlayerListener listener : mListener) {
+        for (Listener listener : mListener) {
             listener.onStateChanged();
         }
     }
 
     private void notifyTrackChanged() {
-        for (IMediaPlayerListener listener : mListener) {
+        for (Listener listener : mListener) {
             listener.onTrackChanged();
         }
     }

@@ -13,7 +13,7 @@ import com.hoccer.xo.android.MediaPlayer;
 import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.util.UriUtils;
 
-public class AudioAttachmentView extends LinearLayout implements View.OnClickListener, MediaMetaData.ArtworkRetrieverListener, MediaPlayer.IMediaPlayerListener {
+public class AudioAttachmentView extends LinearLayout implements View.OnClickListener, MediaMetaData.ArtworkRetrieverListener, MediaPlayer.Listener {
 
     private final Context mContext;
     private XoTransfer mItem;

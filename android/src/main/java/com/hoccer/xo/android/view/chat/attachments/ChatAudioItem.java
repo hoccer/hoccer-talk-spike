@@ -22,7 +22,7 @@ import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 
 
-public class ChatAudioItem extends ChatMessageItem implements MediaPlayer.IMediaPlayerListener {
+public class ChatAudioItem extends ChatMessageItem implements MediaPlayer.Listener {
 
     private ImageButton mPlayPauseButton;
     private boolean mIsPlayable;
