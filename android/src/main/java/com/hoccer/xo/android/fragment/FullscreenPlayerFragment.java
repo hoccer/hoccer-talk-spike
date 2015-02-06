@@ -104,6 +104,7 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
         updateConversationName();
         mPlayButton.setChecked(!MediaPlayer.get().isPaused());
         mShuffleButton.setChecked(MediaPlayer.get().isShuffleActive());
+        updateRepeatButton();
 
         setupViewListeners();
     }
