@@ -10,11 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class ApplicationBackgroundManager implements Application.ActivityLifecycleCallbacks {
+public class BackgroundManager implements Application.ActivityLifecycleCallbacks {
 
-    private static final Logger LOG = Logger.getLogger(ApplicationBackgroundManager.class);
+    private static final Logger LOG = Logger.getLogger(BackgroundManager.class);
 
     public static final long BACKGROUND_DELAY = 500;
+
+    private static BackgroundManager sInstance;
 
     public interface Listener {
         public void onBecameForeground();
@@ -27,8 +29,15 @@ public class ApplicationBackgroundManager implements Application.ActivityLifecyc
     private final Handler mBackgroundDelayHandler = new Handler();
     private Runnable mBackgroundTransition;
 
-    public ApplicationBackgroundManager(Application application) {
-        application.registerActivityLifecycleCallbacks(this);
+    public static BackgroundManager get() {
+        if (sInstance == null) {
+            sInstance = new BackgroundManager();
+        }
+        return sInstance;
+    }
+
+    private BackgroundManager() {
+        XoApplication.get().registerActivityLifecycleCallbacks(this);
     }
 
     public void registerListener(Listener listener) {

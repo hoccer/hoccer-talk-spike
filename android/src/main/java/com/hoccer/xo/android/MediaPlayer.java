@@ -11,7 +11,6 @@ import android.media.AudioManager;
 import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
 import android.view.View;
 import android.widget.RemoteViews;
 import com.artcom.hoccer.R;
@@ -31,7 +30,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, android.media.MediaPlayer.OnCompletionListener, MediaPlaylistController.Listener, ApplicationBackgroundManager.Listener {
+public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, android.media.MediaPlayer.OnCompletionListener, MediaPlaylistController.Listener, BackgroundManager.Listener {
 
     private static final Logger LOG = Logger.getLogger(MediaPlayer.class);
 
@@ -39,7 +38,7 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
 
     private static MediaPlayer sInstance;
 
-    private final XoApplication mXoApplication;
+    private final Context mContext;
     private final NotificationManager mNotificationManager;
 
     private final List<IMediaPlayerListener> mListener = new ArrayList<IMediaPlayerListener>();
@@ -47,6 +46,7 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
     private static final String UPDATE_PLAYSTATE_ACTION = "com.hoccer.xo.android.content.audio.UPDATE_PLAYSTATE_ACTION";
 
     private final AudioManager mAudioManager;
+    private final BackgroundManager mBackgroundManager;
     private android.media.MediaPlayer mMediaPlayer;
 
     private boolean mPaused;
@@ -81,29 +81,25 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
         }
     };
 
-    public static MediaPlayer create(XoApplication application) {
-        if(sInstance == null) {
-            sInstance = new MediaPlayer(application);
-        }
-
-        return sInstance;
-    }
-
     public static MediaPlayer get() {
+        if(sInstance == null) {
+            sInstance = new MediaPlayer();
+        }
         return sInstance;
     }
 
-    private MediaPlayer(XoApplication application) {
-        mXoApplication = application;
+    private MediaPlayer() {
+        mContext = XoApplication.get();
+        mBackgroundManager = BackgroundManager.get();
         mPlaylistController.registerListener(this);
-        mAudioManager = (AudioManager) mXoApplication.getSystemService(Context.AUDIO_SERVICE);
-        mNotificationManager = (NotificationManager) mXoApplication.getSystemService(Context.NOTIFICATION_SERVICE);
+        mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+        mNotificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
         mRemoteViews = createRemoteViews();
 
         registerHeadsetHandlerReceiver();
         registerUpdatePlayStateReceiver();
 
-        mXoApplication.getBackgroundManager().registerListener(this);
+        mBackgroundManager.registerListener(this);
     }
 
     @Override
@@ -128,28 +124,28 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
 
     private RemoteViews createRemoteViews() {
         Intent updatePlayStateIntent = new Intent(UPDATE_PLAYSTATE_ACTION);
-        PendingIntent updatePlayStatePendingIntent = PendingIntent.getBroadcast(mXoApplication, 0, updatePlayStateIntent, 0);
+        PendingIntent updatePlayStatePendingIntent = PendingIntent.getBroadcast(mContext, 0, updatePlayStateIntent, 0);
 
-        RemoteViews views = new RemoteViews(mXoApplication.getPackageName(), R.layout.view_audioplayer_notification);
+        RemoteViews views = new RemoteViews(mContext.getPackageName(), R.layout.view_audioplayer_notification);
         views.setOnClickPendingIntent(R.id.btn_play_pause, updatePlayStatePendingIntent);
         return views;
     }
 
     private void registerHeadsetHandlerReceiver() {
         IntentFilter receiverFilter = new IntentFilter(android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY);
-        mXoApplication.registerReceiver(mHeadsetActionReceiver, receiverFilter);
+        mContext.registerReceiver(mHeadsetActionReceiver, receiverFilter);
     }
 
     private void registerUpdatePlayStateReceiver() {
         IntentFilter updatePlayStateIntent = new IntentFilter(UPDATE_PLAYSTATE_ACTION);
-        mXoApplication.registerReceiver(mPlaystateActionReceiver, updatePlayStateIntent);
+        mContext.registerReceiver(mPlaystateActionReceiver, updatePlayStateIntent);
     }
 
     private void createMediaPlayer() {
         mMediaPlayer = new android.media.MediaPlayer();
         mMediaPlayer.setOnErrorListener(this);
         mMediaPlayer.setOnCompletionListener(this);
-        mMediaPlayer.setWakeMode(mXoApplication, PowerManager.PARTIAL_WAKE_LOCK);
+        mMediaPlayer.setWakeMode(mContext, PowerManager.PARTIAL_WAKE_LOCK);
     }
 
     private final OnAudioFocusChangeListener mAudioFocusChangeListener = new OnAudioFocusChangeListener() {
@@ -171,13 +167,13 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
     };
 
     private Notification buildNotification() {
-        Intent intent = new Intent(mXoApplication, FullscreenPlayerActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(mXoApplication, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent intent = new Intent(mContext, FullscreenPlayerActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         updateRemoteViewButton();
         updateRemoteViewMetaData();
 
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mXoApplication)
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mContext)
                 .setSmallIcon(R.drawable.ic_notification_music)
                 .setContent(mRemoteViews)
                 .setAutoCancel(false)
@@ -267,8 +263,7 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
                     invokeTrackChanged();
                 }
 
-                ApplicationBackgroundManager backgroundManager = mXoApplication.getBackgroundManager();
-                if (backgroundManager.getInBackground()) {
+                if (mBackgroundManager.getInBackground()) {
                     mNotificationManager.notify(NotificationId.MUSIC_PLAYER, buildNotification());
                 }
 
@@ -316,8 +311,7 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
         mPaused = true;
         mStopped = false;
 
-        ApplicationBackgroundManager backgroundManager = mXoApplication.getBackgroundManager();
-        if (backgroundManager.getInBackground()) {
+        if (mBackgroundManager.getInBackground()) {
             mNotificationManager.notify(NotificationId.MUSIC_PLAYER, buildNotification());
         }
 

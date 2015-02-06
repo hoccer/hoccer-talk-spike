@@ -35,7 +35,7 @@ import java.util.concurrent.ScheduledExecutorService;
  * for such things as initializing the logger and setting up the
  * XO client itself. All global initialization should go here.
  */
-public class XoApplication extends Application implements Thread.UncaughtExceptionHandler, ApplicationBackgroundManager.Listener {
+public class XoApplication extends Application implements Thread.UncaughtExceptionHandler, BackgroundManager.Listener {
 
     private static Logger sLog;
 
@@ -75,7 +75,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
     private EnvironmentUpdater mEnvironmentUpdater;
 
-    private ApplicationBackgroundManager mBackgroundManager;
     private static StartupTasks sStartupTasks;
     private boolean mStayActiveInBackground;
     private boolean mNearbyEnabled;
@@ -83,9 +82,17 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     private final Handler mNearbyTimeoutHandler = new Handler();
     private Runnable mNearbyTimeout;
 
+    private static XoApplication sInstance;
+
+    public static XoApplication get() {
+        return sInstance;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
+
+        sInstance = this;
 
         // currently we use our own instance here
         sUncaughtExceptionHandler = this;
@@ -200,8 +207,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         // create sound pool instance
         sSoundPool = new XoSoundPool(this);
 
-        mBackgroundManager = new ApplicationBackgroundManager(this);
-        mBackgroundManager.registerListener(this);
+        BackgroundManager.get().registerListener(this);
 
         mEnvironmentUpdater = new EnvironmentUpdater(this, XoApplication.sClient);
 
@@ -291,10 +297,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
             return new File(filePath);
         }
         return null;
-    }
-
-    public ApplicationBackgroundManager getBackgroundManager() {
-        return mBackgroundManager;
     }
 
     public static void reinitializeXoClient() {
