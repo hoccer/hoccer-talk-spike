@@ -24,8 +24,6 @@ public class MediaPlayerActivityComponent extends ActivityComponent implements M
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        updateActionBarIcons();
         MediaPlayer.get().registerListener(this);
     }
 
@@ -37,15 +35,15 @@ public class MediaPlayerActivityComponent extends ActivityComponent implements M
 
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
-        final boolean result = super.onCreateOptionsMenu(menu);
-        if (result) {
+        final boolean showMenu = super.onCreateOptionsMenu(menu);
+        if (showMenu) {
             mMenu = menu;
             updateActionBarIcons();
         } else {
             mMenu = null;
         }
 
-        return result;
+        return showMenu;
     }
 
     @Override
