@@ -54,8 +54,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        MediaPlayer.create((XoApplication)getApplication());
-
         super.onCreate(savedInstanceState);
 
         initActionBar();
