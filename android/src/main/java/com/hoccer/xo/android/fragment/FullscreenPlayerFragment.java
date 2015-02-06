@@ -126,11 +126,6 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
         MediaPlayer.get().unregisterListener(this);
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
     public void updatePlayState() {
         final boolean isPlaying;
 
