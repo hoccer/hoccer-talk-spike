@@ -11,6 +11,8 @@ import android.os.Handler;
 import com.artcom.hoccer.R;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hoccer.talk.client.IXoClientHost;
+import com.hoccer.talk.client.IXoStateListener;
+import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.model.TalkPresence;
@@ -433,7 +435,11 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
         if (mNearbyEnabled) {
             mEnvironmentUpdater.start();
-            sLog.info("Nearby mode restarted.");
+            sLog.info("EnvironmentUpdater restarted.");
+
+            if (sClient.getState() != XoClient.STATE_READY) {
+                sClient.registerStateListener(mClientStateListener);
+            }
         }
     }
 
@@ -454,4 +460,14 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
             mNearbyTimeoutHandler.postDelayed(mNearbyTimeout, timeout * 1000);
         }
     }
+
+    private final IXoStateListener mClientStateListener = new IXoStateListener() {
+        @Override
+        public void onClientStateChange(XoClient client, int state) {
+            if (state == XoClient.STATE_READY) {
+                mEnvironmentUpdater.sendEnvironmentUpdate();
+                sClient.unregisterStateListener(this);
+            }
+        }
+    };
 }

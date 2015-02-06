@@ -733,9 +733,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     mDatabase.savePresence(presence);
                     if (TalkPresence.CONN_STATUS_ONLINE.equals(newStatus)) {
                         LOG.debug("entering foreground -> idle timer deactivated");
-                        //LOG.debug("stacktrace", new Exception());
                         mBackgroundMode = false;
                         shutdownIdle();
+                        wake();
                     } else if (TalkPresence.CONN_STATUS_BACKGROUND.equals(newStatus)) {
                         mBackgroundMode = true;
                         LOG.debug("entering background -> idle timer activated");

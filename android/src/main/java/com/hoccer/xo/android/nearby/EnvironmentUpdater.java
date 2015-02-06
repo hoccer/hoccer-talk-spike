@@ -44,6 +44,13 @@ public class EnvironmentUpdater {
         sendEnvironmentUpdate();
     }
 
+    public void sendEnvironmentUpdate() {
+        TalkEnvironment environment = getEnvironment();
+        if (environment.isValid()) {
+            mClient.sendEnvironmentUpdate(environment);
+        }
+    }
+
     public void stop() {
         mLocationManager.removeUpdates(mGPSLocationListener);
         mLocationManager.removeUpdates(mNetworkLocationListener);
@@ -60,13 +67,6 @@ public class EnvironmentUpdater {
 
     private boolean isNetworkProviderEnabled() {
         return mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-    }
-
-    private void sendEnvironmentUpdate() {
-        TalkEnvironment environment = getEnvironment();
-        if (environment.isValid()) {
-            mClient.sendEnvironmentUpdate(environment);
-        }
     }
 
     private TalkEnvironment getEnvironment() {
