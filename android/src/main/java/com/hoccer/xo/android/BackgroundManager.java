@@ -48,7 +48,7 @@ public class BackgroundManager implements Application.ActivityLifecycleCallbacks
         listeners.remove(listener);
     }
 
-    public boolean getInBackground() {
+    public boolean isInBackground() {
         return mInBackground;
     }
 

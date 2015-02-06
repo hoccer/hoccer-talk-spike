@@ -263,7 +263,7 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
                     notifyTrackChanged();
                 }
 
-                if (mBackgroundManager.getInBackground()) {
+                if (mBackgroundManager.isInBackground()) {
                     mNotificationManager.notify(NotificationId.MUSIC_PLAYER, buildNotification());
                 }
 
@@ -311,7 +311,7 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
         mPaused = true;
         mStopped = false;
 
-        if (mBackgroundManager.getInBackground()) {
+        if (mBackgroundManager.isInBackground()) {
             mNotificationManager.notify(NotificationId.MUSIC_PLAYER, buildNotification());
         }
 
