@@ -113,7 +113,7 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
 
     @Override
     public void onPlaylistChanged(MediaPlaylist newPlaylist) {
-        invokeTrackChanged();
+        notifyTrackChanged();
     }
 
     @Override
@@ -260,14 +260,14 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
                 mStopped = false;
                 if (item != mCurrentItem) {
                     mCurrentItem = item;
-                    invokeTrackChanged();
+                    notifyTrackChanged();
                 }
 
                 if (mBackgroundManager.getInBackground()) {
                     mNotificationManager.notify(NotificationId.MUSIC_PLAYER, buildNotification());
                 }
 
-                invokePlayStateChanged();
+                notifyPlayStateChanged();
             } else {
                 LOG.debug("Audio focus request not granted");
             }
@@ -315,7 +315,7 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
             mNotificationManager.notify(NotificationId.MUSIC_PLAYER, buildNotification());
         }
 
-        invokePlayStateChanged();
+        notifyPlayStateChanged();
     }
 
     public void reset() {
@@ -330,7 +330,7 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
 
         removeNotification();
 
-        invokePlayStateChanged();
+        notifyPlayStateChanged();
     }
 
     public void setSeekPosition(final int position) {
@@ -475,13 +475,13 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
         mListener.remove(listener);
     }
 
-    private void invokePlayStateChanged() {
+    private void notifyPlayStateChanged() {
         for (IMediaPlayerListener listener : mListener) {
             listener.onStateChanged();
         }
     }
 
-    private void invokeTrackChanged() {
+    private void notifyTrackChanged() {
         for (IMediaPlayerListener listener : mListener) {
             listener.onTrackChanged();
         }
