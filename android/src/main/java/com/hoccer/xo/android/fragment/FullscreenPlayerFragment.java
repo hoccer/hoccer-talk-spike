@@ -111,7 +111,6 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
     @Override
     public void onResume() {
         super.onResume();
-
         if (MediaPlayer.get().getCurrentMediaItem() != null) {
             updateTrackData();
             updatePlayState();
@@ -120,8 +119,8 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
+    public void onPause() {
+        super.onPause();
         mTimeProgressHandler.removeCallbacks(mUpdateTimeTask);
         mUpdateTimeTask = null;
         MediaPlayer.get().unregisterListener(this);
@@ -130,7 +129,6 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
     @Override
     public void onDestroy() {
         super.onDestroy();
-        MediaPlayer.get().unregisterListener(this);
     }
 
     public void updatePlayState() {
