@@ -6,7 +6,6 @@ import com.artcom.hoccer.R;
 
 public class FullscreenPlayerActivity extends FragmentActivity {
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

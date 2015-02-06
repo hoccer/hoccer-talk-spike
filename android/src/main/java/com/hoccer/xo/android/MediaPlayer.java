@@ -19,6 +19,7 @@ import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
+import com.hoccer.xo.android.activity.NotificationBridgeActivity;
 import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.content.MediaPlaylist;
 import com.hoccer.xo.android.content.audio.MediaPlaylistController;
@@ -175,7 +176,8 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
     };
 
     private Notification buildNotification() {
-        Intent intent = new Intent(mContext, FullscreenPlayerActivity.class);
+        Intent intent = new Intent(mContext, NotificationBridgeActivity.class);
+        intent.setAction(NotificationBridgeActivity.ACTION_FULLSCREEN_PLAYER_ACTIVITY_TO_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         updateRemoteViewButton();
