@@ -61,12 +61,12 @@ public class BackgroundManager implements Application.ActivityLifecycleCallbacks
 
         if (mInBackground) {
             mInBackground = false;
-            invokeOnBecameForeground();
+            notifyOnBecameForeground();
             LOG.info("Application went to foreground");
         }
     }
 
-    private void invokeOnBecameForeground() {
+    private void notifyOnBecameForeground() {
         for (Listener listener : listeners) {
             try {
                 listener.onBecameForeground();
@@ -84,7 +84,7 @@ public class BackgroundManager implements Application.ActivityLifecycleCallbacks
                 public void run() {
                     mInBackground = true;
                     mBackgroundTransition = null;
-                    invokeOnBecameBackground();
+                    notifyOnBecameBackground();
                     LOG.info("Application went to background");
                 }
             };
@@ -92,7 +92,7 @@ public class BackgroundManager implements Application.ActivityLifecycleCallbacks
         }
     }
 
-    private void invokeOnBecameBackground() {
+    private void notifyOnBecameBackground() {
         for (Listener listener : listeners) {
             try {
                 listener.onBecameBackground();
