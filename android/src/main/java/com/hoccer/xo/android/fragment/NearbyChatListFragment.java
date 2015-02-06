@@ -88,9 +88,7 @@ public class NearbyChatListFragment extends XoListFragment implements IPagerFrag
     }
 
     @Override
-    public void onPageSelected() {
-        ((XoApplication) getActivity().getApplication()).startNearbySession(getActivity());
-    }
+    public void onPageSelected() {}
 
     @Override
     public void onPageUnselected() {
@@ -98,7 +96,9 @@ public class NearbyChatListFragment extends XoListFragment implements IPagerFrag
     }
 
     @Override
-    public void onPageResume() {}
+    public void onPageResume() {
+        ((XoApplication) getActivity().getApplication()).startNearbySession(getActivity());
+    }
 
     @Override
     public void onPagePause() {}
