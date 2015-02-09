@@ -114,11 +114,7 @@ public class UriUtils {
         String filePath = null;
 
         if (isContentUri(uri)) {
-
-            String[] projection = {
-                    MediaStore.Images.Media.MIME_TYPE,
-                    MediaStore.Images.Media.DATA
-            };
+            String[] projection = {MediaStore.Images.Media.DATA};
 
             Cursor cursor = context.getContentResolver().query(uri, projection, null, null, null);
             if (cursor == null) {
