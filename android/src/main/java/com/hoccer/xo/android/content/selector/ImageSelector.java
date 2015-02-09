@@ -10,6 +10,7 @@ import android.provider.MediaStore;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import org.apache.log4j.Logger;
 
@@ -90,18 +91,24 @@ public class ImageSelector implements IContentSelector {
 
     @Override
     public boolean isValidIntent(Context context, Intent intent) {
-        Uri contentUri = intent.getData();
-        if (contentUri != null) {
-            String[] columns = {
-                    MediaStore.Images.Media.MIME_TYPE
-            };
-            Cursor cursor = context.getContentResolver().query(contentUri, columns, null, null, null);
+        if (UriUtils.isFileUri(intent.getData())) {
+            return true;
+        }
 
-            if (cursor != null) {
-                cursor.moveToFirst();
-                int mimeTypeIndex = cursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE);
-                String mimeType = cursor.getString(mimeTypeIndex);
-                return (mimeType.startsWith("image"));
+        if (UriUtils.isContentUri(intent.getData())) {
+            Uri contentUri = intent.getData();
+            if (contentUri != null) {
+                String[] columns = {
+                        MediaStore.Images.Media.MIME_TYPE
+                };
+                Cursor cursor = context.getContentResolver().query(contentUri, columns, null, null, null);
+
+                if (cursor != null) {
+                    cursor.moveToFirst();
+                    int mimeTypeIndex = cursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE);
+                    String mimeType = cursor.getString(mimeTypeIndex);
+                    return (mimeType.startsWith("image"));
+                }
             }
         }
 
