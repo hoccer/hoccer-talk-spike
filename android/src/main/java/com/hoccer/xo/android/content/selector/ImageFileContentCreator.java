@@ -19,8 +19,6 @@ import java.io.InputStream;
 
 public class ImageFileContentCreator implements IContentCreator {
 
-    private static final Logger LOG = Logger.getLogger(ImageFileContentCreator.class);
-
     @Override
     public SelectedContent apply(Context context, Intent intent) {
 
