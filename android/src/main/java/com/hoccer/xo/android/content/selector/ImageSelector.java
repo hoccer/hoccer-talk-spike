@@ -74,11 +74,9 @@ public class ImageSelector implements IContentSelector {
         String contentString = selectedContent.toString();
         if (isPicasaContent(contentString)) {
             return new PicasaContentCreator();
-        } else if (isFileContent(contentString)) {
+        } else {
             return new ImageFileContentCreator();
         }
-
-        return null;
     }
 
     static private boolean isPicasaContent(String contentString) {
@@ -88,10 +86,6 @@ public class ImageSelector implements IContentSelector {
 
                         // Moto G content string on dirks mobile
                         || contentString.startsWith("content://com.google.android.apps.photos.content/");
-    }
-
-    static private boolean isFileContent(String contentString) {
-        return contentString.startsWith("content://media/");
     }
 
     @Override
