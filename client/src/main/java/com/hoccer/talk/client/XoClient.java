@@ -47,11 +47,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     public static final int STATE_DISCONNECTED = 0;
     public static final int STATE_CONNECTING = 1;
-    public static final int STATE_RECONNECTING = 2;
-    public static final int STATE_REGISTERING = 3;
-    public static final int STATE_LOGIN = 4;
-    public static final int STATE_SYNCING = 5;
-    public static final int STATE_READY = 6;
+    public static final int STATE_REGISTERING = 2;
+    public static final int STATE_LOGIN = 3;
+    public static final int STATE_SYNCING = 4;
+    public static final int STATE_READY = 5;
 
     // Digest instance used for SRP auth
     private static final Digest SRP_DIGEST = new SHA256Digest();
@@ -120,14 +119,14 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     // The current state of this client
     int mState;
 
-    /** Connection retry count for back-off */
-    int mConnectionFailures;
-
-    ObjectMapper mJsonMapper;
+    // Count connections attempts for back-off
+    int mNumConnectionAttempts;
 
     // temporary group for geolocation grouping
     String mEnvironmentGroupId;
     AtomicBoolean mEnvironmentUpdateCallPending = new AtomicBoolean(false);
+
+    ObjectMapper mJsonMapper;
 
     int mRSAKeysize = 1024;
 
@@ -394,6 +393,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     /**
      * Imports the client credentials.
+     *
      * @note After import the client deletes all contacts and relationsships and reconnects for full sync.
      */
     public void importCredentials(final Credentials newCredentials) throws SQLException, NoClientIdInPresenceException {
@@ -422,7 +422,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         mDatabase.eraseAllGroupMemberships();
         mDatabase.eraseAllGroupContacts();
 
-        reconnect("Credentials imported.");
+        switchState(STATE_DISCONNECTED, "login with new imported credentials");
+        switchState(STATE_CONNECTING, "login with new imported credentials");
     }
 
     /**
@@ -516,29 +517,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
      */
     public void disconnect() {
         LOG.debug("client: disconnect()");
-        if(mState != STATE_DISCONNECTED) {
-            switchState(STATE_DISCONNECTED, "disconnecting client");
-        }
-    }
-
-    public void wakeInBackground() {
-        LOG.debug("client: wakeInBackground()");
-        mBackgroundMode = true;
-        connect();
-     }
-
-    /**
-     * Reconnect the client immediately
-     */
-    public void reconnect(final String reason) {
-        if(mState > STATE_DISCONNECTED) {
-            mExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    switchState(STATE_RECONNECTING, "reconnect: " + reason);
-                }
-            });
-        }
+        switchState(STATE_DISCONNECTED, "disconnecting client");
     }
 
     /**
@@ -1100,116 +1079,80 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     private void switchState(int newState, String message) {
-        // only switch of there really was a change
-        if(mState == newState) {
-            LOG.debug("state remains " + STATE_NAMES[mState] + " (" + message + ")");
-        }
+        if (mState != newState) {
+            LOG.info("[switchState: connection #" + mConnection.getConnectionId() + "] state " + STATE_NAMES[mState] + " -> " + STATE_NAMES[newState] + " (" + message + ")");
 
-        // log about it
-        LOG.info("[switchState: connection #" + mConnection.getConnectionId() + "] state " + STATE_NAMES[mState] + " -> " + STATE_NAMES[newState] + " (" + message + ")");
+            int previousState = mState;
+            mState = newState;
 
-        // perform transition
-        int previousState = mState;
-        mState = newState;
-
-        // maintain keep-alives timer
-        if(mState >= STATE_SYNCING) {
-            scheduleKeepAlive();
-        } else {
-            shutdownKeepAlive();
-        }
-
-        // make disconnects happen
-        if(mState == STATE_DISCONNECTED) {
-            scheduleDisconnect();
-        } else {
-            shutdownDisconnect();
-        }
-
-        // make connects happen
-        if(mState == STATE_RECONNECTING) {
-            LOG.info("[connection #" + mConnection.getConnectionId() + "] scheduling requested reconnect");
-            mConnectionFailures = 0;
-            scheduleConnect(true);
-        } else if(mState == STATE_CONNECTING) {
-            if(previousState == STATE_DISCONNECTED) {
-                LOG.info("[connection #" + mConnection.getConnectionId() + "] scheduling connect");
-                mConnectionFailures = 0;
-                scheduleConnect(false);
+            if (mState == STATE_DISCONNECTED) {
+                mNumConnectionAttempts = 0;
+                scheduleDisconnect();
             } else {
-                LOG.info("[connection #" + mConnection.getConnectionId() + "] scheduling reconnect");
-                mConnectionFailures++;
-                scheduleConnect(true);
+                shutdownDisconnect();
             }
-        } else {
-            shutdownConnect();
-        }
 
-        if(mState == STATE_REGISTERING) {
-            scheduleRegistration();
-        } else {
-            shutdownRegistration();
-        }
+            if (mState == STATE_CONNECTING) {
+                scheduleConnect();
+            } else {
+                shutdownConnect();
+            }
 
-        if(mState == STATE_LOGIN) {
-            scheduleLogin();
-        } else {
-            shutdownLogin();
-        }
+            if (mState == STATE_REGISTERING) {
+                scheduleRegistration();
+            } else {
+                shutdownRegistration();
+            }
 
-        if(mState == STATE_SYNCING) {
-            scheduleSync();
-        }
+            if (mState == STATE_LOGIN) {
+                scheduleLogin();
+            } else {
+                shutdownLogin();
+            }
 
-        if(mState == STATE_READY) {
-            mConnectionFailures = 0;
-            // start talking
-            mExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    mServerRpc.ready();
-                    LOG.info("[connection #" + mConnection.getConnectionId() + "] connected and ready");
-                    LOG.info("Delivering potentially unsent messages.");
-                    requestSendAllPendingMessages();
+            if (mState == STATE_SYNCING) {
+                scheduleSync();
+            }
+
+            if (mState == STATE_READY) {
+                mNumConnectionAttempts = 0;
+                mExecutor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        mServerRpc.ready();
+                        LOG.info("[connection #" + mConnection.getConnectionId() + "] connected and ready");
+                        LOG.info("Delivering potentially unsent messages.");
+                        requestSendAllPendingMessages();
+                    }
+                });
+            }
+
+            if (mState >= STATE_SYNCING) {
+                scheduleKeepAlive();
+            } else {
+                shutdownKeepAlive();
+            }
+
+            // call listeners
+            if (previousState != newState) {
+                for (IXoStateListener listener : mStateListeners) {
+                    listener.onClientStateChange(this, newState);
                 }
-            });
-        }
-
-        // call listeners
-        if(previousState != newState) {
-            for(IXoStateListener listener: mStateListeners) {
-                listener.onClientStateChange(this, newState);
             }
-        }
-    }
-
-    private void handleDisconnect() {
-        LOG.debug("handleDisconnect()");
-        switch(mState) {
-            case STATE_DISCONNECTED:
-            case STATE_CONNECTING:
-            case STATE_RECONNECTING:
-            case STATE_REGISTERING:
-            case STATE_LOGIN:
-            case STATE_SYNCING:
-            case STATE_READY:
-                LOG.debug("supposed to be connected - scheduling connect, state = " + stateToString(mState));
-                switchState(STATE_CONNECTING, "disconnected while ready");
-                break;
-            default:
-                LOG.error("illegal state=" + stateToString(mState));
-                break;
+        } else {
+            LOG.debug("state remains " + getStateString() + " (" + message + ")");
         }
     }
 
     /**
      * Called when the connection is opened
+     *
      * @param connection
      */
     @Override
     public void onOpen(JsonRpcConnection connection) {
         LOG.debug("onOpen()");
-        if(isRegistered()) {
+        if (isRegistered()) {
             switchState(STATE_LOGIN, "connected");
         } else {
             switchState(STATE_REGISTERING, "connected and unregistered");
@@ -1223,7 +1166,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     @Override
     public void onClose(JsonRpcConnection connection) {
         LOG.debug("onClose()");
-        handleDisconnect();
+        if(mState == STATE_CONNECTING) {
+            scheduleConnect();
+        }
     }
 
     private void doConnect() {
@@ -1254,18 +1199,18 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     private void scheduleKeepAlive() {
         shutdownKeepAlive();
-        if(mClientConfiguration.getKeepAliveEnabled()) {
+        if (mClientConfiguration.getKeepAliveEnabled()) {
             mKeepAliveFuture = mExecutor.scheduleAtFixedRate(new Runnable() {
-                @Override
-                public void run() {
-                    LOG.debug("performing keep-alive");
-                    try {
-                        mConnection.sendKeepAlive();
-                    } catch (IOException e) {
-                        LOG.error("error sending keepalive", e);
-                    }
-                }
-            },
+                                                                 @Override
+                                                                 public void run() {
+                                                                     LOG.debug("performing keep-alive");
+                                                                     try {
+                                                                         mConnection.sendKeepAlive();
+                                                                     } catch (IOException e) {
+                                                                         LOG.error("error sending keepalive", e);
+                                                                     }
+                                                                 }
+                                                             },
                     mClientConfiguration.getKeepAliveInterval(),
                     mClientConfiguration.getKeepAliveInterval(),
                     TimeUnit.SECONDS);
@@ -1279,32 +1224,28 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
-    private void scheduleConnect(boolean isReconnect) {
+    private void scheduleConnect() {
         LOG.debug("scheduleConnect()");
         shutdownConnect();
 
-        int backoffDelay = 0;
-
-        if(isReconnect) {
+        int backoffDelay;
+        if(mNumConnectionAttempts > 0) {
             // compute the backoff factor
-            int variableFactor = 1 << mConnectionFailures;
+            int variableFactor = 1 << mNumConnectionAttempts;
 
             // compute variable backoff component
-            double variableTime =
-                    Math.random() * Math.min(
-                            mClientConfiguration.getReconnectBackoffVariableMaximum(),
-                            variableFactor * mClientConfiguration.getReconnectBackoffVariableFactor());
+            double variableTime = Math.random() * Math.min(mClientConfiguration.getReconnectBackoffVariableMaximum(), variableFactor * mClientConfiguration.getReconnectBackoffVariableFactor());
 
             // compute total backoff
             double totalTime = mClientConfiguration.getReconnectBackoffFixedDelay() + variableTime;
-
-            // convert to msecs
-            backoffDelay = (int) Math.round(1000.0 * totalTime);
-
             LOG.debug("connection attempt backed off by " + totalTime + " seconds");
+
+            backoffDelay = (int) Math.round(1000.0 * totalTime);
+        } else {
+            backoffDelay = 0;
         }
 
-        // schedule the attempt
+        mNumConnectionAttempts++;
         mConnectFuture = mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
