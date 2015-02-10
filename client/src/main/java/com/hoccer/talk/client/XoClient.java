@@ -728,33 +728,33 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     public void setGroupName(final TalkClientContact group, final String groupName) {
-       mExecutor.execute(new Runnable() {
-           @Override
-           public void run() {
-               LOG.debug("changing group name");
-               TalkGroupPresence groupPresence = group.getGroupPresence();
-               if (groupPresence == null) {
-                   LOG.error("group has no presence");
-                   return;
-               }
-               groupPresence.setGroupName(groupName);
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                LOG.debug("changing group name");
+                TalkGroupPresence groupPresence = group.getGroupPresence();
+                if (groupPresence == null) {
+                    LOG.error("group has no presence");
+                    return;
+                }
+                groupPresence.setGroupName(groupName);
 
-               try {
-                   mDatabase.saveGroupPresence(groupPresence);
-                   mDatabase.saveContact(group);
-                   LOG.debug("sending new group presence");
-                   mServerRpc.updateGroup(groupPresence);
-               } catch (SQLException e) {
-                   LOG.error("sql error", e);
-               } catch (JsonRpcClientException e) {
-                   LOG.error("Error while sending new group presence: " , e);
-               }
+                try {
+                    mDatabase.saveGroupPresence(groupPresence);
+                    mDatabase.saveContact(group);
+                    LOG.debug("sending new group presence");
+                    mServerRpc.updateGroup(groupPresence);
+                } catch (SQLException e) {
+                    LOG.error("sql error", e);
+                } catch (JsonRpcClientException e) {
+                    LOG.error("Error while sending new group presence: ", e);
+                }
 
-               for (IXoContactListener listener : mContactListeners) {
-                   listener.onGroupPresenceChanged(group);
-               }
-           }
-       });
+                for (IXoContactListener listener : mContactListeners) {
+                    listener.onGroupPresenceChanged(group);
+                }
+            }
+        });
     }
 
     /*
