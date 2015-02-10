@@ -225,14 +225,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         return mSelfContact.isSelfRegistered();
     }
 
-    public boolean isBackgroundMode() {
-        return mBackgroundMode;
-    }
-
-    public void setBackgroundMode(boolean backgroundMode) {
-        this.mBackgroundMode = backgroundMode;
-    }
-
     public TalkClientContact getSelfContact() {
         return mSelfContact;
     }
