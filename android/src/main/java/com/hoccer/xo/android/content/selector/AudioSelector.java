@@ -10,6 +10,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.talk.content.SelectedFile;
+import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 
 public class AudioSelector implements IContentSelector {
@@ -44,25 +45,8 @@ public class AudioSelector implements IContentSelector {
             return null;
         }
 
-        Uri selectedContent = intent.getData();
-        String[] filePathColumn = {
-                MediaStore.Audio.Media.MIME_TYPE,
-                MediaStore.Audio.Media.DATA
-        };
-
-        Cursor cursor = context.getContentResolver().query(
-                selectedContent, filePathColumn, null, null, null);
-        cursor.moveToFirst();
-
-        int mimeTypeIndex = cursor.getColumnIndex(filePathColumn[0]);
-        String mimeType = cursor.getString(mimeTypeIndex);
-        int dataIndex = cursor.getColumnIndex(filePathColumn[1]);
-        String filePath = cursor.getString(dataIndex);
-        cursor.close();
-
-        if (filePath == null) {
-            return null;
-        }
+        String filePath = UriUtils.getFilePathByUri(context, intent.getData(), MediaStore.Audio.Media.DATA);
+        String mimeType = UriUtils.getMimeType(context, intent.getData());
 
         return new SelectedFile(filePath, mimeType, ContentMediaType.AUDIO);
     }

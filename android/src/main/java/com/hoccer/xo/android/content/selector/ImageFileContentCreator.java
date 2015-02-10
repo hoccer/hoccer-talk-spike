@@ -2,27 +2,20 @@ package com.hoccer.xo.android.content.selector;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.provider.MediaStore;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.talk.content.SelectedFile;
 import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.util.UriUtils;
-import org.apache.log4j.Logger;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 
 public class ImageFileContentCreator implements IContentCreator {
 
     @Override
     public SelectedContent apply(Context context, Intent intent) {
 
-        String filePath = UriUtils.getFilePathByUri(context, intent.getData());
+        String filePath = UriUtils.getFilePathByUri(context, intent.getData(), MediaStore.Images.Media.DATA);
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;

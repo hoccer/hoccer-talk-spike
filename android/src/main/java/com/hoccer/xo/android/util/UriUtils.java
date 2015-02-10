@@ -110,13 +110,11 @@ public class UriUtils {
         return null;
     }
 
-    public static String getFilePathByUri(Context context, Uri uri) {
+    public static String getFilePathByUri(Context context, Uri uri, String mediaColumn) {
         String filePath = null;
 
         if (isContentUri(uri)) {
-            String[] projection = {MediaStore.Images.Media.DATA};
-
-            Cursor cursor = context.getContentResolver().query(uri, projection, null, null, null);
+            Cursor cursor = context.getContentResolver().query(uri, new String[]{mediaColumn}, null, null, null);
             if (cursor == null) {
                 LOG.error("Query failed! Could not resolve cursor for content uri: " + uri);
                 return null;

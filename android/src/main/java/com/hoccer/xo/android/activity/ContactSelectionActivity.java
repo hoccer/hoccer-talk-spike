@@ -14,6 +14,7 @@ import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
+import com.hoccer.xo.android.content.selector.AudioSelector;
 import com.hoccer.xo.android.content.selector.IContentSelector;
 import com.hoccer.xo.android.content.selector.ImageSelector;
 import com.hoccer.xo.android.content.selector.VideoSelector;
@@ -145,6 +146,8 @@ public class ContactSelectionActivity extends ComposableActivity implements Cont
             selector = new ImageSelector(this);
         } else if (type.startsWith("video/")) {
             selector = new VideoSelector(this);
+        } else  if (type.startsWith("audio/")) {
+            selector = new AudioSelector(this);
         }
 
         return selector;
