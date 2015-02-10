@@ -14,7 +14,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.talk.content.SelectedFile;
-import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.hoccer.xo.android.util.ImageUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
@@ -35,7 +35,7 @@ public class CaptureSelector implements IContentSelector {
     public CaptureSelector(Context context) {
         mContext = context;
         mName = context.getResources().getString(R.string.content_capture);
-        mIcon = ColorSchemeManager.getRepaintedDrawable(context.getResources(), R.drawable.ic_attachment_select_video, true);
+        mIcon = ColoredDrawable.getFromCache(R.drawable.ic_attachment_select_video, R.color.primary);
     }
 
     @Override

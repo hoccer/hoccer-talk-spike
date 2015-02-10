@@ -11,7 +11,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/profile_text_margin"
             android:text="@string/profile_name_text"
-            style="@style/AppBaseTheme.DescriptiveText"/>
+            style="@style/BaseTheme.DescriptiveText"/>
 
     <View
             android:id="@+id/v_profile_name_delimiter"
@@ -23,7 +23,7 @@
     <EditText
             android:id="@+id/et_profile_name"
             android:hint="@string/profile_name_hint"
-            android:textColorHint="@color/xo_content_description_text"
+            android:textColorHint="@color/text_hint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/tv_profile_name_text"

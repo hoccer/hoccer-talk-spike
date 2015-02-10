@@ -28,7 +28,7 @@
 
     <!-- Tutorial and FAQ links -->
     <string name="link_tutorial">http://faq.hoccer.com/de/tutorial-xo/</string>
-    <string name="link_faq">http://faq.hoccer.com/de/faq-xo/</string>
+    <string name="link_faq">http://faq.hoccer.com/de/</string>
 
     <!-- Contacts fragment -->
     <string name="contacts_title">Kontakte</string>

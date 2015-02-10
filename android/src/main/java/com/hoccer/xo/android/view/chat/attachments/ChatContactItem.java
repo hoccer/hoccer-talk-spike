@@ -13,7 +13,7 @@ import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import ezvcard.Ezvcard;
@@ -60,11 +60,16 @@ public class ChatContactItem extends ChatMessageItem {
         TextView contactDescription = (TextView) mContentWrapper.findViewById(R.id.tv_vcard_description);
         ImageButton showButton = (ImageButton) mContentWrapper.findViewById(R.id.ib_vcard_show_button);
 
-        int textColor = (mMessage.isIncoming()) ? mContext.getResources().getColor(R.color.xo_incoming_message_textColor) : mContext.getResources().getColor(R.color.xo_compose_message_textColor);
+        int textColor = (mMessage.isIncoming()) ? mContext.getResources().getColor(R.color.message_incoming_text) : mContext.getResources().getColor(R.color.compose_message_text);
 
         contactName.setTextColor(textColor);
         contactDescription.setTextColor(textColor);
-        showButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(mContext, R.drawable.ic_light_contact, mMessage.isIncoming()));
+
+        if (mMessage.isIncoming()) {
+            showButton.setBackgroundDrawable(ColoredDrawable.getFromCache(R.drawable.ic_light_contact, R.color.attachment_incoming));
+        } else {
+            showButton.setBackgroundDrawable(ColoredDrawable.getFromCache(R.drawable.ic_light_contact, R.color.attachment_outgoing));
+        }
 
         showButton.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -29,7 +29,7 @@
 
     <!-- Tutorial and FAQ links -->
     <string name="link_tutorial">http://faq.hoccer.com/tutorial-xo/</string>
-    <string name="link_faq">http://faq.hoccer.com/faq-xo/</string>
+    <string name="link_faq">http://faq.hoccer.com/</string>
 
     <!-- Contacts fragment -->
     <string name="contacts_title">Contacts</string>

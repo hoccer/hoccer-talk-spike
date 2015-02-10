@@ -15,7 +15,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import org.apache.log4j.Logger;
@@ -58,12 +58,17 @@ public class ChatLocationItem extends ChatMessageItem {
         TextView locationTitleView = (TextView) mContentWrapper.findViewById(R.id.tv_location_title);
         ImageButton locationButton = (ImageButton) mContentWrapper.findViewById(R.id.ib_content_location);
 
-        int textColor = (mMessage.isIncoming()) ? mContext.getResources().getColor(R.color.xo_incoming_message_textColor) : mContext.getResources().getColor(R.color.xo_compose_message_textColor);
+        int textColor = (mMessage.isIncoming()) ? mContext.getResources().getColor(R.color.message_incoming_text) : mContext.getResources().getColor(R.color.compose_message_text);
 
         locationTextView.setTextColor(textColor);
         locationTitleView.setTextColor(textColor);
 
-        locationButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(mContext, R.drawable.ic_light_location, mMessage.isIncoming()));
+        if (mMessage.isIncoming()) {
+            locationButton.setBackgroundDrawable(ColoredDrawable.getFromCache(R.drawable.ic_light_location, R.color.attachment_incoming));
+        } else {
+            locationButton.setBackgroundDrawable(ColoredDrawable.getFromCache(R.drawable.ic_light_location, R.color.attachment_outgoing));
+        }
+
 
         locationButton.setOnClickListener(new View.OnClickListener() {
             @Override

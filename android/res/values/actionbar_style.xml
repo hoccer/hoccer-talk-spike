@@ -5,7 +5,7 @@
 
     <style name="ActionBar.Solid.AppBaseTheme" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
         <item name="android:background">@drawable/ab_solid_appbasetheme </item>
-        <item name="android:backgroundStacked">@color/xo_tab_color</item>
+        <item name="android:backgroundStacked">@color/tab</item>
         <item name="android:backgroundSplit">@drawable/ab_bottom_solid_appbasetheme</item>
         <item name="android:progressBarStyle">@style/ProgressBar.AppBaseTheme</item>
     </style>
@@ -16,7 +16,7 @@
     </style>
 
     <style name="ActionBarTabText.Solid.AppBaseTheme" parent="@android:style/Widget.Holo.Light.ActionBar.TabText">
-        <item name="android:textColor">@color/xo_actionbar_tabtext_color</item>
+        <item name="android:textColor">@color/tab_text</item>
     </style>
 
     <style name="DropDownListView.AppBaseTheme" parent="@android:style/Widget.Holo.ListView.DropDown">

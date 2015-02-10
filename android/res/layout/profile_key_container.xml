@@ -11,7 +11,7 @@
             android:layout_height="wrap_content"
             android:text="@string/profile_key_text"
             android:layout_marginLeft="@dimen/profile_text_margin"
-            style="@style/AppBaseTheme.DescriptiveText"/>
+            style="@style/BaseTheme.DescriptiveText"/>
 
     <View
             android:id="@+id/v_profile_key_delimiter"

@@ -15,8 +15,8 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.content.MediaPlaylist;
 import com.hoccer.xo.android.content.SingleItemPlaylist;
-import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.util.UriUtils;
+import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 
 
@@ -56,11 +56,11 @@ public class ChatAudioItem extends ChatMessageItem implements MediaPlayer.Listen
         setPlayButton();
 
         if (mMessage.isIncoming()) {
-            captionTextView.setTextColor(mContext.getResources().getColor(R.color.xo_incoming_message_textColor));
-            fileNameTextView.setTextColor(mContext.getResources().getColor(R.color.xo_incoming_message_textColor));
+            captionTextView.setTextColor(mContext.getResources().getColor(R.color.message_incoming_text));
+            fileNameTextView.setTextColor(mContext.getResources().getColor(R.color.message_incoming_text));
         } else {
-            captionTextView.setTextColor(mContext.getResources().getColor(R.color.xo_compose_message_textColor));
-            fileNameTextView.setTextColor(mContext.getResources().getColor(R.color.xo_compose_message_textColor));
+            captionTextView.setTextColor(mContext.getResources().getColor(R.color.compose_message_text));
+            fileNameTextView.setTextColor(mContext.getResources().getColor(R.color.compose_message_text));
         }
 
         MediaMetaData metaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(transfer.getFilePath()).getPath());
@@ -103,13 +103,19 @@ public class ChatAudioItem extends ChatMessageItem implements MediaPlayer.Listen
 
 
     private void setPlayButton() {
-        mPlayPauseButton.setBackgroundDrawable(null);
-        mPlayPauseButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(mContext, R.drawable.ic_light_play, mMessage.isIncoming()));
+        if (mMessage.isIncoming()) {
+            mPlayPauseButton.setBackgroundDrawable(ColoredDrawable.getFromCache(R.drawable.ic_light_play, R.color.attachment_incoming));
+        } else {
+            mPlayPauseButton.setBackgroundDrawable(ColoredDrawable.getFromCache(R.drawable.ic_light_play, R.color.attachment_outgoing));
+        }
     }
 
     private void setPauseButton() {
-        mPlayPauseButton.setBackgroundDrawable(null);
-        mPlayPauseButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(mContext, R.drawable.ic_light_pause, mMessage.isIncoming()));
+        if (mMessage.isIncoming()) {
+            mPlayPauseButton.setBackgroundDrawable(ColoredDrawable.getFromCache(R.drawable.ic_light_pause, R.color.attachment_incoming));
+        } else {
+            mPlayPauseButton.setBackgroundDrawable(ColoredDrawable.getFromCache(R.drawable.ic_light_pause, R.color.attachment_outgoing));
+        }
     }
 
     public void updatePlayPauseView() {

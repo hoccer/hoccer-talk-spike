@@ -10,7 +10,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.talk.content.SelectedFile;
-import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 
 import java.io.File;
 
@@ -21,7 +21,7 @@ public class VideoSelector implements IContentSelector {
 
     public VideoSelector(Context context) {
         mName = context.getResources().getString(R.string.content_video);
-        mIcon = ColorSchemeManager.getRepaintedDrawable(context.getResources(), R.drawable.ic_attachment_select_video, true);
+        mIcon = ColoredDrawable.getFromCache(R.drawable.ic_attachment_select_video, R.color.primary);
     }
 
     @Override

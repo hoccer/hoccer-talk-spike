@@ -7,7 +7,7 @@ import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.artcom.hoccer.R;
 
 public class Placeholder {
@@ -30,10 +30,10 @@ public class Placeholder {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             placeholderImageFrame.setBackground(resources.getDrawable(mImageId));
-            placeholderImage.setBackground(ColorSchemeManager.getRepaintedDrawable(resources, mHeadImageId, true));
+            placeholderImage.setBackground(ColoredDrawable.getFromCache(mHeadImageId, R.color.primary));
         } else {
             placeholderImageFrame.setBackgroundDrawable(resources.getDrawable(mImageId));
-            placeholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(resources, mHeadImageId, true));
+            placeholderImage.setBackgroundDrawable(ColoredDrawable.getFromCache(mHeadImageId, R.color.primary));
         }
 
         String text = resources.getString(mTextId);

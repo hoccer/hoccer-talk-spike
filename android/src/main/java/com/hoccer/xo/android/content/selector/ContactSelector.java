@@ -7,7 +7,7 @@ import android.provider.ContactsContract;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.content.SelectedContact;
-import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -21,7 +21,7 @@ public class ContactSelector implements IContentSelector {
 
     public ContactSelector(Context context) {
         mName = context.getResources().getString(R.string.content_contact);
-        mIcon = ColorSchemeManager.getRepaintedDrawable(context.getResources(), R.drawable.ic_attachment_select_contact, true);
+        mIcon = ColoredDrawable.getFromCache(R.drawable.ic_attachment_select_contact, R.color.primary);
     }
 
     @Override
