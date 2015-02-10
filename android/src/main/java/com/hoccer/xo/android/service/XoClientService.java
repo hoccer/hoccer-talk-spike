@@ -374,15 +374,12 @@ public class XoClientService extends Service {
                     + " type " + activeNetwork.getTypeName()
                     + " state " + activeNetwork.getState().name());
 
-            int clientState = mClient.getState();
             if (activeNetwork.isConnected() || activeNetwork.isConnectedOrConnecting()) {
-                if (clientState == XoClient.STATE_DISCONNECTED && !BackgroundManager.get().isInBackground()) {
+                if (!BackgroundManager.get().isInBackground()) {
                     mClient.connect();
                 }
             } else {
-                if (clientState != XoClient.STATE_DISCONNECTED) {
-                    mClient.disconnect();
-                }
+                mClient.disconnect();
             }
 
             // TODO: is this check too early ? Last if-statement above deactivates client when network dead.
