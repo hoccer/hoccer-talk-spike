@@ -1,30 +1,40 @@
 package com.hoccer.xo.android.activity;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.SparseBooleanArray;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.content.SelectedContent;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
+import com.hoccer.xo.android.content.selector.IContentSelector;
+import com.hoccer.xo.android.content.selector.ImageSelector;
+import com.hoccer.xo.android.content.selector.VideoSelector;
 import com.hoccer.xo.android.fragment.ContactSelectionFragment;
-import com.artcom.hoccer.R;
+import com.hoccer.xo.android.util.ContactOperations;
 
+import java.io.FileNotFoundException;
+import java.net.URISyntaxException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class ContactSelectionActivity extends ComposableActivity implements ContactSelectionFragment.IContactSelectionListener {
 
     public static final String EXTRA_SELECTED_CONTACT_IDS = "com.hoccer.xo.android.extra.SELECTED_CONTACT_IDS";
 
-
     private ContactSelectionFragment mContactSelectionFragment;
-
     private Menu mMenu;
 
     @Override
     protected ActivityComponent[] createComponents() {
-        return new ActivityComponent[] { new MediaPlayerActivityComponent(this) };
+        return new ActivityComponent[]{new MediaPlayerActivityComponent(this)};
     }
 
     @Override
@@ -48,14 +58,47 @@ public class ContactSelectionActivity extends ComposableActivity implements Cont
         ft.commit();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
-        mMenu = menu;
-        menu.findItem(R.id.menu_my_profile).setVisible(false);
-        menu.findItem(R.id.menu_settings).setVisible(false);
+    private void handleShareIntent(Intent shareIntent) {
+        Uri contentUri = shareIntent.getParcelableExtra(Intent.EXTRA_STREAM);
+        SelectedContent content = getContent(contentUri, shareIntent.getType());
+        final TalkClientUpload upload = new TalkClientUpload();
+        upload.initializeAsAttachment(content);
 
-        return true;
+        for (Integer contactId : getSelectedContactIdsFromFragment()) {
+            try {
+                TalkClientContact contact = XoApplication.getXoClient().getDatabase().findContactById(contactId);
+                ContactOperations.sendTransferToContact(upload, contact);
+            } catch (SQLException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (FileNotFoundException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (URISyntaxException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+
+        Intent intent = new Intent(this, ChatsActivity.class);
+        startActivity(intent);
+    }
+
+    private SelectedContent getContent(Uri contentUri, String type) {
+        IContentSelector selector = determineContentSelectorForType(type);
+
+        Intent intent = new Intent();
+        intent.setData(contentUri);
+
+        return selector.createObjectFromSelectionResult(this, intent);
+    }
+
+    private IContentSelector determineContentSelectorForType(String type) {
+        IContentSelector selector = null;
+        if (type.startsWith("image/")) {
+            selector = new ImageSelector(this);
+        } else if (type.startsWith("video/")) {
+            selector = new VideoSelector(this);
+        }
+
+        return selector;
     }
 
     @Override
@@ -67,6 +110,43 @@ public class ContactSelectionActivity extends ComposableActivity implements Cont
         return super.onOptionsItemSelected(item);
     }
 
+    private void createResultAndFinish() {
+        if (Intent.ACTION_SEND.equals(getIntent().getAction())) {
+            handleShareIntent(getIntent());
+        } else {
+            Intent intent = new Intent();
+            intent.putIntegerArrayListExtra(EXTRA_SELECTED_CONTACT_IDS,
+                    getSelectedContactIdsFromFragment());
+            setResult(RESULT_OK, intent);
+
+            finish();
+        }
+    }
+
+    private ArrayList<Integer> getSelectedContactIdsFromFragment() {
+        ArrayList<Integer> selectedContactIds = new ArrayList<Integer>();
+        SparseBooleanArray checkedItems = mContactSelectionFragment.getListView().getCheckedItemPositions();
+        for (int i = 0; i < checkedItems.size(); i++) {
+            int pos = checkedItems.keyAt(i);
+            if (checkedItems.get(pos)) {
+                TalkClientContact contact = (TalkClientContact) mContactSelectionFragment.getListView().getAdapter().getItem(pos);
+                selectedContactIds.add(contact.getClientContactId());
+            }
+        }
+
+        return selectedContactIds;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        mMenu = menu;
+        menu.findItem(R.id.menu_my_profile).setVisible(false);
+        menu.findItem(R.id.menu_settings).setVisible(false);
+
+        return true;
+    }
+
     @Override
     public void onContactSelectionChanged() {
         if (mContactSelectionFragment.getListView().getCheckedItemCount() == 0) {
@@ -74,28 +154,5 @@ public class ContactSelectionActivity extends ComposableActivity implements Cont
         } else {
             mMenu.findItem(R.id.menu_collections_ok).setVisible(true);
         }
-    }
-
-    private void createResultAndFinish() {
-        Intent resultIntent = new Intent();
-        resultIntent.putIntegerArrayListExtra(EXTRA_SELECTED_CONTACT_IDS,
-                getSelectedContactIdsFromFragment(mContactSelectionFragment));
-        setResult(RESULT_OK, resultIntent);
-
-        finish();
-    }
-
-    private ArrayList<Integer> getSelectedContactIdsFromFragment(ContactSelectionFragment contactSelectionFragment) {
-        ArrayList<Integer> selectedContactIds = new ArrayList<Integer>();
-        SparseBooleanArray checkedItems = contactSelectionFragment.getListView().getCheckedItemPositions();
-        for (int i = 0; i < checkedItems.size(); i++) {
-            int pos = checkedItems.keyAt(i);
-            if (checkedItems.get(pos)) {
-                TalkClientContact contact = (TalkClientContact) contactSelectionFragment.getListView().getAdapter().getItem(pos);
-                selectedContactIds.add(contact.getClientContactId());
-            }
-        }
-
-        return selectedContactIds;
     }
 }
