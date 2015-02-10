@@ -50,14 +50,47 @@ public class ContactSelectionActivity extends ComposableActivity implements Cont
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         enableUpNavigation();
+        showContactSelectionFragment();
+    }
 
+    private void showContactSelectionFragment() {
         mContactSelectionFragment = new ContactSelectionFragment();
         mContactSelectionFragment.addContactSelectionListener(this);
         android.support.v4.app.FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.fl_fragment_container, mContactSelectionFragment);
         ft.commit();
+    }
+
+    @Override
+    public void onContactSelectionChanged() {
+        if (mContactSelectionFragment.getListView().getCheckedItemCount() == 0) {
+            mMenu.findItem(R.id.menu_collections_ok).setVisible(false);
+        } else {
+            mMenu.findItem(R.id.menu_collections_ok).setVisible(true);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_collections_ok:
+                createResultAndFinish();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void createResultAndFinish() {
+        if (Intent.ACTION_SEND.equals(getIntent().getAction())) {
+            handleShareIntent(getIntent());
+        } else {
+            Intent intent = new Intent();
+            intent.putIntegerArrayListExtra(EXTRA_SELECTED_CONTACT_IDS,
+                    getSelectedContactIdsFromFragment());
+            setResult(RESULT_OK, intent);
+
+            finish();
+        }
     }
 
     private void handleShareIntent(Intent shareIntent) {
@@ -83,6 +116,20 @@ public class ContactSelectionActivity extends ComposableActivity implements Cont
         startActivity(intent);
     }
 
+    private ArrayList<Integer> getSelectedContactIdsFromFragment() {
+        ArrayList<Integer> selectedContactIds = new ArrayList<Integer>();
+        SparseBooleanArray checkedItems = mContactSelectionFragment.getListView().getCheckedItemPositions();
+        for (int i = 0; i < checkedItems.size(); i++) {
+            int pos = checkedItems.keyAt(i);
+            if (checkedItems.get(pos)) {
+                TalkClientContact contact = (TalkClientContact) mContactSelectionFragment.getListView().getAdapter().getItem(pos);
+                selectedContactIds.add(contact.getClientContactId());
+            }
+        }
+
+        return selectedContactIds;
+    }
+
     private SelectedContent getContent(Uri contentUri, String type) {
         IContentSelector selector = determineContentSelectorForType(type);
 
@@ -104,42 +151,6 @@ public class ContactSelectionActivity extends ComposableActivity implements Cont
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_collections_ok:
-                createResultAndFinish();
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    private void createResultAndFinish() {
-        if (Intent.ACTION_SEND.equals(getIntent().getAction())) {
-            handleShareIntent(getIntent());
-        } else {
-            Intent intent = new Intent();
-            intent.putIntegerArrayListExtra(EXTRA_SELECTED_CONTACT_IDS,
-                    getSelectedContactIdsFromFragment());
-            setResult(RESULT_OK, intent);
-
-            finish();
-        }
-    }
-
-    private ArrayList<Integer> getSelectedContactIdsFromFragment() {
-        ArrayList<Integer> selectedContactIds = new ArrayList<Integer>();
-        SparseBooleanArray checkedItems = mContactSelectionFragment.getListView().getCheckedItemPositions();
-        for (int i = 0; i < checkedItems.size(); i++) {
-            int pos = checkedItems.keyAt(i);
-            if (checkedItems.get(pos)) {
-                TalkClientContact contact = (TalkClientContact) mContactSelectionFragment.getListView().getAdapter().getItem(pos);
-                selectedContactIds.add(contact.getClientContactId());
-            }
-        }
-
-        return selectedContactIds;
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         mMenu = menu;
@@ -147,14 +158,5 @@ public class ContactSelectionActivity extends ComposableActivity implements Cont
         menu.findItem(R.id.menu_settings).setVisible(false);
 
         return true;
-    }
-
-    @Override
-    public void onContactSelectionChanged() {
-        if (mContactSelectionFragment.getListView().getCheckedItemCount() == 0) {
-            mMenu.findItem(R.id.menu_collections_ok).setVisible(false);
-        } else {
-            mMenu.findItem(R.id.menu_collections_ok).setVisible(true);
-        }
     }
 }
