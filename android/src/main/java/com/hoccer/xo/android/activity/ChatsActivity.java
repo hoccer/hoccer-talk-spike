@@ -122,7 +122,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     @Override
     public void onClientStateChange(XoClient client, int state) {
-        if (mPairingToken != null && client.isActive()) {
+        if (mPairingToken != null && client.isReady()) {
             performTokenPairing(mPairingToken);
             mPairingToken = null;
         }
@@ -198,7 +198,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private void handleTokenPairingIntent(Intent intent) {
         String token = intent.getData().getHost();
 
-        if (getXoClient().isActive()) {
+        if (getXoClient().isReady()) {
             performTokenPairing(token);
         } else {
             mPairingToken = token;

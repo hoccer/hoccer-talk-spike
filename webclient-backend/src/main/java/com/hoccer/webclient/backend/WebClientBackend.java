@@ -52,7 +52,7 @@ public class WebClientBackend implements IXoStateListener {
         mClient.registerTransferListener(mTransferListener);
         mClient.registerStateListener(this);
 
-        mClient.wake();
+        mClient.connect();
     }
 
     public void onClientStateChange(XoClient client, int state) {

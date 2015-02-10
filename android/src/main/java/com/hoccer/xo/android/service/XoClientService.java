@@ -382,11 +382,11 @@ public class XoClientService extends Service {
             int previousState = mClient.getState();
             if (activeNetwork.isConnected()) {
                 if (previousState <= XoClient.STATE_DISCONNECTED) {
-                    mClient.activate();
+                    mClient.connect();
                 }
             } else if (activeNetwork.isConnectedOrConnecting()) {
                 if (previousState <= XoClient.STATE_DISCONNECTED) {
-                    mClient.activate();
+                    mClient.connect();
                 }
             } else {
                 if (previousState > XoClient.STATE_DISCONNECTED) {

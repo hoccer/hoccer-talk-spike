@@ -36,7 +36,7 @@ public class TestHelper {
             XoClient client = createTalkClient(server);
             String clientName = "client" + (i + 1);
 
-            client.wake();
+            client.connect();
 
             await(clientName + " reaches active state").untilCall(to(client).getState(), equalTo(XoClient.STATE_READY));
             clients.put(clientName, client);

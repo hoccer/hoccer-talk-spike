@@ -52,7 +52,7 @@ public class TalkToolClient {
     }
 
     public void start() {
-        mClient.activate();
+        mClient.connect();
     }
 
     public void stop() {
@@ -63,7 +63,7 @@ public class TalkToolClient {
     }
 
     public void wake() {
-        mClient.wake();
+        mClient.connect();
     }
 
     public void setNearby(boolean enabled, boolean schedule) {

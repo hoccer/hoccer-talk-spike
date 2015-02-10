@@ -74,7 +74,7 @@ public class ITTwoClientsMessage extends IntegrationTest {
         }
 
         // Taking recipient online again
-        receivingClient.wake();
+        receivingClient.connect();
         await("receivingClient reaches active state").untilCall(to(receivingClient).getState(), equalTo(XoClient.STATE_READY));
 
         await().until(new Callable<Boolean>() {

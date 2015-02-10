@@ -216,7 +216,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         sStartupTasks = new StartupTasks(this);
         sStartupTasks.executeRegisteredTasks();
 
-        sClient.wake();
+        sClient.connect();
 
         Intent xoClientServiceIntent = new Intent(this, XoClientService.class);
         startService(xoClientServiceIntent);

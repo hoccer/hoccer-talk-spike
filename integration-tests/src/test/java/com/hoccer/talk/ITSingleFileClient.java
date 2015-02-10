@@ -41,7 +41,7 @@ public class ITSingleFileClient extends IntegrationTest {
     public void uploadAvatar() throws Exception {
         // create client
         final XoClient c = TestHelper.createTalkClient(talkServer);
-        c.wake();
+        c.connect();
         await().untilCall(to(c).getState(), equalTo(XoClient.STATE_READY));
 
         // upload file
