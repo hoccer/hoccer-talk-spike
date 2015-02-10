@@ -212,7 +212,7 @@ public class XoClientService extends Service {
                 createPushMessageNotification(message);
             }
             if (intent.hasExtra(TalkPushService.EXTRA_WAKE_CLIENT)) {
-                wakeClientInBackground();
+                mClient.connect();
             }
             if (intent.hasExtra(TalkPushService.EXTRA_GCM_REGISTERED)) {
                 doUpdateGcm(true);
@@ -268,12 +268,6 @@ public class XoClientService extends Service {
                         Integer.toString(DEFAULT_IMAGE_UPLOAD_ENCODING_QUALITY));
                 mClient.setImageUploadEncodingQuality(Integer.parseInt(imageQuality));
             }
-        }
-    }
-
-    private void wakeClientInBackground() {
-        if (mNetworkConnected) {
-            mClient.wakeInBackground();
         }
     }
 
