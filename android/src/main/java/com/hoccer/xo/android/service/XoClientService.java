@@ -24,6 +24,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.xo.android.BackgroundManager;
 import com.hoccer.xo.android.XoAndroidClient;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ChatsActivity;
@@ -105,12 +106,12 @@ public class XoClientService extends Service {
     /**
      * Previous state of connectivity
      */
-    boolean mCurrentConnectionState;
+    boolean mNetworkConnected;
 
     /**
      * Type of previous connection
      */
-    int mCurrentConnectionType = -1;
+    int mNetworkConnectionType = -1;
 
     /**
      * Notification manager
@@ -229,7 +230,7 @@ public class XoClientService extends Service {
     }
 
     private void configureAutoTransfers() {
-        switch (mCurrentConnectionType) {
+        switch (mNetworkConnectionType) {
             case ConnectivityManager.TYPE_MOBILE:
             case ConnectivityManager.TYPE_BLUETOOTH:
             case ConnectivityManager.TYPE_WIMAX:
@@ -271,7 +272,7 @@ public class XoClientService extends Service {
     }
 
     private void wakeClientInBackground() {
-        if (mCurrentConnectionState) {
+        if (mNetworkConnected) {
             mClient.wakeInBackground();
         }
     }
@@ -372,31 +373,27 @@ public class XoClientService extends Service {
         if (activeNetwork == null) {
             LOG.debug("connectivity change: no connectivity");
             mClient.disconnect();
-            mCurrentConnectionState = false;
-            mCurrentConnectionType = -1;
+            mNetworkConnected = false;
+            mNetworkConnectionType = -1;
         } else {
             LOG.debug("connectivity change:"
                     + " type " + activeNetwork.getTypeName()
                     + " state " + activeNetwork.getState().name());
 
-            int previousState = mClient.getState();
-            if (activeNetwork.isConnected()) {
-                if (previousState <= XoClient.STATE_DISCONNECTED) {
-                    mClient.connect();
-                }
-            } else if (activeNetwork.isConnectedOrConnecting()) {
-                if (previousState <= XoClient.STATE_DISCONNECTED) {
+            int clientState = mClient.getState();
+            if (activeNetwork.isConnected() || activeNetwork.isConnectedOrConnecting()) {
+                if (clientState == XoClient.STATE_DISCONNECTED && !BackgroundManager.get().isInBackground()) {
                     mClient.connect();
                 }
             } else {
-                if (previousState > XoClient.STATE_DISCONNECTED) {
+                if (clientState != XoClient.STATE_DISCONNECTED) {
                     mClient.disconnect();
                 }
             }
 
             // TODO: is this check too early ? Last if-statement above deactivates client when network dead.
-            mCurrentConnectionState = activeNetwork.isConnected();
-            mCurrentConnectionType = activeNetwork.getType();
+            mNetworkConnected = activeNetwork.isConnected();
+            mNetworkConnectionType = activeNetwork.getType();
 
             // reset transfer limits on network type change.
             configureAutoTransfers();
