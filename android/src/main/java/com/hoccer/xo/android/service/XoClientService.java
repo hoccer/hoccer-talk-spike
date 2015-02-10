@@ -71,56 +71,36 @@ public class XoClientService extends Service {
     private static final String sPreferenceImageUploadPixelCountKey = "preference_image_encoding_size";
     private static final String sPreferenceImageUploadQualityKey = "preference_image_encoding_quality";
 
-    /**
-     * Executor for ourselves and the client
-     */
+    // Executor for ourselves and the client
     ScheduledExecutorService mExecutor;
 
-    /**
-     * Hoccer client that we serve
-     */
+    // Hoccer client that we serve
     XoAndroidClient mClient;
 
     XoClientServiceBinder mBinder = new XoClientServiceBinder();
 
-    /**
-     * Preferences containing service configuration
-     */
+    // Preferences containing service configuration
     SharedPreferences mPreferences;
 
-    /**
-     * Listener for configuration changes
-     */
+    // Listener for configuration changes
     SharedPreferences.OnSharedPreferenceChangeListener mPreferencesListener;
 
-    /**
-     * Connectivity manager for monitoring
-     */
+    // Connectivity manager for monitoring
     ConnectivityManager mConnectivityManager;
 
-    /**
-     * Our connectivity change broadcast receiver
-     */
+    // Our connectivity change broadcast receiver
     ConnectivityReceiver mConnectivityReceiver;
 
-    /**
-     * Previous state of connectivity
-     */
+    // Previous state of connectivity
     boolean mNetworkConnected;
 
-    /**
-     * Type of previous connection
-     */
+    // Type of previous connection
     int mNetworkConnectionType = -1;
 
-    /**
-     * Notification manager
-     */
+    // Notification manager
     NotificationManager mNotificationManager;
 
-    /**
-     * Time of last notification
-     */
+    // Time of last notification
     long mTimeOfLastAlarm;
 
     ClientListener mClientListener;
