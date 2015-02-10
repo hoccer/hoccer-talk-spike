@@ -1,8 +1,5 @@
 package com.hoccer.talk.content;
 
-import com.hoccer.talk.content.SelectedContent;
-
-
 public class SelectedFile extends SelectedContent {
 
     private double mAspectRatio;
