@@ -480,18 +480,14 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     /**
      * Returns true if the client is ready
-     *
      * This means that the client is logged in and synced.
-     *
-     * @return
      */
     public boolean isReady() {
         return mState >= STATE_READY;
     }
+
     /**
      * Returns true if the client is logged in
-     *     *
-     * @return
      */
     public boolean isLoggedIn() {
         return mState >= STATE_SYNCING;
@@ -499,10 +495,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     /**
      * Returns true if the client is awake
-     *
      * This means that the client is trying to connect or connected.
-     *
-     * @return
      */
     public boolean isAwake() {
         return mState > STATE_DISCONNECTED;
