@@ -51,6 +51,8 @@ public class ContactSelectionActivity extends ComposableActivity implements Cont
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        enableUpNavigation();
+
         mContactSelectionFragment = new ContactSelectionFragment();
         mContactSelectionFragment.addContactSelectionListener(this);
         android.support.v4.app.FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
