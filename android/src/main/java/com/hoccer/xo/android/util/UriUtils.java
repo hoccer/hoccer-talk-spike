@@ -121,12 +121,9 @@ public class UriUtils {
             }
 
             cursor.moveToFirst();
-
             filePath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
             cursor.close();
-
         } else if (isFileUri(uri)) {
-
             filePath = uri.getPath();
         }
 
