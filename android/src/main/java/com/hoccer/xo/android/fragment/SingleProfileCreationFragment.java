@@ -96,10 +96,6 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
     @Override
     public void onAvatarSelected(SelectedContent content) {
         mAvatarToSet = content;
-    }
-
-    @Override
-    public void onServiceConnected() {
         if (mAvatarToSet != null) {
             uploadAvatar(mAvatarToSet);
             mAvatarToSet = null;

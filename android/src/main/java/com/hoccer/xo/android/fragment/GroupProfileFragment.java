@@ -549,11 +549,6 @@ public class GroupProfileFragment extends ProfileFragment
     @Override
     public void onAvatarSelected(SelectedContent content) {
         mAvatarToSet = content;
-    }
-
-    @Override
-    public void onServiceConnected() {
-        LOG.debug("onServiceConnected()");
         if (mAvatarToSet != null) {
             updateAvatar(mAvatarToSet);
             mAvatarToSet = null;

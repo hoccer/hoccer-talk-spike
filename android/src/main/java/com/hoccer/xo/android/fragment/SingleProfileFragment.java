@@ -225,11 +225,6 @@ public class SingleProfileFragment extends ProfileFragment
     public void onAvatarSelected(SelectedContent content) {
         LOG.debug("onAvatarSelected(" + content.getFilePath() + ")");
         mAvatarToSet = content;
-    }
-
-    @Override
-    public void onServiceConnected() {
-        LOG.debug("onServiceConnected()");
         if (mAvatarToSet != null) {
             updateAvatar(mAvatarToSet);
             mAvatarToSet = null;

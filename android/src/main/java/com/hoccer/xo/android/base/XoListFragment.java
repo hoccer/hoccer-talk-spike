@@ -56,14 +56,6 @@ public abstract class XoListFragment extends ListFragment implements IXoFragment
     }
 
     @Override
-    public void onServiceConnected() {
-    }
-
-    @Override
-    public void onServiceDisconnected() {
-    }
-
-    @Override
     public void onAvatarSelected(SelectedContent co) {
     }
 }
