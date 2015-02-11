@@ -43,8 +43,6 @@ public class SingleProfileFragment extends ProfileFragment
     private ImageButton mNicknameEditButton;
     private LinearLayout mInviteButtonContainer;
 
-    private SelectedContent mAvatarToSet;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_single_profile, container, false);
@@ -222,18 +220,9 @@ public class SingleProfileFragment extends ProfileFragment
     }
 
     @Override
-    public void onAvatarSelected(SelectedContent content) {
-        LOG.debug("onAvatarSelected(" + content.getFilePath() + ")");
-        mAvatarToSet = content;
-    }
-
-    @Override
-    public void onServiceConnected() {
-        LOG.debug("onServiceConnected()");
-        if (mAvatarToSet != null) {
-            updateAvatar(mAvatarToSet);
-            mAvatarToSet = null;
-        }
+    public void onAvatarSelected(SelectedContent avatar) {
+        LOG.debug("onAvatarSelected(" + avatar.getFilePath() + ")");
+        updateAvatar(avatar);
     }
 
     @Override
@@ -253,7 +242,7 @@ public class SingleProfileFragment extends ProfileFragment
 
     private void updateAvatar(final SelectedContent avatar) {
         if (avatar != null) {
-            XoApplication.getExecutor().execute(new Runnable() {
+            XoApplication.get().getExecutor().execute(new Runnable() {
                 @Override
                 public void run() {
                     LOG.debug("creating avatar upload");

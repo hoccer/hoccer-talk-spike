@@ -17,6 +17,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.SelectedContent;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.selector.*;
 import com.hoccer.xo.android.util.IntentHelper;
@@ -303,7 +304,8 @@ public class ContentRegistry {
         if (!xoActivity.canStartActivity(intent)) {
             return;
         }
-        xoActivity.setBackgroundActive();
+
+        ((XoApplication)xoActivity.getApplication()).stayActiveInBackground();
         try {
             fragment.startActivityForResult(intent, requestCode);
         } catch (ActivityNotFoundException e) {

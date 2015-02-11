@@ -164,7 +164,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     @DatabaseField
     private ApprovalState approvalState;
 
-    private HttpGet mDownloadRequest = null;
+    private HttpGet mDownloadRequest;
 
     /**
      * Only for display purposes, the real content length will be retrieved from server since after encryption this value will differ

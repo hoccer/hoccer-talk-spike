@@ -94,7 +94,7 @@ public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment,
     private void generateToken() {
         resetViews();
 
-        XoApplication.getExecutor().execute(new Runnable() {
+        XoApplication.get().getExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 final String pairingToken = XoApplication.getXoClient().generatePairingToken();

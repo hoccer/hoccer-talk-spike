@@ -18,9 +18,12 @@ import com.hoccer.xo.android.fragment.MessagingFragment;
 import com.hoccer.xo.android.fragment.NearbyArchiveFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
+import org.apache.log4j.Logger;
 
 
 public class MessagingActivity extends ComposableActivity {
+
+    private static final Logger LOG = Logger.getLogger(MessagingActivity.class);
 
     public static final String EXTRA_NEARBY_ARCHIVE = "com.hoccer.xo.android.intent.extra.NEARBY_ARCHIVE";
 

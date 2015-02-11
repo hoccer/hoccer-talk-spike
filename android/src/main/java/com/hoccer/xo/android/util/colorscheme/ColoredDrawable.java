@@ -32,6 +32,6 @@ public abstract class ColoredDrawable {
     }
 
     private static Resources getResources() {
-        return XoApplication.getContext().getResources();
+        return XoApplication.get().getResources();
     }
 }

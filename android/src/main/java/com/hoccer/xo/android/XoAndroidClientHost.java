@@ -43,7 +43,7 @@ public class XoAndroidClientHost implements IXoClientHost {
 
     @Override
     public ScheduledExecutorService getBackgroundExecutor() {
-        return XoApplication.getExecutor();
+        return XoApplication.get().getExecutor();
     }
 
     @Override

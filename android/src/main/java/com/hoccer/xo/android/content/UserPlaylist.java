@@ -25,8 +25,8 @@ public class UserPlaylist extends MediaPlaylist implements IXoUploadListener, IX
     private static final Logger LOG = Logger.getLogger(UserPlaylist.class);
 
     private List<XoTransfer> mList;
-    private TalkClientContact mContact;
-    private XoClientDatabase mDatabase;
+    private final TalkClientContact mContact;
+    private final XoClientDatabase mDatabase;
 
     /*
      * Constructs a playlist filtered by the given contact.
@@ -43,7 +43,7 @@ public class UserPlaylist extends MediaPlaylist implements IXoUploadListener, IX
             if (contact != null) {
                 mList = new ArrayList<XoTransfer>(mDatabase.findClientDownloadsByMediaTypeAndContactId(ContentMediaType.AUDIO, mContact.getClientContactId()));
             } else {
-                mList = mDatabase.findTransfersByMediaType(ContentMediaType.AUDIO);
+                mList = mDatabase.findTransfersByMediaTypeDistinct(ContentMediaType.AUDIO);
             }
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
@@ -77,7 +77,7 @@ public class UserPlaylist extends MediaPlaylist implements IXoUploadListener, IX
     @Override
     public Iterator<XoTransfer> iterator() {
         return new Iterator<XoTransfer>() {
-            private Iterator<XoTransfer> mIterator = mList.iterator();
+            private final Iterator<XoTransfer> mIterator = mList.iterator();
 
             @Override
             public boolean hasNext() {

@@ -19,10 +19,7 @@ import org.apache.commons.collections4.Transformer;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 
 public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
@@ -657,6 +654,29 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         List<TalkClientDownload> downloads = findClientDownloadsByMediaType(mediaType);
 
         return mergeUploadsAndDownloadsByMessageTimestamp(uploads, downloads);
+    }
+
+    public List<XoTransfer> findTransfersByMediaTypeDistinct(String mediaType) throws SQLException {
+        List<TalkClientUpload> uploads = findClientUploadsByMediaType(mediaType);
+        List<TalkClientDownload> downloads = findClientDownloadsByMediaType(mediaType);
+
+        List<XoTransfer> transfers = mergeUploadsAndDownloadsByMessageTimestamp(uploads, downloads);
+        return filterDuplicateFiles(transfers);
+    }
+
+    private static List<XoTransfer> filterDuplicateFiles(List<XoTransfer> transfers) {
+        List<XoTransfer> filteredTransfers = new ArrayList<XoTransfer>();
+        HashSet<String> filePathes = new HashSet<String>();
+
+        for (int i = transfers.size() - 1; i >= 0; i--) {
+            XoTransfer transfer = transfers.get(i);
+            if (!filePathes.contains(transfer.getFilePath())) {
+                filteredTransfers.add(0, transfer);
+                filePathes.add(transfer.getFilePath());
+            }
+        }
+
+        return filteredTransfers;
     }
 
     public List<TalkClientUpload> findClientUploadsByMediaType(String mediaType) throws SQLException {

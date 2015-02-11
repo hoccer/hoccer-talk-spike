@@ -30,7 +30,7 @@ public class CredentialResultReceiver extends ResultReceiver {
         mListener = listener;
 
         // schedule invoke callback in case of timeout if no answer has been received
-        XoApplication.getExecutor().schedule(new Runnable() {
+        XoApplication.get().getExecutor().schedule(new Runnable() {
             @Override
             public void run() {
                 if (!mAnswerReceived) {
