@@ -470,7 +470,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     /**
      * Returns true if the client has been activated
-     *
      * This is only true after an explicit call to connect().
      *
      * @return
@@ -579,6 +578,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     /**
      * Register the given GCM push information with the server
+     *
      * @param packageName
      * @param registrationId
      */
@@ -1161,12 +1161,13 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     /**
      * Called when the connection is closed
+     *
      * @param connection
      */
     @Override
     public void onClose(JsonRpcConnection connection) {
         LOG.debug("onClose()");
-        if(mState == STATE_CONNECTING) {
+        if (mState == STATE_CONNECTING) {
             scheduleConnect();
         }
     }
@@ -1229,7 +1230,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         shutdownConnect();
 
         int backoffDelay;
-        if(mNumConnectionAttempts > 0) {
+        if (mNumConnectionAttempts > 0) {
             // compute the backoff factor
             int variableFactor = 1 << mNumConnectionAttempts;
 
