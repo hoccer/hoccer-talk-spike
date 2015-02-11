@@ -7,19 +7,16 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import com.hoccer.talk.client.XoTransfer;
-import com.hoccer.xo.android.content.MediaMetaData;
-import com.hoccer.xo.android.service.MediaPlayerService;
-import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
-import com.hoccer.xo.android.util.IntentHelper;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.XoTransfer;
+import com.hoccer.xo.android.MediaPlayer;
+import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.util.UriUtils;
 
-public class AudioAttachmentView extends LinearLayout implements View.OnClickListener, MediaMetaData.ArtworkRetrieverListener {
+public class AudioAttachmentView extends LinearLayout implements View.OnClickListener, MediaMetaData.ArtworkRetrieverListener, MediaPlayer.Listener {
 
     private final Context mContext;
     private XoTransfer mItem;
-    private final MediaPlayerServiceConnector mMediaPlayerServiceConnector;
 
     private final TextView mTitleTextView;
     private final TextView mArtistTextView;
@@ -31,7 +28,6 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
     public AudioAttachmentView(Context context) {
         super(context.getApplicationContext());
         mContext = context;
-        mMediaPlayerServiceConnector = new MediaPlayerServiceConnector(mContext);
         addView(inflate(mContext, R.layout.item_audio_attachment, null));
 
         mTitleTextView = ((TextView) findViewById(R.id.tv_title_name));
@@ -49,13 +45,9 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
     }
 
     public boolean isActive() {
-        if (mMediaPlayerServiceConnector.isConnected()) {
-            MediaPlayerService service = mMediaPlayerServiceConnector.getService();
-            XoTransfer currentItem = service.getCurrentMediaItem();
-            return !service.isPaused() && !service.isStopped() && (mItem.equals(currentItem));
-        } else {
-            return false;
-        }
+        MediaPlayer mediaPlayer = MediaPlayer.get();
+        XoTransfer currentItem = mediaPlayer.getCurrentMediaItem();
+        return !mediaPlayer.isPaused() && !mediaPlayer.isStopped() && (mItem.equals(currentItem));
     }
 
     public void updatePlayPauseView() {
@@ -69,27 +61,14 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-
-        mMediaPlayerServiceConnector.connect(IntentHelper.ACTION_PLAYER_STATE_CHANGED,
-                new MediaPlayerServiceConnector.Listener() {
-                    @Override
-                    public void onConnected(MediaPlayerService service) {
-                        updatePlayPauseView();
-                    }
-                    @Override
-                    public void onDisconnected() {
-                    }
-                    @Override
-                    public void onAction(String action, MediaPlayerService service) {
-                        updatePlayPauseView();
-                    }
-                });
+        updatePlayPauseView();
+        MediaPlayer.get().registerListener(this);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mMediaPlayerServiceConnector.disconnect();
+        MediaPlayer.get().unregisterListener(this);
     }
 
     @Override
@@ -114,7 +93,7 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
 
     private void updateAudioView() {
         // ensure that we are not listening to any previous artwork retrieval tasks
-        if(mCurrentMetaData != null) {
+        if (mCurrentMetaData != null) {
             mCurrentMetaData.unregisterArtworkRetrievalListener(this);
         }
 
@@ -140,4 +119,12 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
             }
         });
     }
+
+    @Override
+    public void onStateChanged() {
+        updatePlayPauseView();
+    }
+
+    @Override
+    public void onTrackChanged() {}
 }

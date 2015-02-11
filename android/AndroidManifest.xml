@@ -69,8 +69,6 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <!-- Wifi-Scanning for location grouping -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <!-- Mediaplayer needs to check if Hoccer is running -->
-    <uses-permission android:name="android.permission.GET_TASKS"/>
     <!-- Camera is needed for QR-Code scanning -->
     <uses-permission android:name="android.permission.CAMERA"/>
 
@@ -190,6 +188,9 @@
                     android:value="com.hoccer.xo.android.activity.MediaBrowserActivity"/>
         </activity>
 
+        <!-- NotificationBridgeActivity activity -->
+        <activity android:name="com.hoccer.xo.android.activity.NotificationBridgeActivity"/>
+
         <!-- Registration activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.RegistrationActivity"
@@ -305,8 +306,6 @@
                 <category android:name="com.hoccer.talk.android"/>
             </intent-filter>
         </receiver>
-
-        <service android:name="com.hoccer.xo.android.service.MediaPlayerService"/>
 
         <service android:name="com.hoccer.xo.android.backup.BackupAndRestoreService" android:exported="false"/>
 

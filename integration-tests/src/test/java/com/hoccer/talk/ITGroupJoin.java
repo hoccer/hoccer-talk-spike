@@ -62,8 +62,8 @@ public class ITGroupJoin extends IntegrationTest {
         TestHelper.inviteToGroup(invitingClient, invitedClient, groupId);
 
         // take inviting client offline
-        invitingClient.deactivate();
-        await("invitingClient is inactive").untilCall(to(invitingClient).getState(), equalTo(XoClient.STATE_INACTIVE));
+        invitingClient.disconnect();
+        await("invitingClient is inactive").untilCall(to(invitingClient).getState(), equalTo(XoClient.STATE_DISCONNECTED));
 
         // invited client joins group
         TestHelper.joinGroup(invitedClient, groupId);

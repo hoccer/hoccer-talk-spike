@@ -10,11 +10,14 @@ import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.fragment.SingleProfileCreationFragment;
 import com.hoccer.xo.android.fragment.SingleProfileFragment;
 import com.artcom.hoccer.R;
+import org.apache.log4j.Logger;
 
 /**
  * Activity wrapping a single profile fragment
  */
 public class SingleProfileActivity extends ComposableActivity {
+
+    private static final Logger LOG = Logger.getLogger(SingleProfileActivity.class);
 
     public static final String ACTION_CREATE_SELF = "com.hoccer.xo.android.activity.SingleProfileActivity.CREATE_SELF";
 

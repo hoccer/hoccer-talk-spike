@@ -77,7 +77,7 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
             showProgressOverlay(true);
             mIsInvitationCancelled = false;
 
-            XoApplication.getExecutor().execute(new Runnable() {
+            XoApplication.get().getExecutor().execute(new Runnable() {
                 @Override
                 public void run() {
                     try {

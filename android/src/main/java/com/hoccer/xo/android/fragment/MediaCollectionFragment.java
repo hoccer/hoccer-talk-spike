@@ -11,6 +11,7 @@ import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
+import com.hoccer.xo.android.MediaPlayer;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.ContactSelectionActivity;
@@ -21,7 +22,6 @@ import com.hoccer.xo.android.adapter.MediaCollectionItemAdapter;
 import com.hoccer.xo.android.content.MediaCollectionPlaylist;
 import com.hoccer.xo.android.content.MediaPlaylist;
 import com.hoccer.xo.android.content.SingleItemPlaylist;
-import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
 import com.hoccer.xo.android.util.ContactOperations;
 import com.hoccer.xo.android.util.DragSortController;
 import com.hoccer.xo.android.util.UriUtils;
@@ -53,7 +53,6 @@ public class MediaCollectionFragment extends SearchableListFragment {
     private MediaCollectionItemAdapter mCollectionAdapter;
     private AttachmentSearchResultAdapter mSearchResultAdapter;
 
-    private MediaPlayerServiceConnector mMediaPlayerServiceConnector;
     private ActionMode mCurrentActionMode;
 
     @Override
@@ -99,8 +98,6 @@ public class MediaCollectionFragment extends SearchableListFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mMediaPlayerServiceConnector = new MediaPlayerServiceConnector(getActivity());
-        mMediaPlayerServiceConnector.connect();
     }
 
     @Override
@@ -127,12 +124,6 @@ public class MediaCollectionFragment extends SearchableListFragment {
     @Override
     public void onResume() {
         super.onResume();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mMediaPlayerServiceConnector.disconnect();
     }
 
     @Override
@@ -241,17 +232,12 @@ public class MediaCollectionFragment extends SearchableListFragment {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             XoTransfer clickedItem = (XoTransfer) getListAdapter().getItem(position);
 
-            if (mMediaPlayerServiceConnector.isConnected()) {
-                MediaPlaylist playlist = isSearchModeEnabled() ?
-                        new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), clickedItem) :
-                        new MediaCollectionPlaylist(mCollection);
+            MediaPlaylist playlist = isSearchModeEnabled() ?
+                    new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), clickedItem) :
+                    new MediaCollectionPlaylist(mCollection);
 
-                mMediaPlayerServiceConnector.getService().playItemInPlaylist(clickedItem, playlist);
-
-                getActivity().startActivity(new Intent(getActivity(), FullscreenPlayerActivity.class));
-            } else {
-                LOG.error("MediaPlayerService is not connected");
-            }
+            MediaPlayer.get().playItemInPlaylist(clickedItem, playlist);
+            getActivity().startActivity(new Intent(getActivity(), FullscreenPlayerActivity.class));
         }
 
         @Override

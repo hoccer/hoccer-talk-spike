@@ -1,16 +1,18 @@
 package com.hoccer.xo.android.fragment;
 
 import android.app.Activity;
-import android.content.*;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.view.*;
 import android.widget.*;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.talk.content.ContentMediaType;
+import com.hoccer.xo.android.MediaPlayer;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.ContactSelectionActivity;
@@ -24,10 +26,8 @@ import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.MediaPlaylist;
 import com.hoccer.xo.android.content.SingleItemPlaylist;
 import com.hoccer.xo.android.content.UserPlaylist;
-import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.util.ContactOperations;
 import com.hoccer.xo.android.util.IntentHelper;
-import com.artcom.hoccer.R;
 import com.hoccer.xo.android.util.UriUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -47,11 +47,7 @@ public class AttachmentListFragment extends SearchableListFragment {
     public static final int SELECT_COLLECTION_REQUEST = 1;
     public static final int SELECT_CONTACT_REQUEST = 2;
 
-    private MediaPlayerService mMediaPlayerService;
-
     private final static Logger LOG = Logger.getLogger(AttachmentListFragment.class);
-
-    private ServiceConnection mConnection;
 
     private AttachmentListAdapter mAttachmentAdapter;
     private SectionedListAdapter mResultsAdapter;
@@ -96,15 +92,10 @@ public class AttachmentListFragment extends SearchableListFragment {
         super.onStart();
 
         mSearchContactsAdapter.requestReload();
-
         getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
         ListInteractionHandler listHandler = new ListInteractionHandler();
         getListView().setOnItemClickListener(listHandler);
         getListView().setMultiChoiceModeListener(listHandler);
-
-        Intent intent = new Intent(getActivity(), MediaPlayerService.class);
-        getActivity().startService(intent);
-        bindToMediaPlayerService(intent);
     }
 
     @Override
@@ -143,7 +134,6 @@ public class AttachmentListFragment extends SearchableListFragment {
     @Override
     public void onStop() {
         super.onStop();
-        getActivity().unbindService(mConnection);
     }
 
     @Override
@@ -189,7 +179,7 @@ public class AttachmentListFragment extends SearchableListFragment {
             }
         }
 
-        if(mCurrentActionMode != null) {
+        if (mCurrentActionMode != null) {
             mCurrentActionMode.finish();
         }
     }
@@ -223,30 +213,11 @@ public class AttachmentListFragment extends SearchableListFragment {
     }
 
     @Override
-    protected void onSearchModeDisabled() {
-        // do nothing
-    }
-
-    private void bindToMediaPlayerService(Intent intent) {
-        mConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                MediaPlayerService.MediaPlayerBinder binder = (MediaPlayerService.MediaPlayerBinder) service;
-                mMediaPlayerService = binder.getService();
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                mMediaPlayerService = null;
-            }
-        };
-
-        getActivity().bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-    }
+    protected void onSearchModeDisabled() {}
 
     private void retrieveCollectionAndAddSelectedAttachments(Integer mediaCollectionId) {
         List<XoTransfer> selectedItems = mAttachmentAdapter.getSelectedItems();
-        if(!selectedItems.isEmpty()) {
+        if (!selectedItems.isEmpty()) {
             try {
                 TalkClientMediaCollection mediaCollection = mDatabase.findMediaCollectionById(mediaCollectionId);
                 List<String> addedFilenames = new ArrayList<String>();
@@ -263,9 +234,9 @@ public class AttachmentListFragment extends SearchableListFragment {
 
     private void deleteSelectedAttachments() {
         List<XoTransfer> selectedObjects = mAttachmentAdapter.getSelectedItems();
-        for(XoTransfer item : selectedObjects) {
+        for (XoTransfer item : selectedObjects) {
             try {
-                for(XoTransfer transfer : XoApplication.getXoClient().getDatabase().findTransfersByFilePath(item.getFilePath())) {
+                for (XoTransfer transfer : XoApplication.getXoClient().getDatabase().findTransfersByFilePath(item.getFilePath())) {
                     XoApplication.getXoClient().getDatabase().deleteTransferAndUpdateMessage(transfer, getResources().getString(R.string.deleted_attachment));
                 }
                 FileUtils.deleteQuietly(new File(UriUtils.getAbsoluteFileUri(item.getFilePath()).getPath()));
@@ -281,14 +252,13 @@ public class AttachmentListFragment extends SearchableListFragment {
             Object selectedItem = getListAdapter().getItem(position);
 
             if (selectedItem instanceof XoTransfer) {
-                XoTransfer transfer = (XoTransfer)selectedItem;
+                XoTransfer transfer = (XoTransfer) selectedItem;
 
                 MediaPlaylist playlist = isSearchModeEnabled() ?
                         new SingleItemPlaylist(mDatabase, transfer) :
                         new UserPlaylist(mDatabase, mAttachmentAdapter.getContact());
 
-                mMediaPlayerService.playItemInPlaylist(transfer, playlist);
-
+                MediaPlayer.get().playItemInPlaylist(transfer, playlist);
                 getActivity().startActivity(new Intent(getActivity(), FullscreenPlayerActivity.class));
             } else if (selectedItem instanceof TalkClientContact) {
                 leaveSearchMode();
@@ -302,7 +272,7 @@ public class AttachmentListFragment extends SearchableListFragment {
 
         @Override
         public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
-            if(checked) {
+            if (checked) {
                 mAttachmentAdapter.selectItem((int) id);
             } else {
                 mAttachmentAdapter.deselectItem((int) id);

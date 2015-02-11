@@ -5,20 +5,17 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
-import com.hoccer.xo.android.service.MediaPlayerService;
-import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
-import com.hoccer.xo.android.util.IntentHelper;
 import com.artcom.hoccer.R;
+import com.hoccer.xo.android.MediaPlayer;
+import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
 
 
 /**
- * Adds and manages the media icon in the actionbar based on the current MediaPlayerService state.
+ * Adds and manages the media icon in the actionbar based on the current MediaPlayer state.
  */
-public class MediaPlayerActivityComponent extends ActivityComponent {
+public class MediaPlayerActivityComponent extends ActivityComponent implements MediaPlayer.Listener {
 
     private Menu mMenu;
-    private MediaPlayerServiceConnector mMediaPlayerServiceConnector;
 
     public MediaPlayerActivityComponent(final FragmentActivity activity) {
         super(activity);
@@ -27,52 +24,33 @@ public class MediaPlayerActivityComponent extends ActivityComponent {
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        mMediaPlayerServiceConnector = new MediaPlayerServiceConnector(getActivity());
-        mMediaPlayerServiceConnector.connect(
-                IntentHelper.ACTION_PLAYER_STATE_CHANGED,
-                new MediaPlayerServiceConnector.Listener() {
-                    @Override
-                    public void onConnected(final MediaPlayerService service) {
-                        updateActionBarIcons();
-                    }
-
-                    @Override
-                    public void onDisconnected() {
-                    }
-
-                    @Override
-                    public void onAction(final String action, final MediaPlayerService service) {
-                        updateActionBarIcons();
-                    }
-                }
-        );
+        MediaPlayer.get().registerListener(this);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mMediaPlayerServiceConnector.disconnect();
+        MediaPlayer.get().unregisterListener(this);
     }
 
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
-        final boolean result = super.onCreateOptionsMenu(menu);
-        if (result) {
+        final boolean showMenu = super.onCreateOptionsMenu(menu);
+        if (showMenu) {
             mMenu = menu;
             updateActionBarIcons();
         } else {
             mMenu = null;
         }
 
-        return result;
+        return showMenu;
     }
 
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        if(item.getItemId() == R.id.menu_media_player) {
-                openFullScreenPlayer();
-                return true;
+        if (item.getItemId() == R.id.menu_media_player) {
+            openFullScreenPlayer();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -83,15 +61,23 @@ public class MediaPlayerActivityComponent extends ActivityComponent {
     }
 
     private void updateActionBarIcons() {
-        if (mMediaPlayerServiceConnector != null && mMediaPlayerServiceConnector.isConnected() && mMenu != null) {
+        if (mMenu != null) {
             final MenuItem mediaPlayerItem = mMenu.findItem(R.id.menu_media_player);
 
-            final MediaPlayerService service = mMediaPlayerServiceConnector.getService();
-            if (service.isStopped() || service.isPaused()) {
+            final MediaPlayer mediaPlayer = MediaPlayer.get();
+            if (mediaPlayer.isStopped() || mediaPlayer.isPaused()) {
                 mediaPlayerItem.setVisible(false);
             } else {
                 mediaPlayerItem.setVisible(true);
             }
         }
     }
+
+    @Override
+    public void onStateChanged() {
+        updateActionBarIcons();
+    }
+
+    @Override
+    public void onTrackChanged() {}
 }

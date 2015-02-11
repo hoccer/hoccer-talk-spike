@@ -15,8 +15,5 @@ public interface IXoFragment {
 
     public XoClientDatabase getXoDatabase();
 
-    public void onServiceConnected();
-    public void onServiceDisconnected();
-
     public void onAvatarSelected(SelectedContent co);
 }

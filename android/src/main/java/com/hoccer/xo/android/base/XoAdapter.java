@@ -58,7 +58,7 @@ public abstract class XoAdapter extends BaseAdapter {
         mDatabase = mActivity.getXoDatabase();
         mInflater = mActivity.getLayoutInflater();
         mResources = mActivity.getResources();
-        mExecutor = mActivity.getBackgroundExecutor();
+        mExecutor = XoApplication.get().getExecutor();
     }
 
     public void runOnUiThread(Runnable runnable) {

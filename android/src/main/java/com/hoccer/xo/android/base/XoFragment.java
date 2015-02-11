@@ -57,12 +57,6 @@ public abstract class XoFragment extends Fragment implements IXoFragment {
         }
     }
 
-    public void onServiceConnected() {
-    }
-
-    public void onServiceDisconnected() {
-    }
-
     public void onAvatarSelected(SelectedContent content) {
     }
 }

@@ -296,7 +296,7 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
         });
     }
 
-    private void restartApplication() {
+    private static void restartApplication() {
         android.os.Process.killProcess(android.os.Process.myPid());
     }
 

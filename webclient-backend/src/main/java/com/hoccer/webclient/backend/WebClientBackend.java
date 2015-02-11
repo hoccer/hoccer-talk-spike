@@ -54,11 +54,11 @@ public class WebClientBackend implements IXoStateListener {
         mClient.registerTransferListener(mTransferListener);
         mClient.registerStateListener(this);
 
-        mClient.wake();
+        mClient.connect();
     }
 
     public void onClientStateChange(XoClient client, int state) {
-        if(state == XoClient.STATE_ACTIVE) {
+        if(state == XoClient.STATE_READY) {
             // send nearby environment
             mClient.sendEnvironmentUpdate(getEnvironment());
 
