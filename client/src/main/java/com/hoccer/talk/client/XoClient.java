@@ -1165,8 +1165,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     @Override
     public void onClose(JsonRpcConnection connection) {
         LOG.debug("onClose()");
-        if (mState == STATE_CONNECTING) {
-            scheduleConnect();
+        if(mState != STATE_DISCONNECTED) {
+            if (mState == STATE_CONNECTING) {
+                scheduleConnect();
+            } else {
+                switchState(STATE_CONNECTING, "connection had closed");
+            }
         }
     }
 
