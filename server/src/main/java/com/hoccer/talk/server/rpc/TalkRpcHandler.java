@@ -1390,6 +1390,15 @@ public class TalkRpcHandler implements ITalkRpcServer {
             return false;
         }
 
+        final TalkRelationship relationship = mDatabase.findRelationshipBetween(receiverId, clientId);
+
+        if (isBlocking(relationship)) {
+            LOG.info("delivery rejected: Recipient: '" + receiverId + "' blocks sender: '" + clientId);
+            delivery.setState(TalkDelivery.STATE_FAILED);
+            delivery.setReason("recipient blocked sender");
+            return false;
+        }
+
         // all fine, delivery accepted
         LOG.info("delivery accepted for recipient with id '" + receiverId + "'");
         // return
@@ -1834,7 +1843,16 @@ public class TalkRpcHandler implements ITalkRpcServer {
         if (client == null) {
             throw new RuntimeException("No such client");
         }
-        // XXX need to apply blocklist here?
+
+        // disallow invitation by blocked clients
+        String invitingId = mConnection.getClientId();
+        final TalkRelationship relationship = mDatabase.findRelationshipBetween(clientId, invitingId);
+
+        if (isBlocking(relationship)) {
+            LOG.info("Inviting contact '"+invitingId+"' blocked by invitee '" + clientId + "'");
+            throw new RuntimeException("Inviting contact blocked by invitee");
+        }
+
         // get or create the group member
         TalkGroupMembership membership = mDatabase.findGroupMembershipForClient(groupId, clientId);
         if (membership == null) {
