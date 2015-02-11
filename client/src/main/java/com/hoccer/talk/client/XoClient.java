@@ -109,6 +109,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     ScheduledFuture<?> mRegistrationFuture;
     ScheduledFuture<?> mConnectFuture;
     ScheduledFuture<?> mDisconnectFuture;
+    ScheduledFuture<?> mTimeoutDisconnectFuture;
     ScheduledFuture<?> mKeepAliveFuture;
 
     List<IXoContactListener> mContactListeners = new CopyOnWriteArrayList<IXoContactListener>();
@@ -647,11 +648,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     if (TalkPresence.CONN_STATUS_ONLINE.equals(newStatus)) {
                         LOG.debug("entering foreground");
                         mBackgroundMode = false;
+                        shutdownTimeoutDisconnect();
                         connect();
                     } else if (TalkPresence.CONN_STATUS_BACKGROUND.equals(newStatus)) {
                         mBackgroundMode = true;
                         int timeout = mClientConfiguration.getBackgroundDisconnectTimeoutSeconds();
-                        scheduleDisconnect(timeout);
+                        scheduleTimeoutDisconnect(timeout);
                         LOG.debug("entering background");
                     }
 
@@ -1410,18 +1412,26 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         });
     }
 
-    private void shutdownDisconnect() {
-        if (mDisconnectFuture != null) {
-            mDisconnectFuture.cancel(false);
-            mDisconnectFuture = null;
+    private void scheduleTimeoutDisconnect(int timeoutInSeconds) {
+        LOG.debug("scheduleTimeoutDisconnect()");
+        shutdownTimeoutDisconnect();
+        mTimeoutDisconnectFuture = mExecutor.schedule(new Runnable() {
+            @Override
+            public void run() {
+                switchState(STATE_DISCONNECTED, "disconnect timout");
+                mTimeoutDisconnectFuture = null;
+            }
+        }, timeoutInSeconds, TimeUnit.SECONDS);
+    }
+
+    private void shutdownTimeoutDisconnect() {
+        if (mTimeoutDisconnectFuture != null) {
+            mTimeoutDisconnectFuture.cancel(false);
+            mTimeoutDisconnectFuture = null;
         }
     }
 
     private void scheduleDisconnect() {
-        scheduleDisconnect(0);
-    }
-
-    private void scheduleDisconnect(int timeoutInSeconds) {
         LOG.debug("scheduleDisconnect()");
         shutdownDisconnect();
         mDisconnectFuture = mExecutor.schedule(new Runnable() {
@@ -1434,7 +1444,14 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 }
                 mDisconnectFuture = null;
             }
-        }, timeoutInSeconds, TimeUnit.SECONDS);
+        }, 0, TimeUnit.SECONDS);
+    }
+
+    private void shutdownDisconnect() {
+        if (mDisconnectFuture != null) {
+            mDisconnectFuture.cancel(false);
+            mDisconnectFuture = null;
+        }
     }
 
     public TalkClientMessage composeClientMessage(TalkClientContact contact, String messageText) {
