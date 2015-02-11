@@ -109,7 +109,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     ScheduledFuture<?> mRegistrationFuture;
     ScheduledFuture<?> mConnectFuture;
     ScheduledFuture<?> mDisconnectFuture;
-    ScheduledFuture<?> mTimeoutDisconnectFuture;
+    ScheduledFuture<?> mDisconnectTimeoutFuture;
     ScheduledFuture<?> mKeepAliveFuture;
 
     List<IXoContactListener> mContactListeners = new CopyOnWriteArrayList<IXoContactListener>();
@@ -648,12 +648,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     if (TalkPresence.CONN_STATUS_ONLINE.equals(newStatus)) {
                         LOG.debug("entering foreground");
                         mBackgroundMode = false;
-                        shutdownTimeoutDisconnect();
+                        shutdownDisconnectTimeout();
                         connect();
                     } else if (TalkPresence.CONN_STATUS_BACKGROUND.equals(newStatus)) {
                         mBackgroundMode = true;
                         int timeout = mClientConfiguration.getBackgroundDisconnectTimeoutSeconds();
-                        scheduleTimeoutDisconnect(timeout);
+                        scheduleDisconnectTimeout(timeout);
                         LOG.debug("entering background");
                     }
 
@@ -1412,22 +1412,22 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         });
     }
 
-    private void scheduleTimeoutDisconnect(int timeoutInSeconds) {
-        LOG.debug("scheduleTimeoutDisconnect()");
-        shutdownTimeoutDisconnect();
-        mTimeoutDisconnectFuture = mExecutor.schedule(new Runnable() {
+    private void scheduleDisconnectTimeout(int timeoutInSeconds) {
+        LOG.debug("scheduleDisconnectTimeout()");
+        shutdownDisconnectTimeout();
+        mDisconnectTimeoutFuture = mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
                 switchState(STATE_DISCONNECTED, "disconnect timout");
-                mTimeoutDisconnectFuture = null;
+                mDisconnectTimeoutFuture = null;
             }
         }, timeoutInSeconds, TimeUnit.SECONDS);
     }
 
-    private void shutdownTimeoutDisconnect() {
-        if (mTimeoutDisconnectFuture != null) {
-            mTimeoutDisconnectFuture.cancel(false);
-            mTimeoutDisconnectFuture = null;
+    private void shutdownDisconnectTimeout() {
+        if (mDisconnectTimeoutFuture != null) {
+            mDisconnectTimeoutFuture.cancel(false);
+            mDisconnectTimeoutFuture = null;
         }
     }
 
