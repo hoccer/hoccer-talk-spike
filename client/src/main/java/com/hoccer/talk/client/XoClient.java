@@ -647,7 +647,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     if (TalkPresence.CONN_STATUS_ONLINE.equals(newStatus)) {
                         LOG.debug("entering foreground");
                         mBackgroundMode = false;
-                        shutdownDisconnectTimeout();
+                        cancelDisconnectTimeout();
                         connect();
                     } else if (TalkPresence.CONN_STATUS_BACKGROUND.equals(newStatus)) {
                         mBackgroundMode = true;
@@ -1090,25 +1090,25 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 mNumConnectionAttempts = 0;
                 scheduleDisconnect();
             } else {
-                shutdownDisconnect();
+                cancelDisconnect();
             }
 
             if (mState == STATE_CONNECTING) {
                 scheduleConnect();
             } else {
-                shutdownConnect();
+                cancelConnect();
             }
 
             if (mState == STATE_REGISTERING) {
                 scheduleRegistration();
             } else {
-                shutdownRegistration();
+                cancelRegistration();
             }
 
             if (mState == STATE_LOGIN) {
                 scheduleLogin();
             } else {
-                shutdownLogin();
+                cancelLogin();
             }
 
             if (mState == STATE_SYNCING) {
@@ -1131,7 +1131,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             if (mState >= STATE_SYNCING) {
                 scheduleKeepAlive();
             } else {
-                shutdownKeepAlive();
+                cancelKeepAlive();
             }
 
             // call listeners
@@ -1192,7 +1192,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         mConnection.disconnect();
     }
 
-    private void shutdownKeepAlive() {
+    private void cancelKeepAlive() {
         if (mKeepAliveFuture != null) {
             mKeepAliveFuture.cancel(false);
             mKeepAliveFuture = null;
@@ -1200,7 +1200,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     private void scheduleKeepAlive() {
-        shutdownKeepAlive();
+        cancelKeepAlive();
         if (mClientConfiguration.getKeepAliveEnabled()) {
             mKeepAliveFuture = mExecutor.scheduleAtFixedRate(new Runnable() {
                                                                  @Override
@@ -1219,7 +1219,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
-    private void shutdownConnect() {
+    private void cancelConnect() {
         if (mConnectFuture != null) {
             mConnectFuture.cancel(false);
             mConnectFuture = null;
@@ -1228,7 +1228,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     private void scheduleConnect() {
         LOG.debug("scheduleConnect()");
-        shutdownConnect();
+        cancelConnect();
 
         int backoffDelay;
         if (mNumConnectionAttempts > 0) {
@@ -1257,7 +1257,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }, backoffDelay, TimeUnit.MILLISECONDS);
     }
 
-    private void shutdownLogin() {
+    private void cancelLogin() {
         if (mLoginFuture != null) {
             mLoginFuture.cancel(false);
             mLoginFuture = null;
@@ -1266,7 +1266,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     private void scheduleLogin() {
         LOG.debug("scheduleLogin()");
-        shutdownLogin();
+        cancelLogin();
         mLoginFuture = mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
@@ -1277,7 +1277,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }, 0, TimeUnit.SECONDS);
     }
 
-    private void shutdownRegistration() {
+    private void cancelRegistration() {
         if (mRegistrationFuture != null) {
             mRegistrationFuture.cancel(false);
             mRegistrationFuture = null;
@@ -1286,7 +1286,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     private void scheduleRegistration() {
         LOG.debug("scheduleRegistration()");
-        shutdownRegistration();
+        cancelRegistration();
         mRegistrationFuture = mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
@@ -1413,7 +1413,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     private void scheduleDisconnectTimeout(int timeoutInSeconds) {
         LOG.debug("scheduleDisconnectTimeout()");
-        shutdownDisconnectTimeout();
+        cancelDisconnectTimeout();
         mDisconnectTimeoutFuture = mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
@@ -1423,7 +1423,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }, timeoutInSeconds, TimeUnit.SECONDS);
     }
 
-    private void shutdownDisconnectTimeout() {
+    private void cancelDisconnectTimeout() {
         if (mDisconnectTimeoutFuture != null) {
             mDisconnectTimeoutFuture.cancel(false);
             mDisconnectTimeoutFuture = null;
@@ -1432,7 +1432,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     private void scheduleDisconnect() {
         LOG.debug("scheduleDisconnect()");
-        shutdownDisconnect();
+        cancelDisconnect();
         mDisconnectFuture = mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
@@ -1446,7 +1446,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }, 0, TimeUnit.SECONDS);
     }
 
-    private void shutdownDisconnect() {
+    private void cancelDisconnect() {
         if (mDisconnectFuture != null) {
             mDisconnectFuture.cancel(false);
             mDisconnectFuture = null;
