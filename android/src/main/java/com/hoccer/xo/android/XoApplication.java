@@ -201,10 +201,10 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         sClient.setRelativeAttachmentDirectory(sConfiguration.getAttachmentsDirectory());
         sClient.setEncryptedDownloadDirectory(getEncryptedDownloadDirectory().toString());
         sClient.setExternalStorageDirectory(sExternalStorage.getAbsolutePath());
+        sClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
 
         // add srp secret change listener
         sClient.registerStateListener(new SrpChangeListener(this));
-
 
         // create sound pool instance
         sSoundPool = new XoSoundPool(this);
@@ -425,6 +425,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
     @Override
     public void onBecameForeground() {
+        sLog.debug("onBecameForeground()");
         sClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
         mStayActiveInBackground = false;
 
@@ -445,6 +446,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
     @Override
     public void onBecameBackground() {
+        sLog.debug("onBecameBackground()");
         if (!mStayActiveInBackground) {
             sClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
 

@@ -24,7 +24,7 @@ public class BackgroundManager implements Application.ActivityLifecycleCallbacks
         public void onBecameBackground();
     }
 
-    private boolean mInBackground;
+    private boolean mInBackground = true;
     private final List<Listener> listeners = new ArrayList<Listener>();
     private final Handler mBackgroundDelayHandler = new Handler();
     private Runnable mBackgroundTransition;
