@@ -2,6 +2,6 @@
 <FrameLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/fl_single_profile_fragment_container"
-        android:background="@color/xo_main_background"
+        android:background="@color/background_default"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

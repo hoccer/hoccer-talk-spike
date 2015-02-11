@@ -21,28 +21,25 @@ public abstract class ActivityComponent {
     }
 
     @SuppressWarnings("unused")
-    public void onCreate(Bundle savedInstanceState) {
-    }
+    public void onCreate(Bundle savedInstanceState) {}
 
-    public void onStart() {
-    }
+    public void onStart() {}
 
-    public void onResume() {
-    }
+    public void onResume() {}
 
-    public void onPause() {
-    }
+    public void onPause() {}
 
-    public void onStop() {
-    }
+    public void onStop() {}
 
-    public void onDestroy() {
-    }
+    public void onDestroy() {}
 
+
+    @SuppressWarnings("unused")
     public boolean onCreateOptionsMenu(Menu menu) {
         return true;
     }
 
+    @SuppressWarnings("unused")
     public boolean onOptionsItemSelected(MenuItem item) {
         return false;
     }

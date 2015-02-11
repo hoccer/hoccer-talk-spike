@@ -13,7 +13,7 @@ import com.hoccer.xo.android.base.XoActivity;
  */
 public abstract class ComposableActivity extends XoActivity {
 
-    private ActivityComponent[] mComponents;
+    private final ActivityComponent[] mComponents;
 
     /*
      * Needs to be implemented in a derived class.
@@ -21,7 +21,7 @@ public abstract class ComposableActivity extends XoActivity {
      */
     protected abstract ActivityComponent[] createComponents();
 
-    public ComposableActivity() {
+    protected ComposableActivity() {
         super();
 
         mComponents = createComponents();

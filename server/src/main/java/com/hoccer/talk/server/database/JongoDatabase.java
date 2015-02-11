@@ -662,7 +662,11 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     public void saveEnvironment(TalkEnvironment environment) {
-        mEnvironments.save(environment);
+        if (environment.getClientId() != null) {
+            mEnvironments.save(environment);
+        } else {
+            LOG.warn("Not saving environment without clientId (groupId == " + environment.getGroupId() + ")");
+        }
     }
 
     @Override

@@ -11,7 +11,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.content.Clipboard;
@@ -19,9 +18,12 @@ import com.hoccer.xo.android.fragment.MessagingFragment;
 import com.hoccer.xo.android.fragment.NearbyArchiveFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
+import org.apache.log4j.Logger;
 
 
 public class MessagingActivity extends ComposableActivity {
+
+    private static final Logger LOG = Logger.getLogger(MessagingActivity.class);
 
     public static final String EXTRA_NEARBY_ARCHIVE = "com.hoccer.xo.android.intent.extra.NEARBY_ARCHIVE";
 
@@ -104,8 +106,8 @@ public class MessagingActivity extends ComposableActivity {
     private void popupItemSelected(MenuItem item, ChatMessageItem messageItem) {
         switch (item.getItemId()) {
             case R.id.menu_copy_message:
-                if (messageItem.getContent() != null && messageItem.getContent().isContentAvailable()) {
-                    Clipboard.getInstance().setContent(messageItem.getContent());
+                if (messageItem.getAttachment() != null && messageItem.getAttachment().isContentAvailable()) {
+                    Clipboard.getInstance().setContent(messageItem.getAttachment());
                 } else {
                     putMessageTextInSystemClipboard(messageItem);
                 }

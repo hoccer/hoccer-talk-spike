@@ -1,7 +1,7 @@
 package com.hoccer.xo.android.content;
 
 import android.app.Activity;
-import com.hoccer.xo.android.content.contentselectors.IContentSelector;
+import com.hoccer.xo.android.content.selector.IContentSelector;
 
 /**
  * Handle object for content selection

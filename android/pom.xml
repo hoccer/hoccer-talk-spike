@@ -201,9 +201,11 @@
   </dependencies>
 
   <properties>
-    <!-- Can be overridden by calling `mvn -Denvironment=ENVIRONMENT` -->
+    <!-- Can be overridden by calling `mvn -Dlabel=LABEL -Denvironment=ENVIRONMENT` -->
+    <label>hoccer</label>
+    <label.path>${project.basedir}/label/${label}</label.path>
     <environment>development</environment>
-    <environment.path>${project.basedir}/environments/${environment}</environment.path>
+    <environment.path>${label.path}/environments/${environment}</environment.path>
 
     <!-- Can be overridden by calling `mvn -Dapk.sign=false` -->
     <apk.sign>true</apk.sign>
@@ -260,7 +262,7 @@
       </resource>
     </resources>
 
-    <finalName>hoccer-android-${project.version}-${environment}-${apk.sign.postfix}</finalName>
+    <finalName>${label}-android-${project.version}-${environment}-${apk.sign.postfix}</finalName>
 
     <plugins>
       <plugin>
@@ -297,6 +299,7 @@
           <resourceOverlayDirectories>
             <directory>${project.build.directory}/generated-resources</directory>
             <directory>${environment.path}/res</directory>
+            <directory>${label.path}/res</directory>
             <directory>${project.build.directory}/res</directory>
           </resourceOverlayDirectories>
           <nativeLibrariesDirectory>${project.basedir}/libs</nativeLibrariesDirectory>

@@ -19,10 +19,7 @@ import org.apache.commons.collections4.Transformer;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 
 public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
@@ -586,6 +583,10 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         mDownloadListeners.unregisterListener(listener);
     }
 
+    public List<TalkClientDownload> findAllClientDownloads() throws SQLException {
+        return mClientDownloads.queryForAll();
+    }
+
     public TalkClientUpload findClientUploadById(int clientUploadId) throws SQLException {
         return mClientUploads.queryForId(clientUploadId);
     }
@@ -649,15 +650,72 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public List<XoTransfer> findTransfersByMediaType(String mediaType) throws SQLException {
-        List<TalkClientUpload> uploads = mClientUploads.queryBuilder().where()
-                .eq("mediaType", mediaType)
-                .isNotNull("contentUrl")
-                .and(2)
-                .query();
-
-        List<TalkClientDownload> downloads = mClientDownloads.queryForEq("mediaType", mediaType);
+        List<TalkClientUpload> uploads = findClientUploadsByMediaType(mediaType);
+        List<TalkClientDownload> downloads = findClientDownloadsByMediaType(mediaType);
 
         return mergeUploadsAndDownloadsByMessageTimestamp(uploads, downloads);
+    }
+
+    public List<XoTransfer> findTransfersByMediaTypeDistinct(String mediaType) throws SQLException {
+        List<TalkClientUpload> uploads = findClientUploadsByMediaType(mediaType);
+        List<TalkClientDownload> downloads = findClientDownloadsByMediaType(mediaType);
+
+        List<XoTransfer> transfers = mergeUploadsAndDownloadsByMessageTimestamp(uploads, downloads);
+        return filterDuplicateFiles(transfers);
+    }
+
+    private static List<XoTransfer> filterDuplicateFiles(List<XoTransfer> transfers) {
+        List<XoTransfer> filteredTransfers = new ArrayList<XoTransfer>();
+        HashSet<String> filePathes = new HashSet<String>();
+
+        for (int i = transfers.size() - 1; i >= 0; i--) {
+            XoTransfer transfer = transfers.get(i);
+            if (!filePathes.contains(transfer.getFilePath())) {
+                filteredTransfers.add(0, transfer);
+                filePathes.add(transfer.getFilePath());
+            }
+        }
+
+        return filteredTransfers;
+    }
+
+    public List<TalkClientUpload> findClientUploadsByMediaType(String mediaType) throws SQLException {
+        return mClientUploads.queryBuilder().where()
+                .eq("mediaType", mediaType)
+                .and()
+                .eq("state", TalkClientUpload.State.COMPLETE)
+                .query();
+    }
+
+    public List<TalkClientDownload> findClientDownloadsByMediaType(String mediaType) throws SQLException {
+        return mClientDownloads.queryBuilder().where()
+                .eq("mediaType", mediaType)
+                .and()
+                .eq("state", TalkClientDownload.State.COMPLETE)
+                .query();
+    }
+
+    public List<? extends XoTransfer> findTransfersByFilePath(String filePath) throws SQLException {
+        List<TalkClientUpload> uploads = findClientUploadsByFilePath(filePath);
+        List<TalkClientDownload> downloads = findClientDownloadsByFilePath(filePath);
+
+        return ListUtils.union(uploads, downloads);
+    }
+
+    public List<TalkClientUpload> findClientUploadsByFilePath(String filePath) throws SQLException {
+        return mClientUploads.queryBuilder().where()
+                .eq("dataFile", filePath)
+                .and()
+                .eq("state", TalkClientDownload.State.COMPLETE)
+                .query();
+    }
+
+    public List<TalkClientDownload> findClientDownloadsByFilePath(String filePath) throws SQLException {
+        return mClientDownloads.queryBuilder().where()
+                .eq("dataFile", filePath)
+                .and()
+                .eq("state", TalkClientDownload.State.COMPLETE)
+                .query();
     }
 
     public long getAttachmentCountByContactId(int contactId) throws SQLException {

@@ -28,7 +28,7 @@
 
     <!-- Tutorial and FAQ links -->
     <string name="link_tutorial">http://faq.hoccer.com/de/tutorial-xo/</string>
-    <string name="link_faq">http://faq.hoccer.com/de/faq-xo/</string>
+    <string name="link_faq">http://faq.hoccer.com/de/</string>
 
     <!-- Contacts fragment -->
     <string name="contacts_title">Kontakte</string>
@@ -147,9 +147,6 @@
     <string name="content_location">Ort</string>
     <string name="content_data">Dokument</string>
     <string name="content_clipboard">Aus Zwischenablage</string>
-
-    <string name="content_not_supported_audio_title">Nicht unterstütztes Format</string>
-    <string name="content_not_supported_audio_msg">Dieser Audio-Anhang kann nicht wiedergegeben werden.</string>
 
     <!-- FullscreenPlayer -->
     <string name="deleted_contact_name">Entfernter Kontakt</string>
@@ -294,10 +291,8 @@
     <string name="error_send_message_blocked">Sie haben diesen Kontakt blockiert. Die Nachricht wird nicht gesendet.</string>
     <string name="multi_invitation_button">weiter</string>
 
-    <string-array name="tab_names">
-        <item>CHATS</item>
-        <item>IN DER NÄHE</item>
-    </string-array>
+    <string name="chats_tab_name">CHATS</string>
+    <string name="nearby_tab_name">IN DER NÄHE</string>
 
     <string name="contacts_tab_friends">FREUNDE</string>
     <string name="contacts_tab_groups">GRUPPEN</string>

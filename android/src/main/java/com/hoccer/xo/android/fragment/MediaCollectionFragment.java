@@ -6,10 +6,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.*;
 import android.widget.*;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
+import com.hoccer.xo.android.MediaPlayer;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.ContactSelectionActivity;
@@ -20,13 +22,14 @@ import com.hoccer.xo.android.adapter.MediaCollectionItemAdapter;
 import com.hoccer.xo.android.content.MediaCollectionPlaylist;
 import com.hoccer.xo.android.content.MediaPlaylist;
 import com.hoccer.xo.android.content.SingleItemPlaylist;
-import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
 import com.hoccer.xo.android.util.ContactOperations;
 import com.hoccer.xo.android.util.DragSortController;
-import com.artcom.hoccer.R;
+import com.hoccer.xo.android.util.UriUtils;
 import com.mobeta.android.dslv.DragSortListView;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
@@ -41,7 +44,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
     public static final int SELECT_COLLECTION_REQUEST = 1;
     public static final int SELECT_CONTACT_REQUEST = 2;
 
-    private int mRenameMenuId = 0;
+    private int mRenameMenuId;
 
     private DragSortListView mListView;
     private DragSortController mController;
@@ -50,7 +53,6 @@ public class MediaCollectionFragment extends SearchableListFragment {
     private MediaCollectionItemAdapter mCollectionAdapter;
     private AttachmentSearchResultAdapter mSearchResultAdapter;
 
-    private MediaPlayerServiceConnector mMediaPlayerServiceConnector;
     private ActionMode mCurrentActionMode;
 
     @Override
@@ -96,8 +98,6 @@ public class MediaCollectionFragment extends SearchableListFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mMediaPlayerServiceConnector = new MediaPlayerServiceConnector(getActivity());
-        mMediaPlayerServiceConnector.connect();
     }
 
     @Override
@@ -124,12 +124,6 @@ public class MediaCollectionFragment extends SearchableListFragment {
     @Override
     public void onResume() {
         super.onResume();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mMediaPlayerServiceConnector.disconnect();
     }
 
     @Override
@@ -180,7 +174,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
         // do nothing
     }
 
-    private MenuItem.OnMenuItemClickListener mRenameCollectionClickListener = new MenuItem.OnMenuItemClickListener() {
+    private final MenuItem.OnMenuItemClickListener mRenameCollectionClickListener = new MenuItem.OnMenuItemClickListener() {
         @Override
         public boolean onMenuItemClick(MenuItem menuItem) {
             XoDialogs.showInputTextDialog("rename_collection", R.string.rename_collection, getActivity(),
@@ -188,7 +182,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
             return false;
         }
 
-        private XoDialogs.OnTextSubmittedListener mTextSubmittedListener = new XoDialogs.OnTextSubmittedListener() {
+        private final XoDialogs.OnTextSubmittedListener mTextSubmittedListener = new XoDialogs.OnTextSubmittedListener() {
             @Override
             public void onClick(DialogInterface dialog, int id, String text) {
                 if (text != null && !text.isEmpty()) {
@@ -200,7 +194,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
     };
 
     private void updateActionBarTitle() {
-        if(mCollection != null) {
+        if (mCollection != null) {
             getActivity().getActionBar().setTitle(mCollection.getName());
         }
     }
@@ -217,7 +211,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
 
     private void addSelectedItemsToCollection(Integer mediaCollectionId) {
         List<XoTransfer> selectedItems = mCollectionAdapter.getSelectedItems();
-        if(selectedItems.size() > 0) {
+        if (!selectedItems.isEmpty()) {
             try {
                 TalkClientMediaCollection mediaCollection = mDatabase.findMediaCollectionById(mediaCollectionId);
                 List<String> addedFilenames = new ArrayList<String>();
@@ -236,25 +230,20 @@ public class MediaCollectionFragment extends SearchableListFragment {
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            XoTransfer clickedItem = (XoTransfer)getListAdapter().getItem(position);
+            XoTransfer clickedItem = (XoTransfer) getListAdapter().getItem(position);
 
-            if (mMediaPlayerServiceConnector.isConnected()) {
-                MediaPlaylist playlist = isSearchModeEnabled() ?
-                        new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), clickedItem) :
-                        new MediaCollectionPlaylist(mCollection);
+            MediaPlaylist playlist = isSearchModeEnabled() ?
+                    new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), clickedItem) :
+                    new MediaCollectionPlaylist(mCollection);
 
-                mMediaPlayerServiceConnector.getService().playItemInPlaylist(clickedItem, playlist);
-
-                getActivity().startActivity(new Intent(getActivity(), FullscreenPlayerActivity.class));
-            } else {
-                LOG.error("MediaPlayerService is not connected");
-            }
+            MediaPlayer.get().playItemInPlaylist(clickedItem, playlist);
+            getActivity().startActivity(new Intent(getActivity(), FullscreenPlayerActivity.class));
         }
 
         @Override
         public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
-            if(checked) {
-                mCollectionAdapter.selectItem((int)id);
+            if (checked) {
+                mCollectionAdapter.selectItem((int) id);
             } else {
                 mCollectionAdapter.deselectItem((int) id);
             }
@@ -337,10 +326,11 @@ public class MediaCollectionFragment extends SearchableListFragment {
         private void deleteSelectedItems() {
             List<XoTransfer> items = mCollectionAdapter.getSelectedItems();
             for (XoTransfer item : items) {
-                try{
+                try {
                     mDatabase.deleteTransferAndUpdateMessage(item, getResources().getString(R.string.deleted_attachment));
-                } catch(SQLException e) {
-                    LOG.error("Could not delete download", e);
+                    FileUtils.deleteQuietly(new File(UriUtils.getAbsoluteFileUri(item.getFilePath()).getPath()));
+                } catch (SQLException e) {
+                    LOG.error("Could not delete transfer", e);
                 }
             }
         }

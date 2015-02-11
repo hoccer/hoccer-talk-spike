@@ -14,9 +14,12 @@ import android.widget.ImageView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.client.XoTransfer;
+import com.hoccer.talk.content.ContentMediaType;
+import com.hoccer.talk.content.SelectedContent;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.content.contentselectors.*;
+import com.hoccer.xo.android.content.selector.*;
 import com.hoccer.xo.android.util.IntentHelper;
 import org.apache.log4j.Logger;
 
@@ -121,28 +124,28 @@ public class ContentRegistry {
         }
     }
 
-    public static String getContentDescription(IContentObject object) {
+    public static String getContentDescription(XoTransfer transfer) {
         String mediaTypeString = "Unknown file";
-        String mediaType = object.getContentMediaType();
-        if ("image".equals(mediaType)) {
+        String mediaType = transfer.getMediaType();
+        if (ContentMediaType.IMAGE.equals(mediaType)) {
             mediaTypeString = "Image";
-        } else if ("audio".equals(mediaType)) {
+        } else if (ContentMediaType.AUDIO.equals(mediaType)) {
             mediaTypeString = "Audio";
-        } else if ("video".equals(mediaType)) {
+        } else if (ContentMediaType.VIDEO.equals(mediaType)) {
             mediaTypeString = "Video";
-        } else if ("contact".equals(mediaType)) {
+        } else if (ContentMediaType.VCARD.equals(mediaType)) {
             mediaTypeString = "Contact";
-        } else if ("location".equals(mediaType)) {
+        } else if (ContentMediaType.LOCATION.equals(mediaType)) {
             mediaTypeString = "Location";
-        } else if ("data".equals(mediaType)) {
+        } else if (ContentMediaType.DATA.equals(mediaType)) {
             mediaTypeString = "Data";
         }
 
         String sizeString = "";
-        if (object.getContentLength() > 0) {
-            sizeString = " —" + humanReadableByteCount(object.getContentLength(), true);
-        } else if (object.getTransferLength() > 0) {
-            sizeString = " —" + humanReadableByteCount(object.getTransferLength(), true);
+        if (transfer.getContentLength() > 0) {
+            sizeString = " — " + humanReadableByteCount(transfer.getContentLength(), true);
+        } else if (transfer.getTransferLength() > 0) {
+            sizeString = " — " + humanReadableByteCount(transfer.getTransferLength(), true);
         }
 
         return mediaTypeString + sizeString;
@@ -175,7 +178,7 @@ public class ContentRegistry {
      * @param intent    returned from the selector
      * @return content object for selected avatar
      */
-    public static IContentObject createSelectedAvatar(ContentSelection selection, Intent intent) {
+    public static SelectedContent createSelectedAvatar(ContentSelection selection, Intent intent) {
         return selection.getSelector().createObjectFromSelectionResult(selection.getActivity(), intent);
     }
 
@@ -301,7 +304,8 @@ public class ContentRegistry {
         if (!xoActivity.canStartActivity(intent)) {
             return;
         }
-        xoActivity.setBackgroundActive();
+
+        ((XoApplication)xoActivity.getApplication()).stayActiveInBackground();
         try {
             fragment.startActivityForResult(intent, requestCode);
         } catch (ActivityNotFoundException e) {

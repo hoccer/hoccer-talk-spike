@@ -16,9 +16,9 @@ import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.content.MediaMetaData;
 import com.artcom.hoccer.R;
+import com.hoccer.xo.android.util.UriUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -61,7 +61,7 @@ public class AttachmentSearchResultAdapter extends BaseAdapter {
         mMatchedItems.clear();
         if (!mLastQuery.isEmpty()) {
             for (XoTransfer attachment : mItems) {
-                MediaMetaData metaData = MediaMetaData.retrieveMetaData(attachment.getContentDataUrl());
+                MediaMetaData metaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(attachment.getFilePath()).getPath());
                 String title = metaData.getTitle();
                 String artist = metaData.getArtist();
 
@@ -76,7 +76,7 @@ public class AttachmentSearchResultAdapter extends BaseAdapter {
 
     private View createAttachmentView(Context context, XoTransfer attachment) {
         View attachmentView = View.inflate(context, R.layout.item_attachment_search_result, null);
-        String type = attachment.getContentMediaType();
+        String type = attachment.getMediaType();
         if (type.equals(ContentMediaType.AUDIO)) {
             attachmentView = setupAudioAttachmentView(context, attachmentView, attachment);
         }
@@ -85,7 +85,7 @@ public class AttachmentSearchResultAdapter extends BaseAdapter {
 
     private View setupAudioAttachmentView(final Context context, View attachmentView, XoTransfer attachment) {
         TextView titleTv = (TextView) attachmentView.findViewById(R.id.tv_title);
-        MediaMetaData metaData = MediaMetaData.retrieveMetaData(attachment.getContentDataUrl());
+        MediaMetaData metaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(attachment.getFilePath()).getPath());
         String title = metaData.getTitleOrFilename();
         titleTv.setText(getHighlightedSearchResult(title, mLastQuery));
 

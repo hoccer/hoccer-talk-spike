@@ -11,7 +11,7 @@
       android:layout_height="wrap_content"
       android:text="@string/profile_chat_info_text"
       android:paddingLeft="@dimen/profile_text_margin"
-      style="@style/AppBaseTheme.DescriptiveText"/>
+      style="@style/BaseTheme.DescriptiveText"/>
 
   <View
       android:id="@+id/v_profile_chat_info_delimiter"
@@ -42,8 +42,7 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:singleLine="true"
-        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
-        android:text="123 Messages"/>
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"/>
 
     <ImageView
         android:id="@+id/iv_go_to_chats_indicator"

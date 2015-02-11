@@ -17,12 +17,12 @@ import java.util.List;
 
 public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortListView.DropListener, TalkClientMediaCollection.Listener {
 
-    protected Logger LOG = Logger.getLogger(MediaCollectionItemAdapter.class);
+    private static final Logger LOG = Logger.getLogger(MediaCollectionItemAdapter.class);
 
-    private List<Integer> mSelectedItemIds = new ArrayList<Integer>();
+    private final List<Integer> mSelectedItemIds = new ArrayList<Integer>();
 
-    private TalkClientMediaCollection mCollection = null;
-    private boolean mShowDragHandle = false;
+    private final TalkClientMediaCollection mCollection;
+    private boolean mShowDragHandle;
 
     public MediaCollectionItemAdapter(TalkClientMediaCollection collection) {
         mCollection = collection;
@@ -54,7 +54,7 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
         XoTransfer item = mCollection.getItem(position);
         audioView.setMediaItem(item);
         audioView.updatePlayPauseView();
-        Integer itemId = (int)getItemId(position);
+        Integer itemId = (int) getItemId(position);
         audioView.getChildAt(0).setSelected(mSelectedItemIds.contains(itemId));
         audioView.showDragHandle(mShowDragHandle);
 
@@ -66,23 +66,23 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
     }
 
     public void selectItem(int itemId) {
-        if(!mSelectedItemIds.contains(itemId)) {
+        if (!mSelectedItemIds.contains(itemId)) {
             mSelectedItemIds.add(itemId);
             refreshView();
         }
     }
 
     public void deselectItem(int itemId) {
-        if(mSelectedItemIds.contains(itemId)) {
-            mSelectedItemIds.remove((Integer)itemId);
+        if (mSelectedItemIds.contains(itemId)) {
+            mSelectedItemIds.remove((Integer) itemId);
             refreshView();
         }
     }
 
     public void selectAllItems() {
         deselectAllItems();
-        for(int i = 0; i < mCollection.size(); i++) {
-            mSelectedItemIds.add((int)getItemId(i));
+        for (int i = 0; i < mCollection.size(); i++) {
+            mSelectedItemIds.add((int) getItemId(i));
         }
     }
 
@@ -93,7 +93,7 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
     public List<XoTransfer> getSelectedItems() {
         List<XoTransfer> result = new ArrayList<XoTransfer>();
 
-        for(int itemId : mSelectedItemIds) {
+        for (int itemId : mSelectedItemIds) {
             result.add(mCollection.getItemFromId(itemId));
         }
 

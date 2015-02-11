@@ -8,12 +8,15 @@ import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.fragment.GroupProfileCreationFragment;
 import com.hoccer.xo.android.fragment.GroupProfileFragment;
+import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * Activity wrapping a group profile fragment
  */
 public class GroupProfileActivity extends ComposableActivity {
+
+    private static final Logger LOG = Logger.getLogger(GroupProfileActivity.class);
 
     public static final String ACTION_CREATE = "com.hoccer.xo.android.activity.GroupProfileActivity.CREATE";
 

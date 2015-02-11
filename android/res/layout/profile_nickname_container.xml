@@ -11,7 +11,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/profile_text_margin"
             android:text="@string/profile_nickname_text"
-            style="@style/AppBaseTheme.DescriptiveText"/>
+            style="@style/BaseTheme.DescriptiveText"/>
 
     <View
             android:id="@+id/v_profile_nickname_delimiter"
@@ -41,7 +41,6 @@
             android:layout_below="@+id/v_profile_nickname_delimiter"
             android:layout_alignLeft="@+id/tv_profile_nickname_text"
             android:layout_alignRight="@+id/v_profile_nickname_delimiter"
-            android:text="Max Power"
             android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"/>
 
     <ImageButton

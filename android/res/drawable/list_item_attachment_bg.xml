@@ -3,12 +3,12 @@
     <!-- Selector style for listrow -->
     <item
             android:state_pressed="true"
-            android:drawable="@color/xo_selected_background">
+            android:drawable="@color/background_selected">
     </item>
     <item
             android:state_selected="true"
-            android:drawable="@color/xo_selected_background">
+            android:drawable="@color/background_selected">
     </item>
-    <item android:drawable="@color/xo_main_background">
+    <item android:drawable="@color/background_default">
     </item>
 </selector>

@@ -1,6 +1,5 @@
 package com.hoccer.xo.android.view.chat.attachments;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -9,25 +8,26 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.content.ContentDisposition;
-import com.hoccer.talk.content.IContentObject;
-import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.util.ColorSchemeManager;
-import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.XoTransfer;
+import com.hoccer.talk.client.model.TalkClientMessage;
+import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
+import com.hoccer.xo.android.util.UriUtils;
+import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import ezvcard.Ezvcard;
 import ezvcard.VCard;
-import org.jetbrains.annotations.Nullable;
+import org.apache.log4j.Logger;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
 
 public class ChatContactItem extends ChatMessageItem {
 
-    private IContentObject mContent;
+    private final static Logger LOG = Logger.getLogger(ChatContactItem.class);
+
     private VCard mVCard;
 
     public ChatContactItem(Context context, TalkClientMessage message) {
@@ -46,10 +46,8 @@ public class ChatContactItem extends ChatMessageItem {
     }
 
     @Override
-    protected void displayAttachment(IContentObject contentObject) {
-        super.displayAttachment(contentObject);
-
-        mContent = contentObject;
+    protected void displayAttachment(XoTransfer attachment) {
+        super.displayAttachment(attachment);
 
         // add view lazily
         if (mContentWrapper.getChildCount() == 0) {
@@ -61,82 +59,34 @@ public class ChatContactItem extends ChatMessageItem {
         TextView contactName = (TextView) mContentWrapper.findViewById(R.id.tv_vcard_name);
         TextView contactDescription = (TextView) mContentWrapper.findViewById(R.id.tv_vcard_description);
         ImageButton showButton = (ImageButton) mContentWrapper.findViewById(R.id.ib_vcard_show_button);
-        ImageButton importButton = (ImageButton) mContentWrapper.findViewById(R.id.ib_vcard_import_button);
 
-        int textColor = (mMessage.isIncoming()) ? mContext.getResources().getColor(R.color.xo_incoming_message_textColor) : mContext.getResources().getColor(R.color.xo_compose_message_textColor);
+        int textColor = (mMessage.isIncoming()) ? mContext.getResources().getColor(R.color.message_incoming_text) : mContext.getResources().getColor(R.color.compose_message_text);
 
         contactName.setTextColor(textColor);
         contactDescription.setTextColor(textColor);
-        showButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(mContext, R.drawable.ic_light_contact, mMessage.isIncoming()));
-        importButton.setBackgroundDrawable(showButton.getBackground());
+
+        if (mMessage.isIncoming()) {
+            showButton.setBackgroundDrawable(ColoredDrawable.getFromCache(R.drawable.ic_light_contact, R.color.attachment_incoming));
+        } else {
+            showButton.setBackgroundDrawable(ColoredDrawable.getFromCache(R.drawable.ic_light_contact, R.color.attachment_outgoing));
+        }
 
         showButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 LOG.debug("onClick(showButton)");
-                if (isContentShowable()) {
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mContent.getContentUrl()));
-                    XoActivity activity = (XoActivity) mContext;
-                    activity.startExternalActivity(intent);
-                }
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(UriUtils.getAbsoluteFileUri(mAttachment.getFilePath()), mAttachment.getMimeType());
+                XoActivity activity = (XoActivity) mContext;
+                activity.startExternalActivity(intent);
             }
         });
 
+        if (mVCard == null) {
+            parseVCard();
+        }
 
-        importButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                LOG.debug("onClick(importButton)");
-                if (isContentImportable()) {
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setDataAndType(Uri.parse(mContent.getContentDataUrl()), mContent.getContentType());
-                    XoActivity activity = (XoActivity) mContext;
-                    activity.startExternalActivity(intent);
-                }
-            }
-        });
-
-
-        // apply data from VCard
-        parseVCard();
         contactName.setText(getContactName());
-
-        if (isContentShowable()) {
-            showButton.setVisibility(View.VISIBLE);
-        } else {
-            showButton.setVisibility(View.GONE);
-        }
-        if (isContentImportable()) {
-            importButton.setVisibility(View.VISIBLE);
-        } else {
-            importButton.setVisibility(View.GONE);
-        }
-
-    }
-
-    private boolean isContentImported() {
-        return mContent != null
-                && mContent.getContentUrl() != null
-                && !mContent.getContentUrl().startsWith("file://")
-                && !mContent.getContentUrl().startsWith("content://media/external/file");
-    }
-
-    private boolean isContentImportable() {
-        return mContent != null
-                && mContent.getContentDisposition() == ContentDisposition.DOWNLOAD
-                && !isContentImported();
-    }
-
-    private boolean isContentShowable() {
-        return mContent != null
-                && mContent.getContentDisposition() != ContentDisposition.SELECTED
-                && isContentImported();
-    }
-
-    private boolean isContentChanged(IContentObject newContent) {
-        return mContent == null
-                || (newContent.getContentDataUrl() != null
-                && !newContent.getContentDataUrl().equals(mContent.getContentDataUrl()));
     }
 
     private String getContactName() {
@@ -150,40 +100,20 @@ public class ChatContactItem extends ChatMessageItem {
     }
 
     private void parseVCard() {
-        if (mVCard != null) {
-            return;
-        }
-
-        InputStream inputStream = openStreamForContentUri(mContent.getContentDataUrl());
-        if (inputStream == null) {
-            LOG.error("Could not open VCard at " + mContent.getContentDataUrl());
+        Uri fileUri = UriUtils.getAbsoluteFileUri(mAttachment.getFilePath());
+        InputStream inputStream;
+        try {
+            inputStream = XoApplication.getXoClient().getHost().openInputStreamForUrl(fileUri.toString());
+        } catch (IOException e) {
+            LOG.error("Could not open VCard at " + mAttachment.getFilePath(), e);
             return;
         }
 
         try {
             Ezvcard.ParserChainTextReader reader = Ezvcard.parse(inputStream);
-            if (reader != null) {
-                mVCard = reader.first();
-            }
+            mVCard = reader.first();
         } catch (IOException e) {
             LOG.error("Could not parse VCard", e);
         }
-    }
-
-    private @Nullable InputStream openStreamForContentUri(String contentUri) {
-        if (contentUri == null) {
-            return null;
-        }
-        InputStream inputStream = null;
-        ContentResolver resolver = mContext.getContentResolver();
-        try {
-            inputStream = resolver.openInputStream(Uri.parse(contentUri));
-        } catch (FileNotFoundException e) {
-            LOG.error("Could not find VCard at " + contentUri, e);
-        }
-        if (inputStream == null) {
-            LOG.error("Do not know how to open " + contentUri);
-        }
-        return inputStream;
     }
 }

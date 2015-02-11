@@ -9,5 +9,5 @@
              android:top="@dimen/well_box_padding_default"
              android:right="@dimen/well_box_padding_default"
              android:bottom="@dimen/well_box_padding_default"/>
-    <solid android:color="@color/well_box_color_default"/>
+    <solid android:color="@color/well_box"/>
 </shape>

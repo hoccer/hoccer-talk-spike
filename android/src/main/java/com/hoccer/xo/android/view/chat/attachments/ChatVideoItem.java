@@ -1,7 +1,6 @@
 package com.hoccer.xo.android.view.chat.attachments;
 
 import android.content.*;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -15,8 +14,8 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.DisplayUtils;
@@ -25,6 +24,7 @@ import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.squareup.picasso.Picasso;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -32,6 +32,8 @@ import java.io.FileOutputStream;
 
 
 public class ChatVideoItem extends ChatMessageItem {
+
+    private final static Logger LOG = Logger.getLogger(ChatVideoItem.class);
 
     private String mThumbnailPath;
     private ImageView mTargetView;
@@ -53,8 +55,8 @@ public class ChatVideoItem extends ChatMessageItem {
     }
 
     @Override
-    protected void displayAttachment(final IContentObject contentObject) {
-        super.displayAttachment(contentObject);
+    protected void displayAttachment(final XoTransfer attachment) {
+        super.displayAttachment(attachment);
 
         // add view lazily
         if (mContentWrapper.getChildCount() == 0) {
@@ -68,14 +70,14 @@ public class ChatVideoItem extends ChatMessageItem {
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openVideo(contentObject);
+                openVideo(attachment);
             }
         });
 
         mContentWrapper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openVideo(contentObject);
+                openVideo(attachment);
             }
         });
 
@@ -88,7 +90,7 @@ public class ChatVideoItem extends ChatMessageItem {
 
         // retrieve thumbnail path if not set already
         if (mThumbnailPath == null) {
-            mThumbnailPath = retrieveThumbnailPath(Uri.parse(contentObject.getContentDataUrl()));
+            mThumbnailPath = retrieveThumbnailPath(UriUtils.getAbsoluteFileUri(attachment.getFilePath()));
         }
 
         // adjust width/height based on thumbnail size if it exists
@@ -140,7 +142,7 @@ public class ChatVideoItem extends ChatMessageItem {
         if (doListen) {
             if (mMediaScannedReceiver == null) {
                 IntentFilter filter = new IntentFilter(MediaScannedReceiver.class.getName());
-                filter.addAction(IntentHelper.ACTION_MEDIA_DOWNLOAD_SCANNED);
+                filter.addAction(IntentHelper.ACTION_DOWNLOAD_SCANNED);
                 mMediaScannedReceiver = new MediaScannedReceiver();
                 mContext.registerReceiver(mMediaScannedReceiver, filter);
             }
@@ -187,11 +189,8 @@ public class ChatVideoItem extends ChatMessageItem {
         }
     }
 
-    /*
-     * Tries to retrieve a thumbnail bitmap for the given video and stores it as JPEG file at the given thumbnailPath
-     */
     private boolean createVideoThumbnail(Uri videoUri, Uri thumbnailUri) {
-        long videoId = getVideoId(videoUri);
+        long videoId = UriUtils.getContentIdByDataPath(mContext, MediaStore.Video.Media.getContentUri("external"), videoUri.getPath());
         if (videoId > 0) {
             Bitmap thumbnail = MediaStore.Video.Thumbnails.getThumbnail(mContext.getContentResolver(), videoId, MediaStore.Video.Thumbnails.MINI_KIND, new BitmapFactory.Options());
             if (thumbnail != null) {
@@ -207,69 +206,31 @@ public class ChatVideoItem extends ChatMessageItem {
         return false;
     }
 
-    /*
-     * Returns the media store video id of the video at the given path or -1 if the video is unknown.
-     */
-    private long getVideoId(Uri videoUri) {
-        long videoId = -1;
-
-        Uri videosUri = MediaStore.Video.Media.getContentUri("external");
-        String[] projection = {
-                MediaStore.Video.VideoColumns._ID
-        };
-        Cursor cursor = mContext.getContentResolver().query(videosUri, projection, MediaStore.Video.VideoColumns.DATA + " LIKE ?", new String[]{videoUri.getPath()}, null);
-
-        // if we have found a database entry for the video file
-        if (cursor.moveToFirst()) {
-            videoId = cursor.getLong(0);
-        }
-        cursor.close();
-
-        return videoId;
-    }
-
-    /*
-     * Sends an intent to open the video contained in contentObject.
-     */
-    private void openVideo(IContentObject contentObject) {
-        if (contentObject.isContentAvailable()) {
-
-            String url;
-            if (UriUtils.isExistingContentUri(mContext, contentObject.getContentUrl())) {
-                url = contentObject.getContentUrl();
-            } else {
-                url = contentObject.getContentDataUrl();
+    private void openVideo(XoTransfer attachment) {
+        if (attachment.isContentAvailable()) {
+            Uri videoUri = UriUtils.getAbsoluteFileUri(attachment.getFilePath());
+            try {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(videoUri, "video/*");
+                XoActivity activity = (XoActivity) mContext;
+                activity.startExternalActivity(intent);
+            } catch (ActivityNotFoundException exception) {
+                Toast.makeText(mContext, R.string.error_no_videoplayer, Toast.LENGTH_LONG).show();
+                LOG.error("Exception while starting external activity ", exception);
             }
-
-            if (url != null) {
-                try {
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setDataAndType(Uri.parse(url), "video/*");
-                    XoActivity activity = (XoActivity) mContext;
-                    activity.startExternalActivity(intent);
-                } catch (ActivityNotFoundException exception) {
-                    Toast.makeText(mContext, R.string.error_no_videoplayer, Toast.LENGTH_LONG).show();
-                    LOG.error("Exception while starting external activity ", exception);
-                }
-            }
-        }
-    }
-
-    private void onMediaScanned(String uri) {
-        // call display attachment again assuming that the file is now known
-        // be aware that this callback is invoked on every scan of the target file as long as thumbnail could be created
-        if (uri.equals(mContentObject.getContentUrl())) {
-            displayAttachment(mContentObject);
-            listenToMediaScannedIntent(false);
         }
     }
 
     private class MediaScannedReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context arg0, Intent intent) {
-            String uri = intent.getStringExtra(IntentHelper.EXTRA_MEDIA_URI);
-            if (uri != null) {
-                onMediaScanned(uri);
+
+            // call displayAttachment assuming that Android has scanned it and can generate a thumbnail
+            Uri scannedFileUri = intent.getParcelableExtra(IntentHelper.EXTRA_ATTACHMENT_FILE_URI);
+            Uri videoFileUri = UriUtils.getAbsoluteFileUri(mAttachment.getFilePath());
+            if (scannedFileUri.equals(videoFileUri)) {
+                displayAttachment(mAttachment);
+                listenToMediaScannedIntent(false);
             }
         }
     }

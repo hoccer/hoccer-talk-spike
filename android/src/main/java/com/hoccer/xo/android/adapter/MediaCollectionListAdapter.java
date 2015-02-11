@@ -69,9 +69,9 @@ public class MediaCollectionListAdapter extends BaseAdapter implements IXoMediaC
 //        convertView.setSelected(mSelectedItems.get(position));
 
         if (mSelectedItems.get(position)) {
-            convertView.setBackgroundColor(parent.getResources().getColor(R.color.xo_selected_background));
+            convertView.setBackgroundColor(parent.getResources().getColor(R.color.background_selected));
         } else {
-            convertView.setBackgroundColor(parent.getResources().getColor(R.color.xo_main_background));
+            convertView.setBackgroundColor(parent.getResources().getColor(R.color.background_default));
         }
 
         if (mSelectedItems.size() > 0) {
@@ -94,7 +94,7 @@ public class MediaCollectionListAdapter extends BaseAdapter implements IXoMediaC
         notifyDataSetChanged();
     }
 
-    public List<TalkClientMediaCollection> getSelecteddItems() {
+    public List<TalkClientMediaCollection> getSelectedItems() {
         List<TalkClientMediaCollection> collections = new ArrayList<TalkClientMediaCollection>();
         for (int i = 0; i < mMediaCollections.size(); ++i) {
             if (mSelectedItems.get(i)) {
