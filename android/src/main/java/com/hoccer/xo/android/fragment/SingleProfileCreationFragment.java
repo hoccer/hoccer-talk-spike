@@ -35,8 +35,6 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
     private ImageView mAvatarImage;
     private EditText mEditName;
 
-    private SelectedContent mAvatarToSet;
-
     private TalkClientContact mContact;
 
     @Override
@@ -94,12 +92,8 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
     }
 
     @Override
-    public void onAvatarSelected(SelectedContent content) {
-        mAvatarToSet = content;
-        if (mAvatarToSet != null) {
-            uploadAvatar(mAvatarToSet);
-            mAvatarToSet = null;
-        }
+    public void onAvatarSelected(SelectedContent avatar) {
+        uploadAvatar(avatar);
     }
 
     @Override

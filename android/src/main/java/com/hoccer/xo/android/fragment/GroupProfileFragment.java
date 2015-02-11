@@ -63,8 +63,6 @@ public class GroupProfileFragment extends ProfileFragment
 
     private TalkClientContact mGroup;
 
-    private SelectedContent mAvatarToSet;
-
     private Menu mOptionsMenu;
 
     private final List<TalkClientContact> mCurrentClientsInGroup = new ArrayList<TalkClientContact>();
@@ -547,12 +545,8 @@ public class GroupProfileFragment extends ProfileFragment
     }
 
     @Override
-    public void onAvatarSelected(SelectedContent content) {
-        mAvatarToSet = content;
-        if (mAvatarToSet != null) {
-            updateAvatar(mAvatarToSet);
-            mAvatarToSet = null;
-        }
+    public void onAvatarSelected(SelectedContent avatar) {
+        updateAvatar(avatar);
     }
 
     private void updateAvatar(final SelectedContent avatar) {
