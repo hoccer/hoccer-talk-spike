@@ -133,8 +133,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     private long serverTimeDiff;
 
-    private boolean mBackgroundMode;
-
     /**
      * Create a Hoccer Talk client using the given client database
      */
@@ -644,13 +642,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     presence.setConnectionStatus(newStatus);
                     mSelfContact.updatePresence(presence);
                     mDatabase.savePresence(presence);
+
                     if (TalkPresence.CONN_STATUS_ONLINE.equals(newStatus)) {
                         LOG.debug("entering foreground");
-                        mBackgroundMode = false;
                         cancelDisconnectTimeout();
                         connect();
                     } else if (TalkPresence.CONN_STATUS_BACKGROUND.equals(newStatus)) {
-                        mBackgroundMode = true;
                         int timeout = mClientConfiguration.getBackgroundDisconnectTimeoutSeconds();
                         scheduleDisconnectTimeout(timeout);
                         LOG.debug("entering background");
@@ -1310,13 +1307,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 try {
                     LOG.debug("sync: HELLO");
                     hello();
-                    LOG.debug("sync: updating presence");
-                    if (mBackgroundMode) {
-                        setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
-                    } else {
-                        setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
-                    }
+
+                    LOG.debug("sync: updating self presence");
                     ScheduledFuture sendPresenceFuture = sendPresence();
+
                     LOG.debug("sync: syncing presences");
                     TalkPresence[] presences = mServerRpc.getPresences(never);
                     for (TalkPresence presence : presences) {
