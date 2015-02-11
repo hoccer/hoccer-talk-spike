@@ -423,8 +423,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         mDatabase.eraseAllGroupMemberships();
         mDatabase.eraseAllGroupContacts();
 
-        switchState(STATE_DISCONNECTED, "login with new imported credentials");
-        switchState(STATE_CONNECTING, "login with new imported credentials");
+        switchState(STATE_DISCONNECTED, "disconnect because of imported credentials");
     }
 
     /**
