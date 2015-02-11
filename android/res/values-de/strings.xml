@@ -374,9 +374,9 @@
     <string name="restore_failure_default_message">Beim Wiederherstellen ist etwas schief gelaufen. Bitte versuche es erneut.</string>
     <string name="restore_failure_insufficient_disk_space_message">Nicht genügend Speicherplatz. Bitte Dateien von der SD Karte löschen und erneut versuchen. Du brauchst %1$s freien Speicherplatz.</string>
     <string name="restore_enter_password">Passwort eingeben</string>
-    <string name="restore_restart_hoccer">Bitte Hoccer neu starten, um die Wiederherstellung zu beenden.</string>
+    <string name="restore_restart_hoccer">Bitte ${app.name.short} neu starten, um die Wiederherstellung zu beenden.</string>
     <string name="restore_no_backups_found_title">Kein Backup vorhanden</string>
-    <string name="restore_no_backups_found_message">Bitte bestehendes Backup nach\n%1$s\nkopieren um früheren Hoccer Account wiederherstellen zu können.</string>
+    <string name="restore_no_backups_found_message">Bitte bestehendes Backup nach\n%1$s\nkopieren um früheren ${app.name.short} Account wiederherstellen zu können.</string>
 
     <string name="date">Datum</string>
     <string name="user">Benutzer</string>
