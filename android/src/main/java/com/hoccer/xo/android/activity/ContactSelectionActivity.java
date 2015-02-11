@@ -142,7 +142,7 @@ public class ContactSelectionActivity extends ComposableActivity implements Cont
             selector = new ImageSelector(this);
         } else if (type.startsWith("video/")) {
             selector = new VideoSelector(this);
-        } else  if (type.startsWith("audio/")) {
+        } else if (type.startsWith("audio/")) {
             selector = new AudioSelector(this);
         }
 
