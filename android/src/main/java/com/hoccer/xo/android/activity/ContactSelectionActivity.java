@@ -104,11 +104,7 @@ public class ContactSelectionActivity extends ComposableActivity implements Cont
             try {
                 TalkClientContact contact = XoApplication.getXoClient().getDatabase().findContactById(contactId);
                 ContactOperations.sendTransferToContact(upload, contact);
-            } catch (SQLException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (FileNotFoundException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (URISyntaxException e) {
+            } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
             }
         }
