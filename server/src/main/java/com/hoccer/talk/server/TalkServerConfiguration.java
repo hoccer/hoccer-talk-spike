@@ -128,6 +128,102 @@ public class TalkServerConfiguration {
                 PropertyTypes.STRING,
                 "password"),
 
+        APNS_CLIENT_NAME_4(PROPERTY_PREFIX + ".apns.4.clientName",
+                PropertyTypes.STRING,
+                ""),
+        APNS_PRODUCTION_CERTIFICATE_PATH_4(PROPERTY_PREFIX + ".apns.4.cert.production.path",
+                PropertyTypes.STRING,
+                "apns_production.p12"),
+        APNS_PRODUCTION_CERTIFICATE_PASSWORD_4(PROPERTY_PREFIX + ".apns.4.cert.production.password",
+                PropertyTypes.STRING,
+                "password"),
+        APNS_SANDBOX_CERTIFICATE_PATH_4(PROPERTY_PREFIX + ".apns.4.cert.sandbox.path",
+                PropertyTypes.STRING,
+                "apns_sandbox.p12"),
+        APNS_SANDBOX_CERTIFICATE_PASSWORD_4(PROPERTY_PREFIX + ".apns.4.cert.sandbox.password",
+                PropertyTypes.STRING,
+                "password"),
+
+        APNS_CLIENT_NAME_5(PROPERTY_PREFIX + ".apns.5.clientName",
+                PropertyTypes.STRING,
+                ""),
+        APNS_PRODUCTION_CERTIFICATE_PATH_5(PROPERTY_PREFIX + ".apns.5.cert.production.path",
+                PropertyTypes.STRING,
+                "apns_production.p12"),
+        APNS_PRODUCTION_CERTIFICATE_PASSWORD_5(PROPERTY_PREFIX + ".apns.5.cert.production.password",
+                PropertyTypes.STRING,
+                "password"),
+        APNS_SANDBOX_CERTIFICATE_PATH_5(PROPERTY_PREFIX + ".apns.5.cert.sandbox.path",
+                PropertyTypes.STRING,
+                "apns_sandbox.p12"),
+        APNS_SANDBOX_CERTIFICATE_PASSWORD_5(PROPERTY_PREFIX + ".apns.5.cert.sandbox.password",
+                PropertyTypes.STRING,
+                "password"),
+
+        APNS_CLIENT_NAME_6(PROPERTY_PREFIX + ".apns.6.clientName",
+                PropertyTypes.STRING,
+                ""),
+        APNS_PRODUCTION_CERTIFICATE_PATH_6(PROPERTY_PREFIX + ".apns.6.cert.production.path",
+                PropertyTypes.STRING,
+                "apns_production.p12"),
+        APNS_PRODUCTION_CERTIFICATE_PASSWORD_6(PROPERTY_PREFIX + ".apns.6.cert.production.password",
+                PropertyTypes.STRING,
+                "password"),
+        APNS_SANDBOX_CERTIFICATE_PATH_6(PROPERTY_PREFIX + ".apns.6.cert.sandbox.path",
+                PropertyTypes.STRING,
+                "apns_sandbox.p12"),
+        APNS_SANDBOX_CERTIFICATE_PASSWORD_6(PROPERTY_PREFIX + ".apns.6.cert.sandbox.password",
+                PropertyTypes.STRING,
+                "password"),
+
+        APNS_CLIENT_NAME_7(PROPERTY_PREFIX + ".apns.7.clientName",
+                PropertyTypes.STRING,
+                ""),
+        APNS_PRODUCTION_CERTIFICATE_PATH_7(PROPERTY_PREFIX + ".apns.7.cert.production.path",
+                PropertyTypes.STRING,
+                "apns_production.p12"),
+        APNS_PRODUCTION_CERTIFICATE_PASSWORD_7(PROPERTY_PREFIX + ".apns.7.cert.production.password",
+                PropertyTypes.STRING,
+                "password"),
+        APNS_SANDBOX_CERTIFICATE_PATH_7(PROPERTY_PREFIX + ".apns.7.cert.sandbox.path",
+                PropertyTypes.STRING,
+                "apns_sandbox.p12"),
+        APNS_SANDBOX_CERTIFICATE_PASSWORD_7(PROPERTY_PREFIX + ".apns.7.cert.sandbox.password",
+                PropertyTypes.STRING,
+                "password"),
+
+        APNS_CLIENT_NAME_8(PROPERTY_PREFIX + ".apns.8.clientName",
+                PropertyTypes.STRING,
+                ""),
+        APNS_PRODUCTION_CERTIFICATE_PATH_8(PROPERTY_PREFIX + ".apns.8.cert.production.path",
+                PropertyTypes.STRING,
+                "apns_production.p12"),
+        APNS_PRODUCTION_CERTIFICATE_PASSWORD_8(PROPERTY_PREFIX + ".apns.8.cert.production.password",
+                PropertyTypes.STRING,
+                "password"),
+        APNS_SANDBOX_CERTIFICATE_PATH_8(PROPERTY_PREFIX + ".apns.8.cert.sandbox.path",
+                PropertyTypes.STRING,
+                "apns_sandbox.p12"),
+        APNS_SANDBOX_CERTIFICATE_PASSWORD_8(PROPERTY_PREFIX + ".apns.8.cert.sandbox.password",
+                PropertyTypes.STRING,
+                "password"),
+
+        APNS_CLIENT_NAME_9(PROPERTY_PREFIX + ".apns.9.clientName",
+                PropertyTypes.STRING,
+                ""),
+        APNS_PRODUCTION_CERTIFICATE_PATH_9(PROPERTY_PREFIX + ".apns.9.cert.production.path",
+                PropertyTypes.STRING,
+                "apns_production.p12"),
+        APNS_PRODUCTION_CERTIFICATE_PASSWORD_9(PROPERTY_PREFIX + ".apns.9.cert.production.password",
+                PropertyTypes.STRING,
+                "password"),
+        APNS_SANDBOX_CERTIFICATE_PATH_9(PROPERTY_PREFIX + ".apns.9.cert.sandbox.path",
+                PropertyTypes.STRING,
+                "apns_sandbox.p12"),
+        APNS_SANDBOX_CERTIFICATE_PASSWORD_9(PROPERTY_PREFIX + ".apns.9.cert.sandbox.password",
+                PropertyTypes.STRING,
+                "password"),
+
         // GCM
         GCM_ENABLED(PROPERTY_PREFIX + ".gcm.enabled",
                 PropertyTypes.BOOLEAN,
@@ -354,6 +450,60 @@ public class TalkServerConfiguration {
                     (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PASSWORD_3.value,
                     (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PATH_3.value,
                     (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PASSWORD_3.value));
+        }
+
+        String clientName4 = (String) ConfigurableProperties.APNS_CLIENT_NAME_4.value;
+        if (!clientName4.isEmpty()) {
+            mApnsConfigurations.put(clientName4, new ApnsConfiguration(
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PATH_4.value,
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PASSWORD_4.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PATH_4.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PASSWORD_4.value));
+        }
+
+        String clientName5 = (String) ConfigurableProperties.APNS_CLIENT_NAME_5.value;
+        if (!clientName5.isEmpty()) {
+            mApnsConfigurations.put(clientName5, new ApnsConfiguration(
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PATH_5.value,
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PASSWORD_5.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PATH_5.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PASSWORD_5.value));
+        }
+
+        String clientName6 = (String) ConfigurableProperties.APNS_CLIENT_NAME_6.value;
+        if (!clientName6.isEmpty()) {
+            mApnsConfigurations.put(clientName6, new ApnsConfiguration(
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PATH_6.value,
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PASSWORD_6.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PATH_6.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PASSWORD_6.value));
+        }
+
+        String clientName7 = (String) ConfigurableProperties.APNS_CLIENT_NAME_7.value;
+        if (!clientName7.isEmpty()) {
+            mApnsConfigurations.put(clientName7, new ApnsConfiguration(
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PATH_7.value,
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PASSWORD_7.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PATH_7.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PASSWORD_7.value));
+        }
+
+        String clientName8 = (String) ConfigurableProperties.APNS_CLIENT_NAME_8.value;
+        if (!clientName8.isEmpty()) {
+            mApnsConfigurations.put(clientName8, new ApnsConfiguration(
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PATH_8.value,
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PASSWORD_8.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PATH_8.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PASSWORD_8.value));
+        }
+
+        String clientName9 = (String) ConfigurableProperties.APNS_CLIENT_NAME_9.value;
+        if (!clientName9.isEmpty()) {
+            mApnsConfigurations.put(clientName9, new ApnsConfiguration(
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PATH_9.value,
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PASSWORD_9.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PATH_9.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PASSWORD_9.value));
         }
     }
 
