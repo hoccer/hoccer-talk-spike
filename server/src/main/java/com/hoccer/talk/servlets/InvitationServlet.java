@@ -28,6 +28,7 @@ public class InvitationServlet extends HttpServlet {
 
     public enum Label {
         HOCCER,
+        HOCCME,
         SIMSME,
         STROEER
     }
@@ -37,6 +38,8 @@ public class InvitationServlet extends HttpServlet {
     static {
         LABELS.put("hcr", Label.HOCCER);
         LABELS.put("hcrd", Label.HOCCER);
+        LABELS.put("hoccme", Label.HOCCME);
+        LABELS.put("hoccmed", Label.HOCCME);
         LABELS.put("simsme", Label.SIMSME);
         LABELS.put("simsmed", Label.SIMSME);
         LABELS.put("strm", Label.STROEER);
