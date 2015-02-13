@@ -36,6 +36,7 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
         @Override
         public void run() {
             if (mCamera != null) {
+                mCamera.cancelAutoFocus();
                 mCamera.autoFocus(mAutoFocusCallback);
             }
         }
@@ -210,6 +211,8 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
             }
 
             mCamera.startPreview();
+            mCamera.cancelAutoFocus();
+            mAutoFocusHandler.removeCallbacks(mAutoFocusRunnable);
             mCamera.autoFocus(mAutoFocusCallback);
         }
     }
