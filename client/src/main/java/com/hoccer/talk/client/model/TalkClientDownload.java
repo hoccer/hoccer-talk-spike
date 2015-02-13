@@ -199,7 +199,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         this.contentType = attachment.getMimeType();
         this.mediaType = attachment.getMediaType();
         this.aspectRatio = attachment.getAspectRatio();
-        this.transmittedContentLength = attachment.getContentLength();
+        this.transmittedContentLength = Long.parseLong(attachment.getContentSize());
         this.downloadUrl = attachment.getUrl();
         this.downloadFile = id;
         this.decryptedFile = UUID.randomUUID().toString();

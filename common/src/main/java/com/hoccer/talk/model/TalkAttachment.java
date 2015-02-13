@@ -6,18 +6,17 @@ import com.j256.ormlite.table.DatabaseTable;
 
 /**
  * Attachments are files sent along with messages
- *
  * These objects are transferred only in encrypted form,
  * so the server never encounters them.
  */
 @DatabaseTable(tableName = "attachment")
 public class TalkAttachment {
 
-    /** internal id, not transferred */
+    // internal id, not transferred
     @DatabaseField(generatedId = true)
     private int attachmentId;
 
-    /** The download URL of attached file */
+    // The download URL of attached file
     @DatabaseField
     private String url;
 
@@ -28,19 +27,19 @@ public class TalkAttachment {
     @DatabaseField
     private String fileName;
 
-    /** MIME type of attached file */
+    // MIME type of attached file
     @DatabaseField
     private String mimeType;
 
-    /** String of decimal digits denoting the size of attached file in bytes */
+    // String of decimal digits denoting the size of attached file in bytes
     @DatabaseField
     private String contentSize;
 
-    /** Media-type of attached file, currently image, video, audio, contact, geolocation, data */
+    // Media-type of attached file, currently image, video, audio, contact, geolocation, data
     @DatabaseField
     private String mediaType;
 
-    /** Aspect-ratio for the preview of an attachment */
+    // Aspect-ratio for the preview of an attachment
     @DatabaseField
     private double aspectRatio;
 
@@ -70,7 +69,7 @@ public class TalkAttachment {
         this.fileName = fileName;
     }
 
-    /** XXX Reserved for legacy json-mapping. !!Do not use!! */
+    // XXX Reserved for legacy json-mapping. !!Do not use!!
     public void setFilename(String filename) {
         this.fileName = filename;
     }
@@ -83,12 +82,8 @@ public class TalkAttachment {
         this.mimeType = mimeType;
     }
 
-    public long getContentLength(){
-        try {
-            return Long.parseLong(contentSize);
-        } catch (NumberFormatException e) {
-            return -1;
-        }
+    public String getContentSize() {
+        return contentSize;
     }
 
     public void setContentSize(String contentSize) {
