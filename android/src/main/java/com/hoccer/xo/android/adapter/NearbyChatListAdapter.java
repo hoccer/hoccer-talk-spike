@@ -105,7 +105,6 @@ public class NearbyChatListAdapter extends BaseAdapter implements IXoContactList
         }
         avatarView.setContact(contact);
 
-
         typeView.setText("");
         lastMessageText.setText("");
         lastMessageTimeView.setText("");
