@@ -21,7 +21,7 @@ public class DisconnectService extends IntentService {
 
     @Override
     protected void onHandleIntent(final Intent intent) {
-        final XoClient client = XoApplication.getXoClient();
+        final XoClient client = XoApplication.get().getXoClient();
         if(client.getState() != XoClient.STATE_DISCONNECTED) {
             LOG.info("Disconnecting client by intent.");
             client.disconnect();

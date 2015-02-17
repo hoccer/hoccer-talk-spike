@@ -57,28 +57,28 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                             if (mTransfer instanceof TalkClientDownload) {
                                 LOG.debug("Will resume download for " + ((TalkClientDownload) mTransfer).getDownloadUrl());
                                 TalkClientDownload download = (TalkClientDownload) mTransfer;
-                                XoApplication.getXoClient().requestDownload(download, true);
+                                XoApplication.get().getXoClient().requestDownload(download, true);
                             }
                             break;
                         case CANCEL_DOWNLOAD:
                             if (mTransfer instanceof TalkClientDownload) {
                                 LOG.debug("Will pause download for " + ((TalkClientDownload) mTransfer).getDownloadUrl());
                                 TalkClientDownload download = (TalkClientDownload) mTransfer;
-                                XoApplication.getXoClient().getTransferAgent().pauseDownload(download);
+                                XoApplication.get().getXoClient().getTransferAgent().pauseDownload(download);
                             }
                             break;
                         case REQUEST_UPLOAD:
                             if (mTransfer instanceof TalkClientUpload) {
                                 LOG.debug("Will resume upload for " + ((TalkClientUpload) mTransfer).getUploadUrl());
                                 TalkClientUpload upload = (TalkClientUpload) mTransfer;
-                                XoApplication.getXoClient().getTransferAgent().startOrRestartUpload(upload);
+                                XoApplication.get().getXoClient().getTransferAgent().startOrRestartUpload(upload);
                             }
                             break;
                         case CANCEL_UPLOAD:
                             if (mTransfer instanceof TalkClientUpload) {
                                 LOG.debug("Will pause upload for " + ((TalkClientUpload) mTransfer).getUploadUrl());
                                 TalkClientUpload upload = (TalkClientUpload) mTransfer;
-                                XoApplication.getXoClient().getTransferAgent().pauseUpload(upload);
+                                XoApplication.get().getXoClient().getTransferAgent().pauseUpload(upload);
                             }
                     }
                     mTransferControl.post(new Runnable() {

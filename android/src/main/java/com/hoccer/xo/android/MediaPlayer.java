@@ -14,6 +14,7 @@ import android.support.v4.app.NotificationCompat;
 import android.view.View;
 import android.widget.RemoteViews;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
@@ -23,6 +24,7 @@ import com.hoccer.xo.android.activity.NotificationBridgeActivity;
 import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.content.MediaPlaylist;
 import com.hoccer.xo.android.content.audio.MediaPlaylistController;
+import com.hoccer.xo.android.database.AndroidTalkDatabase;
 import com.hoccer.xo.android.service.NotificationId;
 import com.hoccer.xo.android.util.UriUtils;
 import org.apache.log4j.Logger;
@@ -410,15 +412,16 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
 
         try {
             TalkClientMessage message;
+            XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
             if (mCurrentItem instanceof TalkClientDownload) {
                 int attachmentId = ((TalkClientDownload) mCurrentItem).getClientDownloadId();
-                message = XoApplication.getXoClient().getDatabase().findClientMessageByTalkClientDownloadId(attachmentId);
+                message = database.findClientMessageByTalkClientDownloadId(attachmentId);
                 if (message != null) {
                     conversationContactId = message.getSenderContact().getClientContactId();
                 }
             } else if (mCurrentItem instanceof TalkClientUpload) {
                 int attachmentId = ((TalkClientUpload) mCurrentItem).getClientUploadId();
-                message = XoApplication.getXoClient().getDatabase().findClientMessageByTalkClientUploadId(attachmentId);
+                message = database.findClientMessageByTalkClientUploadId(attachmentId);
                 if (message != null) {
                     conversationContactId = message.getSenderContact().getClientContactId();
                 }

@@ -8,7 +8,7 @@ public class DeleteMissingTransfersTask implements IStartupTask {
 
     @Override
     public void execute(Context context) {
-        DatabaseOperations databaseOperations = new DatabaseOperations(XoApplication.getXoClient().getDatabase(), context);
+        DatabaseOperations databaseOperations = new DatabaseOperations(XoApplication.get().getXoClient().getDatabase(), context);
         databaseOperations.removeMissingTransfers();
     }
 }

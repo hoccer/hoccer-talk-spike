@@ -47,7 +47,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         mContact = contact;
         updateItems();
 
-        XoClientDatabase database = XoApplication.getXoClient().getDatabase();
+        XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
         database.registerUploadListener(this);
         database.registerDownloadListener(this);
     }
@@ -233,10 +233,11 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
 
     public void updateItems() {
         try {
+            XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
             if (mContact != null) {
-                mItems = new ArrayList<XoTransfer>(XoApplication.getXoClient().getDatabase().findClientDownloadsByMediaTypeAndContactId(mMediaType, mContact.getClientContactId()));
+                mItems = new ArrayList<XoTransfer>(database.findClientDownloadsByMediaTypeAndContactId(mMediaType, mContact.getClientContactId()));
             } else {
-                mItems = XoApplication.getXoClient().getDatabase().findTransfersByMediaTypeDistinct(mMediaType);
+                mItems = database.findTransfersByMediaTypeDistinct(mMediaType);
             }
         } catch (SQLException e) {
             LOG.error(e);
@@ -259,7 +260,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         // check if contact matches
         if (mContact != null) {
             try {
-                XoClientDatabase database = XoApplication.getXoClient().getDatabase();
+                XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
                 TalkClientMessage message = transfer.isUpload() ?
                         database.findClientMessageByTalkClientUploadId(transfer.getUploadOrDownloadId()) :
                         database.findClientMessageByTalkClientDownloadId(transfer.getUploadOrDownloadId());

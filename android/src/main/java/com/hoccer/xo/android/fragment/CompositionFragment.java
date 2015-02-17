@@ -85,7 +85,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         if (getArguments() != null) {
             try {
                 int clientContactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
-                mContact = XoApplication.getXoClient().getDatabase().findContactById(clientContactId);
+                mContact = XoApplication.get().getXoClient().getDatabase().findContactById(clientContactId);
             } catch (SQLException e) {
                 LOG.error("sql error", e);
             }
@@ -286,7 +286,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     private static boolean isGroupEmpty(TalkClientContact contact) {
         final List<TalkClientContact> otherContactsInGroup;
         try {
-            otherContactsInGroup = XoApplication.getXoClient().getDatabase().findContactsInGroupByState(contact.getGroupId(), TalkGroupMembership.STATE_JOINED);
+            otherContactsInGroup = XoApplication.get().getXoClient().getDatabase().findContactsInGroupByState(contact.getGroupId(), TalkGroupMembership.STATE_JOINED);
             CollectionUtils.filterInverse(otherContactsInGroup, TalkClientContactPredicates.IS_SELF_PREDICATE);
             return otherContactsInGroup.isEmpty();
         } catch (SQLException e) {

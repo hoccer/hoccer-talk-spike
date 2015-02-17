@@ -36,9 +36,9 @@ public class ContactOperations {
         TalkClientUpload upload = new TalkClientUpload();
         upload.initializeAsAttachment(content);
 
-        String messageTag = XoApplication.getXoClient().composeClientMessage(contact, "", upload).getMessageTag();
+        String messageTag = XoApplication.get().getXoClient().composeClientMessage(contact, "", upload).getMessageTag();
         LOG.debug("Sending Attachment " + upload + " to contact " + contact);
-        XoApplication.getXoClient().sendMessage(messageTag);
+        XoApplication.get().getXoClient().sendMessage(messageTag);
     }
 
     public static void sendSMS(Context context, String message, String[] recipients) {

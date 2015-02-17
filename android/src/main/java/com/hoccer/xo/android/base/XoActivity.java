@@ -94,7 +94,7 @@ public abstract class XoActivity extends FragmentActivity {
     protected abstract int getMenuResource();
 
     public XoClient getXoClient() {
-        return XoApplication.getXoClient();
+        return XoApplication.get().getXoClient();
     }
 
     public XoSoundPool getXoSoundPool() {
@@ -172,7 +172,7 @@ public abstract class XoActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
 
         // set up database connection
-        mDatabase = XoApplication.getXoClient().getDatabase();
+        mDatabase = XoApplication.get().getXoClient().getDatabase();
 
         // set layout
         setContentView(getLayoutResource());
@@ -260,7 +260,7 @@ public abstract class XoActivity extends FragmentActivity {
             @Override
             public void run() {
                 try {
-                    XoApplication.getXoClient().regenerateKeyPair();
+                    XoApplication.get().getXoClient().regenerateKeyPair();
 
                     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
                     SharedPreferences.Editor editor = preferences.edit();

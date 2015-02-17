@@ -92,7 +92,7 @@ public class ChatAudioItem extends ChatMessageItem implements MediaPlayer.Listen
     }
 
     private void play() {
-        MediaPlaylist playlist = new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), mAttachment);
+        MediaPlaylist playlist = new SingleItemPlaylist(XoApplication.get().getXoClient().getDatabase(), mAttachment);
         MediaPlayer.get().playItemInPlaylist(mAttachment, playlist);
     }
 

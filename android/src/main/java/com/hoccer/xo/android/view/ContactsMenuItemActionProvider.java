@@ -75,7 +75,7 @@ public class ContactsMenuItemActionProvider extends ActionProvider implements IX
             @Override
             public void run() {
                 try {
-                    mNotificationCount = XoApplication.getXoClient().getDatabase().getTotalCountOfInvitations();
+                    mNotificationCount = XoApplication.get().getXoClient().getDatabase().getTotalCountOfInvitations();
                     mNotificationBadge.update(mNotificationCount);
                 } catch (SQLException e) {
                     e.printStackTrace();

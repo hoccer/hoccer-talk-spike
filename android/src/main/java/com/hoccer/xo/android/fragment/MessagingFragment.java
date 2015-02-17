@@ -57,7 +57,7 @@ public class MessagingFragment extends XoListFragment
         if (getArguments() != null) {
             int clientContactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
             try {
-                mContact = XoApplication.getXoClient().getDatabase().findContactById(clientContactId);
+                mContact = XoApplication.get().getXoClient().getDatabase().findContactById(clientContactId);
             } catch (SQLException e) {
                 LOG.error("sql error", e);
                 return;
@@ -131,7 +131,7 @@ public class MessagingFragment extends XoListFragment
         mMessageListView.setAdapter(mAdapter);
 
         configureMotionInterpreterForContact(mContact);
-        XoApplication.getXoClient().registerContactListener(this);
+        XoApplication.get().getXoClient().registerContactListener(this);
 
         // send intent to XoClientService that we are conversing with the contact
         Intent intent = new Intent();
@@ -145,7 +145,7 @@ public class MessagingFragment extends XoListFragment
         super.onPause();
         mAdapter.onPause();
         mMotionInterpreter.deactivate();
-        XoApplication.getXoClient().unregisterContactListener(this);
+        XoApplication.get().getXoClient().unregisterContactListener(this);
         ImageLoader.getInstance().clearMemoryCache();
 
         // send intent to XoClientService that we are not conversing any longer

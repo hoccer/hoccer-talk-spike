@@ -63,7 +63,7 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
 
                     if (!mScannedCodes.contains(code)) {
                         final String pairingToken = UriUtils.getAbsoluteFileUri(code).getAuthority();
-                        XoApplication.getXoClient().performTokenPairing(pairingToken, QrCodeScannerFragment.this);
+                        XoApplication.get().getXoClient().performTokenPairing(pairingToken, QrCodeScannerFragment.this);
                         mScannedCodes.add(code);
                     }
                 }
@@ -144,7 +144,7 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
         if (pairingToken != null && !pairingToken.isEmpty()) {
             mConfirmCodeButton.setEnabled(false);
             mPairingTokenEditText.clearFocus();
-            XoApplication.getXoClient().performTokenPairing(pairingToken, this);
+            XoApplication.get().getXoClient().performTokenPairing(pairingToken, this);
         }
     }
 

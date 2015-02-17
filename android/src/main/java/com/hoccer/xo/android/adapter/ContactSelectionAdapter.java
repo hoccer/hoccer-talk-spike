@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckedTextView;
+import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.view.AvatarView;
@@ -70,7 +71,8 @@ public class ContactSelectionAdapter extends BaseAdapter {
 
     private void loadContacts() {
         try {
-            for (TalkClientContact contact : XoApplication.getXoClient().getDatabase().findAllContacts()) {
+            XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
+            for (TalkClientContact contact : database.findAllContacts()) {
                 if (shouldShow(contact)) {
                     mContacts.add(contact);
                 }

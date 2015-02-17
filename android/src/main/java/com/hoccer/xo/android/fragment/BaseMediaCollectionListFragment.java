@@ -6,7 +6,6 @@ import android.support.v4.app.ListFragment;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.MediaCollectionListAdapter;
@@ -70,9 +69,9 @@ public abstract class BaseMediaCollectionListFragment extends ListFragment {
         );
     }
 
-    private void addNewMediaCollection(String name) {
+    private static void addNewMediaCollection(String name) {
         try {
-            XoApplication.getXoClient().getDatabase().createMediaCollection(name);
+            XoApplication.get().getXoClient().getDatabase().createMediaCollection(name);
         } catch (SQLException e) {
             LOG.error("Creating new media collection failed.", e);
         }

@@ -270,7 +270,7 @@ public class GroupProfileFragment extends ProfileFragment
     @Override
     protected void updateMessageText() {
         try {
-            int count = (int) XoApplication.getXoClient().getDatabase().getMessageCountByContactId(mGroup.getClientContactId());
+            int count = (int) XoApplication.get().getXoClient().getDatabase().getMessageCountByContactId(mGroup.getClientContactId());
             super.updateMessageText(count);
         } catch (SQLException e) {
             LOG.error("Error fetching message count from database.");
@@ -608,7 +608,7 @@ public class GroupProfileFragment extends ProfileFragment
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
-                                XoApplication.getXoClient().deleteContact(mGroup);
+                                XoApplication.get().getXoClient().deleteContact(mGroup);
                                 getActivity().finish();
                             }
                         },

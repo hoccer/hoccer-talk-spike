@@ -233,7 +233,7 @@ public class SingleProfileFragment extends ProfileFragment
     @Override
     protected void updateMessageText() {
         try {
-            int count = (int) XoApplication.getXoClient().getDatabase().getMessageCountByContactId(mContact.getClientContactId());
+            int count = (int) XoApplication.get().getXoClient().getDatabase().getMessageCountByContactId(mContact.getClientContactId());
             super.updateMessageText(count);
         } catch (SQLException e) {
             LOG.error("Error fetching message count from database.");
@@ -485,7 +485,7 @@ public class SingleProfileFragment extends ProfileFragment
         LOG.debug("refreshContact()");
 
         try {
-            XoClientDatabase database = XoApplication.getXoClient().getDatabase();
+            XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
             database.refreshClientContact(mContact);
             if (mContact.getAvatarDownload() != null) {
                 database.refreshClientDownload(mContact.getAvatarDownload());

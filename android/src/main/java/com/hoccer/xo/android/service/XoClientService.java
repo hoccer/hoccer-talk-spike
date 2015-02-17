@@ -117,7 +117,7 @@ public class XoClientService extends Service {
         super.onCreate();
 
         mExecutor = XoApplication.get().getExecutor();
-        mClient = XoApplication.getXoClient();
+        mClient = XoApplication.get().getXoClient();
 
         if (mClientListener == null) {
             mClientListener = new ClientListener();
@@ -629,7 +629,7 @@ public class XoClientService extends Service {
             if (temporaryFilePath != null) {
                 try {
                     upload.setTempCompressedFilePath(null);
-                    XoApplication.getXoClient().getDatabase().saveClientUpload(upload);
+                    XoApplication.get().getXoClient().getDatabase().saveClientUpload(upload);
                     FileUtils.deleteQuietly(new File(temporaryFilePath));
                 } catch (SQLException e) {
                     LOG.error("Error updating upload with original file path.");
