@@ -40,8 +40,8 @@ public class InvitationServlet extends HttpServlet {
         LABELS.put("hcrd", Label.HOCCER);
         LABELS.put("hoccme", Label.HOCCME);
         LABELS.put("hoccmed", Label.HOCCME);
-        LABELS.put("simsme", Label.SIMSME);
-        LABELS.put("simsmed", Label.SIMSME);
+        LABELS.put("hcrsms", Label.SIMSME);
+        LABELS.put("hcrsmsd", Label.SIMSME);
         LABELS.put("strm", Label.STROEER);
         LABELS.put("strmd", Label.STROEER);
     }
