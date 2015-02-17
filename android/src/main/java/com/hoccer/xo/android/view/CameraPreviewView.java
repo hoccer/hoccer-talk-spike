@@ -91,12 +91,12 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
         }
     }
 
-    private Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes, int width, int h) {
+    private Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes, int width, int height) {
         final double ASPECT_TOLERANCE = 0.1;
         final int MIN_WIDTH = Math.max(width / 2, 640);
-        final int MIN_HEIGHT = Math.max(h / 2, 480);
+        final int MIN_HEIGHT = Math.max(height / 2, 480);
 
-        double targetRatio = (double) width / h;
+        double targetRatio = (double) width / height;
         if (sizes == null) {
             return null;
         }
@@ -115,9 +115,9 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
                 continue;
             }
 
-            if (Math.abs(size.height - h) < minDiff) {
+            if (Math.abs(size.height - height) < minDiff) {
                 optimalSize = size;
-                minDiff = Math.abs(size.height - h);
+                minDiff = Math.abs(size.height - height);
             }
         }
 
@@ -125,9 +125,9 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
         if (optimalSize == null) {
             minDiff = Double.MAX_VALUE;
             for (Camera.Size size : sizes) {
-                if (Math.abs(size.height - h) < minDiff) {
+                if (Math.abs(size.height - height) < minDiff) {
                     optimalSize = size;
-                    minDiff = Math.abs(size.height - h);
+                    minDiff = Math.abs(size.height - height);
                 }
             }
         }
