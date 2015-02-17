@@ -244,7 +244,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         }
     }
 
-    public static void ensureNoMedia(File directory) {
+    private static void ensureNoMedia(File directory) {
         if (directory.exists()) {
             File noMedia = new File(directory, ".nomedia");
             if (!noMedia.exists()) {
