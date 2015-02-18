@@ -303,6 +303,8 @@ public class SingleProfileFragment extends ProfileFragment
 
         Picasso.with(getActivity())
                 .load(avatarUri)
+                .centerCrop()
+                .fit()
                 .placeholder(R.drawable.avatar_default_contact_large)
                 .error(R.drawable.avatar_default_contact_large)
                 .into(mAvatarImage);

@@ -232,6 +232,8 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
         Uri avatarUri = mAvatar == null ? null : UriUtils.getAbsoluteFileUri(mAvatar.getFilePath());
         Picasso.with(getActivity())
                 .load(avatarUri)
+                .centerCrop()
+                .fit()
                 .placeholder(R.drawable.avatar_default_group_large)
                 .error(R.drawable.avatar_default_group_large)
                 .into(mAvatarImageView);
