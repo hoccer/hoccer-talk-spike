@@ -336,23 +336,27 @@ public class SingleProfileFragment extends ProfileFragment
     }
 
     private void updateFingerprint() {
-        String keyId = mContact.getPublicKey().getKeyId();
+        if(mContact.getPublicKey() != null) {
+            String keyId = mContact.getPublicKey().getKeyId();
 
-        keyId = keyId.toUpperCase();
+            keyId = keyId.toUpperCase();
 
-        char[] chars = keyId.toCharArray();
-        int length = chars.length;
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < length; i++) {
-            builder.append(chars[i]);
-            if ((i % 2) == 1) {
-                builder.append(":");
+            char[] chars = keyId.toCharArray();
+            int length = chars.length;
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < length; i++) {
+                builder.append(chars[i]);
+                if ((i % 2) == 1) {
+                    builder.append(":");
+                }
+
             }
+            builder.deleteCharAt(builder.lastIndexOf(":"));
 
+            mKeyText.setText(builder.toString());
+        } else {
+            mKeyText.setText("");
         }
-        builder.deleteCharAt(builder.lastIndexOf(":"));
-
-        mKeyText.setText(builder.toString());
     }
 
     private void updateInviteButton(final TalkClientContact contact) {
