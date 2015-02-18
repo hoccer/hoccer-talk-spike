@@ -33,6 +33,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+
 /**
  * Fragment for display and editing of group profiles.
  */
@@ -88,9 +89,13 @@ public class GroupProfileFragment extends ProfileFragment
     };
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_group_profile, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_group_profile, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         view.setFocusableInTouchMode(true);
         view.setOnKeyListener(new BackPressListener());
 
@@ -105,8 +110,6 @@ public class GroupProfileFragment extends ProfileFragment
 
         mInviteAllButton = (Button) view.findViewById(R.id.profile_group_button_invite_all);
         mInviteAllButton.setOnClickListener(this);
-
-        return view;
     }
 
     @Override

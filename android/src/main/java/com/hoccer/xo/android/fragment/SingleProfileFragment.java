@@ -26,6 +26,7 @@ import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 
+
 /**
  * Fragment for display and editing of single-contact profiles.
  */

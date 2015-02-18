@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 
+
 public class SingleProfileCreationFragment extends XoFragment implements IXoContactListener, View.OnClickListener, ActionMode.Callback {
 
     private static final String HOCCER_CLASSIC_PREFERENCES = "com.artcom.hoccer_preferences";
@@ -72,6 +73,7 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
         if (mActionMode == null) {
             mActionMode = getActivity().startActionMode(this);
         }
+
         updateAvatarView();
     }
 
