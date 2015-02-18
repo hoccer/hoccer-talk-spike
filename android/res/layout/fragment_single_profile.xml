@@ -12,7 +12,6 @@
 
         <ImageView
                 android:id="@+id/profile_avatar_image"
-                android:src="@drawable/avatar_default_contact_large"
                 android:scaleType="centerCrop"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"

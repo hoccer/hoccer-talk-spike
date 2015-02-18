@@ -146,6 +146,8 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
             groupMembersTitle.setVisibility(View.GONE);
             groupMembersList.setVisibility(View.GONE);
         }
+
+        updateAvatarView(null);
     }
 
     @Override
