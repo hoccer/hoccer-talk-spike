@@ -29,5 +29,5 @@ public abstract class Backup implements Parcelable {
 
     public File getFile() {
         return mBackupFile;
-    };
+    }
 }

@@ -49,7 +49,7 @@ public class MediaPlaylistTest {
             }
         });
 
-        mDatabase.createTables(mConnectionSource);
+        XoClientDatabase.createTables(mConnectionSource);
         mDatabase.initialize();
     }
 

@@ -36,8 +36,9 @@ public class LineFeature {
     }
 
     private void compress() {
-        if (mPoints.size() < 20)
+        if (mPoints.size() < 20) {
             return;
+        }
 
         LinkedList<Vec2D> compressedPoints = new LinkedList<Vec2D>();
         int i = 0;

@@ -50,7 +50,7 @@ public class MediaPlaylistControllerTest {
             }
         });
 
-        mDatabase.createTables(mConnectionSource);
+        XoClientDatabase.createTables(mConnectionSource);
         mDatabase.initialize();
 
         mPlaylistController = new MediaPlaylistController();

@@ -357,7 +357,7 @@ public abstract class XoActivity extends FragmentActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        LOG.debug("onOptionsItemSelected(" + item.toString() + ")");
+        LOG.debug("onOptionsItemSelected(" + item + ")");
         switch (item.getItemId()) {
             case android.R.id.home:
                 navigateUp();
