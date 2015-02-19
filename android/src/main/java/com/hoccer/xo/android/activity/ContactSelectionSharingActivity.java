@@ -77,7 +77,7 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity im
     private void sendUploadsToContacts(List<TalkClientUpload> uploads) {
         for (Integer contactId : getSelectedContactIdsFromFragment()) {
             try {
-                TalkClientContact contact = XoApplication.getXoClient().getDatabase().findContactById(contactId);
+                TalkClientContact contact = XoApplication.get().getXoClient().getDatabase().findContactById(contactId);
                 ContactOperations.sendTransfersToContact(uploads, contact);
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
