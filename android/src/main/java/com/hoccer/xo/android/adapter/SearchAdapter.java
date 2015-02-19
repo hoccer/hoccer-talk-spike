@@ -13,7 +13,7 @@ public class SearchAdapter extends BaseAdapter {
 
     static final Logger LOG = Logger.getLogger(SearchAdapter.class);
 
-    private BaseAdapter mAdapter;
+    private final BaseAdapter mAdapter;
     private final LinkedHashMap<Searchable, Integer> mItemIndexMap = new LinkedHashMap<Searchable, Integer>();
     private final List<Object> mFoundItemList = new ArrayList<Object>();
 

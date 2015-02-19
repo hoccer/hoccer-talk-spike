@@ -26,14 +26,14 @@ public class TalkClientChatItem extends BaseChatItem implements SearchAdapter.Se
 
     private static final Logger LOG = Logger.getLogger(TalkClientChatItem.class);
 
-    private Context mContext;
+    private final Context mContext;
     private TalkClientContact mContact;
 
     @Nullable
-    private Date mLastMessageTimeStamp = null;
+    private Date mLastMessageTimeStamp;
     private String mLastMessageText;
-    private long mUnseenMessageCount = 0;
-    private Date mContactCreationTimeStamp = null;
+    private long mUnseenMessageCount;
+    private Date mContactCreationTimeStamp;
 
     public TalkClientChatItem(TalkClientContact contact, Context context) {
         mContact = contact;

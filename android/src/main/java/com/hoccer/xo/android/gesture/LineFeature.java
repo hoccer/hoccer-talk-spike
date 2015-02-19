@@ -77,7 +77,7 @@ public class LineFeature {
         return getNewest().x - getLatest().x;
     }
 
-    private float computeSlope(Vec2D pA, Vec2D pB) {
+    private static float computeSlope(Vec2D pA, Vec2D pB) {
         return (pB.y - pA.y) / (pB.x - pA.x);
     }
 

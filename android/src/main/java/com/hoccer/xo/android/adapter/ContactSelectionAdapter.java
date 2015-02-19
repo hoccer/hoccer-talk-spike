@@ -5,11 +5,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckedTextView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.view.AvatarView;
-import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -20,7 +20,7 @@ public class ContactSelectionAdapter extends BaseAdapter {
 
     static final Logger LOG = Logger.getLogger(ContactSelectionAdapter.class);
 
-    private List<TalkClientContact> mContacts;
+    private final List<TalkClientContact> mContacts;
 
     public ContactSelectionAdapter() {
         mContacts = new ArrayList<TalkClientContact>();
@@ -82,7 +82,7 @@ public class ContactSelectionAdapter extends BaseAdapter {
         }
     }
 
-    private boolean shouldShow(TalkClientContact contact) {
+    private static boolean shouldShow(TalkClientContact contact) {
         boolean shouldShow = false;
         if (contact.isGroup()) {
             if (contact.isGroupInvolved() && contact.isGroupExisting() && !(contact.getGroupPresence() != null && contact.getGroupPresence().isKept())) {

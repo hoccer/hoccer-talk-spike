@@ -21,8 +21,8 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
 
     private ContactListAdapter mContactListAdapter;
 
-    private int mTabNameId;
-    private Placeholder mPlaceholder;
+    private final int mTabNameId;
+    private final Placeholder mPlaceholder;
 
     private MenuItem mMenuItemPairing;
     private MenuItem mMenuItemNewGroup;
@@ -30,7 +30,7 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     private View mTabView;
     private NotificationBadgeTextView mNotificationBadgeTextView;
 
-    public ContactListFragment(int tabNameId, Placeholder placeholder) {
+    protected ContactListFragment(int tabNameId, Placeholder placeholder) {
         mTabNameId = tabNameId;
         mPlaceholder = placeholder;
     }

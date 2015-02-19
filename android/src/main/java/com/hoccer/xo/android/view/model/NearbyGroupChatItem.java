@@ -25,7 +25,7 @@ public class NearbyGroupChatItem extends BaseChatItem implements SearchAdapter.S
     private List<TalkClientMessage> mNearbyMessages;
 
     @Nullable
-    private Date mLastMessageTimeStamp = null;
+    private Date mLastMessageTimeStamp;
     private String mLastMessageText = "";
 
     public NearbyGroupChatItem() {
@@ -69,7 +69,7 @@ public class NearbyGroupChatItem extends BaseChatItem implements SearchAdapter.S
 
     @Override
     public Object getContent() {
-        return new String("nearbyArchived");
+        return "nearbyArchived";
     }
 
     @Override

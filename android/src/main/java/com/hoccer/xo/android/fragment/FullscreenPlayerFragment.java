@@ -265,7 +265,7 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
         });
     }
 
-    private String getStringFromTimeStamp(int timeInMillis) {
+    private static String getStringFromTimeStamp(int timeInMillis) {
         long hours = TimeUnit.MILLISECONDS.toHours(timeInMillis);
         long minutes = TimeUnit.MILLISECONDS.toMinutes(timeInMillis) - TimeUnit.HOURS.toMinutes(hours);
         long seconds = TimeUnit.MILLISECONDS.toSeconds(timeInMillis) - TimeUnit.MINUTES.toSeconds(minutes);

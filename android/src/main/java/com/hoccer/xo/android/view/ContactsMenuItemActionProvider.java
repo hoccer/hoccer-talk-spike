@@ -9,20 +9,19 @@ import android.view.ActionProvider;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ContactsActivity;
-import com.artcom.hoccer.R;
-import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
+
 
 public class ContactsMenuItemActionProvider extends ActionProvider implements IXoContactListener {
 
     private NotificationBadgeTextView mNotificationBadge;
-    private Context mContext;
+    private final Context mContext;
     private Integer mNotificationCount = 0;
     private View mMenuItemView;
 
@@ -85,7 +84,6 @@ public class ContactsMenuItemActionProvider extends ActionProvider implements IX
     }
 
     private View initView() {
-
         if (mMenuItemView == null) {
             mMenuItemView = LayoutInflater.from(mContext).inflate(R.layout.view_contacts_menu_item, null);
             mMenuItemView.setOnClickListener(new View.OnClickListener() {

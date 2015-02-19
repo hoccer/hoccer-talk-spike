@@ -118,7 +118,7 @@ public class AttachmentSearchResultAdapter extends BaseAdapter {
         return attachmentView;
     }
 
-    private Spannable getHighlightedSearchResult(String text, String query) {
+    private static Spannable getHighlightedSearchResult(String text, String query) {
         Spannable result = new SpannableString(text);
         String lowerCaseText = text.toLowerCase();
 

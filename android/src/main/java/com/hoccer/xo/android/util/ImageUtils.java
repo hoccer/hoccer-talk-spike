@@ -148,30 +148,29 @@ public class ImageUtils {
         try {
             ExifInterface exifIn = new ExifInterface(inPath);
             ExifInterface exifOut = new ExifInterface(outPath);
-            if (exifIn != null && exifOut != null) {
-                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_APERTURE);
-                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_DATETIME);
-                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_EXPOSURE_TIME);
-                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_FLASH);
-                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_FOCAL_LENGTH);
-                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_ALTITUDE);
-                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_ALTITUDE_REF);
-                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_DATESTAMP);
-                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_LATITUDE);
-                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_LATITUDE_REF);
-                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_LONGITUDE);
-                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_LONGITUDE_REF);
-                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_PROCESSING_METHOD);
-                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_TIMESTAMP);
-                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_IMAGE_LENGTH);
-                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_IMAGE_WIDTH);
-                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_ISO);
-                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_MAKE);
-                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_MODEL);
-                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_ORIENTATION);
-                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_WHITE_BALANCE);
-                exifOut.saveAttributes();
-            }
+            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_APERTURE);
+            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_DATETIME);
+            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_EXPOSURE_TIME);
+            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_FLASH);
+            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_FOCAL_LENGTH);
+            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_ALTITUDE);
+            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_ALTITUDE_REF);
+            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_DATESTAMP);
+            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_LATITUDE);
+            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_LATITUDE_REF);
+            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_LONGITUDE);
+            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_LONGITUDE_REF);
+            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_PROCESSING_METHOD);
+            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_TIMESTAMP);
+            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_IMAGE_LENGTH);
+            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_IMAGE_WIDTH);
+            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_ISO);
+            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_MAKE);
+            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_MODEL);
+            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_ORIENTATION);
+            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_WHITE_BALANCE);
+            exifOut.saveAttributes();
+            success = true;
         } catch (IOException e) {
             LOG.error("Error loading Exif data", e);
         }

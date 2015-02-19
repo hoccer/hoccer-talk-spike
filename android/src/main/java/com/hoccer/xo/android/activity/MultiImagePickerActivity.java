@@ -39,7 +39,7 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
 
     private ImageAdapter mAdapter;
     private GridView mImageGridView;
-    private HashSet<String> mSelectedImages = new HashSet<String>();
+    private final HashSet<String> mSelectedImages = new HashSet<String>();
     private Button mSelectBtn;
 
     @Override
@@ -106,8 +106,8 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
     }
 
     private class ImageAdapter extends CursorAdapter {
-        private LayoutInflater mInflater;
-        private Context mContext;
+        private final LayoutInflater mInflater;
+        private final Context mContext;
 
         public ImageAdapter(Context context) {
             super(context, null, 0);

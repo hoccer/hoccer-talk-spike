@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.UUID;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Base class for our activities.
@@ -414,7 +413,7 @@ public abstract class XoActivity extends FragmentActivity {
         return null;
     }
 
-    private Uri getImageContentUri(Context context, File imageFile) {
+    private static Uri getImageContentUri(Context context, File imageFile) {
         String filePath = imageFile.getAbsolutePath();
         Cursor cursor = context.getContentResolver().query(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI,

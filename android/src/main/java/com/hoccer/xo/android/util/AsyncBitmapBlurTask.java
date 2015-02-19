@@ -12,9 +12,9 @@ import android.renderscript.ScriptIntrinsicBlur;
 @TargetApi(17)
 public class AsyncBitmapBlurTask extends AsyncTask<Bitmap, Bitmap, Bitmap> {
 
-    private Context             mContext;
-    private float               mRadius;
-    private int                 mRenderCycles;
+    private final Context mContext;
+    private final float mRadius;
+    private final int mRenderCycles;
     private BlurProgressHandler mProgressHandler;
 
     public AsyncBitmapBlurTask(Context pContext, float pRadius, int pRenderCycles,
@@ -71,6 +71,5 @@ public class AsyncBitmapBlurTask extends AsyncTask<Bitmap, Bitmap, Bitmap> {
         public void onBlurProgressUpdate(Bitmap... pBitmaps);
 
         public void onBlurFinished(Bitmap pBlurredBitmap);
-
     }
 }

@@ -7,18 +7,16 @@ import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by jacob on 13.02.14.
- */
+
 public class OverscrollListView extends ListView {
 
-    private List<OnOverscrollListener> mOnOverscrollListeners = new ArrayList<OnOverscrollListener>();
+    private final List<OnOverscrollListener> mOnOverscrollListeners = new ArrayList<OnOverscrollListener>();
 
     private int mOverScrollByDeltaX;
 
     private int mOverScrollByDeltaY;
 
-    private int mMaxOverScrollY = 0;
+    private int mMaxOverScrollY;
 
     public OverscrollListView(Context context) {
         super(context);

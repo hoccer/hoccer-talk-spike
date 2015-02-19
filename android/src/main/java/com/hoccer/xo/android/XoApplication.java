@@ -313,7 +313,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         }
     }
 
-    private void showLocationServiceDialog(final Activity activity) {
+    private static void showLocationServiceDialog(final Activity activity) {
         XoDialogs.showYesNoDialog("EnableLocationServiceDialog",
                 R.string.dialog_enable_location_service_title,
                 R.string.dialog_enable_location_service_message,

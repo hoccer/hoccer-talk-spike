@@ -324,8 +324,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
         LOG.debug("performDownloadRequest(downloadId: '" + clientDownloadId + "', filename: '" + downloadFilename + "')");
         HttpClient client = mTransferAgent.getHttpClient();
-        RandomAccessFile randomAccessFile = null;
-        FileDescriptor fileDescriptor = null;
+        RandomAccessFile randomAccessFile;
+        FileDescriptor fileDescriptor;
         try {
             logGetDebug("downloading '" + downloadUrl + "'");
             // create the GET request
@@ -337,7 +337,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             mDownloadRequest = new HttpGet(downloadUrl);
 
             // determine the requested range
-            String range = null;
+            String range;
             if (contentLength != -1) {
                 long last = contentLength - 1;
                 range = "bytes=" + downloadProgress + "-" + last;
@@ -916,10 +916,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof TalkClientDownload && (clientDownloadId == ((TalkClientDownload) obj).clientDownloadId)) {
-            return true;
-        } else {
-            return false;
-        }
+        return obj instanceof TalkClientDownload && (clientDownloadId == ((TalkClientDownload) obj).clientDownloadId);
     }
 }

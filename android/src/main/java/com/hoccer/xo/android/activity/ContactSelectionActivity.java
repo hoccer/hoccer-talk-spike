@@ -85,7 +85,7 @@ public class ContactSelectionActivity extends ComposableActivity implements Cont
         finish();
     }
 
-    private ArrayList<Integer> getSelectedContactIdsFromFragment(ContactSelectionFragment contactSelectionFragment) {
+    private static ArrayList<Integer> getSelectedContactIdsFromFragment(ContactSelectionFragment contactSelectionFragment) {
         ArrayList<Integer> selectedContactIds = new ArrayList<Integer>();
         SparseBooleanArray checkedItems = contactSelectionFragment.getListView().getCheckedItemPositions();
         for (int i = 0; i < checkedItems.size(); i++) {

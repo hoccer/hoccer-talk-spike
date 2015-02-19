@@ -284,7 +284,7 @@ public class TalkClientMessage {
 
         TalkClientMessage message = (TalkClientMessage) o;
 
-        return messageId != null && message.getMessageId() != null && messageId.equals(message.getMessageId());
+        return messageId != null && message.messageId != null && messageId.equals(message.messageId);
     }
 
     @Override
