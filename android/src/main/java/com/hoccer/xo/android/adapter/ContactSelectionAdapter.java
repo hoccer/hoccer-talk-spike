@@ -1,11 +1,14 @@
 package com.hoccer.xo.android.adapter;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckedTextView;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
@@ -16,7 +19,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ContactSelectionAdapter extends BaseAdapter {
+public class ContactSelectionAdapter extends BaseAdapter implements IXoContactListener {
 
     static final Logger LOG = Logger.getLogger(ContactSelectionAdapter.class);
 
@@ -73,7 +76,16 @@ public class ContactSelectionAdapter extends BaseAdapter {
         return convertView;
     }
 
+    public void registerListeners() {
+        XoApplication.get().getXoClient().registerContactListener(this);
+    }
+
+    public void unregisterListeners() {
+        XoApplication.get().getXoClient().unregisterContactListener(this);
+    }
+
     private void loadContacts() {
+        mContacts.clear();
         try {
             XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
             for (TalkClientContact contact : database.findAllContacts()) {
@@ -99,6 +111,41 @@ public class ContactSelectionAdapter extends BaseAdapter {
         }
 
         return shouldShow;
+    }
+
+    @Override
+    public void onClientPresenceChanged(TalkClientContact contact) {
+        LOG.info("onClientPresenceChanged");
+        refreshList();
+    }
+
+    @Override
+    public void onClientRelationshipChanged(TalkClientContact contact) {
+        LOG.info("onClientRelationshipChanged");
+        refreshList();
+    }
+
+    @Override
+    public void onGroupPresenceChanged(TalkClientContact contact) {
+        LOG.info("onGroupPresenceChanged");
+        refreshList();
+    }
+
+    @Override
+    public void onGroupMembershipChanged(TalkClientContact contact) {
+        LOG.info("onGroupMembershipChanged");
+        refreshList();
+    }
+
+    private void refreshList() {
+        loadContacts();
+        Handler guiHandler = new Handler(Looper.getMainLooper());
+        guiHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                notifyDataSetChanged();
+            }
+        });
     }
 
     private class ViewHolder {

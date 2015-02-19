@@ -21,6 +21,7 @@ public class ContactSelectionFragment extends ListFragment {
     public static final String EXTRA_SELECTED_CONTACT_IDS = "com.hoccer.xo.android.extra.SELECTED_CONTACT_IDS";
 
     private final Set<IContactSelectionListener> contactSelectionListeners = new HashSet<IContactSelectionListener>();
+    private ContactSelectionAdapter mContactSelectionAdapter;
 
     public interface IContactSelectionListener {
         public void onContactSelectionChanged();
@@ -36,7 +37,25 @@ public class ContactSelectionFragment extends ListFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setupListView();
-        setListAdapter(new ContactSelectionAdapter());
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mContactSelectionAdapter = new ContactSelectionAdapter();
+        setListAdapter(mContactSelectionAdapter);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mContactSelectionAdapter.registerListeners();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mContactSelectionAdapter.unregisterListeners();
     }
 
     public void addContactSelectionListener(IContactSelectionListener l) {
