@@ -64,6 +64,10 @@ public class ContactSelectionAdapter extends BaseAdapter {
             viewHolder.checkedNameTextView.setText(R.string.nearby_text);
         } else {
             viewHolder.checkedNameTextView.setText(contact.getNickname());
+            if (!contact.isClientRelated() && contact.isNearby()) {
+                //TODO Set nearby icon indicator icon instead of text
+                viewHolder.checkedNameTextView.setText(contact.getNickname() + " (" + parent.getContext().getString(R.string.nearby) + ")");
+            }
         }
 
         return convertView;
@@ -89,8 +93,7 @@ public class ContactSelectionAdapter extends BaseAdapter {
                 shouldShow = true;
             }
         } else if (contact.isClient()) {
-            if (contact.isClientRelated() && (contact.getClientRelationship().isFriend() || contact.getClientRelationship()
-                    .isBlocked())) {
+            if (contact.isClientFriend() || contact.isNearby() || (contact.isClientRelated() && contact.getClientRelationship().isBlocked())) {
                 shouldShow = true;
             }
         }
