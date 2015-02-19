@@ -387,9 +387,9 @@
     <string name="restore_failure_default_message">Oh noes, something went wrong importing the backup. Please try again.</string>
     <string name="restore_failure_insufficient_disk_space_message">There is not enough free storage to import the chosen backup. Please delete files from SD card and try again. You need %1$s free disk space.</string>
     <string name="restore_enter_password">Enter password</string>
-    <string name="restore_restart_hoccer">Please re-start Hoccer to complete restoring your account. </string>
+    <string name="restore_restart_hoccer">Please re-start ${app.name.short} to complete restoring your account. </string>
     <string name="restore_no_backups_found_title">No backups found</string>
-    <string name="restore_no_backups_found_message">Please copy a backup to\n%1$s\nto restore a former Hoccer account.</string>
+    <string name="restore_no_backups_found_message">Please copy a backup to\n%1$s\nto restore a former ${app.name.short} account.</string>
 
     <string name="date">Date</string>
     <string name="user">User</string>

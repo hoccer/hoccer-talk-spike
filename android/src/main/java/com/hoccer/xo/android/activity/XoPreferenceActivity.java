@@ -160,7 +160,7 @@ public class XoPreferenceActivity extends PreferenceActivity
             @Override
             public void run() {
                 try {
-                    XoApplication.getXoClient().regenerateKeyPair();
+                    XoApplication.get().getXoClient().regenerateKeyPair();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 } finally {

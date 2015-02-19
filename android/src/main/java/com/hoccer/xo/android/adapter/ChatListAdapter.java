@@ -128,8 +128,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
     }
 
     private BaseChatItem findChatItemForContent(Object content) {
-        for (int i = 0; i < mChatItems.size(); i++) {
-            BaseChatItem item = mChatItems.get(i);
+        for (BaseChatItem item : mChatItems) {
             if (content.equals(item.getContent())) {
                 return item;
             }

@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.UUID;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Base class for our activities.
@@ -94,7 +93,7 @@ public abstract class XoActivity extends FragmentActivity {
     protected abstract int getMenuResource();
 
     public XoClient getXoClient() {
-        return XoApplication.getXoClient();
+        return XoApplication.get().getXoClient();
     }
 
     public XoSoundPool getXoSoundPool() {
@@ -172,7 +171,7 @@ public abstract class XoActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
 
         // set up database connection
-        mDatabase = XoApplication.getXoClient().getDatabase();
+        mDatabase = XoApplication.get().getXoClient().getDatabase();
 
         // set layout
         setContentView(getLayoutResource());
@@ -260,7 +259,7 @@ public abstract class XoActivity extends FragmentActivity {
             @Override
             public void run() {
                 try {
-                    XoApplication.getXoClient().regenerateKeyPair();
+                    XoApplication.get().getXoClient().regenerateKeyPair();
 
                     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
                     SharedPreferences.Editor editor = preferences.edit();
@@ -358,7 +357,7 @@ public abstract class XoActivity extends FragmentActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        LOG.debug("onOptionsItemSelected(" + item.toString() + ")");
+        LOG.debug("onOptionsItemSelected(" + item + ")");
         switch (item.getItemId()) {
             case android.R.id.home:
                 navigateUp();
@@ -414,7 +413,7 @@ public abstract class XoActivity extends FragmentActivity {
         return null;
     }
 
-    private Uri getImageContentUri(Context context, File imageFile) {
+    private static Uri getImageContentUri(Context context, File imageFile) {
         String filePath = imageFile.getAbsolutePath();
         Cursor cursor = context.getContentResolver().query(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI,

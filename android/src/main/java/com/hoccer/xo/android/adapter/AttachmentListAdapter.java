@@ -21,12 +21,11 @@ import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 public class AttachmentListAdapter extends BaseAdapter implements DragSortListView.DropListener, IXoUploadListener, IXoDownloadListener {
 
-    protected Logger LOG = Logger.getLogger(AttachmentListAdapter.class);
+    private static final Logger LOG = Logger.getLogger(AttachmentListAdapter.class);
 
     private List<XoTransfer> mItems = new ArrayList<XoTransfer>();
 
@@ -47,7 +46,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         mContact = contact;
         updateItems();
 
-        XoClientDatabase database = XoApplication.getXoClient().getDatabase();
+        XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
         database.registerUploadListener(this);
         database.registerDownloadListener(this);
     }
@@ -233,10 +232,11 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
 
     public void updateItems() {
         try {
+            XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
             if (mContact != null) {
-                mItems = new ArrayList<XoTransfer>(XoApplication.getXoClient().getDatabase().findClientDownloadsByMediaTypeAndContactId(mMediaType, mContact.getClientContactId()));
+                mItems = new ArrayList<XoTransfer>(database.findClientDownloadsByMediaTypeAndContactId(mMediaType, mContact.getClientContactId()));
             } else {
-                mItems = XoApplication.getXoClient().getDatabase().findTransfersByMediaTypeDistinct(mMediaType);
+                mItems = database.findTransfersByMediaTypeDistinct(mMediaType);
             }
         } catch (SQLException e) {
             LOG.error(e);
@@ -259,7 +259,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         // check if contact matches
         if (mContact != null) {
             try {
-                XoClientDatabase database = XoApplication.getXoClient().getDatabase();
+                XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
                 TalkClientMessage message = transfer.isUpload() ?
                         database.findClientMessageByTalkClientUploadId(transfer.getUploadOrDownloadId()) :
                         database.findClientMessageByTalkClientDownloadId(transfer.getUploadOrDownloadId());
@@ -282,7 +282,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         return true;
     }
 
-    private boolean areEqual(Object obj1, Object obj2) {
+    private static boolean areEqual(Object obj1, Object obj2) {
         if (obj1 != null) {
             if (obj1.equals(obj2)) {
                 return true;

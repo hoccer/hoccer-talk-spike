@@ -5,14 +5,15 @@ import com.hoccer.talk.client.model.TalkClientMediaCollection;
 
 import java.util.Iterator;
 
+
 /**
  * Playlist instance wrapping a media collection.
  */
 public class MediaCollectionPlaylist extends MediaPlaylist {
 
-    private TalkClientMediaCollection mCollection;
+    private final TalkClientMediaCollection mCollection;
 
-    private TalkClientMediaCollection.Listener mListener = new TalkClientMediaCollection.Listener() {
+    private final TalkClientMediaCollection.Listener mListener = new TalkClientMediaCollection.Listener() {
         @Override
         public void onCollectionNameChanged(TalkClientMediaCollection collection) {
             // do nothing
@@ -60,9 +61,8 @@ public class MediaCollectionPlaylist extends MediaPlaylist {
 
     @Override
     public boolean hasItem(XoTransfer item) {
-        XoTransfer transfer = item;
-        if (transfer != null) {
-            return mCollection.hasItem(transfer);
+        if (item != null) {
+            return mCollection.hasItem(item);
         } else {
             return false;
         }
@@ -70,9 +70,8 @@ public class MediaCollectionPlaylist extends MediaPlaylist {
 
     @Override
     public int indexOf(XoTransfer item) {
-        XoTransfer transfer = item;
-        if (transfer != null) {
-            return mCollection.indexOf(transfer);
+        if (item != null) {
+            return mCollection.indexOf(item);
         } else {
             return -1;
         }
@@ -81,7 +80,7 @@ public class MediaCollectionPlaylist extends MediaPlaylist {
     @Override
     public Iterator<XoTransfer> iterator() {
         return new Iterator<XoTransfer>() {
-            private Iterator<XoTransfer> mIterator = mCollection.iterator();
+            private final Iterator<XoTransfer> mIterator = mCollection.iterator();
 
             @Override
             public boolean hasNext() {

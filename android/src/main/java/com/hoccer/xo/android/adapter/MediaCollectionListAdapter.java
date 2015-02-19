@@ -19,13 +19,14 @@ import java.util.List;
 
 public class MediaCollectionListAdapter extends BaseAdapter implements IXoMediaCollectionListener {
 
+    private final static Logger LOG = Logger.getLogger(MediaCollectionListAdapter.class);
+
     private List<TalkClientMediaCollection> mMediaCollections = new ArrayList<TalkClientMediaCollection>();
-    private SparseBooleanArray mSelectedItems = new SparseBooleanArray();
-    private Logger LOG = Logger.getLogger(MediaCollectionListAdapter.class);
+    private final SparseBooleanArray mSelectedItems = new SparseBooleanArray();
 
     public MediaCollectionListAdapter() {
         try {
-            XoApplication.getXoClient().getDatabase().registerMediaCollectionListener(this);
+            XoApplication.get().getXoClient().getDatabase().registerMediaCollectionListener(this);
             loadMediaCollections();
         } catch (SQLException e) {
             LOG.error("Loading media collections failed.", e);
@@ -86,7 +87,7 @@ public class MediaCollectionListAdapter extends BaseAdapter implements IXoMediaC
 
     public void selectItem(int position, boolean selected) {
         if(selected) {
-            mSelectedItems.put(position, selected);
+            mSelectedItems.put(position, true);
         } else {
             mSelectedItems.delete(position);
         }
@@ -111,7 +112,7 @@ public class MediaCollectionListAdapter extends BaseAdapter implements IXoMediaC
     }
 
     private void loadMediaCollections() throws SQLException {
-        mMediaCollections = XoApplication.getXoClient().getDatabase().findAllMediaCollections();
+        mMediaCollections = XoApplication.get().getXoClient().getDatabase().findAllMediaCollections();
     }
 
     @Override
@@ -124,7 +125,7 @@ public class MediaCollectionListAdapter extends BaseAdapter implements IXoMediaC
     public void onMediaCollectionDeleted(TalkClientMediaCollection collectionDeleted) {
         TalkClientMediaCollection collectionToRemove = null;
         for (TalkClientMediaCollection collection : mMediaCollections) {
-            if (collection.getId() == collectionDeleted.getId()) {
+            if (collection.getId().equals(collectionDeleted.getId())) {
                 collectionToRemove = collection;
                 break;
             }

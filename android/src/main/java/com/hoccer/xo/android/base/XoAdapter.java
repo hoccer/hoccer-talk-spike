@@ -66,7 +66,7 @@ public abstract class XoAdapter extends BaseAdapter {
     }
 
     public XoClient getXoClient() {
-        return XoApplication.getXoClient();
+        return XoApplication.get().getXoClient();
     }
 
     public File getAvatarDirectory() {

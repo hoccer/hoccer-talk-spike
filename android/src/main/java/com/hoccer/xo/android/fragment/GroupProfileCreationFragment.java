@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+
 /**
  * Fragment for display and editing of group profiles.
  */
@@ -43,8 +44,6 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
 
     private EditText mGroupNameEdit;
     private Button mGroupCreateButton;
-    private TextView mGroupMembersTitle;
-    private ListView mGroupMembersList;
     private ContactsAdapter mGroupMemberAdapter;
 
     private SelectedContent mAvatar;
@@ -86,9 +85,9 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
 
         mAvatarImageView = (ImageView) view.findViewById(R.id.profile_group_profile_image);
         mGroupNameEdit = (EditText) view.findViewById(R.id.profile_group_name_edit);
-        mGroupMembersTitle = (TextView) view.findViewById(R.id.profile_group_members_title);
-        mGroupMembersList = (ListView) view.findViewById(R.id.profile_group_members_list);
         mGroupCreateButton = (Button) view.findViewById(R.id.profile_group_button_create);
+        TextView groupMembersTitle = (TextView) view.findViewById(R.id.profile_group_members_title);
+        ListView groupMembersList = (ListView) view.findViewById(R.id.profile_group_members_list);
 
         mAvatarImageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -141,12 +140,14 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
             }
         });
         mGroupMemberAdapter.onCreate();
-        mGroupMembersList.setAdapter(mGroupMemberAdapter);
+        groupMembersList.setAdapter(mGroupMemberAdapter);
 
         if (mContactsToInvite.isEmpty()) {
-            mGroupMembersTitle.setVisibility(View.GONE);
-            mGroupMembersList.setVisibility(View.GONE);
+            groupMembersTitle.setVisibility(View.GONE);
+            groupMembersList.setVisibility(View.GONE);
         }
+
+        updateAvatarView(null);
     }
 
     @Override
@@ -231,6 +232,8 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
         Uri avatarUri = mAvatar == null ? null : UriUtils.getAbsoluteFileUri(mAvatar.getFilePath());
         Picasso.with(getActivity())
                 .load(avatarUri)
+                .centerCrop()
+                .fit()
                 .placeholder(R.drawable.avatar_default_group_large)
                 .error(R.drawable.avatar_default_group_large)
                 .into(mAvatarImageView);

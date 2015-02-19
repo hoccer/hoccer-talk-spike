@@ -70,7 +70,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     private final Object mGroupCreationLock = new Object();
 
     // Return the name of the given state
-    public static final String stateToString(int state) {
+    public static String stateToString(int state) {
         if (state >= 0 && state < STATE_NAMES.length) {
             return STATE_NAMES[state];
         } else {
@@ -563,7 +563,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 // serverTimeDiff is positive if server time is ahead of client time
                 this.serverTimeDiff = talkServerInfo.getServerTime().getTime() - new Date().getTime();
                 LOG.info("Hello: client time differs from server time by " + this.serverTimeDiff + " ms");
-                LOG.debug("Hello: Current server time: " + talkServerInfo.getServerTime().toString());
+                LOG.debug("Hello: Current server time: " + talkServerInfo.getServerTime());
                 LOG.debug("Hello: Server switched to supportMode: " + talkServerInfo.isSupportMode());
                 LOG.debug("Hello: Server version is '" + talkServerInfo.getVersion() + "'");
                 LOG.debug("Hello: supported protocol versions: '" + talkServerInfo.getProtocolVersions() + "'");
@@ -1026,7 +1026,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     public void deleteMessage(TalkClientMessage message) {
         try {
-            getDatabase().deleteMessageById(message.getClientMessageId());
+            mDatabase.deleteMessageById(message.getClientMessageId());
             for (IXoMessageListener listener : mMessageListeners) {
                 listener.onMessageDeleted(message);
             }
@@ -1165,7 +1165,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     @Override
     public void onClose(JsonRpcConnection connection) {
         LOG.debug("onClose()");
-        if(mState != STATE_DISCONNECTED) {
+        if (mState != STATE_DISCONNECTED) {
             if (mState == STATE_CONNECTING) {
                 scheduleConnect();
             } else {
@@ -1343,7 +1343,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                             groupIds.add(contact.getGroupId());
                         }
                     }
-                    if (groupIds.size() > 0) {
+                    if (!groupIds.isEmpty()) {
                         Boolean[] groupMembershipFlags = mServerRpc.isMemberInGroups(groupIds.toArray(new String[groupIds.size()]));
 
                         for (int i = 0; i < groupContacts.size(); i++) {
@@ -1563,7 +1563,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 return failed;
             }
 
-            if (sharedKeyId.equalsIgnoreCase("renew")) {
+            if ("renew".equalsIgnoreCase(sharedKeyId)) {
                 generateGroupKey(contact);
                 isRenewGroupKey = true;
             } else {
@@ -2192,7 +2192,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     private void updateIncomingDelivery(final TalkDelivery delivery) {
         LOG.debug("updateIncomingDelivery (Only)(" + delivery.getMessageId() + ")");
-        TalkClientMessage clientMessage = null;
+        TalkClientMessage clientMessage;
         try {
             clientMessage = mDatabase.findMessageByMessageId(delivery.getMessageId(), false);
             if (clientMessage == null) {
@@ -2366,12 +2366,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         String rawAttachment = message.getAttachment();
 
         // get decryption key
-        byte[] decryptedKey = null;
+        byte[] decryptedKey;
         if (contact.isClient()) {
             LOG.trace("decrypting using private key");
             // decrypt the provided key using our private key
             try {
-                TalkPrivateKey talkPrivateKey = null;
+                TalkPrivateKey talkPrivateKey;
                 talkPrivateKey = mDatabase.findPrivateKeyByKeyId(keyId);
                 if (talkPrivateKey == null) {
                     LOG.error("no private key for keyId " + keyId);
@@ -2450,9 +2450,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
 
         // add decrypted information to message
-        if (decryptedBody != null) {
-            clientMessage.setText(decryptedBody);
-        }
+        clientMessage.setText(decryptedBody);
+
         if (decryptedAttachment != null) {
             TalkClientDownload download = new TalkClientDownload();
             download.initializeAsAttachment(mTransferAgent, decryptedAttachment, message.getMessageId(), decryptedKey);
@@ -2482,7 +2481,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             return;
         }
 
-        byte[] plainKey = null;
+        byte[] plainKey;
         byte[] keySalt = null;
         if (receiver.isClient()) {
             LOG.trace("using client key for encryption");
@@ -2670,9 +2669,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     private boolean updateAvatarDownload(TalkClientContact contact, String avatarUrl, String avatarId, Date avatarTimestamp) throws MalformedURLException {
-        boolean haveUrl = avatarUrl != null && !avatarUrl.isEmpty();
-        if (!haveUrl) {
-            LOG.debug("no avatar url for contact " + contact.getClientContactId());
+        boolean urlIsValid = avatarUrl != null && !avatarUrl.isEmpty();
+        if (!urlIsValid) {
+            LOG.debug("no valid avatar url for contact " + contact.getClientContactId());
             contact.setAvatarDownload(null);
             return false;
         }
@@ -2680,12 +2679,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         boolean wantDownload = false;
         TalkClientDownload avatarDownload = contact.getAvatarDownload();
         if (avatarDownload == null) {
-            if (haveUrl) {
-                LOG.debug("new avatar for contact " + contact.getClientContactId());
-                avatarDownload = new TalkClientDownload();
-                avatarDownload.initializeAsAvatar(mTransferAgent, avatarUrl, avatarId, avatarTimestamp);
-                wantDownload = true;
-            }
+            LOG.debug("new avatar for contact " + contact.getClientContactId());
+            avatarDownload = new TalkClientDownload();
+            avatarDownload.initializeAsAvatar(mTransferAgent, avatarUrl, avatarId, avatarTimestamp);
+            wantDownload = true;
         } else {
             try {
                 mDatabase.refreshClientDownload(avatarDownload);
@@ -2694,26 +2691,21 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 return false;
             }
             String downloadUrl = avatarDownload.getDownloadUrl();
-            if (haveUrl) {
-                if (downloadUrl == null || !downloadUrl.equals(avatarUrl)) {
-                    LOG.debug("new avatar for contact " + contact.getClientContactId());
-                    avatarDownload = new TalkClientDownload();
-                    avatarDownload.initializeAsAvatar(mTransferAgent, avatarUrl, avatarId, avatarTimestamp);
+            if (downloadUrl == null || !downloadUrl.equals(avatarUrl)) {
+                LOG.debug("new avatar for contact " + contact.getClientContactId());
+                avatarDownload = new TalkClientDownload();
+                avatarDownload.initializeAsAvatar(mTransferAgent, avatarUrl, avatarId, avatarTimestamp);
+                wantDownload = true;
+            } else {
+                LOG.debug("avatar not changed for contact " + contact.getClientContactId());
+                TalkClientDownload.State state = avatarDownload.getState();
+                if (state != TalkClientDownload.State.COMPLETE && state != TalkClientDownload.State.FAILED) {
                     wantDownload = true;
-                } else {
-                    LOG.debug("avatar not changed for contact " + contact.getClientContactId());
-                    TalkClientDownload.State state = avatarDownload.getState();
-                    if (!state.equals(TalkClientDownload.State.COMPLETE) && !state.equals(TalkClientDownload.State.FAILED)) {
-                        wantDownload = true;
-                    }
                 }
             }
         }
 
-        if (avatarDownload != null) {
-            contact.setAvatarDownload(avatarDownload);
-        }
-
+        contact.setAvatarDownload(avatarDownload);
         return wantDownload;
     }
 
@@ -2753,7 +2745,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     private void updateClientRelationship(TalkRelationship relationship) {
         LOG.debug("updateClientRelationship(" + relationship.getOtherClientId() + ")");
-        TalkClientContact clientContact = null;
+        TalkClientContact clientContact;
         try {
             clientContact = mDatabase.findContactByClientId(relationship.getOtherClientId(), relationship.isRelated());
         } catch (SQLException e) {
@@ -3018,8 +3010,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             byte[] newGroupKey = AESCryptor.makeRandomBytes(AESCryptor.KEY_SIZE);
             byte[] sharedKeyIdSalt = AESCryptor.makeRandomBytes(AESCryptor.KEY_SIZE);
             String sharedKeyIdSaltString = new String(Base64.encodeBase64(sharedKeyIdSalt));
-            byte[] sharedKeyId = new byte[0];
-            sharedKeyId = AESCryptor.calcSymmetricKeyId(newGroupKey, sharedKeyIdSalt);
+            byte[] sharedKeyId = AESCryptor.calcSymmetricKeyId(newGroupKey, sharedKeyIdSalt);
             String sharedKeyIdString = new String(Base64.encodeBase64(sharedKeyId));
 
             // remember the group key for ourselves

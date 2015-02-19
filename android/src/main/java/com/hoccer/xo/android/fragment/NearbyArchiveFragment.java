@@ -67,7 +67,7 @@ public class NearbyArchiveFragment extends ListFragment {
                                 @Override
                                 public void onClick(DialogInterface dialog, int id) {
                                     try {
-                                        XoApplication.getXoClient().getDatabase().deleteAllMessagesFromContactId(chatItem.getConversationContactId());
+                                        XoApplication.get().getXoClient().getDatabase().deleteAllMessagesFromContactId(chatItem.getConversationContactId());
                                         mAdapter.requestReload();
                                     } catch (SQLException e) {
                                         e.printStackTrace();

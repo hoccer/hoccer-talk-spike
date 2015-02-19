@@ -44,7 +44,7 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mDatabase = XoApplication.getXoClient().getDatabase();
+        mDatabase = XoApplication.get().getXoClient().getDatabase();
     }
 
     @Override
@@ -203,7 +203,7 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
 
     public void onGroupCreationSucceeded(int contactId) {
         try {
-            TalkClientContact contact = XoApplication.getXoClient().getDatabase().findContactById(contactId);
+            TalkClientContact contact = mDatabase.findContactById(contactId);
             if (contact != null) {
                 ((XoActivity) getActivity()).showContactProfile(contact);
             }

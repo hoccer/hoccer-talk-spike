@@ -17,7 +17,7 @@ import java.util.List;
 
 public class ContactSearchResultAdapter extends ContactsAdapter {
 
-    private List<TalkClientContact> mFoundContacts = new ArrayList<TalkClientContact>();
+    private final List<TalkClientContact> mFoundContacts = new ArrayList<TalkClientContact>();
     private String mLastQuery = "";
 
     public ContactSearchResultAdapter(XoActivity activity) {
@@ -28,7 +28,7 @@ public class ContactSearchResultAdapter extends ContactsAdapter {
         mFoundContacts.clear();
         mLastQuery = query.toLowerCase();
 
-        if (query.length() > 0) {
+        if (!query.isEmpty()) {
             for (TalkClientContact contact : mContacts) {
                 // ignore self
                 if (contact.isSelf()) {

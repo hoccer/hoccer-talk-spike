@@ -26,6 +26,7 @@ import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 
+
 /**
  * Fragment for display and editing of single-contact profiles.
  */
@@ -233,7 +234,7 @@ public class SingleProfileFragment extends ProfileFragment
     @Override
     protected void updateMessageText() {
         try {
-            int count = (int) XoApplication.getXoClient().getDatabase().getMessageCountByContactId(mContact.getClientContactId());
+            int count = (int) XoApplication.get().getXoClient().getDatabase().getMessageCountByContactId(mContact.getClientContactId());
             super.updateMessageText(count);
         } catch (SQLException e) {
             LOG.error("Error fetching message count from database.");
@@ -302,6 +303,8 @@ public class SingleProfileFragment extends ProfileFragment
 
         Picasso.with(getActivity())
                 .load(avatarUri)
+                .centerCrop()
+                .fit()
                 .placeholder(R.drawable.avatar_default_contact_large)
                 .error(R.drawable.avatar_default_contact_large)
                 .into(mAvatarImage);
@@ -333,23 +336,27 @@ public class SingleProfileFragment extends ProfileFragment
     }
 
     private void updateFingerprint() {
-        String keyId = mContact.getPublicKey().getKeyId();
+        if(mContact.getPublicKey() != null) {
+            String keyId = mContact.getPublicKey().getKeyId();
 
-        keyId = keyId.toUpperCase();
+            keyId = keyId.toUpperCase();
 
-        char[] chars = keyId.toCharArray();
-        int length = chars.length;
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < length; i++) {
-            builder.append(chars[i]);
-            if ((i % 2) == 1) {
-                builder.append(":");
+            char[] chars = keyId.toCharArray();
+            int length = chars.length;
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < length; i++) {
+                builder.append(chars[i]);
+                if ((i % 2) == 1) {
+                    builder.append(":");
+                }
+
             }
+            builder.deleteCharAt(builder.lastIndexOf(":"));
 
+            mKeyText.setText(builder.toString());
+        } else {
+            mKeyText.setText("");
         }
-        builder.deleteCharAt(builder.lastIndexOf(":"));
-
-        mKeyText.setText(builder.toString());
     }
 
     private void updateInviteButton(final TalkClientContact contact) {
@@ -485,7 +492,7 @@ public class SingleProfileFragment extends ProfileFragment
         LOG.debug("refreshContact()");
 
         try {
-            XoClientDatabase database = XoApplication.getXoClient().getDatabase();
+            XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
             database.refreshClientContact(mContact);
             if (mContact.getAvatarDownload() != null) {
                 database.refreshClientDownload(mContact.getAvatarDownload());

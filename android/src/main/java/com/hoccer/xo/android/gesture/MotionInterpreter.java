@@ -41,7 +41,7 @@ public class MotionInterpreter implements SensorEventListener {
     private final FeatureHistory mFeatureHistory;
     //private Transaction pMode;
 
-    public boolean activated = false;
+    public boolean activated;
 
     public MotionInterpreter(Transaction pMode, Context pContext,
                              MotionGestureListener pOnShakeListener) {

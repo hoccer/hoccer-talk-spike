@@ -13,7 +13,7 @@ public class DatabaseRestoreOperation {
     private final File mDatabaseTarget;
     private final String mPassword;
 
-    private File mDatabaseTemp;
+    private final File mDatabaseTemp;
 
     public DatabaseRestoreOperation(File backupFile, File databaseTarget, String password) {
         mBackupFile = backupFile;

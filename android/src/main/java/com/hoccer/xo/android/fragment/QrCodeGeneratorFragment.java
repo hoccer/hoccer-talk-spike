@@ -69,7 +69,7 @@ public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment,
             generateToken();
         }
 
-        XoApplication.getXoClient().registerContactListener(this);
+        XoApplication.get().getXoClient().registerContactListener(this);
     }
 
     @Override
@@ -80,7 +80,7 @@ public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment,
 
     @Override
     public void onPagePause() {
-        XoApplication.getXoClient().unregisterContactListener(this);
+        XoApplication.get().getXoClient().unregisterContactListener(this);
     }
 
     @Override
@@ -97,7 +97,7 @@ public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment,
         XoApplication.get().getExecutor().execute(new Runnable() {
             @Override
             public void run() {
-                final String pairingToken = XoApplication.getXoClient().generatePairingToken();
+                final String pairingToken = XoApplication.get().getXoClient().generatePairingToken();
 
                 if (isResumed()) {
                     getActivity().runOnUiThread(new Runnable() {
@@ -124,7 +124,7 @@ public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment,
         if (pairingToken != null) {
             mPairingTokenView.setText(pairingToken);
 
-            final String invitationUrl = XoApplication.getXoClient().getConfiguration().getUrlScheme() + pairingToken;
+            final String invitationUrl = XoApplication.get().getXoClient().getConfiguration().getUrlScheme() + pairingToken;
             final Bitmap qrCode = createQrCode(invitationUrl, 400, 400);
 
             if (qrCode != null) {

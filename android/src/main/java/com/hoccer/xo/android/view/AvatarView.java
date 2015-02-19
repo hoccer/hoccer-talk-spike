@@ -26,7 +26,7 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
 
     private Uri mDefaultAvatarImageUri;
     private DisplayImageOptions mDefaultOptions;
-    private float mCornerRadius = 0.0f;
+    private float mCornerRadius;
     private AspectImageView mAvatarImage;
     private View mPresenceIndicatorActive;
     private View mPresenceIndicatorInactive;
@@ -79,11 +79,11 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
         if (mIsAttachedToWindow) {
             if (mContact == null) {
                 if(contact != null) {
-                    XoApplication.getXoClient().registerContactListener(this);
+                    XoApplication.get().getXoClient().registerContactListener(this);
                 }
             } else {
                 if(contact == null) {
-                    XoApplication.getXoClient().unregisterContactListener(this);
+                    XoApplication.get().getXoClient().unregisterContactListener(this);
                 }
             }
         }
@@ -128,7 +128,7 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
 
         mIsAttachedToWindow = true;
         if (mContact != null) {
-            XoApplication.getXoClient().registerContactListener(this);
+            XoApplication.get().getXoClient().registerContactListener(this);
         }
     }
 
@@ -138,7 +138,7 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
 
         mIsAttachedToWindow = false;
         if (mContact != null) {
-            XoApplication.getXoClient().unregisterContactListener(this);
+            XoApplication.get().getXoClient().unregisterContactListener(this);
         }
     }
 

@@ -11,26 +11,27 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+import com.artcom.hoccer.R;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.util.DeviceContact;
-import com.artcom.hoccer.R;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class DeviceContactsAdapter extends BaseAdapter {
 
     private static final Logger LOG = Logger.getLogger(DeviceContactsAdapter.class);
 
-    private Activity mActivity;
-    private List<DeviceContact> mContacts;
+    private final Activity mActivity;
+    private final List<DeviceContact> mContacts;
     private List<DeviceContact> mQueriedContacts;
     private String mQuery;
-    private List<String> mSelectedData;
+    private final List<String> mSelectedData;
 
-    private LayoutInflater mInflater = null;
+    private LayoutInflater mInflater;
 
     // Constructor expects an ordered list of device contacts
     public DeviceContactsAdapter(List<DeviceContact> items, Activity activity) {
@@ -44,7 +45,7 @@ public class DeviceContactsAdapter extends BaseAdapter {
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        if(convertView == null) {
+        if (convertView == null) {
             if (mInflater == null) {
                 mInflater = LayoutInflater.from(parent.getContext());
             }
@@ -54,7 +55,7 @@ public class DeviceContactsAdapter extends BaseAdapter {
         DeviceContact contact = mQueriedContacts.get(position);
         TextView displayNameView = (TextView) convertView.findViewById(R.id.tv_displayname);
 
-        if(mQuery == null) {
+        if (mQuery == null) {
             displayNameView.setText(contact.getDisplayName());
         } else {
             displayNameView.setText(getHighlightedSearchResult(contact.getDisplayName()));
@@ -75,8 +76,8 @@ public class DeviceContactsAdapter extends BaseAdapter {
 
         boolean isSelected = false;
         final String[] contactDataList = contact.getDataItem();
-        if(contactDataList.length > 0) {
-            if(contactDataList.length == 1) {
+        if (contactDataList.length > 0) {
+            if (contactDataList.length == 1) {
                 final String data = contactDataList[0];
                 dataView.setText(data);
                 isSelected = mSelectedData.contains(data);
@@ -84,7 +85,7 @@ public class DeviceContactsAdapter extends BaseAdapter {
                 clicker.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if(mSelectedData.contains(data)) {
+                        if (mSelectedData.contains(data)) {
                             mSelectedData.remove(data);
                         } else {
                             mSelectedData.add(data);
@@ -96,8 +97,8 @@ public class DeviceContactsAdapter extends BaseAdapter {
                 dataView.setText(R.string.invite_several_entries);
 
                 // is any of the data items selected
-                for(String contactData : contactDataList) {
-                    if(mSelectedData.contains(contactData)) {
+                for (String contactData : contactDataList) {
+                    if (mSelectedData.contains(contactData)) {
                         isSelected = true;
                         break;
                     }
@@ -108,7 +109,7 @@ public class DeviceContactsAdapter extends BaseAdapter {
                     public void onClick(View view) {
                         // create selection states array
                         boolean[] selectionStates = new boolean[contactDataList.length];
-                        for(int i = 0; i < selectionStates.length; i++) {
+                        for (int i = 0; i < selectionStates.length; i++) {
                             selectionStates[i] = mSelectedData.contains(contactDataList[i]);
                         }
                         XoDialogs.showMultiChoiceDialog("DeviceContactDialog",
@@ -119,15 +120,15 @@ public class DeviceContactsAdapter extends BaseAdapter {
                                 new XoDialogs.OnMultiSelectionFinishedListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int id, boolean[] newSelectionStates) {
-                                        for(int i = 0; i < newSelectionStates.length; i++) {
+                                        for (int i = 0; i < newSelectionStates.length; i++) {
                                             String data = contactDataList[i];
                                             boolean isSelected = mSelectedData.contains(data);
-                                            if(isSelected) {
-                                                if(!newSelectionStates[i]) {
+                                            if (isSelected) {
+                                                if (!newSelectionStates[i]) {
                                                     mSelectedData.remove(data);
                                                 }
                                             } else {
-                                                if(newSelectionStates[i]) {
+                                                if (newSelectionStates[i]) {
                                                     mSelectedData.add(data);
                                                 }
                                             }
@@ -174,11 +175,11 @@ public class DeviceContactsAdapter extends BaseAdapter {
      * If query is empty string everything is filtered.
      */
     public void setQuery(String query) {
-        if(query != null) {
+        if (query != null) {
             mQuery = query.toLowerCase();
             mQueriedContacts = new ArrayList<DeviceContact>();
 
-            if(!mQuery.isEmpty()) {
+            if (!mQuery.isEmpty()) {
                 for (DeviceContact contact : mContacts) {
                     if (contact.getDisplayName().toLowerCase().contains(mQuery)) {
                         mQueriedContacts.add(contact);
@@ -206,7 +207,7 @@ public class DeviceContactsAdapter extends BaseAdapter {
 
         int fromIndex = 0;
         int highlightStart = lowerCaseText.indexOf(mQuery, fromIndex);
-        while(highlightStart >= 0) {
+        while (highlightStart >= 0) {
             int highlightEnd = highlightStart + mQuery.length();
             result.setSpan(new ForegroundColorSpan(Color.BLACK), highlightStart, highlightEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             fromIndex = highlightEnd;

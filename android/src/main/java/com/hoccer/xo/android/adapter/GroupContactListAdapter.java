@@ -44,7 +44,7 @@ public class GroupContactListAdapter extends ContactListAdapter {
         List<TalkClientContact> joined;
 
         try {
-            XoClientDatabase database = XoApplication.getXoClient().getDatabase();
+            XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
             invitedMe = database.findGroupContactsByMembershipState(TalkGroupMembership.STATE_INVITED);
             joined = database.findGroupContactsByMembershipState(TalkGroupMembership.STATE_JOINED);
         } catch (SQLException e) {
@@ -86,7 +86,7 @@ public class GroupContactListAdapter extends ContactListAdapter {
         viewHolder.acceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                XoApplication.getXoClient().joinGroup(group.getGroupId());
+                XoApplication.get().getXoClient().joinGroup(group.getGroupId());
             }
         });
 
@@ -122,7 +122,7 @@ public class GroupContactListAdapter extends ContactListAdapter {
     private String getGroupMembersString(TalkClientContact group) {
         try {
             ArrayDeque<String> displayMembers = new ArrayDeque<String>();
-            XoClientDatabase database = XoApplication.getXoClient().getDatabase();
+            XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
             List<TalkClientContact> joinedContacts = database.findContactsInGroupByState(group.getGroupId(), TalkGroupMembership.STATE_JOINED);
             CollectionUtils.filterInverse(joinedContacts, TalkClientContactPredicates.IS_SELF_PREDICATE);
 
@@ -159,7 +159,7 @@ public class GroupContactListAdapter extends ContactListAdapter {
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        XoApplication.getXoClient().leaveGroup(group.getGroupId());
+                        XoApplication.get().getXoClient().leaveGroup(group.getGroupId());
                     }
                 });
     }

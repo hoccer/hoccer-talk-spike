@@ -24,7 +24,7 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
     }
 
     public static enum RepeatMode {
-        REPEAT_ITEM, REPEAT_ALL, NO_REPEAT;
+        REPEAT_ITEM, REPEAT_ALL, NO_REPEAT
     }
 
     private static final Logger LOG = Logger.getLogger(MediaPlaylistController.class);

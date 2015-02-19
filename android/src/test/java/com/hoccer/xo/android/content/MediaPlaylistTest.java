@@ -49,7 +49,7 @@ public class MediaPlaylistTest {
             }
         });
 
-        mDatabase.createTables(mConnectionSource);
+        XoClientDatabase.createTables(mConnectionSource);
         mDatabase.initialize();
     }
 
@@ -418,7 +418,7 @@ public class MediaPlaylistTest {
 
     //////// Helpers ////////
 
-    private static int mFilePathCounter = 0;
+    private static int mFilePathCounter;
 
     private TalkClientDownload createAudioDownloadWithUser(TalkClientContact user) {
         // create download

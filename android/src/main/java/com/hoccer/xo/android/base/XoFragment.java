@@ -25,7 +25,7 @@ public abstract class XoFragment extends Fragment implements IXoFragment {
     }
 
     public XoAndroidClient getXoClient() {
-        return XoApplication.getXoClient();
+        return XoApplication.get().getXoClient();
     }
 
     public XoClientDatabase getXoDatabase() {

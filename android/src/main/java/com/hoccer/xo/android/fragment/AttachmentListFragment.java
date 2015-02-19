@@ -61,7 +61,7 @@ public class AttachmentListFragment extends SearchableListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mDatabase = XoApplication.getXoClient().getDatabase();
+        mDatabase = XoApplication.get().getXoClient().getDatabase();
 
         setHasOptionsMenu(true);
 
@@ -236,8 +236,8 @@ public class AttachmentListFragment extends SearchableListFragment {
         List<XoTransfer> selectedObjects = mAttachmentAdapter.getSelectedItems();
         for (XoTransfer item : selectedObjects) {
             try {
-                for (XoTransfer transfer : XoApplication.getXoClient().getDatabase().findTransfersByFilePath(item.getFilePath())) {
-                    XoApplication.getXoClient().getDatabase().deleteTransferAndUpdateMessage(transfer, getResources().getString(R.string.deleted_attachment));
+                for (XoTransfer transfer : mDatabase.findTransfersByFilePath(item.getFilePath())) {
+                    mDatabase.deleteTransferAndUpdateMessage(transfer, getResources().getString(R.string.deleted_attachment));
                 }
                 FileUtils.deleteQuietly(new File(UriUtils.getAbsoluteFileUri(item.getFilePath()).getPath()));
             } catch (SQLException e) {

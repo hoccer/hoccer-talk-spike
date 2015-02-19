@@ -508,7 +508,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
     }
 
     protected ContentState getTransferState(XoTransfer object) {
-        XoTransferAgent agent = XoApplication.getXoClient().getTransferAgent();
+        XoTransferAgent agent = XoApplication.get().getXoClient().getTransferAgent();
         ContentState state = object.getContentState();
         if (object instanceof TalkClientDownload) {
             TalkClientDownload download = (TalkClientDownload) object;

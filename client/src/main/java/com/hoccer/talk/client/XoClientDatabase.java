@@ -445,8 +445,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .eq("deleted", false)
                 .and(2);
         builder.setWhere(where);
-        List<TalkClientMessage> messages = mClientMessages.query(builder.prepare());
-        return messages;
+        return mClientMessages.query(builder.prepare());
     }
 
     public Vector<Integer> findMessageIdsByContactId(int contactId) throws SQLException {
@@ -854,7 +853,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                     .or()
                     .eq("state", TalkRelationship.STATE_INVITED)
                     .query();
-            if (invitedRelations != null && invitedRelations.size() > 0) {
+            if (invitedRelations != null && !invitedRelations.isEmpty()) {
                 return true;
             }
         } catch (SQLException e) {
@@ -874,8 +873,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .eq("clientMessageId", messageId)
                 .and(2);
         updateBuilder.update();
-
-        TalkClientMessage message = mClientMessages.queryForId(messageId);
     }
 
     public void deleteAllMessagesFromContactId(int contactId) throws SQLException {

@@ -1,7 +1,6 @@
 package com.hoccer.xo.android;
 
 import com.hoccer.talk.client.HttpClientWithKeyStore;
-import com.hoccer.talk.client.XoClientSslConfiguration;
 import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
@@ -15,15 +14,15 @@ import java.security.KeyStore;
  */
 public class XoSsl {
 
-    private static Logger LOG = Logger.getLogger(XoSsl.class);
+    private static final Logger LOG = Logger.getLogger(XoSsl.class);
 
-    private static KeyStore KEYSTORE = null;
+    private static KeyStore sKeystore;
 
     public static KeyStore getKeyStore() {
-        if (KEYSTORE == null) {
+        if (sKeystore == null) {
             throw new RuntimeException("SSL KeyStore not initialized");
         }
-        return KEYSTORE;
+        return sKeystore;
     }
 
     public static void initialize(XoApplication application) {
@@ -42,7 +41,7 @@ public class XoSsl {
             // configure HttpClient
             HttpClientWithKeyStore.initializeSsl(ks);
             // remember the KeyStore
-            KEYSTORE = ks;
+            sKeystore = ks;
         } catch (Exception e) {
             LOG.error("Error initializing SSL KeyStore: ", e);
         }

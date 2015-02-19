@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.view.View;
 import android.widget.TextView;
+import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
@@ -25,14 +26,14 @@ public class TalkClientChatItem extends BaseChatItem implements SearchAdapter.Se
 
     private static final Logger LOG = Logger.getLogger(TalkClientChatItem.class);
 
-    private Context mContext;
+    private final Context mContext;
     private TalkClientContact mContact;
 
     @Nullable
-    private Date mLastMessageTimeStamp = null;
+    private Date mLastMessageTimeStamp;
     private String mLastMessageText;
-    private long mUnseenMessageCount = 0;
-    private Date mContactCreationTimeStamp = null;
+    private long mUnseenMessageCount;
+    private Date mContactCreationTimeStamp;
 
     public TalkClientChatItem(TalkClientContact contact, Context context) {
         mContact = contact;
@@ -59,13 +60,14 @@ public class TalkClientChatItem extends BaseChatItem implements SearchAdapter.Se
 
     public void update() {
         try {
-            mUnseenMessageCount = XoApplication.getXoClient().getDatabase().findUnseenMessageCountByContactId(mContact.getClientContactId());
-            TalkClientMessage message = XoApplication.getXoClient().getDatabase().findLatestMessageByContactId(mContact.getClientContactId());
+            XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
+            mUnseenMessageCount = database.findUnseenMessageCountByContactId(mContact.getClientContactId());
+            TalkClientMessage message = database.findLatestMessageByContactId(mContact.getClientContactId());
             if (message != null) {
                 mLastMessageTimeStamp = message.getTimestamp();
                 updateLastMessageText(message);
             }
-            TalkClientContact contact = XoApplication.getXoClient().getDatabase().findContactById(mContact.getClientContactId());
+            TalkClientContact contact = database.findContactById(mContact.getClientContactId());
             if (contact != null) {
                 mContact = contact;
                 mContactCreationTimeStamp = contact.getCreatedTimeStamp();
