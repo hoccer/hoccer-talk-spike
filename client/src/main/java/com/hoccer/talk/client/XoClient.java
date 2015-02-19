@@ -2450,9 +2450,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
 
         // add decrypted information to message
-        if (decryptedBody != null) {
-            clientMessage.setText(decryptedBody);
-        }
+        clientMessage.setText(decryptedBody);
+
         if (decryptedAttachment != null) {
             TalkClientDownload download = new TalkClientDownload();
             download.initializeAsAttachment(mTransferAgent, decryptedAttachment, message.getMessageId(), decryptedKey);
@@ -2670,9 +2669,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     private boolean updateAvatarDownload(TalkClientContact contact, String avatarUrl, String avatarId, Date avatarTimestamp) throws MalformedURLException {
-        boolean haveUrl = avatarUrl != null && !avatarUrl.isEmpty();
-        if (!haveUrl) {
-            LOG.debug("no avatar url for contact " + contact.getClientContactId());
+        boolean urlIsValid = avatarUrl != null && !avatarUrl.isEmpty();
+        if (!urlIsValid) {
+            LOG.debug("no valid avatar url for contact " + contact.getClientContactId());
             contact.setAvatarDownload(null);
             return false;
         }
@@ -2680,12 +2679,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         boolean wantDownload = false;
         TalkClientDownload avatarDownload = contact.getAvatarDownload();
         if (avatarDownload == null) {
-            if (haveUrl) {
-                LOG.debug("new avatar for contact " + contact.getClientContactId());
-                avatarDownload = new TalkClientDownload();
-                avatarDownload.initializeAsAvatar(mTransferAgent, avatarUrl, avatarId, avatarTimestamp);
-                wantDownload = true;
-            }
+            LOG.debug("new avatar for contact " + contact.getClientContactId());
+            avatarDownload = new TalkClientDownload();
+            avatarDownload.initializeAsAvatar(mTransferAgent, avatarUrl, avatarId, avatarTimestamp);
+            wantDownload = true;
         } else {
             try {
                 mDatabase.refreshClientDownload(avatarDownload);
@@ -2694,26 +2691,21 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 return false;
             }
             String downloadUrl = avatarDownload.getDownloadUrl();
-            if (haveUrl) {
-                if (downloadUrl == null || !downloadUrl.equals(avatarUrl)) {
-                    LOG.debug("new avatar for contact " + contact.getClientContactId());
-                    avatarDownload = new TalkClientDownload();
-                    avatarDownload.initializeAsAvatar(mTransferAgent, avatarUrl, avatarId, avatarTimestamp);
+            if (downloadUrl == null || !downloadUrl.equals(avatarUrl)) {
+                LOG.debug("new avatar for contact " + contact.getClientContactId());
+                avatarDownload = new TalkClientDownload();
+                avatarDownload.initializeAsAvatar(mTransferAgent, avatarUrl, avatarId, avatarTimestamp);
+                wantDownload = true;
+            } else {
+                LOG.debug("avatar not changed for contact " + contact.getClientContactId());
+                TalkClientDownload.State state = avatarDownload.getState();
+                if (state != TalkClientDownload.State.COMPLETE && state != TalkClientDownload.State.FAILED) {
                     wantDownload = true;
-                } else {
-                    LOG.debug("avatar not changed for contact " + contact.getClientContactId());
-                    TalkClientDownload.State state = avatarDownload.getState();
-                    if (!state.equals(TalkClientDownload.State.COMPLETE) && !state.equals(TalkClientDownload.State.FAILED)) {
-                        wantDownload = true;
-                    }
                 }
             }
         }
 
-        if (avatarDownload != null) {
-            contact.setAvatarDownload(avatarDownload);
-        }
-
+        contact.setAvatarDownload(avatarDownload);
         return wantDownload;
     }
 
