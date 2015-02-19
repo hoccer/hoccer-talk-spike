@@ -25,7 +25,7 @@ public class ContactOperations {
 
     private static final Logger LOG = Logger.getLogger(ContactOperations.class);
 
-    public static void sendTransfersToContact(List<XoTransfer> transfers, TalkClientContact contact) throws FileNotFoundException, URISyntaxException {
+    public static void sendTransfersToContact(List<? extends XoTransfer> transfers, TalkClientContact contact) throws FileNotFoundException, URISyntaxException {
         for (XoTransfer transfer : transfers) {
             sendTransferToContact(transfer, contact);
         }
