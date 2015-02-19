@@ -18,6 +18,8 @@ import java.util.Set;
 
 public class ContactSelectionFragment extends ListFragment {
 
+    public static final String EXTRA_SELECTED_CONTACT_IDS = "com.hoccer.xo.android.extra.SELECTED_CONTACT_IDS";
+
     private final static Logger LOG = Logger.getLogger(ContactSelectionFragment.class);
 
     private Set<IContactSelectionListener> contactSelectionListeners = new HashSet<IContactSelectionListener>();

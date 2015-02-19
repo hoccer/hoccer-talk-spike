@@ -160,10 +160,10 @@
 
         <!-- SharingActivity activity -->
         <activity
-                android:name="com.hoccer.xo.android.activity.SharingActivity"
+                android:name="com.hoccer.xo.android.activity.ContactSelectionSharingActivity"
                 android:parentActivityName="com.hoccer.xo.android.activity.ChatsActivity"
-                android:label="@string/select_recipients">
-                <!--android:launchMode="singleTask">-->
+                android:label="@string/select_recipients"
+                android:launchMode="singleTask">
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
                     android:value="com.hoccer.xo.android.activity.ChatsActivity"/>
@@ -179,7 +179,7 @@
 
         <!-- ContactSelectionActivity activity -->
         <activity
-                android:name="com.hoccer.xo.android.activity.ContactSelectionActivity"
+                android:name="com.hoccer.xo.android.activity.ContactSelectionResultActivity"
                 android:label="@string/select_recipients"
                 android:screenOrientation="portrait">
         </activity>

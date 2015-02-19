@@ -15,7 +15,7 @@ import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.MediaPlayer;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.activity.ContactSelectionActivity;
+import com.hoccer.xo.android.activity.ContactSelectionResultActivity;
 import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
 import com.hoccer.xo.android.activity.MediaCollectionSelectionActivity;
 import com.hoccer.xo.android.adapter.AttachmentListAdapter;
@@ -161,7 +161,7 @@ public class AttachmentListFragment extends SearchableListFragment {
                     }
                     break;
                 case SELECT_CONTACT_REQUEST:
-                    List<Integer> contactSelections = data.getIntegerArrayListExtra(ContactSelectionActivity.EXTRA_SELECTED_CONTACT_IDS);
+                    List<Integer> contactSelections = data.getIntegerArrayListExtra(ContactSelectionFragment.EXTRA_SELECTED_CONTACT_IDS);
                     // send attachment to all selected contacts
                     for (Integer contactId : contactSelections) {
                         try {
@@ -311,7 +311,7 @@ public class AttachmentListFragment extends SearchableListFragment {
                     return true;
                 case R.id.menu_share:
                     mCurrentActionMode = mode;
-                    startActivityForResult(new Intent(getActivity(), ContactSelectionActivity.class), SELECT_CONTACT_REQUEST);
+                    startActivityForResult(new Intent(getActivity(), ContactSelectionResultActivity.class), SELECT_CONTACT_REQUEST);
                     return true;
                 case R.id.menu_add_to_collection:
                     mCurrentActionMode = mode;

@@ -1,39 +1,25 @@
 package com.hoccer.xo.android.activity;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.SparseBooleanArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.talk.content.SelectedContent;
-import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.activity.ComposableActivity;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
-import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
-import com.hoccer.xo.android.content.selector.AudioSelector;
-import com.hoccer.xo.android.content.selector.IContentSelector;
-import com.hoccer.xo.android.content.selector.ImageSelector;
-import com.hoccer.xo.android.content.selector.VideoSelector;
 import com.hoccer.xo.android.fragment.ContactSelectionFragment;
-import com.hoccer.xo.android.util.ContactOperations;
-import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 
-public class ContactSelectionActivity extends ComposableActivity implements ContactSelectionFragment.IContactSelectionListener {
-
-    public static final String EXTRA_SELECTED_CONTACT_IDS = "com.hoccer.xo.android.extra.SELECTED_CONTACT_IDS";
-    private static final Logger LOG = Logger.getLogger(ContactSelectionActivity.class);
+public abstract class ContactSelectionActivity extends ComposableActivity implements ContactSelectionFragment.IContactSelectionListener {
 
     private ContactSelectionFragment mContactSelectionFragment;
     private Menu mMenu;
 
     @Override
     protected ActivityComponent[] createComponents() {
-        return new ActivityComponent[]{new MediaPlayerActivityComponent(this)};
+        return new ActivityComponent[0];
     }
 
     @Override
@@ -65,31 +51,34 @@ public class ContactSelectionActivity extends ComposableActivity implements Cont
     @Override
     public void onContactSelectionChanged() {
         if (mContactSelectionFragment.getListView().getCheckedItemCount() == 0) {
-            mMenu.findItem(R.id.menu_collections_ok).setVisible(false);
+            mMenu.findItem(R.id.menu_contact_selection_ok).setVisible(false);
         } else {
-            mMenu.findItem(R.id.menu_collections_ok).setVisible(true);
+            mMenu.findItem(R.id.menu_contact_selection_ok).setVisible(true);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        mMenu = menu;
+        menu.findItem(R.id.menu_my_profile).setVisible(false);
+        menu.findItem(R.id.menu_settings).setVisible(false);
+
+        return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_collections_ok:
-                createResultAndFinish();
+            case R.id.menu_contact_selection_ok:
+                handleContactSelection();
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void createResultAndFinish() {
-        Intent intent = new Intent();
-        intent.putIntegerArrayListExtra(EXTRA_SELECTED_CONTACT_IDS,
-                getSelectedContactIdsFromFragment());
-        setResult(RESULT_OK, intent);
+    protected abstract void handleContactSelection();
 
-        finish();
-    }
-
-    private ArrayList<Integer> getSelectedContactIdsFromFragment() {
+    protected ArrayList<Integer> getSelectedContactIdsFromFragment() {
         ArrayList<Integer> selectedContactIds = new ArrayList<Integer>();
         SparseBooleanArray checkedItems = mContactSelectionFragment.getListView().getCheckedItemPositions();
         for (int i = 0; i < checkedItems.size(); i++) {
@@ -101,15 +90,5 @@ public class ContactSelectionActivity extends ComposableActivity implements Cont
         }
 
         return selectedContactIds;
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
-        mMenu = menu;
-        menu.findItem(R.id.menu_my_profile).setVisible(false);
-        menu.findItem(R.id.menu_settings).setVisible(false);
-
-        return true;
     }
 }
