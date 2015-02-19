@@ -3,6 +3,8 @@ package com.hoccer.xo.android.activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.SparseBooleanArray;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,17 +25,17 @@ import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 
-public class ContactSelectionActivity extends ComposableActivity implements ContactSelectionFragment.IContactSelectionListener {
+public class SharingActivity extends ComposableActivity implements ContactSelectionFragment.IContactSelectionListener {
 
     public static final String EXTRA_SELECTED_CONTACT_IDS = "com.hoccer.xo.android.extra.SELECTED_CONTACT_IDS";
-    private static final Logger LOG = Logger.getLogger(ContactSelectionActivity.class);
+    private static final Logger LOG = Logger.getLogger(SharingActivity.class);
 
     private ContactSelectionFragment mContactSelectionFragment;
     private Menu mMenu;
 
     @Override
     protected ActivityComponent[] createComponents() {
-        return new ActivityComponent[]{new MediaPlayerActivityComponent(this)};
+        return new ActivityComponent[]{new MediaPlayerActivityComponent(this)}; //TODO
     }
 
     @Override
@@ -49,6 +51,8 @@ public class ContactSelectionActivity extends ComposableActivity implements Cont
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        TaskStackBuilder.create(this).addNextIntentWithParentStack(NavUtils.getParentActivityIntent(this));
 
         enableUpNavigation();
         showContactSelectionFragment();
@@ -73,20 +77,31 @@ public class ContactSelectionActivity extends ComposableActivity implements Cont
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_collections_ok:
-                createResultAndFinish();
+        if (item.getItemId() == R.id.menu_collections_ok) {
+            if (Intent.ACTION_SEND.equals(getIntent().getAction())) {
+                handleShareIntent(getIntent());
+            }
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void createResultAndFinish() {
-        Intent intent = new Intent();
-        intent.putIntegerArrayListExtra(EXTRA_SELECTED_CONTACT_IDS,
-                getSelectedContactIdsFromFragment());
-        setResult(RESULT_OK, intent);
+    private void handleShareIntent(Intent shareIntent) {
+        Uri contentUri = shareIntent.getParcelableExtra(Intent.EXTRA_STREAM);
+        SelectedContent content = getContent(contentUri, shareIntent.getType());
+        final TalkClientUpload upload = new TalkClientUpload();
+        upload.initializeAsAttachment(content);
 
-        finish();
+        for (Integer contactId : getSelectedContactIdsFromFragment()) {
+            try {
+                TalkClientContact contact = XoApplication.getXoClient().getDatabase().findContactById(contactId);
+                ContactOperations.sendTransferToContact(upload, contact);
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+
+        Intent intent = new Intent(this, ChatsActivity.class);
+        startActivity(intent);
     }
 
     private ArrayList<Integer> getSelectedContactIdsFromFragment() {
@@ -101,6 +116,28 @@ public class ContactSelectionActivity extends ComposableActivity implements Cont
         }
 
         return selectedContactIds;
+    }
+
+    private SelectedContent getContent(Uri contentUri, String type) {
+        IContentSelector selector = determineContentSelectorForType(type);
+
+        Intent intent = new Intent();
+        intent.setData(contentUri);
+
+        return selector.createObjectFromSelectionResult(this, intent);
+    }
+
+    private IContentSelector determineContentSelectorForType(String type) {
+        IContentSelector selector = null;
+        if (type.startsWith("image/")) {
+            selector = new ImageSelector(this);
+        } else if (type.startsWith("video/")) {
+            selector = new VideoSelector(this);
+        } else if (type.startsWith("audio/")) {
+            selector = new AudioSelector(this);
+        }
+
+        return selector;
     }
 
     @Override

@@ -158,12 +158,15 @@
                 android:screenOrientation="portrait">
         </activity>
 
-        <!-- ContactSelectionActivity activity -->
+        <!-- SharingActivity activity -->
         <activity
-                android:name="com.hoccer.xo.android.activity.ContactSelectionActivity"
-                android:label="@string/select_recipients"
-                android:screenOrientation="portrait"
-                android:launchMode="singleTask">
+                android:name="com.hoccer.xo.android.activity.SharingActivity"
+                android:parentActivityName="com.hoccer.xo.android.activity.ChatsActivity"
+                android:label="@string/select_recipients">
+                <!--android:launchMode="singleTask">-->
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="com.hoccer.xo.android.activity.ChatsActivity"/>
             <intent-filter android:label="@string/app_name">
                 <action android:name="android.intent.action.SEND"/>
                 <action android:name="android.intent.action.SEND_MULTIPLE"/>
@@ -172,6 +175,13 @@
                 <data android:mimeType="video/*"/>
                 <data android:mimeType="audio/*"/>
             </intent-filter>
+        </activity>
+
+        <!-- ContactSelectionActivity activity -->
+        <activity
+                android:name="com.hoccer.xo.android.activity.ContactSelectionActivity"
+                android:label="@string/select_recipients"
+                android:screenOrientation="portrait">
         </activity>
 
         <!-- FullscreenPlayerActivity activity -->
