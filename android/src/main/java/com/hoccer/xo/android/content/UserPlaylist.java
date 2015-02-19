@@ -145,7 +145,7 @@ public class UserPlaylist extends MediaPlaylist implements IXoUploadListener, IX
                         mDatabase.findClientMessageByTalkClientUploadId(transfer.getUploadOrDownloadId()) :
                         mDatabase.findClientMessageByTalkClientDownloadId(transfer.getUploadOrDownloadId());
 
-                if (message != null && message.getConversationContact().getClientId().equals(mContact.getClientId())) {
+                if (message != null && message.getConversationContact().getClientContactId() == mContact.getClientContactId()) {
                     mList = new ArrayList<XoTransfer>(mDatabase.findClientDownloadsByMediaTypeAndContactId(ContentMediaType.AUDIO, mContact.getClientContactId()));
                     invokeItemAdded(transfer);
                 }
@@ -169,7 +169,7 @@ public class UserPlaylist extends MediaPlaylist implements IXoUploadListener, IX
                         mDatabase.findClientMessageByTalkClientUploadId(transfer.getUploadOrDownloadId()) :
                         mDatabase.findClientMessageByTalkClientDownloadId(transfer.getUploadOrDownloadId());
 
-                if (message != null && message.getConversationContact().getClientId().equals(mContact.getClientId())) {
+                if (message != null && message.getConversationContact().getClientContactId() == mContact.getClientContactId()) {
                     mList = new ArrayList<XoTransfer>(mDatabase.findClientDownloadsByMediaTypeAndContactId(ContentMediaType.AUDIO, mContact.getClientContactId()));
                     invokeItemRemoved(transfer);
                 }
