@@ -6,21 +6,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.xo.android.activity.ComposableActivity;
-import com.hoccer.xo.android.activity.component.ActivityComponent;
+import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.fragment.ContactSelectionFragment;
 
 import java.util.ArrayList;
 
-public abstract class ContactSelectionActivity extends ComposableActivity implements ContactSelectionFragment.IContactSelectionListener {
+public abstract class ContactSelectionActivity extends XoActivity implements ContactSelectionFragment.IContactSelectionListener {
 
     private ContactSelectionFragment mContactSelectionFragment;
     private Menu mMenu;
-
-    @Override
-    protected ActivityComponent[] createComponents() {
-        return new ActivityComponent[0];
-    }
 
     @Override
     protected int getLayoutResource() {
