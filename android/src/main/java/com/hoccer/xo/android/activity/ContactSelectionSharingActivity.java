@@ -27,17 +27,15 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity im
 
     private static final Logger LOG = Logger.getLogger(ContactSelectionSharingActivity.class);
 
-    private List<Uri> mContentUris = new ArrayList<Uri>();
-
     @Override
     protected void handleContactSelection(ArrayList<Integer> selectedContactIds) {
         if (getIntent().hasExtra(Intent.EXTRA_TEXT)) {
             sendMessageToContacts(getTextFromIntent(), selectedContactIds);
-            showSendingMessageToast();
+            showToast(getString(R.string.sending_message));
         } else if (getIntent().hasExtra(Intent.EXTRA_STREAM)) {
-            mContentUris = getContentUrisFromIntent();
-            sendUploadsToContacts(createUploadsFromContentUris(), selectedContactIds);
-            showSendingUploadsToast();
+            List<Uri> contentUris = getContentUrisFromIntent();
+            sendUploadsToContacts(createUploadsFromContentUris(contentUris), selectedContactIds);
+            showToast(getResources().getQuantityString(R.plurals.sending_attachments, contentUris.size()));
         }
 
         startChatsActivity();
@@ -75,9 +73,9 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity im
         return result;
     }
 
-    private List<TalkClientUpload> createUploadsFromContentUris() {
+    private List<TalkClientUpload> createUploadsFromContentUris(List<Uri> contentUris) {
         List<TalkClientUpload> uploads = new ArrayList<TalkClientUpload>();
-        for (Uri contentUri : mContentUris) {
+        for (Uri contentUri : contentUris) {
             TalkClientUpload upload = new TalkClientUpload();
             upload.initializeAsAttachment(getSelectedContent(contentUri, getIntent().getType()));
             uploads.add(upload);
@@ -86,20 +84,20 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity im
         return uploads;
     }
 
-    private SelectedContent getSelectedContent(Uri contentUri, String type) {
+    private SelectedContent getSelectedContent(Uri contentUri, String mimeType) {
         Intent intent = new Intent();
         intent.setData(contentUri);
 
-        return getContentSelector(type).createObjectFromSelectionResult(this, intent);
+        return getContentSelector(mimeType).createObjectFromSelectionResult(this, intent);
     }
 
-    private IContentSelector getContentSelector(String type) {
+    private IContentSelector getContentSelector(String mimeType) {
         IContentSelector selector = null;
-        if (type.startsWith("image/")) {
+        if (mimeType.startsWith("image/")) {
             selector = new ImageSelector(this);
-        } else if (type.startsWith("video/")) {
+        } else if (mimeType.startsWith("video/")) {
             selector = new VideoSelector(this);
-        } else if (type.startsWith("audio/")) {
+        } else if (mimeType.startsWith("audio/")) {
             selector = new AudioSelector(this);
         }
 
@@ -117,13 +115,7 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity im
         }
     }
 
-    private void showSendingMessageToast() {
-        String message = getString(R.string.sending_message);
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-    }
-
-    private void showSendingUploadsToast() {
-        String message = getResources().getQuantityString(R.plurals.sending_attachments, mContentUris.size());
+    private void showToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
