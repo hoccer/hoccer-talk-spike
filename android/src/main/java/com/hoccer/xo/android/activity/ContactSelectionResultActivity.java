@@ -14,13 +14,8 @@ public class ContactSelectionResultActivity extends ContactSelectionActivity imp
 
     @Override
     protected void handleContactSelection() {
-        createResultAndFinish();
-    }
-
-    private void createResultAndFinish() {
         Intent intent = new Intent();
-        intent.putIntegerArrayListExtra(ContactSelectionFragment.EXTRA_SELECTED_CONTACT_IDS,
-                getSelectedContactIdsFromFragment());
+        intent.putIntegerArrayListExtra(ContactSelectionFragment.EXTRA_SELECTED_CONTACT_IDS, getSelectedContactIdsFromFragment());
         setResult(RESULT_OK, intent);
 
         finish();
