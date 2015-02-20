@@ -45,10 +45,10 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity im
     }
 
     private String getTextFromIntent() {
+        String subject = getIntent().getStringExtra(Intent.EXTRA_SUBJECT) != null ? getIntent().getStringExtra(Intent.EXTRA_SUBJECT) + "\n" : "";
         String url = getIntent().getStringExtra(Intent.EXTRA_TEXT);
-        String subject = getIntent().getStringExtra(Intent.EXTRA_SUBJECT) != null ? getIntent().getStringExtra(Intent.EXTRA_SUBJECT) : "";
 
-        return subject + " " + url;
+        return subject + url;
     }
 
     private void sendMessageToContacts(String textFromIntent, List<Integer> selectedContactIds) {
