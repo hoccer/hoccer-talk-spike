@@ -229,6 +229,14 @@
         Dateien selbst werden dabei nicht gelöscht.
     </string>
 
+    <!-- Share content from other apps -->
+    <string name="sending_message">Sende Nachricht..</string>
+
+    <plurals name="sending_attachments">
+        <item quantity="one">Sende Datei..</item>
+        <item quantity="other">Sende Dateien..</item>
+    </plurals>
+
     <!-- Preferences -->
     <string name="preference_keysize_summary">RSA Schlüssel mit gewählter Schlüssellänge erneuern</string>
     <string name="preference_keysize_title">RSA Schlüssellänge</string>

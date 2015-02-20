@@ -5,6 +5,8 @@ import android.net.Uri;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.TaskStackBuilder;
 import android.view.MenuItem;
+import android.widget.Toast;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
@@ -25,12 +27,17 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity im
 
     private static final Logger LOG = Logger.getLogger(ContactSelectionSharingActivity.class);
 
+    private List<Uri> mContentUris = new ArrayList<Uri>();
+
     @Override
     protected void handleContactSelection() {
         if (getIntent().hasExtra(Intent.EXTRA_TEXT)) {
             sendMessageToContacts(getTextFromIntent());
+            showSendingMessageToast();
         } else if (getIntent().hasExtra(Intent.EXTRA_STREAM)) {
-            sendUploadsToContacts(createUploads(getContentUrisFromIntent()));
+            mContentUris = getContentUrisFromIntent();
+            sendUploadsToContacts(createUploadsFromContentUris());
+            showSendingUploadsToast();
         }
 
         startChatsActivity();
@@ -68,9 +75,9 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity im
         return result;
     }
 
-    private List<TalkClientUpload> createUploads(List<Uri> contentUris) {
+    private List<TalkClientUpload> createUploadsFromContentUris() {
         List<TalkClientUpload> uploads = new ArrayList<TalkClientUpload>();
-        for (Uri contentUri : contentUris) {
+        for (Uri contentUri : mContentUris) {
             TalkClientUpload upload = new TalkClientUpload();
             upload.initializeAsAttachment(getSelectedContent(contentUri, getIntent().getType()));
             uploads.add(upload);
@@ -108,6 +115,16 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity im
                 LOG.error(e.getMessage(), e);
             }
         }
+    }
+
+    private void showSendingMessageToast() {
+        String message = getString(R.string.sending_message);
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
+
+    private void showSendingUploadsToast() {
+        String message = getResources().getQuantityString(R.plurals.sending_attachments, mContentUris.size());
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
     private void startChatsActivity() {
