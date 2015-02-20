@@ -68,7 +68,6 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
         } else {
             viewHolder.checkedNameTextView.setText(contact.getNickname());
             if (!contact.isClientRelated() && contact.isNearby()) {
-                //TODO Set nearby icon indicator icon instead of text
                 viewHolder.checkedNameTextView.setText(contact.getNickname() + " (" + parent.getContext().getString(R.string.nearby) + ")");
             }
         }
