@@ -158,7 +158,7 @@
                 android:screenOrientation="portrait">
         </activity>
 
-        <!-- SharingActivity activity -->
+        <!-- ContactSelectionSharingActivity activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.ContactSelectionSharingActivity"
                 android:parentActivityName="com.hoccer.xo.android.activity.ChatsActivity"
