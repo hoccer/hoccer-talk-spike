@@ -115,20 +115,14 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
 
     @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
-        LOG.info("onClientPresenceChanged");
-        refreshList();
     }
 
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
-        LOG.info("onClientRelationshipChanged");
-        refreshList();
     }
 
     @Override
     public void onGroupPresenceChanged(TalkClientContact contact) {
-        LOG.info("onGroupPresenceChanged");
-        refreshList();
     }
 
     @Override
