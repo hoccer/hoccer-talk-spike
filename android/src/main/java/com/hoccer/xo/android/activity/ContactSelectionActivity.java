@@ -10,6 +10,7 @@ import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.fragment.ContactSelectionFragment;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public abstract class ContactSelectionActivity extends XoActivity implements ContactSelectionFragment.IContactSelectionListener {
 
@@ -65,14 +66,14 @@ public abstract class ContactSelectionActivity extends XoActivity implements Con
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_contact_selection_ok:
-                handleContactSelection();
+                handleContactSelection(getSelectedContactIdsFromFragment());
         }
         return super.onOptionsItemSelected(item);
     }
 
-    protected abstract void handleContactSelection();
+    protected abstract void handleContactSelection(ArrayList<Integer> selectedContactIds);
 
-    protected ArrayList<Integer> getSelectedContactIdsFromFragment() {
+    private ArrayList<Integer> getSelectedContactIdsFromFragment() {
         ArrayList<Integer> selectedContactIds = new ArrayList<Integer>();
         SparseBooleanArray checkedItems = mContactSelectionFragment.getListView().getCheckedItemPositions();
         for (int i = 0; i < checkedItems.size(); i++) {

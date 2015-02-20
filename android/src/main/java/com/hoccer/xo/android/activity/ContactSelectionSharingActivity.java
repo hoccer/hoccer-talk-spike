@@ -30,13 +30,13 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity im
     private List<Uri> mContentUris = new ArrayList<Uri>();
 
     @Override
-    protected void handleContactSelection() {
+    protected void handleContactSelection(ArrayList<Integer> selectedContactIds) {
         if (getIntent().hasExtra(Intent.EXTRA_TEXT)) {
-            sendMessageToContacts(getTextFromIntent());
+            sendMessageToContacts(getTextFromIntent(), selectedContactIds);
             showSendingMessageToast();
         } else if (getIntent().hasExtra(Intent.EXTRA_STREAM)) {
             mContentUris = getContentUrisFromIntent();
-            sendUploadsToContacts(createUploadsFromContentUris());
+            sendUploadsToContacts(createUploadsFromContentUris(), selectedContactIds);
             showSendingUploadsToast();
         }
 
@@ -51,8 +51,8 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity im
         return subject + " " + url;
     }
 
-    private void sendMessageToContacts(String textFromIntent) {
-        for (Integer contactId : getSelectedContactIdsFromFragment()) {
+    private void sendMessageToContacts(String textFromIntent, List<Integer> selectedContactIds) {
+        for (Integer contactId : selectedContactIds) {
             try {
                 TalkClientContact contact = XoApplication.get().getXoClient().getDatabase().findContactById(contactId);
                 TalkClientMessage message = getXoClient().composeClientMessage(contact, textFromIntent);
@@ -106,8 +106,8 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity im
         return selector;
     }
 
-    private void sendUploadsToContacts(List<TalkClientUpload> uploads) {
-        for (Integer contactId : getSelectedContactIdsFromFragment()) {
+    private void sendUploadsToContacts(List<TalkClientUpload> uploads, List<Integer> selectedContactIds) {
+        for (Integer contactId : selectedContactIds) {
             try {
                 TalkClientContact contact = XoApplication.get().getXoClient().getDatabase().findContactById(contactId);
                 ContactOperations.sendTransfersToContact(uploads, contact);
