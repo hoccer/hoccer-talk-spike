@@ -6,6 +6,7 @@ import android.support.v4.app.NavUtils;
 import android.support.v4.app.TaskStackBuilder;
 import android.view.MenuItem;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.XoApplication;
@@ -26,9 +27,33 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity im
 
     @Override
     protected void handleContactSelection() {
-        sendUploadsToContacts(createUploads(getContentUrisFromIntent()));
+        if (getIntent().hasExtra(Intent.EXTRA_TEXT)) {
+            sendMessageToContacts(getTextFromIntent());
+        } else if (getIntent().hasExtra(Intent.EXTRA_STREAM)) {
+            sendUploadsToContacts(createUploads(getContentUrisFromIntent()));
+        }
+
         startChatsActivity();
         finish();
+    }
+
+    private String getTextFromIntent() {
+        String url = getIntent().getStringExtra(Intent.EXTRA_TEXT);
+        String subject = getIntent().getStringExtra(Intent.EXTRA_SUBJECT) != null ? getIntent().getStringExtra(Intent.EXTRA_SUBJECT) : "";
+
+        return subject + " " + url;
+    }
+
+    private void sendMessageToContacts(String textFromIntent) {
+        for (Integer contactId : getSelectedContactIdsFromFragment()) {
+            try {
+                TalkClientContact contact = XoApplication.get().getXoClient().getDatabase().findContactById(contactId);
+                TalkClientMessage message = getXoClient().composeClientMessage(contact, textFromIntent);
+                getXoClient().sendMessage(message.getMessageTag());
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
     }
 
     private List<Uri> getContentUrisFromIntent() {
