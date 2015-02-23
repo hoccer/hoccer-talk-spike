@@ -4,7 +4,6 @@ package com.hoccer.xo.android;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.support.v4.app.NotificationCompat;
@@ -24,7 +23,6 @@ public class NearbyController implements BackgroundManager.Listener {
     private boolean mNearbyEnabled;
     private Runnable mNearbyTimeout;
     private final Handler mNearbyTimeoutHandler = new Handler();
-
 
     private final NotificationManager mNotificationManager;
     private final EnvironmentUpdater mEnvironmentUpdater;
