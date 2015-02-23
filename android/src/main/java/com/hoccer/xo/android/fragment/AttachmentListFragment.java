@@ -167,6 +167,7 @@ public class AttachmentListFragment extends SearchableListFragment {
                         try {
                             TalkClientContact contact = mDatabase.findContactById(contactId);
                             ContactOperations.sendTransfersToContact(mAttachmentAdapter.getSelectedItems(), contact);
+                            showToast(getResources().getQuantityString(R.plurals.sending_attachments, mAttachmentAdapter.getSelectedItems().size()));
                         } catch (SQLException e) {
                             LOG.error(e.getMessage(), e);
                         } catch (FileNotFoundException e) {
@@ -182,6 +183,10 @@ public class AttachmentListFragment extends SearchableListFragment {
         if (mCurrentActionMode != null) {
             mCurrentActionMode.finish();
         }
+    }
+
+    private void showToast(String message) {
+        Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
     }
 
     @Override
