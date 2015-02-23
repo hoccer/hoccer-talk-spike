@@ -1,21 +1,19 @@
 package com.hoccer.xo.android.activity;
 
 import android.os.Bundle;
-import android.util.SparseBooleanArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.xo.android.adapter.ContactSelectionAdapter;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.fragment.ContactSelectionFragment;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public abstract class ContactSelectionActivity extends XoActivity implements ContactSelectionFragment.IContactSelectionListener {
+public abstract class ContactSelectionActivity extends XoActivity {
 
     private ContactSelectionFragment mContactSelectionFragment;
-    private Menu mMenu;
 
     @Override
     protected int getLayoutResource() {
@@ -37,25 +35,14 @@ public abstract class ContactSelectionActivity extends XoActivity implements Con
 
     private void showContactSelectionFragment() {
         mContactSelectionFragment = new ContactSelectionFragment();
-        mContactSelectionFragment.addContactSelectionListener(this);
         android.support.v4.app.FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.fl_fragment_container, mContactSelectionFragment);
         ft.commit();
     }
 
     @Override
-    public void onContactSelectionChanged() {
-        if (mContactSelectionFragment.getListView().getCheckedItemCount() == 0) {
-            mMenu.findItem(R.id.menu_contact_selection_ok).setVisible(false);
-        } else {
-            mMenu.findItem(R.id.menu_contact_selection_ok).setVisible(true);
-        }
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        mMenu = menu;
         menu.findItem(R.id.menu_my_profile).setVisible(false);
         menu.findItem(R.id.menu_settings).setVisible(false);
 
@@ -66,24 +53,14 @@ public abstract class ContactSelectionActivity extends XoActivity implements Con
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_contact_selection_ok:
-                handleContactSelection(getSelectedContactIdsFromFragment());
+                handleContactSelection(getSelectedContactsFromFragment());
         }
         return super.onOptionsItemSelected(item);
     }
 
-    protected abstract void handleContactSelection(ArrayList<Integer> selectedContactIds);
+    protected abstract void handleContactSelection(List<TalkClientContact> selectedContacts);
 
-    private ArrayList<Integer> getSelectedContactIdsFromFragment() {
-        ArrayList<Integer> selectedContactIds = new ArrayList<Integer>();
-        SparseBooleanArray checkedItems = mContactSelectionFragment.getListView().getCheckedItemPositions();
-        for (int i = 0; i < checkedItems.size(); i++) {
-            int pos = checkedItems.keyAt(i);
-            if (checkedItems.get(pos)) {
-                TalkClientContact contact = (TalkClientContact) mContactSelectionFragment.getListView().getAdapter().getItem(pos);
-                selectedContactIds.add(contact.getClientContactId());
-            }
-        }
-
-        return selectedContactIds;
+    private List<TalkClientContact> getSelectedContactsFromFragment() {
+        return ((ContactSelectionAdapter)mContactSelectionFragment.getListAdapter()).getSelectedContacts();
     }
 }

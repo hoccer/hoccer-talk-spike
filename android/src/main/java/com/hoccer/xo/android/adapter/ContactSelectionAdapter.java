@@ -11,19 +11,30 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.view.AvatarView;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ContactSelectionAdapter extends BaseAdapter implements IXoContactListener {
 
     static final Logger LOG = Logger.getLogger(ContactSelectionAdapter.class);
 
     private final List<TalkClientContact> mContacts;
+    private final List<TalkClientContact> mSelectedContacts = new ArrayList<TalkClientContact>();
+
+    private final Set<IContactSelectionListener> mContactSelectionListeners = new HashSet<IContactSelectionListener>();
+
+    public interface IContactSelectionListener {
+        public void onContactSelectionChanged();
+    }
 
     public ContactSelectionAdapter() {
         mContacts = new ArrayList<TalkClientContact>();
@@ -60,7 +71,8 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        TalkClientContact contact = mContacts.get(position);
+        final TalkClientContact contact = mContacts.get(position);
+        viewHolder.contact = contact;
         viewHolder.contactAvatarView.setContact(contact);
 
         if (contact.isGroup() && contact.getGroupPresence() != null && contact.getGroupPresence().isTypeNearby()) {
@@ -71,6 +83,25 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
                 viewHolder.checkedNameTextView.setText(contact.getNickname() + " (" + parent.getContext().getString(R.string.nearby) + ")");
             }
         }
+
+        viewHolder.checkedNameTextView.setChecked(mSelectedContacts.contains(contact));
+
+        convertView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ViewHolder viewHolder = (ViewHolder) v.getTag();
+                if (mSelectedContacts.contains(viewHolder.contact)) {
+                    mSelectedContacts.remove(viewHolder.contact);
+                } else {
+                    mSelectedContacts.add(viewHolder.contact);
+                }
+                viewHolder.checkedNameTextView.setChecked(!viewHolder.checkedNameTextView.isChecked());
+
+                for (IContactSelectionListener listener : mContactSelectionListeners) {
+                    listener.onContactSelectionChanged();
+                }
+            }
+        });
 
         return convertView;
     }
@@ -95,12 +126,17 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
         } catch (SQLException e) {
             LOG.error("Could not load contacts from database", e);
         }
+
+        List<TalkClientContact> newSelectedContacts = new ArrayList<TalkClientContact>();
+        newSelectedContacts.addAll(CollectionUtils.intersection(mContacts, mSelectedContacts));
+        mSelectedContacts.clear();
+        mSelectedContacts.addAll(newSelectedContacts);
     }
 
     private static boolean shouldShow(TalkClientContact contact) {
         boolean shouldShow = false;
         if (contact.isGroup()) {
-            if (contact.isGroupInvolved() && contact.isGroupExisting() && !(contact.getGroupPresence() != null && contact.getGroupPresence().isKept())) {
+            if (contact.isGroupInvolved() && contact.isGroupExisting() && groupHasOtherContacts(contact.getGroupId())) {
                 shouldShow = true;
             }
         } else if (contact.isClient()) {
@@ -110,6 +146,15 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
         }
 
         return shouldShow;
+    }
+
+    private static boolean groupHasOtherContacts(String groupId) {
+        try {
+            return XoApplication.get().getXoClient().getDatabase().findMembershipsInGroupByState(groupId, TalkGroupMembership.STATE_JOINED).size() > 1;
+        } catch (SQLException e) {
+            LOG.error(e);
+        }
+        return false;
     }
 
     @Override
@@ -130,19 +175,36 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
         refreshList();
     }
 
+    public List<TalkClientContact> getSelectedContacts() {
+        return mSelectedContacts;
+    }
+
     private void refreshList() {
         loadContacts();
         Handler guiHandler = new Handler(Looper.getMainLooper());
         guiHandler.post(new Runnable() {
             @Override
             public void run() {
+                for (IContactSelectionListener listener : mContactSelectionListeners) {
+                    listener.onContactSelectionChanged();
+                }
+
                 notifyDataSetChanged();
             }
         });
     }
 
+    public void addContactSelectionListener(IContactSelectionListener l) {
+        mContactSelectionListeners.add(l);
+    }
+
+    public void removeContactSelectionListener(IContactSelectionListener l) {
+        mContactSelectionListeners.remove(l);
+    }
+
     private class ViewHolder {
         public AvatarView contactAvatarView;
         public CheckedTextView checkedNameTextView;
+        public TalkClientContact contact;
     }
 }

@@ -11,7 +11,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.SelectedContent;
-import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.adapter.ContactSelectionAdapter;
 import com.hoccer.xo.android.content.selector.AudioSelector;
 import com.hoccer.xo.android.content.selector.IContentSelector;
 import com.hoccer.xo.android.content.selector.ImageSelector;
@@ -23,18 +23,18 @@ import org.apache.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ContactSelectionSharingActivity extends ContactSelectionActivity implements ContactSelectionFragment.IContactSelectionListener {
+public class ContactSelectionSharingActivity extends ContactSelectionActivity {
 
     private static final Logger LOG = Logger.getLogger(ContactSelectionSharingActivity.class);
 
     @Override
-    protected void handleContactSelection(ArrayList<Integer> selectedContactIds) {
+    protected void handleContactSelection(List<TalkClientContact> selectedContacts) {
         if (getIntent().hasExtra(Intent.EXTRA_TEXT)) {
-            sendMessageToContacts(getTextFromIntent(), selectedContactIds);
+            sendMessageToContacts(getTextFromIntent(), selectedContacts);
             showToast(getString(R.string.sending_message));
         } else if (getIntent().hasExtra(Intent.EXTRA_STREAM)) {
             List<Uri> contentUris = getContentUrisFromIntent();
-            sendUploadsToContacts(createUploadsFromContentUris(contentUris), selectedContactIds);
+            sendUploadsToContacts(createUploadsFromContentUris(contentUris), selectedContacts);
             showToast(getResources().getQuantityString(R.plurals.sending_attachments, contentUris.size()));
         }
 
@@ -49,10 +49,9 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity im
         return subject + url;
     }
 
-    private void sendMessageToContacts(String textFromIntent, List<Integer> selectedContactIds) {
-        for (Integer contactId : selectedContactIds) {
+    private void sendMessageToContacts(String textFromIntent, List<TalkClientContact> selectedContacts) {
+        for (TalkClientContact contact : selectedContacts) {
             try {
-                TalkClientContact contact = XoApplication.get().getXoClient().getDatabase().findContactById(contactId);
                 TalkClientMessage message = getXoClient().composeClientMessage(contact, textFromIntent);
                 getXoClient().sendMessage(message.getMessageTag());
             } catch (Exception e) {
@@ -104,10 +103,9 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity im
         return selector;
     }
 
-    private void sendUploadsToContacts(List<TalkClientUpload> uploads, List<Integer> selectedContactIds) {
-        for (Integer contactId : selectedContactIds) {
+    private void sendUploadsToContacts(List<TalkClientUpload> uploads, List<TalkClientContact> selectedContacts) {
+        for (TalkClientContact contact : selectedContacts) {
             try {
-                TalkClientContact contact = XoApplication.get().getXoClient().getDatabase().findContactById(contactId);
                 ContactOperations.sendTransfersToContact(uploads, contact);
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
