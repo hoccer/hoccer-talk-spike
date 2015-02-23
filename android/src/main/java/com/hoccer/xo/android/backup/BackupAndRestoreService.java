@@ -203,7 +203,7 @@ public class BackupAndRestoreService extends CancelableHandlerService {
 
     private NotificationCompat.Builder createNotificationBuilder() {
         return new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_notification)
+                .setSmallIcon(R.drawable.ic_notification_backup)
                 .setContentIntent(createPendingIntent(null, null));
     }
 
