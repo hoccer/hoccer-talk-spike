@@ -488,7 +488,7 @@ public class XoClientService extends Service {
             builder.setContentIntent(pendingIntent);
 
             // title is always the contact name
-            builder.setContentTitle(contact.getNickname());
+            builder.setContentTitle(getContactName(contact));
 
             // text depends on number of messages
             if (holder.getUnseenMessages().size() == 1) {
@@ -506,7 +506,7 @@ public class XoClientService extends Service {
             // concatenate contact names
             StringBuilder sb = new StringBuilder();
             for (ContactUnseenMessageHolder holder : contactsMap.values()) {
-                sb.append(holder.getContact().getNickname()).append(CONTACT_DELIMETER);
+                sb.append(getContactName(holder.getContact())).append(CONTACT_DELIMETER);
             }
 
             // set fields
@@ -528,9 +528,17 @@ public class XoClientService extends Service {
         // log all unseen messages found
         StringBuilder logMessage = new StringBuilder("Notifying about unseen messages: ");
         for (ContactUnseenMessageHolder holder : contactsMap.values()) {
-            logMessage.append(holder.getContact().getNickname()).append("(").append(holder.getUnseenMessages().size()).append(") ");
+            logMessage.append(getContactName(holder.getContact())).append("(").append(holder.getUnseenMessages().size()).append(") ");
         }
         LOG.debug(logMessage);
+    }
+
+    private String getContactName(TalkClientContact contact) {
+        if (contact.isGroup() && contact.getGroupPresence() != null && contact.getGroupPresence().isTypeNearby()) {
+            return getString(R.string.nearby_text);
+        } else {
+            return contact.getNickname();
+        }
     }
 
     private void createPushMessageNotification(String message) {
