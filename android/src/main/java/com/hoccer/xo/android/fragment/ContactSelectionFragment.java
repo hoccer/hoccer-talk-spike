@@ -2,26 +2,18 @@ package com.hoccer.xo.android.fragment;
 
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.AbsListView;
-import android.widget.AdapterView;
-import android.widget.CheckedTextView;
 import com.artcom.hoccer.R;
 import com.hoccer.xo.android.adapter.ContactSelectionAdapter;
 
-import java.util.HashSet;
-import java.util.Set;
 
+public class ContactSelectionFragment extends ListFragment implements ContactSelectionAdapter.IContactSelectionListener{
 
-public class ContactSelectionFragment extends ListFragment {
+    public static final String EXTRA_SELECTED_CONTACT_IDS = "com.hoccer.xo.android.extra.SELECTED_CONTACT_IDS";
 
-    private final Set<IContactSelectionListener> contactSelectionListeners = new HashSet<IContactSelectionListener>();
-
-    public interface IContactSelectionListener {
-        public void onContactSelectionChanged();
-    }
+    private ContactSelectionAdapter mContactSelectionAdapter;
+    private Menu mMenu;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -33,29 +25,43 @@ public class ContactSelectionFragment extends ListFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setupListView();
-        setListAdapter(new ContactSelectionAdapter());
     }
 
-    public void addContactSelectionListener(IContactSelectionListener l) {
-        contactSelectionListeners.add(l);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mContactSelectionAdapter = new ContactSelectionAdapter();
+        setListAdapter(mContactSelectionAdapter);
+        mContactSelectionAdapter.addContactSelectionListener(this);
+        mContactSelectionAdapter.registerListeners();
+
+        setHasOptionsMenu(true);
     }
 
-    public void removeContactSelectionListener(IContactSelectionListener l) {
-        contactSelectionListeners.remove(l);
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mContactSelectionAdapter.unregisterListeners();
+        mContactSelectionAdapter.removeContactSelectionListener(this);
     }
 
     private void setupListView() {
         getListView().setItemsCanFocus(false);
         getListView().setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
-        getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                CheckedTextView checkedTextView = (CheckedTextView) view.findViewById(R.id.contact_name_checked);
-                checkedTextView.setChecked(!checkedTextView.isChecked());
-                for (IContactSelectionListener listener : contactSelectionListeners) {
-                    listener.onContactSelectionChanged();
-                }
-            }
-        });
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        mMenu = menu;
+    }
+
+    @Override
+    public void onContactSelectionChanged() {
+        if (mContactSelectionAdapter.getSelectedContacts().size() == 0) {
+            mMenu.findItem(R.id.menu_contact_selection_ok).setVisible(false);
+        } else {
+            mMenu.findItem(R.id.menu_contact_selection_ok).setVisible(true);
+        }
     }
 }

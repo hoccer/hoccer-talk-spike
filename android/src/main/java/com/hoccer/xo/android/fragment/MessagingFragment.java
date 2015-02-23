@@ -69,7 +69,7 @@ public class MessagingFragment extends XoListFragment
                 return;
             }
         } else {
-            LOG.error("MessagingFragment requires contactId as argument.");
+            LOG.error("MessagingFragment requires clientContactId as argument.");
             return;
         }
 

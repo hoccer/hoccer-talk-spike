@@ -1,31 +1,19 @@
 package com.hoccer.xo.android.activity;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.util.SparseBooleanArray;
 import android.view.Menu;
 import android.view.MenuItem;
-import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.xo.android.activity.component.ActivityComponent;
-import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
-import com.hoccer.xo.android.fragment.ContactSelectionFragment;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.xo.android.adapter.ContactSelectionAdapter;
+import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.fragment.ContactSelectionFragment;
 
-import java.util.ArrayList;
+import java.util.List;
 
-public class ContactSelectionActivity extends ComposableActivity implements ContactSelectionFragment.IContactSelectionListener {
-
-    public static final String EXTRA_SELECTED_CONTACT_IDS = "com.hoccer.xo.android.extra.SELECTED_CONTACT_IDS";
-
+public abstract class ContactSelectionActivity extends XoActivity {
 
     private ContactSelectionFragment mContactSelectionFragment;
-
-    private Menu mMenu;
-
-    @Override
-    protected ActivityComponent[] createComponents() {
-        return new ActivityComponent[] { new MediaPlayerActivityComponent(this) };
-    }
 
     @Override
     protected int getLayoutResource() {
@@ -41,8 +29,12 @@ public class ContactSelectionActivity extends ComposableActivity implements Cont
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        enableUpNavigation();
+        showContactSelectionFragment();
+    }
+
+    private void showContactSelectionFragment() {
         mContactSelectionFragment = new ContactSelectionFragment();
-        mContactSelectionFragment.addContactSelectionListener(this);
         android.support.v4.app.FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.fl_fragment_container, mContactSelectionFragment);
         ft.commit();
@@ -51,7 +43,6 @@ public class ContactSelectionActivity extends ComposableActivity implements Cont
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        mMenu = menu;
         menu.findItem(R.id.menu_my_profile).setVisible(false);
         menu.findItem(R.id.menu_settings).setVisible(false);
 
@@ -61,41 +52,15 @@ public class ContactSelectionActivity extends ComposableActivity implements Cont
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_collections_ok:
-                createResultAndFinish();
+            case R.id.menu_contact_selection_ok:
+                handleContactSelection(getSelectedContactsFromFragment());
         }
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onContactSelectionChanged() {
-        if (mContactSelectionFragment.getListView().getCheckedItemCount() == 0) {
-            mMenu.findItem(R.id.menu_collections_ok).setVisible(false);
-        } else {
-            mMenu.findItem(R.id.menu_collections_ok).setVisible(true);
-        }
-    }
+    protected abstract void handleContactSelection(List<TalkClientContact> selectedContacts);
 
-    private void createResultAndFinish() {
-        Intent resultIntent = new Intent();
-        resultIntent.putIntegerArrayListExtra(EXTRA_SELECTED_CONTACT_IDS,
-                getSelectedContactIdsFromFragment(mContactSelectionFragment));
-        setResult(RESULT_OK, resultIntent);
-
-        finish();
-    }
-
-    private static ArrayList<Integer> getSelectedContactIdsFromFragment(ContactSelectionFragment contactSelectionFragment) {
-        ArrayList<Integer> selectedContactIds = new ArrayList<Integer>();
-        SparseBooleanArray checkedItems = contactSelectionFragment.getListView().getCheckedItemPositions();
-        for (int i = 0; i < checkedItems.size(); i++) {
-            int pos = checkedItems.keyAt(i);
-            if (checkedItems.get(pos)) {
-                TalkClientContact contact = (TalkClientContact) contactSelectionFragment.getListView().getAdapter().getItem(pos);
-                selectedContactIds.add(contact.getClientContactId());
-            }
-        }
-
-        return selectedContactIds;
+    private List<TalkClientContact> getSelectedContactsFromFragment() {
+        return ((ContactSelectionAdapter)mContactSelectionFragment.getListAdapter()).getSelectedContacts();
     }
 }

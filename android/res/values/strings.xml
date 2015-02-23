@@ -241,6 +241,14 @@
         will not be deleted.
     </string>
 
+    <!-- Share content from other apps -->
+    <string name="sending_message">Sending message..</string>
+
+    <plurals name="sending_attachments">
+        <item quantity="one">Sending attachment..</item>
+        <item quantity="other">Sending attachments..</item>
+    </plurals>
+
     <!-- Preferences -->
     <string name="preference_keysize_summary">Renew RSA key with selected size</string>
     <string name="preference_keysize_title">RSA Key Size</string>
@@ -399,6 +407,8 @@
     <string name="size">File size</string>
 
     <string name="progress_cancelling">Cancelling..</string>
+
+    <string name="nearby">nearby</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>
