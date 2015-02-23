@@ -4,6 +4,8 @@ package com.hoccer.xo.android;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.support.v4.app.NotificationCompat;
 import com.artcom.hoccer.R;
@@ -114,6 +116,7 @@ public class NearbyController implements BackgroundManager.Listener {
     private static Notification buildNotification() {
         return new NotificationCompat.Builder(XoApplication.get())
                 .setSmallIcon(R.drawable.ic_notification_nearby)
+                .setLargeIcon(BitmapFactory.decodeResource(XoApplication.get().getResources(), R.drawable.ic_launcher))
                 .setContentTitle(XoApplication.get().getString(R.string.nearby_notification_title))
                 .setContentText(XoApplication.get().getString(R.string.nearby_notification_text))
                 .setAutoCancel(false)

@@ -5,12 +5,15 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Message;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.LocalBroadcastManager;
 import com.artcom.hoccer.R;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.*;
 import com.hoccer.xo.android.service.CancelableHandlerService;
 import com.hoccer.xo.android.service.NotificationId;
@@ -204,6 +207,7 @@ public class BackupAndRestoreService extends CancelableHandlerService {
     private NotificationCompat.Builder createNotificationBuilder() {
         return new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_notification_backup)
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
                 .setContentIntent(createPendingIntent(null, null));
     }
 
