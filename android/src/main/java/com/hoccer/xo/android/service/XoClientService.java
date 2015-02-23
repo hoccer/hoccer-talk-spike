@@ -454,7 +454,7 @@ public class XoClientService extends Service {
         Notification.Builder builder = new Notification.Builder(this);
 
         // always set the small icon (should be different depending on if we have a large one)
-        builder.setSmallIcon(R.drawable.ic_notification);
+        builder.setSmallIcon(R.drawable.ic_notification_message);
 
         // large icon
         Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
