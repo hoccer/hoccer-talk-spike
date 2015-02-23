@@ -171,7 +171,6 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
-        LOG.info("onGroupMembershipChanged");
         refreshList();
     }
 
