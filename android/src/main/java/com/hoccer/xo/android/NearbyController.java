@@ -3,15 +3,19 @@ package com.hoccer.xo.android;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.support.v4.app.NotificationCompat;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
+import com.hoccer.xo.android.activity.ChatsActivity;
 import com.hoccer.xo.android.nearby.EnvironmentUpdater;
 import com.hoccer.xo.android.service.NotificationId;
+import com.hoccer.xo.android.util.IntentHelper;
 import org.apache.log4j.Logger;
 
 public class NearbyController implements BackgroundManager.Listener {
@@ -112,11 +116,15 @@ public class NearbyController implements BackgroundManager.Listener {
     }
 
     private static Notification buildNotification() {
+        Intent intent = new Intent(XoApplication.get(), ChatsActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(XoApplication.get(), 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
         return new NotificationCompat.Builder(XoApplication.get())
                 .setSmallIcon(R.drawable.ic_notification_nearby)
                 .setLargeIcon(BitmapFactory.decodeResource(XoApplication.get().getResources(), R.drawable.ic_launcher))
                 .setContentTitle(XoApplication.get().getString(R.string.nearby_notification_title))
                 .setContentText(XoApplication.get().getString(R.string.nearby_notification_text))
+                .setContentIntent(pendingIntent)
                 .setAutoCancel(false)
                 .setOngoing(true)
                 .build();
