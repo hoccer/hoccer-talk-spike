@@ -344,7 +344,7 @@
     <string name="nearby_invite_all">%1$d Mitglieder als Freunde einladen</string>
     <string name="nearby_disinvite_all">%1$d Mitglieder als Freunde ausladen</string>
     <string name="nearby_notification_title">In der Nähe</string>
-    <string name="nearby_notification_text">In der Nähe Modus aktiviert</string>
+    <string name="nearby_notification_text">In der Nähe Modus aktiv</string>
 
     <string name="profile_chat_info_text">Chat</string>
     <!--<string name="messages_count">%1$s Nachrichten</string>-->
