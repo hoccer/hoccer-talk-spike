@@ -1357,19 +1357,21 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                                         updateGroupMembership(membership);
                                     }
                                 } else {
-                                    // TODO: properly handle group deletion, the following code just marks the group and members as deleted
-                                    LOG.info("Removing members and group with name=" + groupContact.getNickname());
                                     TalkGroupPresence groupPresence = groupContact.getGroupPresence();
-                                    if (groupPresence != null) {
-                                        groupPresence.setState(TalkGroupPresence.STATE_DELETED);
-                                        mDatabase.saveGroupPresence(groupPresence);
-                                    }
+                                    if (groupPresence != null && groupPresence.isTypeNearby()) {
+                                        destroyNearbyGroup(groupContact);
+                                    } else {
+                                        if (groupPresence != null) {
+                                            groupPresence.setState(TalkGroupPresence.STATE_DELETED);
+                                            mDatabase.saveGroupPresence(groupPresence);
+                                        }
 
-                                    // update group member state
-                                    List<TalkGroupMembership> memberships = mDatabase.findMembershipsInGroup(groupContact.getGroupId());
-                                    for (TalkGroupMembership membership : memberships) {
-                                        membership.setState(TalkGroupMembership.STATE_GROUP_REMOVED);
-                                        mDatabase.saveGroupMembership(membership);
+                                        // update group member state
+                                        List<TalkGroupMembership> memberships = mDatabase.findMembershipsInGroup(groupContact.getGroupId());
+                                        for (TalkGroupMembership membership : memberships) {
+                                            membership.setState(TalkGroupMembership.STATE_GROUP_REMOVED);
+                                            mDatabase.saveGroupMembership(membership);
+                                        }
                                     }
 
                                     for (IXoContactListener listener : mContactListeners) {
@@ -1377,7 +1379,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                                         listener.onGroupPresenceChanged(groupContact);
                                     }
                                 }
-
                             } catch (JsonRpcClientException e) {
                                 LOG.error("Error while updating group member: ", e);
                             } catch (RuntimeException e) {
