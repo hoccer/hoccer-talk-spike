@@ -11,6 +11,7 @@
             android:layout_height="60dp"
             android:scaleType="centerCrop"
             android:layout_marginRight="4dp"
+            android:src="@drawable/avatar_default_contact_round"
             custom:aspectRatio="1.0"/>
 
     <View
