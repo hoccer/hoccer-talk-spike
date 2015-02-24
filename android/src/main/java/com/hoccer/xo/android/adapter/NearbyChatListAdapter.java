@@ -93,7 +93,6 @@ public class NearbyChatListAdapter extends BaseAdapter implements IXoContactList
     private void updateContact(final View view, final TalkClientContact contact) {
         TextView nameView = ViewHolderForAdapters.get(view, R.id.contact_name);
         AvatarView avatarView = ViewHolderForAdapters.get(view, R.id.contact_icon);
-        TextView typeView = ViewHolderForAdapters.get(view, R.id.contact_type);
         TextView lastMessageTimeView = (TextView) view.findViewById(R.id.contact_time);
         TextView lastMessageText = (TextView) view.findViewById(R.id.contact_last_message);
         TextView unseenView = (TextView) view.findViewById(R.id.contact_unseen_messages);
@@ -105,18 +104,10 @@ public class NearbyChatListAdapter extends BaseAdapter implements IXoContactList
         }
         avatarView.setContact(contact);
 
-        typeView.setText("");
         lastMessageText.setText("");
         lastMessageTimeView.setText("");
         unseenView.setText("");
 
-        if (contact.isGroup()) {
-            if (contact.isGroupInvited()) {
-                typeView.setText(R.string.common_group_invite);
-            } else {
-                typeView.setText(R.string.common_group);
-            }
-        }
         TalkClientMessage message = null;
         long unseenMessages = 0;
         try {

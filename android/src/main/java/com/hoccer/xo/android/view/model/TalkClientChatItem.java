@@ -41,16 +41,6 @@ public class TalkClientChatItem extends BaseChatItem implements SearchAdapter.Se
         update();
     }
 
-    private void setClientType(TextView typeView) {
-        if (mContact.isGroup()) {
-            if (mContact.isGroupInvited()) {
-                typeView.setText(R.string.common_group_invite);
-            } else {
-                typeView.setText(R.string.common_group);
-            }
-        }
-    }
-
     private void setLastMessageTime(TextView lastMessageTime) {
         if (mLastMessageTimeStamp != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("EEE HH:mm");
@@ -107,13 +97,11 @@ public class TalkClientChatItem extends BaseChatItem implements SearchAdapter.Se
     protected View configure(final Context context, View view) {
         AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
-        TextView typeView = (TextView) view.findViewById(R.id.contact_type);
         TextView lastMessageTextView = (TextView) view.findViewById(R.id.contact_last_message);
         TextView lastMessageTimeView = (TextView) view.findViewById(R.id.contact_time);
         TextView unseenView = (TextView) view.findViewById(R.id.contact_unseen_messages);
 
         nameView.setText(mContact.getNickname());
-        setClientType(typeView);
         setLastMessageTime(lastMessageTimeView);
         lastMessageTextView.setText(mLastMessageText);
         setUnseenMessages(unseenView);
