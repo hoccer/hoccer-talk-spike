@@ -129,7 +129,7 @@ public class TalkClientChatItem extends BaseChatItem implements SearchAdapter.Se
 
     private void setUnseenMessages(TextView unseenView) {
         if (mUnseenMessageCount <= 0) {
-            unseenView.setVisibility(View.GONE);
+            unseenView.setVisibility(View.INVISIBLE);
         } else {
             unseenView.setText(Long.toString(mUnseenMessageCount));
             unseenView.setVisibility(View.VISIBLE);

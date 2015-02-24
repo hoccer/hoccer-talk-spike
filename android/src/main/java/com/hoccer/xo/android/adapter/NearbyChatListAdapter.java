@@ -134,7 +134,7 @@ public class NearbyChatListAdapter extends BaseAdapter implements IXoContactList
             unseenView.setText(Long.toString(unseenMessages));
             unseenView.setVisibility(View.VISIBLE);
         } else {
-            unseenView.setVisibility(View.GONE);
+            unseenView.setVisibility(View.INVISIBLE);
         }
         avatarView.setOnClickListener(new View.OnClickListener() {
             @Override
