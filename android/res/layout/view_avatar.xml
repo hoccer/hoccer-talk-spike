@@ -7,29 +7,28 @@
 
     <com.hoccer.xo.android.view.AspectImageView
             android:id="@+id/avatar_image"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
             android:scaleType="centerCrop"
-            android:layout_marginRight="4dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:src="@drawable/avatar_default_contact_round"
             custom:aspectRatio="1.0"/>
 
-    <View
-            android:id="@+id/presence_indicator_view_active"
-            android:layout_width="12dp"
-            android:layout_height="12dp"
-            android:visibility="invisible"
-            android:layout_alignLeft="@+id/avatar_image"
-            android:layout_alignBottom="@+id/avatar_image"
-            style="@style/AppBaseTheme.Contact.PresenceActive"/>
+    <View android:id="@+id/presence_indicator_view_active"
+          android:layout_width="12dp"
+          android:layout_height="12dp"
+          android:visibility="invisible"
+          android:layout_alignLeft="@+id/avatar_image"
+          android:layout_alignStart="@+id/avatar_image"
+          android:layout_alignBottom="@+id/avatar_image"
+          android:background="@drawable/presence_indicator_shape_active"/>
 
-    <View
-            android:id="@+id/presence_indicator_view_inactive"
-            android:layout_width="12dp"
-            android:layout_height="12dp"
-            android:visibility="invisible"
-            android:layout_alignLeft="@+id/avatar_image"
-            android:layout_alignBottom="@+id/avatar_image"
-            style="@style/AppBaseTheme.Contact.PresenceInactive"/>
+    <View android:id="@+id/presence_indicator_view_inactive"
+          android:layout_width="12dp"
+          android:layout_height="12dp"
+          android:visibility="invisible"
+          android:layout_alignLeft="@+id/avatar_image"
+          android:layout_alignStart="@+id/avatar_image"
+          android:layout_alignBottom="@+id/avatar_image"
+          android:background="@drawable/presence_indicator_shape_inactive"/>
 
 </RelativeLayout>
