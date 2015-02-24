@@ -117,7 +117,7 @@ public class NearbyController implements BackgroundManager.Listener {
 
     private static Notification buildNotification() {
         Intent intent = new Intent(XoApplication.get(), ChatsActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(XoApplication.get(), 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(XoApplication.get(), NotificationId.NEARBY_STATE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         return new NotificationCompat.Builder(XoApplication.get())
                 .setSmallIcon(R.drawable.ic_notification_nearby)

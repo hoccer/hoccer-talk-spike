@@ -482,7 +482,7 @@ public class XoClientService extends Service {
             intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contact.getClientContactId());
 
             // make a pending intent with correct back-stack
-            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, NotificationId.UNSEEN_MESSAGES, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             // add the intent to the notification
             builder.setContentIntent(pendingIntent);
@@ -500,7 +500,7 @@ public class XoClientService extends Service {
         } else {
             // create pending intent
             Intent intent = new Intent(this, ChatsActivity.class);
-            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, NotificationId.UNSEEN_MESSAGES, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             builder.setContentIntent(pendingIntent);
 
             // concatenate contact names
@@ -544,7 +544,7 @@ public class XoClientService extends Service {
     private void createPushMessageNotification(String message) {
         Intent intent = new Intent(this, ChatsActivity.class);
         intent.putExtra(IntentHelper.EXTRA_PUSH_MESSAGE, message);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, NotificationId.PUSH_MESSAGE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Notification notification = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_notification)
