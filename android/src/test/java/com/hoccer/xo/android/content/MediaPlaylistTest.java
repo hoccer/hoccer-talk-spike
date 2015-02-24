@@ -32,7 +32,7 @@ public class MediaPlaylistTest {
     private JdbcConnectionSource mConnectionSource;
 
     @Before
-    public void testSetup() throws Exception {
+    public void setup() throws Exception {
         mConnectionSource = new JdbcConnectionSource("jdbc:h2:mem:account");
         mDatabase = new XoClientDatabase(new IXoClientDatabaseBackend() {
 
@@ -54,14 +54,12 @@ public class MediaPlaylistTest {
     }
 
     @After
-    public void testCleanup() throws SQLException {
+    public void cleanup() throws SQLException {
         mConnectionSource.close();
     }
 
     @Test
-    public void testMediaCollectionPlaylist() {
-        LOG.info("testMediaCollectionPlaylist");
-
+    public void mediaCollectionPlaylist() {
         // create MediaCollection
         String collectionName = "testMediaCollectionPlaylist_collection";
 
@@ -202,9 +200,7 @@ public class MediaPlaylistTest {
     }
 
     @Test
-    public void testUserPlaylist() {
-        LOG.info("testUserPlaylist");
-
+    public void userPlaylist() {
         TalkClientContact user1 = new TalkClientContact(TalkClientContact.TYPE_CLIENT);
         TalkClientContact user2 = new TalkClientContact(TalkClientContact.TYPE_CLIENT);
         try {
@@ -303,9 +299,7 @@ public class MediaPlaylistTest {
     }
 
     @Test
-    public void testSingleItemPlaylist() {
-        LOG.info("testSingleItemPlaylist");
-
+    public void singleItemPlaylist() {
         TalkClientContact user = new TalkClientContact(TalkClientContact.TYPE_CLIENT);
         TalkClientDownload item = createAudioDownloadWithUser(user);
         TalkClientDownload otherItem = createAudioDownloadWithUser(user);
@@ -323,16 +317,15 @@ public class MediaPlaylistTest {
 
         assertEquals(1, playlist.size());
 
-        XoTransfer expectedItem = item;
         XoTransfer actualItem = playlist.getItem(0);
-        assertTrue(expectedItem.equals(actualItem));
+        assertTrue(item.equals(actualItem));
 
         // test iterator
         int expectedItemCount = 1;
         int actualItemCount = 0;
         for (XoTransfer playlistItem : playlist) {
             actualItemCount++;
-            assertTrue(expectedItem.equals(playlistItem));
+            assertTrue(item.equals(playlistItem));
         }
         assertEquals(expectedItemCount, actualItemCount);
 
@@ -402,10 +395,7 @@ public class MediaPlaylistTest {
     }
 
     @Test
-    public void testEmptyPlaylist() {
-        LOG.info("testEmptyPlaylist");
-
-        // create empty playlist
+    public void emptyPlaylist() {
         EmptyPlaylist playlist = new EmptyPlaylist();
 
         assertEquals(0, playlist.size());
