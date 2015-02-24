@@ -4,6 +4,8 @@ import com.hoccer.talk.content.SelectedContent;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.lang.reflect.Field;
+
 import static junit.framework.TestCase.*;
 
 public class ClipboardTest {
@@ -13,18 +15,29 @@ public class ClipboardTest {
 
     @Before
     public void setUp() throws Exception {
+        resetStaticClipboardInstance();
         mClipboard = Clipboard.getInstance();
         mTestContent = new SelectedLocation("hello".getBytes());
     }
 
+    private static void resetStaticClipboardInstance() {
+        try {
+            Field clipboardInstance = Clipboard.class.getDeclaredField("sInstance");
+            clipboardInstance.setAccessible(true);
+            clipboardInstance.set(null, null);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
     @Test
-    public void testClipboardInitialization() {
+    public void clipboardInitialization() {
         assertFalse(mClipboard.hasContent());
         assertNull(mClipboard.getContent());
     }
 
     @Test
-    public void testClipboardSetContent() {
+    public void clipboardSetContent() {
         mClipboard.setContent(mTestContent);
 
         assertTrue(mClipboard.hasContent());
@@ -32,7 +45,7 @@ public class ClipboardTest {
     }
 
     @Test
-    public void testClipboardClearContent() {
+    public void clipboardClearContent() {
         mClipboard.setContent(mTestContent);
         mClipboard.clearContent();
 
