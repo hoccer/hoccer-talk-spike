@@ -221,7 +221,6 @@
     <string name="dialog_device_contact_data_selection">Select entry</string>
 
     <!-- Media Player -->
-    <string name="media_meta_data_unknown_title">Unknown title</string>
     <string name="media_meta_data_unknown_artist">Unknown artist</string>
     <string name="media_player_playlist_track_divider">of</string>
     <string name="media_player_default_filter_label">All</string>

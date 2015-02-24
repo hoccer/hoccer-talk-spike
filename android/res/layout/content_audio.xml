@@ -26,7 +26,6 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/tv_content_audio_caption"
                 android:layout_toLeftOf="@+id/ib_content_audio_play"
-                android:text="[=Artist - ]Title || filename"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textColor="@android:color/secondary_text_light"
