@@ -93,21 +93,11 @@ public class ContactSearchResultAdapter extends ContactsAdapter {
 
     @Override
     protected void updateContact(View view, TalkClientContact contact) {
-        AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
-
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
         nameView.setText(getHighlightedSearchResult(contact.getName()));
-        TextView typeView = (TextView) view.findViewById(R.id.contact_type);
 
+        AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
         avatarView.setContact(contact);
-        if (contact.isGroup()) {
-            if (contact.isGroupInvited()) {
-                typeView.setText(R.string.common_group_invite);
-            } else {
-                typeView.setText(R.string.common_group);
-            }
-        }
-
     }
 
     private Spannable getHighlightedSearchResult(String text) {
