@@ -203,10 +203,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         this.downloadUrl = attachment.getUrl();
         this.downloadFile = id;
         this.decryptedFile = UUID.randomUUID().toString();
-        String fileName = attachment.getFileName();
-        if (fileName != null) {
-            this.fileName = fileName;
-        }
+        this.fileName = attachment.getFileName() != null ? attachment.getFileName() : "";
         this.decryptionKey = new String(Hex.encodeHex(key));
         this.contentHmac = attachment.getHmac();
         this.fileId = attachment.getFileId();

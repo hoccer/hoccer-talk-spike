@@ -24,7 +24,6 @@ import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.ArtworkImageView;
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
@@ -177,26 +176,20 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
             mCurrentMetaData.unregisterArtworkRetrievalListener(this);
         }
 
-        Uri mediaUri = UriUtils.getAbsoluteFileUri(MediaPlayer.get().getCurrentMediaItem().getFilePath());
-        mCurrentMetaData = MediaMetaData.retrieveMetaData(mediaUri.getPath());
-        final String trackArtist;
-        final String trackTitle;
-        final int totalDuration = MediaPlayer.get().getTotalDuration();
-        final String durationLabel = getStringFromTimeStamp(totalDuration);
         final String playlistIndex = Integer.toString(MediaPlayer.get().getCurrentIndex() + 1);
         final String playlistSize = Integer.toString(MediaPlayer.get().getMediaListSize());
+        final int totalDuration = MediaPlayer.get().getTotalDuration();
+        final String durationLabel = getStringFromTimeStamp(totalDuration);
 
-        if (mCurrentMetaData.getTitle() == null || mCurrentMetaData.getTitle().isEmpty()) {
-            File file = new File(mCurrentMetaData.getFilePath());
-            trackTitle = file.getName();
-        } else {
-            trackTitle = mCurrentMetaData.getTitle().trim();
-        }
+        Uri mediaUri = UriUtils.getAbsoluteFileUri(MediaPlayer.get().getCurrentMediaItem().getFilePath());
+        mCurrentMetaData = MediaMetaData.retrieveMetaData(mediaUri.getPath());
+        final String title = mCurrentMetaData.getTitleOrFilename();
 
-        if (mCurrentMetaData.getArtist() == null || mCurrentMetaData.getArtist().isEmpty()) {
-            trackArtist = getActivity().getResources().getString(R.string.media_meta_data_unknown_artist);
+        final String artist;
+        if (mCurrentMetaData.getArtist().isEmpty()) {
+            artist = getActivity().getResources().getString(R.string.media_meta_data_unknown_artist);
         } else {
-            trackArtist = mCurrentMetaData.getArtist().trim();
+            artist = mCurrentMetaData.getArtist();
         }
 
         mCurrentMetaData.getArtwork(getResources(), FullscreenPlayerFragment.this);
@@ -205,8 +198,8 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
             @Override
             public void run() {
 
-                mTrackTitleLabel.setText(trackTitle);
-                mTrackArtistLabel.setText(trackArtist);
+                mTrackTitleLabel.setText(title);
+                mTrackArtistLabel.setText(artist);
                 mTrackProgressBar.setMax(totalDuration);
 
                 mTotalDurationLabel.setText(durationLabel);

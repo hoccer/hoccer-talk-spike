@@ -17,36 +17,33 @@ public class MediaMetaData {
 
     private static final Logger LOG = Logger.getLogger(MediaMetaData.class);
 
+    private final String mFilePath;
+    private String mTitle = "";
+    private String mArtist = "";
+    private String mAlbumTitle = "";
+    private String mMimeType = "";
+    private boolean mHasAudio;
+    private boolean mHasVideo;
+
     private static final Map<String, MediaMetaData> mMetaDataCache = new HashMap<String, MediaMetaData>();
 
+    private WeakListenerArray<ArtworkRetrieverListener> mArtworkRetrievalListeners;
+    private boolean mArtworkRetrieved;
+    private AsyncTask<Void, Void, Drawable> mArtworkRetrievalTask;
+    private Drawable mArtwork;
+
     public static MediaMetaData retrieveMetaData(String mediaFilePath) {
-        MediaMetaData metaData = null;
-        // return cached data if present
+        MediaMetaData metaData;
         if (mMetaDataCache.containsKey(mediaFilePath)) {
             metaData = mMetaDataCache.get(mediaFilePath);
         } else {
-
+            metaData = new MediaMetaData(mediaFilePath);
             MediaMetadataRetriever retriever = new MediaMetadataRetriever();
             try {
                 retriever.setDataSource(mediaFilePath);
-                metaData = new MediaMetaData(mediaFilePath);
-                String album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
-                if (album == null) {
-                    album = retriever.extractMetadata(25); // workaround bug on Galaxy S3 and S4
-                }
-                metaData.mAlbumTitle = album;
-
-                String artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-                if (artist == null) {
-                    artist = retriever.extractMetadata(26); // workaround bug on Galaxy S3 and S4
-                }
-                metaData.mArtist = artist;
-
-                String title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
-                if (title == null) {
-                    title = retriever.extractMetadata(31); // workaround bug on Galaxy S3 and S4
-                }
-                metaData.mTitle = title;
+                metaData.mAlbumTitle = retrieveItem(retriever, MediaMetadataRetriever.METADATA_KEY_ALBUM, 25);
+                metaData.mArtist = retrieveItem(retriever, MediaMetadataRetriever.METADATA_KEY_ARTIST, 26);
+                metaData.mTitle = retrieveItem(retriever, MediaMetadataRetriever.METADATA_KEY_TITLE, 31);
 
                 metaData.mMimeType = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE);
 
@@ -59,8 +56,6 @@ public class MediaMetaData {
                 }
             } catch (IllegalArgumentException e) {
                 LOG.info("Could not read meta data for file: " + mediaFilePath, e);
-                // cache the null object to prevent future retrieval attempts
-                metaData = null;
             } finally {
                 mMetaDataCache.put(mediaFilePath, metaData);
                 retriever.release();
@@ -70,18 +65,16 @@ public class MediaMetaData {
         return metaData;
     }
 
-    private final String mFilePath;
-    private String mTitle;
-    private String mArtist;
-    private String mAlbumTitle;
-    private String mMimeType;
-    private boolean mHasAudio;
-    private boolean mHasVideo;
-
-    private WeakListenerArray<ArtworkRetrieverListener> mArtworkRetrievalListeners;
-    private boolean mArtworkRetrieved;
-    private AsyncTask<Void, Void, Drawable> mArtworkRetrievalTask;
-    private Drawable mArtwork;
+    private static String retrieveItem(MediaMetadataRetriever retriever, int key, int alternativeKey) {
+        String item = retriever.extractMetadata(key);
+        if (item == null) {
+            item = retriever.extractMetadata(alternativeKey); // workaround bug on Galaxy S3 and S4
+            if(item == null) {
+                return "";
+            }
+        }
+        return item.trim();
+    }
 
     /*
     * Private constructor, use MediaMetaData.retrieveMetaData() to create instances
@@ -99,11 +92,12 @@ public class MediaMetaData {
     }
 
     public String getTitleOrFilename() {
-        if (mTitle == null || mTitle.isEmpty()) {
+        if (mTitle.isEmpty()) {
             File file = new File(mFilePath);
             return file.getName();
+        } else {
+            return mTitle;
         }
-        return mTitle;
     }
 
     public String getArtist() {
