@@ -160,7 +160,6 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
     private final OnAudioFocusChangeListener mAudioFocusChangeListener = new OnAudioFocusChangeListener() {
 
         public void onAudioFocusChange(int focusChange) {
-
             LOG.debug("AUDIO FOCUS CHANGED: " + focusChange);
 
             if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
@@ -176,23 +175,6 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
             }
         }
     };
-
-    private Notification buildNotification() {
-        Intent intent = new Intent(mContext, NotificationBridgeActivity.class);
-        intent.setAction(NotificationBridgeActivity.ACTION_FULLSCREEN_PLAYER_ACTIVITY_TO_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        updateRemoteViewButton();
-        updateRemoteViewMetaData();
-
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mContext)
-                .setSmallIcon(R.drawable.ic_notification_music)
-                .setContent(mRemoteViews)
-                .setAutoCancel(false)
-                .setOngoing(true)
-                .setContentIntent(pendingIntent);
-        return mBuilder.build();
-    }
 
     private void updateRemoteViewButton() {
         if (!mPaused) {
@@ -284,6 +266,23 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
                 LOG.debug("Audio focus request not granted");
             }
         }
+    }
+
+    private Notification buildNotification() {
+        Intent intent = new Intent(mContext, NotificationBridgeActivity.class);
+        intent.setAction(NotificationBridgeActivity.ACTION_FULLSCREEN_PLAYER_ACTIVITY_TO_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(mContext, NotificationId.MUSIC_PLAYER, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        updateRemoteViewButton();
+        updateRemoteViewMetaData();
+
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mContext)
+                .setSmallIcon(R.drawable.ic_notification_music)
+                .setContent(mRemoteViews)
+                .setAutoCancel(false)
+                .setOngoing(true)
+                .setContentIntent(pendingIntent);
+        return mBuilder.build();
     }
 
     private void createMediaPlayerAndPlay(final XoTransfer item) {

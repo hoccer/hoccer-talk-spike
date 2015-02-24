@@ -7,13 +7,17 @@ import android.location.LocationManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.model.TalkEnvironment;
+import com.hoccer.xo.android.XoApplication;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 public class EnvironmentUpdater {
@@ -31,6 +35,8 @@ public class EnvironmentUpdater {
     private final LocationChangedListener mGPSLocationListener = new LocationChangedListener();
     private final LocationChangedListener mNetworkLocationListener = new LocationChangedListener();
 
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
+
     public EnvironmentUpdater(Context context, XoClient client) {
         mClient = client;
 
@@ -39,22 +45,47 @@ public class EnvironmentUpdater {
     }
 
     public void start() {
-        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_UPDATE_TIME, MIN_UPDATE_MOVED, mGPSLocationListener);
-        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_UPDATE_TIME, MIN_UPDATE_MOVED, mNetworkLocationListener);
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_UPDATE_TIME, MIN_UPDATE_MOVED, mGPSLocationListener);
+                mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_UPDATE_TIME, MIN_UPDATE_MOVED, mNetworkLocationListener);
+            }
+        });
         sendEnvironmentUpdate();
     }
 
-    public void sendEnvironmentUpdate() {
-        TalkEnvironment environment = getEnvironment();
-        if (environment.isValid()) {
-            mClient.sendEnvironmentUpdate(environment);
-        }
+    public void pause() {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mLocationManager.removeUpdates(mGPSLocationListener);
+                mLocationManager.removeUpdates(mNetworkLocationListener);
+            }
+        });
     }
 
     public void stop() {
-        mLocationManager.removeUpdates(mGPSLocationListener);
-        mLocationManager.removeUpdates(mNetworkLocationListener);
-        mClient.sendDestroyEnvironment(TalkEnvironment.TYPE_NEARBY);
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mLocationManager.removeUpdates(mGPSLocationListener);
+                mLocationManager.removeUpdates(mNetworkLocationListener);
+                mClient.sendDestroyEnvironment(TalkEnvironment.TYPE_NEARBY);
+            }
+        });
+    }
+
+    public void sendEnvironmentUpdate() {
+        XoApplication.get().getExecutor().schedule(new Runnable() {
+            @Override
+            public void run() {
+                TalkEnvironment environment = getEnvironment();
+                if (environment.isValid()) {
+                    mClient.sendEnvironmentUpdate(environment);
+                }
+            }
+        }, 0, TimeUnit.SECONDS);
     }
 
     public boolean locationServicesEnabled() {
