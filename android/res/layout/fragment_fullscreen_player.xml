@@ -91,7 +91,6 @@
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/media_player_text_large"
-                android:text="@string/media_meta_data_unknown_title"
                 android:singleLine="true"
                 android:ellipsize="end"
                 android:fadingEdge="horizontal"

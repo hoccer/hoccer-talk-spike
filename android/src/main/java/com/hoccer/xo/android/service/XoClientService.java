@@ -454,7 +454,7 @@ public class XoClientService extends Service {
         Notification.Builder builder = new Notification.Builder(this);
 
         // always set the small icon (should be different depending on if we have a large one)
-        builder.setSmallIcon(R.drawable.ic_notification);
+        builder.setSmallIcon(R.drawable.ic_notification_message);
 
         // large icon
         Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
@@ -482,13 +482,13 @@ public class XoClientService extends Service {
             intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contact.getClientContactId());
 
             // make a pending intent with correct back-stack
-            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, NotificationId.UNSEEN_MESSAGES, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             // add the intent to the notification
             builder.setContentIntent(pendingIntent);
 
             // title is always the contact name
-            builder.setContentTitle(contact.getNickname());
+            builder.setContentTitle(getContactName(contact));
 
             // text depends on number of messages
             if (holder.getUnseenMessages().size() == 1) {
@@ -500,13 +500,13 @@ public class XoClientService extends Service {
         } else {
             // create pending intent
             Intent intent = new Intent(this, ChatsActivity.class);
-            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, NotificationId.UNSEEN_MESSAGES, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             builder.setContentIntent(pendingIntent);
 
             // concatenate contact names
             StringBuilder sb = new StringBuilder();
             for (ContactUnseenMessageHolder holder : contactsMap.values()) {
-                sb.append(holder.getContact().getNickname()).append(CONTACT_DELIMETER);
+                sb.append(getContactName(holder.getContact())).append(CONTACT_DELIMETER);
             }
 
             // set fields
@@ -528,15 +528,23 @@ public class XoClientService extends Service {
         // log all unseen messages found
         StringBuilder logMessage = new StringBuilder("Notifying about unseen messages: ");
         for (ContactUnseenMessageHolder holder : contactsMap.values()) {
-            logMessage.append(holder.getContact().getNickname()).append("(").append(holder.getUnseenMessages().size()).append(") ");
+            logMessage.append(getContactName(holder.getContact())).append("(").append(holder.getUnseenMessages().size()).append(") ");
         }
         LOG.debug(logMessage);
+    }
+
+    private String getContactName(TalkClientContact contact) {
+        if (contact.isGroup() && contact.getGroupPresence() != null && contact.getGroupPresence().isTypeNearby()) {
+            return getString(R.string.nearby_text);
+        } else {
+            return contact.getNickname();
+        }
     }
 
     private void createPushMessageNotification(String message) {
         Intent intent = new Intent(this, ChatsActivity.class);
         intent.putExtra(IntentHelper.EXTRA_PUSH_MESSAGE, message);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, NotificationId.PUSH_MESSAGE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Notification notification = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_notification)

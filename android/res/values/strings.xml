@@ -221,7 +221,6 @@
     <string name="dialog_device_contact_data_selection">Select entry</string>
 
     <!-- Media Player -->
-    <string name="media_meta_data_unknown_title">Unknown title</string>
     <string name="media_meta_data_unknown_artist">Unknown artist</string>
     <string name="media_player_playlist_track_divider">of</string>
     <string name="media_player_default_filter_label">All</string>
@@ -356,6 +355,8 @@
     <!-- Nearby all invite texts -->
     <string name="nearby_invite_all">invite %1$d group members as friend</string>
     <string name="nearby_disinvite_all">disinvite %1$d group members as friend</string>
+    <string name="nearby_notification_title">Nearby</string>
+    <string name="nearby_notification_text">Nearby mode active</string>
 
     <string name="profile_chat_info_text">Chat</string>
     <!--<string name="messages_count">%1$s Messages</string>-->

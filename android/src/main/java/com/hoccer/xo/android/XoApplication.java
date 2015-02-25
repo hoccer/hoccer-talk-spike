@@ -1,23 +1,16 @@
 package com.hoccer.xo.android;
 
-import android.app.Activity;
 import android.app.Application;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Environment;
-import android.os.Handler;
-import com.artcom.hoccer.R;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hoccer.talk.client.IXoClientHost;
-import com.hoccer.talk.client.IXoStateListener;
-import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.credentialtransfer.SrpChangeListener;
-import com.hoccer.xo.android.nearby.EnvironmentUpdater;
 import com.hoccer.xo.android.service.XoClientService;
 import com.hoccer.xo.android.task.StartupTasks;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -74,15 +67,9 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     private static XoSoundPool sSoundPool;
     private static DisplayImageOptions sImageOptions;
 
-    private EnvironmentUpdater mEnvironmentUpdater;
-
     private static StartupTasks sStartupTasks;
     private boolean mStayActiveInBackground;
 
-    private boolean mNearbyEnabled;
-    private final Handler mNearbyTimeoutHandler = new Handler();
-
-    private Runnable mNearbyTimeout;
     private static XoApplication sInstance;
 
     public static XoApplication get() {
@@ -210,8 +197,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
         BackgroundManager.get().registerListener(this);
 
-        mEnvironmentUpdater = new EnvironmentUpdater(this, mClient);
-
         sStartupTasks = new StartupTasks(this);
         sStartupTasks.executeRegisteredTasks();
 
@@ -304,35 +289,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         sStartupTasks.registerForNextStart(clazz);
     }
 
-    public void startNearbySession(Activity activity) {
-        if (mEnvironmentUpdater.locationServicesEnabled()) {
-            mEnvironmentUpdater.start();
-            mNearbyEnabled = true;
-        } else {
-            showLocationServiceDialog(activity);
-        }
-    }
-
-    private static void showLocationServiceDialog(final Activity activity) {
-        XoDialogs.showYesNoDialog("EnableLocationServiceDialog",
-                R.string.dialog_enable_location_service_title,
-                R.string.dialog_enable_location_service_message,
-                activity,
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        activity.startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                    }
-                }
-        );
-    }
-
-    public void stopNearbySession() {
-        mClient.unregisterStateListener(mClientStateListener);
-        mEnvironmentUpdater.stop();
-        mNearbyEnabled = false;
-    }
-
     public ScheduledExecutorService getExecutor() {
         return mExecutor;
     }
@@ -421,20 +377,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         sLog.debug("onBecameForeground()");
         mClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
         mStayActiveInBackground = false;
-
-        if (mNearbyTimeout != null) {
-            mNearbyTimeoutHandler.removeCallbacks(mNearbyTimeout);
-            mNearbyTimeout = null;
-        }
-
-        if (mNearbyEnabled) {
-            mEnvironmentUpdater.start();
-            sLog.info("EnvironmentUpdater restarted.");
-
-            if (mClient.getState() != XoClient.STATE_READY) {
-                mClient.registerStateListener(mClientStateListener);
-            }
-        }
     }
 
     @Override
@@ -442,27 +384,10 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         sLog.debug("onBecameBackground()");
         if (!mStayActiveInBackground) {
             mClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
-
-            final int timeout = sConfiguration.getBackgroundNearbyTimeoutSeconds();
-            mNearbyTimeout = new Runnable() {
-                @Override
-                public void run() {
-                    mEnvironmentUpdater.stop();
-                    mNearbyTimeout = null;
-                    sLog.info("Nearby mode timed out after " + timeout + " seconds.");
-                }
-            };
-            mNearbyTimeoutHandler.postDelayed(mNearbyTimeout, timeout * 1000);
         }
     }
 
-    private final IXoStateListener mClientStateListener = new IXoStateListener() {
-        @Override
-        public void onClientStateChange(XoClient client, int state) {
-            if (state == XoClient.STATE_READY) {
-                mEnvironmentUpdater.sendEnvironmentUpdate();
-                mClient.unregisterStateListener(this);
-            }
-        }
-    };
+    public boolean getStayActiveInBackground() {
+        return mStayActiveInBackground;
+    }
 }
