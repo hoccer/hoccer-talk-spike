@@ -73,6 +73,7 @@
             android:layout_height="wrap_content"
             android:layout_toRightOf="@+id/contact_icon"
             android:layout_below="@+id/contact_name"
+            android:layout_alignLeft="@+id/contact_name"
             android:visibility="gone"
             style="@style/AppBaseTheme.Contact.LastMessage"/>
 
