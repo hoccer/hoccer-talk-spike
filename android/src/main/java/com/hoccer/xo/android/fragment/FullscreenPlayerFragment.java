@@ -395,14 +395,13 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
     }
 
     private class UpdateTimeTask implements Runnable {
-
         @Override
         public void run() {
             final int currentProgress = MediaPlayer.get().getCurrentProgress();
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    if(!mSeekbarInTrackingTouchMode) {
+                    if ((MediaPlayer.get().getCurrentMediaItem() != null) && !mSeekbarInTrackingTouchMode) {
                         mTrackProgressBar.setProgress(currentProgress);
                     }
                 }
@@ -418,6 +417,11 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
 
     @Override
     public void onTrackChanged() {
+        if (MediaPlayer.get().getCurrentMediaItem() == null) {
+            getActivity().finish();
+            return;
+        }
+
         updateTrackData();
         updateConversationName();
     }

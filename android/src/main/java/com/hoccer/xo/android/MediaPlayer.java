@@ -329,10 +329,12 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
         mAudioManager.abandonAudioFocus(mAudioFocusChangeListener);
         mPaused = false;
         mStopped = true;
+        mCurrentItem = null;
         mPlaylistController.reset();
 
         removeNotification();
 
+        notifyTrackChanged();
         notifyPlayStateChanged();
     }
 
