@@ -45,7 +45,8 @@ public class MediaMetaData {
                 metaData.mArtist = retrieveItem(retriever, MediaMetadataRetriever.METADATA_KEY_ARTIST, 26);
                 metaData.mTitle = retrieveItem(retriever, MediaMetadataRetriever.METADATA_KEY_TITLE, 31);
 
-                metaData.mMimeType = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE);
+                String mimeType = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE);
+                metaData.mMimeType = mimeType != null ? mimeType : "";
 
                 if (retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO) != null) {
                     metaData.mHasAudio = true;
