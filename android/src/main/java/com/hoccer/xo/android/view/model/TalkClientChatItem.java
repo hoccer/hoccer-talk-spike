@@ -32,7 +32,6 @@ public class TalkClientChatItem extends BaseChatItem implements SearchAdapter.Se
     @Nullable
     private Date mLastMessageTimeStamp;
     private String mLastMessageText;
-    private long mUnseenMessageCount;
     private Date mContactCreationTimeStamp;
 
     public TalkClientChatItem(TalkClientContact contact, Context context) {
@@ -125,15 +124,6 @@ public class TalkClientChatItem extends BaseChatItem implements SearchAdapter.Se
         });
 
         return view;
-    }
-
-    private void setUnseenMessages(TextView unseenView) {
-        if (mUnseenMessageCount <= 0) {
-            unseenView.setVisibility(View.INVISIBLE);
-        } else {
-            unseenView.setText(Long.toString(mUnseenMessageCount));
-            unseenView.setVisibility(View.VISIBLE);
-        }
     }
 
     @Override
