@@ -41,7 +41,7 @@
         <item name="android:ellipsize">end</item>
         <item name="android:textColor">@color/last_message</item>
         <item name="android:maxLines">2</item>
-        <item name="android:textSize">13sp</item>
+        <item name="android:textSize">12sp</item>
     </style>
 
     <style name="AppBaseTheme.Contact.CommonGroup" parent="BaseTheme.Contact">

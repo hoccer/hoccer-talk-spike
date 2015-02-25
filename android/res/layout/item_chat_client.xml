@@ -63,8 +63,8 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/contact_last_message"
                     android:text="What's up? I need a burger! When do I need it? Exactly! Now!"
+                    android:lineSpacingExtra="2sp"
                     android:layout_marginRight="32dp"
-                    android:fontFamily="sans-serif-light"
                     style="@style/AppBaseTheme.Contact.LastMessage" tools:ignore="HardcodedText"/>
         </LinearLayout>
 
@@ -78,6 +78,7 @@
                 android:textSize="10sp"
                 android:layout_marginTop="4dp"
                 android:textColor="@color/notification_badge_text"
+                android:fontFamily="sans-serif-medium"
                 tools:ignore="HardcodedText"/>
 
     </RelativeLayout>

@@ -41,5 +41,6 @@
 
     <color name="last_message">@color/text_secondary</color>
 
+    <color name="notification_badge_background">#e52e2e</color>
     <color name="notification_badge_text">@color/text_secondary</color>
 </resources>
