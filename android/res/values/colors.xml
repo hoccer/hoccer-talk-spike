@@ -4,6 +4,8 @@
     <color name="secondary">#ffc8c8c8</color>
     <color name="tertiary">#004ce5</color>
 
+    <color name="text_secondary">#8e8e93</color>
+
     <color name="black_transparency_50_percent">#77000000</color>
 
     <color name="background_default">#ffffff</color>
@@ -36,4 +38,8 @@
     <color name="content_horizontal_divider">#d1d6e4</color>
 
     <color name="well_box">#f7f7f7</color>
+
+    <color name="last_message">@color/text_secondary</color>
+
+    <color name="notification_badge_text">@color/text_secondary</color>
 </resources>
