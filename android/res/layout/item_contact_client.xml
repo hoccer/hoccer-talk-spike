@@ -10,8 +10,8 @@
     <com.hoccer.xo.android.view.AvatarView
             android:id="@+id/contact_icon"
             android:clickable="false"
-            android:layout_width="65dp"
-            android:layout_height="65dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             custom:cornerRadius="65"
             custom:defaultAvatarImageUrl="@drawable/avatar_default_contact"
             style="@style/AppBaseTheme.Contact.Avatar"/>
@@ -64,7 +64,6 @@
             android:layout_toRightOf="@+id/contact_icon"
             android:layout_below="@+id/contact_name"
             android:text="@string/friend_request_invite_send"
-            android:textSize="15dp"
             android:visibility="gone"
             style="@style/AppBaseTheme.Contact.LastMessage"/>
 
@@ -74,7 +73,7 @@
             android:layout_height="wrap_content"
             android:layout_toRightOf="@+id/contact_icon"
             android:layout_below="@+id/contact_name"
-            android:textSize="15dp"
+            android:layout_alignLeft="@+id/contact_name"
             android:visibility="gone"
             style="@style/AppBaseTheme.Contact.LastMessage"/>
 
