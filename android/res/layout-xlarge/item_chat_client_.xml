@@ -51,7 +51,7 @@
 
     <TextView
             android:id="@+id/contact_type"
-            android:text="@string/common_friend"
+            android:text="@string/state_friend"
             android:layout_alignParentRight="true"
             android:layout_alignTop="@id/contact_name"
             android:layout_width="wrap_content"
