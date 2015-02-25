@@ -19,12 +19,10 @@ import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
 import com.hoccer.xo.android.activity.NotificationBridgeActivity;
 import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.content.MediaPlaylist;
 import com.hoccer.xo.android.content.audio.MediaPlaylistController;
-import com.hoccer.xo.android.database.AndroidTalkDatabase;
 import com.hoccer.xo.android.service.NotificationId;
 import com.hoccer.xo.android.util.UriUtils;
 import org.apache.log4j.Logger;
@@ -186,22 +184,16 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
 
     private void updateRemoteViewMetaData() {
         MediaMetaData metaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(mCurrentItem.getFilePath()).getPath());
-        if (metaData != null) {
-            String metaDataTitle = metaData.getTitle();
-            String metaDataArtist = metaData.getArtist();
-            if (metaDataTitle != null && !metaDataTitle.isEmpty()) {
-                mRemoteViews.setViewVisibility(R.id.filename_text, View.GONE);
-                mRemoteViews.setTextViewText(R.id.media_metadata_title_text, metaDataTitle);
-            }
-            if (metaDataArtist != null && !metaDataArtist.isEmpty()) {
-                mRemoteViews.setTextViewText(R.id.media_metadata_artist_text, metaDataArtist);
-            }
-
-            mRemoteViews.setViewVisibility(R.id.media_metadata_layout, View.VISIBLE);
-        } else {
-            mRemoteViews.setViewVisibility(R.id.filename_text, View.VISIBLE);
+        String title = metaData.getTitle();
+        String artist = metaData.getArtist();
+        if (title.isEmpty() && artist.isEmpty()) {
             mRemoteViews.setViewVisibility(R.id.media_metadata_layout, View.GONE);
+            mRemoteViews.setViewVisibility(R.id.filename_text, View.VISIBLE);
             mRemoteViews.setTextViewText(R.id.filename_text, mCurrentItem.getFilePath());
+        } else {
+            mRemoteViews.setViewVisibility(R.id.filename_text, View.GONE);
+            mRemoteViews.setTextViewText(R.id.media_metadata_title_text, title);
+            mRemoteViews.setTextViewText(R.id.media_metadata_artist_text, artist);
         }
     }
 

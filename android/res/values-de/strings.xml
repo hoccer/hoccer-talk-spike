@@ -209,7 +209,6 @@
     <string name="dialog_device_contact_data_selection">Eintrag wählen</string>
 
     <!-- Media Player -->
-    <string name="media_meta_data_unknown_title">Unbekannter Titel</string>
     <string name="media_meta_data_unknown_artist">Unbekannter Interpret</string>
     <string name="media_player_playlist_track_divider">von</string>
     <string name="media_player_default_filter_label">Alle</string>
