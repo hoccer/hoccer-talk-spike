@@ -90,7 +90,7 @@ public class AttachmentSearchResultAdapter extends BaseAdapter {
 
         TextView artistTextView = (TextView) attachmentView.findViewById(R.id.tv_artist);
         String artist = metaData.getArtist();
-        if (metaData.getArtist().isEmpty()) {
+        if (artist.isEmpty()) {
             artistTextView.setText(context.getResources().getString(R.string.media_meta_data_unknown_artist));
         } else {
             artistTextView.setText(getHighlightedSearchResult(artist, mLastQuery));
