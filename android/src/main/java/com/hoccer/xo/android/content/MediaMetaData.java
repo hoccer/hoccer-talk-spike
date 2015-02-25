@@ -17,6 +17,11 @@ public class MediaMetaData {
 
     private static final Logger LOG = Logger.getLogger(MediaMetaData.class);
 
+    // alternative meta data keys (workaround for a bug on Galaxy S3 and S4)
+    public static final int ALTERNATIVE_METADATA_KEY_ALBUM = 25;
+    public static final int ALTERNATIVE_METADATA_KEY_ARTIST = 26;
+    public static final int ALTERNATIVE_METADATA_KEY_TITLE = 31;
+
     private final String mFilePath;
     private String mTitle = "";
     private String mArtist = "";
@@ -41,9 +46,9 @@ public class MediaMetaData {
             MediaMetadataRetriever retriever = new MediaMetadataRetriever();
             try {
                 retriever.setDataSource(mediaFilePath);
-                metaData.mAlbumTitle = retrieveItem(retriever, MediaMetadataRetriever.METADATA_KEY_ALBUM, 25);
-                metaData.mArtist = retrieveItem(retriever, MediaMetadataRetriever.METADATA_KEY_ARTIST, 26);
-                metaData.mTitle = retrieveItem(retriever, MediaMetadataRetriever.METADATA_KEY_TITLE, 31);
+                metaData.mAlbumTitle = retrieveItem(retriever, MediaMetadataRetriever.METADATA_KEY_ALBUM, ALTERNATIVE_METADATA_KEY_ALBUM);
+                metaData.mArtist = retrieveItem(retriever, MediaMetadataRetriever.METADATA_KEY_ARTIST, ALTERNATIVE_METADATA_KEY_ARTIST);
+                metaData.mTitle = retrieveItem(retriever, MediaMetadataRetriever.METADATA_KEY_TITLE, ALTERNATIVE_METADATA_KEY_TITLE);
 
                 String mimeType = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE);
                 metaData.mMimeType = mimeType != null ? mimeType : "";
@@ -69,7 +74,7 @@ public class MediaMetaData {
     private static String retrieveItem(MediaMetadataRetriever retriever, int key, int alternativeKey) {
         String item = retriever.extractMetadata(key);
         if (item == null) {
-            item = retriever.extractMetadata(alternativeKey); // workaround bug on Galaxy S3 and S4
+            item = retriever.extractMetadata(alternativeKey);
             if(item == null) {
                 return "";
             }
