@@ -52,12 +52,10 @@ public class NearbyGroupChatItem extends BaseChatItem implements SearchAdapter.S
     protected View configure(Context context, View view) {
         AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
-        TextView typeView = (TextView) view.findViewById(R.id.contact_type);
         TextView lastMessageTextView = (TextView) view.findViewById(R.id.contact_last_message);
         TextView lastMessageTimeView = (TextView) view.findViewById(R.id.contact_time);
 
         nameView.setText(R.string.nearby_saved);
-        typeView.setText(R.string.common_group);
         setLastMessageTime(lastMessageTimeView);
         lastMessageTextView.setText(mLastMessageText);
 

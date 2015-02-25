@@ -2,16 +2,6 @@
 <resources>
 
     <style name="BaseTheme.Contact">
-        <!--<item name="android:layout_marginTop">10dp</item>
-        <item name="android:layout_marginBottom">10dp</item>-->
-    </style>
-
-    <style name="AppBaseTheme.Contact.PresenceActive" parent="BaseTheme.Contact">
-        <item name="android:background">@drawable/presence_indicator_shape_active</item>
-    </style>
-
-    <style name="AppBaseTheme.Contact.PresenceInactive" parent="BaseTheme.Contact">
-        <item name="android:background">@drawable/presence_indicator_shape_inactive</item>
     </style>
 
     <style name="AppBaseTheme.Contact.Avatar" parent="BaseTheme.Contact">
@@ -27,16 +17,16 @@
         <item name="android:layout_marginRight">10dp</item>
         <item name="android:layout_marginTop">2dp</item>
         <item name="android:layout_marginBottom">2dp</item>
-        <item name="android:textSize">9pt</item>
+        <item name="android:textSize">16sp</item>
     </style>
 
     <style name="AppBaseTheme.Contact.UnreadMessagesChatItem" parent="BaseTheme.Contact">
-      <item name="android:text">55</item>
-      <item name="android:textColor">@android:color/white</item>
-      <item name="android:layout_width">20dp</item>
-      <item name="android:layout_height">20dp</item>
-      <item name="android:textSize">13sp</item>
-      <item name="android:gravity">center</item>
+        <item name="android:text">55</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:layout_width">20dp</item>
+        <item name="android:layout_height">20dp</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:gravity">center</item>
     </style>
 
     <style name="AppBaseTheme.Contact.UnreadMessagesBadge" parent="BaseTheme.Contact">
@@ -49,10 +39,9 @@
 
     <style name="AppBaseTheme.Contact.LastMessage" parent="BaseTheme.Contact">
         <item name="android:ellipsize">end</item>
-        <item name="android:textColor">@android:color/secondary_text_dark</item>
+        <item name="android:textColor">@color/last_message</item>
         <item name="android:maxLines">2</item>
-        <item name="android:layout_margin">2dp</item>
-        <item name="android:textSize">6pt</item>
+        <item name="android:textSize">12sp</item>
     </style>
 
     <style name="AppBaseTheme.Contact.CommonGroup" parent="BaseTheme.Contact">
