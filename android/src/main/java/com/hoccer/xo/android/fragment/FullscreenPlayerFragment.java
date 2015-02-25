@@ -49,6 +49,7 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
     private final Handler mTimeProgressHandler = new Handler();
     private Runnable mUpdateTimeTask;
     private ValueAnimator mBlinkAnimation;
+    private boolean mSeekbarInTrackingTouchMode;
 
     MediaMetaData mCurrentMetaData;
 
@@ -81,9 +82,10 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
         mPlaylistSizeLabel = (TextView) getView().findViewById(R.id.tv_player_playlist_size);
         mConversationNameLabel = (TextView) getView().findViewById(R.id.tv_conversation_name);
         mArtworkImageView = (ArtworkImageView) getView().findViewById(R.id.iv_player_artwork);
+        mPlayButton = (ToggleButton) view.findViewById(R.id.bt_player_play);
+
         mTrackProgressBar.setProgress(0);
         mTrackProgressBar.setMax(100);
-        mPlayButton = (ToggleButton) view.findViewById(R.id.bt_player_play);
 
         view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -197,15 +199,14 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-
                 mTrackTitleLabel.setText(title);
                 mTrackArtistLabel.setText(artist);
                 mTrackProgressBar.setMax(totalDuration);
+                mTrackProgressBar.setProgress(0);
 
                 mTotalDurationLabel.setText(durationLabel);
                 mPlaylistIndexLabel.setText(playlistIndex);
                 mPlaylistSizeLabel.setText(playlistSize);
-
 
                 updatePlayState();
 
@@ -327,15 +328,14 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
     }
 
     private class OnPlayerInteractionListener implements SeekBar.OnSeekBarChangeListener, View.OnClickListener, ToggleButton.OnCheckedChangeListener {
+
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.bt_player_skip_back:
-                    mTrackProgressBar.setProgress(0);
                     MediaPlayer.get().backward();
                     break;
                 case R.id.bt_player_skip_forward:
-                    mTrackProgressBar.setProgress(0);
                     MediaPlayer.get().forward();
                     break;
                 case R.id.bt_player_repeat:
@@ -346,16 +346,17 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
 
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
+            mCurrentTimeLabel.setText(getStringFromTimeStamp(progress));
         }
 
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
-
+            mSeekbarInTrackingTouchMode = true;
         }
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
+            mSeekbarInTrackingTouchMode = false;
             MediaPlayer.get().setSeekPosition(seekBar.getProgress());
         }
 
@@ -401,8 +402,9 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mCurrentTimeLabel.setText(getStringFromTimeStamp(currentProgress));
-                    mTrackProgressBar.setProgress(currentProgress);
+                    if(!mSeekbarInTrackingTouchMode) {
+                        mTrackProgressBar.setProgress(currentProgress);
+                    }
                 }
             });
             mTimeProgressHandler.postDelayed(this, 1000);
