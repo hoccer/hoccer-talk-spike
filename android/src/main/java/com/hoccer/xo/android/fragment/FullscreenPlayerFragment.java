@@ -132,26 +132,26 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
         final boolean isPlaying;
 
         if ((MediaPlayer.get().isPaused()) || MediaPlayer.get().isStopped()) {
-            isPlaying = true;
-        } else if (!MediaPlayer.get().isPaused() && !MediaPlayer.get().isStopped()) {
             isPlaying = false;
+        } else if (!MediaPlayer.get().isPaused() && !MediaPlayer.get().isStopped()) {
+            isPlaying = true;
         } else {
-            isPlaying = !mPlayButton.isChecked();
+            isPlaying = mPlayButton.isChecked();
         }
 
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if (isPlaying) {
-                    mPlayButton.setChecked(false);
-                    mBlinkAnimation.start();
-                } else {
                     if (mBlinkAnimation.isRunning()) {
                         mBlinkAnimation.cancel();
                     }
 
                     mCurrentTimeLabel.setTextColor(getResources().getColor(R.color.media_player_text_secondary));
                     mPlayButton.setChecked(true);
+                } else {
+                    mPlayButton.setChecked(false);
+                    mBlinkAnimation.start();
                 }
             }
         });
