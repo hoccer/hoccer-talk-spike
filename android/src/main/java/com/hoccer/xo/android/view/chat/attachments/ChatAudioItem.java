@@ -64,15 +64,11 @@ public class ChatAudioItem extends ChatMessageItem implements MediaPlayer.Listen
         }
 
         MediaMetaData metaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(transfer.getFilePath()).getPath());
-        String title = metaData.getTitleOrFilename();
-
-        String name;
         if (metaData.getArtist().isEmpty()) {
-            name = title;
+            nameTextView.setText(metaData.getTitleOrFilename());
         } else {
-            name = metaData.getArtist() + " - " + title;
+            nameTextView.setText(metaData.getArtist() + " - " + metaData.getTitleOrFilename());
         }
-        nameTextView.setText(name);
 
         mPlayPauseButton = (ImageButton) audioLayout.findViewById(R.id.ib_content_audio_play);
         mPlayPauseButton.setOnClickListener(new View.OnClickListener() {
