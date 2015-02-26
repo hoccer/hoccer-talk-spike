@@ -15,61 +15,39 @@ public class MotionInterpreter implements SensorEventListener {
 
     private static final Logger LOG = Logger.getLogger(MotionInterpreter.class);
 
-    //public static final int HISTORY_LENGTH = 20;
-    public static final long GESTURE_EXCLUSION_TIMESPAN = 1500;
-    private static final String LOG_TAG = "MotionInterpreter";
-
-    /*
-    public static final Map<Integer, String> AXIS_NAMES;
-
-    static {
-
-        HashMap<Integer, String> axisNames = new HashMap<Integer, String>(3);
-        axisNames.put(SensorConstants.X_AXIS, "X");
-        axisNames.put(SensorConstants.Y_AXIS, "Y");
-        axisNames.put(SensorConstants.Z_AXIS, "Z");
-        AXIS_NAMES = Collections.unmodifiableMap(axisNames);
-    }
-    */
+    private static final long GESTURE_EXCLUSION_TIMESPAN = 1500;
 
     private final Context mContext;
-    private MotionGestureListener mListener;
+    private final MotionGestureListener mListener;
     private List<Detector> mDetectors;
 
     private long mLastGestureTime;
 
     private final FeatureHistory mFeatureHistory;
-    //private Transaction pMode;
 
-    public boolean activated;
+    private boolean mActivated;
 
-    public MotionInterpreter(Transaction pMode, Context pContext,
-                             MotionGestureListener pOnShakeListener) {
-        LOG.debug(LOG_TAG + " Creating GestureInterpreter");
-        mContext = pContext;
+    public MotionInterpreter(Transaction mode, Context context, MotionGestureListener shakeListener) {
+        LOG.debug("Creating GestureInterpreter");
+        mContext = context;
 
         mFeatureHistory = new FeatureHistory();
-
         mLastGestureTime = 0;
-        setMode(pMode);
+        setMode(mode);
 
-        setGestureListener(pOnShakeListener);
+        mListener = shakeListener;
     }
 
     public FeatureHistory getFeatureHistory() {
         return mFeatureHistory;
     }
 
-    public void addGestureDetector(Detector pDetector) {
-        mDetectors.add(pDetector);
-    }
-
-    public void setGestureListener(MotionGestureListener pListener) {
-        mListener = pListener;
+    public void addGestureDetector(Detector detector) {
+        mDetectors.add(detector);
     }
 
     public void deactivate() {
-        if (mContext == null || !activated) {
+        if (mContext == null || !mActivated) {
             return;
         }
 
@@ -81,18 +59,18 @@ public class MotionInterpreter implements SensorEventListener {
             mLastGestureTime = 0;
         }
 
-        activated = false;
+        mActivated = false;
     }
 
     public void activate() {
-        if (mContext == null || activated) {
+        if (mContext == null || mActivated) {
             return;
         }
 
         SensorManager sensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
         sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST);
 
-        activated = true;
+        mActivated = true;
     }
 
     @Override
@@ -125,9 +103,9 @@ public class MotionInterpreter implements SensorEventListener {
     private void handleGesture(long pTimestamp, int pGesture) {
         if (pGesture != Gestures.NO_GESTURE
                 && (pTimestamp - mLastGestureTime > GESTURE_EXCLUSION_TIMESPAN)) {
-            LOG.debug(LOG_TAG + " Gesture detected: " + Gestures.GESTURE_NAMES.get(pGesture));
+            LOG.debug("Gesture detected: " + Gestures.GESTURE_NAMES.get(pGesture));
 
-            if(mListener != null) {
+            if (mListener != null) {
                 mListener.onMotionGesture(pGesture);
             }
 
@@ -136,8 +114,7 @@ public class MotionInterpreter implements SensorEventListener {
         }
     }
 
-    public void setMode(Transaction pMode) {
-
+    private void setMode(Transaction pMode) {
         mDetectors = new ArrayList<Detector>();
 
         if (pMode == Transaction.SHARE || pMode == Transaction.SHARE_AND_RECEIVE) {
@@ -149,7 +126,7 @@ public class MotionInterpreter implements SensorEventListener {
     }
 
     public boolean isActivated() {
-        return activated;
+        return mActivated;
     }
 
 }
