@@ -6,10 +6,13 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+    <com.hoccer.xo.android.view.ConnectionStateView
+            android:id="@+id/connection_state"
+            android:layout_width="1000dp"
+            android:layout_height="40dp"/>
+
     <android.support.v4.view.ViewPager xmlns:android="http://schemas.android.com/apk/res/android"
            android:id="@+id/pager"
            android:layout_width="match_parent"
-           android:layout_height="match_parent">
-    </android.support.v4.view.ViewPager>
-
+           android:layout_height="match_parent"/>
 </LinearLayout>
