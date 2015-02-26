@@ -3,6 +3,7 @@ package com.hoccer.xo.android.view;
 import android.content.Context;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -24,8 +25,9 @@ public class ConnectionStateView extends LinearLayout implements IXoStateListene
     }
 
     private void initializeView() {
-        View layout = inflate(getContext(), R.layout.view_connection_state, null);
-        addView(layout);
+        LayoutInflater inflater = (LayoutInflater) getContext()
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        inflater.inflate(R.layout.view_connection_state, this, true);
         mConnectionStateTextView = (TextView) this.findViewById(R.id.connection_state_text);
     }
 
