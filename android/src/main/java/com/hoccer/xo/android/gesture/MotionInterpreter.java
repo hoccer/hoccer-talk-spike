@@ -20,11 +20,8 @@ public class MotionInterpreter implements SensorEventListener {
     private final Context mContext;
     private final MotionGestureListener mListener;
     private List<Detector> mDetectors;
-
     private long mLastGestureTime;
-
     private final FeatureHistory mFeatureHistory;
-
     private boolean mActivated;
 
     public MotionInterpreter(Transaction mode, Context context, MotionGestureListener shakeListener) {
@@ -74,53 +71,47 @@ public class MotionInterpreter implements SensorEventListener {
     }
 
     @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-    }
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 
     @Override
     public void onSensorChanged(SensorEvent event) {
         handleSensorChange(event.values, event.timestamp / 1000000);
     }
 
-    public void handleSensorChange(float[] pValues, long pTimestamp) {
-        handleSensorChange(new Vec3D(pValues[0], pValues[1], pValues[2]), pTimestamp);
+    public void handleSensorChange(float[] values, long timestamp) {
+        handleSensorChange(new Vec3D(values[0], values[1], values[2]), timestamp);
     }
 
-    public void handleSensorChange(Vec3D pMeasurement, long pTimestamp) {
-
+    public void handleSensorChange(Vec3D measurement, long timestamp) {
         synchronized (mFeatureHistory) {
-
-            mFeatureHistory.add(pMeasurement, pTimestamp);
+            mFeatureHistory.add(measurement, timestamp);
 
             for (Detector detector : mDetectors) {
-                handleGesture(pTimestamp, detector.detect(mFeatureHistory));
+                handleGesture(timestamp, detector.detect(mFeatureHistory));
             }
-
         }
-
     }
 
-    private void handleGesture(long pTimestamp, int pGesture) {
-        if (pGesture != Gestures.NO_GESTURE
-                && (pTimestamp - mLastGestureTime > GESTURE_EXCLUSION_TIMESPAN)) {
-            LOG.debug("Gesture detected: " + Gestures.GESTURE_NAMES.get(pGesture));
+    private void handleGesture(long timestamp, int gesture) {
+        if (gesture != Gestures.NO_GESTURE && (timestamp - mLastGestureTime > GESTURE_EXCLUSION_TIMESPAN)) {
+            LOG.debug("Gesture detected: " + Gestures.GESTURE_NAMES.get(gesture));
 
             if (mListener != null) {
-                mListener.onMotionGesture(pGesture);
+                mListener.onMotionGesture(gesture);
             }
 
-            mLastGestureTime = pTimestamp;
+            mLastGestureTime = timestamp;
             mFeatureHistory.clear();
         }
     }
 
-    private void setMode(Transaction pMode) {
+    private void setMode(Transaction mode) {
         mDetectors = new ArrayList<Detector>();
 
-        if (pMode == Transaction.SHARE || pMode == Transaction.SHARE_AND_RECEIVE) {
+        if (mode == Transaction.SHARE || mode == Transaction.SHARE_AND_RECEIVE) {
             addGestureDetector(new ThrowDetector());
         }
-        if (pMode == Transaction.RECEIVE || pMode == Transaction.SHARE_AND_RECEIVE) {
+        if (mode == Transaction.RECEIVE || mode == Transaction.SHARE_AND_RECEIVE) {
             addGestureDetector(new CatchDetector());
         }
     }
@@ -128,5 +119,4 @@ public class MotionInterpreter implements SensorEventListener {
     public boolean isActivated() {
         return mActivated;
     }
-
 }
