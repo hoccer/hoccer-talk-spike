@@ -214,10 +214,13 @@ public class AttachmentListFragment extends SearchableListFragment {
         }
 
         mSearchAttachmentAdapter = new AttachmentSearchResultAdapter(mAttachmentAdapter.getItems());
+        getListView().setChoiceMode(ListView.CHOICE_MODE_NONE);
     }
 
     @Override
-    protected void onSearchModeDisabled() {}
+    protected void onSearchModeDisabled() {
+        getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+    }
 
     private void retrieveCollectionAndAddSelectedAttachments(Integer mediaCollectionId) {
         List<XoTransfer> selectedItems = mAttachmentAdapter.getSelectedItems();
