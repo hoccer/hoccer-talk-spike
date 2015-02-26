@@ -389,7 +389,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     }
 
     private static void deleteCachedFiles(List<TalkClientUpload> uploads) {
-        for (TalkClientUpload upload : uploads) {
+        for(TalkClientUpload upload : uploads) {
             FileUtils.deleteQuietly(new File(upload.getTempCompressedFilePath()));
         }
     }
@@ -502,7 +502,9 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     private class SendButtonListener implements View.OnClickListener, View.OnLongClickListener {
         @Override
         public void onClick(View v) {
-            processMessage();
+            if (isComposed()) {
+                processMessage();
+            }
         }
 
         @Override
