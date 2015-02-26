@@ -53,7 +53,7 @@ public class AttachmentListFragment extends SearchableListFragment {
     private SectionedListAdapter mResultsAdapter;
     private ContactSearchResultAdapter mSearchContactsAdapter;
     private AttachmentSearchResultAdapter mSearchAttachmentAdapter;
-    private TalkClientContact mFilterContact;
+    private TalkClientContact mContact;
     private XoClientDatabase mDatabase;
     private ActionMode mCurrentActionMode;
 
@@ -69,14 +69,14 @@ public class AttachmentListFragment extends SearchableListFragment {
             int contactId = getActivity().getIntent().getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
             if (contactId >= 0) {
                 try {
-                    mFilterContact = mDatabase.findContactById(contactId);
+                    mContact = mDatabase.findContactById(contactId);
                 } catch (SQLException e) {
                     LOG.warn("Contact with ID " + contactId + " not found");
                 }
             }
         }
 
-        mAttachmentAdapter = new AttachmentListAdapter(mFilterContact, ContentMediaType.AUDIO);
+        mAttachmentAdapter = new AttachmentListAdapter(mContact, ContentMediaType.AUDIO);
 
         mSearchContactsAdapter = new ContactSearchResultAdapter((XoActivity) getActivity());
         mSearchContactsAdapter.onCreate();
@@ -111,9 +111,9 @@ public class AttachmentListFragment extends SearchableListFragment {
         mSearchContactsAdapter.onResume();
         setListAdapter(mAttachmentAdapter);
 
-        if (mFilterContact != null) {
+        if (mContact != null) {
             getActivity().getActionBar().setTitle(getResources().getString(R.string.content_audio_by_contact_caption,
-                    mFilterContact.getNickname()));
+                    mContact.getNickname()));
         } else {
             getActivity().getActionBar().setTitle(R.string.content_audio_caption);
         }
@@ -267,10 +267,10 @@ public class AttachmentListFragment extends SearchableListFragment {
                 getActivity().startActivity(new Intent(getActivity(), FullscreenPlayerActivity.class));
             } else if (selectedItem instanceof TalkClientContact) {
                 leaveSearchMode();
-                mFilterContact = (TalkClientContact) selectedItem;
+                mContact = (TalkClientContact) selectedItem;
                 mAttachmentAdapter.setContact((TalkClientContact) selectedItem);
                 final String newActionBarTitle = getResources().getString(R.string.content_audio_by_contact_caption,
-                        mFilterContact.getNickname());
+                        mContact.getNickname());
                 getActivity().getActionBar().setTitle(newActionBarTitle);
             }
         }
