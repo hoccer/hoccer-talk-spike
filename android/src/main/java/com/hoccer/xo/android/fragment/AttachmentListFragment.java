@@ -53,6 +53,7 @@ public class AttachmentListFragment extends SearchableListFragment {
     private SectionedListAdapter mResultsAdapter;
     private ContactSearchResultAdapter mSearchContactsAdapter;
     private AttachmentSearchResultAdapter mSearchAttachmentAdapter;
+
     private TalkClientContact mContact;
     private XoClientDatabase mDatabase;
     private ActionMode mCurrentActionMode;
@@ -62,9 +63,6 @@ public class AttachmentListFragment extends SearchableListFragment {
         super.onCreate(savedInstanceState);
 
         mDatabase = XoApplication.get().getXoClient().getDatabase();
-
-        setHasOptionsMenu(true);
-
         if (getActivity().getIntent().hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
             int contactId = getActivity().getIntent().getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
             if (contactId >= 0) {
@@ -77,9 +75,10 @@ public class AttachmentListFragment extends SearchableListFragment {
         }
 
         mAttachmentAdapter = new AttachmentListAdapter(mContact, ContentMediaType.AUDIO);
-
         mSearchContactsAdapter = new ContactSearchResultAdapter((XoActivity) getActivity());
         mSearchContactsAdapter.onCreate();
+        
+        setHasOptionsMenu(true);
     }
 
     @Override
