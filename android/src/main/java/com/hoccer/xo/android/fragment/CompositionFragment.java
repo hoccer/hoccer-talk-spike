@@ -389,7 +389,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     }
 
     private static void deleteCachedFiles(List<TalkClientUpload> uploads) {
-        for(TalkClientUpload upload : uploads) {
+        for (TalkClientUpload upload : uploads) {
             FileUtils.deleteQuietly(new File(upload.getTempCompressedFilePath()));
         }
     }
