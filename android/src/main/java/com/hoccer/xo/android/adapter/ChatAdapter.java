@@ -241,16 +241,6 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
         });
     }
 
-    protected static boolean isMessageValid(TalkClientMessage message) {
-        if (message.getAttachmentUpload() != null || message.getAttachmentDownload() != null) {
-            return true;
-        }
-        if (!message.getText().isEmpty()) {
-            return true;
-        }
-        return false;
-    }
-
     @Override
     public void onReloadRequest() {
         super.onReloadRequest();
@@ -266,7 +256,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
     @Override
     public void onMessageCreated(final TalkClientMessage message) {
         LOG.debug("onMessageCreated()");
-        if (isMessageRelevant(message) && isMessageValid(message)) {
+        if (isMessageRelevant(message)) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -305,7 +295,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
     @Override
     public void onMessageUpdated(final TalkClientMessage message) {
         LOG.debug("onMessageUpdated()");
-        if (isMessageRelevant(message) && isMessageValid(message)) {
+        if (isMessageRelevant(message)) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
