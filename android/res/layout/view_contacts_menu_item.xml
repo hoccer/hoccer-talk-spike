@@ -15,11 +15,15 @@
 
     <com.hoccer.xo.android.view.NotificationBadgeTextView
             android:id="@+id/tv_invite_notification_badge"
-            android:layout_marginTop="5dp"
-            android:layout_marginLeft="22dp"
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="20dp"
             android:layout_gravity="start"
             android:visibility="gone"
-            android:background="@drawable/unconfirmed_invitations_badge"
-            style="@style/AppBaseTheme.Contact.UnreadMessagesBadge"/>
+            android:background="@drawable/unconfirmed_invitations_badge_menu"
+            android:textSize="10sp"
+            android:layout_width="16sp"
+            android:layout_height="16sp"
+            android:textColor="@android:color/white"
+            android:gravity="center"/>
 
 </FrameLayout>
