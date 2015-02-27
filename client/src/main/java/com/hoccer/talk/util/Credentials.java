@@ -23,18 +23,16 @@ public class Credentials {
     private final String mPassword;
     private final String mSalt;
 
-    @Nullable
     private final String mClientName;
 
-    public Credentials(String clientId, String password, String salt) {
-        this(clientId, password, salt, null);
-    }
+    private final Long mTimeStamp;
 
-    public Credentials(String clientId, String password, String salt, @Nullable String clientName) {
+    public Credentials(String clientId, String password, String salt, String clientName, Long timestamp) {
         mClientId = clientId;
         mPassword = password;
         mSalt = salt;
         mClientName = clientName;
+        mTimeStamp = timestamp;
     }
 
     public String getClientId() {
@@ -44,6 +42,11 @@ public class Credentials {
     @Nullable
     public String getClientName() {
         return mClientName;
+    }
+
+    @Nullable
+    public Long getTimeStamp() {
+        return mTimeStamp;
     }
 
     public String getPassword() {
@@ -96,6 +99,10 @@ public class Credentials {
 
             if (mClientName != null) {
                 node.put("clientName", mClientName);
+            }
+
+            if (mTimeStamp != null) {
+                node.put("credentialsDate", mTimeStamp);
             }
 
             return true;
@@ -163,7 +170,13 @@ public class Credentials {
             clientName = clientNameNode.asText();
         }
 
-        return new Credentials(clientIdNode.asText(), passwordText, saltNode.asText(), clientName);
+        Long timestamp = null;
+        JsonNode timestampNode = jsonCredentials.get("credentialsDate");
+        if (timestampNode != null) {
+            timestamp = Long.parseLong(timestampNode.asText());
+        }
+
+        return new Credentials(clientIdNode.asText(), passwordText, saltNode.asText(), clientName, timestamp);
     }
 
     private static String convertToHexIfASCII(String byteString) {
