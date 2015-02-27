@@ -97,11 +97,11 @@ public class Credentials {
             node.put("salt", mSalt);
             node.put("clientId", mClientId);
 
-            if(mClientName != null) {
+            if (mClientName != null) {
                 node.put("clientName", mClientName);
             }
 
-            if(mTimeStamp != null) {
+            if (mTimeStamp != null) {
                 node.put("credentialsDate", mTimeStamp);
             }
 
