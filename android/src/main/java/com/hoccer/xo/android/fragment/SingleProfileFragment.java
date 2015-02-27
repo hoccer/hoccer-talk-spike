@@ -336,7 +336,7 @@ public class SingleProfileFragment extends ProfileFragment
     }
 
     private void updateFingerprint() {
-        if(mContact.getPublicKey() != null) {
+        if (mContact.getPublicKey() != null) {
             String keyId = mContact.getPublicKey().getKeyId();
 
             keyId = keyId.toUpperCase();
