@@ -399,6 +399,10 @@
     <string name="restore_no_backups_found_title">No backups found</string>
     <string name="restore_no_backups_found_message">Please copy a backup to\n%1$s\nto restore a former ${app.name.short} account.</string>
 
+    <string name="connection_state_disconnected">disconnected</string>
+    <string name="connection_state_login">logging in</string>
+    <string name="connection_state_syncing">synchronizing</string>
+
     <string name="date">Date</string>
     <string name="user">User</string>
     <string name="file">File</string>
