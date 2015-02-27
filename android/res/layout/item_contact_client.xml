@@ -47,7 +47,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="35dp"
                 android:orientation="horizontal"
-                android:visibility="visible">
+                android:visibility="gone">
             <Button
                     android:id="@+id/btn_decline"
                     android:text="@string/common_decline"
