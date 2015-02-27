@@ -1,14 +1,12 @@
 package com.hoccer.talk.client.util;
 
 import com.hoccer.talk.util.Credentials;
-import junit.framework.Assert;
 import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.print.attribute.standard.DateTimeAtCompleted;
 import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
 import java.sql.SQLException;
