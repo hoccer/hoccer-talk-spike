@@ -17,13 +17,15 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.hoccer.talk.client.IXoContactListener;
+import com.hoccer.talk.client.IXoStateListener;
+import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 
 import java.util.EnumMap;
 import java.util.Map;
 
-public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment, IXoContactListener {
+public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment, IXoContactListener, IXoStateListener {
 
     private ImageView mQrCodeView;
     private TextView mPairingTokenView;
@@ -39,12 +41,12 @@ public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment,
     public void onViewCreated(final View view, final Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mQrCodeView = (ImageView)view.findViewById(R.id.iv_qr_code);
-        mPairingTokenView = (TextView)view.findViewById(R.id.tv_pairing_token);
-        mProgressBar = (ProgressBar)view.findViewById(R.id.pb_generating_pairing_token);
-        mErrorLayout = (LinearLayout)view.findViewById(R.id.ll_error);
+        mQrCodeView = (ImageView) view.findViewById(R.id.iv_qr_code);
+        mPairingTokenView = (TextView) view.findViewById(R.id.tv_pairing_token);
+        mProgressBar = (ProgressBar) view.findViewById(R.id.pb_generating_pairing_token);
+        mErrorLayout = (LinearLayout) view.findViewById(R.id.ll_error);
 
-        final Button retryButton = (Button)view.findViewById(R.id.btn_retry);
+        final Button retryButton = (Button) view.findViewById(R.id.btn_retry);
         retryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -70,6 +72,7 @@ public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment,
         }
 
         XoApplication.get().getXoClient().registerContactListener(this);
+        XoApplication.get().getXoClient().registerStateListener(this);
     }
 
     @Override
@@ -81,6 +84,7 @@ public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment,
     @Override
     public void onPagePause() {
         XoApplication.get().getXoClient().unregisterContactListener(this);
+        XoApplication.get().getXoClient().unregisterStateListener(this);
     }
 
     @Override
@@ -179,7 +183,7 @@ public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment,
     @Override
     public void onClientRelationshipChanged(final TalkClientContact contact) {
         // we assume that this relationship update is a new friendship via QR code scan
-        if(contact.isClientFriend()) {
+        if (contact.isClientFriend()) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -194,4 +198,16 @@ public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment,
 
     @Override
     public void onGroupMembershipChanged(final TalkClientContact contact) {}
+
+    @Override
+    public void onClientStateChange(XoClient client, int state) {
+        if (!isTokenGenerated() && state == XoClient.STATE_READY) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    generateToken();
+                }
+            });
+        }
+    }
 }
