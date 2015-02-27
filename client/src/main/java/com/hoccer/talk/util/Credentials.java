@@ -4,36 +4,35 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hoccer.talk.crypto.CryptoJSON;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+
 
 /**
  * Wraps the credentials exported from XoClient and provides from/to Json conversion.
  */
 public class Credentials {
 
-    public static final String CREDENTIALS_CONTENT_TYPE = "credentials";
-
     private static final Logger LOG = Logger.getLogger(Credentials.class);
 
+    public static final String CREDENTIALS_CONTENT_TYPE = "credentials";
+    private static final int IOS_ASCII_PASSWORD_LENGTH = 23;
+
     private final String mClientId;
-
     private final String mPassword;
-
     private final String mSalt;
 
-    @Nullable
     private final String mClientName;
 
-    public Credentials(String clientId, String password, String salt) {
-        this(clientId, password, salt, null);
-    }
+    private final Long mTimeStamp;
 
-    public Credentials(String clientId, String password, String salt, @Nullable String clientName) {
+    public Credentials(String clientId, String password, String salt, String clientName, Long timestamp) {
         mClientId = clientId;
         mPassword = password;
         mSalt = salt;
         mClientName = clientName;
+        mTimeStamp = timestamp;
     }
 
     public String getClientId() {
@@ -43,6 +42,11 @@ public class Credentials {
     @Nullable
     public String getClientName() {
         return mClientName;
+    }
+
+    @Nullable
+    public Long getTimeStamp() {
+        return mTimeStamp;
     }
 
     public String getPassword() {
@@ -97,6 +101,10 @@ public class Credentials {
                 node.put("clientName", mClientName);
             }
 
+            if (mTimeStamp != null) {
+                node.put("credentialsDate", mTimeStamp);
+            }
+
             return true;
         } catch (Exception e) {
             LOG.error("toJsonNode", e);
@@ -148,6 +156,7 @@ public class Credentials {
             LOG.error("Missing password node");
             return null;
         }
+        String passwordText = convertToHexIfASCII(passwordNode.asText());
 
         JsonNode saltNode = jsonCredentials.get("salt");
         if (saltNode == null) {
@@ -161,6 +170,20 @@ public class Credentials {
             clientName = clientNameNode.asText();
         }
 
-        return new Credentials(clientIdNode.asText(), passwordNode.asText(), saltNode.asText(), clientName);
+        Long timestamp = null;
+        JsonNode timestampNode = jsonCredentials.get("credentialsDate");
+        if (timestampNode != null) {
+            timestamp = Long.parseLong(timestampNode.asText());
+        }
+
+        return new Credentials(clientIdNode.asText(), passwordText, saltNode.asText(), clientName, timestamp);
+    }
+
+    private static String convertToHexIfASCII(String byteString) {
+        if (byteString.length() == IOS_ASCII_PASSWORD_LENGTH) {
+            return new String(Hex.encodeHex(byteString.getBytes()));
+        } else {
+            return byteString;
+        }
     }
 }

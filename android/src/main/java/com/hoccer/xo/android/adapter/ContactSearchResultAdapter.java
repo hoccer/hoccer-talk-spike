@@ -48,7 +48,6 @@ public class ContactSearchResultAdapter extends ContactsAdapter {
         } else {
             mFoundContacts.clear();
         }
-
     }
 
     @Override
@@ -87,9 +86,7 @@ public class ContactSearchResultAdapter extends ContactsAdapter {
     }
 
     @Override
-    protected void updateNearbyHistoryLayout(View v) {
-
-    }
+    protected void updateNearbyHistoryLayout(View v) {}
 
     @Override
     protected void updateContact(View view, TalkClientContact contact) {

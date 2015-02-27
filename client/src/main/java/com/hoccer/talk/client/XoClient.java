@@ -387,7 +387,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         String salt = mSelfContact.getSelf().getSrpSalt();
         String clientName = mSelfContact.getName();
 
-        return new Credentials(clientId, password, salt, clientName);
+        return new Credentials(clientId, password, salt, clientName, new Date().getTime());
     }
 
     /**
