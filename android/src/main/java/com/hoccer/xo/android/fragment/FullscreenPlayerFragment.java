@@ -24,7 +24,6 @@ import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.ArtworkImageView;
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
@@ -50,6 +49,7 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
     private final Handler mTimeProgressHandler = new Handler();
     private Runnable mUpdateTimeTask;
     private ValueAnimator mBlinkAnimation;
+    private boolean mSeekbarInTrackingTouchMode;
 
     MediaMetaData mCurrentMetaData;
 
@@ -82,9 +82,10 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
         mPlaylistSizeLabel = (TextView) getView().findViewById(R.id.tv_player_playlist_size);
         mConversationNameLabel = (TextView) getView().findViewById(R.id.tv_conversation_name);
         mArtworkImageView = (ArtworkImageView) getView().findViewById(R.id.iv_player_artwork);
+        mPlayButton = (ToggleButton) view.findViewById(R.id.bt_player_play);
+
         mTrackProgressBar.setProgress(0);
         mTrackProgressBar.setMax(100);
-        mPlayButton = (ToggleButton) view.findViewById(R.id.bt_player_play);
 
         view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -131,26 +132,26 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
         final boolean isPlaying;
 
         if ((MediaPlayer.get().isPaused()) || MediaPlayer.get().isStopped()) {
-            isPlaying = true;
-        } else if (!MediaPlayer.get().isPaused() && !MediaPlayer.get().isStopped()) {
             isPlaying = false;
+        } else if (!MediaPlayer.get().isPaused() && !MediaPlayer.get().isStopped()) {
+            isPlaying = true;
         } else {
-            isPlaying = !mPlayButton.isChecked();
+            isPlaying = mPlayButton.isChecked();
         }
 
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if (isPlaying) {
-                    mPlayButton.setChecked(false);
-                    mBlinkAnimation.start();
-                } else {
                     if (mBlinkAnimation.isRunning()) {
                         mBlinkAnimation.cancel();
                     }
 
                     mCurrentTimeLabel.setTextColor(getResources().getColor(R.color.media_player_text_secondary));
                     mPlayButton.setChecked(true);
+                } else {
+                    mPlayButton.setChecked(false);
+                    mBlinkAnimation.start();
                 }
             }
         });
@@ -177,26 +178,20 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
             mCurrentMetaData.unregisterArtworkRetrievalListener(this);
         }
 
-        Uri mediaUri = UriUtils.getAbsoluteFileUri(MediaPlayer.get().getCurrentMediaItem().getFilePath());
-        mCurrentMetaData = MediaMetaData.retrieveMetaData(mediaUri.getPath());
-        final String trackArtist;
-        final String trackTitle;
-        final int totalDuration = MediaPlayer.get().getTotalDuration();
-        final String durationLabel = getStringFromTimeStamp(totalDuration);
         final String playlistIndex = Integer.toString(MediaPlayer.get().getCurrentIndex() + 1);
         final String playlistSize = Integer.toString(MediaPlayer.get().getMediaListSize());
+        final int totalDuration = MediaPlayer.get().getTotalDuration();
+        final String durationLabel = getStringFromTimeStamp(totalDuration);
 
-        if (mCurrentMetaData.getTitle() == null || mCurrentMetaData.getTitle().isEmpty()) {
-            File file = new File(mCurrentMetaData.getFilePath());
-            trackTitle = file.getName();
-        } else {
-            trackTitle = mCurrentMetaData.getTitle().trim();
-        }
+        Uri mediaUri = UriUtils.getAbsoluteFileUri(MediaPlayer.get().getCurrentMediaItem().getFilePath());
+        mCurrentMetaData = MediaMetaData.retrieveMetaData(mediaUri.getPath());
+        final String title = mCurrentMetaData.getTitleOrFilename();
 
-        if (mCurrentMetaData.getArtist() == null || mCurrentMetaData.getArtist().isEmpty()) {
-            trackArtist = getActivity().getResources().getString(R.string.media_meta_data_unknown_artist);
+        final String artist;
+        if (mCurrentMetaData.getArtist().isEmpty()) {
+            artist = getActivity().getResources().getString(R.string.media_meta_data_unknown_artist);
         } else {
-            trackArtist = mCurrentMetaData.getArtist().trim();
+            artist = mCurrentMetaData.getArtist();
         }
 
         mCurrentMetaData.getArtwork(getResources(), FullscreenPlayerFragment.this);
@@ -204,15 +199,14 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-
-                mTrackTitleLabel.setText(trackTitle);
-                mTrackArtistLabel.setText(trackArtist);
+                mTrackTitleLabel.setText(title);
+                mTrackArtistLabel.setText(artist);
                 mTrackProgressBar.setMax(totalDuration);
+                mTrackProgressBar.setProgress(0);
 
                 mTotalDurationLabel.setText(durationLabel);
                 mPlaylistIndexLabel.setText(playlistIndex);
                 mPlaylistSizeLabel.setText(playlistSize);
-
 
                 updatePlayState();
 
@@ -265,7 +259,7 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
         });
     }
 
-    private String getStringFromTimeStamp(int timeInMillis) {
+    private static String getStringFromTimeStamp(int timeInMillis) {
         long hours = TimeUnit.MILLISECONDS.toHours(timeInMillis);
         long minutes = TimeUnit.MILLISECONDS.toMinutes(timeInMillis) - TimeUnit.HOURS.toMinutes(hours);
         long seconds = TimeUnit.MILLISECONDS.toSeconds(timeInMillis) - TimeUnit.MINUTES.toSeconds(minutes);
@@ -334,15 +328,14 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
     }
 
     private class OnPlayerInteractionListener implements SeekBar.OnSeekBarChangeListener, View.OnClickListener, ToggleButton.OnCheckedChangeListener {
+
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.bt_player_skip_back:
-                    mTrackProgressBar.setProgress(0);
                     MediaPlayer.get().backward();
                     break;
                 case R.id.bt_player_skip_forward:
-                    mTrackProgressBar.setProgress(0);
                     MediaPlayer.get().forward();
                     break;
                 case R.id.bt_player_repeat:
@@ -353,16 +346,17 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
 
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
+            mCurrentTimeLabel.setText(getStringFromTimeStamp(progress));
         }
 
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
-
+            mSeekbarInTrackingTouchMode = true;
         }
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
+            mSeekbarInTrackingTouchMode = false;
             MediaPlayer.get().setSeekPosition(seekBar.getProgress());
         }
 
@@ -401,15 +395,15 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
     }
 
     private class UpdateTimeTask implements Runnable {
-
         @Override
         public void run() {
             final int currentProgress = MediaPlayer.get().getCurrentProgress();
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mCurrentTimeLabel.setText(getStringFromTimeStamp(currentProgress));
-                    mTrackProgressBar.setProgress(currentProgress);
+                    if ((MediaPlayer.get().getCurrentMediaItem() != null) && !mSeekbarInTrackingTouchMode) {
+                        mTrackProgressBar.setProgress(currentProgress);
+                    }
                 }
             });
             mTimeProgressHandler.postDelayed(this, 1000);
@@ -423,6 +417,11 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
 
     @Override
     public void onTrackChanged() {
+        if (MediaPlayer.get().getCurrentMediaItem() == null) {
+            getActivity().finish();
+            return;
+        }
+
         updateTrackData();
         updateConversationName();
     }

@@ -1,6 +1,7 @@
 package com.hoccer.talk.util;
 
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -35,14 +36,14 @@ public class ProgressOutputStream extends OutputStream {
     }
 
     @Override
-    public void write(byte[] b) throws IOException {
+    public void write(@NotNull byte[] b) throws IOException {
         mWrapped.write(b);
         mProgress += b.length;
         callListener();
     }
 
     @Override
-    public void write(byte[] b, int off, int len) throws IOException {
+    public void write(@NotNull byte[] b, int off, int len) throws IOException {
         mWrapped.write(b, off, len);
         mProgress += len;
         callListener();

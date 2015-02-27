@@ -35,7 +35,7 @@ import static com.google.android.gcm.GCMConstants.DEFAULT_INTENT_SERVICE_CLASS_N
  */
 public class GCMBroadcastReceiver extends BroadcastReceiver {
 
-    private static boolean mReceiverSet = false;
+    private static boolean mReceiverSet;
 
     private final GCMLogger mLogger = new GCMLogger("GCMBroadcastReceiver",
             "[" + getClass().getName() + "]: ", getClass());

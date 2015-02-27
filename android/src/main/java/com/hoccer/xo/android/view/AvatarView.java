@@ -26,7 +26,7 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
 
     private Uri mDefaultAvatarImageUri;
     private DisplayImageOptions mDefaultOptions;
-    private float mCornerRadius = 0.0f;
+    private float mCornerRadius;
     private AspectImageView mAvatarImage;
     private View mPresenceIndicatorActive;
     private View mPresenceIndicatorInactive;

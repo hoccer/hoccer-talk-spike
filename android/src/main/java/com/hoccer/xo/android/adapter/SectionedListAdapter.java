@@ -132,8 +132,8 @@ public class SectionedListAdapter extends BaseAdapter {
         return position;
     }
 
-    private View getHeaderView(String caption, int index,
-                               View convertView, ViewGroup parent) {
+    private static View getHeaderView(String caption, int index,
+                                      View convertView, ViewGroup parent) {
         View headerView = convertView;
         if (headerView == null) {
             headerView = View.inflate(parent.getContext(), R.layout.item_section_header, null);
@@ -145,8 +145,8 @@ public class SectionedListAdapter extends BaseAdapter {
     }
 
     class Section {
-        private String mCaption;
-        private Adapter mAdapter;
+        private final String mCaption;
+        private final Adapter mAdapter;
 
         Section(String caption, Adapter adapter) {
             mCaption = caption;

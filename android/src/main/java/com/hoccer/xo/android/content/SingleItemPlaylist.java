@@ -50,7 +50,7 @@ public class SingleItemPlaylist extends MediaPlaylist implements IXoDownloadList
     @Override
     public Iterator<XoTransfer> iterator() {
         return new Iterator<XoTransfer>() {
-            private int mCurrentIndex = 0;
+            private int mCurrentIndex;
 
             @Override
             public boolean hasNext() {

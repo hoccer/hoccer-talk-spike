@@ -74,7 +74,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
 
     private ContentSelection mAttachmentSelection;
     private EnumMap<AttachmentSelectionType, View> mAttachmentTypeViews;
-    private List<SelectedContent> mSelectedContent;
+    private List<SelectedContent> mSelectedContent = new ArrayList<SelectedContent>();
     private TalkClientContact mContact;
     private String mLastMessage;
 
@@ -94,8 +94,6 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         if (mContact == null) {
             throw new IllegalArgumentException("MessagingFragment requires valid contact.");
         }
-
-        mSelectedContent = new ArrayList<SelectedContent>();
     }
 
     @Override
@@ -218,7 +216,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     }
 
     private boolean isComposed() {
-        return (mTextField.getText().length() > 0 || mSelectedContent != null);
+        return !(mSelectedContent.isEmpty() && mTextField.getText().toString().trim().isEmpty());
     }
 
     private boolean isBlocked() {
@@ -319,6 +317,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         TalkClientMessage message = getXoClient().composeClientMessage(mContact, messageText);
         getXoClient().sendMessage(message.getMessageTag());
         clearComposedMessage();
+        mLastMessage = messageText;
     }
 
     private void sendMessageWithAttachments() {
@@ -390,7 +389,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     }
 
     private static void deleteCachedFiles(List<TalkClientUpload> uploads) {
-        for(TalkClientUpload upload : uploads) {
+        for (TalkClientUpload upload : uploads) {
             FileUtils.deleteQuietly(new File(upload.getTempCompressedFilePath()));
         }
     }
@@ -406,6 +405,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         }
         getXoClient().sendMessages(messageTags);
         clearComposedMessage();
+        mLastMessage = messageText;
     }
 
     private boolean sizeExceedsUploadLimit(long attachmentSize) {
@@ -502,13 +502,15 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     private class SendButtonListener implements View.OnClickListener, View.OnLongClickListener {
         @Override
         public void onClick(View v) {
-            processMessage();
+            if (isComposed()) {
+                processMessage();
+            }
         }
 
         @Override
         public boolean onLongClick(View v) {
             boolean longPressHandled = false;
-            if (mLastMessage != null && !mLastMessage.isEmpty()) {
+            if (mLastMessage != null) {
                 for (int i = 0; i < STRESS_TEST_MESSAGE_COUNT; i++) {
                     getXoClient().sendMessage(getXoClient().composeClientMessage(mContact, mLastMessage + " " + Integer.toString(i)).getMessageTag());
                 }

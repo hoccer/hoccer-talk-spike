@@ -105,16 +105,17 @@ public class FeatureHistory {
             LineFeature line = itr.next();
             durationSum += line.getLength();
 
-            if (line.isFlat())
+            if (line.isFlat()) {
                 pattern = "<flat>" + pattern;
-            else if (line.isFastAscending())
+            } else if (line.isFastAscending()) {
                 pattern = "<fastup>" + pattern;
-            else if (line.isAscending())
+            } else if (line.isAscending()) {
                 pattern = "<up>" + pattern;
-            else if (line.isFastDescending())
+            } else if (line.isFastDescending()) {
                 pattern = "<fastdown>" + pattern;
-            else if (line.isDescending())
+            } else if (line.isDescending()) {
                 pattern = "<down>" + pattern;
+            }
         }
 
         return new FeaturePattern(pattern);

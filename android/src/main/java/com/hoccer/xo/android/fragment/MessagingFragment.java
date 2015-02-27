@@ -69,7 +69,7 @@ public class MessagingFragment extends XoListFragment
                 return;
             }
         } else {
-            LOG.error("MessagingFragment requires contactId as argument.");
+            LOG.error("MessagingFragment requires clientContactId as argument.");
             return;
         }
 
@@ -205,7 +205,7 @@ public class MessagingFragment extends XoListFragment
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        LOG.debug("onOptionsItemSelected(" + item.toString() + ")");
+        LOG.debug("onOptionsItemSelected(" + item + ")");
 
         switch (item.getItemId()) {
             case R.id.menu_profile_single:

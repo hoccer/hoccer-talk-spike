@@ -864,11 +864,10 @@ public class MediaCollectionTest {
 
         ListenerTester listenerTester = new ListenerTester(collection);
 
-        final TalkClientDownload expectedItemRemoved = item1;
         final int expectedItemRemovedIndex = 1;
 
         try {
-            mDatabase.deleteClientDownload(expectedItemRemoved);
+            mDatabase.deleteClientDownload(item1);
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
             fail();
@@ -879,7 +878,7 @@ public class MediaCollectionTest {
         assertEquals(1, listenerTester.onItemRemovedCalled.size()); // callback is only invoked if MediaCollection instances are cached
         assertEquals(collection, listenerTester.onItemRemovedCalled.get(0).args[0]);
         assertEquals(expectedItemRemovedIndex, listenerTester.onItemRemovedCalled.get(0).args[1]);
-        assertEquals(expectedItemRemoved, listenerTester.onItemRemovedCalled.get(0).args[2]);
+        assertEquals(item1, listenerTester.onItemRemovedCalled.get(0).args[2]);
         assertEquals(0, listenerTester.onItemAddedCalled.size());
         assertEquals(0, listenerTester.onCollectionClearedCalled.size());
     }
@@ -1010,8 +1009,8 @@ public class MediaCollectionTest {
 
     // logs listener calls
     private class ListenerTester {
-        private TalkClientMediaCollection mCollection;
-        private TalkClientMediaCollection.Listener mListener;
+        private final TalkClientMediaCollection mCollection;
+        private final TalkClientMediaCollection.Listener mListener;
 
         public ArrayList<Call> onNameChangedCalled = new ArrayList<Call>();
         public ArrayList<Call> onItemOrderChangedCalled = new ArrayList<Call>();

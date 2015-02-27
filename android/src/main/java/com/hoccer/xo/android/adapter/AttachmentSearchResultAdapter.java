@@ -12,10 +12,10 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.content.MediaMetaData;
-import com.artcom.hoccer.R;
 import com.hoccer.xo.android.util.UriUtils;
 
 import java.util.ArrayList;
@@ -64,9 +64,7 @@ public class AttachmentSearchResultAdapter extends BaseAdapter {
                 MediaMetaData metaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(attachment.getFilePath()).getPath());
                 String title = metaData.getTitle();
                 String artist = metaData.getArtist();
-
-                if ((title != null && title.toLowerCase().contains(query.toLowerCase())) ||
-                        (artist != null && artist.toLowerCase().contains(query.toLowerCase()))) {
+                if (title.toLowerCase().contains(mLastQuery) || artist.toLowerCase().contains(mLastQuery)) {
                     mMatchedItems.add(attachment);
                 }
             }
@@ -84,18 +82,18 @@ public class AttachmentSearchResultAdapter extends BaseAdapter {
     }
 
     private View setupAudioAttachmentView(final Context context, View attachmentView, XoTransfer attachment) {
-        TextView titleTv = (TextView) attachmentView.findViewById(R.id.tv_title);
+        TextView titleTextView = (TextView) attachmentView.findViewById(R.id.tv_title);
+
         MediaMetaData metaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(attachment.getFilePath()).getPath());
         String title = metaData.getTitleOrFilename();
-        titleTv.setText(getHighlightedSearchResult(title, mLastQuery));
+        titleTextView.setText(getHighlightedSearchResult(title, mLastQuery));
 
-        TextView subtitleTv = (TextView) attachmentView.findViewById(R.id.tv_subtitle);
+        TextView artistTextView = (TextView) attachmentView.findViewById(R.id.tv_artist);
         String artist = metaData.getArtist();
-        if (artist == null || artist.isEmpty()) {
-            artist = context.getResources().getString(R.string.media_meta_data_unknown_artist);
-            subtitleTv.setText(artist);
+        if (artist.isEmpty()) {
+            artistTextView.setText(context.getResources().getString(R.string.media_meta_data_unknown_artist));
         } else {
-            subtitleTv.setText(getHighlightedSearchResult(artist, mLastQuery));
+            artistTextView.setText(getHighlightedSearchResult(artist, mLastQuery));
         }
 
         View artworkContainer = attachmentView.findViewById(R.id.fl_artwork);
@@ -118,15 +116,15 @@ public class AttachmentSearchResultAdapter extends BaseAdapter {
         return attachmentView;
     }
 
-    private Spannable getHighlightedSearchResult(String text, String query) {
+    private static Spannable getHighlightedSearchResult(String text, String query) {
         Spannable result = new SpannableString(text);
         String lowerCaseText = text.toLowerCase();
 
         int fromIndex = 0;
-        int highlightStart = 0;
+        int highlightStart;
 
         highlightStart = lowerCaseText.indexOf(query, fromIndex);
-        while(highlightStart >= 0) {
+        while (highlightStart >= 0) {
             int highlightEnd = highlightStart + query.length();
             result.setSpan(new ForegroundColorSpan(Color.BLACK), highlightStart, highlightEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             fromIndex = highlightEnd;

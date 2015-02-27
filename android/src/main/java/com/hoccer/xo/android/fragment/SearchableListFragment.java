@@ -20,9 +20,7 @@ import org.apache.log4j.Logger;
  */
 public abstract class SearchableListFragment extends ListFragment {
 
-    private static final Logger LOG = Logger.getLogger(SearchableListFragment.class);
-
-    private boolean mIsSearchModeEnabled = false;
+    private boolean mIsSearchModeEnabled;
     private ListAdapter mCachedListAdapter;
     private MenuItem mSearchMenuItem;
 

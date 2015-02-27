@@ -184,36 +184,6 @@ public class TalkClientContact implements Serializable {
         return isGroup() && this.groupMembership != null && this.groupMembership.isJoined();
     }
 
-    public boolean isGroupNoLongerJoined() {
-        return isGroup() && this.groupMembership != null && !this.groupMembership.isJoined();
-    }
-
-    // returns true if there is actually a group key locally stored
-    @GroupMethodOnly
-    public boolean groupHasKey() {
-        ensureGroup();
-        return this.getGroupKey() != null &&
-                Base64.decodeBase64(this.getGroupKey().getBytes(Charset.forName("UTF-8"))).length == AESCryptor.KEY_SIZE;
-    }
-
-    // return true if there is a group key and the stored shared key id matches the computed key id
-    @GroupMethodOnly
-    public boolean groupHasValidKey() {
-        ensureGroup();
-        if (groupHasKey() && getGroupPresence() != null) {
-            byte[] sharedKey = Base64.decodeBase64(this.getGroupKey().getBytes(Charset.forName("UTF-8")));
-            byte[] sharedKeyId = Base64.decodeBase64(this.groupPresence.getSharedKeyId().getBytes(Charset.forName("UTF-8")));
-            byte[] sharedKeySalt = Base64.decodeBase64(this.groupPresence.getSharedKeyIdSalt().getBytes(Charset.forName("UTF-8")));
-            try {
-                byte[] actualSharedKeyId = AESCryptor.calcSymmetricKeyId(sharedKey, sharedKeySalt);
-                return actualSharedKeyId.equals(sharedKey);
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            }
-        }
-        return false;
-    }
-
     public String getName() {
         if (isClient() || isSelf()) {
             if (clientPresence != null) {

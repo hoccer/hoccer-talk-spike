@@ -22,7 +22,7 @@
             android:layout_alignTop="@id/contact_icon"
             android:layout_marginRight="-3dp"
             android:visibility="gone"
-            android:background="@drawable/unread_messages_chat_item"
+            android:background="@drawable/unread_messages_badge"
             style="@style/AppBaseTheme.Contact.UnreadMessagesChatItem"/>
 
     <TextView
@@ -36,7 +36,6 @@
             android:maxLines="1"
             android:singleLine="true"
             android:layout_marginRight="85dp"
-            android:textSize="20dp"
             style="@style/AppBaseTheme.Contact.Name"/>
 
     <TextView
@@ -48,12 +47,11 @@
             android:layout_toLeftOf="@+id/contact_type"
             android:layout_below="@id/contact_name"
             android:layout_alignLeft="@id/contact_name"
-            android:textSize="15dp"
             style="@style/AppBaseTheme.Contact.LastMessage" tools:ignore="HardcodedText"/>
 
     <TextView
             android:id="@+id/contact_type"
-            android:text="@string/common_friend"
+            android:text="@string/state_friend"
             android:layout_alignParentRight="true"
             android:layout_alignTop="@id/contact_name"
             android:layout_width="wrap_content"
@@ -68,6 +66,5 @@
             android:layout_alignTop="@id/contact_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="15dp"
             style="@style/AppBaseTheme.Contact.CommonGroup" tools:ignore="HardcodedText"/>
 </RelativeLayout>

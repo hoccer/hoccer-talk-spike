@@ -19,12 +19,10 @@ import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
 import com.hoccer.xo.android.activity.NotificationBridgeActivity;
 import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.content.MediaPlaylist;
 import com.hoccer.xo.android.content.audio.MediaPlaylistController;
-import com.hoccer.xo.android.database.AndroidTalkDatabase;
 import com.hoccer.xo.android.service.NotificationId;
 import com.hoccer.xo.android.util.UriUtils;
 import org.apache.log4j.Logger;
@@ -160,7 +158,6 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
     private final OnAudioFocusChangeListener mAudioFocusChangeListener = new OnAudioFocusChangeListener() {
 
         public void onAudioFocusChange(int focusChange) {
-
             LOG.debug("AUDIO FOCUS CHANGED: " + focusChange);
 
             if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
@@ -177,23 +174,6 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
         }
     };
 
-    private Notification buildNotification() {
-        Intent intent = new Intent(mContext, NotificationBridgeActivity.class);
-        intent.setAction(NotificationBridgeActivity.ACTION_FULLSCREEN_PLAYER_ACTIVITY_TO_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        updateRemoteViewButton();
-        updateRemoteViewMetaData();
-
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mContext)
-                .setSmallIcon(R.drawable.ic_notification_music)
-                .setContent(mRemoteViews)
-                .setAutoCancel(false)
-                .setOngoing(true)
-                .setContentIntent(pendingIntent);
-        return mBuilder.build();
-    }
-
     private void updateRemoteViewButton() {
         if (!mPaused) {
             mRemoteViews.setImageViewResource(R.id.btn_play_pause, R.drawable.ic_dark_content_pause);
@@ -204,22 +184,16 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
 
     private void updateRemoteViewMetaData() {
         MediaMetaData metaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(mCurrentItem.getFilePath()).getPath());
-        if (metaData != null) {
-            String metaDataTitle = metaData.getTitle();
-            String metaDataArtist = metaData.getArtist();
-            if (metaDataTitle != null && !metaDataTitle.isEmpty()) {
-                mRemoteViews.setViewVisibility(R.id.filename_text, View.GONE);
-                mRemoteViews.setTextViewText(R.id.media_metadata_title_text, metaDataTitle);
-            }
-            if (metaDataArtist != null && !metaDataArtist.isEmpty()) {
-                mRemoteViews.setTextViewText(R.id.media_metadata_artist_text, metaDataArtist);
-            }
-
-            mRemoteViews.setViewVisibility(R.id.media_metadata_layout, View.VISIBLE);
-        } else {
-            mRemoteViews.setViewVisibility(R.id.filename_text, View.VISIBLE);
+        String title = metaData.getTitle();
+        String artist = metaData.getArtist();
+        if (title.isEmpty() && artist.isEmpty()) {
             mRemoteViews.setViewVisibility(R.id.media_metadata_layout, View.GONE);
+            mRemoteViews.setViewVisibility(R.id.filename_text, View.VISIBLE);
             mRemoteViews.setTextViewText(R.id.filename_text, mCurrentItem.getFilePath());
+        } else {
+            mRemoteViews.setViewVisibility(R.id.filename_text, View.GONE);
+            mRemoteViews.setTextViewText(R.id.media_metadata_title_text, title);
+            mRemoteViews.setTextViewText(R.id.media_metadata_artist_text, artist);
         }
     }
 
@@ -286,6 +260,23 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
         }
     }
 
+    private Notification buildNotification() {
+        Intent intent = new Intent(mContext, NotificationBridgeActivity.class);
+        intent.setAction(NotificationBridgeActivity.ACTION_FULLSCREEN_PLAYER_ACTIVITY_TO_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(mContext, NotificationId.MUSIC_PLAYER, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        updateRemoteViewButton();
+        updateRemoteViewMetaData();
+
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mContext)
+                .setSmallIcon(R.drawable.ic_notification_music)
+                .setContent(mRemoteViews)
+                .setAutoCancel(false)
+                .setOngoing(true)
+                .setContentIntent(pendingIntent);
+        return mBuilder.build();
+    }
+
     private void createMediaPlayerAndPlay(final XoTransfer item) {
         createMediaPlayer();
         mMediaPlayer.setOnPreparedListener(new android.media.MediaPlayer.OnPreparedListener() {
@@ -338,10 +329,12 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
         mAudioManager.abandonAudioFocus(mAudioFocusChangeListener);
         mPaused = false;
         mStopped = true;
+        mCurrentItem = null;
         mPlaylistController.reset();
 
         removeNotification();
 
+        notifyTrackChanged();
         notifyPlayStateChanged();
     }
 

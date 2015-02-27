@@ -24,7 +24,7 @@ public abstract class ContactListAdapter extends BaseAdapter implements IXoConta
     protected List<TalkClientContact> mContacts = new ArrayList<TalkClientContact>();
     private String mQuery;
 
-    public ContactListAdapter(Activity activity) {
+    protected ContactListAdapter(Activity activity) {
         mContacts = getContacts();
         mActivity = activity;
     }
@@ -48,7 +48,7 @@ public abstract class ContactListAdapter extends BaseAdapter implements IXoConta
         }
     }
 
-    private List<TalkClientContact> filterContacts(List<TalkClientContact> contacts, String query) {
+    private static List<TalkClientContact> filterContacts(List<TalkClientContact> contacts, String query) {
         List<TalkClientContact> filtered = new ArrayList<TalkClientContact>();
 
         for (TalkClientContact contact : contacts) {

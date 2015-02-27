@@ -4,7 +4,7 @@
         xmlns:custom="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/white"
+        android:background="@drawable/list_item_attachment_bg"
         android:paddingTop="5dp"
         android:paddingBottom="5dp">
 
@@ -33,7 +33,7 @@
 
     <TextView
             android:id="@+id/contact_type"
-            android:text="@string/common_friend"
+            android:text="@string/state_friend"
             android:layout_alignParentRight="true"
             android:layout_alignTop="@id/contact_name"
             android:layout_width="wrap_content"

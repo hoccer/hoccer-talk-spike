@@ -17,7 +17,7 @@
 
   <com.hoccer.xo.android.view.NotificationBadgeTextView
       android:id="@+id/tv_contact_invite_notification_badge"
-      android:background="@drawable/unread_messages_badge"
+      android:background="@drawable/unconfirmed_invitations_badge"
       android:layout_alignTop="@android:id/title"
       android:layout_alignRight="@android:id/title"
       android:layout_marginRight="-35dp"

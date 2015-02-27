@@ -26,29 +26,18 @@ public class TalkClientChatItem extends BaseChatItem implements SearchAdapter.Se
 
     private static final Logger LOG = Logger.getLogger(TalkClientChatItem.class);
 
-    private Context mContext;
+    private final Context mContext;
     private TalkClientContact mContact;
 
     @Nullable
-    private Date mLastMessageTimeStamp = null;
+    private Date mLastMessageTimeStamp;
     private String mLastMessageText;
-    private long mUnseenMessageCount = 0;
-    private Date mContactCreationTimeStamp = null;
+    private Date mContactCreationTimeStamp;
 
     public TalkClientChatItem(TalkClientContact contact, Context context) {
         mContact = contact;
         mContext = context;
         update();
-    }
-
-    private void setClientType(TextView typeView) {
-        if (mContact.isGroup()) {
-            if (mContact.isGroupInvited()) {
-                typeView.setText(R.string.common_group_invite);
-            } else {
-                typeView.setText(R.string.common_group);
-            }
-        }
     }
 
     private void setLastMessageTime(TextView lastMessageTime) {
@@ -107,13 +96,11 @@ public class TalkClientChatItem extends BaseChatItem implements SearchAdapter.Se
     protected View configure(final Context context, View view) {
         AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
-        TextView typeView = (TextView) view.findViewById(R.id.contact_type);
         TextView lastMessageTextView = (TextView) view.findViewById(R.id.contact_last_message);
         TextView lastMessageTimeView = (TextView) view.findViewById(R.id.contact_time);
         TextView unseenView = (TextView) view.findViewById(R.id.contact_unseen_messages);
 
         nameView.setText(mContact.getNickname());
-        setClientType(typeView);
         setLastMessageTime(lastMessageTimeView);
         lastMessageTextView.setText(mLastMessageText);
         setUnseenMessages(unseenView);
@@ -137,15 +124,6 @@ public class TalkClientChatItem extends BaseChatItem implements SearchAdapter.Se
         });
 
         return view;
-    }
-
-    private void setUnseenMessages(TextView unseenView) {
-        if (mUnseenMessageCount <= 0) {
-            unseenView.setVisibility(View.GONE);
-        } else {
-            unseenView.setText(Long.toString(mUnseenMessageCount));
-            unseenView.setVisibility(View.VISIBLE);
-        }
     }
 
     @Override

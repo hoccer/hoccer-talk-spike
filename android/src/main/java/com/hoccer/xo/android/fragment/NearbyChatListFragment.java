@@ -1,6 +1,8 @@
 package com.hoccer.xo.android.fragment;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,16 +11,14 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.NearbyController;
+import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.NearbyChatListAdapter;
 import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.view.Placeholder;
-import org.apache.log4j.Logger;
 
 
 public class NearbyChatListFragment extends XoListFragment implements IPagerFragment {
-
-    private static final Logger LOG = Logger.getLogger(NearbyChatListFragment.class);
 
     private static final Placeholder PLACEHOLDER = new Placeholder(
             R.drawable.placeholder_nearby,
@@ -92,12 +92,30 @@ public class NearbyChatListFragment extends XoListFragment implements IPagerFrag
 
     @Override
     public void onPageUnselected() {
-        ((XoApplication) getActivity().getApplication()).stopNearbySession();
+        NearbyController.get().disableNearbyMode();
     }
 
     @Override
     public void onPageResume() {
-        ((XoApplication) getActivity().getApplication()).startNearbySession(getActivity());
+        if (NearbyController.get().locationServicesEnabled()) {
+            NearbyController.get().enableNearbyMode();
+        } else {
+            showLocationServiceDialog();
+        }
+    }
+
+    private void showLocationServiceDialog() {
+        XoDialogs.showYesNoDialog("EnableLocationServiceDialog",
+                R.string.dialog_enable_location_service_title,
+                R.string.dialog_enable_location_service_message,
+                getActivity(),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        getActivity().startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    }
+                }
+        );
     }
 
     @Override

@@ -14,15 +14,15 @@ public class XoVersion {
 
     private static final Logger LOG = Logger.getLogger(XoVersion.class);
 
-    private static Properties GIT = null;
+    private static Properties sGit;
 
-    private static String BRANCH = UNINITIALIZED;
+    private static String sBranch = UNINITIALIZED;
 
-    private static String BUILD_TIME = UNINITIALIZED;
+    private static String sBuildTime = UNINITIALIZED;
 
-    private static String COMMIT_ID = UNINITIALIZED;
-    private static String COMMIT_ABBREV = UNINITIALIZED;
-    private static String COMMIT_DESCRIBE = UNINITIALIZED;
+    private static String sCommitId = UNINITIALIZED;
+    private static String sCommitAbbrev = UNINITIALIZED;
+    private static String sCommitDescribe = UNINITIALIZED;
 
     public static void initialize(Context context) {
         LOG.debug("initializing git properties");
@@ -30,37 +30,37 @@ public class XoVersion {
         InputStream is = context.getResources().openRawResource(R.raw.git_properties);
         try {
             git.load(is);
-            GIT = git;
+            sGit = git;
         } catch (IOException e) {
             LOG.error("error loading git properties", e);
         }
-        if(GIT != null) {
-            BRANCH = GIT.getProperty("git.branch", UNINITIALIZED);
-            BUILD_TIME = GIT.getProperty("git.build.time", UNINITIALIZED);
-            COMMIT_ID = GIT.getProperty("git.commit.id", UNINITIALIZED);
-            COMMIT_ABBREV = GIT.getProperty("git.commit.id.abbrev", UNINITIALIZED);
-            COMMIT_DESCRIBE = GIT.getProperty("git.commit.id.describe", UNINITIALIZED);
+        if (sGit != null) {
+            sBranch = sGit.getProperty("git.branch", UNINITIALIZED);
+            sBuildTime = sGit.getProperty("git.build.time", UNINITIALIZED);
+            sCommitId = sGit.getProperty("git.commit.id", UNINITIALIZED);
+            sCommitAbbrev = sGit.getProperty("git.commit.id.abbrev", UNINITIALIZED);
+            sCommitDescribe = sGit.getProperty("git.commit.id.describe", UNINITIALIZED);
         }
     }
 
     public static String getBranch() {
-        return BRANCH;
+        return sBranch;
     }
 
     public static String getBuildTime() {
-        return BUILD_TIME;
+        return sBuildTime;
     }
 
     public static String getCommitId() {
-        return COMMIT_ID;
+        return sCommitId;
     }
 
     public static String getCommitAbbrev() {
-        return COMMIT_ABBREV;
+        return sCommitAbbrev;
     }
 
     public static String getCommitDescribe() {
-        return COMMIT_DESCRIBE;
+        return sCommitDescribe;
     }
 
 }

@@ -18,7 +18,7 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
 
     private final SharedPreferences mPreferences;
     private final Properties mProperties;
-    private String mAppName;
+    private final String mAppName;
 
     public XoAndroidClientConfiguration(Context context) {
         mPreferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -53,7 +53,7 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
     public int getRSAKeysize() {
         String keySizeString = mPreferences.getString("preference_keysize", "2048");
         Integer keySize = Integer.parseInt(keySizeString);
-        return keySize.intValue();
+        return keySize;
     }
 
     @Override

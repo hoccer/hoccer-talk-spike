@@ -51,24 +51,24 @@ public class ChatAudioItem extends ChatMessageItem implements MediaPlayer.Listen
         }
         LinearLayout audioLayout = (LinearLayout) mContentWrapper.getChildAt(0);
         TextView captionTextView = (TextView) audioLayout.findViewById(R.id.tv_content_audio_caption);
-        TextView fileNameTextView = (TextView) audioLayout.findViewById(R.id.tv_content_audio_name);
+        TextView nameTextView = (TextView) audioLayout.findViewById(R.id.tv_content_audio_name);
         mPlayPauseButton = (ImageButton) audioLayout.findViewById(R.id.ib_content_audio_play);
         setPlayButton();
 
         if (mMessage.isIncoming()) {
             captionTextView.setTextColor(mContext.getResources().getColor(R.color.message_incoming_text));
-            fileNameTextView.setTextColor(mContext.getResources().getColor(R.color.message_incoming_text));
+            nameTextView.setTextColor(mContext.getResources().getColor(R.color.message_incoming_text));
         } else {
             captionTextView.setTextColor(mContext.getResources().getColor(R.color.compose_message_text));
-            fileNameTextView.setTextColor(mContext.getResources().getColor(R.color.compose_message_text));
+            nameTextView.setTextColor(mContext.getResources().getColor(R.color.compose_message_text));
         }
 
         MediaMetaData metaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(transfer.getFilePath()).getPath());
-        String displayName = metaData.getTitleOrFilename().trim();
-        if (metaData.getArtist() != null) {
-            displayName = metaData.getArtist().trim() + " - " + displayName;
+        if (metaData.getArtist().isEmpty()) {
+            nameTextView.setText(metaData.getTitleOrFilename());
+        } else {
+            nameTextView.setText(metaData.getArtist() + " - " + metaData.getTitleOrFilename());
         }
-        fileNameTextView.setText(displayName);
 
         mPlayPauseButton = (ImageButton) audioLayout.findViewById(R.id.ib_content_audio_play);
         mPlayPauseButton.setOnClickListener(new View.OnClickListener() {

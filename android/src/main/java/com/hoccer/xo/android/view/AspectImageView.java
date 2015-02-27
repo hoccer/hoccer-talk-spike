@@ -16,7 +16,7 @@ import com.artcom.hoccer.R;
  */
 public class AspectImageView extends ImageView {
 
-    private double mAspectRatio = 0.0;
+    private double mAspectRatio;
 
     private int mMaxHeight = Integer.MAX_VALUE;
 

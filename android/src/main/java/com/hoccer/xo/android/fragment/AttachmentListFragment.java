@@ -15,7 +15,7 @@ import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.MediaPlayer;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.activity.ContactSelectionActivity;
+import com.hoccer.xo.android.activity.ContactSelectionResultActivity;
 import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
 import com.hoccer.xo.android.activity.MediaCollectionSelectionActivity;
 import com.hoccer.xo.android.adapter.AttachmentListAdapter;
@@ -53,7 +53,8 @@ public class AttachmentListFragment extends SearchableListFragment {
     private SectionedListAdapter mResultsAdapter;
     private ContactSearchResultAdapter mSearchContactsAdapter;
     private AttachmentSearchResultAdapter mSearchAttachmentAdapter;
-    private TalkClientContact mFilterContact;
+
+    private TalkClientContact mContact;
     private XoClientDatabase mDatabase;
     private ActionMode mCurrentActionMode;
 
@@ -62,24 +63,22 @@ public class AttachmentListFragment extends SearchableListFragment {
         super.onCreate(savedInstanceState);
 
         mDatabase = XoApplication.get().getXoClient().getDatabase();
-
-        setHasOptionsMenu(true);
-
         if (getActivity().getIntent().hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
             int contactId = getActivity().getIntent().getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
             if (contactId >= 0) {
                 try {
-                    mFilterContact = mDatabase.findContactById(contactId);
+                    mContact = mDatabase.findContactById(contactId);
                 } catch (SQLException e) {
                     LOG.warn("Contact with ID " + contactId + " not found");
                 }
             }
         }
 
-        mAttachmentAdapter = new AttachmentListAdapter(mFilterContact, ContentMediaType.AUDIO);
-
+        mAttachmentAdapter = new AttachmentListAdapter(mContact, ContentMediaType.AUDIO);
         mSearchContactsAdapter = new ContactSearchResultAdapter((XoActivity) getActivity());
         mSearchContactsAdapter.onCreate();
+        
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -111,9 +110,9 @@ public class AttachmentListFragment extends SearchableListFragment {
         mSearchContactsAdapter.onResume();
         setListAdapter(mAttachmentAdapter);
 
-        if (mFilterContact != null) {
+        if (mContact != null) {
             getActivity().getActionBar().setTitle(getResources().getString(R.string.content_audio_by_contact_caption,
-                    mFilterContact.getNickname()));
+                    mContact.getNickname()));
         } else {
             getActivity().getActionBar().setTitle(R.string.content_audio_caption);
         }
@@ -161,12 +160,13 @@ public class AttachmentListFragment extends SearchableListFragment {
                     }
                     break;
                 case SELECT_CONTACT_REQUEST:
-                    List<Integer> contactSelections = data.getIntegerArrayListExtra(ContactSelectionActivity.EXTRA_SELECTED_CONTACT_IDS);
+                    List<Integer> contactSelections = data.getIntegerArrayListExtra(ContactSelectionFragment.EXTRA_SELECTED_CONTACT_IDS);
                     // send attachment to all selected contacts
                     for (Integer contactId : contactSelections) {
                         try {
                             TalkClientContact contact = mDatabase.findContactById(contactId);
                             ContactOperations.sendTransfersToContact(mAttachmentAdapter.getSelectedItems(), contact);
+                            showToast(getResources().getQuantityString(R.plurals.sending_attachments, mAttachmentAdapter.getSelectedItems().size()));
                         } catch (SQLException e) {
                             LOG.error(e.getMessage(), e);
                         } catch (FileNotFoundException e) {
@@ -182,6 +182,10 @@ public class AttachmentListFragment extends SearchableListFragment {
         if (mCurrentActionMode != null) {
             mCurrentActionMode.finish();
         }
+    }
+
+    private void showToast(String message) {
+        Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -210,10 +214,13 @@ public class AttachmentListFragment extends SearchableListFragment {
         }
 
         mSearchAttachmentAdapter = new AttachmentSearchResultAdapter(mAttachmentAdapter.getItems());
+        getListView().setChoiceMode(ListView.CHOICE_MODE_NONE);
     }
 
     @Override
-    protected void onSearchModeDisabled() {}
+    protected void onSearchModeDisabled() {
+        getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+    }
 
     private void retrieveCollectionAndAddSelectedAttachments(Integer mediaCollectionId) {
         List<XoTransfer> selectedItems = mAttachmentAdapter.getSelectedItems();
@@ -262,10 +269,10 @@ public class AttachmentListFragment extends SearchableListFragment {
                 getActivity().startActivity(new Intent(getActivity(), FullscreenPlayerActivity.class));
             } else if (selectedItem instanceof TalkClientContact) {
                 leaveSearchMode();
-                mFilterContact = (TalkClientContact) selectedItem;
+                mContact = (TalkClientContact) selectedItem;
                 mAttachmentAdapter.setContact((TalkClientContact) selectedItem);
                 final String newActionBarTitle = getResources().getString(R.string.content_audio_by_contact_caption,
-                        mFilterContact.getNickname());
+                        mContact.getNickname());
                 getActivity().getActionBar().setTitle(newActionBarTitle);
             }
         }
@@ -311,7 +318,7 @@ public class AttachmentListFragment extends SearchableListFragment {
                     return true;
                 case R.id.menu_share:
                     mCurrentActionMode = mode;
-                    startActivityForResult(new Intent(getActivity(), ContactSelectionActivity.class), SELECT_CONTACT_REQUEST);
+                    startActivityForResult(new Intent(getActivity(), ContactSelectionResultActivity.class), SELECT_CONTACT_REQUEST);
                     return true;
                 case R.id.menu_add_to_collection:
                     mCurrentActionMode = mode;

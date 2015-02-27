@@ -7,4 +7,5 @@ public class NotificationId {
     public static final int MUSIC_PLAYER = 1;
     public static final int PUSH_MESSAGE = 2;
     public static final int BACKUP_RESTORE = 3;
+    public static final int NEARBY_STATE = 4;
 }

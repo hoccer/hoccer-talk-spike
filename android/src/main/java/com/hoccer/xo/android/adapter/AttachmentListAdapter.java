@@ -21,12 +21,11 @@ import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 public class AttachmentListAdapter extends BaseAdapter implements DragSortListView.DropListener, IXoUploadListener, IXoDownloadListener {
 
-    protected Logger LOG = Logger.getLogger(AttachmentListAdapter.class);
+    private static final Logger LOG = Logger.getLogger(AttachmentListAdapter.class);
 
     private List<XoTransfer> mItems = new ArrayList<XoTransfer>();
 
@@ -283,7 +282,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         return true;
     }
 
-    private boolean areEqual(Object obj1, Object obj2) {
+    private static boolean areEqual(Object obj1, Object obj2) {
         if (obj1 != null) {
             if (obj1.equals(obj2)) {
                 return true;
