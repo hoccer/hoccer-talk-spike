@@ -4,22 +4,23 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hoccer.talk.crypto.CryptoJSON;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+
 
 /**
  * Wraps the credentials exported from XoClient and provides from/to Json conversion.
  */
 public class Credentials {
 
-    public static final String CREDENTIALS_CONTENT_TYPE = "credentials";
-
     private static final Logger LOG = Logger.getLogger(Credentials.class);
 
+    public static final String CREDENTIALS_CONTENT_TYPE = "credentials";
+    private static final int IOS_ASCII_PASSWORD_LENGTH = 23;
+
     private final String mClientId;
-
     private final String mPassword;
-
     private final String mSalt;
 
     @Nullable
@@ -148,6 +149,7 @@ public class Credentials {
             LOG.error("Missing password node");
             return null;
         }
+        String passwordText = convertToHexIfASCII(passwordNode.asText());
 
         JsonNode saltNode = jsonCredentials.get("salt");
         if (saltNode == null) {
@@ -161,6 +163,14 @@ public class Credentials {
             clientName = clientNameNode.asText();
         }
 
-        return new Credentials(clientIdNode.asText(), passwordNode.asText(), saltNode.asText(), clientName);
+        return new Credentials(clientIdNode.asText(), passwordText, saltNode.asText(), clientName);
+    }
+
+    private static String convertToHexIfASCII(String byteString) {
+        if (byteString.length() == IOS_ASCII_PASSWORD_LENGTH) {
+            return new String(Hex.encodeHex(byteString.getBytes()));
+        } else {
+            return byteString;
+        }
     }
 }
