@@ -93,7 +93,7 @@ public class Credentials {
 
     public boolean toJsonNode(ObjectNode node) {
         try {
-            node.put("password", new String(Hex.decodeHex(mPassword.toCharArray()), Charset.forName("US-ASCII")));
+            node.put("password", mPassword);
             node.put("salt", mSalt);
             node.put("clientId", mClientId);
 
