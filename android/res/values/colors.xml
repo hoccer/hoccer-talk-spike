@@ -41,6 +41,9 @@
 
     <color name="last_message">@color/text_secondary</color>
 
+    <color name="connection_state_background">#2f2f2f</color>
+    <color name="connection_state_text">#8f8f8f</color>
+
     <color name="notification_badge_background">#e52e2e</color>
     <color name="notification_badge_text">@color/text_secondary</color>
 </resources>
