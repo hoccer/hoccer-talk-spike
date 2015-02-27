@@ -4,8 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hoccer.talk.crypto.CryptoJSON;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+
+import java.nio.charset.Charset;
+
 
 /**
  * Wraps the credentials exported from XoClient and provides from/to Json conversion.
@@ -155,6 +159,7 @@ public class Credentials {
             LOG.error("Missing password node");
             return null;
         }
+        String passwordText = convertToHexIfASCII(passwordNode.asText());
 
         JsonNode saltNode = jsonCredentials.get("salt");
         if (saltNode == null) {
@@ -174,6 +179,14 @@ public class Credentials {
             timestamp = Long.parseLong(timestampNode.asText());
         }
 
-        return new Credentials(clientIdNode.asText(), passwordNode.asText(), saltNode.asText(), clientName, timestamp);
+        return new Credentials(clientIdNode.asText(), passwordText, saltNode.asText(), clientName, timestamp);
+    }
+
+    private static String convertToHexIfASCII(String byteString) {
+        if (byteString.length() != 64) {
+            return new String(Hex.encodeHex(byteString.getBytes(Charset.forName("US-ASCII"))));
+        } else {
+            return byteString;
+        }
     }
 }
