@@ -401,7 +401,7 @@
 
     <string name="connection_state_disconnected">disconnected</string>
     <string name="connection_state_login">logging in</string>
-    <string name="connection_state_synching">synching</string>
+    <string name="connection_state_syncing">synchronizing</string>
 
     <string name="date">Date</string>
     <string name="user">User</string>

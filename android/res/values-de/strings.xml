@@ -388,7 +388,7 @@
 
     <string name="connection_state_disconnected">nicht verbunden</string>
     <string name="connection_state_login">melde an</string>
-    <string name="connection_state_synching">synchronisiere</string>
+    <string name="connection_state_syncing">synchronisiere</string>
 
     <string name="date">Datum</string>
     <string name="user">Benutzer</string>
