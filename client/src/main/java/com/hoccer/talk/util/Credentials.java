@@ -8,22 +8,19 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.charset.Charset;
-
 
 /**
  * Wraps the credentials exported from XoClient and provides from/to Json conversion.
  */
 public class Credentials {
 
-    public static final String CREDENTIALS_CONTENT_TYPE = "credentials";
-
     private static final Logger LOG = Logger.getLogger(Credentials.class);
 
+    public static final String CREDENTIALS_CONTENT_TYPE = "credentials";
+    private static final int IOS_ASCII_PASSWORD_LENGTH = 23;
+
     private final String mClientId;
-
     private final String mPassword;
-
     private final String mSalt;
 
     @Nullable
@@ -170,8 +167,8 @@ public class Credentials {
     }
 
     private static String convertToHexIfASCII(String byteString) {
-        if (byteString.length() != 64) {
-            return new String(Hex.encodeHex(byteString.getBytes(Charset.forName("US-ASCII"))));
+        if (byteString.length() == IOS_ASCII_PASSWORD_LENGTH) {
+            return new String(Hex.encodeHex(byteString.getBytes()));
         } else {
             return byteString;
         }
