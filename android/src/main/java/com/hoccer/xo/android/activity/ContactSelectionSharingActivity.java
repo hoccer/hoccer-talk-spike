@@ -11,12 +11,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.SelectedContent;
-import com.hoccer.xo.android.adapter.ContactSelectionAdapter;
-import com.hoccer.xo.android.content.selector.AudioSelector;
-import com.hoccer.xo.android.content.selector.IContentSelector;
-import com.hoccer.xo.android.content.selector.ImageSelector;
-import com.hoccer.xo.android.content.selector.VideoSelector;
-import com.hoccer.xo.android.fragment.ContactSelectionFragment;
+import com.hoccer.xo.android.content.selector.*;
 import com.hoccer.xo.android.util.ContactOperations;
 import org.apache.log4j.Logger;
 
@@ -34,8 +29,12 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity {
             showToast(getString(R.string.sending_message));
         } else if (getIntent().hasExtra(Intent.EXTRA_STREAM)) {
             List<Uri> contentUris = getContentUrisFromIntent();
-            sendUploadsToContacts(createUploadsFromContentUris(contentUris), selectedContacts);
-            showToast(getResources().getQuantityString(R.plurals.sending_attachments, contentUris.size()));
+            try {
+                sendUploadsToContacts(createUploadsFromContentUris(contentUris), selectedContacts);
+                showToast(getResources().getQuantityString(R.plurals.sending_attachments, contentUris.size()));
+            } catch (ContentSelectorNotSupportedException e) {
+                showToast("Content cannot be shared with Hoccer.");
+            }
         }
 
         startChatsActivity();
@@ -72,7 +71,7 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity {
         return result;
     }
 
-    private List<TalkClientUpload> createUploadsFromContentUris(List<Uri> contentUris) {
+    private List<TalkClientUpload> createUploadsFromContentUris(List<Uri> contentUris) throws ContentSelectorNotSupportedException {
         List<TalkClientUpload> uploads = new ArrayList<TalkClientUpload>();
         for (Uri contentUri : contentUris) {
             TalkClientUpload upload = new TalkClientUpload();
@@ -83,24 +82,23 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity {
         return uploads;
     }
 
-    private SelectedContent getSelectedContent(Uri contentUri, String mimeType) {
+    private SelectedContent getSelectedContent(Uri contentUri, String mimeType) throws ContentSelectorNotSupportedException {
         Intent intent = new Intent();
         intent.setData(contentUri);
 
         return getContentSelector(mimeType).createObjectFromSelectionResult(this, intent);
     }
 
-    private IContentSelector getContentSelector(String mimeType) {
-        IContentSelector selector = null;
+    private IContentSelector getContentSelector(String mimeType) throws ContentSelectorNotSupportedException {
         if (mimeType.startsWith("image/")) {
-            selector = new ImageSelector(this);
+            return new ImageSelector(this);
         } else if (mimeType.startsWith("video/")) {
-            selector = new VideoSelector(this);
+            return new VideoSelector(this);
         } else if (mimeType.startsWith("audio/")) {
-            selector = new AudioSelector(this);
+            return new AudioSelector(this);
+        } else {
+            throw new ContentSelectorNotSupportedException();
         }
-
-        return selector;
     }
 
     private void sendUploadsToContacts(List<TalkClientUpload> uploads, List<TalkClientContact> selectedContacts) {
