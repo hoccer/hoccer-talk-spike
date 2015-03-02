@@ -10,6 +10,7 @@ import android.widget.CheckedTextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.XoClientDatabase;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoApplication;
@@ -114,18 +115,25 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
         XoApplication.get().getXoClient().unregisterContactListener(this);
     }
 
-    private void loadContacts() {
-        mContacts.clear();
+    private List<TalkClientContact> loadContacts() {
+        List<TalkClientContact> contacts = new ArrayList<TalkClientContact>();
         try {
             XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
             for (TalkClientContact contact : database.findAllContacts()) {
                 if (shouldShow(contact)) {
-                    mContacts.add(contact);
+                    contacts.add(contact);
                 }
             }
         } catch (SQLException e) {
             LOG.error("Could not load contacts from database", e);
         }
+
+        return contacts;
+    }
+
+    private void setContacts(List<TalkClientContact> contacts) {
+        mContacts.clear();
+        mContacts.addAll(contacts);
 
         List<TalkClientContact> newSelectedContacts = new ArrayList<TalkClientContact>();
         newSelectedContacts.addAll(CollectionUtils.intersection(mContacts, mSelectedContacts));
@@ -179,15 +187,15 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
     }
 
     private void refreshList() {
-        loadContacts();
+        final List<TalkClientContact> contacts = loadContacts();
         Handler guiHandler = new Handler(Looper.getMainLooper());
         guiHandler.post(new Runnable() {
             @Override
             public void run() {
+                setContacts(contacts);
                 for (IContactSelectionListener listener : mContactSelectionListeners) {
                     listener.onContactSelectionChanged();
                 }
-
                 notifyDataSetChanged();
             }
         });
