@@ -10,6 +10,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.talk.content.SelectedFile;
+import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 
 import java.io.File;
@@ -48,10 +49,14 @@ public class VideoSelector implements IContentSelector {
             return null;
         }
 
+        String filePath = UriUtils.getFilePathByUri(context, intent.getData(), MediaStore.Video.Media.DATA);
+        if (filePath == null || !new File(filePath).exists()) {
+            return null;
+        }
+
         Uri selectedContent = intent.getData();
         String[] filePathColumn = {
                 MediaStore.Video.Media.MIME_TYPE,
-                MediaStore.Video.Media.DATA,
                 MediaStore.Video.Media.WIDTH,
                 MediaStore.Video.Media.HEIGHT
         };
@@ -61,17 +66,11 @@ public class VideoSelector implements IContentSelector {
 
         int typeIndex = cursor.getColumnIndex(filePathColumn[0]);
         String mimeType = cursor.getString(typeIndex);
-        int dataIndex = cursor.getColumnIndex(filePathColumn[1]);
-        String filePath = cursor.getString(dataIndex);
-        int widthIndex = cursor.getColumnIndex(filePathColumn[2]);
+        int widthIndex = cursor.getColumnIndex(filePathColumn[1]);
         int width = cursor.getInt(widthIndex);
-        int heightIndex = cursor.getColumnIndex(filePathColumn[3]);
+        int heightIndex = cursor.getColumnIndex(filePathColumn[2]);
         int height = cursor.getInt(heightIndex);
         cursor.close();
-
-        if (filePath == null || !new File(filePath).exists()) {
-            return null;
-        }
 
         double aspectRatio = ((double) width) / ((double) height);
         return new SelectedFile(filePath, mimeType, ContentMediaType.VIDEO, aspectRatio);

@@ -1,9 +1,13 @@
 package com.hoccer.xo.android.util;
 
+import android.annotation.TargetApi;
+import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.BaseColumns;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.webkit.MimeTypeMap;
 import com.hoccer.xo.android.XoApplication;
@@ -114,6 +118,9 @@ public class UriUtils {
         String filePath = null;
 
         if (isContentUri(uri)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                uri = getContentUriByDocumentUri(context, uri);
+            }
             Cursor cursor = context.getContentResolver().query(uri, new String[]{mediaColumn}, null, null, null);
             if (cursor == null) {
                 LOG.error("Query failed! Could not resolve cursor for content uri: " + uri);
@@ -128,6 +135,15 @@ public class UriUtils {
         }
 
         return filePath;
+    }
+
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    private static Uri getContentUriByDocumentUri(Context context, Uri uri) {
+        if (DocumentsContract.isDocumentUri(context, uri)) {
+            final String id = DocumentsContract.getDocumentId(uri);
+            uri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+        }
+        return uri;
     }
 
     public static String getMimeType(Context context, Uri uri) {
