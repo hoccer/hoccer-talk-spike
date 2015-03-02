@@ -57,6 +57,7 @@ public class AttachmentListFragment extends SearchableListFragment {
     private TalkClientContact mContact;
     private XoClientDatabase mDatabase;
     private ActionMode mCurrentActionMode;
+    private List<XoTransfer> mSelectedAttachments;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -165,7 +166,7 @@ public class AttachmentListFragment extends SearchableListFragment {
                     for (Integer contactId : contactSelections) {
                         try {
                             TalkClientContact contact = mDatabase.findContactById(contactId);
-                            ContactOperations.sendTransfersToContact(mAttachmentAdapter.getSelectedItems(), contact);
+                            ContactOperations.sendTransfersToContact(mSelectedAttachments, contact);
                             showToast(getResources().getQuantityString(R.plurals.sending_attachments, mAttachmentAdapter.getSelectedItems().size()));
                         } catch (SQLException e) {
                             LOG.error(e.getMessage(), e);
@@ -223,12 +224,11 @@ public class AttachmentListFragment extends SearchableListFragment {
     }
 
     private void retrieveCollectionAndAddSelectedAttachments(Integer mediaCollectionId) {
-        List<XoTransfer> selectedItems = mAttachmentAdapter.getSelectedItems();
-        if (!selectedItems.isEmpty()) {
+        if (!mSelectedAttachments.isEmpty()) {
             try {
                 TalkClientMediaCollection mediaCollection = mDatabase.findMediaCollectionById(mediaCollectionId);
                 List<String> addedFilenames = new ArrayList<String>();
-                for (XoTransfer item : selectedItems) {
+                for (XoTransfer item : mSelectedAttachments) {
                     mediaCollection.addItem(item);
                     addedFilenames.add(item.getFileName());
                 }
@@ -240,8 +240,7 @@ public class AttachmentListFragment extends SearchableListFragment {
     }
 
     private void deleteSelectedAttachments() {
-        List<XoTransfer> selectedObjects = mAttachmentAdapter.getSelectedItems();
-        for (XoTransfer item : selectedObjects) {
+        for (XoTransfer item : mSelectedAttachments) {
             try {
                 for (XoTransfer transfer : mDatabase.findTransfersByFilePath(item.getFilePath())) {
                     mDatabase.deleteTransferAndUpdateMessage(transfer, getResources().getString(R.string.deleted_attachment));
@@ -301,6 +300,8 @@ public class AttachmentListFragment extends SearchableListFragment {
 
         @Override
         public boolean onActionItemClicked(final ActionMode mode, MenuItem item) {
+            // save selected attachments, because they're cleared in 'onDestroyActionMode'
+            mSelectedAttachments = mAttachmentAdapter.getSelectedItems();
             switch (item.getItemId()) {
                 case R.id.menu_delete_attachment:
                     XoDialogs.showYesNoDialog("RemoveAttachment", R.string.dialog_attachment_delete_title, R.string.dialog_attachment_delete_message, getActivity(),
