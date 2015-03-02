@@ -28,7 +28,7 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
 
     static final Logger LOG = Logger.getLogger(ContactSelectionAdapter.class);
 
-    private final List<TalkClientContact> mContacts;
+    private final List<TalkClientContact> mContacts = new ArrayList<TalkClientContact>();
     private final List<TalkClientContact> mSelectedContacts = new ArrayList<TalkClientContact>();
 
     private final Set<IContactSelectionListener> mContactSelectionListeners = new HashSet<IContactSelectionListener>();
@@ -38,8 +38,7 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
     }
 
     public ContactSelectionAdapter() {
-        mContacts = new ArrayList<TalkClientContact>();
-        loadContacts();
+        setContacts(loadContacts());
     }
 
     @Override
