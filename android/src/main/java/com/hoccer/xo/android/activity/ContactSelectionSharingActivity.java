@@ -33,7 +33,7 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity {
                 sendUploadsToContacts(createUploadsFromContentUris(contentUris), selectedContacts);
                 showToast(getResources().getQuantityString(R.plurals.sending_attachments, contentUris.size()));
             } catch (ContentSelectorNotSupportedException e) {
-                showToast("Content cannot be shared with Hoccer.");
+                showToast(getString(R.string.content_not_sharable));
             }
         }
 

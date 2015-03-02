@@ -229,6 +229,7 @@
 
     <!-- Share content from other apps -->
     <string name="sending_message">Sende Nachricht..</string>
+    <string name="content_not_sharable">Inhalt kann nicht geteilt werden.</string>
 
     <plurals name="sending_attachments">
         <item quantity="one">Sende Datei..</item>
