@@ -387,7 +387,7 @@
     <string name="restore_no_backups_found_message">Bitte bestehendes Backup nach\n%1$s\nkopieren um früheren ${app.name.short} Account wiederherstellen zu können.</string>
 
     <string name="connection_state_disconnected">nicht verbunden</string>
-    <string name="connection_state_login">melde an</string>
+    <string name="connection_state_login">Anmeldung</string>
     <string name="connection_state_syncing">synchronisiere</string>
 
     <string name="date">Datum</string>
