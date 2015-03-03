@@ -101,10 +101,10 @@
     <string name="toast_pairing_failed">Incorrect code, please try again.</string>
 
     <!-- Invitation dialog -->
-    <string name="dialog_select_invite_method_title">Invite via</string>
-    <string name="dialog_select_invite_method_sms_item">SMS</string>
-    <string name="dialog_select_invite_method_mail_item">E-Mail</string>
-    <string name="dialog_select_invite_method_code_item">Code</string>
+    <string name="dialog_add_contact_type_title">Add contact</string>
+    <string name="dialog_add_contact_type_sms_item">SMS</string>
+    <string name="dialog_add_contact_type_mail_item">E-Mail</string>
+    <string name="dialog_add_contact_type_code_item">Code</string>
 
     <!-- SMS/E-Mail invitation -->
     <string name="dialog_missing_pairing_token_title">Cannot create invitation</string>

@@ -92,10 +92,10 @@
     <string name="toast_pairing_failed">Ungültiger Code. Bitte versuche es erneut.</string>
 
     <!-- Invitation dialog -->
-    <string name="dialog_select_invite_method_title">Einladen per</string>
-    <string name="dialog_select_invite_method_sms_item">SMS</string>
-    <string name="dialog_select_invite_method_mail_item">E-Mail</string>
-    <string name="dialog_select_invite_method_code_item">Code</string>
+    <string name="dialog_add_contact_type_title">Kontakt hinzufügen</string>
+    <string name="dialog_add_contact_type_sms_item">SMS</string>
+    <string name="dialog_add_contact_type_mail_item">E-Mail</string>
+    <string name="dialog_add_contact_type_code_item">Code</string>
 
     <!-- SMS/E-Mail invitation -->
     <string name="dialog_missing_pairing_token_title">Einladung kann nicht erzeugt werden</string>
