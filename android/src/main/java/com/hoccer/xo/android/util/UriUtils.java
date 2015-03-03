@@ -119,11 +119,7 @@ public class UriUtils {
         String filePath = null;
 
         if (isContentUri(uri)) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                if (isDocumentUri(context, uri)) {
-                    uri = getContentUriByDocumentUri(uri);
-                }
-            }
+            uri = getPublicDownloadsUriFromDocumentUri(context, uri);
             Cursor cursor = context.getContentResolver().query(uri, new String[]{mediaColumn}, null, null, null);
             if (cursor == null) {
                 LOG.error("Query failed! Could not resolve cursor for content uri: " + uri);
@@ -138,6 +134,15 @@ public class UriUtils {
         }
 
         return filePath;
+    }
+
+    private static Uri getPublicDownloadsUriFromDocumentUri(Context context, Uri uri) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            if (isDocumentUri(context, uri)) {
+                uri = getContentUriByDocumentUri(uri);
+            }
+        }
+        return uri;
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
