@@ -24,6 +24,7 @@ public class UriUtils {
     public static final String FILE_URI_PREFIX = FILE_SCHEME + "://";
 
     private static final Logger LOG = Logger.getLogger(UriUtils.class);
+    public static final String PUBLIC_DOWNLOADS_CONTENT_URI = "content://downloads/public_downloads";
 
     public static Uri getAbsoluteFileUri(String stringUri) {
         Uri uri = Uri.parse(stringUri);
@@ -119,7 +120,9 @@ public class UriUtils {
 
         if (isContentUri(uri)) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                uri = getContentUriByDocumentUri(context, uri);
+                if (isDocumentUri(context, uri)) {
+                    uri = getContentUriByDocumentUri(uri);
+                }
             }
             Cursor cursor = context.getContentResolver().query(uri, new String[]{mediaColumn}, null, null, null);
             if (cursor == null) {
@@ -138,11 +141,14 @@ public class UriUtils {
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
-    private static Uri getContentUriByDocumentUri(Context context, Uri uri) {
-        if (DocumentsContract.isDocumentUri(context, uri)) {
-            final String id = DocumentsContract.getDocumentId(uri);
-            uri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
-        }
+    private static boolean isDocumentUri(Context context, Uri uri) {
+        return DocumentsContract.isDocumentUri(context, uri);
+    }
+
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    private static Uri getContentUriByDocumentUri(Uri uri) {
+        final String id = DocumentsContract.getDocumentId(uri);
+        uri = ContentUris.withAppendedId(Uri.parse(PUBLIC_DOWNLOADS_CONTENT_URI), Long.valueOf(id));
         return uri;
     }
 
