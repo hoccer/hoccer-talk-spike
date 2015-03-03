@@ -16,14 +16,15 @@ import org.apache.log4j.Logger;
 import java.io.File;
 
 public class UriUtils {
+
+    private static final Logger LOG = Logger.getLogger(UriUtils.class);
+
     public static final String CONTENT_SCHEME = "content";
     public static final String FILE_SCHEME = "file";
-    public static final String HTTP_SCHEME = "http";
-    public static final String HTTPS_SCHEME = "https";
+
     public static final String CONTENT_URI_PREFIX = CONTENT_SCHEME + "://";
     public static final String FILE_URI_PREFIX = FILE_SCHEME + "://";
 
-    private static final Logger LOG = Logger.getLogger(UriUtils.class);
     public static final String PUBLIC_DOWNLOADS_CONTENT_URI = "content://downloads/public_downloads";
 
     public static Uri getAbsoluteFileUri(String stringUri) {
@@ -48,10 +49,6 @@ public class UriUtils {
         return FILE_SCHEME.equals(uri.getScheme()) || uri.toString().startsWith("/");
     }
 
-    public static boolean isRemoteUri(Uri uri) {
-        return HTTP_SCHEME.equals(uri.getScheme()) || HTTPS_SCHEME.equals(uri.getScheme());
-    }
-
     public static Uri getContentUriByDataPath(Context context, Uri tableUri, String dataPath) {
         long contentId = getContentIdByDataPath(context, tableUri, dataPath);
         if (contentId > 0) {
@@ -74,45 +71,6 @@ public class UriUtils {
         cursor.close();
 
         return contentId;
-    }
-
-    public static boolean contentExists(Context context, Uri contentUri) {
-        Uri dataUri = getDataUriByContentUri(context, contentUri);
-        if (dataUri != null) {
-            if (isFileUri(dataUri)) {
-                return new File(dataUri.getPath()).exists();
-            } else if (isRemoteUri(dataUri)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public static Uri getFileUriByContentUri(Context context, Uri contentUri) {
-        Uri dataUri = getDataUriByContentUri(context, contentUri);
-        if (dataUri != null && isFileUri(dataUri)) {
-            return dataUri;
-        } else {
-            return null;
-        }
-    }
-
-    private static Uri getDataUriByContentUri(Context context, Uri contentUri) {
-        String[] projection = {
-                MediaStore.Images.Media.DATA,
-        };
-
-        try {
-            Cursor cursor = context.getContentResolver().query(contentUri, projection, null, null, null);
-            if (cursor != null && cursor.moveToFirst()) {
-                int dataIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
-                return Uri.parse(cursor.getString(dataIndex));
-            }
-        } catch (Exception ignored) {
-        }
-
-        return null;
     }
 
     public static String getFilePathByUri(Context context, Uri uri, String mediaColumn) {
