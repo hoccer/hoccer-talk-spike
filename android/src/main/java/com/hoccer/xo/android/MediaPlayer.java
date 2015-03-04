@@ -264,7 +264,7 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
     private Notification buildNotification() {
         Intent intent = new Intent(mContext, NotificationBridgeActivity.class);
         intent.setAction(NotificationBridgeActivity.ACTION_FULLSCREEN_PLAYER_ACTIVITY_TO_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(mContext, NotificationId.MUSIC_PLAYER, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(mContext, NotificationId.MUSIC_PLAYER, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         updateRemoteViewButton();
         updateRemoteViewMetaData();
