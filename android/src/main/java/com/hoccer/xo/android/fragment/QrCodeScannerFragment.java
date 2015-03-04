@@ -2,28 +2,20 @@ package com.hoccer.xo.android.fragment;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
+import android.view.*;
 import android.widget.Toast;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.CameraPreviewView;
-import com.artcom.hoccer.R;
 import net.sourceforge.zbar.*;
 import org.apache.log4j.Logger;
 
@@ -35,8 +27,6 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
 
     private Camera mCamera;
     private CameraPreviewView mCameraPreviewView;
-    private EditText mPairingTokenEditText;
-    private Button mConfirmCodeButton;
 
     static {
         // required by zbar
@@ -48,6 +38,7 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
 
     private final Camera.PreviewCallback mPreviewCallback = new Camera.PreviewCallback() {
         public void onPreviewFrame(final byte[] data, final Camera camera) {
+            LOG.debug("onPreviewFrame");
             final Camera.Parameters parameters = camera.getParameters();
             final Camera.Size size = parameters.getPreviewSize();
 
@@ -81,76 +72,53 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
 
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
         return inflater.inflate(R.layout.fragment_qr_code_scanner, null);
     }
 
     @Override
     public void onViewCreated(final View view, final Bundle savedInstanceState) {
         mCameraPreviewView = (CameraPreviewView) view.findViewById(R.id.cpv_camera_preview);
-        mPairingTokenEditText = (EditText) view.findViewById(R.id.et_pairing_token);
-        mConfirmCodeButton = (Button) view.findViewById(R.id.b_confirm_code);
-
-        mPairingTokenEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
-                    hideSoftKeyboard();
-                }
-            }
-        });
-
-        mPairingTokenEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(final CharSequence s, final int start, final int count, final int after) {
-            }
-
-            @Override
-            public void onTextChanged(final CharSequence s, final int start, final int before, final int count) {
-            }
-
-            @Override
-            public void afterTextChanged(final Editable s) {
-                if (!mPairingTokenEditText.getText().toString().isEmpty()) {
-                    mConfirmCodeButton.setEnabled(true);
-                } else {
-                    mConfirmCodeButton.setEnabled(false);
-                }
-            }
-        });
-
-        mPairingTokenEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    performTokenPairing();
-                    return true;
-                }
-
-                return false;
-            }
-        });
-
-        mConfirmCodeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                performTokenPairing();
-            }
-        });
     }
 
-    private void performTokenPairing() {
-        final String pairingToken = mPairingTokenEditText.getText().toString();
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_fragment_scan, menu);
+    }
 
-        if (pairingToken != null && !pairingToken.isEmpty()) {
-            mConfirmCodeButton.setEnabled(false);
-            mPairingTokenEditText.clearFocus();
-            XoApplication.get().getXoClient().performTokenPairing(pairingToken, this);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_enter_code:
+                stopAndDisablePreview();
+                showEnterCodeDialog();
         }
+        return super.onOptionsItemSelected(item);
     }
 
-    private void hideSoftKeyboard() {
-        final InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
-        inputMethodManager.hideSoftInputFromWindow(getView().getWindowToken(), 0);
+    private void showEnterCodeDialog() {
+        XoDialogs.showInputTextDialog("CodeInputDialog", R.string.enter_code, -1, R.string.invite_code, getActivity(),
+                new XoDialogs.OnTextSubmittedListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which, String input) {
+                        enableAndStartPreview();
+                        performTokenPairing(input);
+                    }
+                },
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        enableAndStartPreview();
+                    }
+                }
+        );
+    }
+
+    private void performTokenPairing(String token) {
+        if (token != null && !token.isEmpty()) {
+            XoApplication.get().getXoClient().performTokenPairing(token, this);
+        }
     }
 
     @Override
@@ -230,10 +198,6 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
     @Override
     public void onPagePause() {
         stopAndDisablePreview();
-
-        if (mPairingTokenEditText != null) {
-            mPairingTokenEditText.clearFocus();
-        }
     }
 
     private void stopAndDisablePreview() {
@@ -260,10 +224,8 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                getActivity().finish();
                 Toast.makeText(activity, getResources().getString(R.string.toast_pairing_successful), Toast.LENGTH_LONG).show();
-
-                mPairingTokenEditText.setText("");
-                mConfirmCodeButton.setEnabled(true);
             }
         });
     }
@@ -276,8 +238,6 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
             @Override
             public void run() {
                 Toast.makeText(getActivity(), getResources().getString(R.string.toast_pairing_failed), Toast.LENGTH_LONG).show();
-
-                mConfirmCodeButton.setEnabled(true);
             }
         });
     }

@@ -41,7 +41,7 @@ public class XoDialogs {
                 builder.setMessage(message);
                 builder.setPositiveButton(positiveButtonTitleId, positiveListener);
 
-                if(negativeListener != null) {
+                if (negativeListener != null) {
                     builder.setNegativeButton(negativeButtonTitleId, negativeListener);
                 } else {
                     builder.setNegativeButton(negativeButtonTitleId, new DialogInterface.OnClickListener() {
@@ -80,7 +80,7 @@ public class XoDialogs {
                 builder.setMessage(message);
                 builder.setPositiveButton(R.string.common_yes, yesListener);
 
-                if(noListener != null) {
+                if (noListener != null) {
                     builder.setNegativeButton(R.string.common_no, noListener);
                 } else {
                     builder.setNegativeButton(R.string.common_no, new DialogInterface.OnClickListener() {
@@ -134,7 +134,7 @@ public class XoDialogs {
     }
 
     public static void showInputPasswordDialog(final String tag, final int titleId, final Activity activity, final OnTextSubmittedListener okListener, final DialogInterface.OnClickListener cancelListener) {
-        final LinearLayout passwordInputView = (LinearLayout)activity.getLayoutInflater().inflate(R.layout.view_password_input, null);
+        final LinearLayout passwordInputView = (LinearLayout) activity.getLayoutInflater().inflate(R.layout.view_password_input, null);
         final EditText passwordInput = (EditText) passwordInputView.findViewById(R.id.password_input);
         final InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         DialogFragment dialogFragment = new DialogFragment() {
@@ -156,7 +156,7 @@ public class XoDialogs {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
                         inputMethodManager.hideSoftInputFromWindow(passwordInput.getWindowToken(), 0);
-                        if(cancelListener != null) {
+                        if (cancelListener != null) {
                             cancelListener.onClick(dialog, id);
                         }
                     }
@@ -207,10 +207,15 @@ public class XoDialogs {
     }
 
     public static void showInputTextDialog(final String tag, final int titleId, final int messageId, final Activity activity, final OnTextSubmittedListener okListener, final DialogInterface.OnClickListener cancelListener) {
+        showInputTextDialog(tag, titleId, messageId, -1, activity, okListener, null);
+    }
+
+    public static void showInputTextDialog(final String tag, final int titleId, final int messageId, final int hintId, final Activity activity, final OnTextSubmittedListener okListener, final DialogInterface.OnClickListener cancelListener) {
         final View textInputView = activity.getLayoutInflater().inflate(R.layout.dialog_create_new_item, null);
         final EditText textInput = (EditText) textInputView.findViewById(R.id.et_input_name);
         final InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         DialogFragment dialogFragment = new DialogFragment() {
+
             @Override
             public Dialog onCreateDialog(Bundle savedInstanceState) {
                 LOG.debug("Creating dialog: " + tag);
@@ -233,7 +238,7 @@ public class XoDialogs {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
                         inputMethodManager.hideSoftInputFromWindow(textInput.getWindowToken(), 0);
-                        if(cancelListener != null) {
+                        if (cancelListener != null) {
                             cancelListener.onClick(dialog, id);
                         }
                     }
@@ -249,6 +254,9 @@ public class XoDialogs {
                 });
                 alertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
 
+                if (hintId > 0) {
+                    textInput.setHint(hintId);
+                }
                 // update positive button enabled state
                 textInput.addTextChangedListener(new TextWatcher() {
                     @Override
@@ -271,7 +279,17 @@ public class XoDialogs {
                 });
                 return alertDialog;
             }
+
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                super.onDismiss(dialog);
+                inputMethodManager.hideSoftInputFromWindow(textInput.getWindowToken(), 0);
+                if (cancelListener != null) {
+                    cancelListener.onClick(dialog, -1);
+                }
+            }
         };
+
         dialogFragment.show(activity.getFragmentManager(), tag);
     }
 
