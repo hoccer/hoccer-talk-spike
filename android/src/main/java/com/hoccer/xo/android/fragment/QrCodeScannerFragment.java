@@ -81,16 +81,20 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
                 new DialogInterface.OnDismissListener() {
                     @Override
                     public void onDismiss(DialogInterface dialog) {
-                        getView().requestLayout();
-                        new Handler().post(new Runnable() {
-                            @Override
-                            public void run() {
-                                startScanning();
-                            }
-                        });
+                        startScanningWhenViewIsReady();
                     }
                 }
         );
+    }
+
+    private void startScanningWhenViewIsReady() {
+        getView().requestLayout();
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                startScanning();
+            }
+        });
     }
 
     private void performTokenPairing(String token) {
