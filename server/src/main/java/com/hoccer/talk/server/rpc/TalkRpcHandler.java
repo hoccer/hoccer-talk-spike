@@ -299,7 +299,11 @@ public class TalkRpcHandler implements ITalkRpcServer {
             // get client object
             mSrpClient = mDatabase.findClientById(clientId);
             if (mSrpClient == null) {
-                throw new RuntimeException("No such client");  // must not change this string, is checked on client side
+                if (mDatabase.findDeletedClientById(clientId) != null) {
+                    throw new RuntimeException("Client deleted");  // must not change this string, is checked on client side
+                } else {
+                    throw new RuntimeException("No such client");  // must not change this string, is checked on client side
+                }
             }
 
             // verify SRP registration
@@ -392,6 +396,21 @@ public class TalkRpcHandler implements ITalkRpcServer {
             throw e;
         }
 
+    }
+
+    @Override
+    public void deleteAccount(String reason) {
+        requireIdentification(true);
+        logCall("deleteAccount(id: '" + mConnection.getClientId() + "', reason: '" + reason + "')");
+        final String clientId = mConnection.getClientId();
+        TalkClient client = mConnection.getClient();
+
+        // make sure client can no longer log in and won't be found again for delivery stuff
+        client.setSrpVerifier("");
+        mDatabase.markClientDeleted(client);
+
+        // handle deletion after we returned rpc call status to client
+        mServer.getUpdateAgent().requestAccountDeletion(clientId);
     }
 
     @Override
@@ -1833,10 +1852,10 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public void inviteGroupMember(String groupId, String clientId) {
+        logCall("inviteGroupMember(groupId: '" + groupId + "' / clientId: '" + clientId + "')");
         requireIdentification(true);
         requireGroupAdmin(groupId);
         //requireNotNearbyGroupType(groupId);
-        logCall("inviteGroupMember(groupId: '" + groupId + "' / clientId: '" + clientId + "')");
 
         // check that the client exists
         TalkClient client = mDatabase.findClientById(clientId);
@@ -1885,8 +1904,8 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public void joinGroup(String groupId) {
-        requireIdentification(true);
         logCall("joinGroup(groupId: '" + groupId + "')");
+        requireIdentification(true);
 
         String clientId = mConnection.getClientId();
 
@@ -1910,9 +1929,13 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public void leaveGroup(String groupId) {
-        requireIdentification(true);
-        TalkGroupMembership membership = requiredGroupInvitedOrMember(groupId);
         logCall("leaveGroup(groupId: '" + groupId + "')");
+        requireIdentification(true);
+        doLeaveGroup(groupId);
+     }
+
+    public void doLeaveGroup(String groupId) {
+        TalkGroupMembership membership = requiredGroupInvitedOrMember(groupId);
         // set membership state to NONE
         membership.setState(TalkGroupMembership.STATE_NONE);
         // degrade anyone who leaves to member
@@ -1922,6 +1945,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         // save the whole thing
         changedGroupMembership(membership, new Date());
     }
+
 
     @Override
     public void removeGroupMember(String groupId, String clientId) {

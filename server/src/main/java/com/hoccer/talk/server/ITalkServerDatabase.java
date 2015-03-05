@@ -20,13 +20,21 @@ public interface ITalkServerDatabase {
 
     public TalkClient findClientById(String clientId);
 
+    public TalkClient findDeletedClientById(String clientId);
+
     public TalkClient findClientByApnsToken(String apnsToken);
 
     public void saveClient(TalkClient client);
 
+    public void markClientDeleted(TalkClient client);
+
+    public void deleteClient(TalkClient client);
+
     public TalkMessage findMessageById(String messageId);
 
     public List<TalkMessage> findMessagesWithAttachmentFileId(String fileId);
+
+    public List<TalkMessage> findMessagesFromClient(String clientId);
 
     public void deleteMessage(TalkMessage message);
 
@@ -73,6 +81,8 @@ public interface ITalkServerDatabase {
     public TalkPresence findPresenceForClient(String clientId);
 
     public void savePresence(TalkPresence presence);
+
+    public void deletePresence(TalkPresence presence);
 
     public List<TalkPresence> findPresencesChangedAfter(String clientId, Date lastKnown);
 
@@ -133,6 +143,8 @@ public interface ITalkServerDatabase {
 
     public List<TalkEnvironment> findEnvironmentsForGroup(String groupId);
 
+    public List<TalkEnvironment> findEnvironmentsForClient(String clientId);
+
     public List<TalkEnvironment> findEnvironmentsMatching(TalkEnvironment environment);
 
     public void deleteEnvironment(TalkEnvironment environment);
@@ -146,6 +158,8 @@ public interface ITalkServerDatabase {
     public List<TalkClientHostInfo> findClientHostInfoByClientLanguageAndClientName(String clientLanguage, String clientName);
 
     public void saveClientHostInfo(TalkClientHostInfo clientHostInfo);
+
+    public void deleteClientHostInfo(TalkClientHostInfo clientHostInfo);
 
     public List<TalkDatabaseMigration> findDatabaseMigrations();
 

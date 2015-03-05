@@ -128,6 +128,12 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @Nullable // null if client for given id does not exist.
+    public TalkClient findDeletedClientById(String clientId) {
+        return findClientById(clientId+"-DELETED");
+    }
+
+    @Override
     @Nullable // null if client for given apns token does not exist.
     public TalkClient findClientByApnsToken(String apnsToken) {
         return mClients.findOne("{apnsToken:#}", apnsToken)
@@ -135,8 +141,20 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
-    public void saveClient(TalkClient client) {
+    public void saveClient(@NotNull TalkClient client) {
         mClients.save(client);
+    }
+
+    @Override
+    public void markClientDeleted(@NotNull TalkClient client) {
+        if (!client.getClientId().endsWith("-DELETED")) {
+            client.setClientId(client.getClientId()+"-DELETED");
+            mClients.save(client);
+        }
+    }
+    @Override
+    public void deleteClient(@NotNull TalkClient client) {
+        mMessages.remove("{clientId:#}", client.getClientId());
     }
 
     @Override
@@ -151,6 +169,17 @@ public class JongoDatabase implements ITalkServerDatabase {
     public List<TalkMessage> findMessagesWithAttachmentFileId(String fileId) {
         Iterator<TalkMessage> it = mMessages
                 .find("{attachmentFileId:#}", fileId)
+                .as(TalkMessage.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
+    }
+
+    @Override
+    @NotNull
+    public List<TalkMessage> findMessagesFromClient(String clientId) {
+        Iterator<TalkMessage> it = mMessages
+                .find("{clientId:#}", clientId)
                 .as(TalkMessage.class)
                 .iterator();
 
@@ -421,6 +450,11 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public void deletePresence(TalkPresence presence) {
+        mPresences.remove("{clientId:#}", presence.getClientId());
+    }
+
+    @Override
     @Nullable
     public TalkKey findKey(String clientId, String keyId) {
         return mKeys.findOne("{clientId:#,keyId:#}", clientId, keyId)
@@ -686,6 +720,16 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public List<TalkEnvironment> findEnvironmentsForClient(String clientId) {
+        Iterator<TalkEnvironment> it = mEnvironments
+                .find("{clientId:#}", clientId)
+                .as(TalkEnvironment.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
+    }
+
+    @Override
     public List<TalkEnvironment> findEnvironmentsMatching(TalkEnvironment environment) {
         mEnvironments.ensureIndex("{geoLocation: '2dsphere'}");
         List<TalkEnvironment> res = new ArrayList<TalkEnvironment>();
@@ -806,6 +850,11 @@ public class JongoDatabase implements ITalkServerDatabase {
     @Override
     public void saveClientHostInfo(TalkClientHostInfo clientHostInfo) {
         mClientHostInfos.save(clientHostInfo);
+    }
+
+    @Override
+    public void deleteClientHostInfo(TalkClientHostInfo clientHostInfo) {
+        mClientHostInfos.remove("{clientId:#}", clientHostInfo.getClientId());
     }
 
     @Override

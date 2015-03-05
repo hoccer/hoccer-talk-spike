@@ -107,6 +107,8 @@ public interface ITalkRpcServer {
     */
     TalkServerInfo hello(TalkClientInfo clientInfo);
 
+    void deleteAccount(String reason);
+
     /** get the server time
      * @return server time
      * @talk.preconditions none
