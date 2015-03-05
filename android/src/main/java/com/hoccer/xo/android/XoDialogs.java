@@ -207,10 +207,14 @@ public class XoDialogs {
     }
 
     public static void showInputTextDialog(final String tag, final int titleId, final int messageId, final Activity activity, final OnTextSubmittedListener okListener, final DialogInterface.OnClickListener cancelListener) {
-        showInputTextDialog(tag, titleId, messageId, -1, activity, okListener, null);
+        showInputTextDialog(tag, titleId, messageId, activity, okListener, cancelListener, null);
     }
 
-    public static void showInputTextDialog(final String tag, final int titleId, final int messageId, final int hintId, final Activity activity, final OnTextSubmittedListener okListener, final DialogInterface.OnClickListener cancelListener) {
+    private static void showInputTextDialog(String tag, int titleId, int messageId, Activity activity, OnTextSubmittedListener okListener, DialogInterface.OnClickListener cancelListener, final DialogInterface.OnDismissListener dismissListener) {
+        showInputTextDialog(tag, titleId, messageId, -1, activity, okListener, cancelListener, dismissListener);
+    }
+
+    public static void showInputTextDialog(final String tag, final int titleId, final int messageId, final int hintId, final Activity activity, final OnTextSubmittedListener okListener, final DialogInterface.OnClickListener cancelListener, final DialogInterface.OnDismissListener dismissListener) {
         final View textInputView = activity.getLayoutInflater().inflate(R.layout.dialog_create_new_item, null);
         final EditText textInput = (EditText) textInputView.findViewById(R.id.et_input_name);
         final InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -225,12 +229,12 @@ public class XoDialogs {
                 if (messageId > 0) {
                     builder.setMessage(messageId);
                 }
+
                 builder.setPositiveButton(R.string.common_ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
                         inputMethodManager.hideSoftInputFromWindow(textInput.getWindowToken(), 0);
                         okListener.onClick(dialog, id, textInput.getText().toString());
-
                     }
                 });
 
@@ -245,6 +249,7 @@ public class XoDialogs {
                 });
 
                 final AlertDialog alertDialog = builder.create();
+
                 alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
                     @Override
                     public void onShow(DialogInterface dialog) {
@@ -284,8 +289,8 @@ public class XoDialogs {
             public void onDismiss(DialogInterface dialog) {
                 super.onDismiss(dialog);
                 inputMethodManager.hideSoftInputFromWindow(textInput.getWindowToken(), 0);
-                if (cancelListener != null) {
-                    cancelListener.onClick(dialog, -1);
+                if (dismissListener != null) {
+                    dismissListener.onDismiss(dialog);
                 }
             }
         };
