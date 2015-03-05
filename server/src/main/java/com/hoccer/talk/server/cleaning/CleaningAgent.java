@@ -39,6 +39,8 @@ public class CleaningAgent {
     // TODO: expose this to config?
     private static final int KEY_LIFE_TIME = 3; // in months
     private static final int RELATIONSHIP_LIFE_TIME = 3; // in months
+    private static final int DELETED_CLIENT_LIFE_TIME = 1; // in months
+    private static final int UNUSED_CLIENT_LIFE_TIME = 12; // in months
 
     public CleaningAgent(TalkServer server) {
         mServer = server;
@@ -78,8 +80,50 @@ public class CleaningAgent {
 
     private void cleanClientData(final String clientId) {
         LOG.debug("cleaning client " + clientId);
-        doCleanKeysForClient(clientId);
-        doCleanTokensForClient(clientId);
+
+        if (!mDatabase.isDeletedClient(clientId)) {
+            Date now = new Date();
+            Calendar cal = new GregorianCalendar();
+            cal.setTime(now);
+            cal.add(Calendar.MONTH, -UNUSED_CLIENT_LIFE_TIME);
+            TalkClient client = mDatabase.findClientById(clientId);
+            if (client != null && cal.after(client.getTimeLastLogin())) {
+                // delete client that has not been active for UNUSED_CLIENT_LIFE_TIME months
+                LOG.info("deleting unused client id '" + clientId + "'");
+                client.setSrpVerifier("");
+                client.setReasonDeleted("unused-lifetime-expired");
+                mDatabase.markClientDeleted(client);
+                mServer.getUpdateAgent().requestAccountDeletion(clientId);
+            } else {
+                doCleanKeysForClient(clientId);
+                doCleanTokensForClient(clientId);
+            }
+        } else {
+            // check for deleted clients expiry
+
+            Date now = new Date();
+            Calendar cal = new GregorianCalendar();
+            cal.setTime(now);
+            cal.add(Calendar.MONTH, -DELETED_CLIENT_LIFE_TIME);
+
+            TalkClient client = mDatabase.findClientById(clientId);
+            if (client != null && cal.after(client.getTimeDeleted())) {
+                // finally remove deleted client
+                LOG.info("removing deleted expired client id '" + clientId + "'");
+                TalkPresence presence = mDatabase.findPresenceForClient(clientId);
+                mDatabase.deletePresence(presence);
+
+                if (client != null) {
+                    mDatabase.deleteClient(client);
+                }
+
+                TalkClientHostInfo clientHostInfo = mDatabase.findClientHostInfoForClient(clientId);
+                if (clientHostInfo != null) {
+                    mDatabase.deleteClientHostInfo(clientHostInfo);
+                }
+                mServer.getFilecacheClient().deleteAccount(clientId);
+            }
+        }
     }
 
     private void scheduleCleanAllDeliveries() {
@@ -149,30 +193,6 @@ public class CleaningAgent {
         }
         int totalDeliveriesCleaned = finishedDeliveries.size();
 
-        /*
-        List<TalkDelivery> abortedDeliveries = mDatabase.findDeliveriesInState(TalkDelivery.STATE_ABORTED);
-        if (!abortedDeliveries.isEmpty()) {
-            LOG.info("cleanup found " + abortedDeliveries.size() + " aborted deliveries");
-            for (TalkDelivery delivery : abortedDeliveries) {
-                doCleanFinishedDelivery(delivery);
-            }
-        }
-        List<TalkDelivery> failedDeliveries = mDatabase.findDeliveriesInState(TalkDelivery.STATE_FAILED);
-        if (!failedDeliveries.isEmpty()) {
-            LOG.info("cleanup found " + failedDeliveries.size() + " failed deliveries");
-            for (TalkDelivery delivery : failedDeliveries) {
-                doCleanFinishedDelivery(delivery);
-            }
-        }
-        List<TalkDelivery> confirmedDeliveries = mDatabase.findDeliveriesInState(TalkDelivery.STATE_DELIVERED_ACKNOWLEDGED);
-        if (!confirmedDeliveries.isEmpty()) {
-            LOG.info("cleanup found " + confirmedDeliveries.size() + " confirmed deliveries");
-            for (TalkDelivery delivery : confirmedDeliveries) {
-                doCleanFinishedDelivery(delivery);
-            }
-        }
-        int totalDeliveriesCleaned = abortedDeliveries.size() + failedDeliveries.size() + confirmedDeliveries.size();
-        */
         long endTime = System.currentTimeMillis();
         LOG.info("Cleaning of '" + totalDeliveriesCleaned + "' deliveries done (took '" + (endTime - startTime) + "ms'). rescheduling next run...");
     }

@@ -22,6 +22,8 @@ public interface ITalkServerDatabase {
 
     public TalkClient findDeletedClientById(String clientId);
 
+    public boolean isDeletedClient(String clientId);
+
     public TalkClient findClientByApnsToken(String apnsToken);
 
     public void saveClient(TalkClient client);

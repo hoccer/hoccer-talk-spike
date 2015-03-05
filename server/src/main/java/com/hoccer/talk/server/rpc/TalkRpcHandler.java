@@ -407,6 +407,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
         // make sure client can no longer log in and won't be found again for delivery stuff
         client.setSrpVerifier("");
+        client.setReasonDeleted(reason);
         mDatabase.markClientDeleted(client);
 
         // handle deletion after we returned rpc call status to client

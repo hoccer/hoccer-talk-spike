@@ -134,6 +134,11 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public boolean isDeletedClient(String clientId) {
+        return clientId.endsWith("-DELETED");
+    }
+
+    @Override
     @Nullable // null if client for given apns token does not exist.
     public TalkClient findClientByApnsToken(String apnsToken) {
         return mClients.findOne("{apnsToken:#}", apnsToken)
@@ -147,11 +152,13 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     public void markClientDeleted(@NotNull TalkClient client) {
-        if (!client.getClientId().endsWith("-DELETED")) {
+        if (!isDeletedClient(client.getClientId())) {
             client.setClientId(client.getClientId()+"-DELETED");
+            client.setTimeDeleted(new Date());
             mClients.save(client);
         }
     }
+
     @Override
     public void deleteClient(@NotNull TalkClient client) {
         mMessages.remove("{clientId:#}", client.getClientId());

@@ -868,7 +868,7 @@ public class UpdateAgent extends NotificationDeferrer {
                     }
 
                     if (acquaintances == 0) {
-                        // delete all other stuff immediately as well
+                        // delete all other stuff immediately as well because nobody knows us
                         mDatabase.deletePresence(presence);
 
                         TalkClient client = mDatabase.findDeletedClientById(clientId);
