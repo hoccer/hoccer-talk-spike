@@ -340,19 +340,23 @@ public class SingleProfileFragment extends ProfileFragment
         if (mContact.isSelf()) {
             mContactsContainer.setVisibility(View.VISIBLE);
 
-            int numFriends = 0;
-            int numGroups = 0;
+            int friendsCount = 0;
+            int blockedCount = 0;
+            int groupsCount = 0;
             try {
-                numFriends = getXoDatabase().findClientContactsByState(TalkRelationship.STATE_FRIEND).size();
+                friendsCount = getXoDatabase().findClientContactsByState(TalkRelationship.STATE_FRIEND).size();
+                blockedCount = getXoDatabase().findClientContactsByState(TalkRelationship.STATE_BLOCKED).size();
 
                 List<TalkClientContact> joinedGroups = getXoDatabase().findGroupContactsByMembershipState(TalkGroupMembership.STATE_JOINED);
                 CollectionUtils.filterInverse(joinedGroups, TalkClientContactPredicates.IS_NEARBY_GROUP_PREDICATE);
-                numGroups = joinedGroups.size();
+                groupsCount = joinedGroups.size();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-            mContactsText.setText(numFriends + " " + getResources().getQuantityString(R.plurals.profile_contacts_text_friends, numFriends) + ", " +
-                    numGroups + " " + getResources().getQuantityString(R.plurals.profile_contacts_text_groups, numGroups));
+
+            int clientContactsCount = friendsCount + blockedCount;
+            mContactsText.setText(clientContactsCount + " " + getResources().getQuantityString(R.plurals.profile_contacts_text_friends, clientContactsCount) + "   " +
+                    groupsCount + " " + getResources().getQuantityString(R.plurals.profile_contacts_text_groups, groupsCount));
         } else {
             updateMessageText();
             mContactsContainer.setVisibility(View.GONE);
