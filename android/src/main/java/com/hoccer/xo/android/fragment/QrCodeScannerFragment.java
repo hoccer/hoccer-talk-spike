@@ -36,6 +36,8 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
 
     private final HashSet<String> mScannedCodes = new HashSet<String>();
     private boolean mStartScanningOnResume;
+    private boolean mScanning;
+    private boolean mEnterCodeDialogVisible;
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
@@ -57,6 +59,12 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_fragment_scan, menu);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        menu.findItem(R.id.menu_enter_code).setVisible(true);
     }
 
     @Override
@@ -82,9 +90,11 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
                     @Override
                     public void onDismiss(DialogInterface dialog) {
                         startScanningWhenViewIsReady();
+                        mEnterCodeDialogVisible = false;
                     }
                 }
         );
+        mEnterCodeDialogVisible = true;
     }
 
     private void startScanningWhenViewIsReady() {
@@ -117,7 +127,9 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
     public void onResume() {
         super.onResume();
         if (mStartScanningOnResume) {
-            startScanning();
+            if (!mEnterCodeDialogVisible) {
+                startScanning();
+            }
             mStartScanningOnResume = false;
         }
     }
@@ -125,7 +137,9 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
     @Override
     public void onPageResume() {
         if (isResumed()) {
-            startScanning();
+            if (!mEnterCodeDialogVisible) {
+                startScanning();
+            }
         } else {
             mStartScanningOnResume = true;
         }
@@ -134,6 +148,7 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
     private void startScanning() {
         openCamera();
         startPreview();
+        mScanning = true;
     }
 
     private void openCamera() {
@@ -181,12 +196,15 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
 
     @Override
     public void onPagePause() {
-        stopScanning();
+        if (mScanning) {
+            stopScanning();
+        }
     }
 
     private void stopScanning() {
         stopPreview();
         closeCamera();
+        mScanning = false;
     }
 
     private void stopPreview() {
