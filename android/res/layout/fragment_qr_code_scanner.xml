@@ -14,44 +14,4 @@
             android:clickable="true"
             portrait="true"/>
 
-    <LinearLayout
-            android:id="@+id/ll_insert_code_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:background="@color/background_default">
-
-        <EditText
-                android:id="@+id/et_pairing_token"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="5"
-                android:layout_marginLeft="5dp"
-                android:layout_marginBottom="5dp"
-                android:inputType="textNoSuggestions"
-                style="@android:style/TextAppearance.Large"/>
-
-        <Button
-                android:id="@+id/b_confirm_code"
-                android:layout_width="0dp"
-                android:layout_height="fill_parent"
-                android:layout_weight="1"
-                android:layout_marginRight="5dp"
-                android:layout_marginBottom="5dp"
-                android:text="@string/common_ok"
-                android:enabled="false"/>
-
-    </LinearLayout>
-
-    <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@id/ll_insert_code_container"
-            android:paddingLeft="10dp"
-            android:paddingTop="10dp"
-            android:text="@string/or_insert_code"
-            android:textColor="@color/common_signin_btn_light_text_disabled"
-            android:textSize="16sp"
-            android:background="@color/background_default"/>
-
 </RelativeLayout>

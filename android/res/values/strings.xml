@@ -116,7 +116,8 @@
     <string name="scan_or_copy_code">Scan or copy this code</string>
 
     <!-- QR code scanner fragment -->
-    <string name="or_insert_code">Or insert code</string>
+    <string name="enter_code">Enter code</string>
+    <string name="invite_code">Invite code</string>
 
     <!-- Profile fragment -->
     <string name="dialog_avatar_options_title">Avatar options</string>

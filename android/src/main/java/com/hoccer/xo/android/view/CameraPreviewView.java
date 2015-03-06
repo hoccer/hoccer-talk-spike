@@ -27,7 +27,6 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
     private List<Camera.Size> mSupportedPreviewSizes;
     private Camera mCamera;
     private final boolean mIsPortraitModeEnabled;
-    private boolean mIsEnabled;
     private boolean mIsSurfaceCreated;
 
     private final Handler mAutoFocusHandler = new Handler();
@@ -56,7 +55,6 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
         addView(surfaceView);
 
         mIsPortraitModeEnabled = attributeSet.getAttributeBooleanValue(null, "portrait", false);
-        mIsEnabled = true;
         mIsSurfaceCreated = false;
 
         // Install a SurfaceHolder.Callback so we get notified when the
@@ -187,7 +185,7 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
     }
 
     public void startPreview() {
-        if (mIsEnabled && mIsSurfaceCreated && mCamera != null) {
+        if (mIsSurfaceCreated && mCamera != null) {
             try {
                 mCamera.setPreviewDisplay(mHolder);
             } catch (IOException e) {
@@ -223,10 +221,5 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
             mCamera.cancelAutoFocus();
             mCamera.stopPreview();
         }
-    }
-
-    @Override
-    public void setEnabled(boolean isEnabled) {
-        mIsEnabled = isEnabled;
     }
 }
