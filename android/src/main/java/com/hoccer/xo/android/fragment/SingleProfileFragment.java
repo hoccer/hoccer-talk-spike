@@ -358,7 +358,6 @@ public class SingleProfileFragment extends ProfileFragment
             mContactsText.setText(clientContactsCount + " " + getResources().getQuantityString(R.plurals.profile_contacts_text_friends, clientContactsCount) + "   " +
                     groupsCount + " " + getResources().getQuantityString(R.plurals.profile_contacts_text_groups, groupsCount));
         } else {
-            updateMessageText();
             mContactsContainer.setVisibility(View.GONE);
         }
     }
