@@ -108,7 +108,7 @@
 
     <!-- QR code scanner fragment -->
     <string name="enter_code">Code eingeben</string>
-    <string name="invite_code">Einladungs Code</string>
+    <string name="invite_code">Einladungscode</string>
 
     <!-- Profile fragment -->
     <string name="dialog_avatar_options_title">Avatar Optionen</string>
