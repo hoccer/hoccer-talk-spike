@@ -35,9 +35,8 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
     }
 
     private final HashSet<String> mScannedCodes = new HashSet<String>();
-    private boolean mStartScanningOnResume;
-    private boolean mScanning;
     private boolean mEnterCodeDialogVisible;
+    private boolean mIsSelected;
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
@@ -83,6 +82,7 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
                     @Override
                     public void onClick(DialogInterface dialog, int which, String input) {
                         performTokenPairing(input);
+
                     }
                 },
                 null,
@@ -107,10 +107,16 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
         });
     }
 
-    private void performTokenPairing(String token) {
-        if (token != null && !token.isEmpty()) {
-            XoApplication.get().getXoClient().performTokenPairing(token, this);
+    private void performTokenPairingByUri(String uri) {
+        if (!mScannedCodes.contains(uri)) {
+            final String token = UriUtils.getAbsoluteFileUri(uri).getAuthority();
+            performTokenPairing(token);
+            mScannedCodes.add(uri);
         }
+    }
+
+    private void performTokenPairing(String token) {
+        XoApplication.get().getXoClient().performTokenPairing(token, QrCodeScannerFragment.this);
     }
 
     @Override
@@ -126,60 +132,45 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
     @Override
     public void onResume() {
         super.onResume();
-        if (mStartScanningOnResume) {
-            if (!mEnterCodeDialogVisible) {
-                startScanning();
-            }
-            mStartScanningOnResume = false;
+        if (mIsSelected && !mEnterCodeDialogVisible) {
+            startScanning();
         }
     }
 
     @Override
-    public void onPageResume() {
+    public void onPause() {
+        super.onPause();
+        stopScanning();
+    }
+
+    @Override
+    public void onPageSelected() {
+        mIsSelected = true;
         if (isResumed()) {
-            if (!mEnterCodeDialogVisible) {
-                startScanning();
-            }
-        } else {
-            mStartScanningOnResume = true;
+            startScanning();
         }
+    }
+
+    @Override
+    public void onPageUnselected() {
+        mIsSelected = false;
+        stopScanning();
     }
 
     private void startScanning() {
         openCamera();
         startPreview();
-        mScanning = true;
     }
 
     private void openCamera() {
         try {
             mCamera = Camera.open();
             mCamera.setPreviewCallback(new Camera.PreviewCallback() {
-
                 public void onPreviewFrame(final byte[] data, final Camera camera) {
-                    final Camera.Parameters parameters = camera.getParameters();
-                    final Camera.Size size = parameters.getPreviewSize();
-
-                    final Image image = new Image(size.width, size.height, "Y800");
-                    image.setData(data);
-
-                    final ImageScanner mQrCodeScanner = new ImageScanner();
-                    mQrCodeScanner.setConfig(0, Config.X_DENSITY, 3);
-                    mQrCodeScanner.setConfig(0, Config.Y_DENSITY, 3);
-
-                    final int result = mQrCodeScanner.scanImage(image);
-                    if (result != 0) {
-                        final SymbolSet symbols = mQrCodeScanner.getResults();
-
-                        for (final Symbol symbol : symbols) {
-                            final String code = symbol.getData();
-
-                            if (!mScannedCodes.contains(code)) {
-                                final String pairingToken = UriUtils.getAbsoluteFileUri(code).getAuthority();
-                                XoApplication.get().getXoClient().performTokenPairing(pairingToken, QrCodeScannerFragment.this);
-                                mScannedCodes.add(code);
-                            }
-                        }
+                    final Image image = createImageFromCameraData(data, camera);
+                    SymbolSet symbols = scanImageForQrCodes(image);
+                    for (final Symbol symbol : symbols) {
+                        performTokenPairingByUri(symbol.getData());
                     }
                 }
             });
@@ -189,22 +180,37 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
         }
     }
 
+    private Image createImageFromCameraData(byte[] data, Camera camera) {
+        final Camera.Parameters parameters = camera.getParameters();
+        final Camera.Size size = parameters.getPreviewSize();
+        final Image image = new Image(size.width, size.height, "Y800");
+        image.setData(data);
+        return image;
+    }
+
+    private static SymbolSet scanImageForQrCodes(Image image) {
+        final ImageScanner qrCodeScanner = new ImageScanner();
+        qrCodeScanner.setConfig(0, Config.X_DENSITY, 3);
+        qrCodeScanner.setConfig(0, Config.Y_DENSITY, 3);
+
+        qrCodeScanner.scanImage(image);
+        return qrCodeScanner.getResults();
+    }
+
     private void startPreview() {
         mCameraPreviewView.setVisibility(View.VISIBLE);
         mCameraPreviewView.startPreview();
     }
 
     @Override
-    public void onPagePause() {
-        if (mScanning) {
-            stopScanning();
-        }
-    }
+    public void onPageResume() {}
+
+    @Override
+    public void onPagePause() {}
 
     private void stopScanning() {
         stopPreview();
         closeCamera();
-        mScanning = false;
     }
 
     private void stopPreview() {
@@ -213,10 +219,12 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
     }
 
     private void closeCamera() {
-        mCameraPreviewView.setCamera(null);
-        mCamera.setPreviewCallback(null);
-        mCamera.release();
-        mCamera = null;
+        if (mCamera != null) {
+            mCamera.setPreviewCallback(null);
+            mCamera.release();
+            mCamera = null;
+            mCameraPreviewView.setCamera(null);
+        }
     }
 
     @Override
@@ -227,14 +235,6 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
         } else {
             stopPreview();
         }
-    }
-
-    @Override
-    public void onPageSelected() {
-    }
-
-    @Override
-    public void onPageUnselected() {
     }
 
     @Override
