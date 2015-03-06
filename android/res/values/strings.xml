@@ -124,6 +124,18 @@
     <string name="dialog_delete_avatar_option">Delete avatar</string>
     <string name="profile_name_title">Name</string>
     <string name="profile_name_hint">Your name</string>
+
+    <string name="profile_contacts_title">Contacts</string>
+    <plurals name="profile_contacts_text_friends">
+        <item quantity="one">friend</item>
+        <item quantity="other">friends</item>
+    </plurals>
+    <plurals name="profile_contacts_text_groups">
+        <item quantity="one">group</item>
+        <item quantity="other">groups</item>
+    </plurals>
+
+
     <string name="profile_user_block_button">Block this user</string>
     <string name="profile_user_unblock_button">Unblock this user</string>
     <string name="profile_user_delete_button">Delete this user</string>
