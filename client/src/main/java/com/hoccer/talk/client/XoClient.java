@@ -1166,11 +1166,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     public void onClose(JsonRpcConnection connection) {
         LOG.debug("onClose()");
         if (mState != STATE_DISCONNECTED) {
-            if (mState == STATE_CONNECTING) {
-                scheduleConnect();
-            } else {
-                switchState(STATE_CONNECTING, "connection had closed");
-            }
+            switchState(STATE_CONNECTING, "connection had closed");
         }
     }
 
@@ -1185,6 +1181,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             mWebSocket.open(uri, protocol, mClientConfiguration.getConnectTimeout() * 1000);
         } catch (Exception e) {
             LOG.warn("[connection #" + mConnection.getConnectionId() + "] exception while connecting: ", e);
+            scheduleConnect();
         }
     }
 
