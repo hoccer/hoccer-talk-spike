@@ -35,8 +35,8 @@ public abstract class ProfileFragment extends XoFragment implements IXoContactLi
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mChatContainer = (RelativeLayout) view.findViewById(R.id.inc_chat_stats);
-        mChatMessagesContainer = (RelativeLayout) view.findViewById(R.id.rl_messages_container);
+        mChatContainer = (RelativeLayout) view.findViewById(R.id.inc_profile_chat_stats);
+        mChatMessagesContainer = (RelativeLayout) view.findViewById(R.id.rl_profile_messages);
         mChatMessagesText = (TextView) view.findViewById(R.id.tv_messages_text);
     }
 

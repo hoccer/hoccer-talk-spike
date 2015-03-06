@@ -21,7 +21,7 @@
       android:background="#ffcdcdcd"/>
 
   <RelativeLayout
-      android:id="@+id/rl_messages_container"
+      android:id="@+id/rl_profile_messages"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_below="@+id/v_profile_chat_info_delimiter"
