@@ -17,7 +17,7 @@
             android:id="@+id/v_profile_contacts_delimiter"
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_below="@+id/tv_profile_contacts_text"
+            android:layout_below="@+id/tv_profile_contacts_title"
             android:background="#ffcdcdcd"/>
 
     <TextView
@@ -25,9 +25,9 @@
             android:text="Lorem ipsum jabroder dorium pas genum"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/v_profile_contacts_delimiter"
             android:layout_marginTop="5dp"
             android:layout_alignLeft="@+id/tv_profile_contacts_title"
+            android:layout_below="@+id/v_profile_contacts_delimiter"
             android:ellipsize="end"
             android:maxLines="1"
             android:singleLine="true"
