@@ -79,7 +79,7 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
     }
 
     public String getAttachmentsDirectory() {
-        return mAppName;
+        return mProperties.getProperty("hoccer.attachments.dir.name", mAppName);
     }
 
     public String getAvatarsDirectory() {
