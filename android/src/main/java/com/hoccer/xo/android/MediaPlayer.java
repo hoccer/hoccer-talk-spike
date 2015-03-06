@@ -187,13 +187,14 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
         String title = metaData.getTitle();
         String artist = metaData.getArtist();
         if (title.isEmpty() && artist.isEmpty()) {
-            mRemoteViews.setViewVisibility(R.id.media_metadata_layout, View.GONE);
-            mRemoteViews.setViewVisibility(R.id.filename_text, View.VISIBLE);
-            mRemoteViews.setTextViewText(R.id.filename_text, mCurrentItem.getFilePath());
+            mRemoteViews.setViewVisibility(R.id.ll_media_metadata, View.GONE);
+            mRemoteViews.setViewVisibility(R.id.tv_filename, View.VISIBLE);
+            mRemoteViews.setTextViewText(R.id.tv_filename, mCurrentItem.getFileName());
         } else {
-            mRemoteViews.setViewVisibility(R.id.filename_text, View.GONE);
-            mRemoteViews.setTextViewText(R.id.media_metadata_title_text, title);
-            mRemoteViews.setTextViewText(R.id.media_metadata_artist_text, artist);
+            mRemoteViews.setViewVisibility(R.id.ll_media_metadata, View.VISIBLE);
+            mRemoteViews.setViewVisibility(R.id.tv_filename, View.GONE);
+            mRemoteViews.setTextViewText(R.id.tv_metadata_title, title);
+            mRemoteViews.setTextViewText(R.id.tv_metadata_artist, artist);
         }
     }
 
@@ -263,7 +264,7 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
     private Notification buildNotification() {
         Intent intent = new Intent(mContext, NotificationBridgeActivity.class);
         intent.setAction(NotificationBridgeActivity.ACTION_FULLSCREEN_PLAYER_ACTIVITY_TO_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(mContext, NotificationId.MUSIC_PLAYER, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(mContext, NotificationId.MUSIC_PLAYER, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         updateRemoteViewButton();
         updateRemoteViewMetaData();

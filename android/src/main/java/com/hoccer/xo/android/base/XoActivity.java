@@ -514,11 +514,11 @@ public abstract class XoActivity extends FragmentActivity {
         LOG.debug("showPairing()");
         XoDialogs.showSingleChoiceDialog(
                 "SelectPairingMethod",
-                R.string.dialog_select_invite_method_title,
+                R.string.dialog_add_contact_type_title,
                 new String[]{
-                        getResources().getString(R.string.dialog_select_invite_method_sms_item),
-                        getResources().getString(R.string.dialog_select_invite_method_mail_item),
-                        getResources().getString(R.string.dialog_select_invite_method_code_item)
+                        getResources().getString(R.string.dialog_add_contact_type_sms_item),
+                        getResources().getString(R.string.dialog_add_contact_type_mail_item),
+                        getResources().getString(R.string.dialog_add_contact_type_code_item)
                 },
                 this,
                 new XoDialogs.OnSingleSelectionFinishedListener() {

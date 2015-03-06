@@ -32,7 +32,7 @@
             android:id="@+id/profile_group_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
+            android:textAppearance="@android:style/TextAppearance.Large"
             android:layout_marginLeft="45dp"
             android:layout_marginRight="45dp"
             android:layout_marginTop="5dp"
@@ -58,7 +58,7 @@
             style="@style/AppBaseTheme.Group.Name"/>
 
     <include
-        android:id="@+id/inc_chat_stats"
+        android:id="@+id/inc_profile_chat_stats"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         layout="@layout/profile_chat_stats_container"

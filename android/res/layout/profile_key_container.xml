@@ -27,7 +27,7 @@
             android:layout_below="@+id/tv_profile_key_text"
             android:layout_marginTop="10dp"
             android:layout_alignLeft="@+id/tv_profile_key_text"
-            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"/>
+            android:textAppearance="@android:style/TextAppearance.Large"/>
 
     <TextView
             android:id="@+id/tv_profile_key_advice"
