@@ -215,7 +215,7 @@ public class XoDialogs {
     }
 
     public static void showInputTextDialog(final String tag, final int titleId, final int messageId, final int hintId, final Activity activity, final OnTextSubmittedListener okListener, final DialogInterface.OnClickListener cancelListener, final DialogInterface.OnDismissListener dismissListener) {
-        final View textInputView = activity.getLayoutInflater().inflate(R.layout.dialog_create_new_item, null);
+        final View textInputView = activity.getLayoutInflater().inflate(R.layout.dialog_text_input, null);
         final EditText textInput = (EditText) textInputView.findViewById(R.id.et_input_name);
         final InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         DialogFragment dialogFragment = new DialogFragment() {
