@@ -139,6 +139,16 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public String beforeDeletedId(String clientId) {
+        if (isDeletedClient(clientId)) {
+            return clientId.substring(0, clientId.length() - "-DELETED".length());
+        } else {
+            return clientId;
+        }
+    }
+
+
+    @Override
     @Nullable // null if client for given apns token does not exist.
     public TalkClient findClientByApnsToken(String apnsToken) {
         return mClients.findOne("{apnsToken:#}", apnsToken)
@@ -161,7 +171,7 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     public void deleteClient(@NotNull TalkClient client) {
-        mMessages.remove("{clientId:#}", client.getClientId());
+        mClients.remove("{clientId:#}", client.getClientId());
     }
 
     @Override
@@ -524,6 +534,17 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     @NotNull
+    public List<TalkRelationship> findRelationshipsForOtherClientInStates(String clientId, String[] states) {
+        Iterator<TalkRelationship> it = mRelationships
+                .find("{otherClientId:#,state:{ $in: # }}", clientId, Arrays.asList(states))
+                .as(TalkRelationship.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
+    }
+
+    @Override
+    @NotNull
     public List<TalkRelationship> findRelationshipsByOtherClient(String other) {
         Iterator<TalkRelationship> it = mRelationships
                 .find("{otherClientId:#}", other)
@@ -544,6 +565,16 @@ public class JongoDatabase implements ITalkServerDatabase {
     public List<TalkRelationship> findRelationshipsChangedAfter(String client, Date lastKnown) {
         Iterator<TalkRelationship> it = mRelationships
                 .find("{clientId:#,lastChanged: {$gt:#}}", client, lastKnown)
+                .as(TalkRelationship.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
+    }
+
+    @Override
+    public List<TalkRelationship> findRelationshipsWithStatesChangedBefore(String[] states, Date lastChanged) {
+        Iterator<TalkRelationship> it = mRelationships
+                .find("{state: { $in: # }, lastChanged: { $lt:# } }", Arrays.asList(states), lastChanged)
                 .as(TalkRelationship.class)
                 .iterator();
 
@@ -615,6 +646,26 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public List<TalkGroupPresence> findGroupPresencesWithState(String state) {
+        Iterator<TalkGroupPresence> it = mGroupPresences
+                .find("{state:#}", state)
+                .as(TalkGroupPresence.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
+    }
+
+    @Override
+    public List<TalkGroupPresence> findGroupPresencesWithStateChangedBefore(String state, Date changedDate) {
+        Iterator<TalkGroupPresence> it = mGroupPresences
+                .find("{state:#,lastChanged: {$lt:#}}", state, changedDate)
+                .as(TalkGroupPresence.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
+    }
+
+    @Override
     public void saveGroupPresence(TalkGroupPresence groupPresence) {
         mGroupPresences.save(groupPresence);
     }
@@ -671,6 +722,16 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public List<TalkGroupMembership> findGroupMembershipsWithStatesChangedBefore(String[] states, Date lastChanged) {
+        Iterator<TalkGroupMembership> it = mGroupMemberships
+                .find("{state: { $in: # }, lastChanged: { $lt:# } }", Arrays.asList(states), lastChanged)
+                .as(TalkGroupMembership.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
+    }
+
+    @Override
     public List<TalkGroupMembership> findGroupMembershipsForClient(String clientId) {
         Iterator<TalkGroupMembership> it = mGroupMemberships
                 .find("{clientId:#}", clientId)
@@ -699,6 +760,10 @@ public class JongoDatabase implements ITalkServerDatabase {
     @Override
     public void saveGroupMembership(TalkGroupMembership membership) {
         mGroupMemberships.save(membership);
+    }
+    @Override
+    public void deleteGroupMembership(TalkGroupMembership membership) {
+        mGroupMemberships.remove("{groupId:#,clientId:#}", membership.getGroupId(), membership.getClientId());
     }
 
     @Override

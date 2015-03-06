@@ -235,16 +235,20 @@ public class TalkServerConfiguration {
         // CLEANING AGENT
         CLEANUP_ALL_CLIENTS_DELAY(PROPERTY_PREFIX + ".cleanup.allClientsDelay",
                 PropertyTypes.INTEGER,
-                7200), // in seconds (2 hours)
+        //        7200), // in seconds (2 hours)
+                  10), // in seconds (2 hours)
         CLEANUP_ALL_CLIENTS_INTERVAL(PROPERTY_PREFIX + ".cleanup.allClientsInterval",
                 PropertyTypes.INTEGER,
-                60 * 60 * 24), // in seconds (once a day)
+        //        60 * 60 * 24), // in seconds (once a day)
+                  60),
         CLEANUP_ALL_DEVLIVERIES_DELAY(PROPERTY_PREFIX + ".cleanup.allDeliveriesDelay",
                 PropertyTypes.INTEGER,
-                3600), // in second (1 hour)
+                //3600), // in second (1 hour)
+                30), // in seconds (2 hours)
         CLEANUP_ALL_DELIVERIES_INTERVAL(PROPERTY_PREFIX + ".cleanup.allDeliveriesInterval",
                 PropertyTypes.INTEGER,
-                60 * 60 * 6), // in seconds (every 6 hours)
+                //60 * 60 * 6), // in seconds (every 6 hours)
+                60),
         CLEANUP_THREAD_POOL_SIZE(PROPERTY_PREFIX + ".cleanup.threadPoolSize",
                 PropertyTypes.INTEGER,
                 4), // ScheduledThreadPoolExecutor, number is also maximum Number of threads used

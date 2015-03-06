@@ -686,7 +686,6 @@ public class UpdateAgent extends NotificationDeferrer {
         clearRequestContext(context);
     }
 
-
     public void requestUserAlert(final String clientId, final StaticSystemMessage.Message message) {
         TalkClientHostInfo clientHostInfo = mDatabase.findClientHostInfoForClient(clientId);
         String messageString = new StaticSystemMessage(clientId, clientHostInfo, message).generateMessage();
@@ -739,6 +738,7 @@ public class UpdateAgent extends NotificationDeferrer {
     }
 
     public void removeMembership(TalkGroupMembership membership, Date changedDate, String removalState) {
+        LOG.info("removeMembership group "+membership.getGroupId()+" removing membership for client "+membership.getClientId());
         // set membership state to NONE
         membership.setState(TalkGroupMembership.STATE_NONE);
         // degrade anyone who leaves to member
@@ -758,15 +758,26 @@ public class UpdateAgent extends NotificationDeferrer {
         requestRelationshipUpdate(relationship);
     }
 
+    public void removeRelationships(List<TalkRelationship> relationships) {
+        LOG.info("removeRelationships: "+relationships.size());
+        for (TalkRelationship relationship : relationships) {
+            synchronized (mServer.dualIdLock(TalkRelationship.LOCK_PREFIX, relationship.getClientId(), relationship.getOtherClientId())) {
+                removeRelationship(relationship, new Date());
+            }
+        }
+    }
+
     public void requestAccountDeletion(final String clientId) {
         Runnable accountDeleter = new Runnable() {
             @Override
             public void run() {
                 try {
+                    LOG.info("requestAccountDeletion running for client "+clientId);
 
                     // make sure client is disconnected
                     final TalkRpcConnection conn = mServer.getClientConnection(clientId);
                     if (conn != null) {
+                        LOG.info("requestAccountDeletion closing connection for client "+clientId);
                         conn.disconnect();
                     }
 
@@ -774,12 +785,14 @@ public class UpdateAgent extends NotificationDeferrer {
 
                     // remove membership from all groups and close groups where I am admin
                     List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsForClient(clientId);
+                    LOG.info("requestAccountDeletion found "+memberships.size()+" group memberships for client "+clientId);
                     for (int i = 0; i < memberships.size(); i++) {
                         TalkGroupMembership membership = memberships.get(i);
 
                         if (membership != null) {
                             if (membership.isAdmin()) {
                                 // delete group
+                                LOG.info("requestAccountDeletion closing group "+membership.getGroupId()+" for client "+clientId);
                                 TalkGroupPresence groupPresence = mDatabase.findGroupPresenceById(membership.getGroupId());
                                 if (groupPresence != null) {
                                     // mark the group as deleted
@@ -796,6 +809,8 @@ public class UpdateAgent extends NotificationDeferrer {
                                             ++acquaintances;
                                         }
                                     }
+                                } else {
+                                    LOG.warn("requestAccountDeletion not presence for group " + membership.getGroupId() + " for client " + clientId);
                                 }
                             }  else if (membership.isInvited() || membership.isMember()) {
                                 removeMembership(membership, new Date(), TalkGroupMembership.STATE_NONE);
@@ -807,6 +822,13 @@ public class UpdateAgent extends NotificationDeferrer {
                     // remove all relationsships
                     final List<TalkRelationship> relationships =
                             mDatabase.findRelationshipsForClientInStates(clientId, TalkRelationship.STATES_RELATED);
+                    removeRelationships(relationships);
+                    acquaintances += relationships.size();
+
+                    final List<TalkRelationship> otherRelationships =
+                            mDatabase.findRelationshipsForOtherClientInStates(clientId, TalkRelationship.STATES_RELATED);
+                    removeRelationships(otherRelationships);
+                    acquaintances += otherRelationships.size();
 
                     for (TalkRelationship relationship : relationships) {
                         String otherClientId = relationship.getOtherClientId();
@@ -827,20 +849,26 @@ public class UpdateAgent extends NotificationDeferrer {
                     presence.setClientStatus("Account deleted");
                     mDatabase.savePresence(presence);
 
-                    // abort outgoing deliveries
+                    // expire outgoing deliveries
                     final List<TalkDelivery> outDeliveries = mDatabase.findDeliveriesFromClient(clientId);
                     for (TalkDelivery delivery : outDeliveries) {
-                        if (!TalkDelivery.isFinalState(delivery.getState())) {
-                            delivery.setState(TalkDelivery.STATE_ABORTED_ACKNOWLEDGED);
+                        if (!delivery.isFinished()) {
+                            delivery.expireDelivery();
+                            mDatabase.saveDelivery(delivery);
                         }
-                     }
+                    }
 
-                    // reject undelivered incoming deliveries
+                    // reject or expire undelivered incoming deliveries
                     final List<TalkDelivery> inDeliveries = mDatabase.findDeliveriesForClient(clientId);
                     for (TalkDelivery delivery : inDeliveries) {
-                        if (!TalkDelivery.isDeliveredState(delivery.getState())) {
-                            delivery.setState(TalkDelivery.STATE_REJECTED);
+                        if (!delivery.isFinished()) {
+                            if (TalkDelivery.STATE_DELIVERING.equals(delivery.getState())) {
+                                delivery.setState(TalkDelivery.STATE_REJECTED);
+                            } else {
+                                delivery.expireDelivery();
+                            }
                         }
+                        mDatabase.saveDelivery(delivery);
                     }
 
                     // delete messages from client immediately

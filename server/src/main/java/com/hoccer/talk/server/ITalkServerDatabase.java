@@ -24,6 +24,8 @@ public interface ITalkServerDatabase {
 
     public boolean isDeletedClient(String clientId);
 
+    public String beforeDeletedId(String clientId);
+
     public TalkClient findClientByApnsToken(String apnsToken);
 
     public void saveClient(TalkClient client);
@@ -102,9 +104,13 @@ public interface ITalkServerDatabase {
 
     public List<TalkRelationship> findRelationshipsForClientInStates(String clientId, String[] states);
 
+    public List<TalkRelationship> findRelationshipsForOtherClientInStates(String clientId, String[] states);
+
     public List<TalkRelationship> findRelationshipsByOtherClient(String other);
 
     public List<TalkRelationship> findRelationshipsChangedAfter(String client, Date lastKnown);
+
+    public List<TalkRelationship> findRelationshipsWithStatesChangedBefore(String[] states, Date lastChanged);
 
     @Nullable
     public TalkRelationship findRelationshipBetween(String client, String otherClient);
@@ -120,6 +126,12 @@ public interface ITalkServerDatabase {
     public List<TalkGroupPresence> findGroupPresencesByClientIdChangedAfter(String clientId, Date lastKnown);
 
     public List<TalkGroupMembership> findGroupMembershipsByIdWithStatesChangedAfter(String groupId, String[] states, Date lastKnown);
+
+    public List<TalkGroupMembership> findGroupMembershipsWithStatesChangedBefore(String[] states, Date lastChanged);
+
+    public List<TalkGroupPresence> findGroupPresencesWithState(String state);
+
+    public List<TalkGroupPresence> findGroupPresencesWithStateChangedBefore(String state, Date changedDate);
 
     public void saveGroupPresence(TalkGroupPresence groupPresence);
 
@@ -138,6 +150,8 @@ public interface ITalkServerDatabase {
     public TalkGroupMembership findGroupMembershipForClient(String groupId, String clientId);
 
     public void saveGroupMembership(TalkGroupMembership membership);
+
+    public void deleteGroupMembership(TalkGroupMembership membership);
 
     public void saveEnvironment(TalkEnvironment environment);
 
