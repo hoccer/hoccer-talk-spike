@@ -93,17 +93,9 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         return true;
     }
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        handleIntent(intent);
-    }
-
     private void handleIntent(Intent intent) {
         if (Intent.ACTION_VIEW.equals(intent.getAction())) {
             handleTokenPairingIntent(intent);
-        } else if (Intent.ACTION_SEND.equals(intent.getAction())) {
-            handleShareIntent(intent);
         } else if (intent.hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
             handleContactIdIntent(intent);
         } else if (intent.hasExtra(IntentHelper.EXTRA_PUSH_MESSAGE)) {
@@ -159,42 +151,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private void handlePushMessageIntent(Intent intent) {
         String message = intent.getStringExtra(IntentHelper.EXTRA_PUSH_MESSAGE);
         XoDialogs.showOkDialog("PushMessage", "", message, this);
-    }
-
-    private void handleShareIntent(Intent intent) {
-        Uri contentUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-        SelectedContent content = getContent(contentUri, intent.getType());
-        addSharedContentToClipboard(content);
-    }
-
-    private SelectedContent getContent(Uri contentUri, String type) {
-        IContentSelector selector = determineContentSelectorForType(type);
-
-        Intent intent = new Intent();
-        intent.setData(contentUri);
-
-        return selector.createObjectFromSelectionResult(this, intent);
-    }
-
-    private IContentSelector determineContentSelectorForType(String type) {
-        IContentSelector selector = null;
-        if (type.startsWith("image/")) {
-            selector = new ImageSelector(this);
-        } else if (type.startsWith("video/")) {
-            selector = new VideoSelector(this);
-        }
-
-        return selector;
-    }
-
-    private void addSharedContentToClipboard(SelectedContent content) {
-        if (content != null) {
-            Clipboard.getInstance().setContent(content);
-            Toast.makeText(this, getString(R.string.toast_stored_file_in_clipboard), Toast.LENGTH_LONG).show();
-        } else {
-            Clipboard.getInstance().clearContent();
-            Toast.makeText(this, R.string.toast_failed_to_store_file_in_clipboard, Toast.LENGTH_LONG).show();
-        }
     }
 
     private void handleTokenPairingIntent(Intent intent) {

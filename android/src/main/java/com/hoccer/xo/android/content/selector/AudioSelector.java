@@ -2,9 +2,7 @@ package com.hoccer.xo.android.content.selector;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.provider.MediaStore;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.content.ContentMediaType;
@@ -39,20 +37,19 @@ public class AudioSelector implements IContentSelector {
     }
 
     @Override
-    public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
-        boolean isValidIntent = isValidIntent(context, intent);
-        if (!isValidIntent) {
-            return null;
+    public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) throws Exception {
+        if (isMimeTypeAudio(context, intent)) {
+            String filePath = UriUtils.getFilePathByUri(context, intent.getData(), MediaStore.Audio.Media.DATA);
+            String mimeType = UriUtils.getMimeType(context, intent.getData());
+
+            return new SelectedFile(filePath, mimeType, ContentMediaType.AUDIO);
+        } else {
+            throw new Exception("Mime type is not 'audio/*'");
         }
-
-        String filePath = UriUtils.getFilePathByUri(context, intent.getData(), MediaStore.Audio.Media.DATA);
-        String mimeType = UriUtils.getMimeType(context, intent.getData());
-
-        return new SelectedFile(filePath, mimeType, ContentMediaType.AUDIO);
     }
 
-    @Override
-    public boolean isValidIntent(Context context, Intent intent) {
-        return true;
+    private boolean isMimeTypeAudio(Context context, Intent intent) {
+        String mimeType = UriUtils.getMimeType(context, intent.getData());
+        return mimeType.startsWith("audio");
     }
 }

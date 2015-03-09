@@ -199,12 +199,16 @@ public abstract class XoActivity extends FragmentActivity {
         } else if (requestCode == REQUEST_CROP_AVATAR) {
             intent = selectedAvatarPreProcessing(intent);
             if (intent != null) {
-                SelectedContent content = ContentRegistry.createSelectedAvatar(mAvatarSelection, intent);
-                if (content != null) {
-                    LOG.debug("selected avatar " + content.getFilePath());
-                    for (IXoFragment fragment : mTalkFragments) {
-                        fragment.onAvatarSelected(content);
+                try {
+                    SelectedContent content = ContentRegistry.createSelectedAvatar(mAvatarSelection, intent);
+                    if (content != null) {
+                        LOG.debug("selected avatar " + content.getFilePath());
+                        for (IXoFragment fragment : mTalkFragments) {
+                            fragment.onAvatarSelected(content);
+                        }
                     }
+                } catch (Exception e) {
+                    LOG.error("Creating selected avatar failed.", e);
                 }
             } else {
                 showAvatarSelectionError();

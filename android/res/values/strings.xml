@@ -116,7 +116,8 @@
     <string name="scan_or_copy_code">Scan or copy this code</string>
 
     <!-- QR code scanner fragment -->
-    <string name="or_insert_code">Or insert code</string>
+    <string name="enter_code">Enter code</string>
+    <string name="invite_code">Invite code</string>
 
     <!-- Profile fragment -->
     <string name="dialog_avatar_options_title">Avatar options</string>
@@ -124,6 +125,18 @@
     <string name="dialog_delete_avatar_option">Delete avatar</string>
     <string name="profile_name_title">Name</string>
     <string name="profile_name_hint">Your name</string>
+
+    <string name="profile_contacts_title">Contacts</string>
+    <plurals name="profile_contacts_text_friends">
+        <item quantity="one">friend</item>
+        <item quantity="other">friends</item>
+    </plurals>
+    <plurals name="profile_contacts_text_groups">
+        <item quantity="one">group</item>
+        <item quantity="other">groups</item>
+    </plurals>
+
+
     <string name="profile_user_block_button">Block this user</string>
     <string name="profile_user_unblock_button">Unblock this user</string>
     <string name="profile_user_delete_button">Delete this user</string>
@@ -349,8 +362,6 @@
     <string name="message_rejected_text">rejected</string>
 
     <string name="error_compatible_app_unavailable">No app found to open the selected item.</string>
-    <string name="toast_stored_file_in_clipboard">Your file has been stored in the clipboard.</string>
-    <string name="toast_failed_to_store_file_in_clipboard">Sorry, this file could not be stored in the clipboard.</string>
 
     <!-- Nearby all invite texts -->
     <string name="nearby_invite_all">invite %1$d group members as friend</string>

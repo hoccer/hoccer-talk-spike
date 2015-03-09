@@ -68,14 +68,18 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
     }
 
     public boolean isCrashReportingEnabled() {
+        if (mProperties.getProperty("hoccer.android.enable.crash.reporting") != null) {
+            return Boolean.parseBoolean(mProperties.getProperty("hoccer.android.enable.crash.reporting"));
+        }
         return mPreferences.getBoolean("preference_report_crashes", true);
     }
 
     public String getBackupDirectory() {
         return getAttachmentsDirectory() + File.separator + "Backups";
     }
+
     public String getAttachmentsDirectory() {
-        return mAppName;
+        return mProperties.getProperty("hoccer.attachments.dir.name", mAppName);
     }
 
     public String getAvatarsDirectory() {

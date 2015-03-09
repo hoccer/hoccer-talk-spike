@@ -35,18 +35,12 @@ public class LocationSelector implements IContentSelector {
     }
 
     @Override
-    public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
-        boolean isValidIntent = isValidIntent(context, intent);
-        if (!isValidIntent) {
-            return null;
+    public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) throws Exception {
+        if (intent.hasExtra(MapsLocationActivity.EXTRA_GEOJSON)) {
+            String json = intent.getStringExtra(MapsLocationActivity.EXTRA_GEOJSON);
+            return new SelectedLocation(json.getBytes());
+        } else {
+            throw new Exception("Missing extra 'EXTRA_GEOJSON'");
         }
-
-        String json = intent.getStringExtra(MapsLocationActivity.EXTRA_GEOJSON);
-        return new SelectedLocation(json.getBytes());
-    }
-
-    @Override
-    public boolean isValidIntent(Context context, Intent intent) {
-        return (intent.hasExtra(MapsLocationActivity.EXTRA_GEOJSON));
     }
 }

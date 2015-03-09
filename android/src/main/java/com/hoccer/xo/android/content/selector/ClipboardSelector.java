@@ -45,11 +45,6 @@ public class ClipboardSelector implements IContentSelector {
         return content;
     }
 
-    @Override
-    public boolean isValidIntent(Context context, Intent intent) {
-        return true;
-    }
-
     public boolean hasContent() {
         return mClipboard.hasContent();
     }

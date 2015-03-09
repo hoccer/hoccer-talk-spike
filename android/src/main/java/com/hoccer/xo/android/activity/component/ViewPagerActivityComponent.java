@@ -18,6 +18,7 @@ public class ViewPagerActivityComponent extends ActivityComponent {
     private ViewPager mViewPager;
     private final Fragment[] mFragments;
     private final int mViewPagerId;
+    private boolean mResumeAfterPause;
 
     public <T extends Fragment & IPagerFragment> ViewPagerActivityComponent(FragmentActivity activity, int viewPagerId, T... fragments) {
         super(activity);
@@ -70,13 +71,18 @@ public class ViewPagerActivityComponent extends ActivityComponent {
     @Override
     public void onResume() {
         super.onResume();
-        ((IPagerFragment) mFragments[mViewPager.getCurrentItem()]).onPageResume();
+
+        // do not call onPageResume() on Activity start because this is already done in TabListener.onTabSelected()
+        if(mResumeAfterPause) {
+            ((IPagerFragment) mFragments[mViewPager.getCurrentItem()]).onPageResume();
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
         ((IPagerFragment) mFragments[mViewPager.getCurrentItem()]).onPagePause();
+        mResumeAfterPause = true;
     }
 
     @Override
