@@ -16,8 +16,6 @@ public interface IContentSelector {
     /** Returns the icon for the specific type of content */
     public abstract Drawable getContentIcon();
 
-    public abstract boolean isValidIntent(Context context, Intent intent);
-
     /** Creates an intent for content selection */
     public abstract Intent createSelectionIntent(Context context);
 

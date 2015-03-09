@@ -40,17 +40,7 @@ public class ContactSelector implements IContentSelector {
     }
 
     @Override
-    public boolean isValidIntent(Context context, Intent intent) {
-        return true;
-    }
-
-    @Override
     public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
-        boolean isValidIntent = isValidIntent(context, intent);
-        if (!isValidIntent) {
-            return null;
-        }
-
         String lookupUri = intent.getDataString();
         String vcardUri = lookupUri.replace(ContactsContract.Contacts.CONTENT_LOOKUP_URI.toString(), ContactsContract.Contacts.CONTENT_VCARD_URI.toString());
         vcardUri = vcardUri.substring(0, vcardUri.lastIndexOf(File.separator));

@@ -2,7 +2,6 @@ package com.hoccer.xo.android.content.selector;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -48,19 +47,22 @@ public class ImageSelector implements IContentSelector {
 
     @Override
     public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
-        boolean isValidIntent = isValidIntent(context, intent);
-        if (!isValidIntent) {
-            return null;
-        }
+        if (isMimeTypeImage(context, intent)) {
+            Uri selectedContent = intent.getData();
+            IContentCreator creator = findContentCreator(selectedContent);
+            if (creator == null) {
+                LOG.warn("No IContentCreator found for url '" + selectedContent + "'");
+                return null;
+            }
 
-        Uri selectedContent = intent.getData();
-        IContentCreator creator = findContentCreator(selectedContent);
-        if (creator == null) {
-            LOG.warn("No IContentCreator found for url '" + selectedContent + "'");
-            return null;
+            return creator.apply(context, intent);
         }
+        return null;
+    }
 
-        return creator.apply(context, intent);
+    private boolean isMimeTypeImage(Context context, Intent intent) {
+        String mimeType = UriUtils.getMimeType(context, intent.getData());
+        return mimeType.startsWith("image");
     }
 
     protected void setName(String name) {
@@ -87,12 +89,6 @@ public class ImageSelector implements IContentSelector {
 
                         // Moto G content string on dirks mobile
                         || contentString.startsWith("content://com.google.android.apps.photos.content/");
-    }
-
-    @Override
-    public boolean isValidIntent(Context context, Intent intent) {
-        String mimeType = UriUtils.getMimeType(context, intent.getData());
-        return mimeType.startsWith("image");
     }
 
     public static Intent createCropIntent(Uri data) {

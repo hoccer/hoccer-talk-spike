@@ -44,8 +44,8 @@ public class VideoSelector implements IContentSelector {
 
     @Override
     public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
-        boolean isValidIntent = isValidIntent(context, intent);
-        if (!isValidIntent) {
+        String mimeType = UriUtils.getMimeType(context, intent.getData());
+        if (!mimeType.startsWith("video")) {
             return null;
         }
 
@@ -74,11 +74,5 @@ public class VideoSelector implements IContentSelector {
 
         double aspectRatio = ((double) width) / ((double) height);
         return new SelectedFile(filePath, mimeType, ContentMediaType.VIDEO, aspectRatio);
-    }
-
-    @Override
-    public boolean isValidIntent(Context context, Intent intent) {
-        String mimeType = UriUtils.getMimeType(context, intent.getData());
-        return mimeType.startsWith("video");
     }
 }

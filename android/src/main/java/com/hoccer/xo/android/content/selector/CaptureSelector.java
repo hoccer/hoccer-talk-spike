@@ -74,11 +74,6 @@ public class CaptureSelector implements IContentSelector {
     }
 
     @Override
-    public boolean isValidIntent(Context context, Intent intent) {
-        return true;
-    }
-
-    @Override
     public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
         String filePath = mFileUri.getPath();
         String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(FilenameUtils.getExtension(filePath));
