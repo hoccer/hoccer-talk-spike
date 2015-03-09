@@ -7,10 +7,7 @@ import com.hoccer.talk.util.WeakListenerArray;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.GenericRawResults;
 import com.j256.ormlite.field.DataType;
-import com.j256.ormlite.stmt.DeleteBuilder;
-import com.j256.ormlite.stmt.QueryBuilder;
-import com.j256.ormlite.stmt.UpdateBuilder;
-import com.j256.ormlite.stmt.Where;
+import com.j256.ormlite.stmt.*;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 import org.apache.commons.collections4.CollectionUtils;
@@ -702,16 +699,22 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public List<TalkClientUpload> findClientUploadsByFilePath(String filePath) throws SQLException {
+        SelectArg filePathArg = new SelectArg();
+        filePathArg.setValue("%" + filePath + "%");
+
         return mClientUploads.queryBuilder().where()
-                .eq("dataFile", filePath)
+                .like("dataFile", filePathArg)
                 .and()
                 .eq("state", TalkClientDownload.State.COMPLETE)
                 .query();
     }
 
     public List<TalkClientDownload> findClientDownloadsByFilePath(String filePath) throws SQLException {
+        SelectArg filePathArg = new SelectArg();
+        filePathArg.setValue("%" + filePath + "%");
+
         return mClientDownloads.queryBuilder().where()
-                .eq("dataFile", filePath)
+                .eq("dataFile", filePathArg)
                 .and()
                 .eq("state", TalkClientDownload.State.COMPLETE)
                 .query();
