@@ -11,7 +11,10 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.SelectedContent;
-import com.hoccer.xo.android.content.selector.*;
+import com.hoccer.xo.android.content.selector.AudioSelector;
+import com.hoccer.xo.android.content.selector.IContentSelector;
+import com.hoccer.xo.android.content.selector.ImageSelector;
+import com.hoccer.xo.android.content.selector.VideoSelector;
 import com.hoccer.xo.android.util.ContactOperations;
 import org.apache.log4j.Logger;
 
@@ -32,7 +35,7 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity {
             try {
                 sendUploadsToContacts(createUploadsFromContentUris(contentUris), selectedContacts);
                 showToast(getResources().getQuantityString(R.plurals.sending_attachments, contentUris.size()));
-            } catch (ContentSelectorNotSupportedException e) {
+            } catch (Exception e) {
                 showToast(getString(R.string.content_not_sharable));
             }
         }
@@ -71,7 +74,7 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity {
         return result;
     }
 
-    private List<TalkClientUpload> createUploadsFromContentUris(List<Uri> contentUris) throws ContentSelectorNotSupportedException {
+    private List<TalkClientUpload> createUploadsFromContentUris(List<Uri> contentUris) throws Exception {
         List<TalkClientUpload> uploads = new ArrayList<TalkClientUpload>();
         for (Uri contentUri : contentUris) {
             TalkClientUpload upload = new TalkClientUpload();
@@ -82,14 +85,14 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity {
         return uploads;
     }
 
-    private SelectedContent getSelectedContent(Uri contentUri, String mimeType) throws ContentSelectorNotSupportedException {
+    private SelectedContent getSelectedContent(Uri contentUri, String mimeType) throws Exception {
         Intent intent = new Intent();
         intent.setData(contentUri);
 
         return getContentSelector(mimeType).createObjectFromSelectionResult(this, intent);
     }
 
-    private IContentSelector getContentSelector(String mimeType) throws ContentSelectorNotSupportedException {
+    private IContentSelector getContentSelector(String mimeType) throws Exception {
         if (mimeType.startsWith("image/")) {
             return new ImageSelector(this);
         } else if (mimeType.startsWith("video/")) {
@@ -97,7 +100,7 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity {
         } else if (mimeType.startsWith("audio/")) {
             return new AudioSelector(this);
         } else {
-            throw new ContentSelectorNotSupportedException();
+            throw new Exception("Content is not supported.");
         }
     }
 

@@ -14,6 +14,7 @@ import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 
 public class VideoSelector implements IContentSelector {
 
@@ -43,15 +44,15 @@ public class VideoSelector implements IContentSelector {
     }
 
     @Override
-    public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
+    public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) throws Exception {
         String mimeType = UriUtils.getMimeType(context, intent.getData());
         if (!mimeType.startsWith("video")) {
-            return null;
+            throw new Exception("Mime type is not 'video/*'");
         }
 
         String filePath = UriUtils.getFilePathByUri(context, intent.getData(), MediaStore.Video.Media.DATA);
         if (filePath == null || !new File(filePath).exists()) {
-            return null;
+            throw new FileNotFoundException("File not found for " + intent.getData());
         }
 
         Uri mediaStoreUri = UriUtils.getContentUriByDataPath(context, MediaStore.Video.Media.getContentUri("external"), filePath);

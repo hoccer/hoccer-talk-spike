@@ -46,18 +46,14 @@ public class ImageSelector implements IContentSelector {
     }
 
     @Override
-    public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
+    public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) throws Exception {
         if (isMimeTypeImage(context, intent)) {
             Uri selectedContent = intent.getData();
             IContentCreator creator = findContentCreator(selectedContent);
-            if (creator == null) {
-                LOG.warn("No IContentCreator found for url '" + selectedContent + "'");
-                return null;
-            }
-
             return creator.apply(context, intent);
+        } else {
+            throw new Exception("Mime type is not 'image/*'");
         }
-        return null;
     }
 
     private boolean isMimeTypeImage(Context context, Intent intent) {

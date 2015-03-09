@@ -185,8 +185,13 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
                     mSelectedContent = selector.createObjectsFromSelectionResult(getActivity(), intent);
                 } else {
                     IContentSelector selector = mAttachmentSelection.getSelector();
-                    SelectedContent content = selector.createObjectFromSelectionResult(getActivity(), intent);
-                    CollectionUtils.addIgnoreNull(mSelectedContent, content);
+                    SelectedContent content = null;
+                    try {
+                        content = selector.createObjectFromSelectionResult(getActivity(), intent);
+                        CollectionUtils.addIgnoreNull(mSelectedContent, content);
+                    } catch (Exception e) {
+                        LOG.error("Could not create object from selection result.");
+                    }
                 }
 
                 if (mSelectedContent.isEmpty()) {

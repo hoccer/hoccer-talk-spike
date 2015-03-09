@@ -178,7 +178,7 @@ public class ContentRegistry {
      * @param intent    returned from the selector
      * @return content object for selected avatar
      */
-    public static SelectedContent createSelectedAvatar(ContentSelection selection, Intent intent) {
+    public static SelectedContent createSelectedAvatar(ContentSelection selection, Intent intent) throws Exception {
         return selection.getSelector().createObjectFromSelectionResult(selection.getActivity(), intent);
     }
 

@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import com.hoccer.talk.content.SelectedContent;
 
+import java.io.FileNotFoundException;
+
 /**
  * Content selectors allow the user to select content from some source via intents
  */
@@ -20,5 +22,5 @@ public interface IContentSelector {
     public abstract Intent createSelectionIntent(Context context);
 
     /** Handles the intent result, returning a content object */
-    public abstract SelectedContent createObjectFromSelectionResult(Context context, Intent intent);
+    public abstract SelectedContent createObjectFromSelectionResult(Context context, Intent intent) throws Exception;
 }
