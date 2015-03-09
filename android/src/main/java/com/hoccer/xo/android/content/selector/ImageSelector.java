@@ -91,28 +91,8 @@ public class ImageSelector implements IContentSelector {
 
     @Override
     public boolean isValidIntent(Context context, Intent intent) {
-        if (UriUtils.isFileUri(intent.getData())) {
-            return true;
-        }
-
-        if (UriUtils.isContentUri(intent.getData())) {
-            Uri contentUri = intent.getData();
-            if (contentUri != null) {
-                String[] columns = {
-                        MediaStore.Images.Media.MIME_TYPE
-                };
-                Cursor cursor = context.getContentResolver().query(contentUri, columns, null, null, null);
-
-                if (cursor != null) {
-                    cursor.moveToFirst();
-                    int mimeTypeIndex = cursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE);
-                    String mimeType = cursor.getString(mimeTypeIndex);
-                    return (mimeType.startsWith("image"));
-                }
-            }
-        }
-
-        return false;
+        String mimeType = UriUtils.getMimeType(context, intent.getData());
+        return mimeType.startsWith("image");
     }
 
     public static Intent createCropIntent(Uri data) {

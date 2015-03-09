@@ -53,6 +53,7 @@ public class AudioSelector implements IContentSelector {
 
     @Override
     public boolean isValidIntent(Context context, Intent intent) {
-        return true;
+        String mimeType = UriUtils.getMimeType(context, intent.getData());
+        return mimeType.startsWith("audio");
     }
 }
