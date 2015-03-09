@@ -54,21 +54,17 @@ public class VideoSelector implements IContentSelector {
             return null;
         }
 
-        Uri selectedContent = intent.getData();
+        Uri mediaStoreUri = UriUtils.getContentUriByDataPath(context, MediaStore.Video.Media.getContentUri("external"), filePath);
         String[] projection = {
-                MediaStore.Video.Media.MIME_TYPE,
                 MediaStore.Video.Media.WIDTH,
                 MediaStore.Video.Media.HEIGHT
         };
-
-        Cursor cursor = context.getContentResolver().query(selectedContent, projection, null, null, null);
+        Cursor cursor = context.getContentResolver().query(mediaStoreUri, projection, null, null, null);
         cursor.moveToFirst();
 
-        int typeIndex = cursor.getColumnIndex(projection[0]);
-        String mimeType = cursor.getString(typeIndex);
-        int widthIndex = cursor.getColumnIndex(projection[1]);
+        int widthIndex = cursor.getColumnIndex(projection[0]);
         int width = cursor.getInt(widthIndex);
-        int heightIndex = cursor.getColumnIndex(projection[2]);
+        int heightIndex = cursor.getColumnIndex(projection[1]);
         int height = cursor.getInt(heightIndex);
         cursor.close();
 
