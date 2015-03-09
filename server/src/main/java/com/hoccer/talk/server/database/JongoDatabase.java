@@ -101,9 +101,59 @@ public class JongoDatabase implements ITalkServerDatabase {
         mEnvironments = getCollection("environment");
         mClientHostInfos = getCollection("clientHostInfo");
         mMigrations = getCollection("migrations");
+
+        mClients.ensureIndex("{clientId:1}");
+
+        mTokens.ensureIndex("{clientId:1}");
+        mTokens.ensureIndex("{clientId:1, secret:1}");
+
+        mRelationships.ensureIndex("{clientId:1, otherClientId:1}") ;
+        mRelationships.ensureIndex("{clientId:1}") ;
+        mRelationships.ensureIndex("{otherClientId:1}") ;
+        mRelationships.ensureIndex("{clientId:1, state:1}") ;
+        mRelationships.ensureIndex("{otherClientId:1, state:1}") ;
+        mRelationships.ensureIndex("{clientId:1, lastChanged:1}") ;
+        mRelationships.ensureIndex("{state:1, lastChanged:1}") ;
+
+        mPresences.ensureIndex("{clientId:1}");
+
+        mKeys.ensureIndex("{clientId:1}");
+
+        mGroupPresences.ensureIndex("{groupId:1}");
+        mGroupPresences.ensureIndex("{state:1}");
+        mGroupPresences.ensureIndex("{state:1, lastChanged:1}");
+
+        mGroupMemberships.ensureIndex("{groupId:1, clientId:1}");
+        mGroupMemberships.ensureIndex("{clientId:1}");
+        mGroupMemberships.ensureIndex("{groupId:1, state:1, role:1}");
+        mGroupMemberships.ensureIndex("{groupId:1, state:1, lastChanged:1}");
+        mGroupMemberships.ensureIndex("{clientId:1, state:1}");
+        mGroupMemberships.ensureIndex("{state:1, lastChanged:1}");
+
+        mMessages.ensureIndex("{messageId:1, senderId:1}");
+        mMessages.ensureIndex("{messageId:1}");
+        mMessages.ensureIndex("{senderId:1}");
+        mMessages.ensureIndex("{attachmentFileId:1}");
+
+        mDeliveries.ensureIndex("{messageId:1, senderId:1, receiverId:1}");
+        mDeliveries.ensureIndex("{messageId:1}");
+        mDeliveries.ensureIndex("{senderId:1}");
+        mDeliveries.ensureIndex("{receiverId:1}");
+        mDeliveries.ensureIndex("{receiverId:1, state:1}");
+        mDeliveries.ensureIndex("{receiverId:1, state:1, attachmentState:1}");
+        mDeliveries.ensureIndex("{state:1}");
+        mDeliveries.ensureIndex("{state:1, attachmentState:1}");
+
+        mEnvironments.ensureIndex("{geoLocation: '2dsphere'}");
+        mEnvironments.ensureIndex("{groupId: 1}");
+        mEnvironments.ensureIndex("{clientId: 1}");
+
+        mClientHostInfos.ensureIndex("{clientId: 1}");
+        mClientHostInfos.ensureIndex("{clientLanguage: 1, clientName:1}");
+
     }
 
-    private MongoCollection getCollection(String name) {
+     private MongoCollection getCollection(String name) {
         MongoCollection res = mJongo.getCollection(name).withWriteConcern(WriteConcern.JOURNALED);
         mCollections.add(res);
         return res;
@@ -196,7 +246,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     @NotNull
     public List<TalkMessage> findMessagesFromClient(String clientId) {
         Iterator<TalkMessage> it = mMessages
-                .find("{clientId:#}", clientId)
+                .find("{senderId:#}", clientId)
                 .as(TalkMessage.class)
                 .iterator();
 

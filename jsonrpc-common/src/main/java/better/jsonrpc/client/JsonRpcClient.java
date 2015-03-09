@@ -186,8 +186,8 @@ public class JsonRpcClient {
         mAverageResponseTime = 0.9 * mAverageResponseTime + 0.1 * mLastResponseTime;
         mRequestTimeoutCountSinceLastSuccess = 0;
         mRequestSuccessCount++;
-        LOG.debug("responseReceived: responseTime:"+mLastResponseTime+", averageResponseTime:"+mAverageResponseTime+
-                ", outstanding:"+mOutstandingRequests.size()+", successes:"+mRequestSuccessCount+", failures:"+mRequestFailureCount+", timeouts:" +mRequestTimeoutCount);
+        LOG.debug("responseReceived: responseTime:"+mLastResponseTime+", averageResponseTime:"+String.format("%.2f",mAverageResponseTime)+
+                " ms , outstanding:"+mOutstandingRequests.size()+", successes:"+mRequestSuccessCount+", failures:"+mRequestFailureCount+", timeouts:" +mRequestTimeoutCount);
         /*
         if (!isResponsive()) {
             LOG.warn("Client purposely not responsive, disconnecting");
@@ -206,8 +206,8 @@ public class JsonRpcClient {
         }
         mAverageFailureTime = 0.9 * mAverageFailureTime + 0.1 * mLastFailureTime;
 
-        LOG.debug("responseFailed: timeout:"+request.timeoutOccured()+"failureTime:"+mLastFailureTime+", averageResponseTime:"+mAverageFailureTime+
-                ", outstanding:"+mOutstandingRequests.size()+", timeouts since last success:"+mRequestTimeoutCountSinceLastSuccess+", failures:"+mRequestFailureCount+", timeouts:" +mRequestTimeoutCount);
+        LOG.debug("responseFailed: timeout:"+request.timeoutOccured()+"failureTime:"+mLastFailureTime+", mAverageFailureTime:"+String.format("%.2f",mAverageFailureTime)+
+                " ms, outstanding:"+mOutstandingRequests.size()+", timeouts since last success:"+mRequestTimeoutCountSinceLastSuccess+", failures:"+mRequestFailureCount+", timeouts:" +mRequestTimeoutCount);
 
         if (!isResponsive()) {
             LOG.warn("Client not responsive, disconnecting");
