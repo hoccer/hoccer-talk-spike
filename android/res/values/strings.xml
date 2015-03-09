@@ -362,8 +362,6 @@
     <string name="message_rejected_text">rejected</string>
 
     <string name="error_compatible_app_unavailable">No app found to open the selected item.</string>
-    <string name="toast_stored_file_in_clipboard">Your file has been stored in the clipboard.</string>
-    <string name="toast_failed_to_store_file_in_clipboard">Sorry, this file could not be stored in the clipboard.</string>
 
     <!-- Nearby all invite texts -->
     <string name="nearby_invite_all">invite %1$d group members as friend</string>

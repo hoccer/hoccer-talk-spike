@@ -348,8 +348,6 @@
 
     <string name="nearby_saved">Nahebei gespeichert</string>
     <string name="error_compatible_app_unavailable">Keine App zum öffnen des gewählten Objekts gefunden.</string>
-    <string name="toast_stored_file_in_clipboard">Die Datei wurde in der Zwischenablage gespeichert.</string>
-    <string name="toast_failed_to_store_file_in_clipboard">Diese Datei konnte leider nicht in der Zwischenablage gespeichert werden.</string>
 
     <!-- Nearby all invite texts -->
     <string name="nearby_invite_all">%1$d Mitglieder als Freunde einladen</string>
