@@ -112,6 +112,8 @@ public interface ITalkServerDatabase {
 
     public List<TalkRelationship> findRelationshipsWithStatesChangedBefore(String[] states, Date lastChanged);
 
+    public int deleteRelationshipsWithStatesChangedBefore(String[] states, Date lastChanged);
+
     @Nullable
     public TalkRelationship findRelationshipBetween(String client, String otherClient);
 
@@ -129,9 +131,13 @@ public interface ITalkServerDatabase {
 
     public List<TalkGroupMembership> findGroupMembershipsWithStatesChangedBefore(String[] states, Date lastChanged);
 
+    public int deleteGroupMembershipsWithStatesChangedBefore(String[] states, Date lastChanged);
+
     public List<TalkGroupPresence> findGroupPresencesWithState(String state);
 
     public List<TalkGroupPresence> findGroupPresencesWithStateChangedBefore(String state, Date changedDate);
+
+    public int deleteGroupPresencesWithStateChangedBefore(String state, Date changedDate);
 
     public void saveGroupPresence(TalkGroupPresence groupPresence);
 

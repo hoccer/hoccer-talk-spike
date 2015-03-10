@@ -632,6 +632,12 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public int deleteRelationshipsWithStatesChangedBefore(String[] states, Date lastChanged) {
+        WriteResult result = mRelationships.remove("{state: { $in: # }, lastChanged: { $lt:# } }", Arrays.asList(states), lastChanged);
+        return result.getN();
+    }
+
+    @Override
     public void deleteRelationship(TalkRelationship relationship) {
         mRelationships.remove("{clientId:#,otherClientId:#}",
                 relationship.getClientId(), relationship.getOtherClientId());
@@ -716,6 +722,12 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public int deleteGroupPresencesWithStateChangedBefore(String state, Date changedDate) {
+        WriteResult result = mGroupPresences.remove("{state:#,lastChanged: {$lt:#}}", state, changedDate);
+        return result.getN();
+    }
+
+    @Override
     public void saveGroupPresence(TalkGroupPresence groupPresence) {
         mGroupPresences.save(groupPresence);
     }
@@ -779,6 +791,12 @@ public class JongoDatabase implements ITalkServerDatabase {
                 .iterator();
 
         return IteratorUtils.toList(it);
+    }
+
+    @Override
+    public int deleteGroupMembershipsWithStatesChangedBefore(String[] states, Date lastChanged) {
+        WriteResult result = mGroupMemberships.remove("{state: { $in: # }, lastChanged: { $lt:# } }", Arrays.asList(states), lastChanged);
+        return result.getN();
     }
 
     @Override

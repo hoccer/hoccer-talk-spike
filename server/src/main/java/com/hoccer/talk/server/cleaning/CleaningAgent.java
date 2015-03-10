@@ -235,12 +235,10 @@ public class CleaningAgent {
         long current = 0;
         for (TalkClient client : allClients) {
             LOG.info("Clean client " + current++ + "/"+allClients.size() + " clients...");
-
             cleanClientData(client.getClientId());
-            //Thread.yield();
         }
         long endTime = System.currentTimeMillis();
-        LOG.info("Cleaning of '" + allClients.size() + "' clients done (took '" + (endTime - startTime) + "ms'). rescheduling next run...");
+        LOG.info("Cleaning of " + allClients.size() + " clients done (took " + (endTime - startTime) + " ms')");
     }
 
     private void doCleanAllFinishedDeliveries() {
@@ -255,7 +253,6 @@ public class CleaningAgent {
             if (counter++ % 100 == 0) {
                 LOG.info("cleanup finished deliveries: "+counter+ "/" + finishedDeliveries.size() + " done");
             }
-            //Thread.yield();
         }
 
         List<TalkDelivery> finalFailedDeliveries = mDatabase.findDeliveriesInStates(TalkDelivery.FINAL_FAILED_STATES);
@@ -266,7 +263,6 @@ public class CleaningAgent {
             if (counter++ % 100 == 0) {
                 LOG.info("cleanup failed deliveries: "+counter+ "/" + finalFailedDeliveries.size() + " done");
             }
-            //Thread.yield();
         }
 
         int totalDeliveriesCleaned = finishedDeliveries.size() + finalFailedDeliveries.size();
@@ -324,9 +320,10 @@ public class CleaningAgent {
         LOG.debug("cleaning keys for client " + clientId);
 
         TalkPresence presence = mDatabase.findPresenceForClient(clientId);
+
         List<TalkKey> keys = mDatabase.findKeys(clientId);
         for (TalkKey key : keys) {
-            if (key.getKeyId().equals(presence.getKeyId())) {
+            if (presence != null && key.getKeyId().equals(presence.getKeyId())) {
                 LOG.debug("keeping " + key.getKeyId() + " because it is used");
                 continue;
             }
@@ -386,26 +383,51 @@ public class CleaningAgent {
     private void doCleanGroups() {
         LOG.debug("doCleanGroups");
         Date oldGroupDate = new Date(new Date().getTime() - DELETED_GROUP_PRESENCE_LIFE_TIME);
+
+        int deleted = mDatabase.deleteGroupPresencesWithStateChangedBefore(TalkGroupPresence.STATE_DELETED, oldGroupDate);
+        LOG.debug("doCleanGroups: deleted "+deleted+" group presences");
+
+        /*
         List<TalkGroupPresence> groupPresences = mDatabase.findGroupPresencesWithStateChangedBefore(TalkGroupPresence.STATE_DELETED, oldGroupDate);
         LOG.debug("doCleanGroups: deleting "+groupPresences.size()+" group presences");
+        int counter = 0;
         for (TalkGroupPresence groupPresence : groupPresences) {
             mDatabase.deleteGroupPresence(groupPresence);
+            if (counter++ % 100 == 0) {
+                LOG.debug("doCleanGroups: deleted "+ counter + "/"+groupPresences.size()+" group presences");
+            }
         }
+        */
 
         Date oldGroupMemberDate = new Date(new Date().getTime() - DELETED_GROUP_MEMBER_LIFE_TIME);
+
+        deleted = mDatabase.deleteGroupMembershipsWithStatesChangedBefore(
+                new String[]{TalkGroupMembership.STATE_GROUP_REMOVED, TalkGroupMembership.STATE_NONE}, oldGroupMemberDate);
+
+        LOG.debug("doCleanGroups: deleted "+deleted+" group members");
+
+        /*
         List<TalkGroupMembership> groupMembers =
                 mDatabase.findGroupMembershipsWithStatesChangedBefore(
                         new String[]{TalkGroupMembership.STATE_GROUP_REMOVED, TalkGroupMembership.STATE_NONE}, oldGroupMemberDate);
         LOG.debug("doCleanGroups: deleting "+groupMembers.size()+" group members");
+        counter = 0;
         for (TalkGroupMembership membership : groupMembers) {
             mDatabase.deleteGroupMembership(membership);
+            if (counter++ % 100 == 0) {
+                LOG.debug("doCleanGroups: deleted " + counter + "/" + groupMembers.size() + " group members");
+            }
         }
+        */
 
     }
 
     private void doCleanRelationships() {
         LOG.debug("doCleanRelationships");
         Date oldDate = new Date(new Date().getTime() - NO_RELATIONSHIP_LIFE_TIME);
+        int deleted = mDatabase.deleteGroupMembershipsWithStatesChangedBefore(new String[]{TalkRelationship.STATE_NONE}, oldDate);
+        LOG.debug("doCleanRelationships: deleted "+deleted+" relationships");
+ /*
         List<TalkRelationship> relationships = mDatabase.findRelationshipsWithStatesChangedBefore(
                 new String[]{TalkRelationship.STATE_NONE}, oldDate);
 
@@ -413,6 +435,7 @@ public class CleaningAgent {
         for (TalkRelationship relationship : relationships) {
             mDatabase.deleteRelationship(relationship);
         }
+ */
     }
 
 }
