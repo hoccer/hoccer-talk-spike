@@ -93,6 +93,12 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         return true;
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        handleIntent(intent);
+    }
+
     private void handleIntent(Intent intent) {
         if (Intent.ACTION_VIEW.equals(intent.getAction())) {
             handleTokenPairingIntent(intent);
