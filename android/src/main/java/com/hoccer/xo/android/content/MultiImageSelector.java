@@ -28,9 +28,9 @@ public class MultiImageSelector extends ImageSelector {
         return new Intent(context, MultiImagePickerActivity.class);
     }
 
-    public ArrayList<SelectedContent> createObjectsFromSelectionResult(Context context, Intent intent) {
+    public ArrayList<SelectedContent> createObjectsFromSelectionResult(Context context, Intent intent) throws Exception {
         ArrayList<SelectedContent> result = new ArrayList<SelectedContent>();
-        if (!hasExtraImages(context, intent)) {
+        if (!hasExtraImages(intent)) {
             return result;
         }
 
@@ -53,7 +53,7 @@ public class MultiImageSelector extends ImageSelector {
         return result;
     }
 
-    private boolean hasExtraImages(Context context, Intent intent) {
+    private static boolean hasExtraImages(Intent intent) {
         String[] arrayExtra = intent.getStringArrayExtra(MultiImagePickerActivity.EXTRA_IMAGES);
         return arrayExtra != null && arrayExtra.length > 0;
     }
