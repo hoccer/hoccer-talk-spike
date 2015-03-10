@@ -714,7 +714,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         filePathArg.setValue("%" + filePath + "%");
 
         return mClientDownloads.queryBuilder().where()
-                .eq("dataFile", filePathArg)
+                .like("dataFile", filePathArg)
                 .and()
                 .eq("state", TalkClientDownload.State.COMPLETE)
                 .query();
