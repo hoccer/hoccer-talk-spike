@@ -48,6 +48,8 @@ public class CleaningAgent {
     private static final long UNUSED_CLIENT_LIFE_TIME = 6 * MONTHS;
     private static final long DELETED_GROUP_MEMBER_LIFE_TIME = 2 * MONTHS;
     private static final long DELETED_GROUP_PRESENCE_LIFE_TIME = 2 * MONTHS;
+    private static final long UNFINISHED_DELIVERY_LIFE_TIME = 3 * MONTHS;
+
 
     private boolean firstRunDone = false;
 
@@ -199,7 +201,7 @@ public class CleaningAgent {
             @Override
             public void run() {
                 try {
-                    doCleanAllFinishedDeliveries();
+                    doCleanAllDeliveries();
                     doCleanAllClients();
                     doCleanGroups();
                     doCleanRelationships();
@@ -241,13 +243,26 @@ public class CleaningAgent {
         LOG.info("Cleaning of " + allClients.size() + " clients done (took " + (endTime - startTime) + " ms')");
     }
 
-    private void doCleanAllFinishedDeliveries() {
+    private void doCleanAllDeliveries() {
         long startTime = System.currentTimeMillis();
-        LOG.info("Cleaning all finished deliveries...");
+        LOG.info("Cleaning all deliveries...");
 
         long counter = 0;
+        Date oldDate = new Date(new Date().getTime() - UNFINISHED_DELIVERY_LIFE_TIME);
+        List<TalkDelivery> expiredDeliveries = mDatabase.findDeliveriesAcceptedBefore(oldDate);
+        LOG.info("cleanup found " + expiredDeliveries.size() + " expired unfinished deliveries");
+        counter = 0;
+        for (TalkDelivery delivery : expiredDeliveries) {
+            delivery.expireDelivery();
+            mDatabase.saveDelivery(delivery);
+            if (counter++ % 100 == 0) {
+                LOG.info("expiring unfinished deliveries: "+counter+ "/" + expiredDeliveries.size() + " done");
+            }
+        }
+
         List<TalkDelivery> finishedDeliveries = mDatabase.findDeliveriesInStatesAndAttachmentStates(TalkDelivery.FINAL_STATES, TalkDelivery.FINAL_ATTACHMENT_STATES);
         LOG.info("cleanup found " + finishedDeliveries.size() + " finished deliveries");
+        counter = 0;
         for (TalkDelivery delivery : finishedDeliveries) {
             doCleanFinishedDelivery(delivery);
             if (counter++ % 100 == 0) {

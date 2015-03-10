@@ -70,6 +70,8 @@ public interface ITalkServerDatabase {
 
     public List<TalkDelivery> findDeliveriesForMessage(String messageId);
 
+    public List<TalkDelivery> findDeliveriesAcceptedBefore(Date limit);
+
     public void deleteDelivery(TalkDelivery delivery);
 
     public void saveDelivery(TalkDelivery delivery);
