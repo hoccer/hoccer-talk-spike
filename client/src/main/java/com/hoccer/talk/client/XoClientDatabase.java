@@ -645,13 +645,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return ListUtils.union(uploads, downloads);
     }
 
-    public List<XoTransfer> findTransfersByMediaType(String mediaType) throws SQLException {
-        List<TalkClientUpload> uploads = findClientUploadsByMediaType(mediaType);
-        List<TalkClientDownload> downloads = findClientDownloadsByMediaType(mediaType);
-
-        return mergeUploadsAndDownloadsByMessageTimestamp(uploads, downloads);
-    }
-
     public List<XoTransfer> findTransfersByMediaTypeDistinct(String mediaType) throws SQLException {
         List<TalkClientUpload> uploads = findClientUploadsByMediaType(mediaType);
         List<TalkClientDownload> downloads = findClientDownloadsByMediaType(mediaType);
