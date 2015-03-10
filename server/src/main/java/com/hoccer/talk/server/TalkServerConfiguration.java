@@ -240,7 +240,7 @@ public class TalkServerConfiguration {
         CLEANUP_ALL_CLIENTS_INTERVAL(PROPERTY_PREFIX + ".cleanup.allClientsInterval",
                 PropertyTypes.INTEGER,
         //        60 * 60 * 24), // in seconds (once a day)
-                  60),
+                  60 * 60),
         /*
         CLEANUP_ALL_DEVLIVERIES_DELAY(PROPERTY_PREFIX + ".cleanup.allDeliveriesDelay",
                 PropertyTypes.INTEGER,
