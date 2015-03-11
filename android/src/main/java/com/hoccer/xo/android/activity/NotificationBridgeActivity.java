@@ -5,7 +5,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
-public class NotificationBridgeActivity extends Activity{
+public class NotificationBridgeActivity extends Activity {
 
     public static final String ACTION_FULLSCREEN_PLAYER_ACTIVITY_TO_TOP = "com.hoccer.xo.android.action.ACTION_FULLSCREEN_PLAYER_TO_TOP";
 
