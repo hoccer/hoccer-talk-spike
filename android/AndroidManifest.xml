@@ -264,6 +264,8 @@
                 android:windowSoftInputMode="adjustResize">
         </activity>
 
+        <activity android:name="com.hoccer.xo.android.activity.PasscodeInputActivity"/>
+
         <service android:name="com.hoccer.xo.android.credentialtransfer.CredentialExportService"/>
 
         <service android:name="com.hoccer.xo.android.credentialtransfer.DisconnectService"/>

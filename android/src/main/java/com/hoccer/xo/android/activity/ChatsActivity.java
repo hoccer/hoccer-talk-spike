@@ -11,10 +11,7 @@ import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.content.SelectedContent;
-import com.hoccer.xo.android.MediaPlayer;
-import com.hoccer.xo.android.NearbyController;
-import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.XoDialogs;
+import com.hoccer.xo.android.*;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.activity.component.ViewPagerActivityComponent;
@@ -27,7 +24,7 @@ import com.hoccer.xo.android.fragment.NearbyChatListFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.ContactsMenuItemActionProvider;
 
-public class ChatsActivity extends ComposableActivity implements IXoStateListener, IXoPairingListener {
+public class ChatsActivity extends ComposableActivity implements IXoStateListener, IXoPairingListener, BackgroundManager.Listener {
 
     private String mPairingToken;
     private ContactsMenuItemActionProvider mContactsMenuItemActionProvider;
@@ -63,6 +60,12 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        BackgroundManager.get().registerListener(this);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         showProfileIfClientIsNotRegistered();
@@ -74,6 +77,12 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     protected void onPause() {
         super.onPause();
         unregisterListeners();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        BackgroundManager.get().unregisterListener(this);
     }
 
     @Override
@@ -201,5 +210,16 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private void startMediaBrowserActivity() {
         Intent intent = new Intent(this, MediaBrowserActivity.class);
         startActivity(intent);
+    }
+
+    @Override
+    public void onBecameForeground() {
+        Intent intent = new Intent(this, PasscodeInputActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onBecameBackground() {
     }
 }
