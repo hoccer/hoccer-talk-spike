@@ -25,7 +25,7 @@ public class SetPasscodeActivity extends Activity {
             public void onClick(View v) {
                 if (passcodeInput.getText().length() > 0) {
                     String passCode = passcodeInput.getText().toString();
-                    getSharedPreferences(PASSCODE_PREFERENCES, MODE_PRIVATE).edit().putString(PASSCODE, passCode);
+                    getSharedPreferences(PASSCODE_PREFERENCES, MODE_PRIVATE).edit().putString(PASSCODE, passCode).commit();
                     setResult(RESULT_OK);
                     finish();
                 }
