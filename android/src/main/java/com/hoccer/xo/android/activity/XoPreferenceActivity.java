@@ -163,7 +163,7 @@ public class XoPreferenceActivity extends PreferenceActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 15) {
+        if (requestCode == 15 || requestCode == 16) {
             if (resultCode == RESULT_CANCELED) {
                 ((SwitchPreference) findPreference("preference_activate_passcode")).setChecked(false);
             }
@@ -177,7 +177,8 @@ public class XoPreferenceActivity extends PreferenceActivity
 
     private void startPassCodeInputActivity() {
         Intent intent = new Intent(this, PasscodeInputActivity.class);
-        startActivity(intent);
+        intent.putExtra("ENABLE_BACK", true);
+        startActivityForResult(intent, 16);
     }
 
     private boolean isPasscodeSet() {
