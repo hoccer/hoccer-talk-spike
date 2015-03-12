@@ -34,6 +34,21 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+            android:title="@string/pref_passcode">
+        <Preference
+                android:title="@string/menu_change_passcode"
+                android:key="preference_passcode">
+            <intent android:targetClass="com.hoccer.xo.android.activity.ChangePasscodeActivity"
+                    android:targetPackage="${apk.package.name}"
+                    android:action="android.intent.action.VIEW">
+            </intent>
+        </Preference>
+        <SwitchPreference android:title="@string/menu_activate_passcode"
+                          android:key="preference_activate_passcode"
+                          android:defaultValue="false"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
             android:title="@string/pref_category_image_encoding">
 
         <ListPreference
@@ -157,8 +172,8 @@
             android:title="Development">
 
         <Preference
-            android:key="preference_database_dump"
-            android:title="Dump SQLite Database"/>
+                android:key="preference_database_dump"
+                android:title="Dump SQLite Database"/>
     </PreferenceCategory>
 
 </PreferenceScreen>

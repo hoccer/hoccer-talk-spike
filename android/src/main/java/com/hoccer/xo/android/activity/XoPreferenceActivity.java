@@ -9,10 +9,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.preference.Preference;
-import android.preference.PreferenceActivity;
-import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
+import android.preference.*;
 import android.view.*;
 import android.widget.ListAdapter;
 import android.widget.Toast;
@@ -152,7 +149,39 @@ public class XoPreferenceActivity extends PreferenceActivity
         if ("preference_keysize".equals(key)) {
             createDialog();
             regenerateKeys();
+        } else if ("preference_activate_passcode".equals(key)) {
+            if (sharedPreferences.getBoolean("preference_activate_passcode", false)) {
+                if (!isPasscodeSet()) {
+                    startSetPasswordActivityForResult();
+                } else {
+                    startPassCodeInputActivity();
+                }
+            }
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 15) {
+            if (resultCode == RESULT_CANCELED) {
+                ((SwitchPreference) findPreference("preference_activate_passcode")).setChecked(false);
+            }
+        }
+    }
+
+    private void startSetPasswordActivityForResult() {
+        Intent intent = new Intent(this, SetPasscodeActivity.class);
+        startActivityForResult(intent, 15);
+    }
+
+    private void startPassCodeInputActivity() {
+        Intent intent = new Intent(this, PasscodeInputActivity.class);
+        startActivity(intent);
+    }
+
+    private boolean isPasscodeSet() {
+        return getSharedPreferences(SetPasscodeActivity.PASSCODE_PREFERENCES, MODE_PRIVATE).contains(SetPasscodeActivity.PASSCODE);
     }
 
     private void regenerateKeys() {
