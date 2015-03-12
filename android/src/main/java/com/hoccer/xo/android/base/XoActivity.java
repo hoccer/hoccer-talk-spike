@@ -114,7 +114,7 @@ public abstract class XoActivity extends FragmentActivity {
             return;
         }
 
-        ((XoApplication) getApplication()).stayActiveInBackground();
+        ((XoApplication) getApplication()).setActiveInBackground(true);
         try {
             startActivity(intent);
         } catch (ActivityNotFoundException e) {
@@ -129,7 +129,7 @@ public abstract class XoActivity extends FragmentActivity {
             return;
         }
 
-        ((XoApplication) getApplication()).stayActiveInBackground();
+        ((XoApplication) getApplication()).setActiveInBackground(true);
         try {
             startActivityForResult(intent, requestCode);
         } catch (ActivityNotFoundException e) {

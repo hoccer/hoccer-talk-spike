@@ -1,7 +1,6 @@
 package com.hoccer.xo.android.activity;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -10,21 +9,20 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
-import com.hoccer.talk.content.SelectedContent;
+import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.*;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.activity.component.ViewPagerActivityComponent;
-import com.hoccer.xo.android.content.Clipboard;
-import com.hoccer.xo.android.content.selector.IContentSelector;
-import com.hoccer.xo.android.content.selector.ImageSelector;
-import com.hoccer.xo.android.content.selector.VideoSelector;
 import com.hoccer.xo.android.fragment.ChatListFragment;
 import com.hoccer.xo.android.fragment.NearbyChatListFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.ContactsMenuItemActionProvider;
+import org.apache.log4j.Logger;
 
 public class ChatsActivity extends ComposableActivity implements IXoStateListener, IXoPairingListener, BackgroundManager.Listener {
+
+    private static final Logger LOG = Logger.getLogger(ChatsActivity.class);
 
     private String mPairingToken;
     private ContactsMenuItemActionProvider mContactsMenuItemActionProvider;
@@ -57,12 +55,14 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         mContactsMenuItemActionProvider = new ContactsMenuItemActionProvider(this);
 
         handleIntent(getIntent());
+
+        BackgroundManager.get().registerListener(this);
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        BackgroundManager.get().registerListener(this);
     }
 
     @Override
@@ -82,7 +82,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     @Override
     protected void onStop() {
         super.onStop();
-        BackgroundManager.get().unregisterListener(this);
     }
 
     @Override
@@ -90,6 +89,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         super.onDestroy();
         MediaPlayer.get().removeNotification();
         NearbyController.get().removeNotification();
+        BackgroundManager.get().unregisterListener(this);
     }
 
     @Override
@@ -214,12 +214,23 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     @Override
     public void onBecameForeground() {
-        Intent intent = new Intent(this, PasscodeInputActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(intent);
+        LOG.debug("onBecameForeground()");
+        getXoClient().setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
+
+        if (getXoClient().getSelfContact().getSelf().isRegistrationConfirmed() && !((XoApplication)getApplication()).isActiveInBackground()) {
+            Intent intent = new Intent(this, PasscodeInputActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            startActivity(intent);
+        }
+
+        ((XoApplication)getApplication()).setActiveInBackground(false);
     }
 
     @Override
     public void onBecameBackground() {
+        LOG.debug("onBecameBackground()");
+        if (!((XoApplication)getApplication()).isActiveInBackground()) {
+            getXoClient().setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
+        }
     }
 }
