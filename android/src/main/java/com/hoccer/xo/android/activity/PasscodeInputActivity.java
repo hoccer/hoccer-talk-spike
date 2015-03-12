@@ -14,7 +14,7 @@ public class PasscodeInputActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_passcode_input);
-        Button button = (Button) findViewById(R.id.btn_ok);
+        Button button = (Button) findViewById(R.id.btn_unlock);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

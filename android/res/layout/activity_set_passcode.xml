@@ -4,18 +4,33 @@
               android:orientation="horizontal"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:gravity="center"
+              android:gravity="center_vertical"
               android:padding="8dp">
 
-    <EditText android:id="@+id/et_enter_passcode"
-              android:layout_width="0dp"
-              android:layout_weight="3"
-              android:layout_height="wrap_content"/>
+    <LinearLayout android:orientation="vertical"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content">
 
-    <Button android:id="@+id/btn_ok"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="@string/common_ok"/>
+        <TextView android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:text="Please enter a secure passcode."/>
+
+        <LinearLayout android:layout_width="match_parent"
+                      android:layout_height="match_parent"
+                      android:orientation="horizontal">
+
+            <EditText android:id="@+id/et_enter_passcode"
+                      android:layout_width="0dp"
+                      android:layout_weight="3"
+                      android:layout_height="wrap_content"
+                      android:inputType="textPassword"/>
+
+            <Button android:id="@+id/btn_unlock"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="@string/common_ok"/>
+        </LinearLayout>
+    </LinearLayout>
 
 </LinearLayout>

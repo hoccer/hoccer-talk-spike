@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
+              android:orientation="horizontal"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:gravity="center">
+              android:gravity="center"
+              android:padding="8dp">
 
-    <Button android:id="@+id/btn_ok"
+    <EditText android:id="@+id/et_enter_passcode"
+              android:layout_width="0dp"
+              android:layout_weight="3"
+              android:layout_height="wrap_content"
+              android:inputType="textPassword"/>
+
+    <Button android:id="@+id/btn_unlock"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/common_ok"/>
+            android:text="@string/unlock"/>
+
 </LinearLayout>

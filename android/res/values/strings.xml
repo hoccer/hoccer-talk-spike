@@ -427,6 +427,7 @@
     <string name="pref_passcode">Password</string>
     <string name="menu_change_passcode">change</string>
     <string name="menu_activate_passcode">activate</string>
+    <string name="unlock">Unlock</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>

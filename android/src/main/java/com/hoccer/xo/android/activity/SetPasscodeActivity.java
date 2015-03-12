@@ -16,7 +16,7 @@ public class SetPasscodeActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_set_passcode);
-        Button button = (Button) findViewById(R.id.btn_ok);
+        Button button = (Button) findViewById(R.id.btn_unlock);
 
         final EditText passcodeInput = (EditText) findViewById(R.id.et_enter_passcode);
 

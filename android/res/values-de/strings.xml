@@ -413,6 +413,7 @@
     <string name="pref_passcode">Passwort</string>
     <string name="menu_change_passcode">ändern</string>
     <string name="menu_activate_passcode">aktivieren</string>
+    <string name="unlock">Entsperren</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Kontakt</item>
