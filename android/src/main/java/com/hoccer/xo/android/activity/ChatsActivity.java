@@ -2,6 +2,7 @@ package com.hoccer.xo.android.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -217,19 +218,22 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         LOG.debug("onBecameForeground()");
         getXoClient().setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
 
-        if (getXoClient().getSelfContact().getSelf().isRegistrationConfirmed() && !((XoApplication)getApplication()).isActiveInBackground()) {
+        boolean passcodeActivated = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("preference_activate_passcode", false);
+        boolean isPasscodeSet = getSharedPreferences(SetPasscodeActivity.PASSCODE_PREFERENCES, MODE_PRIVATE).contains(SetPasscodeActivity.PASSCODE);
+
+        if (passcodeActivated && isPasscodeSet && getXoClient().getSelfContact().getSelf().isRegistrationConfirmed() && !((XoApplication) getApplication()).isActiveInBackground()) {
             Intent intent = new Intent(this, PasscodeInputActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION);
             startActivity(intent);
         }
 
-        ((XoApplication)getApplication()).setActiveInBackground(false);
+        ((XoApplication) getApplication()).setActiveInBackground(false);
     }
 
     @Override
     public void onBecameBackground() {
         LOG.debug("onBecameBackground()");
-        if (!((XoApplication)getApplication()).isActiveInBackground()) {
+        if (!((XoApplication) getApplication()).isActiveInBackground()) {
             getXoClient().setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
         }
     }
