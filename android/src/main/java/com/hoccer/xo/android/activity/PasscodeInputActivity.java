@@ -22,4 +22,8 @@ public class PasscodeInputActivity extends Activity {
             }
         });
     }
+
+    @Override
+    public void onBackPressed() {
+    }
 }
