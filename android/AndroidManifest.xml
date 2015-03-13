@@ -265,13 +265,14 @@
         </activity>
 
         <activity android:name="com.hoccer.xo.android.activity.PasscodeInputActivity"
-                  android:theme="@android:style/Theme.Holo.Light.NoActionBar"/>
+                  android:theme="@android:style/Theme.Holo.Light.NoActionBar"
+                  android:windowSoftInputMode="stateVisible|adjustPan" />
 
         <activity android:name="com.hoccer.xo.android.activity.ChangePasscodeActivity"
-                  android:label="@string/change_passcode"/>
+                  android:label="@string/change_password"/>
 
         <activity android:name="com.hoccer.xo.android.activity.SetPasscodeActivity"
-                  android:label="@string/set_passcode"/>
+                  android:label="@string/set_password"/>
 
         <service android:name="com.hoccer.xo.android.credentialtransfer.CredentialExportService"/>
 
