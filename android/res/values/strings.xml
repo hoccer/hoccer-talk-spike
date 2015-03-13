@@ -424,13 +424,13 @@
 
     <string name="nearby">nearby</string>
 
-    <string name="pref_passcode">Password</string>
-    <string name="menu_change_passcode">change</string>
-    <string name="menu_activate_passcode">activate</string>
+    <string name="pref_password">Password</string>
+    <string name="menu_change_password">change</string>
+    <string name="menu_activate_password">activate</string>
     <string name="unlock">Unlock</string>
-    <string name="change_passcode">Change passcode</string>
-    <string name="set_passcode">Set passcode</string>
-
+    <string name="change_password">Change password</string>
+    <string name="set_password">Set password</string>
+    <string name="password">Password</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>
