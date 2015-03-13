@@ -167,7 +167,7 @@
                 <data android:mimeType="image/*"/>
                 <data android:mimeType="video/*"/>
                 <data android:mimeType="audio/*"/>
-                <data android:mimeType="text/plain" />
+                <data android:mimeType="text/plain"/>
             </intent-filter>
         </activity>
 
@@ -264,9 +264,14 @@
                 android:windowSoftInputMode="adjustResize">
         </activity>
 
-        <activity android:name="com.hoccer.xo.android.activity.PasscodeInputActivity"/>
-        <activity android:name="com.hoccer.xo.android.activity.ChangePasscodeActivity"/>
-        <activity android:name="com.hoccer.xo.android.activity.SetPasscodeActivity"/>
+        <activity android:name="com.hoccer.xo.android.activity.PasscodeInputActivity"
+                  android:theme="@android:style/Theme.Holo.Light.NoActionBar"/>
+
+        <activity android:name="com.hoccer.xo.android.activity.ChangePasscodeActivity"
+                  android:label="@string/change_passcode"/>
+
+        <activity android:name="com.hoccer.xo.android.activity.SetPasscodeActivity"
+                  android:label="@string/set_passcode"/>
 
         <service android:name="com.hoccer.xo.android.credentialtransfer.CredentialExportService"/>
 
