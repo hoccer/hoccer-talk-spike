@@ -269,10 +269,12 @@
                   android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
 
         <activity android:name="com.hoccer.xo.android.activity.ChangePasscodeActivity"
-                  android:label="@string/change_password"/>
+                  android:label="@string/change_password"
+                  android:windowSoftInputMode="stateAlwaysVisible|adjustResize"/>
 
         <activity android:name="com.hoccer.xo.android.activity.SetPasscodeActivity"
-                  android:label="@string/set_password"/>
+                  android:label="@string/set_password"
+                  android:windowSoftInputMode="stateAlwaysVisible|adjustResize"/>
 
         <service android:name="com.hoccer.xo.android.credentialtransfer.CredentialExportService"/>
 
