@@ -36,6 +36,7 @@
     <PreferenceCategory
             android:title="@string/pref_passcode">
         <Preference
+                android:enabled="false"
                 android:title="@string/menu_change_passcode"
                 android:key="preference_change_passcode">
             <intent android:targetClass="com.hoccer.xo.android.activity.ChangePasscodeActivity"

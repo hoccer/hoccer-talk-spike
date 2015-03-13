@@ -76,6 +76,10 @@ public class XoPreferenceActivity extends PreferenceActivity
     protected void onResume() {
         super.onResume();
 
+        if (getSharedPreferences(SetPasscodeActivity.PASSCODE_PREFERENCES, MODE_PRIVATE).contains(SetPasscodeActivity.PASSCODE)) {
+            findPreference("preference_change_passcode").setEnabled(true);
+        }
+
         mBackupController.handleIntent(getIntent());
         mBackupController.registerAndBind();
     }
