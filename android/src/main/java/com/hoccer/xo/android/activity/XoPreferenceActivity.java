@@ -80,6 +80,11 @@ public class XoPreferenceActivity extends PreferenceActivity
             findPreference("preference_change_passcode").setEnabled(true);
         }
 
+        if (!getSharedPreferences(SetPasscodeActivity.PASSCODE_PREFERENCES, MODE_PRIVATE).getBoolean(SetPasscodeActivity.PASSCODE_ACTIVE, false)) {
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("preference_activate_passcode", false).apply();
+            ((SwitchPreference) findPreference("preference_activate_passcode")).setChecked(false);
+        }
+
         mBackupController.handleIntent(getIntent());
         mBackupController.registerAndBind();
     }
@@ -160,6 +165,8 @@ public class XoPreferenceActivity extends PreferenceActivity
                 } else {
                     startPassCodeInputActivityForResult(16);
                 }
+            } else {
+                getSharedPreferences(SetPasscodeActivity.PASSCODE_PREFERENCES, MODE_PRIVATE).edit().putBoolean(SetPasscodeActivity.PASSCODE_ACTIVE, false).commit();
             }
         }
     }
@@ -180,8 +187,8 @@ public class XoPreferenceActivity extends PreferenceActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 15 || requestCode == 16) {
-            if (resultCode == RESULT_CANCELED) {
-                ((SwitchPreference) findPreference("preference_activate_passcode")).setChecked(false);
+            if (resultCode == RESULT_OK) {
+                getSharedPreferences(SetPasscodeActivity.PASSCODE_PREFERENCES, MODE_PRIVATE).edit().putBoolean(SetPasscodeActivity.PASSCODE_ACTIVE, true).commit();
             }
         }
         if (requestCode == 17 && resultCode == RESULT_OK) {

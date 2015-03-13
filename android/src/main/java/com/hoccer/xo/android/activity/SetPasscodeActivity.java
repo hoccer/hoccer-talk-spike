@@ -14,6 +14,7 @@ public class SetPasscodeActivity extends Activity {
 
     public static final String PASSCODE_PREFERENCES = "com.artcom.hoccer._preferences";
     public static final String PASSCODE = "passcode";
+    public static final String PASSCODE_ACTIVE = "passcode_active";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +50,7 @@ public class SetPasscodeActivity extends Activity {
             public void onClick(View v) {
                 String passCode = passcodeInputView.getText().toString();
                 getSharedPreferences(PASSCODE_PREFERENCES, MODE_PRIVATE).edit().putString(PASSCODE, passCode).commit();
+                getSharedPreferences(PASSCODE_PREFERENCES, MODE_PRIVATE).edit().putBoolean(PASSCODE_ACTIVE, true).commit();
                 setResult(RESULT_OK);
                 finish();
             }
