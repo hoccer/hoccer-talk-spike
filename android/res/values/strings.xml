@@ -431,6 +431,7 @@
     <string name="change_password">Change password</string>
     <string name="set_password">Set password</string>
     <string name="password">Password</string>
+    <string name="password_note">Please note, that we cannot reset or restore your password.</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>
