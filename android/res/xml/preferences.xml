@@ -34,13 +34,13 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-            android:title="@string/pref_passcode">
+            android:title="@string/pref_password">
         <Preference
                 android:enabled="false"
-                android:title="@string/menu_change_passcode"
+                android:title="@string/menu_change_password"
                 android:key="preference_change_passcode">
         </Preference>
-        <SwitchPreference android:title="@string/menu_activate_passcode"
+        <SwitchPreference android:title="@string/menu_activate_password"
                           android:key="preference_activate_passcode"
                           android:defaultValue="false"/>
     </PreferenceCategory>
