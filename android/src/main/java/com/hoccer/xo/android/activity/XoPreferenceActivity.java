@@ -158,10 +158,22 @@ public class XoPreferenceActivity extends PreferenceActivity
                 if (!isPasscodeSet()) {
                     startSetPasswordActivityForResult();
                 } else {
-                    startPassCodeInputActivityForResult();
+                    startPassCodeInputActivityForResult(16);
                 }
             }
         }
+    }
+
+    private void startSetPasswordActivityForResult() {
+        Intent intent = new Intent(this, SetPasscodeActivity.class);
+        startActivityForResult(intent, 15);
+    }
+
+    private void startPassCodeInputActivityForResult(int requestCode) {
+        Intent intent = new Intent(this, PasscodeInputActivity.class);
+        intent.putExtra("ENABLE_BACK", true);
+        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        startActivityForResult(intent, requestCode);
     }
 
     @Override
@@ -172,17 +184,14 @@ public class XoPreferenceActivity extends PreferenceActivity
                 ((SwitchPreference) findPreference("preference_activate_passcode")).setChecked(false);
             }
         }
+        if (requestCode == 17 && resultCode == RESULT_OK) {
+            startChangePasscodeActivity();
+        }
     }
 
-    private void startSetPasswordActivityForResult() {
-        Intent intent = new Intent(this, SetPasscodeActivity.class);
-        startActivityForResult(intent, 15);
-    }
-
-    private void startPassCodeInputActivityForResult() {
-        Intent intent = new Intent(this, PasscodeInputActivity.class);
-        intent.putExtra("ENABLE_BACK", true);
-        startActivityForResult(intent, 16);
+    private void startChangePasscodeActivity() {
+        Intent intent = new Intent(this, ChangePasscodeActivity.class);
+        startActivity(intent);
     }
 
     private boolean isPasscodeSet() {
@@ -223,6 +232,9 @@ public class XoPreferenceActivity extends PreferenceActivity
             return true;
         } else if ("preference_database_dump".equals(preference.getKey())) {
             dumpDatabase();
+            return true;
+        } else if ("preference_change_passcode".equals(preference.getKey())) {
+            startPassCodeInputActivityForResult(17);
             return true;
         }
 

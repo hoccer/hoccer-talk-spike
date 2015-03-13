@@ -39,10 +39,6 @@
                 android:enabled="false"
                 android:title="@string/menu_change_passcode"
                 android:key="preference_change_passcode">
-            <intent android:targetClass="com.hoccer.xo.android.activity.ChangePasscodeActivity"
-                    android:targetPackage="${apk.package.name}"
-                    android:action="android.intent.action.VIEW">
-            </intent>
         </Preference>
         <SwitchPreference android:title="@string/menu_activate_passcode"
                           android:key="preference_activate_passcode"
