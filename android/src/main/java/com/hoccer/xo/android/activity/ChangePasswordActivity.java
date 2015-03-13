@@ -10,19 +10,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import com.artcom.hoccer.R;
 
-public class PasscodeInputActivity extends Activity {
-
-    private boolean mEnableBack;
+public class ChangePasswordActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mEnableBack = getIntent().getBooleanExtra("ENABLE_BACK", false);
-
-        setContentView(R.layout.activity_passcode_prompt);
-
-        final Button button = (Button) findViewById(R.id.btn_unlock);
+        setContentView(R.layout.activity_passcode_change);
+        final Button button = (Button) findViewById(R.id.btn_ok);
         final EditText passcodeInputView = (android.widget.EditText) findViewById(R.id.et_enter_passcode);
 
         passcodeInputView.addTextChangedListener(new TextWatcher() {
@@ -48,20 +43,11 @@ public class PasscodeInputActivity extends Activity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String passcodeInput = passcodeInputView.getText().toString();
-                String passcode = getSharedPreferences(SetPasscodeActivity.PASSCODE_PREFERENCES, MODE_PRIVATE).getString(SetPasscodeActivity.PASSCODE, null);
-                if (passcodeInput.equals(passcode)) {
-                    setResult(RESULT_OK);
-                    finish();
-                }
+                String passCode = passcodeInputView.getText().toString();
+                getSharedPreferences(SetPasscodeActivity.PASSCODE_PREFERENCES, MODE_PRIVATE).edit().putString(SetPasscodeActivity.PASSCODE, passCode).commit();
+                setResult(RESULT_OK);
+                finish();
             }
         });
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (mEnableBack) {
-            super.onBackPressed();
-        }
     }
 }
