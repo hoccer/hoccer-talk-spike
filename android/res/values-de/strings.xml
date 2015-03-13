@@ -410,9 +410,8 @@
 
     <string name="nearby">in der Nähe</string>
 
-    <string name="pref_password">Passwort</string>
-    <string name="menu_change_password">ändern</string>
-    <string name="menu_activate_password">aktivieren</string>
+    <string name="password_protection">Passwortschutz</string>
+    <string name="activate">Aktivieren</string>
     <string name="unlock">Entsperren</string>
     <string name="change_password">Passwort ändern</string>
     <string name="set_password">Passwort setzen</string>

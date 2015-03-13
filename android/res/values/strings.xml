@@ -424,9 +424,8 @@
 
     <string name="nearby">nearby</string>
 
-    <string name="pref_password">Password</string>
-    <string name="menu_change_password">change</string>
-    <string name="menu_activate_password">activate</string>
+    <string name="password_protection">Password protection</string>
+    <string name="activate">Activate</string>
     <string name="unlock">Unlock</string>
     <string name="change_password">Change password</string>
     <string name="set_password">Set password</string>
