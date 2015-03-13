@@ -158,7 +158,7 @@ public class XoPreferenceActivity extends PreferenceActivity
                 if (!isPasscodeSet()) {
                     startSetPasswordActivityForResult();
                 } else {
-                    startPassCodeInputActivity();
+                    startPassCodeInputActivityForResult();
                 }
             }
         }
@@ -179,7 +179,7 @@ public class XoPreferenceActivity extends PreferenceActivity
         startActivityForResult(intent, 15);
     }
 
-    private void startPassCodeInputActivity() {
+    private void startPassCodeInputActivityForResult() {
         Intent intent = new Intent(this, PasscodeInputActivity.class);
         intent.putExtra("ENABLE_BACK", true);
         startActivityForResult(intent, 16);
