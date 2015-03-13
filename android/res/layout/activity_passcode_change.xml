@@ -37,13 +37,13 @@
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
+                        android:enabled="false"
                         android:text="@string/common_ok"/>
             </LinearLayout>
 
             <TextView android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
                       android:text="@string/password_note"
-                      android:enabled="false"
                       android:paddingLeft="4dp"/>
 
         </LinearLayout>
