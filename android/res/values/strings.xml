@@ -431,6 +431,7 @@
     <string name="set_password">Set password</string>
     <string name="password">Password</string>
     <string name="password_note">Please note, that we cannot reset or restore your password.</string>
+    <string name="re_enter_password">Re-Enter your Password</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>

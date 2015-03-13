@@ -417,6 +417,7 @@
     <string name="set_password">Passwort setzen</string>
     <string name="password">Passwort</string>
     <string name="password_note">Bitte beachte, dass wir dein Passwort weder zurücksetzen noch wieder herstellen können.</string>
+    <string name="re_enter_password">Wiederhole das Passwort</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Kontakt</item>
