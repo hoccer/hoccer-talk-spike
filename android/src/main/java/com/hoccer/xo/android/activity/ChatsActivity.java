@@ -219,7 +219,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
         boolean passcodeActive = getSharedPreferences(SetPasscodeActivity.PASSCODE_PREFERENCES, MODE_PRIVATE).getBoolean(SetPasscodeActivity.PASSCODE_ACTIVE, false);
         if (passcodeActive && getXoClient().getSelfContact().getSelf().isRegistrationConfirmed() && !((XoApplication) getApplication()).isActiveInBackground()) {
-            Intent intent = new Intent(this, PasscodeInputActivity.class);
+            Intent intent = new Intent(this, PromptPasswordActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION);
             startActivity(intent);
         }

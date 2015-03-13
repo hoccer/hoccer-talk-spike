@@ -177,7 +177,7 @@ public class XoPreferenceActivity extends PreferenceActivity
     }
 
     private void startPassCodeInputActivityForResult(int requestCode) {
-        Intent intent = new Intent(this, PasscodeInputActivity.class);
+        Intent intent = new Intent(this, PromptPasswordActivity.class);
         intent.putExtra("ENABLE_BACK", true);
         intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION);
         startActivityForResult(intent, requestCode);
@@ -197,7 +197,7 @@ public class XoPreferenceActivity extends PreferenceActivity
     }
 
     private void startChangePasscodeActivity() {
-        Intent intent = new Intent(this, ChangePasscodeActivity.class);
+        Intent intent = new Intent(this, ChangePasswordActivity.class);
         startActivity(intent);
     }
 

@@ -10,7 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import com.artcom.hoccer.R;
 
-public class PasscodeInputActivity extends Activity {
+public class PromptPasswordActivity extends Activity {
 
     private boolean mEnableBack;
 
