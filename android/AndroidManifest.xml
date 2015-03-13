@@ -266,7 +266,7 @@
 
         <activity android:name="com.hoccer.xo.android.activity.PasscodeInputActivity"
                   android:theme="@android:style/Theme.Holo.Light.NoActionBar"
-                  android:windowSoftInputMode="stateVisible|adjustPan" />
+                  android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
 
         <activity android:name="com.hoccer.xo.android.activity.ChangePasscodeActivity"
                   android:label="@string/change_password"/>
