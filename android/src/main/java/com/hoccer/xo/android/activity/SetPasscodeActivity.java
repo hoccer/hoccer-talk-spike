@@ -20,7 +20,7 @@ public class SetPasscodeActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_set_passcode);
+        setContentView(R.layout.activity_passcode_set);
 
         final Button button = (Button) findViewById(R.id.btn_ok);
         final EditText passcodeInputView = (EditText) findViewById(R.id.et_enter_passcode);

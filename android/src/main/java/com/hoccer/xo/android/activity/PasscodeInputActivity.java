@@ -20,7 +20,7 @@ public class PasscodeInputActivity extends Activity {
 
         mEnableBack = getIntent().getBooleanExtra("ENABLE_BACK", false);
 
-        setContentView(R.layout.activity_enter_passcode);
+        setContentView(R.layout.activity_passcode_prompt);
 
         final Button button = (Button) findViewById(R.id.btn_unlock);
         final EditText passcodeInputView = (android.widget.EditText) findViewById(R.id.et_enter_passcode);
