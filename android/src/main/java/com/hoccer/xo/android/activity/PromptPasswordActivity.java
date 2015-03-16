@@ -1,11 +1,13 @@
 package com.hoccer.xo.android.activity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import com.artcom.hoccer.R;
@@ -54,6 +56,9 @@ public class PromptPasswordActivity extends Activity {
                     setResult(RESULT_OK);
                     finish();
                 }
+
+                final InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputMethodManager.hideSoftInputFromWindow(passcodeInputView.getWindowToken(), 0);
             }
         });
     }
