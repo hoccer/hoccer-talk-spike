@@ -432,6 +432,9 @@
     <string name="password">Password</string>
     <string name="password_note">Please note, that we cannot reset or restore your password.</string>
 
+    <string name="preference_key_activate_passcode">preference_activate_passcode</string>
+    <string name="preference_key_change_passcode">preference_change_passcode</string>
+
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>
         <item quantity="other">%d Contacts</item>

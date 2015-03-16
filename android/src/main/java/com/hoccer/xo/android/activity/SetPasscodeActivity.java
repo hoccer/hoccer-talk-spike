@@ -2,6 +2,7 @@ package com.hoccer.xo.android.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -14,7 +15,6 @@ public class SetPasscodeActivity extends Activity {
 
     public static final String PASSCODE_PREFERENCES = "com.artcom.hoccer._preferences";
     public static final String PASSCODE = "passcode";
-    public static final String PASSCODE_ACTIVE = "passcode_active";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,8 +49,7 @@ public class SetPasscodeActivity extends Activity {
             @Override
             public void onClick(View v) {
                 String passCode = passcodeInputView.getText().toString();
-                getSharedPreferences(PASSCODE_PREFERENCES, MODE_PRIVATE).edit().putString(PASSCODE, passCode).commit();
-                getSharedPreferences(PASSCODE_PREFERENCES, MODE_PRIVATE).edit().putBoolean(PASSCODE_ACTIVE, true).commit();
+                getSharedPreferences(PASSCODE_PREFERENCES, MODE_PRIVATE).edit().putString(PASSCODE, passCode).apply();
                 setResult(RESULT_OK);
                 finish();
             }

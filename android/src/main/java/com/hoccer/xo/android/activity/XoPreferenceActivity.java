@@ -32,6 +32,11 @@ public class XoPreferenceActivity extends PreferenceActivity
 
     private static final String CREDENTIALS_TRANSFER_FILE = "credentials.json";
 
+    private static final int SET_PASSCODE = 1;
+    private static final int ACTIVATE_PASSCODE = 2;
+    private static final int DEACTIVATE_PASSCODE = 3;
+    public static final int CHANGE_PASSCODE = 4;
+
     private AttachmentTransferControlView mSpinner;
 
     private Handler mDialogDismisser;
@@ -41,10 +46,12 @@ public class XoPreferenceActivity extends PreferenceActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        preferences.registerOnSharedPreferenceChangeListener(this);
         LOG.debug("onCreate()");
         super.onCreate(savedInstanceState);
+
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        preferences.registerOnSharedPreferenceChangeListener(this);
+
         getActionBar().setDisplayHomeAsUpEnabled(true);
         if (XoApplication.getConfiguration().isDevelopmentModeEnabled()) {
             addPreferencesFromResource(R.xml.development_preferences);
@@ -53,26 +60,36 @@ public class XoPreferenceActivity extends PreferenceActivity
         }
         getListView().setBackgroundColor(Color.WHITE);
 
-        BackupPreference createBackupPreference = (BackupPreference) findPreference(getString(R.string.preference_key_create_backup));
-        BackupPreference restoreBackupPreference = (BackupPreference) findPreference(getString(R.string.preference_key_restore_backup));
+        final BackupPreference createBackupPreference = (BackupPreference) findPreference(getString(R.string.preference_key_create_backup));
+        final BackupPreference restoreBackupPreference = (BackupPreference) findPreference(getString(R.string.preference_key_restore_backup));
 
-        SwitchPreference activatePasswordPreference = (SwitchPreference) findPreference("preference_activate_passcode");
+        SwitchPreference activatePasswordPreference = (SwitchPreference) findPreference(getString(R.string.preference_key_activate_passcode));
         activatePasswordPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
-                boolean active = (Boolean) newValue;
-                if (active && isPasscodeActive()) {
-                    startPassCodeInputActivityForResult(16);
-                } else if (active && !isPasscodeActive()) {
-                    startSetPasswordActivityForResult();
-                } else if (!active && isPasscodeActive()) {
-                    startPassCodeInputActivityForResult(18);
+                boolean oldValue = preferences.getBoolean(getString(R.string.preference_key_activate_passcode), false);
+                boolean activated = (Boolean) newValue;
+                if (oldValue == newValue) {
+                    return oldValue;
                 }
-                return false;
+
+                if (activated && !isPasswordSet()) {
+                    startSetPasswordActivityForResult();
+                } else if (activated) {
+                    startPassCodeInputActivityForResult(ACTIVATE_PASSCODE);
+                } else {
+                    startPassCodeInputActivityForResult(DEACTIVATE_PASSCODE);
+                }
+
+                return oldValue;
             }
         });
 
         mBackupController = new BackupController(this, createBackupPreference, restoreBackupPreference);
+    }
+
+    private boolean isPasswordSet() {
+        return getSharedPreferences(SetPasscodeActivity.PASSCODE_PREFERENCES, MODE_PRIVATE).contains(SetPasscodeActivity.PASSCODE);
     }
 
     @Override
@@ -93,16 +110,8 @@ public class XoPreferenceActivity extends PreferenceActivity
     protected void onResume() {
         super.onResume();
 
-        if (getSharedPreferences(SetPasscodeActivity.PASSCODE_PREFERENCES, MODE_PRIVATE).contains(SetPasscodeActivity.PASSCODE)) {
-            findPreference("preference_change_passcode").setEnabled(true);
-        }
-
-        if (!getSharedPreferences(SetPasscodeActivity.PASSCODE_PREFERENCES, MODE_PRIVATE).getBoolean(SetPasscodeActivity.PASSCODE_ACTIVE, false)) {
-            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("preference_activate_passcode", false).apply();
-            ((SwitchPreference) findPreference("preference_activate_passcode")).setChecked(false);
-        } else {
-            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("preference_activate_passcode", true).apply();
-            ((SwitchPreference) findPreference("preference_activate_passcode")).setChecked(true);
+        if (isPasswordSet()) {
+            findPreference(getString(R.string.preference_key_change_passcode)).setEnabled(true);
         }
 
         mBackupController.handleIntent(getIntent());
@@ -183,7 +192,7 @@ public class XoPreferenceActivity extends PreferenceActivity
 
     private void startSetPasswordActivityForResult() {
         Intent intent = new Intent(this, SetPasscodeActivity.class);
-        startActivityForResult(intent, 15);
+        startActivityForResult(intent, SET_PASSCODE);
     }
 
     private void startPassCodeInputActivityForResult(int requestCode) {
@@ -196,26 +205,33 @@ public class XoPreferenceActivity extends PreferenceActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 15 || requestCode == 16) {
+
+        if (requestCode == SET_PASSCODE && resultCode == RESULT_OK) {
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(getString(R.string.preference_key_activate_passcode), true).apply();
+            ((SwitchPreference) findPreference(getString(R.string.preference_key_activate_passcode))).setChecked(true);
+            findPreference(getString(R.string.preference_key_change_passcode)).setEnabled(true);
+        }
+        if (requestCode == ACTIVATE_PASSCODE && resultCode == RESULT_OK) {
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(getString(R.string.preference_key_activate_passcode), true).apply();
+            ((SwitchPreference) findPreference(getString(R.string.preference_key_activate_passcode))).setChecked(true);
+        }
+        if (requestCode == DEACTIVATE_PASSCODE) {
             if (resultCode == RESULT_OK) {
-                getSharedPreferences(SetPasscodeActivity.PASSCODE_PREFERENCES, MODE_PRIVATE).edit().putBoolean(SetPasscodeActivity.PASSCODE_ACTIVE, true).commit();
+                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(getString(R.string.preference_key_activate_passcode), false).apply();
+                ((SwitchPreference) findPreference(getString(R.string.preference_key_activate_passcode))).setChecked(false);
+            } else {
+                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(getString(R.string.preference_key_activate_passcode), true).apply();
+                ((SwitchPreference) findPreference(getString(R.string.preference_key_activate_passcode))).setChecked(true);
             }
         }
-        if (requestCode == 17 && resultCode == RESULT_OK) {
+        if (requestCode == CHANGE_PASSCODE && resultCode == RESULT_OK) {
             startChangePasscodeActivity();
-        }
-        if (requestCode == 18 && resultCode == RESULT_OK) {
-            getSharedPreferences(SetPasscodeActivity.PASSCODE_PREFERENCES, MODE_PRIVATE).edit().putBoolean(SetPasscodeActivity.PASSCODE_ACTIVE, false).commit();
         }
     }
 
     private void startChangePasscodeActivity() {
         Intent intent = new Intent(this, ChangePasswordActivity.class);
         startActivity(intent);
-    }
-
-    private boolean isPasscodeActive() {
-        return getSharedPreferences(SetPasscodeActivity.PASSCODE_PREFERENCES, MODE_PRIVATE).getBoolean(SetPasscodeActivity.PASSCODE_ACTIVE, false);
     }
 
     private void regenerateKeys() {
@@ -253,8 +269,8 @@ public class XoPreferenceActivity extends PreferenceActivity
         } else if ("preference_database_dump".equals(preference.getKey())) {
             dumpDatabase();
             return true;
-        } else if ("preference_change_passcode".equals(preference.getKey())) {
-            startPassCodeInputActivityForResult(17);
+        } else if (getString(R.string.preference_key_change_passcode).equals(preference.getKey())) {
+            startPassCodeInputActivityForResult(CHANGE_PASSCODE);
             return true;
         }
 
