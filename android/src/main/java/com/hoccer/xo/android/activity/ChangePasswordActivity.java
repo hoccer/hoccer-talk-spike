@@ -44,7 +44,7 @@ public class ChangePasswordActivity extends Activity {
             @Override
             public void onClick(View v) {
                 String passCode = passcodeInputView.getText().toString();
-                getSharedPreferences(SetPasscodeActivity.PASSCODE_PREFERENCES, MODE_PRIVATE).edit().putString(SetPasscodeActivity.PASSCODE, passCode).commit();
+                getSharedPreferences(SetPasscodeActivity.PASSCODE_PREFERENCES, MODE_PRIVATE).edit().putString(SetPasscodeActivity.PASSCODE, passCode).apply();
                 setResult(RESULT_OK);
                 finish();
             }
