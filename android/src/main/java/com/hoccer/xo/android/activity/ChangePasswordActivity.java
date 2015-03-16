@@ -15,8 +15,7 @@ public class ChangePasswordActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_passcode_change);
+        setContentView(R.layout.fragment_password_set);
         final Button button = (Button) findViewById(R.id.btn_ok);
         final EditText passcodeInputView = (android.widget.EditText) findViewById(R.id.et_enter_passcode);
 
