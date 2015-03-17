@@ -1170,60 +1170,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
-    private void doConnect() {
-        LOG.debug("performing connect on connection #" + mConnection.getConnectionId());
-        try {
-            URI uri = new URI(mClientConfiguration.getServerUri());
-            String protocol = mClientConfiguration.getUseBsonProtocol()
-                    ? mClientConfiguration.getBsonProtocolString()
-                    : mClientConfiguration.getJsonProtocolString();
-
-            mWebSocket.open(uri, protocol, mClientConfiguration.getConnectTimeout() * 1000);
-        } catch (Exception e) {
-            LOG.warn("[connection #" + mConnection.getConnectionId() + "] exception while connecting: ", e);
-            scheduleConnect();
-        }
-    }
-
-    private void doDisconnect() {
-        LOG.debug("performing disconnect");
-        mConnection.disconnect();
-    }
-
-    private void cancelKeepAlive() {
-        if (mKeepAliveFuture != null) {
-            mKeepAliveFuture.cancel(false);
-            mKeepAliveFuture = null;
-        }
-    }
-
-    private void scheduleKeepAlive() {
-        cancelKeepAlive();
-        if (mClientConfiguration.getKeepAliveEnabled()) {
-            mKeepAliveFuture = mExecutor.scheduleAtFixedRate(new Runnable() {
-                                                                 @Override
-                                                                 public void run() {
-                                                                     LOG.debug("performing keep-alive");
-                                                                     try {
-                                                                         mConnection.sendKeepAlive();
-                                                                     } catch (IOException e) {
-                                                                         LOG.error("error sending keepalive", e);
-                                                                     }
-                                                                 }
-                                                             },
-                    mClientConfiguration.getKeepAliveInterval(),
-                    mClientConfiguration.getKeepAliveInterval(),
-                    TimeUnit.SECONDS);
-        }
-    }
-
-    private void cancelConnect() {
-        if (mConnectFuture != null) {
-            mConnectFuture.cancel(false);
-            mConnectFuture = null;
-        }
-    }
-
     private void scheduleConnect() {
         LOG.debug("scheduleConnect()");
         cancelConnect();
@@ -1255,22 +1201,88 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }, backoffDelay, TimeUnit.MILLISECONDS);
     }
 
-    private void cancelLogin() {
-        if (mLoginFuture != null) {
-            mLoginFuture.cancel(false);
-            mLoginFuture = null;
+    private void cancelConnect() {
+        if (mConnectFuture != null) {
+            mConnectFuture.cancel(false);
+            mConnectFuture = null;
         }
     }
 
-    private void scheduleLogin() {
-        LOG.debug("scheduleLogin()");
-        cancelLogin();
-        mLoginFuture = mExecutor.schedule(new Runnable() {
+    private void doConnect() {
+        LOG.debug("do connect on connection #" + mConnection.getConnectionId());
+        try {
+            URI uri = new URI(mClientConfiguration.getServerUri());
+            String protocol = mClientConfiguration.getUseBsonProtocol()
+                    ? mClientConfiguration.getBsonProtocolString()
+                    : mClientConfiguration.getJsonProtocolString();
+
+            mWebSocket.open(uri, protocol, mClientConfiguration.getConnectTimeout() * 1000);
+        } catch (Exception e) {
+            LOG.warn("[connection #" + mConnection.getConnectionId() + "] exception while connecting: ", e);
+            scheduleConnect();
+        }
+    }
+
+    private void scheduleDisconnectTimeout(int timeoutInSeconds) {
+        LOG.debug("scheduleDisconnectTimeout()");
+        cancelDisconnectTimeout();
+        mDisconnectTimeoutFuture = mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                performLogin(mSelfContact);
-                mLoginFuture = null;
-                switchState(STATE_SYNCING, "login successful");
+                switchState(STATE_DISCONNECTED, "disconnect timout");
+                mDisconnectTimeoutFuture = null;
+            }
+        }, timeoutInSeconds, TimeUnit.SECONDS);
+    }
+
+    private void cancelDisconnectTimeout() {
+        if (mDisconnectTimeoutFuture != null) {
+            mDisconnectTimeoutFuture.cancel(false);
+            mDisconnectTimeoutFuture = null;
+        }
+    }
+
+    private void scheduleDisconnect() {
+        LOG.debug("scheduleDisconnect()");
+        cancelDisconnect();
+        mDisconnectFuture = mExecutor.schedule(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    doDisconnect();
+                } catch (Throwable t) {
+                    LOG.error("error disconnecting", t);
+                }
+                mDisconnectFuture = null;
+            }
+        }, 0, TimeUnit.SECONDS);
+    }
+
+    private void cancelDisconnect() {
+        if (mDisconnectFuture != null) {
+            mDisconnectFuture.cancel(false);
+            mDisconnectFuture = null;
+        }
+    }
+
+    private void doDisconnect() {
+        LOG.debug("performing disconnect");
+        mConnection.disconnect();
+    }
+
+    private void scheduleRegistration() {
+        LOG.debug("scheduleRegistration()");
+        cancelRegistration();
+        mRegistrationFuture = mExecutor.schedule(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    doRegistration(mSelfContact);
+                    mRegistrationFuture = null;
+                    switchState(STATE_LOGIN, "registered");
+                } catch (Exception e) {
+                    LOG.error("registration error", e);
+                }
             }
         }, 0, TimeUnit.SECONDS);
     }
@@ -1282,21 +1294,140 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
-    private void scheduleRegistration() {
-        LOG.debug("scheduleRegistration()");
-        cancelRegistration();
-        mRegistrationFuture = mExecutor.schedule(new Runnable() {
+    private void doRegistration(TalkClientContact selfContact) {
+        LOG.debug("registration: attempting registration");
+
+        Digest digest = SRP_DIGEST;
+        byte[] salt = new byte[digest.getDigestSize()];
+        byte[] secret = new byte[digest.getDigestSize()];
+        SRP6VerifierGenerator vg = new SRP6VerifierGenerator();
+
+        vg.init(SRP_PARAMETERS.N, SRP_PARAMETERS.g, digest);
+
+        SRP_RANDOM.nextBytes(salt);
+        SRP_RANDOM.nextBytes(secret);
+
+//        String saltString = Hex.encodeHexString(salt);
+//        String secretString = Hex.encodeHexString(secret);
+        String saltString = new String(Hex.encodeHex(salt));
+        String secretString = new String(Hex.encodeHex(secret));
+
+        try {
+            String clientId = mServerRpc.generateId();
+
+            LOG.debug("registration: started with id " + clientId);
+
+            BigInteger verifier = vg.generateVerifier(salt, clientId.getBytes(), secret);
+
+//        mServerRpc.srpRegister(verifier.toString(16), Hex.encodeHexString(salt));
+            mServerRpc.srpRegister(verifier.toString(16), new String(Hex.encodeHex(salt)));
+
+            LOG.debug("registration: finished");
+
+            TalkClientSelf self = mSelfContact.getSelf();
+            self.provideCredentials(saltString, secretString);
+            selfContact.updateSelfRegistered(clientId);
+
+            try {
+                TalkPresence presence = ensureSelfPresence(mSelfContact);
+                presence.setClientId(clientId);
+                presence.setClientName(self.getRegistrationName());
+                mDatabase.saveCredentials(self);
+                mDatabase.savePresence(presence);
+                mDatabase.saveContact(selfContact);
+            } catch (SQLException e) {
+                LOG.error("SQL error on doRegistration", e);
+            } catch (Exception e) { // TODO: specify exception in XoClientDatabase.savePresence!
+                LOG.error("error on doRegistration", e);
+            }
+
+        } catch (JsonRpcClientException e) {
+            LOG.error("Error while registering: ", e);
+        }
+
+    }
+
+    private void scheduleLogin() {
+        LOG.debug("scheduleLogin()");
+        cancelLogin();
+        mLoginFuture = mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                try {
-                    performRegistration(mSelfContact);
-                    mRegistrationFuture = null;
-                    switchState(STATE_LOGIN, "registered");
-                } catch (Exception e) {
-                    LOG.error("registration error", e);
-                }
+                doLogin(mSelfContact);
+                mLoginFuture = null;
+                switchState(STATE_SYNCING, "login successful");
             }
         }, 0, TimeUnit.SECONDS);
+    }
+
+    private void cancelLogin() {
+        if (mLoginFuture != null) {
+            mLoginFuture.cancel(false);
+            mLoginFuture = null;
+        }
+    }
+
+    private void doLogin(TalkClientContact selfContact) {
+        String clientId = selfContact.getClientId();
+        LOG.debug("login: attempting login as " + clientId);
+        Digest digest = SRP_DIGEST;
+
+        TalkClientSelf self = selfContact.getSelf();
+
+        SRP6VerifyingClient vc = new SRP6VerifyingClient();
+        vc.init(SRP_PARAMETERS.N, SRP_PARAMETERS.g, digest, SRP_RANDOM);
+
+        LOG.debug("login: performing phase 1");
+
+        try {
+            byte[] loginId = clientId.getBytes();
+            byte[] loginSalt = Hex.decodeHex(self.getSrpSalt().toCharArray());
+            byte[] loginSecret = Hex.decodeHex(self.getSrpSecret().toCharArray());
+            BigInteger A = vc.generateClientCredentials(loginSalt, loginId, loginSecret);
+
+            String Bs = mServerRpc.srpPhase1(clientId, A.toString(16));
+            vc.calculateSecret(new BigInteger(Bs, 16));
+
+            LOG.debug("login: performing phase 2");
+
+//            String Vc = Hex.encodeHexString(vc.calculateVerifier());
+            String Vc = new String(Hex.encodeHex(vc.calculateVerifier()));
+            String Vs = mServerRpc.srpPhase2(Vc);
+            vc.verifyServer(Hex.decodeHex(Vs.toCharArray()));
+        } catch (JsonRpcClientException e) {
+            LOG.error("Error while performing registration: ", e);
+        } catch (Exception e) {
+            LOG.error("decoder exception in login", e);
+            throw new RuntimeException("exception during login", e);
+        }
+        LOG.debug("login: successful");
+    }
+
+    private void cancelKeepAlive() {
+        if (mKeepAliveFuture != null) {
+            mKeepAliveFuture.cancel(false);
+            mKeepAliveFuture = null;
+        }
+    }
+
+    private void scheduleKeepAlive() {
+        cancelKeepAlive();
+        if (mClientConfiguration.getKeepAliveEnabled()) {
+            mKeepAliveFuture = mExecutor.scheduleAtFixedRate(new Runnable() {
+                                                                 @Override
+                                                                 public void run() {
+                                                                     LOG.debug("performing keep-alive");
+                                                                     try {
+                                                                         mConnection.sendKeepAlive();
+                                                                     } catch (IOException e) {
+                                                                         LOG.error("error sending keepalive", e);
+                                                                     }
+                                                                 }
+                                                             },
+                    mClientConfiguration.getKeepAliveInterval(),
+                    mClientConfiguration.getKeepAliveInterval(),
+                    TimeUnit.SECONDS);
+        }
     }
 
     private void scheduleSync() {
@@ -1405,48 +1536,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 }
             }
         });
-    }
-
-    private void scheduleDisconnectTimeout(int timeoutInSeconds) {
-        LOG.debug("scheduleDisconnectTimeout()");
-        cancelDisconnectTimeout();
-        mDisconnectTimeoutFuture = mExecutor.schedule(new Runnable() {
-            @Override
-            public void run() {
-                switchState(STATE_DISCONNECTED, "disconnect timout");
-                mDisconnectTimeoutFuture = null;
-            }
-        }, timeoutInSeconds, TimeUnit.SECONDS);
-    }
-
-    private void cancelDisconnectTimeout() {
-        if (mDisconnectTimeoutFuture != null) {
-            mDisconnectTimeoutFuture.cancel(false);
-            mDisconnectTimeoutFuture = null;
-        }
-    }
-
-    private void scheduleDisconnect() {
-        LOG.debug("scheduleDisconnect()");
-        cancelDisconnect();
-        mDisconnectFuture = mExecutor.schedule(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    doDisconnect();
-                } catch (Throwable t) {
-                    LOG.error("error disconnecting", t);
-                }
-                mDisconnectFuture = null;
-            }
-        }, 0, TimeUnit.SECONDS);
-    }
-
-    private void cancelDisconnect() {
-        if (mDisconnectFuture != null) {
-            mDisconnectFuture.cancel(false);
-            mDisconnectFuture = null;
-        }
     }
 
     public TalkClientMessage composeClientMessage(TalkClientContact contact, String messageText) {
@@ -1692,95 +1781,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             updateGroupMembership(membership);
         }
 
-    }
-
-    private void performRegistration(TalkClientContact selfContact) {
-        LOG.debug("registration: attempting registration");
-
-        Digest digest = SRP_DIGEST;
-        byte[] salt = new byte[digest.getDigestSize()];
-        byte[] secret = new byte[digest.getDigestSize()];
-        SRP6VerifierGenerator vg = new SRP6VerifierGenerator();
-
-        vg.init(SRP_PARAMETERS.N, SRP_PARAMETERS.g, digest);
-
-        SRP_RANDOM.nextBytes(salt);
-        SRP_RANDOM.nextBytes(secret);
-
-//        String saltString = Hex.encodeHexString(salt);
-//        String secretString = Hex.encodeHexString(secret);
-        String saltString = new String(Hex.encodeHex(salt));
-        String secretString = new String(Hex.encodeHex(secret));
-
-        try {
-            String clientId = mServerRpc.generateId();
-
-            LOG.debug("registration: started with id " + clientId);
-
-            BigInteger verifier = vg.generateVerifier(salt, clientId.getBytes(), secret);
-
-//        mServerRpc.srpRegister(verifier.toString(16), Hex.encodeHexString(salt));
-            mServerRpc.srpRegister(verifier.toString(16), new String(Hex.encodeHex(salt)));
-
-            LOG.debug("registration: finished");
-
-            TalkClientSelf self = mSelfContact.getSelf();
-            self.provideCredentials(saltString, secretString);
-            selfContact.updateSelfRegistered(clientId);
-
-            try {
-                TalkPresence presence = ensureSelfPresence(mSelfContact);
-                presence.setClientId(clientId);
-                presence.setClientName(self.getRegistrationName());
-                mDatabase.saveCredentials(self);
-                mDatabase.savePresence(presence);
-                mDatabase.saveContact(selfContact);
-            } catch (SQLException e) {
-                LOG.error("SQL error on performRegistration", e);
-            } catch (Exception e) { // TODO: specify exception in XoClientDatabase.savePresence!
-                LOG.error("error on performRegistration", e);
-            }
-
-        } catch (JsonRpcClientException e) {
-            LOG.error("Error while performing registration: ", e);
-        }
-
-    }
-
-    private void performLogin(TalkClientContact selfContact) {
-        String clientId = selfContact.getClientId();
-        LOG.debug("login: attempting login as " + clientId);
-        Digest digest = SRP_DIGEST;
-
-        TalkClientSelf self = selfContact.getSelf();
-
-        SRP6VerifyingClient vc = new SRP6VerifyingClient();
-        vc.init(SRP_PARAMETERS.N, SRP_PARAMETERS.g, digest, SRP_RANDOM);
-
-        LOG.debug("login: performing phase 1");
-
-        try {
-            byte[] loginId = clientId.getBytes();
-            byte[] loginSalt = Hex.decodeHex(self.getSrpSalt().toCharArray());
-            byte[] loginSecret = Hex.decodeHex(self.getSrpSecret().toCharArray());
-            BigInteger A = vc.generateClientCredentials(loginSalt, loginId, loginSecret);
-
-            String Bs = mServerRpc.srpPhase1(clientId, A.toString(16));
-            vc.calculateSecret(new BigInteger(Bs, 16));
-
-            LOG.debug("login: performing phase 2");
-
-//            String Vc = Hex.encodeHexString(vc.calculateVerifier());
-            String Vc = new String(Hex.encodeHex(vc.calculateVerifier()));
-            String Vs = mServerRpc.srpPhase2(Vc);
-            vc.verifyServer(Hex.decodeHex(Vs.toCharArray()));
-        } catch (JsonRpcClientException e) {
-            LOG.error("Error while performing registration: ", e);
-        } catch (Exception e) {
-            LOG.error("decoder exception in login", e);
-            throw new RuntimeException("exception during login", e);
-        }
-        LOG.debug("login: successful");
     }
 
     private void performDeliveries(final List<TalkClientMessage> clientMessages) {
@@ -2873,7 +2873,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
-    public void updateGroupMembership(TalkGroupMembership membership) {
+    private void updateGroupMembership(TalkGroupMembership membership) {
         LOG.info("updateGroupMembership(groupId: '" + membership.getGroupId() + "', clientId: '" + membership.getClientId() + "', state: '" + membership.getState() + "')");
         TalkClientContact groupContact;
         TalkClientContact clientContact;
