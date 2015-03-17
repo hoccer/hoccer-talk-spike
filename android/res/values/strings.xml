@@ -435,6 +435,8 @@
 
     <string name="preference_key_activate_passcode">preference_activate_passcode</string>
     <string name="preference_key_change_passcode">preference_change_passcode</string>
+    <string name="password_prompt_retry">Incorrect password. Please try again.</string>
+    <string name="passwords_not_matching">Passwords do not match. Please enter your password again.</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>

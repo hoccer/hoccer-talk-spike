@@ -418,6 +418,8 @@
     <string name="password">Passwort</string>
     <string name="password_note">Bitte beachte, dass wir dein Passwort weder zurücksetzen noch wieder herstellen können.</string>
     <string name="re_enter_password">Wiederhole das Passwort</string>
+    <string name="password_prompt_retry">Passwort nicht korrekt, bitte erneut versuchen.</string>
+    <string name="passwords_not_matching">Die eingegebenen Passwörter stimmen nicht überein. Bitte Eingabe wiederholen.</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Kontakt</item>
