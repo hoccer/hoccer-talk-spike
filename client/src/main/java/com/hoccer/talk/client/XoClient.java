@@ -38,7 +38,10 @@ import java.nio.charset.Charset;
 import java.security.*;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class XoClient implements JsonRpcConnection.Listener, IXoTransferListenerOld {
@@ -105,9 +108,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     ScheduledExecutorService mExecutor;
 
     // Futures keeping track of singleton background operations
-    ScheduledFuture<?> mLoginFuture;
-    ScheduledFuture<?> mRegistrationFuture;
     ScheduledFuture<?> mConnectFuture;
+    ScheduledFuture<?> mRegistrationFuture;
+    ScheduledFuture<?> mLoginFuture;
+    ScheduledFuture<?> mSyncFuture;
     ScheduledFuture<?> mDisconnectFuture;
     ScheduledFuture<?> mDisconnectTimeoutFuture;
     ScheduledFuture<?> mKeepAliveFuture;
@@ -1063,7 +1067,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     private void switchState(int newState, String message) {
         if (mState != newState) {
-            LOG.info("[switchState: connection #" + mConnection.getConnectionId() + "] state " + STATE_NAMES[mState] + " -> " + STATE_NAMES[newState] + " (" + message + ")");
+            LOG.info("[switchState() connection #" + mConnection.getConnectionId() + "]: state " + STATE_NAMES[mState] + " -> " + STATE_NAMES[newState] + " (" + message + ")");
 
             int previousState = mState;
             mState = newState;
@@ -1095,6 +1099,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
             if (mState == STATE_SYNCING) {
                 scheduleSync();
+            } else {
+                cancelSync();
             }
 
             if (mState == STATE_READY) {
@@ -1123,36 +1129,36 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 }
             }
         } else {
-            LOG.debug("state remains " + getStateString() + " (" + message + ")");
+            LOG.debug("[switchState() connection #" + mConnection.getConnectionId() + "]: state remains " + getStateString() + " (" + message + ")");
         }
     }
 
-    /**
-     * Called when the connection is opened
-     *
-     * @param connection
-     */
-    @Override
-    public void onOpen(JsonRpcConnection connection) {
-        LOG.debug("onOpen()");
-        if (isRegistered()) {
-            switchState(STATE_LOGIN, "connected");
-        } else {
-            switchState(STATE_REGISTERING, "connected and unregistered");
+    private void scheduleDisconnect() {
+        LOG.debug("scheduleDisconnect()");
+        cancelDisconnect();
+        mDisconnectFuture = mExecutor.schedule(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mDisconnectFuture = null;
+                    doDisconnect();
+                } catch (Exception e) {
+                    LOG.error("Exception while disconnecting", e);
+                }
+            }
+        }, 0, TimeUnit.SECONDS);
+    }
+
+    private void cancelDisconnect() {
+        if (mDisconnectFuture != null) {
+            mDisconnectFuture.cancel(false);
+            mDisconnectFuture = null;
         }
     }
 
-    /**
-     * Called when the connection is closed
-     *
-     * @param connection
-     */
-    @Override
-    public void onClose(JsonRpcConnection connection) {
-        LOG.debug("onClose()");
-        if (mState != STATE_DISCONNECTED) {
-            switchState(STATE_CONNECTING, "connection had closed");
-        }
+    private void doDisconnect() {
+        LOG.debug("doDisconnect()");
+        mConnection.disconnect();
     }
 
     private void scheduleConnect() {
@@ -1180,8 +1186,13 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         mConnectFuture = mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                doConnect();
-                mConnectFuture = null;
+                try {
+                    mConnectFuture = null;
+                    doConnect();
+                } catch (Exception e) {
+                    LOG.error("Exception while connecting", e);
+                    scheduleConnect();
+                }
             }
         }, backoffDelay, TimeUnit.MILLISECONDS);
     }
@@ -1193,66 +1204,11 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
-    private void doConnect() {
-        LOG.debug("do connect on connection #" + mConnection.getConnectionId());
-        try {
-            URI uri = new URI(mClientConfiguration.getServerUri());
-            String protocol = mClientConfiguration.getUseBsonProtocol()
-                    ? mClientConfiguration.getBsonProtocolString()
-                    : mClientConfiguration.getJsonProtocolString();
-
-            mWebSocket.open(uri, protocol, mClientConfiguration.getConnectTimeout() * 1000);
-        } catch (Exception e) {
-            LOG.warn("[connection #" + mConnection.getConnectionId() + "] exception while connecting: ", e);
-            scheduleConnect();
-        }
-    }
-
-    private void scheduleDisconnectTimeout(int timeoutInSeconds) {
-        LOG.debug("scheduleDisconnectTimeout()");
-        cancelDisconnectTimeout();
-        mDisconnectTimeoutFuture = mExecutor.schedule(new Runnable() {
-            @Override
-            public void run() {
-                switchState(STATE_DISCONNECTED, "disconnect timout");
-                mDisconnectTimeoutFuture = null;
-            }
-        }, timeoutInSeconds, TimeUnit.SECONDS);
-    }
-
-    private void cancelDisconnectTimeout() {
-        if (mDisconnectTimeoutFuture != null) {
-            mDisconnectTimeoutFuture.cancel(false);
-            mDisconnectTimeoutFuture = null;
-        }
-    }
-
-    private void scheduleDisconnect() {
-        LOG.debug("scheduleDisconnect()");
-        cancelDisconnect();
-        mDisconnectFuture = mExecutor.schedule(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    doDisconnect();
-                } catch (Throwable t) {
-                    LOG.error("error disconnecting", t);
-                }
-                mDisconnectFuture = null;
-            }
-        }, 0, TimeUnit.SECONDS);
-    }
-
-    private void cancelDisconnect() {
-        if (mDisconnectFuture != null) {
-            mDisconnectFuture.cancel(false);
-            mDisconnectFuture = null;
-        }
-    }
-
-    private void doDisconnect() {
-        LOG.debug("performing disconnect");
-        mConnection.disconnect();
+    private void doConnect() throws Exception {
+        LOG.debug("doConnect() on connection #" + mConnection.getConnectionId());
+        URI uri = new URI(mClientConfiguration.getServerUri());
+        String protocol = mClientConfiguration.getUseBsonProtocol() ? mClientConfiguration.getBsonProtocolString() : mClientConfiguration.getJsonProtocolString();
+        mWebSocket.open(uri, protocol, mClientConfiguration.getConnectTimeout() * 1000);
     }
 
     private void scheduleRegistration() {
@@ -1262,11 +1218,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             @Override
             public void run() {
                 try {
-                    doRegistration(mSelfContact);
                     mRegistrationFuture = null;
-                    switchState(STATE_LOGIN, "registered");
+                    doRegistration(mSelfContact);
+                    switchState(STATE_LOGIN, "login after registration");
                 } catch (Exception e) {
-                    LOG.error("registration error", e);
+                    LOG.error("Exception while registering", e);
+                    switchState(STATE_CONNECTING, "reconnect after registration failed");
                 }
             }
         }, 0, TimeUnit.SECONDS);
@@ -1279,7 +1236,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
-    private void doRegistration(TalkClientContact selfContact) {
+    private void doRegistration(TalkClientContact selfContact) throws Exception {
         LOG.debug("registration: attempting registration");
 
         Digest digest = SRP_DIGEST;
@@ -1295,37 +1252,25 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         String saltString = new String(Hex.encodeHex(salt));
         String secretString = new String(Hex.encodeHex(secret));
 
-        try {
-            String clientId = mServerRpc.generateId();
+        String clientId = mServerRpc.generateId();
 
-            LOG.debug("registration: started with id " + clientId);
+        LOG.debug("registration: started with id " + clientId);
 
-            BigInteger verifier = vg.generateVerifier(salt, clientId.getBytes(), secret);
-            mServerRpc.srpRegister(verifier.toString(16), new String(Hex.encodeHex(salt)));
+        BigInteger verifier = vg.generateVerifier(salt, clientId.getBytes(), secret);
+        mServerRpc.srpRegister(verifier.toString(16), new String(Hex.encodeHex(salt)));
 
-            LOG.debug("registration: finished");
+        LOG.debug("registration: finished");
 
-            TalkClientSelf self = mSelfContact.getSelf();
-            self.provideCredentials(saltString, secretString);
-            selfContact.updateSelfRegistered(clientId);
+        TalkClientSelf self = mSelfContact.getSelf();
+        self.provideCredentials(saltString, secretString);
+        selfContact.updateSelfRegistered(clientId);
 
-            try {
-                TalkPresence presence = ensureSelfPresence(mSelfContact);
-                presence.setClientId(clientId);
-                presence.setClientName(self.getRegistrationName());
-                mDatabase.saveCredentials(self);
-                mDatabase.savePresence(presence);
-                mDatabase.saveContact(selfContact);
-            } catch (SQLException e) {
-                LOG.error("SQL error on doRegistration", e);
-            } catch (Exception e) { // TODO: specify exception in XoClientDatabase.savePresence!
-                LOG.error("error on doRegistration", e);
-            }
-
-        } catch (JsonRpcClientException e) {
-            LOG.error("Error while registering: ", e);
-        }
-
+        TalkPresence presence = ensureSelfPresence(mSelfContact);
+        presence.setClientId(clientId);
+        presence.setClientName(self.getRegistrationName());
+        mDatabase.saveCredentials(self);
+        mDatabase.savePresence(presence);
+        mDatabase.saveContact(selfContact);
     }
 
     private void scheduleLogin() {
@@ -1334,9 +1279,14 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         mLoginFuture = mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                doLogin(mSelfContact);
-                mLoginFuture = null;
-                switchState(STATE_SYNCING, "login successful");
+                try {
+                    mLoginFuture = null;
+                    doLogin(mSelfContact);
+                    switchState(STATE_SYNCING, "sync ofter login");
+                } catch (Exception e) {
+                    LOG.error("Exception while logging in", e);
+                    switchState(STATE_CONNECTING, "reconnect after login failed");
+                }
             }
         }, 0, TimeUnit.SECONDS);
     }
@@ -1348,11 +1298,11 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
-    private void doLogin(TalkClientContact selfContact) {
+    private void doLogin(TalkClientContact selfContact) throws Exception {
         String clientId = selfContact.getClientId();
-        LOG.debug("login: attempting login as " + clientId);
-        Digest digest = SRP_DIGEST;
+        LOG.debug("doLogin() with clientId " + clientId);
 
+        Digest digest = SRP_DIGEST;
         TalkClientSelf self = selfContact.getSelf();
 
         SRP6VerifyingClient vc = new SRP6VerifyingClient();
@@ -1360,27 +1310,149 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
         LOG.debug("login: performing phase 1");
 
-        try {
-            byte[] loginId = clientId.getBytes();
-            byte[] loginSalt = Hex.decodeHex(self.getSrpSalt().toCharArray());
-            byte[] loginSecret = Hex.decodeHex(self.getSrpSecret().toCharArray());
-            BigInteger A = vc.generateClientCredentials(loginSalt, loginId, loginSecret);
+        byte[] loginId = clientId.getBytes();
+        byte[] loginSalt = Hex.decodeHex(self.getSrpSalt().toCharArray());
+        byte[] loginSecret = Hex.decodeHex(self.getSrpSecret().toCharArray());
+        BigInteger A = vc.generateClientCredentials(loginSalt, loginId, loginSecret);
 
-            String Bs = mServerRpc.srpPhase1(clientId, A.toString(16));
-            vc.calculateSecret(new BigInteger(Bs, 16));
+        String Bs = mServerRpc.srpPhase1(clientId, A.toString(16));
+        vc.calculateSecret(new BigInteger(Bs, 16));
 
-            LOG.debug("login: performing phase 2");
+        LOG.debug("login: performing phase 2");
 
-            String Vc = new String(Hex.encodeHex(vc.calculateVerifier()));
-            String Vs = mServerRpc.srpPhase2(Vc);
-            vc.verifyServer(Hex.decodeHex(Vs.toCharArray()));
-        } catch (JsonRpcClientException e) {
-            LOG.error("Error while performing registration: ", e);
-        } catch (Exception e) {
-            LOG.error("decoder exception in login", e);
-            throw new RuntimeException("exception during login", e);
+        String Vc = new String(Hex.encodeHex(vc.calculateVerifier()));
+        String Vs = mServerRpc.srpPhase2(Vc);
+        vc.verifyServer(Hex.decodeHex(Vs.toCharArray()));
+    }
+
+    private void scheduleSync() {
+        LOG.debug("scheduleSync()");
+        cancelSync();
+        mSyncFuture = mExecutor.schedule(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mSyncFuture = null;
+                    doSync();
+                    switchState(STATE_READY, "ready after sync");
+                } catch (Exception e) {
+                    LOG.error("Exception while syncing", e);
+                    switchState(STATE_CONNECTING, "reconnect after sync failed");
+                }
+            }
+        }, 0, TimeUnit.SECONDS);
+    }
+
+    private void cancelSync() {
+        if (mSyncFuture != null) {
+            mSyncFuture.cancel(false);
+            mSyncFuture = null;
         }
-        LOG.debug("login: successful");
+    }
+
+    private void doSync() throws Exception {
+        LOG.debug("doSync()");
+        Date never = new Date(0);
+
+        LOG.debug("sync: HELLO");
+        hello();
+
+        LOG.debug("sync: updating self presence");
+        ScheduledFuture sendPresenceFuture = sendPresence();
+
+        LOG.debug("sync: syncing presences");
+        TalkPresence[] presences = mServerRpc.getPresences(never);
+        for (TalkPresence presence : presences) {
+            updateClientPresence(presence, null);
+        }
+        LOG.debug("sync: syncing relationships");
+        TalkRelationship[] relationships = mServerRpc.getRelationships(never);
+        for (TalkRelationship relationship : relationships) {
+            updateClientRelationship(relationship);
+        }
+        LOG.debug("sync: syncing groups");
+        TalkGroupPresence[] groupPresences = mServerRpc.getGroups(never);
+        for (TalkGroupPresence groupPresence : groupPresences) {
+            if (groupPresence.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
+                updateGroupPresence(groupPresence);
+            }
+        }
+
+        LOG.debug("sync: syncing group memberships");
+        List<TalkClientContact> contacts = mDatabase.findAllGroupContacts();
+        List<TalkClientContact> groupContacts = new ArrayList<TalkClientContact>();
+        List<String> groupIds = new ArrayList<String>();
+        for (TalkClientContact contact : contacts) {
+            if (contact.isGroup() && contact.isGroupExisting()) {
+                groupContacts.add(contact);
+                groupIds.add(contact.getGroupId());
+            }
+        }
+        if (!groupIds.isEmpty()) {
+            Boolean[] groupMembershipFlags = mServerRpc.isMemberInGroups(groupIds.toArray(new String[groupIds.size()]));
+
+            for (int i = 0; i < groupContacts.size(); i++) {
+                TalkClientContact groupContact = groupContacts.get(i);
+                try {
+                    LOG.debug("sync: membership in group (" + groupContact.getGroupId() + ") : '" + groupMembershipFlags[i] + "'");
+
+                    if (groupMembershipFlags[i]) {
+                        TalkGroupMembership[] memberships = mServerRpc.getGroupMembers(groupContact.getGroupId(), never);
+                        for (TalkGroupMembership membership : memberships) {
+                            updateGroupMembership(membership);
+                        }
+                    } else {
+                        TalkGroupPresence groupPresence = groupContact.getGroupPresence();
+                        if (groupPresence != null && groupPresence.isTypeNearby()) {
+                            destroyNearbyGroup(groupContact);
+                        } else {
+                            if (groupPresence != null) {
+                                groupPresence.setState(TalkGroupPresence.STATE_DELETED);
+                                mDatabase.saveGroupPresence(groupPresence);
+                            }
+
+                            // update group member state
+                            List<TalkGroupMembership> memberships = mDatabase.findMembershipsInGroup(groupContact.getGroupId());
+                            for (TalkGroupMembership membership : memberships) {
+                                membership.setState(TalkGroupMembership.STATE_GROUP_REMOVED);
+                                mDatabase.saveGroupMembership(membership);
+                            }
+                        }
+
+                        for (IXoContactListener listener : mContactListeners) {
+                            listener.onGroupMembershipChanged(groupContact);
+                            listener.onGroupPresenceChanged(groupContact);
+                        }
+                    }
+                } catch (JsonRpcClientException e) {
+                    LOG.error("Error while updating group member: ", e);
+                } catch (RuntimeException e) {
+                    LOG.error("Error while updating group members: ", e);
+                }
+            }
+        }
+
+        // ensure we are finished with generating pub/private keys before actually becoming ready...
+        sendPresenceFuture.get();
+    }
+
+    private void scheduleDisconnectTimeout(int timeoutInSeconds) {
+        LOG.debug("scheduleDisconnectTimeout()");
+        cancelDisconnectTimeout();
+        mDisconnectTimeoutFuture = mExecutor.schedule(new Runnable() {
+            @Override
+            public void run() {
+                mDisconnectTimeoutFuture = null;
+                switchState(STATE_DISCONNECTED, "disconnect timout");
+            }
+        }, timeoutInSeconds, TimeUnit.SECONDS);
+    }
+
+    private void cancelDisconnectTimeout() {
+        if (mDisconnectTimeoutFuture != null) {
+            mDisconnectTimeoutFuture.cancel(false);
+            mDisconnectTimeoutFuture = null;
+        }
     }
 
     private void cancelKeepAlive() {
@@ -1393,129 +1465,46 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     private void scheduleKeepAlive() {
         cancelKeepAlive();
         if (mClientConfiguration.getKeepAliveEnabled()) {
-            mKeepAliveFuture = mExecutor.scheduleAtFixedRate(new Runnable() {
-                                                                 @Override
-                                                                 public void run() {
-                                                                     LOG.debug("performing keep-alive");
-                                                                     try {
-                                                                         mConnection.sendKeepAlive();
-                                                                     } catch (IOException e) {
-                                                                         LOG.error("error sending keepalive", e);
-                                                                     }
-                                                                 }
-                                                             },
+            mKeepAliveFuture = mExecutor.scheduleAtFixedRate(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            LOG.debug("performing keep-alive");
+                            try {
+                                mConnection.sendKeepAlive();
+                            } catch (IOException e) {
+                                LOG.error("error sending keepalive", e);
+                            }
+                        }
+                    },
                     mClientConfiguration.getKeepAliveInterval(),
                     mClientConfiguration.getKeepAliveInterval(),
                     TimeUnit.SECONDS);
         }
     }
 
-    private void scheduleSync() {
-        LOG.debug("scheduleSync()");
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                Date never = new Date(0);
-                try {
-                    LOG.debug("sync: HELLO");
-                    hello();
+    /**
+     * Called when the connection is opened
+     */
+    @Override
+    public void onOpen(JsonRpcConnection connection) {
+        LOG.debug("onOpen()");
+        if (isRegistered()) {
+            switchState(STATE_LOGIN, "connected");
+        } else {
+            switchState(STATE_REGISTERING, "connected and unregistered");
+        }
+    }
 
-                    LOG.debug("sync: updating self presence");
-                    ScheduledFuture sendPresenceFuture = sendPresence();
-
-                    LOG.debug("sync: syncing presences");
-                    TalkPresence[] presences = mServerRpc.getPresences(never);
-                    for (TalkPresence presence : presences) {
-                        updateClientPresence(presence, null);
-                    }
-                    LOG.debug("sync: syncing relationships");
-                    TalkRelationship[] relationships = mServerRpc.getRelationships(never);
-                    for (TalkRelationship relationship : relationships) {
-                        updateClientRelationship(relationship);
-                    }
-                    LOG.debug("sync: syncing groups");
-                    TalkGroupPresence[] groupPresences = mServerRpc.getGroups(never);
-                    for (TalkGroupPresence groupPresence : groupPresences) {
-                        if (groupPresence.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
-                            updateGroupPresence(groupPresence);
-                        }
-                    }
-
-                    LOG.debug("sync: syncing group memberships");
-                    List<TalkClientContact> contacts = mDatabase.findAllGroupContacts();
-                    List<TalkClientContact> groupContacts = new ArrayList<TalkClientContact>();
-                    List<String> groupIds = new ArrayList<String>();
-                    for (TalkClientContact contact : contacts) {
-                        if (contact.isGroup() && contact.isGroupExisting()) {
-                            groupContacts.add(contact);
-                            groupIds.add(contact.getGroupId());
-                        }
-                    }
-                    if (!groupIds.isEmpty()) {
-                        Boolean[] groupMembershipFlags = mServerRpc.isMemberInGroups(groupIds.toArray(new String[groupIds.size()]));
-
-                        for (int i = 0; i < groupContacts.size(); i++) {
-                            TalkClientContact groupContact = groupContacts.get(i);
-                            try {
-                                LOG.debug("sync: membership in group (" + groupContact.getGroupId() + ") : '" + groupMembershipFlags[i] + "'");
-
-                                if (groupMembershipFlags[i]) {
-                                    TalkGroupMembership[] memberships = mServerRpc.getGroupMembers(groupContact.getGroupId(), never);
-                                    for (TalkGroupMembership membership : memberships) {
-                                        updateGroupMembership(membership);
-                                    }
-                                } else {
-                                    TalkGroupPresence groupPresence = groupContact.getGroupPresence();
-                                    if (groupPresence != null && groupPresence.isTypeNearby()) {
-                                        destroyNearbyGroup(groupContact);
-                                    } else {
-                                        if (groupPresence != null) {
-                                            groupPresence.setState(TalkGroupPresence.STATE_DELETED);
-                                            mDatabase.saveGroupPresence(groupPresence);
-                                        }
-
-                                        // update group member state
-                                        List<TalkGroupMembership> memberships = mDatabase.findMembershipsInGroup(groupContact.getGroupId());
-                                        for (TalkGroupMembership membership : memberships) {
-                                            membership.setState(TalkGroupMembership.STATE_GROUP_REMOVED);
-                                            mDatabase.saveGroupMembership(membership);
-                                        }
-                                    }
-
-                                    for (IXoContactListener listener : mContactListeners) {
-                                        listener.onGroupMembershipChanged(groupContact);
-                                        listener.onGroupPresenceChanged(groupContact);
-                                    }
-                                }
-                            } catch (JsonRpcClientException e) {
-                                LOG.error("Error while updating group member: ", e);
-                            } catch (RuntimeException e) {
-                                LOG.error("Error while updating group members: ", e);
-                            }
-                        }
-                    }
-                    // ensure we are finished with generating pub/private keys before actually becoming ready...
-                    // TODO: have a proper statemachine
-                    sendPresenceFuture.get();
-
-                    switchState(STATE_READY, "Synchronization successfull");
-
-                } catch (SQLException e) {
-                    LOG.error("SQL Error while syncing: ", e);
-                } catch (JsonRpcClientException e) {
-                    LOG.error("Error while syncing: ", e);
-                } catch (InterruptedException e) {
-                    LOG.error("Error while asserting future", e);
-                } catch (ExecutionException e) {
-                    LOG.error("ExecutionException ", e);
-                }
-
-                if (!isReady()) {
-                    LOG.warn("sync failed, scheduling new sync");
-                    scheduleSync();
-                }
-            }
-        });
+    /**
+     * Called when the connection is closed
+     */
+    @Override
+    public void onClose(JsonRpcConnection connection) {
+        LOG.debug("onClose()");
+        if (mState != STATE_DISCONNECTED) {
+            switchState(STATE_CONNECTING, "reconnect after connection closed");
+        }
     }
 
     public TalkClientMessage composeClientMessage(TalkClientContact contact, String messageText) {
