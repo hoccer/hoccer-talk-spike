@@ -3029,16 +3029,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         });
     }
 
-    public void register() {
-        if (!isRegistered()) {
-            if (mState == STATE_REGISTERING) {
-                scheduleRegistration();
-            } else {
-                connect();
-            }
-        }
-    }
-
     public void markMessageAsAborted(TalkClientMessage message) {
         message.getOutgoingDelivery().setState(TalkDelivery.STATE_ABORTED); // TODO: ABORTED OR ABORTED_ACKNOWLEDGED?
         try {
