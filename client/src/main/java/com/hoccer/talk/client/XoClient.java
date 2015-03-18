@@ -1069,7 +1069,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         if (mState != newState) {
             LOG.info("[switchState() connection #" + mConnection.getConnectionId() + "]: state " + STATE_NAMES[mState] + " -> " + STATE_NAMES[newState] + " (" + message + ")");
 
-            int previousState = mState;
             mState = newState;
 
             if (mState == STATE_DISCONNECTED) {
@@ -1122,11 +1121,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 cancelKeepAlive();
             }
 
-            // call listeners
-            if (previousState != newState) {
                 for (IXoStateListener listener : mStateListeners) {
-                    listener.onClientStateChange(this, newState);
-                }
+                        listener.onClientStateChange(XoClient.this, newState);
             }
         } else {
             LOG.debug("[switchState() connection #" + mConnection.getConnectionId() + "]: state remains " + getStateString() + " (" + message + ")");
@@ -1362,11 +1358,13 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         for (TalkPresence presence : presences) {
             updateClientPresence(presence, null);
         }
+
         LOG.debug("sync: syncing relationships");
         TalkRelationship[] relationships = mServerRpc.getRelationships(never);
         for (TalkRelationship relationship : relationships) {
             updateClientRelationship(relationship);
         }
+
         LOG.debug("sync: syncing groups");
         TalkGroupPresence[] groupPresences = mServerRpc.getGroups(never);
         for (TalkGroupPresence groupPresence : groupPresences) {
