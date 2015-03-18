@@ -21,7 +21,6 @@ import com.hoccer.xo.android.passwordprotection.PasswordProtection;
 
 public class PasswordSetFragment extends Fragment {
 
-    public static final String PASSWORD_SET_FRAGMENT = "PASSWORD_SET_FRAGMENT";
     private EditText mEnterPasswordView;
     private EditText mConfirmPasswordView;
     private Button mSubmitButton;

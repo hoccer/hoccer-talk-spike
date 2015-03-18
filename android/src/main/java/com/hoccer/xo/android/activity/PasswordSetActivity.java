@@ -18,7 +18,7 @@ public class PasswordSetActivity extends FragmentActivity {
 
     private void showPasswordSetFragment() {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_fragment_container, new PasswordSetFragment(), PasswordSetFragment.PASSWORD_SET_FRAGMENT);
+        ft.replace(R.id.fl_fragment_container, new PasswordSetFragment());
         ft.commit();
     }
 }
