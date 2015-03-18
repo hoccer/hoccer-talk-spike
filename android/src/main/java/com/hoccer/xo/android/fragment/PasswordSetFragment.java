@@ -105,13 +105,15 @@ public class PasswordSetFragment extends Fragment {
         }
     }
 
-    private void updateConfirmPasswordView(Editable s) {
-        if (TextUtils.isEmpty(s)) {
+    private void updateConfirmPasswordView(CharSequence charSequence) {
+        if (TextUtils.isEmpty(charSequence)) {
             mConfirmPasswordView.setFocusableInTouchMode(false);
             mConfirmPasswordView.setFocusable(false);
+            mConfirmPasswordView.setHint(null);
         } else {
             mConfirmPasswordView.setFocusableInTouchMode(true);
             mConfirmPasswordView.setFocusable(true);
+            mConfirmPasswordView.setHint(R.string.confirm_password);
         }
     }
 
