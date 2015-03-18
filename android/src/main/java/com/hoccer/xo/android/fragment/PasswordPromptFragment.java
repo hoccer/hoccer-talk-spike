@@ -86,14 +86,18 @@ public class PasswordPromptFragment extends Fragment {
     }
 
     private void notifyIfUnlocked() {
-        String passwordEntered = mPasswordInputView.getText().toString();
-        String password = getActivity().getSharedPreferences(PasswordProtection.PASSWORD_PROTECTION_PREFERENCES, Context.MODE_PRIVATE).getString(PasswordProtection.PASSWORD_KEY, null);
-        if (passwordEntered.equals(password)) {
+        if (isPasswordCorrect()) {
             mListener.onPasswordProtectionUnlocked();
         } else {
             mPasswordInputView.getText().clear();
             Toast.makeText(getActivity(), getActivity().getString(R.string.password_prompt_retry), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private boolean isPasswordCorrect() {
+        String passwordEntered = mPasswordInputView.getText().toString();
+        String password = getActivity().getSharedPreferences(PasswordProtection.PASSWORD_PROTECTION_PREFERENCES, Context.MODE_PRIVATE).getString(PasswordProtection.PASSWORD_KEY, null);
+        return passwordEntered.equals(password);
     }
 
     private void updateUnlockButton(CharSequence charSequence) {
