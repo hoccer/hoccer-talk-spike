@@ -91,6 +91,7 @@ public class PasswordPromptFragment extends Fragment {
         if (passcodeInput.equals(passcode)) {
             mListener.onPasswordProtectionUnlocked();
         } else {
+            mPasswordInputView.getText().clear();
             Toast.makeText(getActivity(), getActivity().getString(R.string.password_prompt_retry), Toast.LENGTH_SHORT).show();
         }
     }
