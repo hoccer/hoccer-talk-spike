@@ -1307,8 +1307,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         SRP_RANDOM.nextBytes(salt);
         SRP_RANDOM.nextBytes(secret);
 
-//        String saltString = Hex.encodeHexString(salt);
-//        String secretString = Hex.encodeHexString(secret);
         String saltString = new String(Hex.encodeHex(salt));
         String secretString = new String(Hex.encodeHex(secret));
 
@@ -1318,8 +1316,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             LOG.debug("registration: started with id " + clientId);
 
             BigInteger verifier = vg.generateVerifier(salt, clientId.getBytes(), secret);
-
-//        mServerRpc.srpRegister(verifier.toString(16), Hex.encodeHexString(salt));
             mServerRpc.srpRegister(verifier.toString(16), new String(Hex.encodeHex(salt)));
 
             LOG.debug("registration: finished");
@@ -1390,7 +1386,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
             LOG.debug("login: performing phase 2");
 
-//            String Vc = Hex.encodeHexString(vc.calculateVerifier());
             String Vc = new String(Hex.encodeHex(vc.calculateVerifier()));
             String Vs = mServerRpc.srpPhase2(Vc);
             vc.verifyServer(Hex.decodeHex(Vs.toCharArray()));
