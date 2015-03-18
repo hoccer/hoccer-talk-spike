@@ -199,7 +199,7 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
 
         mActionMode = null;
 
-        String nameString = mEditName.getText().toString();
+        String nameString = mEditName.getText().toString().trim();
         String newUserName = nameString.isEmpty() ? getResources().getString(R.string.profile_self_initial_name) : nameString;
 
         mEditName.setVisibility(View.GONE);
