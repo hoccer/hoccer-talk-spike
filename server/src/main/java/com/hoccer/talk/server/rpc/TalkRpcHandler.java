@@ -670,7 +670,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         TalkKey key = null;
 
         TalkRelationship relationship = mDatabase.findRelationshipBetween(mConnection.getClientId(), clientId);
-        if (relationship != null && (relationship.isFriend() || relationship.invitedMe())) {
+        if (relationship != null && relationship.isRelated()) {
             key = mDatabase.findKey(clientId, keyId);
         } else {
             List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsForClient(mConnection.getClientId());
