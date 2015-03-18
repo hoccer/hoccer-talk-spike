@@ -12,7 +12,7 @@ import com.hoccer.xo.android.fragment.PasswordPromptFragment;
 
 public class PasswordPromptActivity extends FragmentActivity implements PasswordPromptFragment.OnPasswordProtectionUnlockListener {
 
-    public static final String EXTRA_ENABLE_BACK_NAVIGATION = "ENABLE_BACK";
+    public static final String EXTRA_ENABLE_BACK_NAVIGATION = "EXTRA_ENABLE_BACK_NAVIGATION";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
