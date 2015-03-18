@@ -53,7 +53,7 @@ public class PasswordPromptFragment extends Fragment {
         mUnlockButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                notifyIfUnlocked();
+                verifyPassword();
             }
         });
     }
@@ -77,7 +77,7 @@ public class PasswordPromptFragment extends Fragment {
             @Override
             public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
                 if (view.getText().length() > 0 && (event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE)) {
-                    notifyIfUnlocked();
+                    verifyPassword();
                     return true;
                 }
                 return false;
@@ -85,7 +85,7 @@ public class PasswordPromptFragment extends Fragment {
         });
     }
 
-    private void notifyIfUnlocked() {
+    private void verifyPassword() {
         if (isPasswordCorrect()) {
             mListener.onPasswordProtectionUnlocked();
         } else {
