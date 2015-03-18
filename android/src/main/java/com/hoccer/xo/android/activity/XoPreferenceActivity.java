@@ -68,19 +68,17 @@ public class XoPreferenceActivity extends PreferenceActivity
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 boolean oldValue = preferences.getBoolean(getString(R.string.preference_key_activate_passcode), false);
                 boolean activated = (Boolean) newValue;
-                if (oldValue == newValue) {
-                    return oldValue;
+                if (oldValue != newValue) {
+                    if (activated && !isPasswordSet()) {
+                        startSetPasswordActivityForResult();
+                    } else if (activated) {
+                        startPasswordPromptActivityForResult(ACTIVATE_PASSWORD);
+                    } else {
+                        startPasswordPromptActivityForResult(DEACTIVATE_PASSWORD);
+                    }
                 }
 
-                if (activated && !isPasswordSet()) {
-                    startSetPasswordActivityForResult();
-                } else if (activated) {
-                    startPasswordPromptActivityForResult(ACTIVATE_PASSWORD);
-                } else {
-                    startPasswordPromptActivityForResult(DEACTIVATE_PASSWORD);
-                }
-
-                return oldValue;
+                return false;
             }
         });
 
