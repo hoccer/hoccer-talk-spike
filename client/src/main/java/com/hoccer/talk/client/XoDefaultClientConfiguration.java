@@ -78,7 +78,7 @@ public abstract class XoDefaultClientConfiguration implements IXoClientConfigura
 
     @Override
     public float getReconnectBackoffVariableMaximum() {
-        return 120;
+        return 60;
     }
 
     @Override
