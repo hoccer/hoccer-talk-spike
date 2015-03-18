@@ -46,11 +46,10 @@ public class XoPreferenceActivity extends PreferenceActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        LOG.debug("onCreate()");
-        super.onCreate(savedInstanceState);
-
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         preferences.registerOnSharedPreferenceChangeListener(this);
+        LOG.debug("onCreate()");
+        super.onCreate(savedInstanceState);
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         if (XoApplication.getConfiguration().isDevelopmentModeEnabled()) {
