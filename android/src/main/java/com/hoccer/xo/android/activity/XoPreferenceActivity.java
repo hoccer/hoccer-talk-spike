@@ -17,6 +17,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.backup.*;
+import com.hoccer.xo.android.passwordprotection.PasswordProtection;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -88,7 +89,7 @@ public class XoPreferenceActivity extends PreferenceActivity
     }
 
     private boolean isPasswordSet() {
-        return getSharedPreferences(PasswordSetActivity.PASSCODE_PREFERENCES, MODE_PRIVATE).contains(PasswordSetActivity.PASSCODE);
+        return getSharedPreferences(PasswordProtection.PASSWORD_PROTECTION_PREFERENCES, MODE_PRIVATE).contains(PasswordProtection.PASSWORD_KEY);
     }
 
     @Override

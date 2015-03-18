@@ -9,9 +9,6 @@ import com.hoccer.xo.android.fragment.PasswordSetFragment;
 
 public class PasswordChangeActivity extends FragmentActivity implements PasswordPromptFragment.OnPasswordProtectionUnlockListener {
 
-    private static final String PASSWORD_PROMPT_FRAGMENT = "PASSWORD_PROMPT_FRAGMENT";
-    private static final String PASSWORD_SET_FRAGMENT = "PASSWORD_SET_FRAGMENT";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -21,7 +18,7 @@ public class PasswordChangeActivity extends FragmentActivity implements Password
 
     private void showPasswordPromptFragment() {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_fragment_container, new PasswordPromptFragment(), PASSWORD_PROMPT_FRAGMENT);
+        ft.replace(R.id.fl_fragment_container, new PasswordPromptFragment());
         ft.commit();
     }
 
@@ -32,7 +29,7 @@ public class PasswordChangeActivity extends FragmentActivity implements Password
 
     private void showPasswordSetFragment() {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_fragment_container, new PasswordSetFragment(), PASSWORD_SET_FRAGMENT);
+        ft.replace(R.id.fl_fragment_container, new PasswordSetFragment());
         ft.commit();
     }
 }

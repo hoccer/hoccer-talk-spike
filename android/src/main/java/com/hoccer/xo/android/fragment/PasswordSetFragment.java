@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
 import com.hoccer.xo.android.activity.PasswordSetActivity;
+import com.hoccer.xo.android.passwordprotection.PasswordProtection;
 
 public class PasswordSetFragment extends Fragment {
 
@@ -80,7 +81,7 @@ public class PasswordSetFragment extends Fragment {
 
                 if (passwordEntered.equals(passwordConfirmed)) {
                     String passCode = enterPasswordView.getText().toString();
-                    getActivity().getSharedPreferences(PasswordSetActivity.PASSCODE_PREFERENCES, Context.MODE_PRIVATE).edit().putString(PasswordSetActivity.PASSCODE, passCode).apply();
+                    getActivity().getSharedPreferences(PasswordProtection.PASSWORD_PROTECTION_PREFERENCES, Context.MODE_PRIVATE).edit().putString(PasswordProtection.PASSWORD_KEY, passCode).apply();
                     getActivity().setResult(Activity.RESULT_OK);
                     getActivity().finish();
                 } else {

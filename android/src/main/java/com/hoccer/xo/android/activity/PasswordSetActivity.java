@@ -9,9 +9,6 @@ import com.hoccer.xo.android.fragment.PasswordSetFragment;
 
 public class PasswordSetActivity extends FragmentActivity {
 
-    public static final String PASSCODE_PREFERENCES = "com.artcom.hoccer._preferences";
-    public static final String PASSCODE = "passcode";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
