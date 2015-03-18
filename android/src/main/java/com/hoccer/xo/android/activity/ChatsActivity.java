@@ -208,13 +208,20 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         LOG.debug("onBecameForeground()");
         getXoClient().setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
 
-        if (isPasswordProtectionActive() && getXoClient().getSelfContact().getSelf().isRegistrationConfirmed() && !((XoApplication) getApplication()).isActiveInBackground()) {
-            Intent intent = new Intent(this, PasswordPromptActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            startActivity(intent);
+        if (isPasswordProtectionActive()) {
+            startPasswordPromptActivity();
         }
 
         ((XoApplication) getApplication()).setActiveInBackground(false);
+    }
+
+    private void startPasswordPromptActivity() {
+        if (getXoClient().getSelfContact().getSelf().isRegistrationConfirmed() && !((XoApplication) getApplication()).isActiveInBackground()) {
+            Intent intent = new Intent(this, PasswordPromptActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            intent.putExtra(PasswordPromptActivity.EXTRA_ENABLE_BACK_NAVIGATION, false);
+            startActivity(intent);
+        }
     }
 
     private boolean isPasswordProtectionActive() {
