@@ -62,11 +62,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
         showProfileIfClientIsNotRegistered();
@@ -78,11 +73,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     protected void onPause() {
         super.onPause();
         unregisterListeners();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
     }
 
     @Override
