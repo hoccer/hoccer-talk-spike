@@ -215,6 +215,10 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         ((XoApplication) getApplication()).setActiveInBackground(false);
     }
 
+    private boolean isPasswordProtectionActive() {
+        return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.preference_key_activate_passcode), false);
+    }
+
     private void startPasswordPromptActivity() {
         if (getXoClient().getSelfContact().getSelf().isRegistrationConfirmed() && !((XoApplication) getApplication()).isActiveInBackground()) {
             Intent intent = new Intent(this, PasswordPromptActivity.class);
@@ -222,10 +226,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
             intent.putExtra(PasswordPromptActivity.EXTRA_ENABLE_BACK_NAVIGATION, false);
             startActivity(intent);
         }
-    }
-
-    private boolean isPasswordProtectionActive() {
-        return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.preference_key_activate_passcode), false);
     }
 
     @Override
