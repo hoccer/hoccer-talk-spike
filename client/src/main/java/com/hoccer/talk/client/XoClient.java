@@ -191,6 +191,13 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         ensureSelfContact();
     }
 
+    private static ObjectMapper createObjectMapper(JsonFactory jsonFactory) {
+        ObjectMapper result = new ObjectMapper(jsonFactory);
+        result.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        result.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        return result;
+    }
+
     private void createJsonRpcConnection(ObjectMapper rpcMapper) {
         mWebSocket = new JavaWebSocket(mClientHost.getKeyStore(), XoClientSslConfiguration.TLS_CIPHERS);
         mConnection = new JsonRpcWsConnection(mWebSocket, rpcMapper);
@@ -211,6 +218,39 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         } catch (SQLException e) {
             LOG.error("SQL error", e);
         }
+    }
+
+    /**
+     * Returns true if the client has been activated
+     * This is only true after an explicit call to connect().
+     *
+     * @return
+     */
+    public boolean isActivated() {
+        return mState > STATE_DISCONNECTED;
+    }
+
+    /**
+     * Returns true if the client is ready
+     * This means that the client is logged in and synced.
+     */
+    public boolean isReady() {
+        return mState >= STATE_READY;
+    }
+
+    /**
+     * Returns true if the client is logged in
+     */
+    public boolean isLoggedIn() {
+        return mState >= STATE_SYNCING;
+    }
+
+    /**
+     * Returns true if the client is awake
+     * This means that the client is trying to connect or connected.
+     */
+    public boolean isAwake() {
+        return mState > STATE_DISCONNECTED;
     }
 
     public boolean isRegistered() {
@@ -458,39 +498,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             LOG.error("Error while performing srp secret change request: ", e);
             return false;
         }
-    }
-
-    /**
-     * Returns true if the client has been activated
-     * This is only true after an explicit call to connect().
-     *
-     * @return
-     */
-    public boolean isActivated() {
-        return mState > STATE_DISCONNECTED;
-    }
-
-    /**
-     * Returns true if the client is ready
-     * This means that the client is logged in and synced.
-     */
-    public boolean isReady() {
-        return mState >= STATE_READY;
-    }
-
-    /**
-     * Returns true if the client is logged in
-     */
-    public boolean isLoggedIn() {
-        return mState >= STATE_SYNCING;
-    }
-
-    /**
-     * Returns true if the client is awake
-     * This means that the client is trying to connect or connected.
-     */
-    public boolean isAwake() {
-        return mState > STATE_DISCONNECTED;
     }
 
     /**
@@ -1061,13 +1068,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 }
             }
         });
-    }
-
-    private static ObjectMapper createObjectMapper(JsonFactory jsonFactory) {
-        ObjectMapper result = new ObjectMapper(jsonFactory);
-        result.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        result.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return result;
     }
 
     private void switchState(int newState, String message) {
