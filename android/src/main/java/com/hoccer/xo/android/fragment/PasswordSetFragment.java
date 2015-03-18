@@ -37,6 +37,8 @@ public class PasswordSetFragment extends Fragment {
         mEnterPasswordView = (EditText) view.findViewById(R.id.et_enter_passcode);
         mConfirmPasswordView = (EditText) view.findViewById(R.id.et_confirm_passcode);
 
+        mEnterPasswordView.requestFocus();
+
         registerTextChangeListenerOnEnterPasswordView();
         registerListenersOnConfirmPasswordView();
         registerClickListernOnSubmitButton();
