@@ -266,6 +266,9 @@
     <string name="preference_keysize_title">RSA Key Size</string>
     <string name="category">Category</string>
 
+    <string name="preference_key_activate_passcode">preference_activate_passcode</string>
+    <string name="preference_key_change_passcode">preference_change_passcode</string>
+
     <string name="pref_category_image_encoding">Image Attachment Compression</string>
     <string name="pref_image_size">Image size</string>
     <string name="pref_image_quality">Image quality</string>
@@ -411,6 +414,18 @@
     <string name="restore_no_backups_found_title">No backups found</string>
     <string name="restore_no_backups_found_message">Please copy a backup to\n%1$s\nto restore a former ${app.name.short} account.</string>
 
+    <!-- Passcode Protection -->
+    <string name="password_protection">Password protection</string>
+    <string name="activate">Activate</string>
+    <string name="unlock">Unlock</string>
+    <string name="change_password">Change password</string>
+    <string name="set_password">Set password</string>
+    <string name="password">Password</string>
+    <string name="password_note">Please note, that we cannot reset or restore your password.</string>
+    <string name="re_enter_password">Re-Enter your Password</string>
+    <string name="password_prompt_retry">Incorrect password. Please try again.</string>
+    <string name="passwords_not_matching">Passwords do not match. Please enter your password again.</string>
+
     <string name="connection_state_disconnected">disconnected</string>
     <string name="connection_state_login">logging in</string>
     <string name="connection_state_syncing">synchronizing</string>
@@ -423,20 +438,6 @@
     <string name="progress_cancelling">Cancelling..</string>
 
     <string name="nearby">nearby</string>
-
-    <string name="password_protection">Password protection</string>
-    <string name="activate">Activate</string>
-    <string name="unlock">Unlock</string>
-    <string name="change_password">Change password</string>
-    <string name="set_password">Set password</string>
-    <string name="password">Password</string>
-    <string name="password_note">Please note, that we cannot reset or restore your password.</string>
-    <string name="re_enter_password">Re-Enter your Password</string>
-
-    <string name="preference_key_activate_passcode">preference_activate_passcode</string>
-    <string name="preference_key_change_passcode">preference_change_passcode</string>
-    <string name="password_prompt_retry">Incorrect password. Please try again.</string>
-    <string name="passwords_not_matching">Passwords do not match. Please enter your password again.</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>
