@@ -67,7 +67,7 @@ public class PicasaContentCreator implements IContentCreator {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(contentUri.getPath().getBytes());
-            uriHash = Hex.encodeHexString(md.digest());
+            uriHash = new String(Hex.encodeHex(md.digest()));
         } catch (NoSuchAlgorithmException e) {
             LOG.error("Couldn't generate Hash for content uri path: " + contentUri.getPath());
             e.printStackTrace();
