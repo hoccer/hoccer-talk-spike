@@ -86,9 +86,9 @@ public class PasswordPromptFragment extends Fragment {
     }
 
     private void notifyIfUnlocked() {
-        String passcodeInput = mPasswordInputView.getText().toString();
-        String passcode = getActivity().getSharedPreferences(PasswordProtection.PASSWORD_PROTECTION_PREFERENCES, Context.MODE_PRIVATE).getString(PasswordProtection.PASSWORD_KEY, null);
-        if (passcodeInput.equals(passcode)) {
+        String passwordEntered = mPasswordInputView.getText().toString();
+        String password = getActivity().getSharedPreferences(PasswordProtection.PASSWORD_PROTECTION_PREFERENCES, Context.MODE_PRIVATE).getString(PasswordProtection.PASSWORD_KEY, null);
+        if (passwordEntered.equals(password)) {
             mListener.onPasswordProtectionUnlocked();
         } else {
             mPasswordInputView.getText().clear();
