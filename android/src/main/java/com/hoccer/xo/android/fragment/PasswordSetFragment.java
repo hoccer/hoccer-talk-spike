@@ -7,19 +7,24 @@ import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
-import com.hoccer.xo.android.activity.PasswordSetActivity;
 import com.hoccer.xo.android.passwordprotection.PasswordProtection;
 
 public class PasswordSetFragment extends Fragment {
 
     public static final String PASSWORD_SET_FRAGMENT = "PASSWORD_SET_FRAGMENT";
+    private EditText mEnterPasswordView;
+    private EditText mConfirmPasswordView;
+    private Button mSubmitButton;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -29,11 +34,17 @@ public class PasswordSetFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        final Button button = (Button) view.findViewById(R.id.btn_submit);
-        final EditText enterPasswordView = (EditText) view.findViewById(R.id.et_enter_passcode);
-        final EditText confirmPasswordView = (EditText) view.findViewById(R.id.et_confirm_passcode);
+        mSubmitButton = (Button) view.findViewById(R.id.btn_submit);
+        mEnterPasswordView = (EditText) view.findViewById(R.id.et_enter_passcode);
+        mConfirmPasswordView = (EditText) view.findViewById(R.id.et_confirm_passcode);
 
-        enterPasswordView.addTextChangedListener(new TextWatcher() {
+        registerTextChangeListenerOnEnterPasswordView();
+        registerListenersOnConfirmPasswordView();
+        registerClickListernOnSubmitButton();
+    }
+
+    private void registerTextChangeListenerOnEnterPasswordView() {
+        mEnterPasswordView.addTextChangedListener(new TextWatcher() {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
             }
@@ -44,17 +55,13 @@ public class PasswordSetFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (TextUtils.isEmpty(s)) {
-                    confirmPasswordView.setFocusableInTouchMode(false);
-                    confirmPasswordView.setFocusable(false);
-                } else {
-                    confirmPasswordView.setFocusableInTouchMode(true);
-                    confirmPasswordView.setFocusable(true);
-                }
+                updateConfirmPasswordView(s);
             }
         });
+    }
 
-        confirmPasswordView.addTextChangedListener(new TextWatcher() {
+    private void registerListenersOnConfirmPasswordView() {
+        mConfirmPasswordView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
@@ -64,32 +71,74 @@ public class PasswordSetFragment extends Fragment {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
-                if (TextUtils.isEmpty(s)) {
-                    button.setEnabled(false);
-                } else {
-                    button.setEnabled(true);
-                }
+            public void afterTextChanged(Editable editable) {
+                updateSubmitButton(editable);
             }
         });
 
-        button.setOnClickListener(new View.OnClickListener() {
+        mConfirmPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE)) {
+                    updatePasswordAndFinishIfCorrectlyConfirmed();
+                    return true;
+                }
+                return false;
+            }
+        });
+    }
+
+    private void registerClickListernOnSubmitButton() {
+        mSubmitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String passwordEntered = enterPasswordView.getText().toString();
-                String passwordConfirmed = confirmPasswordView.getText().toString();
-
-                if (passwordEntered.equals(passwordConfirmed)) {
-                    String passCode = enterPasswordView.getText().toString();
-                    getActivity().getSharedPreferences(PasswordProtection.PASSWORD_PROTECTION_PREFERENCES, Context.MODE_PRIVATE).edit().putString(PasswordProtection.PASSWORD_KEY, passCode).apply();
-                    getActivity().setResult(Activity.RESULT_OK);
-                    getActivity().finish();
-                } else {
-                    enterPasswordView.getText().clear();
-                    confirmPasswordView.getText().clear();
-                    Toast.makeText(getActivity(), getActivity().getString(R.string.passwords_not_matching), Toast.LENGTH_SHORT).show();
-                }
+                updatePasswordAndFinishIfCorrectlyConfirmed();
             }
         });
+    }
+
+    private void updateSubmitButton(CharSequence charSequence) {
+        if (TextUtils.isEmpty(charSequence)) {
+            mSubmitButton.setEnabled(false);
+        } else {
+            mSubmitButton.setEnabled(true);
+        }
+    }
+
+    private void updateConfirmPasswordView(Editable s) {
+        if (TextUtils.isEmpty(s)) {
+            mConfirmPasswordView.setFocusableInTouchMode(false);
+            mConfirmPasswordView.setFocusable(false);
+        } else {
+            mConfirmPasswordView.setFocusableInTouchMode(true);
+            mConfirmPasswordView.setFocusable(true);
+        }
+    }
+
+    private void updatePasswordAndFinishIfCorrectlyConfirmed() {
+        if (correctlyConfirmed()) {
+            updatePasswordAndFinish();
+        } else {
+            clearInputFields();
+            Toast.makeText(getActivity(), getActivity().getString(R.string.passwords_not_matching), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private boolean correctlyConfirmed() {
+        String passwordEntered = mEnterPasswordView.getText().toString();
+        String passwordConfirmed = mConfirmPasswordView.getText().toString();
+        return passwordEntered.equals(passwordConfirmed);
+    }
+
+    private void updatePasswordAndFinish() {
+        String passCode = mEnterPasswordView.getText().toString();
+        getActivity().getSharedPreferences(PasswordProtection.PASSWORD_PROTECTION_PREFERENCES, Context.MODE_PRIVATE).edit().putString(PasswordProtection.PASSWORD_KEY, passCode).apply();
+        getActivity().setResult(Activity.RESULT_OK);
+        getActivity().finish();
+    }
+
+    private void clearInputFields() {
+        mEnterPasswordView.getText().clear();
+        mConfirmPasswordView.getText().clear();
     }
 }

@@ -7,19 +7,23 @@ import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
-import com.hoccer.xo.android.activity.PasswordSetActivity;
 import com.hoccer.xo.android.passwordprotection.PasswordProtection;
 
 public class PasswordPromptFragment extends Fragment {
 
     OnPasswordProtectionUnlockListener mListener;
+    private Button mUnlockButton;
+    private EditText mPasswordInputView;
 
     public interface OnPasswordProtectionUnlockListener {
         public void onPasswordProtectionUnlocked();
@@ -39,11 +43,23 @@ public class PasswordPromptFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mPasswordInputView = (EditText) view.findViewById(R.id.et_enter_passcode);
+        mUnlockButton = (Button) view.findViewById(R.id.btn_unlock);
+        registerListenersOnPasswordInputView();
+        registerClickListenerOnUnlockButton();
+    }
 
-        final Button button = (Button) view.findViewById(R.id.btn_unlock);
-        final EditText passcodeInputView = (android.widget.EditText) view.findViewById(R.id.et_enter_passcode);
+    private void registerClickListenerOnUnlockButton() {
+        mUnlockButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                notifyIfUnlocked();
+            }
+        });
+    }
 
-        passcodeInputView.addTextChangedListener(new TextWatcher() {
+    private void registerListenersOnPasswordInputView() {
+        mPasswordInputView.addTextChangedListener(new TextWatcher() {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
             }
@@ -53,26 +69,37 @@ public class PasswordPromptFragment extends Fragment {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
-                if (TextUtils.isEmpty(s)) {
-                    button.setEnabled(false);
-                } else {
-                    button.setEnabled(true);
-                }
+            public void afterTextChanged(Editable charSequence) {
+                updateUnlockButton(charSequence);
             }
         });
-
-        button.setOnClickListener(new View.OnClickListener() {
+        mPasswordInputView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
-            public void onClick(View v) {
-                String passcodeInput = passcodeInputView.getText().toString();
-                String passcode = getActivity().getSharedPreferences(PasswordProtection.PASSWORD_PROTECTION_PREFERENCES, Context.MODE_PRIVATE).getString(PasswordProtection.PASSWORD_KEY, null);
-                if (passcodeInput.equals(passcode)) {
-                    mListener.onPasswordProtectionUnlocked();
-                } else {
-                    Toast.makeText(getActivity(), getActivity().getString(R.string.password_prompt_retry), Toast.LENGTH_SHORT).show();
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE)) {
+                    notifyIfUnlocked();
+                    return true;
                 }
+                return false;
             }
         });
+    }
+
+    private void notifyIfUnlocked() {
+        String passcodeInput = mPasswordInputView.getText().toString();
+        String passcode = getActivity().getSharedPreferences(PasswordProtection.PASSWORD_PROTECTION_PREFERENCES, Context.MODE_PRIVATE).getString(PasswordProtection.PASSWORD_KEY, null);
+        if (passcodeInput.equals(passcode)) {
+            mListener.onPasswordProtectionUnlocked();
+        } else {
+            Toast.makeText(getActivity(), getActivity().getString(R.string.password_prompt_retry), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void updateUnlockButton(CharSequence charSequence) {
+        if (TextUtils.isEmpty(charSequence)) {
+            mUnlockButton.setEnabled(false);
+        } else {
+            mUnlockButton.setEnabled(true);
+        }
     }
 }

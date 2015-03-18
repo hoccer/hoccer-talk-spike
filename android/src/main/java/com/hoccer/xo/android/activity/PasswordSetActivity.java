@@ -22,4 +22,3 @@ public class PasswordSetActivity extends FragmentActivity {
         ft.commit();
     }
 }
-
