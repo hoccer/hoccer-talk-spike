@@ -508,7 +508,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
      * Connect the client, allowing it do operate
      */
     public void connect() {
-        LOG.debug("client: connect()");
+        LOG.debug("connect()");
         if (mState == STATE_DISCONNECTED) {
             switchState(STATE_CONNECTING, "connecting client");
         }
@@ -518,7 +518,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
      * Deactivate the client, shutting it down completely
      */
     public void disconnect() {
-        LOG.debug("client: disconnect()");
+        LOG.debug("disconnect()");
         switchState(STATE_DISCONNECTED, "disconnecting client");
     }
 
