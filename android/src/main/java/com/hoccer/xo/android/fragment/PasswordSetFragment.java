@@ -78,8 +78,8 @@ public class PasswordSetFragment extends Fragment {
 
         mConfirmPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE)) {
+            public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
+                if (view.getText().length() > 0 && (event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE)) {
                     updatePasswordAndFinishIfCorrectlyConfirmed();
                     return true;
                 }
