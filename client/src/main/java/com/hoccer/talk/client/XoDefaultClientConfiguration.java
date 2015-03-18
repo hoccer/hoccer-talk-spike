@@ -68,7 +68,7 @@ public abstract class XoDefaultClientConfiguration implements IXoClientConfigura
 
     @Override
     public float getReconnectBackoffFixedDelay() {
-        return 3;
+        return 2;
     }
 
     @Override
