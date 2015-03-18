@@ -532,15 +532,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         return new Date(new Date().getTime() + this.serverTimeDiff);
     }
 
-    public void scheduleHello() {
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                hello();
-            }
-        });
-    }
-
     public void hello() {
         try {
             TalkClientInfo clientInfo = new TalkClientInfo();
