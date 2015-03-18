@@ -137,13 +137,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
      * Create a Hoccer Talk client using the given client database
      */
     public XoClient(IXoClientHost host, IXoClientConfiguration configuration) {
-        mClientConfiguration = configuration;
-        initialize(host);
-    }
-
-    public void initialize(IXoClientHost host) {
-        // remember the host
         mClientHost = host;
+        mClientConfiguration = configuration;
 
         // fetch executor and db immediately
         mExecutor = host.getBackgroundExecutor();
@@ -205,7 +200,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             mConnection.setSendBinaryMessages(true);
         }
     }
-
 
     private void ensureSelfContact() {
         try {
