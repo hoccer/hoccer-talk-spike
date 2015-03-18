@@ -10,7 +10,6 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -59,7 +58,6 @@ public class PasswordPromptFragment extends Fragment {
                 } else {
                     button.setEnabled(true);
                 }
-
             }
         });
 
@@ -71,7 +69,7 @@ public class PasswordPromptFragment extends Fragment {
                 if (passcodeInput.equals(passcode)) {
                     mListener.onPasswordProtectionUnlocked();
                 } else {
-                    Toast.makeText(getActivity(), getActivity().getString(R.string.password_prompt_retry), Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), getActivity().getString(R.string.password_prompt_retry), Toast.LENGTH_SHORT).show();
                 }
             }
         });

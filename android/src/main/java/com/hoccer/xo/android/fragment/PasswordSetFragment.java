@@ -86,7 +86,7 @@ public class PasswordSetFragment extends Fragment {
                 } else {
                     enterPasswordView.getText().clear();
                     confirmPasswordView.getText().clear();
-                    Toast.makeText(getActivity(), getActivity().getString(R.string.passwords_not_matching), Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), getActivity().getString(R.string.passwords_not_matching), Toast.LENGTH_SHORT).show();
                 }
             }
         });
