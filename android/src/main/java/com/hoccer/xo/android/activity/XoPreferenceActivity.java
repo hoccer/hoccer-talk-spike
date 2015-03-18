@@ -118,6 +118,13 @@ public class XoPreferenceActivity extends PreferenceActivity
             PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(getString(R.string.preference_key_activate_passcode), false).apply();
             ((SwitchPreference) findPreference(getString(R.string.preference_key_activate_passcode))).setChecked(false);
         }
+
+        Intent intent = getIntent();
+        overridePendingTransition(0, 0);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        finish();
+        overridePendingTransition(0, 0);
+        startActivity(intent);
     }
 
     @Override
