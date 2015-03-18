@@ -125,7 +125,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     int mState;
 
     // Count connections attempts for back-off
-    int mNumConnectionAttempts;
+    int mConnectBackoffPotency;
 
     // temporary group for geolocation grouping
     String mEnvironmentGroupId;
@@ -1073,7 +1073,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             mState = newState;
 
             if (mState == STATE_DISCONNECTED) {
-                mNumConnectionAttempts = 0;
+                mConnectBackoffPotency = 0;
                 scheduleDisconnect();
             } else {
                 cancelDisconnect();
@@ -1104,7 +1104,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             }
 
             if (mState == STATE_READY) {
-                mNumConnectionAttempts = 0;
+                mConnectBackoffPotency = 0;
                 mExecutor.execute(new Runnable() {
                     @Override
                     public void run() {
@@ -1165,29 +1165,26 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         LOG.debug("scheduleConnect()");
         cancelConnect();
 
-        int backoffDelay;
-        if (mNumConnectionAttempts > 0) {
+        long backoffDelay;
+        if (mConnectBackoffPotency > 0) {
             // compute the backoff factor
-            int variableFactor = 1 << mNumConnectionAttempts;
+            int variableFactor = 1 << mConnectBackoffPotency;
 
             // compute variable backoff component
-            double variableTime = Math.random() * Math.min(mClientConfiguration.getReconnectBackoffVariableMaximum(), variableFactor * mClientConfiguration.getReconnectBackoffVariableFactor());
+            double variableBackoff = Math.random() * Math.min(mClientConfiguration.getReconnectBackoffVariableMaximum(), variableFactor * mClientConfiguration.getReconnectBackoffVariableFactor());
 
-            // compute total backoff
-            double totalTime = mClientConfiguration.getReconnectBackoffFixedDelay() + variableTime;
-            LOG.debug("connection attempt backed off by " + totalTime + " seconds");
-
-            backoffDelay = (int) Math.round(1000.0 * totalTime);
+            backoffDelay = (long) ((mClientConfiguration.getReconnectBackoffFixedDelay() + variableBackoff) * 1000);
+            LOG.debug("connection attempt backed off by " + backoffDelay + " milliseconds");
         } else {
             backoffDelay = 0;
         }
 
-        mNumConnectionAttempts++;
         mConnectFuture = mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
                 try {
                     mConnectFuture = null;
+                    mConnectBackoffPotency++;
                     doConnect();
                 } catch (Exception e) {
                     LOG.error("Exception while connecting", e);
@@ -1503,6 +1500,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     public void onClose(JsonRpcConnection connection) {
         LOG.debug("onClose()");
         if (mState != STATE_DISCONNECTED) {
+            // ensure backoff counter > 0 to delay reconnect
+            if (mConnectBackoffPotency == 0) {
+                mConnectBackoffPotency = 1;
+            }
             switchState(STATE_CONNECTING, "reconnect after connection closed");
         }
     }
