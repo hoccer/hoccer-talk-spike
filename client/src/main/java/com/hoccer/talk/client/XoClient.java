@@ -1390,7 +1390,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
             for (int i = 0; i < groupContacts.size(); i++) {
                 TalkClientContact groupContact = groupContacts.get(i);
-                try {
                     LOG.debug("sync: membership in group (" + groupContact.getGroupId() + ") : '" + groupMembershipFlags[i] + "'");
 
                     if (groupMembershipFlags[i]) {
@@ -1421,15 +1420,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                             listener.onGroupPresenceChanged(groupContact);
                         }
                     }
-                } catch (JsonRpcClientException e) {
-                    LOG.error("Error while updating group member: ", e);
-                } catch (RuntimeException e) {
-                    LOG.error("Error while updating group members: ", e);
-                }
             }
         }
 
-        // ensure we are finished with generating pub/private keys before actually becoming ready...
+        // ensure we are finished with generating pub/private keys
         sendPresenceFuture.get();
     }
 
