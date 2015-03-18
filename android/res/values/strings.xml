@@ -266,9 +266,6 @@
     <string name="preference_keysize_title">RSA Key Size</string>
     <string name="category">Category</string>
 
-    <string name="preference_key_activate_passcode">preference_activate_passcode</string>
-    <string name="preference_key_change_passcode">preference_change_passcode</string>
-
     <string name="pref_category_image_encoding">Image Attachment Compression</string>
     <string name="pref_image_size">Image size</string>
     <string name="pref_image_quality">Image quality</string>

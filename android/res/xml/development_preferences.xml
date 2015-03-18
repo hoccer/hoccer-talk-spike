@@ -38,10 +38,10 @@
         <Preference
                 android:enabled="false"
                 android:title="@string/change_password"
-                android:key="preference_change_passcode">
+                android:key="@string/preference_key_change_passcode">
         </Preference>
         <SwitchPreference android:title="@string/activate"
-                          android:key="preference_activate_passcode"
+                          android:key="@string/preference_key_activate_passcode"
                           android:defaultValue="false"/>
     </PreferenceCategory>
 
