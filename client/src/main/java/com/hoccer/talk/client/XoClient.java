@@ -1321,8 +1321,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         String Vc = new String(Hex.encodeHex(vc.calculateVerifier()));
         String Vs = mServerRpc.srpPhase2(Vc);
         vc.verifyServer(Hex.decodeHex(Vs.toCharArray()));
-
-        throw new IllegalStateException("test");
     }
 
     private void scheduleSync() {
