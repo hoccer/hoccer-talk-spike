@@ -305,7 +305,7 @@ public class ContentRegistry {
             return;
         }
 
-        ((XoApplication)xoActivity.getApplication()).stayActiveInBackground();
+        ((XoApplication)xoActivity.getApplication()).setActiveInBackground(true);
         try {
             fragment.startActivityForResult(intent, requestCode);
         } catch (ActivityNotFoundException e) {

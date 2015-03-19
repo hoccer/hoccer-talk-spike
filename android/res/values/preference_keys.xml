@@ -2,4 +2,6 @@
 <resources>
     <string name="preference_key_create_backup">preference_key_create_backup</string>
     <string name="preference_key_restore_backup">preference_key_restore_backup</string>
+    <string name="preference_key_activate_passcode">preference_key_activate_passcode</string>
+    <string name="preference_key_change_passcode">preference_key_change_passcode</string>
 </resources>

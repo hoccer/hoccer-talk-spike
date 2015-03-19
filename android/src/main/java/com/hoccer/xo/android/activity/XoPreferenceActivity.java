@@ -9,10 +9,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.preference.Preference;
-import android.preference.PreferenceActivity;
-import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
+import android.preference.*;
 import android.view.*;
 import android.widget.ListAdapter;
 import android.widget.Toast;
@@ -20,6 +17,10 @@ import com.artcom.hoccer.R;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.backup.*;
+import com.hoccer.xo.android.passwordprotection.activity.PasswordChangeActivity;
+import com.hoccer.xo.android.passwordprotection.activity.PasswordPromptActivity;
+import com.hoccer.xo.android.passwordprotection.PasswordProtection;
+import com.hoccer.xo.android.passwordprotection.activity.PasswordSetActivity;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -35,6 +36,10 @@ public class XoPreferenceActivity extends PreferenceActivity
 
     private static final String CREDENTIALS_TRANSFER_FILE = "credentials.json";
 
+    private static final int REQUEST_SET_PASSWORD = 1;
+    private static final int REQUEST_ACTIVATE_PASSWORD = 2;
+    private static final int REQUEST_DEACTIVATE_PASSWORD = 3;
+
     private AttachmentTransferControlView mSpinner;
 
     private Handler mDialogDismisser;
@@ -44,10 +49,11 @@ public class XoPreferenceActivity extends PreferenceActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         preferences.registerOnSharedPreferenceChangeListener(this);
         LOG.debug("onCreate()");
         super.onCreate(savedInstanceState);
+
         getActionBar().setDisplayHomeAsUpEnabled(true);
         if (XoApplication.getConfiguration().isDevelopmentModeEnabled()) {
             addPreferencesFromResource(R.xml.development_preferences);
@@ -56,9 +62,77 @@ public class XoPreferenceActivity extends PreferenceActivity
         }
         getListView().setBackgroundColor(Color.WHITE);
 
-        BackupPreference createBackupPreference = (BackupPreference) findPreference(getString(R.string.preference_key_create_backup));
-        BackupPreference restoreBackupPreference = (BackupPreference) findPreference(getString(R.string.preference_key_restore_backup));
+        final BackupPreference createBackupPreference = (BackupPreference) findPreference(getString(R.string.preference_key_create_backup));
+        final BackupPreference restoreBackupPreference = (BackupPreference) findPreference(getString(R.string.preference_key_restore_backup));
+
+        SwitchPreference activatePasswordPreference = (SwitchPreference) findPreference(getString(R.string.preference_key_activate_passcode));
+        activatePasswordPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                boolean oldValue = preferences.getBoolean(getString(R.string.preference_key_activate_passcode), false);
+                if (oldValue != newValue) {
+                    boolean activatePassword = (Boolean) newValue;
+                    if (activatePassword && !isPasswordSet()) {
+                        startSetPasswordActivityForResult();
+                    } else if (activatePassword) {
+                        startPasswordPromptActivityForResult(REQUEST_ACTIVATE_PASSWORD);
+                    } else {
+                        startPasswordPromptActivityForResult(REQUEST_DEACTIVATE_PASSWORD);
+                    }
+                }
+
+                return false;
+            }
+        });
+
         mBackupController = new BackupController(this, createBackupPreference, restoreBackupPreference);
+    }
+
+    private boolean isPasswordSet() {
+        return getSharedPreferences(PasswordProtection.PASSWORD_PROTECTION_PREFERENCES, MODE_PRIVATE).contains(PasswordProtection.PASSWORD_KEY);
+    }
+
+    private void startSetPasswordActivityForResult() {
+        Intent intent = new Intent(this, PasswordSetActivity.class);
+        startActivityForResult(intent, REQUEST_SET_PASSWORD);
+    }
+
+    private void startPasswordPromptActivityForResult(int requestCode) {
+        Intent intent = new Intent(this, PasswordPromptActivity.class);
+        intent.putExtra(PasswordPromptActivity.EXTRA_ENABLE_BACK_NAVIGATION, true);
+        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        startActivityForResult(intent, requestCode);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_SET_PASSWORD && resultCode == RESULT_OK) {
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(getString(R.string.preference_key_activate_passcode), true).apply();
+            findPreference(getString(R.string.preference_key_change_passcode)).setEnabled(true);
+            restartActivityWithoutAnimation();
+        }
+        if (requestCode == REQUEST_ACTIVATE_PASSWORD && resultCode == RESULT_OK) {
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(getString(R.string.preference_key_activate_passcode), true).apply();
+            restartActivityWithoutAnimation();
+        }
+        if (requestCode == REQUEST_DEACTIVATE_PASSWORD && resultCode == RESULT_OK) {
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(getString(R.string.preference_key_activate_passcode), false).apply();
+            restartActivityWithoutAnimation();
+        }
+    }
+
+    /*
+     * This is a workaround for some devices, e.g. HTC One, to update ui components respective to its preference state
+     */
+    private void restartActivityWithoutAnimation() {
+        finish();
+        overridePendingTransition(0, 0);
+        Intent intent = getIntent();
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
     }
 
     @Override
@@ -78,6 +152,10 @@ public class XoPreferenceActivity extends PreferenceActivity
     @Override
     protected void onResume() {
         super.onResume();
+
+        if (isPasswordSet()) {
+            findPreference(getString(R.string.preference_key_change_passcode)).setEnabled(true);
+        }
 
         mBackupController.handleIntent(getIntent());
         mBackupController.registerAndBind();
@@ -190,9 +268,17 @@ public class XoPreferenceActivity extends PreferenceActivity
         } else if ("preference_database_dump".equals(preference.getKey())) {
             dumpDatabase();
             return true;
+        } else if (getString(R.string.preference_key_change_passcode).equals(preference.getKey())) {
+            startChangePasscodeActivity();
+            return true;
         }
 
         return super.onPreferenceTreeClick(preferenceScreen, preference);
+    }
+
+    private void startChangePasscodeActivity() {
+        Intent intent = new Intent(this, PasswordChangeActivity.class);
+        startActivity(intent);
     }
 
     private void showImportCredentialsDialog() {

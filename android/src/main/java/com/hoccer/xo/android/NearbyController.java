@@ -15,7 +15,6 @@ import com.hoccer.talk.client.XoClient;
 import com.hoccer.xo.android.activity.ChatsActivity;
 import com.hoccer.xo.android.nearby.EnvironmentUpdater;
 import com.hoccer.xo.android.service.NotificationId;
-import com.hoccer.xo.android.util.IntentHelper;
 import org.apache.log4j.Logger;
 
 public class NearbyController implements BackgroundManager.Listener {
@@ -81,7 +80,7 @@ public class NearbyController implements BackgroundManager.Listener {
 
     @Override
     public void onBecameBackground() {
-        if (mNearbyEnabled && !XoApplication.get().getStayActiveInBackground()) {
+        if (mNearbyEnabled && !XoApplication.get().isActiveInBackground()) {
             final int timeout = XoApplication.getConfiguration().getBackgroundNearbyTimeoutSeconds();
             mNearbyTimeout = new Runnable() {
                 @Override
