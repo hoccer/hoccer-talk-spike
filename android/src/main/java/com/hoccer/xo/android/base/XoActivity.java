@@ -194,7 +194,13 @@ public abstract class XoActivity extends FragmentActivity {
 
         if (requestCode == REQUEST_SELECT_AVATAR) {
             if (mAvatarSelection != null) {
-                startExternalActivityForResult(ImageSelector.createCropIntent(intent.getData()), REQUEST_CROP_AVATAR);
+                final Intent finalIntent = intent;
+                new Handler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        startExternalActivityForResult(ImageSelector.createCropIntent(finalIntent.getData()), REQUEST_CROP_AVATAR);
+                    }
+                });
             }
         } else if (requestCode == REQUEST_CROP_AVATAR) {
             intent = selectedAvatarPreProcessing(intent);
