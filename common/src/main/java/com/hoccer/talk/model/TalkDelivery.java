@@ -497,9 +497,35 @@ public class TalkDelivery {
     }
 
     public void expireDelivery() {
+        if (STATE_DELIVERED_OLD.equals(state)) {
+            state = STATE_DELIVERED_PRIVATE_ACKNOWLEDGED;
+        }
+        if (STATE_DELIVERED_PRIVATE.equals(state)) {
+            state = STATE_DELIVERED_PRIVATE_ACKNOWLEDGED;
+        }
+        if (STATE_DELIVERED_UNSEEN.equals(state)) {
+            state = STATE_DELIVERED_UNSEEN_ACKNOWLEDGED;
+        }
+        if (STATE_DELIVERED_SEEN.equals(state)) {
+            state = STATE_DELIVERED_SEEN_ACKNOWLEDGED;
+        }
+        if (STATE_FAILED.equals(state)) {
+            state = STATE_FAILED_ACKNOWLEDGED;
+        }
+        if (STATE_ABORTED.equals(state)) {
+            state = STATE_ABORTED_ACKNOWLEDGED;
+        }
+        if (STATE_REJECTED.equals(state)) {
+            state = STATE_REJECTED_ACKNOWLEDGED;
+        }
         if (!isFinalState(state)) {
             state = STATE_EXPIRED;
         }
+
+        if (ATTACHMENT_STATE_RECEIVED.equals(attachmentState)) {
+            attachmentState = ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED;
+        }
+
         if (!isFinalAttachmentState(attachmentState)) {
             attachmentState = ATTACHMENT_STATE_EXPIRED;
         }
