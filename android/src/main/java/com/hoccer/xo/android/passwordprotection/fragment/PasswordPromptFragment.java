@@ -21,7 +21,10 @@ import com.hoccer.xo.android.passwordprotection.PasswordProtection;
 
 public class PasswordPromptFragment extends Fragment {
 
+    public static final String ARG_HINT_STRING_ID = "ARG_HINT_STRING_ID";
+
     OnPasswordProtectionUnlockListener mListener;
+
     private Button mUnlockButton;
     private EditText mPasswordInputView;
 
@@ -45,8 +48,15 @@ public class PasswordPromptFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mPasswordInputView = (EditText) view.findViewById(R.id.et_enter_passcode);
         mUnlockButton = (Button) view.findViewById(R.id.btn_unlock);
+        updatePasswordInputHint();
         registerListenersOnPasswordInputView();
         registerClickListenerOnUnlockButton();
+    }
+
+    private void updatePasswordInputHint() {
+        if (getArguments() != null && getArguments().containsKey(ARG_HINT_STRING_ID)) {
+            mPasswordInputView.setHint(getArguments().getInt(ARG_HINT_STRING_ID));
+        }
     }
 
     private void registerClickListenerOnUnlockButton() {
