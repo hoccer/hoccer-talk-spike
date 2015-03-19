@@ -114,9 +114,9 @@ public abstract class XoActivity extends FragmentActivity {
             return;
         }
 
-        ((XoApplication) getApplication()).setActiveInBackground(true);
         try {
             startActivity(intent);
+            ((XoApplication) getApplication()).setActiveInBackground(true);
         } catch (ActivityNotFoundException e) {
             Toast.makeText(this, R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
             e.printStackTrace();
@@ -129,9 +129,9 @@ public abstract class XoActivity extends FragmentActivity {
             return;
         }
 
-        ((XoApplication) getApplication()).setActiveInBackground(true);
         try {
             startActivityForResult(intent, requestCode);
+            ((XoApplication) getApplication()).setActiveInBackground(true);
         } catch (ActivityNotFoundException e) {
             Toast.makeText(this, R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
             e.printStackTrace();
