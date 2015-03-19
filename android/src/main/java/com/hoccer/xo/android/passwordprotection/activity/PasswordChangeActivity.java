@@ -17,8 +17,14 @@ public class PasswordChangeActivity extends FragmentActivity implements Password
     }
 
     private void showPasswordPromptFragment() {
+        PasswordPromptFragment fragment = new PasswordPromptFragment();
+
+        Bundle bundle = new Bundle();
+        bundle.putInt(PasswordPromptFragment.ARG_HINT_STRING_ID, R.string.old_password);
+        fragment.setArguments(bundle);
+
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_fragment_container, new PasswordPromptFragment());
+        ft.replace(R.id.fl_fragment_container, fragment);
         ft.commit();
     }
 
