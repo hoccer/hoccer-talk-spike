@@ -110,24 +110,26 @@ public class XoPreferenceActivity extends PreferenceActivity
 
         if (requestCode == REQUEST_SET_PASSWORD && resultCode == RESULT_OK) {
             PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(getString(R.string.preference_key_activate_passcode), true).apply();
-            ((SwitchPreference) findPreference(getString(R.string.preference_key_activate_passcode))).setChecked(true);
             findPreference(getString(R.string.preference_key_change_passcode)).setEnabled(true);
+            restartActivityWithoutAnimation();
         }
         if (requestCode == REQUEST_ACTIVATE_PASSWORD && resultCode == RESULT_OK) {
             PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(getString(R.string.preference_key_activate_passcode), true).apply();
-            ((SwitchPreference) findPreference(getString(R.string.preference_key_activate_passcode))).setChecked(true);
+            restartActivityWithoutAnimation();
         }
         if (requestCode == REQUEST_DEACTIVATE_PASSWORD && resultCode == RESULT_OK) {
             PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(getString(R.string.preference_key_activate_passcode), false).apply();
-            ((SwitchPreference) findPreference(getString(R.string.preference_key_activate_passcode))).setChecked(false);
+            restartActivityWithoutAnimation();
         }
+    }
 
-        Intent intent = getIntent();
-        overridePendingTransition(0, 0);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+    private void restartActivityWithoutAnimation() {
         finish();
         overridePendingTransition(0, 0);
+        Intent intent = getIntent();
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         startActivity(intent);
+        overridePendingTransition(0, 0);
     }
 
     @Override
