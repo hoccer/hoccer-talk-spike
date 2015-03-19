@@ -1167,9 +1167,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             int variableFactor = 1 << mConnectBackoffPotency;
 
             // compute variable backoff component
-            double variableBackoff = Math.random() * Math.min(mClientConfiguration.getReconnectBackoffVariableMaximum(), variableFactor * mClientConfiguration.getReconnectBackoffVariableFactor());
+            double variableBackoff = Math.min(mClientConfiguration.getReconnectBackoffVariableMaximum(), variableFactor * mClientConfiguration.getReconnectBackoffVariableFactor());
+            double variableDeltaBackoff = Math.max(0, randomizedDelta(variableBackoff, 0.2));
 
-            backoffDelay = (long) ((mClientConfiguration.getReconnectBackoffFixedDelay() + variableBackoff) * 1000);
+            backoffDelay = (long) ((mClientConfiguration.getReconnectBackoffFixedDelay() + variableDeltaBackoff) * 1000);
             LOG.debug("connection attempt backed off by " + backoffDelay + " milliseconds");
         } else {
             backoffDelay = 0;
@@ -1188,6 +1189,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 }
             }
         }, backoffDelay, TimeUnit.MILLISECONDS);
+    }
+
+    private static double randomizedDelta(double value, double relativeDelta) {
+        return (Math.random() * relativeDelta * 2 - relativeDelta) * value + value;
     }
 
     private void cancelConnect() {
@@ -1316,6 +1321,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         String Vc = new String(Hex.encodeHex(vc.calculateVerifier()));
         String Vs = mServerRpc.srpPhase2(Vc);
         vc.verifyServer(Hex.decodeHex(Vs.toCharArray()));
+
+        throw new IllegalStateException("test");
     }
 
     private void scheduleSync() {
