@@ -1121,8 +1121,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 cancelKeepAlive();
             }
 
-                for (IXoStateListener listener : mStateListeners) {
-                        listener.onClientStateChange(XoClient.this, newState);
+            for (IXoStateListener listener : mStateListeners) {
+                listener.onClientStateChange(XoClient.this, newState);
             }
         } else {
             LOG.debug("[switchState() connection #" + mConnection.getConnectionId() + "]: state remains " + getStateString() + " (" + message + ")");
@@ -1388,36 +1388,36 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
             for (int i = 0; i < groupContacts.size(); i++) {
                 TalkClientContact groupContact = groupContacts.get(i);
-                    LOG.debug("sync: membership in group (" + groupContact.getGroupId() + ") : '" + groupMembershipFlags[i] + "'");
+                LOG.debug("sync: membership in group (" + groupContact.getGroupId() + ") : '" + groupMembershipFlags[i] + "'");
 
-                    if (groupMembershipFlags[i]) {
-                        TalkGroupMembership[] memberships = mServerRpc.getGroupMembers(groupContact.getGroupId(), never);
-                        for (TalkGroupMembership membership : memberships) {
-                            updateGroupMembership(membership);
-                        }
+                if (groupMembershipFlags[i]) {
+                    TalkGroupMembership[] memberships = mServerRpc.getGroupMembers(groupContact.getGroupId(), never);
+                    for (TalkGroupMembership membership : memberships) {
+                        updateGroupMembership(membership);
+                    }
+                } else {
+                    TalkGroupPresence groupPresence = groupContact.getGroupPresence();
+                    if (groupPresence != null && groupPresence.isTypeNearby()) {
+                        destroyNearbyGroup(groupContact);
                     } else {
-                        TalkGroupPresence groupPresence = groupContact.getGroupPresence();
-                        if (groupPresence != null && groupPresence.isTypeNearby()) {
-                            destroyNearbyGroup(groupContact);
-                        } else {
-                            if (groupPresence != null) {
-                                groupPresence.setState(TalkGroupPresence.STATE_DELETED);
-                                mDatabase.saveGroupPresence(groupPresence);
-                            }
-
-                            // update group member state
-                            List<TalkGroupMembership> memberships = mDatabase.findMembershipsInGroup(groupContact.getGroupId());
-                            for (TalkGroupMembership membership : memberships) {
-                                membership.setState(TalkGroupMembership.STATE_GROUP_REMOVED);
-                                mDatabase.saveGroupMembership(membership);
-                            }
+                        if (groupPresence != null) {
+                            groupPresence.setState(TalkGroupPresence.STATE_DELETED);
+                            mDatabase.saveGroupPresence(groupPresence);
                         }
 
-                        for (IXoContactListener listener : mContactListeners) {
-                            listener.onGroupMembershipChanged(groupContact);
-                            listener.onGroupPresenceChanged(groupContact);
+                        // update group member state
+                        List<TalkGroupMembership> memberships = mDatabase.findMembershipsInGroup(groupContact.getGroupId());
+                        for (TalkGroupMembership membership : memberships) {
+                            membership.setState(TalkGroupMembership.STATE_GROUP_REMOVED);
+                            mDatabase.saveGroupMembership(membership);
                         }
                     }
+
+                    for (IXoContactListener listener : mContactListeners) {
+                        listener.onGroupMembershipChanged(groupContact);
+                        listener.onGroupPresenceChanged(groupContact);
+                    }
+                }
             }
         }
 
@@ -1742,7 +1742,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             LOG.debug("server: groupMemberUpdated(" + membership.getGroupId() + "/" + membership.getClientId() + ")");
             updateGroupMembership(membership);
         }
-
     }
 
     private void performDeliveries(final List<TalkClientMessage> clientMessages) {
