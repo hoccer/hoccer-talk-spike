@@ -114,9 +114,9 @@ public abstract class XoActivity extends FragmentActivity {
             return;
         }
 
-        ((XoApplication) getApplication()).setActiveInBackground(true);
         try {
             startActivity(intent);
+            ((XoApplication) getApplication()).setActiveInBackground(true);
         } catch (ActivityNotFoundException e) {
             Toast.makeText(this, R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
             e.printStackTrace();
@@ -129,9 +129,9 @@ public abstract class XoActivity extends FragmentActivity {
             return;
         }
 
-        ((XoApplication) getApplication()).setActiveInBackground(true);
         try {
             startActivityForResult(intent, requestCode);
+            ((XoApplication) getApplication()).setActiveInBackground(true);
         } catch (ActivityNotFoundException e) {
             Toast.makeText(this, R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
             e.printStackTrace();
@@ -194,7 +194,14 @@ public abstract class XoActivity extends FragmentActivity {
 
         if (requestCode == REQUEST_SELECT_AVATAR) {
             if (mAvatarSelection != null) {
-                startExternalActivityForResult(ImageSelector.createCropIntent(intent.getData()), REQUEST_CROP_AVATAR);
+                final Intent finalIntent = intent;
+                // defer activity start after application came to foreground and XoApplication.setActiveInBackground() has been reset
+                new Handler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        startExternalActivityForResult(ImageSelector.createCropIntent(finalIntent.getData()), REQUEST_CROP_AVATAR);
+                    }
+                });
             }
         } else if (requestCode == REQUEST_CROP_AVATAR) {
             intent = selectedAvatarPreProcessing(intent);
