@@ -13,7 +13,7 @@
                android:layout_height="wrap_content"/>
 
     <TextView android:id="@+id/select_content_text"
-              android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
+              android:textAppearance="@android:style/TextAppearance.Medium"
               android:text="App Name"
               android:layout_weight="2"
               android:layout_width="match_parent"

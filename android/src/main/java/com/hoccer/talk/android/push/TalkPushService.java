@@ -39,7 +39,7 @@ public class TalkPushService extends GCMBaseIntentService {
 
     @Override
     protected void onMessage(Context context, Intent intent) {
-        LOG.info("onMessage(" + intent.toString() + ")");
+        LOG.info("onMessage(" + intent + ")");
 
         String message = intent.getStringExtra("message");
 

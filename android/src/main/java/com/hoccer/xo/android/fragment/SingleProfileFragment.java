@@ -13,19 +13,23 @@ import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
+import com.hoccer.talk.content.SelectedContent;
+import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
-import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.UriUtils;
 import com.squareup.picasso.Picasso;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
+import java.util.List;
+
 
 /**
  * Fragment for display and editing of single-contact profiles.
@@ -44,7 +48,8 @@ public class SingleProfileFragment extends ProfileFragment
     private ImageButton mNicknameEditButton;
     private LinearLayout mInviteButtonContainer;
 
-    private IContentObject mAvatarToSet;
+    private RelativeLayout mContactsContainer;
+    private TextView mContactsText;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -62,6 +67,8 @@ public class SingleProfileFragment extends ProfileFragment
         mNicknameEditButton = (ImageButton) view.findViewById(R.id.ib_profile_nickname_edit);
         mNicknameTextView = (TextView) view.findViewById(R.id.tv_profile_nickname);
         mNicknameEditText = (EditText) view.findViewById(R.id.et_profile_nickname);
+        mContactsContainer = (RelativeLayout) view.findViewById(R.id.inc_profile_contacts);
+        mContactsText = (TextView) view.findViewById(R.id.tv_profile_contacts_text);
         mInviteButtonContainer = (LinearLayout) view.findViewById(R.id.inc_profile_request);
     }
 
@@ -192,7 +199,7 @@ public class SingleProfileFragment extends ProfileFragment
     public void onClick(View v) {
         if (v.getId() == R.id.profile_avatar_image) {
             if (mContact.isEditable()) {
-                if (mContact.getAvatarContentUrl() != null) {
+                if (mContact.getAvatarFilePath() != null) {
                     XoDialogs.showRadioSingleChoiceDialog("AvatarSelection",
                             R.string.dialog_avatar_options_title,
                             new String[]{
@@ -223,18 +230,9 @@ public class SingleProfileFragment extends ProfileFragment
     }
 
     @Override
-    public void onAvatarSelected(IContentObject contentObject) {
-        LOG.debug("onAvatarSelected(" + contentObject.getFilePath() + ")");
-        mAvatarToSet = contentObject;
-    }
-
-    @Override
-    public void onServiceConnected() {
-        LOG.debug("onServiceConnected()");
-        if (mAvatarToSet != null) {
-            updateAvatar(mAvatarToSet);
-            mAvatarToSet = null;
-        }
+    public void onAvatarSelected(SelectedContent avatar) {
+        LOG.debug("onAvatarSelected(" + avatar.getFilePath() + ")");
+        updateAvatar(avatar);
     }
 
     @Override
@@ -245,20 +243,21 @@ public class SingleProfileFragment extends ProfileFragment
     @Override
     protected void updateMessageText() {
         try {
-            int count = (int) XoApplication.getXoClient().getDatabase().getMessageCountByContactId(mContact.getClientContactId());
+            int count = (int) XoApplication.get().getXoClient().getDatabase().getMessageCountByContactId(mContact.getClientContactId());
             super.updateMessageText(count);
         } catch (SQLException e) {
             LOG.error("Error fetching message count from database.");
         }
     }
 
-    private void updateAvatar(final IContentObject avatar) {
+    private void updateAvatar(final SelectedContent avatar) {
         if (avatar != null) {
-            XoApplication.getExecutor().execute(new Runnable() {
+            XoApplication.get().getExecutor().execute(new Runnable() {
                 @Override
                 public void run() {
                     LOG.debug("creating avatar upload");
-                    TalkClientUpload upload = SelectedContent.createAvatarUpload(avatar);
+                    TalkClientUpload upload = new TalkClientUpload();
+                    upload.initializeAsAvatar(avatar);
                     try {
                         getXoDatabase().saveClientUpload(upload);
                         if (mContact.isSelf()) {
@@ -290,6 +289,7 @@ public class SingleProfileFragment extends ProfileFragment
     protected void updateView() {
         updateAvatarView();
         updateName();
+        updateContactsContainer();
         updateChatContainer();
         updateFingerprint();
         updateInviteButton(mContact);
@@ -313,6 +313,8 @@ public class SingleProfileFragment extends ProfileFragment
 
         Picasso.with(getActivity())
                 .load(avatarUri)
+                .centerCrop()
+                .fit()
                 .placeholder(R.drawable.avatar_default_contact_large)
                 .error(R.drawable.avatar_default_contact_large)
                 .into(mAvatarImage);
@@ -334,6 +336,32 @@ public class SingleProfileFragment extends ProfileFragment
         mNameText.setText(name);
     }
 
+    private void updateContactsContainer() {
+        if (mContact.isSelf()) {
+            mContactsContainer.setVisibility(View.VISIBLE);
+
+            int friendsCount = 0;
+            int blockedCount = 0;
+            int groupsCount = 0;
+            try {
+                friendsCount = getXoDatabase().findClientContactsByState(TalkRelationship.STATE_FRIEND).size();
+                blockedCount = getXoDatabase().findClientContactsByState(TalkRelationship.STATE_BLOCKED).size();
+
+                List<TalkClientContact> joinedGroups = getXoDatabase().findGroupContactsByMembershipState(TalkGroupMembership.STATE_JOINED);
+                CollectionUtils.filterInverse(joinedGroups, TalkClientContactPredicates.IS_NEARBY_GROUP_PREDICATE);
+                groupsCount = joinedGroups.size();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            int clientContactsCount = friendsCount + blockedCount;
+            mContactsText.setText(clientContactsCount + " " + getResources().getQuantityString(R.plurals.profile_contacts_text_friends, clientContactsCount) + "   " +
+                    groupsCount + " " + getResources().getQuantityString(R.plurals.profile_contacts_text_groups, groupsCount));
+        } else {
+            mContactsContainer.setVisibility(View.GONE);
+        }
+    }
+
     private void updateChatContainer() {
         if (mContact.isSelf()) {
             mChatContainer.setVisibility(View.GONE);
@@ -344,23 +372,27 @@ public class SingleProfileFragment extends ProfileFragment
     }
 
     private void updateFingerprint() {
-        String keyId = mContact.getPublicKey().getKeyId();
+        if (mContact.getPublicKey() != null) {
+            String keyId = mContact.getPublicKey().getKeyId();
 
-        keyId = keyId.toUpperCase();
+            keyId = keyId.toUpperCase();
 
-        char[] chars = keyId.toCharArray();
-        int length = chars.length;
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < length; i++) {
-            builder.append(chars[i]);
-            if ((i % 2) == 1) {
-                builder.append(":");
+            char[] chars = keyId.toCharArray();
+            int length = chars.length;
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < length; i++) {
+                builder.append(chars[i]);
+                if ((i % 2) == 1) {
+                    builder.append(":");
+                }
+
             }
+            builder.deleteCharAt(builder.lastIndexOf(":"));
 
+            mKeyText.setText(builder.toString());
+        } else {
+            mKeyText.setText("");
         }
-        builder.deleteCharAt(builder.lastIndexOf(":"));
-
-        mKeyText.setText(builder.toString());
     }
 
     private void updateInviteButton(final TalkClientContact contact) {
@@ -496,7 +528,7 @@ public class SingleProfileFragment extends ProfileFragment
         LOG.debug("refreshContact()");
 
         try {
-            XoClientDatabase database = XoApplication.getXoClient().getDatabase();
+            XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
             database.refreshClientContact(mContact);
             if (mContact.getAvatarDownload() != null) {
                 database.refreshClientDownload(mContact.getAvatarDownload());
@@ -570,7 +602,6 @@ public class SingleProfileFragment extends ProfileFragment
 
     @Override
     public void onDestroyActionMode(ActionMode mode) {
-
         String nameString = mNameEditText.getText().toString();
         String newUserName = nameString.isEmpty() ? getResources().getString(R.string.profile_self_initial_name) : nameString;
 

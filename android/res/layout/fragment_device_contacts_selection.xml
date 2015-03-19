@@ -32,7 +32,7 @@
             android:id="@+id/rl_progress_overlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/xo_black_transparency_50_percent"
+            android:background="@color/black_transparency_50_percent"
             android:clickable="true"
             android:visibility="gone">
         <ProgressBar

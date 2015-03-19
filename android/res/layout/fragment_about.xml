@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:background="@color/xo_main_background"
+              android:background="@color/background_default"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
     <LinearLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/ll_about_general"
-            android:background="@color/xo_main_background"
+            android:background="@color/background_default"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"

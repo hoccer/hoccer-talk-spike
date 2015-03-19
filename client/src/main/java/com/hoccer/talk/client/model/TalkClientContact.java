@@ -1,6 +1,6 @@
 package com.hoccer.talk.client.model;
 
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.crypto.AESCryptor;
 import com.hoccer.talk.model.*;
 import com.j256.ormlite.field.DatabaseField;
@@ -123,7 +123,7 @@ public class TalkClientContact implements Serializable {
         return clientContactId;
     }
 
-    public IContentObject getAvatar() {
+    public XoTransfer getAvatar() {
         if (avatarDownload != null && avatarDownload.isContentAvailable()) {
             return avatarDownload;
         } else if (avatarUpload != null && avatarUpload.isContentAvailable()) {
@@ -132,8 +132,8 @@ public class TalkClientContact implements Serializable {
         return null;
     }
 
-    public String getAvatarContentUrl() {
-        IContentObject avatar = getAvatar();
+    public String getAvatarFilePath() {
+        XoTransfer avatar = getAvatar();
         if (avatar != null) {
             return avatar.getFilePath();
         }
@@ -182,36 +182,6 @@ public class TalkClientContact implements Serializable {
 
     public boolean isGroupJoined() {
         return isGroup() && this.groupMembership != null && this.groupMembership.isJoined();
-    }
-
-    public boolean isGroupNoLongerJoined() {
-        return isGroup() && this.groupMembership != null && !this.groupMembership.isJoined();
-    }
-
-    // returns true if there is actually a group key locally stored
-    @GroupMethodOnly
-    public boolean groupHasKey() {
-        ensureGroup();
-        return this.getGroupKey() != null &&
-                Base64.decodeBase64(this.getGroupKey().getBytes(Charset.forName("UTF-8"))).length == AESCryptor.KEY_SIZE;
-    }
-
-    // return true if there is a group key and the stored shared key id matches the computed key id
-    @GroupMethodOnly
-    public boolean groupHasValidKey() {
-        ensureGroup();
-        if (groupHasKey() && getGroupPresence() != null) {
-            byte[] sharedKey = Base64.decodeBase64(this.getGroupKey().getBytes(Charset.forName("UTF-8")));
-            byte[] sharedKeyId = Base64.decodeBase64(this.groupPresence.getSharedKeyId().getBytes(Charset.forName("UTF-8")));
-            byte[] sharedKeySalt = Base64.decodeBase64(this.groupPresence.getSharedKeyIdSalt().getBytes(Charset.forName("UTF-8")));
-            try {
-                byte[] actualSharedKeyId = AESCryptor.calcSymmetricKeyId(sharedKey, sharedKeySalt);
-                return actualSharedKeyId.equals(sharedKey);
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            }
-        }
-        return false;
     }
 
     public String getName() {

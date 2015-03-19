@@ -2,18 +2,18 @@ package com.hoccer.xo.android.content;
 
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
-import com.hoccer.talk.content.IContentObject;
 
 import java.util.Iterator;
+
 
 /**
  * Playlist instance wrapping a media collection.
  */
 public class MediaCollectionPlaylist extends MediaPlaylist {
 
-    private TalkClientMediaCollection mCollection;
+    private final TalkClientMediaCollection mCollection;
 
-    private TalkClientMediaCollection.Listener mListener = new TalkClientMediaCollection.Listener() {
+    private final TalkClientMediaCollection.Listener mListener = new TalkClientMediaCollection.Listener() {
         @Override
         public void onCollectionNameChanged(TalkClientMediaCollection collection) {
             // do nothing
@@ -50,7 +50,7 @@ public class MediaCollectionPlaylist extends MediaPlaylist {
     }
 
     @Override
-    public IContentObject getItem(int index) {
+    public XoTransfer getItem(int index) {
         return mCollection.getItem(index);
     }
 
@@ -60,29 +60,27 @@ public class MediaCollectionPlaylist extends MediaPlaylist {
     }
 
     @Override
-    public boolean hasItem(IContentObject item) {
-        XoTransfer transfer = (XoTransfer)item;
-        if(transfer != null) {
-            return mCollection.hasItem(transfer);
+    public boolean hasItem(XoTransfer item) {
+        if (item != null) {
+            return mCollection.hasItem(item);
         } else {
             return false;
         }
     }
 
     @Override
-    public int indexOf(IContentObject item) {
-        XoTransfer transfer = (XoTransfer)item;
-        if(transfer != null) {
-            return mCollection.indexOf(transfer);
+    public int indexOf(XoTransfer item) {
+        if (item != null) {
+            return mCollection.indexOf(item);
         } else {
             return -1;
         }
     }
 
     @Override
-    public Iterator<IContentObject> iterator() {
-        return new Iterator<IContentObject>() {
-            private Iterator<XoTransfer> mIterator = mCollection.iterator();
+    public Iterator<XoTransfer> iterator() {
+        return new Iterator<XoTransfer>() {
+            private final Iterator<XoTransfer> mIterator = mCollection.iterator();
 
             @Override
             public boolean hasNext() {
@@ -90,7 +88,7 @@ public class MediaCollectionPlaylist extends MediaPlaylist {
             }
 
             @Override
-            public IContentObject next() {
+            public XoTransfer next() {
                 return mIterator.next();
             }
 

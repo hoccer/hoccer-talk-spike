@@ -28,7 +28,7 @@
 
     <!-- Tutorial and FAQ links -->
     <string name="link_tutorial">http://faq.hoccer.com/de/tutorial-xo/</string>
-    <string name="link_faq">http://faq.hoccer.com/de/faq-xo/</string>
+    <string name="link_faq">http://faq.hoccer.com/de/</string>
 
     <!-- Contacts fragment -->
     <string name="contacts_title">Kontakte</string>
@@ -92,10 +92,10 @@
     <string name="toast_pairing_failed">Ungültiger Code. Bitte versuche es erneut.</string>
 
     <!-- Invitation dialog -->
-    <string name="dialog_select_invite_method_title">Einladen per</string>
-    <string name="dialog_select_invite_method_sms_item">SMS</string>
-    <string name="dialog_select_invite_method_mail_item">E-Mail</string>
-    <string name="dialog_select_invite_method_code_item">Code</string>
+    <string name="dialog_add_contact_type_title">Kontakt hinzufügen</string>
+    <string name="dialog_add_contact_type_sms_item">SMS</string>
+    <string name="dialog_add_contact_type_mail_item">E-Mail</string>
+    <string name="dialog_add_contact_type_code_item">Code</string>
 
     <!-- SMS/E-Mail invitation -->
     <string name="dialog_missing_pairing_token_title">Einladung kann nicht erzeugt werden</string>
@@ -107,7 +107,8 @@
     <string name="scan_or_copy_code">Scanne oder kopiere diesen Code</string>
 
     <!-- QR code scanner fragment -->
-    <string name="or_insert_code">Oder Code eingeben</string>
+    <string name="enter_code">Code eingeben</string>
+    <string name="invite_code">Einladungscode</string>
 
     <!-- Profile fragment -->
     <string name="dialog_avatar_options_title">Avatar Optionen</string>
@@ -115,6 +116,17 @@
     <string name="dialog_delete_avatar_option">Lösche Avatar</string>
     <string name="profile_name_title">Name</string>
     <string name="profile_name_hint">Dein Name</string>
+
+    <string name="profile_contacts_title">Kontakte</string>
+    <plurals name="profile_contacts_text_friends">
+        <item quantity="one">Freund</item>
+        <item quantity="other">Freunde</item>
+    </plurals>
+    <plurals name="profile_contacts_text_groups">
+        <item quantity="one">Gruppe</item>
+        <item quantity="other">Gruppen</item>
+    </plurals>
+
     <string name="profile_user_block_button">User blockieren</string>
     <string name="profile_user_unblock_button">User entblockieren</string>
     <string name="profile_user_delete_button">Kontakt löschen</string>
@@ -148,9 +160,6 @@
     <string name="content_data">Dokument</string>
     <string name="content_clipboard">Aus Zwischenablage</string>
 
-    <string name="content_not_supported_audio_title">Nicht unterstütztes Format</string>
-    <string name="content_not_supported_audio_msg">Dieser Audio-Anhang kann nicht wiedergegeben werden.</string>
-
     <!-- FullscreenPlayer -->
     <string name="deleted_contact_name">Entfernter Kontakt</string>
 
@@ -178,9 +187,8 @@
     <string name="dialog_leave_group_title">Gruppe verlassen</string>
     <string name="dialog_leave_group_message">Bist du dir sicher, dass du die Gruppe verlassen möchtest? Du musst erneut eingeladen werden, um wieder teilnehmen zu können.
     </string>
-    <string name="common_group">Gruppe</string>
-    <string name="common_group_invite">Eingeladen</string>
-    <string name="common_friend">Freund</string>
+    <string name="state_invited">Eingeladen</string>
+    <string name="state_friend">Freund</string>
     <string name="menu_licenses">Lizenzen</string>
     <string name="file_chooser_string">Datei auswählen</string>
     <string name="error_no_videoplayer">Video nicht abspielbar. Bitte anderen Videoplayer installieren.
@@ -212,7 +220,6 @@
     <string name="dialog_device_contact_data_selection">Eintrag wählen</string>
 
     <!-- Media Player -->
-    <string name="media_meta_data_unknown_title">Unbekannter Titel</string>
     <string name="media_meta_data_unknown_artist">Unbekannter Interpret</string>
     <string name="media_player_playlist_track_divider">von</string>
     <string name="media_player_default_filter_label">Alle</string>
@@ -221,7 +228,7 @@
     <string name="collections">Sammlungen</string>
     <string name="menu_collections">Sammlungen</string>
     <string name="new_media_collection">Neue Sammlung</string>
-    <string name="enter_new_collection_name">Bitte geben Sie einen Namen für die neue Sammlung ein:</string>
+    <string name="enter_new_collection_name">Bitte gib einen Namen für die neue Sammlung ein:</string>
     <string name="add_to_collection">Einer Sammlung hinzufügen</string>
     <string name="share_with_contact">Teilen</string>
     <string name="added_attachment_to_collection">%1$s zur Sammlung \'%2$s\' hinzugefügt</string>
@@ -231,6 +238,15 @@
     <string name="dialog_delete_collection_message">Bist du dir sicher, dass du die ausgewählte(n) Sammlung(en) entfernen möchtest? Die
         Dateien selbst werden dabei nicht gelöscht.
     </string>
+
+    <!-- Share content from other apps -->
+    <string name="sending_message">Sende Nachricht..</string>
+    <string name="content_not_sharable">Inhalt kann nicht geteilt werden.</string>
+
+    <plurals name="sending_attachments">
+        <item quantity="one">Sende Datei..</item>
+        <item quantity="other">Sende Dateien..</item>
+    </plurals>
 
     <!-- Preferences -->
     <string name="preference_keysize_summary">RSA Schlüssel mit gewählter Schlüssellänge erneuern</string>
@@ -265,8 +281,8 @@
     <string name="my_profile_title">Mein Profil</string>
     <string name="contact_item_received_attachment">%1$s Datei erhalten</string>
     <string name="contact_item_sent_attachment">%1$s Datei gesendet</string>
-    <string name="error_avatar_selection">Sie können dieses Bild nicht als Avatar verwenden.</string>
-    <string name="error_attachment_selection">Sie können diese Datei nicht als Anhang verwenden.</string>
+    <string name="error_avatar_selection">Du kannst dieses Bild nicht als Avatar verwenden.</string>
+    <string name="error_attachment_selection">Du kannst diese Datei nicht als Anhang verwenden.</string>
     <string name="sms_invitation_text">Hey! Ich nutze die Gratis-App ${app.name} zum sicheren Chatten! Jetzt herunterladen und mich als Kontakt hinzufügen: %1$s%2$s\n%3$s</string>
     <string name="email_invitation_subject">Triff mich bei ${app.name}!</string>
     <string name="email_invitation_text">Hey!&lt;br&gt;Ich nutze jetzt die Gratis-App ${app.name} zum sicheren Chatten! Jetzt herunterladen und mich als Kontakt hinzufügen:&lt;br&gt;&lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;&lt;br&gt;&lt;br&gt;%3$s</string>
@@ -275,11 +291,11 @@
     <string name="export_credentials_failure">Es ist ein Fehler beim Exportieren der Zugangsdaten aufgetreten.</string>
 
     <string name="dialog_import_credentials_title">Zugangsdaten importieren</string>
-    <string name="import_credentials_success">Zugangsdaten erfolgreich importiert.\nBitte starten Sie die App neu.</string>
+    <string name="import_credentials_success">Zugangsdaten erfolgreich importiert.\nBitte starte die App neu.</string>
     <string name="import_credentials_failure">Es ist ein Fehler beim Importieren der Zugangsdaten aufgetreten.</string>
 
     <string name="enter_password">Passwort:</string>
-    <string name="no_password">Bitte geben Sie ein Passwort ein.</string>
+    <string name="no_password">Bitte gib ein Passwort ein.</string>
     <string name="cant_find_credentials">Kann die Datei "credentials.json" mit den Zugangsdaten nicht finden.</string>
 
     <string name="placeholder_conversations_text">Lade deine Freunde zum Chatten ein!</string>
@@ -291,13 +307,11 @@
     <string name="profile_nickname_text">Anzeigename</string>
     <string name="nearby_text">Alle nahebei</string>
     <string name="pref_privacy_title">Privatspähre</string>
-    <string name="error_send_message_blocked">Sie haben diesen Kontakt blockiert. Die Nachricht wird nicht gesendet.</string>
+    <string name="error_send_message_blocked">Du hast diesen Kontakt blockiert. Die Nachricht wird nicht gesendet.</string>
     <string name="multi_invitation_button">weiter</string>
 
-    <string-array name="tab_names">
-        <item>CHATS</item>
-        <item>IN DER NÄHE</item>
-    </string-array>
+    <string name="chats_tab_name">CHATS</string>
+    <string name="nearby_tab_name">IN DER NÄHE</string>
 
     <string name="contacts_tab_friends">FREUNDE</string>
     <string name="contacts_tab_groups">GRUPPEN</string>
@@ -334,12 +348,12 @@
 
     <string name="nearby_saved">Nahebei gespeichert</string>
     <string name="error_compatible_app_unavailable">Keine App zum öffnen des gewählten Objekts gefunden.</string>
-    <string name="toast_stored_file_in_clipboard">Die Datei wurde in der Zwischenablage gespeichert.</string>
-    <string name="toast_failed_to_store_file_in_clipboard">Diese Datei konnte leider nicht in der Zwischenablage gespeichert werden.</string>
 
     <!-- Nearby all invite texts -->
     <string name="nearby_invite_all">%1$d Mitglieder als Freunde einladen</string>
     <string name="nearby_disinvite_all">%1$d Mitglieder als Freunde ausladen</string>
+    <string name="nearby_notification_title">In der Nähe</string>
+    <string name="nearby_notification_text">In der Nähe Modus aktiv</string>
 
     <string name="profile_chat_info_text">Chat</string>
     <!--<string name="messages_count">%1$s Nachrichten</string>-->
@@ -379,9 +393,13 @@
     <string name="restore_failure_default_message">Beim Wiederherstellen ist etwas schief gelaufen. Bitte versuche es erneut.</string>
     <string name="restore_failure_insufficient_disk_space_message">Nicht genügend Speicherplatz. Bitte Dateien von der SD Karte löschen und erneut versuchen. Du brauchst %1$s freien Speicherplatz.</string>
     <string name="restore_enter_password">Passwort eingeben</string>
-    <string name="restore_restart_hoccer">Bitte Hoccer neu starten, um die Wiederherstellung zu beenden.</string>
+    <string name="restore_restart_hoccer">Bitte ${app.name.short} neu starten, um die Wiederherstellung zu beenden.</string>
     <string name="restore_no_backups_found_title">Kein Backup vorhanden</string>
-    <string name="restore_no_backups_found_message">Bitte bestehendes Backup nach\n%1$s\nkopieren um früheren Hoccer Account wiederherstellen zu können.</string>
+    <string name="restore_no_backups_found_message">Bitte bestehendes Backup nach\n%1$s\nkopieren um früheren ${app.name.short} Account wiederherstellen zu können.</string>
+
+    <string name="connection_state_disconnected">nicht verbunden</string>
+    <string name="connection_state_login">Anmeldung</string>
+    <string name="connection_state_syncing">synchronisiere</string>
 
     <string name="date">Datum</string>
     <string name="user">Benutzer</string>
@@ -389,6 +407,8 @@
     <string name="size">Dateigröße</string>
 
     <string name="progress_cancelling">Beende..</string>
+
+    <string name="nearby">in der Nähe</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Kontakt</item>

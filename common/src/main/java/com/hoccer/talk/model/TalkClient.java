@@ -28,6 +28,8 @@ public class TalkClient {
     public static final String FIELD_TIME_LAST_LOGIN      = "timeLastLogin";
     public static final String FIELD_TIME_LAST_PUSH       = "timeLastPush";
     public static final String FIELD_TIME_READY           = "timeReady";
+    public static final String FIELD_TIME_DELETED         = "timeDeleted";
+    public static final String FIELD_REASON_DELETED       = "reasonDeleted";
     public static final String FIELD_LAST_PUSH_MESSAGE    = "lastPushMessage";
     public static final String FIELD_PUSH_ALERT_MESSAGE   = "pushAlertMessage";
 
@@ -81,6 +83,14 @@ public class TalkClient {
     /** Time of last ready call received */
     @DatabaseField(columnName = FIELD_TIME_READY, canBeNull = true)
     Date timeReady;
+
+    /** Time of account deletion */
+    @DatabaseField(columnName = FIELD_TIME_DELETED, canBeNull = true)
+    Date timeDeleted;
+
+    /** Time of account deletion */
+    @DatabaseField(columnName = FIELD_REASON_DELETED, canBeNull = true)
+    String reasonDeleted;
 
     /** Some identifier that describes the content of the last message, typically number of out outstanding messages */
     @DatabaseField(columnName = FIELD_LAST_PUSH_MESSAGE, canBeNull = true)
@@ -212,6 +222,22 @@ public class TalkClient {
 
     public void setTimeReady(Date timeReady) {
         this.timeReady = timeReady;
+    }
+
+    public Date getTimeDeleted() {
+        return timeDeleted;
+    }
+
+    public String getReasonDeleted() {
+        return reasonDeleted;
+    }
+
+    public void setReasonDeleted(String reasonDeleted) {
+        this.reasonDeleted = reasonDeleted;
+    }
+
+    public void setTimeDeleted(Date timeDeleted) {
+        this.timeDeleted = timeDeleted;
     }
 
     public String getLastPushMessage() {

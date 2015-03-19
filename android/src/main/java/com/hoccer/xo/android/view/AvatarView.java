@@ -10,8 +10,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.util.UriUtils;
@@ -26,7 +26,7 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
 
     private Uri mDefaultAvatarImageUri;
     private DisplayImageOptions mDefaultOptions;
-    private float mCornerRadius = 0.0f;
+    private float mCornerRadius;
     private AspectImageView mAvatarImage;
     private View mPresenceIndicatorActive;
     private View mPresenceIndicatorInactive;
@@ -79,11 +79,11 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
         if (mIsAttachedToWindow) {
             if (mContact == null) {
                 if(contact != null) {
-                    XoApplication.getXoClient().registerContactListener(this);
+                    XoApplication.get().getXoClient().registerContactListener(this);
                 }
             } else {
                 if(contact == null) {
-                    XoApplication.getXoClient().unregisterContactListener(this);
+                    XoApplication.get().getXoClient().unregisterContactListener(this);
                 }
             }
         }
@@ -98,7 +98,7 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
             resetAvatar();
             return;
         }
-        IContentObject avatar = mContact.getAvatar();
+        XoTransfer avatar = mContact.getAvatar();
         Uri avatarUri = avatar == null ? null : UriUtils.getAbsoluteFileUri(avatar.getFilePath());
 
         if (avatarUri == null) {
@@ -128,7 +128,7 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
 
         mIsAttachedToWindow = true;
         if (mContact != null) {
-            XoApplication.getXoClient().registerContactListener(this);
+            XoApplication.get().getXoClient().registerContactListener(this);
         }
     }
 
@@ -138,7 +138,7 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
 
         mIsAttachedToWindow = false;
         if (mContact != null) {
-            XoApplication.getXoClient().unregisterContactListener(this);
+            XoApplication.get().getXoClient().unregisterContactListener(this);
         }
     }
 

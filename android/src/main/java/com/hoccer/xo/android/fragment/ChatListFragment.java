@@ -1,6 +1,8 @@
 package com.hoccer.xo.android.fragment;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.*;
 import android.widget.AdapterView;
@@ -23,9 +25,10 @@ import java.lang.ref.WeakReference;
 import java.sql.SQLException;
 import java.util.List;
 
-public class ChatListFragment extends SearchableListFragment {
+public class ChatListFragment extends SearchableListFragment implements IPagerFragment {
 
     private static final Logger LOG = Logger.getLogger(ChatListFragment.class);
+
     private static final Placeholder PLACEHOLDER = new Placeholder(
             R.drawable.placeholder_chats,
             R.drawable.placeholder_chats_head,
@@ -41,7 +44,7 @@ public class ChatListFragment extends SearchableListFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mDatabase = XoApplication.getXoClient().getDatabase();
+        mDatabase = XoApplication.get().getXoClient().getDatabase();
     }
 
     @Override
@@ -200,7 +203,7 @@ public class ChatListFragment extends SearchableListFragment {
 
     public void onGroupCreationSucceeded(int contactId) {
         try {
-            TalkClientContact contact = XoApplication.getXoClient().getDatabase().findContactById(contactId);
+            TalkClientContact contact = mDatabase.findContactById(contactId);
             if (contact != null) {
                 ((XoActivity) getActivity()).showContactProfile(contact);
             }
@@ -228,4 +231,31 @@ public class ChatListFragment extends SearchableListFragment {
             startActivity(intent);
         }
     }
+
+    @Override
+    public View getCustomTabView(Context context) {
+        return null;
+    }
+
+    @Override
+    public String getTabName(Resources resources) {
+        return resources.getString(R.string.chats_tab_name);
+    }
+
+    @Override
+    public void onPageSelected() {}
+
+    @Override
+    public void onPageUnselected() {
+        leaveSearchMode();
+    }
+
+    @Override
+    public void onPageResume() {}
+
+    @Override
+    public void onPagePause() {}
+
+    @Override
+    public void onPageScrollStateChanged(int state) {}
 }

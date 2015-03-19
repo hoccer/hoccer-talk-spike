@@ -2,15 +2,15 @@ package com.hoccer.xo.android.content.selector;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.content.SelectedContent;
-import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.UriUtils;
+import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -24,7 +24,7 @@ public class ImageSelector implements IContentSelector {
 
     public ImageSelector(Context context) {
         mName = context.getResources().getString(R.string.content_images);
-        mIcon = ColorSchemeManager.getRepaintedDrawable(context.getResources(), R.drawable.ic_attachment_select_image, true);
+        mIcon = ColoredDrawable.getFromCache(R.drawable.ic_attachment_select_image, R.color.primary);
     }
 
     @Override
@@ -46,20 +46,19 @@ public class ImageSelector implements IContentSelector {
     }
 
     @Override
-    public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
-        boolean isValidIntent = isValidIntent(context, intent);
-        if (!isValidIntent) {
-            return null;
+    public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) throws Exception {
+        if (isMimeTypeImage(context, intent)) {
+            Uri selectedContent = intent.getData();
+            IContentCreator creator = findContentCreator(selectedContent);
+            return creator.apply(context, intent);
+        } else {
+            throw new Exception("Mime type is not 'image/*'");
         }
+    }
 
-        Uri selectedContent = intent.getData();
-        IContentCreator creator = findContentObjectCreator(selectedContent);
-        if (creator == null) {
-            LOG.warn("No IContentCreator found for url '" + selectedContent + "'");
-            return null;
-        }
-
-        return creator.apply(context, intent);
+    private boolean isMimeTypeImage(Context context, Intent intent) {
+        String mimeType = UriUtils.getMimeType(context, intent.getData());
+        return mimeType.startsWith("image");
     }
 
     protected void setName(String name) {
@@ -70,15 +69,13 @@ public class ImageSelector implements IContentSelector {
         mIcon = icon;
     }
 
-    protected static IContentCreator findContentObjectCreator(Uri selectedContent) {
+    protected static IContentCreator findContentCreator(Uri selectedContent) {
         String contentString = selectedContent.toString();
         if (isPicasaContent(contentString)) {
-            return new PicasaContentObjectCreator();
-        } else if (isFileContent(contentString)) {
-            return new ImageFileContentObjectCreator();
+            return new PicasaContentCreator();
+        } else {
+            return new ImageFileContentCreator();
         }
-
-        return null;
     }
 
     static private boolean isPicasaContent(String contentString) {
@@ -88,30 +85,6 @@ public class ImageSelector implements IContentSelector {
 
                         // Moto G content string on dirks mobile
                         || contentString.startsWith("content://com.google.android.apps.photos.content/");
-    }
-
-    static private boolean isFileContent(String contentString) {
-        return contentString.startsWith("content://media/");
-    }
-
-    @Override
-    public boolean isValidIntent(Context context, Intent intent) {
-        Uri contentUri = intent.getData();
-        if (contentUri != null) {
-            String[] columns = {
-                    MediaStore.Images.Media.MIME_TYPE
-            };
-            Cursor cursor = context.getContentResolver().query(contentUri, columns, null, null, null);
-
-            if (cursor != null) {
-                cursor.moveToFirst();
-                int mimeTypeIndex = cursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE);
-                String mimeType = cursor.getString(mimeTypeIndex);
-                return (mimeType.startsWith("image"));
-            }
-        }
-
-        return false;
     }
 
     public static Intent createCropIntent(Uri data) {

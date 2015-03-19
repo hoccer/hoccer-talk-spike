@@ -12,10 +12,10 @@ public class ScanTransfersTask implements IStartupTask {
     @Override
     public void execute(Context context) {
         try {
-            List<? extends XoTransfer> allTransfers = XoApplication.getXoClient().getDatabase().findAllTransfers();
+            List<? extends XoTransfer> allTransfers = XoApplication.get().getXoClient().getDatabase().findAllTransfers();
             for(XoTransfer transfer : allTransfers) {
                 String[] path = new String[]{transfer.getFilePath()};
-                String[] ctype = new String[]{transfer.getContentType()};
+                String[] ctype = new String[]{transfer.getMimeType()};
                 MediaScannerConnection.scanFile(context, path, ctype, null);
             }
         } catch (SQLException e) {

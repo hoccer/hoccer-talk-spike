@@ -2,6 +2,7 @@ package com.hoccer.xo.android.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
 
@@ -25,11 +26,11 @@ public class NotificationBadgeTextView extends TextView {
 
     private void setNotificationBadgeTextSize(Integer notificationCount) {
         if (notificationCount < 10) {
-            setTextSize(13);
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
         } else if (notificationCount < 100) {
-            setTextSize(11);
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 8);
         } else if (notificationCount < 1000) {
-            setTextSize(9);
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 6);
         }
     }
 

@@ -10,6 +10,7 @@ import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentMediaType;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
@@ -185,26 +186,26 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
      */
     private static ChatItemType getListItemTypeForMessage(TalkClientMessage message) {
         ChatItemType chatItemType = ChatItemType.ChatItemWithText;
-        String contentType = null;
+        String mediaType = null;
 
         if (message.getAttachmentDownload() != null) {
-            contentType = message.getAttachmentDownload().getContentMediaType();
+            mediaType = message.getAttachmentDownload().getMediaType();
         } else if (message.getAttachmentUpload() != null) {
-            contentType = message.getAttachmentUpload().getContentMediaType();
+            mediaType = message.getAttachmentUpload().getMediaType();
         }
 
-        if (contentType != null) {
-            if (contentType.equalsIgnoreCase(ContentMediaType.IMAGE)) {
+        if (mediaType != null) {
+            if (mediaType.equalsIgnoreCase(ContentMediaType.IMAGE)) {
                 chatItemType = ChatItemType.ChatItemWithImage;
-            } else if (contentType.equalsIgnoreCase(ContentMediaType.VIDEO)) {
+            } else if (mediaType.equalsIgnoreCase(ContentMediaType.VIDEO)) {
                 chatItemType = ChatItemType.ChatItemWithVideo;
-            } else if (contentType.equalsIgnoreCase(ContentMediaType.AUDIO)) {
+            } else if (mediaType.equalsIgnoreCase(ContentMediaType.AUDIO)) {
                 chatItemType = ChatItemType.ChatItemWithAudio;
-            } else if (contentType.equalsIgnoreCase(ContentMediaType.DATA)) {
+            } else if (mediaType.equalsIgnoreCase(ContentMediaType.DATA)) {
                 chatItemType = ChatItemType.ChatItemWithData;
-            } else if (contentType.equalsIgnoreCase(ContentMediaType.VCARD)) {
+            } else if (mediaType.equalsIgnoreCase(ContentMediaType.VCARD)) {
                 chatItemType = ChatItemType.ChatItemWithContact;
-            } else if (contentType.equalsIgnoreCase(ContentMediaType.LOCATION)) {
+            } else if (mediaType.equalsIgnoreCase(ContentMediaType.LOCATION)) {
                 chatItemType = ChatItemType.ChatItemWithLocation;
             }
         }
@@ -232,22 +233,12 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
     }
 
     protected void markMessageAsSeen(final TalkClientMessage message) {
-        mActivity.getBackgroundExecutor().execute(new Runnable() {
+        XoApplication.get().getExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 getXoClient().markAsSeen(message);
             }
         });
-    }
-
-    protected static boolean isMessageValid(TalkClientMessage message) {
-        if (message.getAttachmentUpload() != null || message.getAttachmentDownload() != null) {
-            return true;
-        }
-        if (!message.getText().isEmpty()) {
-            return true;
-        }
-        return false;
     }
 
     @Override
@@ -265,12 +256,12 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
     @Override
     public void onMessageCreated(final TalkClientMessage message) {
         LOG.debug("onMessageCreated()");
-        if (isMessageRelevant(message) && isMessageValid(message)) {
+        if (isMessageRelevant(message)) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     ChatMessageItem messageItem = getItemForMessage(message);
-                    if(!mChatMessageItems.contains(messageItem)) {
+                    if (!mChatMessageItems.contains(messageItem)) {
                         mChatMessageItems.add(messageItem);
                         notifyDataSetChanged();
 
@@ -304,7 +295,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
     @Override
     public void onMessageUpdated(final TalkClientMessage message) {
         LOG.debug("onMessageUpdated()");
-        if (isMessageRelevant(message) && isMessageValid(message)) {
+        if (isMessageRelevant(message)) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {

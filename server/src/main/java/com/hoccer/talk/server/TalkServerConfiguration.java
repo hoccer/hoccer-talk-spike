@@ -128,6 +128,102 @@ public class TalkServerConfiguration {
                 PropertyTypes.STRING,
                 "password"),
 
+        APNS_CLIENT_NAME_4(PROPERTY_PREFIX + ".apns.4.clientName",
+                PropertyTypes.STRING,
+                ""),
+        APNS_PRODUCTION_CERTIFICATE_PATH_4(PROPERTY_PREFIX + ".apns.4.cert.production.path",
+                PropertyTypes.STRING,
+                "apns_production.p12"),
+        APNS_PRODUCTION_CERTIFICATE_PASSWORD_4(PROPERTY_PREFIX + ".apns.4.cert.production.password",
+                PropertyTypes.STRING,
+                "password"),
+        APNS_SANDBOX_CERTIFICATE_PATH_4(PROPERTY_PREFIX + ".apns.4.cert.sandbox.path",
+                PropertyTypes.STRING,
+                "apns_sandbox.p12"),
+        APNS_SANDBOX_CERTIFICATE_PASSWORD_4(PROPERTY_PREFIX + ".apns.4.cert.sandbox.password",
+                PropertyTypes.STRING,
+                "password"),
+
+        APNS_CLIENT_NAME_5(PROPERTY_PREFIX + ".apns.5.clientName",
+                PropertyTypes.STRING,
+                ""),
+        APNS_PRODUCTION_CERTIFICATE_PATH_5(PROPERTY_PREFIX + ".apns.5.cert.production.path",
+                PropertyTypes.STRING,
+                "apns_production.p12"),
+        APNS_PRODUCTION_CERTIFICATE_PASSWORD_5(PROPERTY_PREFIX + ".apns.5.cert.production.password",
+                PropertyTypes.STRING,
+                "password"),
+        APNS_SANDBOX_CERTIFICATE_PATH_5(PROPERTY_PREFIX + ".apns.5.cert.sandbox.path",
+                PropertyTypes.STRING,
+                "apns_sandbox.p12"),
+        APNS_SANDBOX_CERTIFICATE_PASSWORD_5(PROPERTY_PREFIX + ".apns.5.cert.sandbox.password",
+                PropertyTypes.STRING,
+                "password"),
+
+        APNS_CLIENT_NAME_6(PROPERTY_PREFIX + ".apns.6.clientName",
+                PropertyTypes.STRING,
+                ""),
+        APNS_PRODUCTION_CERTIFICATE_PATH_6(PROPERTY_PREFIX + ".apns.6.cert.production.path",
+                PropertyTypes.STRING,
+                "apns_production.p12"),
+        APNS_PRODUCTION_CERTIFICATE_PASSWORD_6(PROPERTY_PREFIX + ".apns.6.cert.production.password",
+                PropertyTypes.STRING,
+                "password"),
+        APNS_SANDBOX_CERTIFICATE_PATH_6(PROPERTY_PREFIX + ".apns.6.cert.sandbox.path",
+                PropertyTypes.STRING,
+                "apns_sandbox.p12"),
+        APNS_SANDBOX_CERTIFICATE_PASSWORD_6(PROPERTY_PREFIX + ".apns.6.cert.sandbox.password",
+                PropertyTypes.STRING,
+                "password"),
+
+        APNS_CLIENT_NAME_7(PROPERTY_PREFIX + ".apns.7.clientName",
+                PropertyTypes.STRING,
+                ""),
+        APNS_PRODUCTION_CERTIFICATE_PATH_7(PROPERTY_PREFIX + ".apns.7.cert.production.path",
+                PropertyTypes.STRING,
+                "apns_production.p12"),
+        APNS_PRODUCTION_CERTIFICATE_PASSWORD_7(PROPERTY_PREFIX + ".apns.7.cert.production.password",
+                PropertyTypes.STRING,
+                "password"),
+        APNS_SANDBOX_CERTIFICATE_PATH_7(PROPERTY_PREFIX + ".apns.7.cert.sandbox.path",
+                PropertyTypes.STRING,
+                "apns_sandbox.p12"),
+        APNS_SANDBOX_CERTIFICATE_PASSWORD_7(PROPERTY_PREFIX + ".apns.7.cert.sandbox.password",
+                PropertyTypes.STRING,
+                "password"),
+
+        APNS_CLIENT_NAME_8(PROPERTY_PREFIX + ".apns.8.clientName",
+                PropertyTypes.STRING,
+                ""),
+        APNS_PRODUCTION_CERTIFICATE_PATH_8(PROPERTY_PREFIX + ".apns.8.cert.production.path",
+                PropertyTypes.STRING,
+                "apns_production.p12"),
+        APNS_PRODUCTION_CERTIFICATE_PASSWORD_8(PROPERTY_PREFIX + ".apns.8.cert.production.password",
+                PropertyTypes.STRING,
+                "password"),
+        APNS_SANDBOX_CERTIFICATE_PATH_8(PROPERTY_PREFIX + ".apns.8.cert.sandbox.path",
+                PropertyTypes.STRING,
+                "apns_sandbox.p12"),
+        APNS_SANDBOX_CERTIFICATE_PASSWORD_8(PROPERTY_PREFIX + ".apns.8.cert.sandbox.password",
+                PropertyTypes.STRING,
+                "password"),
+
+        APNS_CLIENT_NAME_9(PROPERTY_PREFIX + ".apns.9.clientName",
+                PropertyTypes.STRING,
+                ""),
+        APNS_PRODUCTION_CERTIFICATE_PATH_9(PROPERTY_PREFIX + ".apns.9.cert.production.path",
+                PropertyTypes.STRING,
+                "apns_production.p12"),
+        APNS_PRODUCTION_CERTIFICATE_PASSWORD_9(PROPERTY_PREFIX + ".apns.9.cert.production.password",
+                PropertyTypes.STRING,
+                "password"),
+        APNS_SANDBOX_CERTIFICATE_PATH_9(PROPERTY_PREFIX + ".apns.9.cert.sandbox.path",
+                PropertyTypes.STRING,
+                "apns_sandbox.p12"),
+        APNS_SANDBOX_CERTIFICATE_PASSWORD_9(PROPERTY_PREFIX + ".apns.9.cert.sandbox.password",
+                PropertyTypes.STRING,
+                "password"),
+
         // GCM
         GCM_ENABLED(PROPERTY_PREFIX + ".gcm.enabled",
                 PropertyTypes.BOOLEAN,
@@ -139,16 +235,22 @@ public class TalkServerConfiguration {
         // CLEANING AGENT
         CLEANUP_ALL_CLIENTS_DELAY(PROPERTY_PREFIX + ".cleanup.allClientsDelay",
                 PropertyTypes.INTEGER,
-                7200), // in seconds (2 hours)
+        //        7200), // in seconds (2 hours)
+                  10), // in seconds (2 hours)
         CLEANUP_ALL_CLIENTS_INTERVAL(PROPERTY_PREFIX + ".cleanup.allClientsInterval",
                 PropertyTypes.INTEGER,
-                60 * 60 * 24), // in seconds (once a day)
+        //        60 * 60 * 24), // in seconds (once a day)
+                  60 * 60),
+        /*
         CLEANUP_ALL_DEVLIVERIES_DELAY(PROPERTY_PREFIX + ".cleanup.allDeliveriesDelay",
                 PropertyTypes.INTEGER,
-                3600), // in second (1 hour)
+                //3600), // in second (1 hour)
+                30), // in seconds (2 hours)
         CLEANUP_ALL_DELIVERIES_INTERVAL(PROPERTY_PREFIX + ".cleanup.allDeliveriesInterval",
                 PropertyTypes.INTEGER,
-                60 * 60 * 6), // in seconds (every 6 hours)
+                //60 * 60 * 6), // in seconds (every 6 hours)
+                60),
+                */
         CLEANUP_THREAD_POOL_SIZE(PROPERTY_PREFIX + ".cleanup.threadPoolSize",
                 PropertyTypes.INTEGER,
                 4), // ScheduledThreadPoolExecutor, number is also maximum Number of threads used
@@ -184,11 +286,6 @@ public class TalkServerConfiguration {
         FILECACHE_DOWNLOAD_BASE(PROPERTY_PREFIX + ".filecache.downloadBase",
                 PropertyTypes.STRING,
                 "http://localhost:8081/download/"),
-
-        // INVITATIONS
-        INVITATION_ALLOWED_URI_SCHEMES(PROPERTY_PREFIX + ".invitation.allowed.uri.schemes",
-                PropertyTypes.STRING,
-                "hxo, hxod, hcr, hcrd"),
 
         // MISC
         SUPPORT_TAG(PROPERTY_PREFIX + ".support.tag",
@@ -304,14 +401,14 @@ public class TalkServerConfiguration {
         builder.append(                     "\n - Cleaning Agent Configuration:");
         builder.append(MessageFormat.format("\n   * clients cleanup delay (in s):         {0}", Long.toString(this.getApnsInvalidateDelay())));
         builder.append(MessageFormat.format("\n   * clients cleanup interval (in s):      {0}", Long.toString(this.getCleanupAllClientsInterval())));
+        /*
         builder.append(MessageFormat.format("\n   * deliveries cleanup delay (in s):      {0}", Long.toString(this.getCleanupAllDeliveriesDelay())));
         builder.append(MessageFormat.format("\n   * deliveries cleanup interval (in s):   {0}", Long.toString(this.getCleanupAllDeliveriesInterval())));
+        */
         builder.append(                     "\n - Filecache Configuration:");
         builder.append(MessageFormat.format("\n   * filecache control url:                ''{0}''", this.getFilecacheControlUrl()));
         builder.append(MessageFormat.format("\n   * filecache upload base url:            ''{0}''", this.getFilecacheUploadBase()));
         builder.append(MessageFormat.format("\n   * filecache download base url:          ''{0}''", this.getFilecacheDownloadBase()));
-        builder.append(                      "\n - Invitation Configuration:");
-        builder.append(MessageFormat.format("\n   * allowed invitation URI schemes:     {0}", this.getAllowedInviteUriSchemes()));
         builder.append(                     "\n - Other:");
         builder.append(MessageFormat.format("\n   * support tag:                          ''{0}''", this.getSupportTag()));
         builder.append(                     "\n - Threads:");
@@ -361,6 +458,60 @@ public class TalkServerConfiguration {
                     (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PASSWORD_3.value,
                     (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PATH_3.value,
                     (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PASSWORD_3.value));
+        }
+
+        String clientName4 = (String) ConfigurableProperties.APNS_CLIENT_NAME_4.value;
+        if (!clientName4.isEmpty()) {
+            mApnsConfigurations.put(clientName4, new ApnsConfiguration(
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PATH_4.value,
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PASSWORD_4.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PATH_4.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PASSWORD_4.value));
+        }
+
+        String clientName5 = (String) ConfigurableProperties.APNS_CLIENT_NAME_5.value;
+        if (!clientName5.isEmpty()) {
+            mApnsConfigurations.put(clientName5, new ApnsConfiguration(
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PATH_5.value,
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PASSWORD_5.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PATH_5.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PASSWORD_5.value));
+        }
+
+        String clientName6 = (String) ConfigurableProperties.APNS_CLIENT_NAME_6.value;
+        if (!clientName6.isEmpty()) {
+            mApnsConfigurations.put(clientName6, new ApnsConfiguration(
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PATH_6.value,
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PASSWORD_6.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PATH_6.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PASSWORD_6.value));
+        }
+
+        String clientName7 = (String) ConfigurableProperties.APNS_CLIENT_NAME_7.value;
+        if (!clientName7.isEmpty()) {
+            mApnsConfigurations.put(clientName7, new ApnsConfiguration(
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PATH_7.value,
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PASSWORD_7.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PATH_7.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PASSWORD_7.value));
+        }
+
+        String clientName8 = (String) ConfigurableProperties.APNS_CLIENT_NAME_8.value;
+        if (!clientName8.isEmpty()) {
+            mApnsConfigurations.put(clientName8, new ApnsConfiguration(
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PATH_8.value,
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PASSWORD_8.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PATH_8.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PASSWORD_8.value));
+        }
+
+        String clientName9 = (String) ConfigurableProperties.APNS_CLIENT_NAME_9.value;
+        if (!clientName9.isEmpty()) {
+            mApnsConfigurations.put(clientName9, new ApnsConfiguration(
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PATH_9.value,
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PASSWORD_9.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PATH_9.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PASSWORD_9.value));
         }
     }
 
@@ -439,15 +590,15 @@ public class TalkServerConfiguration {
     public int getCleanupAllClientsInterval() {
         return (Integer) ConfigurableProperties.CLEANUP_ALL_CLIENTS_INTERVAL.value;
     }
-
+/*
     public int getCleanupAllDeliveriesDelay() {
         return (Integer) ConfigurableProperties.CLEANUP_ALL_DEVLIVERIES_DELAY.value;
     }
 
     public int getCleanupAllDeliveriesInterval() {
-        return (Integer) ConfigurableProperties.CLEANUP_ALL_CLIENTS_INTERVAL.value;
+        return (Integer) ConfigurableProperties.CLEANUP_ALL_DELIVERIES_INTERVAL.value;
     }
-
+*/
     public URI getFilecacheControlUrl() {
         URI url = null;
         try {
@@ -476,11 +627,6 @@ public class TalkServerConfiguration {
 
     public void setFilecacheDownloadBase(String mFilecacheDownloadBase) {
         ConfigurableProperties.FILECACHE_DOWNLOAD_BASE.setValue(mFilecacheDownloadBase);
-    }
-
-    public List<String> getAllowedInviteUriSchemes() {
-        String schemesString = (String) ConfigurableProperties.INVITATION_ALLOWED_URI_SCHEMES.value;
-        return Arrays.asList(schemesString.replace(" ", "").split(","));
     }
 
     public String getSupportTag() {

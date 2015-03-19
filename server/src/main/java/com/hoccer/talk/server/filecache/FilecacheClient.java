@@ -89,4 +89,10 @@ public class FilecacheClient {
         mRpc.deleteFile(fileId);
     }
 
+    public void deleteAccount(String accountId) {
+        ensureConnected();
+        LOG.info("deleting account with id: '" + accountId + "'");
+        mRpc.deleteAccount(accountId);
+    }
+
 }

@@ -36,8 +36,9 @@ public class LineFeature {
     }
 
     private void compress() {
-        if (mPoints.size() < 20)
+        if (mPoints.size() < 20) {
             return;
+        }
 
         LinkedList<Vec2D> compressedPoints = new LinkedList<Vec2D>();
         int i = 0;
@@ -77,7 +78,7 @@ public class LineFeature {
         return getNewest().x - getLatest().x;
     }
 
-    private float computeSlope(Vec2D pA, Vec2D pB) {
+    private static float computeSlope(Vec2D pA, Vec2D pB) {
         return (pB.y - pA.y) / (pB.x - pA.x);
     }
 

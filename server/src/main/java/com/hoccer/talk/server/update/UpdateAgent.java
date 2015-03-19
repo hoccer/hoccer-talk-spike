@@ -686,7 +686,6 @@ public class UpdateAgent extends NotificationDeferrer {
         clearRequestContext(context);
     }
 
-
     public void requestUserAlert(final String clientId, final StaticSystemMessage.Message message) {
         TalkClientHostInfo clientHostInfo = mDatabase.findClientHostInfoForClient(clientId);
         String messageString = new StaticSystemMessage(clientId, clientHostInfo, message).generateMessage();
@@ -736,6 +735,210 @@ public class UpdateAgent extends NotificationDeferrer {
         };
 
         queueOrExecute(context, notificationGenerator);
+    }
+
+    public void removeMembership(TalkGroupMembership membership, Date changedDate, String removalState) {
+        LOG.info("removeMembership group "+membership.getGroupId()+" removing membership for client "+membership.getClientId());
+        // set membership state to NONE
+        membership.setState(TalkGroupMembership.STATE_NONE);
+        // degrade anyone who leaves to member
+        membership.setRole(TalkGroupMembership.ROLE_MEMBER);
+        // trash keys
+        membership.trashPrivate();
+        membership.setLastChanged(changedDate);
+        mDatabase.saveGroupMembership(membership);
+        requestGroupMembershipUpdate(membership.getGroupId(), membership.getClientId());
+    }
+
+    public void removeRelationship(TalkRelationship relationship, Date changedDate) {
+        relationship.setState(TalkRelationship.STATE_NONE);
+        relationship.setUnblockState(TalkRelationship.STATE_NONE);
+        relationship.setLastChanged(changedDate);
+        mDatabase.saveRelationship(relationship);
+        requestRelationshipUpdate(relationship);
+    }
+
+    public void removeRelationships(List<TalkRelationship> relationships, List<TalkRelationship> otherRelationships) {
+        LOG.info("removeRelationships: count:"+relationships.size()+", otherCount:"+otherRelationships.size());
+
+        int count = 0;
+        int otherCount = 0;
+        for (TalkRelationship relationship : relationships) {
+            synchronized (mServer.dualIdLock(TalkRelationship.LOCK_PREFIX, relationship.getClientId(), relationship.getOtherClientId())) {
+                Date deletionMarkDate = new Date();
+                removeRelationship(relationship, deletionMarkDate);
+                ++count;
+                for (TalkRelationship otherRelationship : otherRelationships) {
+                    if (otherRelationship.getOtherClientId().equals(relationship.getClientId()) &&
+                        otherRelationship.getClientId().equals(relationship.getOtherClientId())) {
+                        removeRelationship(otherRelationship, deletionMarkDate);
+                        ++otherCount;
+                        break;
+                    }
+                }
+            }
+        }
+        if (count != otherCount) {
+            LOG.warn("removeRelationships: counts differ, done count:"+count+", done otherCount:"+otherCount);
+        } else {
+            LOG.info("removeRelationships: done count:"+count+", done otherCount:"+otherCount);
+        }
+    }
+
+    public void performAccountDeletion(final String clientId) {
+        LOG.info("performAccountDeletion running for client " + clientId);
+
+        // make sure client is disconnected
+        final TalkRpcConnection conn = mServer.getClientConnection(clientId);
+        if (conn != null) {
+            LOG.info("performAccountDeletion closing connection for client " + clientId);
+            conn.disconnect();
+        }
+
+        long acquaintances = 0;
+
+        // remove membership from all groups and close groups where I am admin
+        List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsForClient(clientId);
+        LOG.info("performAccountDeletion found " + memberships.size() + " group memberships for client " + clientId);
+        for (int i = 0; i < memberships.size(); i++) {
+            TalkGroupMembership membership = memberships.get(i);
+
+            if (membership != null) {
+                if (membership.isAdmin()) {
+                    // delete group
+                    LOG.info("performAccountDeletion closing group " + membership.getGroupId() + " for client " + clientId);
+                    TalkGroupPresence groupPresence = mDatabase.findGroupPresenceById(membership.getGroupId());
+                    if (groupPresence != null) {
+                        // mark the group as deleted
+                        groupPresence.setState(TalkGroupPresence.STATE_DELETED);
+                        groupPresence.setLastChanged(new Date());
+                        mDatabase.saveGroupPresence(groupPresence);
+                        requestGroupUpdate(groupPresence.getGroupId());
+
+                        // walk the group and make everyone have a "none" relationship to it
+                        List<TalkGroupMembership> otherMemberships = mDatabase.findGroupMembershipsById(groupPresence.getGroupId());
+                        for (TalkGroupMembership otherMembership : otherMemberships) {
+                            if (otherMembership.isInvited() || otherMembership.isJoined()) {
+                                removeMembership(otherMembership, groupPresence.getLastChanged(), TalkGroupMembership.STATE_GROUP_REMOVED);
+                                ++acquaintances;
+                            }
+                        }
+                    } else {
+                        LOG.warn("performAccountDeletion not presence for group " + membership.getGroupId() + " for client " + clientId);
+                    }
+                } else if (membership.isInvited() || membership.isMember()) {
+                    removeMembership(membership, new Date(), TalkGroupMembership.STATE_NONE);
+                    ++acquaintances;
+                }
+            }
+        }
+
+        // remove all relationsships
+        final List<TalkRelationship> relationships =
+                mDatabase.findRelationshipsForClientInStates(clientId, TalkRelationship.STATES_RELATED);
+
+        final List<TalkRelationship> otherRelationships =
+                mDatabase.findRelationshipsForOtherClientInStates(clientId, TalkRelationship.STATES_RELATED);
+
+        if (otherRelationships.size() > 0 || relationships.size() > 0) {
+            removeRelationships(relationships, otherRelationships);
+            acquaintances += relationships.size() + otherRelationships.size();
+        }
+
+        // cleanup presence
+        TalkPresence presence = mDatabase.findPresenceForClient(clientId);
+        if (presence != null) {
+            presence.setAvatarUrl("");
+            presence.setClientStatus("Account deleted");
+            mDatabase.savePresence(presence);
+        } else {
+            LOG.warn("performAccountDeletion no presence for clientId " + clientId);
+        }
+
+        // expire outgoing deliveries
+        final List<TalkDelivery> outDeliveries = mDatabase.findDeliveriesFromClient(clientId);
+        for (TalkDelivery delivery : outDeliveries) {
+            if (!delivery.isFinished()) {
+                delivery.expireDelivery();
+                mDatabase.saveDelivery(delivery);
+            }
+        }
+
+        // reject or expire undelivered incoming deliveries
+        final List<TalkDelivery> inDeliveries = mDatabase.findDeliveriesForClient(clientId);
+        for (TalkDelivery delivery : inDeliveries) {
+            if (!delivery.isFinished()) {
+                if (TalkDelivery.STATE_DELIVERING.equals(delivery.getState())) {
+                    delivery.setState(TalkDelivery.STATE_REJECTED);
+                } else {
+                    delivery.expireDelivery();
+                }
+            }
+            mDatabase.saveDelivery(delivery);
+        }
+
+        // delete messages from client immediately
+        final List<TalkMessage> messages = mDatabase.findMessagesFromClient(clientId);
+        for (TalkMessage message : messages) {
+            mDatabase.deleteMessage(message);
+        }
+
+        // throw away the keys now
+        final List<TalkKey> keys = mDatabase.findKeys(clientId);
+        for (TalkKey key : keys) {
+            mDatabase.deleteKey(key);
+        }
+
+        // throw away all tokens
+        final List<TalkToken> tokens = mDatabase.findTokensByClient(clientId);
+        for (TalkToken token : tokens) {
+            mDatabase.deleteToken(token);
+        }
+
+        // throw away all tokens
+        final List<TalkEnvironment> environments = mDatabase.findEnvironmentsForClient(clientId);
+        for (TalkEnvironment environment : environments) {
+            mDatabase.deleteEnvironment(environment);
+        }
+
+        if (acquaintances == 0) {
+            LOG.info("performAccountDeletion: no acquaintances, deleting " + clientId + " immediately");
+            // delete all other stuff immediately as well because nobody knows us
+            if (presence != null) {
+                mDatabase.deletePresence(presence);
+            }
+
+            TalkClient client = mDatabase.findDeletedClientById(clientId);
+            if (client != null) {
+                mDatabase.deleteClient(client);
+            }
+
+            TalkClientHostInfo clientHostInfo = mDatabase.findClientHostInfoForClient(clientId);
+            if (clientHostInfo != null) {
+                mDatabase.deleteClientHostInfo(clientHostInfo);
+            }
+            mServer.getFilecacheClient().deleteAccount(clientId);
+        } else {
+            LOG.info("performAccountDeletion: " + acquaintances + ", just marked " + clientId + " for deletion");
+        }
+
+        //@DatabaseTable(tableName = "groupPresence")
+        //public class TalkGroupPresence {
+    }
+
+    public void requestAccountDeletion(final String clientId) {
+        Runnable accountDeleter = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    performAccountDeletion(clientId);
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                }
+            }
+        };
+
+        queueOrExecute(context, accountDeleter);
     }
 
 }

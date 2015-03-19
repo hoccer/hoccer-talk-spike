@@ -13,7 +13,7 @@ import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.view.model.BaseChatItem;
-import com.hoccer.xo.android.view.model.NearbyGroupChatItem;
+import com.hoccer.xo.android.view.model.NearbyHistoryChatItem;
 import com.hoccer.xo.android.view.model.TalkClientChatItem;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -71,7 +71,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
                     }
 
                     if (nearbyMessageCount > 0) {
-                        mChatItems.add(new NearbyGroupChatItem());
+                        mChatItems.add(new NearbyHistoryChatItem());
                     }
 
                     notifyDataSetChanged();
@@ -128,8 +128,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
     }
 
     private BaseChatItem findChatItemForContent(Object content) {
-        for (int i = 0; i < mChatItems.size(); i++) {
-            BaseChatItem item = mChatItems.get(i);
+        for (BaseChatItem item : mChatItems) {
             if (content.equals(item.getContent())) {
                 return item;
             }

@@ -17,7 +17,7 @@ import java.util.List;
 
 public class ContactSearchResultAdapter extends ContactsAdapter {
 
-    private List<TalkClientContact> mFoundContacts = new ArrayList<TalkClientContact>();
+    private final List<TalkClientContact> mFoundContacts = new ArrayList<TalkClientContact>();
     private String mLastQuery = "";
 
     public ContactSearchResultAdapter(XoActivity activity) {
@@ -28,7 +28,7 @@ public class ContactSearchResultAdapter extends ContactsAdapter {
         mFoundContacts.clear();
         mLastQuery = query.toLowerCase();
 
-        if (query.length() > 0) {
+        if (!query.isEmpty()) {
             for (TalkClientContact contact : mContacts) {
                 // ignore self
                 if (contact.isSelf()) {
@@ -48,7 +48,6 @@ public class ContactSearchResultAdapter extends ContactsAdapter {
         } else {
             mFoundContacts.clear();
         }
-
     }
 
     @Override
@@ -87,27 +86,15 @@ public class ContactSearchResultAdapter extends ContactsAdapter {
     }
 
     @Override
-    protected void updateNearbyHistoryLayout(View v) {
-
-    }
+    protected void updateNearbyHistoryLayout(View v) {}
 
     @Override
     protected void updateContact(View view, TalkClientContact contact) {
-        AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
-
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
         nameView.setText(getHighlightedSearchResult(contact.getName()));
-        TextView typeView = (TextView) view.findViewById(R.id.contact_type);
 
+        AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
         avatarView.setContact(contact);
-        if (contact.isGroup()) {
-            if (contact.isGroupInvited()) {
-                typeView.setText(R.string.common_group_invite);
-            } else {
-                typeView.setText(R.string.common_group);
-            }
-        }
-
     }
 
     private Spannable getHighlightedSearchResult(String text) {

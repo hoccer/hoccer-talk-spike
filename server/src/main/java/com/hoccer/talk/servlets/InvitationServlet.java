@@ -1,10 +1,10 @@
 package com.hoccer.talk.servlets;
 
+import com.floreysoft.jmte.DefaultModelAdaptor;
 import com.floreysoft.jmte.Engine;
-import com.hoccer.talk.server.TalkServer;
-import com.hoccer.talk.server.TalkServerConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -14,19 +14,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
+import java.util.ResourceBundle;
 
 public class InvitationServlet extends HttpServlet {
 
     private static final Logger LOG = Logger.getLogger(InvitationServlet.class);
-    private TalkServerConfiguration mConfig;
-
-    private static final HashMap<String, Map<String, Object>> LOCALIZED_MESSAGES = new HashMap<String, Map<String, Object>>();
-    static {
-        LOCALIZED_MESSAGES.put("en", loadMessages("messages-en.properties"));
-        LOCALIZED_MESSAGES.put("de", loadMessages("messages-de.properties"));
-    }
 
     private enum Platform {
         IOS,
@@ -34,39 +26,31 @@ public class InvitationServlet extends HttpServlet {
         OTHER
     }
 
-    private static final HashMap<Platform, String> DOWNLOAD_LINKS = new HashMap<Platform, String>();
+    public enum Label {
+        HOCCER,
+        HOCCME,
+        SIMSME,
+        STROEER
+    }
+
+    private static final HashMap<String, Label> LABELS = new HashMap<String, Label>();
+
     static {
-        DOWNLOAD_LINKS.put(Platform.IOS, "https://itunes.apple.com/app/hoccer/id340180776");
-        DOWNLOAD_LINKS.put(Platform.ANDROID, "https://play.google.com/store/apps/details?id=com.artcom.hoccer");
-        DOWNLOAD_LINKS.put(Platform.OTHER, "http://hoccer.com");
+        LABELS.put("hcr", Label.HOCCER);
+        LABELS.put("hcrd", Label.HOCCER);
+        LABELS.put("hoccme", Label.HOCCME);
+        LABELS.put("hoccmed", Label.HOCCME);
+        LABELS.put("hcrsms", Label.SIMSME);
+        LABELS.put("hcrsmsd", Label.SIMSME);
+        LABELS.put("strm", Label.STROEER);
+        LABELS.put("strmd", Label.STROEER);
     }
 
-    private Engine mEngine = new Engine();
-    private String mTemplate;
+    private final Engine mEngine = new Engine();
+    private final String mTemplate = loadTemplate("/invite/common/inviteTemplate.html");
 
-    private static Map<String, Object> loadMessages(String filename) {
-        Properties properties = new Properties();
-
-        try {
-            InputStream inputStream = InvitationServlet.class.getResourceAsStream("/messages/" + filename);
-            properties.load(inputStream);
-        } catch (IOException e) {
-            LOG.error("Error loading localized messages", e);
-        }
-
-        return (Map)properties;
-    }
-
-    @Override
-    public void init() throws ServletException {
-        mTemplate = loadTemplate("inviteTemplate.html");
-
-        TalkServer server = (TalkServer)getServletContext().getAttribute("server");
-        mConfig = server.getConfiguration();
-    }
-
-    private static String loadTemplate(String name) {
-        InputStream stream = InvitationServlet.class.getResourceAsStream("/templates/" + name);
+    private static String loadTemplate(String path) {
+        InputStream stream = InvitationServlet.class.getResourceAsStream(path);
 
         try {
             return IOUtils.toString(stream);
@@ -77,48 +61,35 @@ public class InvitationServlet extends HttpServlet {
     }
 
     @Override
+    public void init() throws ServletException {
+        mEngine.setModelAdaptor(new ResourceBundleModelAdapter());
+    }
+
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        UrlParameters parameters = new UrlParameters(request.getPathInfo());
+        Label label = LABELS.get(parameters.scheme);
+
+        if (label == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
+        ResourceBundle resourceBundle = getResourceBundle(label, request.getLocale());
         String userAgent = request.getHeader("User-Agent");
         Platform platform = determinePlatform(userAgent);
-        String language = determineLanguage(request.getLocale(), "en");
 
         HashMap<String, Object> model = new HashMap<String, Object>();
-        model.put("messages", LOCALIZED_MESSAGES.get(language));
-        model.put("downloadLink", DOWNLOAD_LINKS.get(platform));
-        model.put("inviteLink", extractInviteLink(request.getPathInfo()));
+        model.put("label", label.toString().toLowerCase());
+        model.put("messages", resourceBundle);
+        model.put("downloadLink", resourceBundle.getString("downloadLink" + platform));
+        model.put("inviteLink", parameters.scheme + "://" + parameters.token);
 
         String body = mEngine.transform(mTemplate, model);
 
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("text/html; charset=UTF-8");
         response.getWriter().println(body);
-    }
-
-    private String extractInviteLink(String pathInfo) {
-        String[] components = pathInfo.split("/");
-
-        if (components.length > 2) {
-            // pathInfo is expected to look like this: "/<scheme>/<token>"
-            // components[0] is an empty string
-            String scheme = components[1];
-            String token = components[2];
-
-            if (mConfig.getAllowedInviteUriSchemes().contains(scheme)) {
-                return scheme + "://" + token;
-            }
-        }
-
-        return null;
-    }
-
-    private static String determineLanguage(Locale locale, String defaultLanguage) {
-        String language = locale.getLanguage();
-
-        if (language.isEmpty() || !LOCALIZED_MESSAGES.containsKey(language)) {
-            language = defaultLanguage;
-        }
-
-        return language;
     }
 
     private static Platform determinePlatform(String userAgent) {
@@ -131,5 +102,39 @@ public class InvitationServlet extends HttpServlet {
         }
 
         return platform;
+    }
+
+    private ResourceBundle getResourceBundle(Label label, Locale locale) {
+        return ResourceBundle.getBundle("invite/" + label.toString().toLowerCase() + "/messages", locale);
+    }
+
+    private class ResourceBundleModelAdapter extends DefaultModelAdaptor {
+        @Override
+        protected Object getPropertyValue(Object o, String propertyName) {
+            if (o instanceof ResourceBundle) {
+                return ((ResourceBundle) o).getString(propertyName);
+            }
+
+            return super.getPropertyValue(o, propertyName);
+        }
+    }
+
+    private class UrlParameters {
+        @Nullable public final String scheme;
+        @Nullable public final String token;
+
+        public UrlParameters(String pathInfo) {
+            // pathInfo is expected to look like this: "/<scheme>/<token>"
+            String[] components = pathInfo.split("/");
+
+            if (components.length > 2) {
+                // components[0] is an empty string
+                scheme = components[1];
+                token = components[2];
+            } else {
+                scheme = null;
+                token = null;
+            }
+        }
     }
 }

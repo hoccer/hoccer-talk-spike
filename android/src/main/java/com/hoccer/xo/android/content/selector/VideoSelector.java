@@ -8,10 +8,13 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.content.ContentMediaType;
-import com.hoccer.talk.content.IContentObject;
-import com.hoccer.xo.android.content.SelectedContent;
-import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.talk.content.SelectedContent;
+import com.hoccer.talk.content.SelectedFile;
 import com.hoccer.xo.android.util.UriUtils;
+import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
+
+import java.io.File;
+import java.io.FileNotFoundException;
 
 public class VideoSelector implements IContentSelector {
 
@@ -20,7 +23,7 @@ public class VideoSelector implements IContentSelector {
 
     public VideoSelector(Context context) {
         mName = context.getResources().getString(R.string.content_video);
-        mIcon = ColorSchemeManager.getRepaintedDrawable(context.getResources(), R.drawable.ic_attachment_select_video, true);
+        mIcon = ColoredDrawable.getFromCache(R.drawable.ic_attachment_select_video, R.color.primary);
     }
 
     @Override
@@ -41,70 +44,32 @@ public class VideoSelector implements IContentSelector {
     }
 
     @Override
-    public IContentObject createObjectFromSelectionResult(Context context, Intent intent) {
-
-        boolean isValidIntent = isValidIntent(context, intent);
-        if (!isValidIntent) {
-            return null;
+    public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) throws Exception {
+        String mimeType = UriUtils.getMimeType(context, intent.getData());
+        if (!mimeType.startsWith("video")) {
+            throw new Exception("Mime type is not 'video/*'");
         }
 
-        Uri selectedContent = intent.getData();
-        String[] filePathColumn = {
-                MediaStore.Video.Media.MIME_TYPE,
-                MediaStore.Video.Media.DATA,
-                MediaStore.Video.Media.SIZE,
-                MediaStore.Video.Media.WIDTH,
-                MediaStore.Video.Media.HEIGHT,
-                MediaStore.Video.Media.TITLE
-        };
+        String filePath = UriUtils.getFilePathByUri(context, intent.getData(), MediaStore.Video.Media.DATA);
+        if (filePath == null || !new File(filePath).exists()) {
+            throw new FileNotFoundException("File not found for " + intent.getData());
+        }
 
-        Cursor cursor = context.getContentResolver().query(selectedContent, filePathColumn, null, null, null);
+        Uri mediaStoreUri = UriUtils.getContentUriByDataPath(context, MediaStore.Video.Media.getContentUri("external"), filePath);
+        String[] projection = {
+                MediaStore.Video.Media.WIDTH,
+                MediaStore.Video.Media.HEIGHT
+        };
+        Cursor cursor = context.getContentResolver().query(mediaStoreUri, projection, null, null, null);
         cursor.moveToFirst();
 
-        int typeIndex = cursor.getColumnIndex(filePathColumn[0]);
-        String fileType = cursor.getString(typeIndex);
-        int dataIndex = cursor.getColumnIndex(filePathColumn[1]);
-        String filePath = cursor.getString(dataIndex);
-        int sizeIndex = cursor.getColumnIndex(filePathColumn[2]);
-        int fileSize = cursor.getInt(sizeIndex);
-        int widthIndex = cursor.getColumnIndex(filePathColumn[3]);
-        int fileWidth = cursor.getInt(widthIndex);
-        int heightIndex = cursor.getColumnIndex(filePathColumn[4]);
-        int fileHeight = cursor.getInt(heightIndex);
-        int fileNameIndex = cursor.getColumnIndex(filePathColumn[5]);
-        String fileName = cursor.getString(fileNameIndex);
-
+        int widthIndex = cursor.getColumnIndex(projection[0]);
+        int width = cursor.getInt(widthIndex);
+        int heightIndex = cursor.getColumnIndex(projection[1]);
+        int height = cursor.getInt(heightIndex);
         cursor.close();
 
-        if (filePath == null) {
-            return null;
-        }
-
-        SelectedContent contentObject = new SelectedContent(intent, UriUtils.FILE_URI_PREFIX + filePath);
-        contentObject.setFileName(fileName);
-        contentObject.setContentMediaType(ContentMediaType.VIDEO);
-        contentObject.setContentType(fileType);
-        contentObject.setContentLength(fileSize);
-        if (fileWidth > 0 && fileHeight > 0) {
-            contentObject.setContentAspectRatio(((float) fileWidth) / ((float) fileHeight));
-        }
-
-        return contentObject;
-    }
-
-    @Override
-    public boolean isValidIntent(Context context, Intent intent) {
-        Uri contentUri = intent.getData();
-        String[] columns = {MediaStore.Video.Media.MIME_TYPE};
-        Cursor cursor = context.getContentResolver().query(contentUri, columns, null, null, null);
-
-        if (cursor != null) {
-            cursor.moveToFirst();
-            int mimeTypeIndex = cursor.getColumnIndex(MediaStore.Video.Media.MIME_TYPE);
-            String mimeType = cursor.getString(mimeTypeIndex);
-            return (mimeType.startsWith("video"));
-        }
-
-        return false;
+        double aspectRatio = ((double) width) / ((double) height);
+        return new SelectedFile(filePath, mimeType, ContentMediaType.VIDEO, aspectRatio);
     }
 }

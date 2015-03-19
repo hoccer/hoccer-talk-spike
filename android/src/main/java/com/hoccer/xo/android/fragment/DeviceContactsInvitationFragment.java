@@ -77,11 +77,11 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
             showProgressOverlay(true);
             mIsInvitationCancelled = false;
 
-            XoApplication.getExecutor().execute(new Runnable() {
+            XoApplication.get().getExecutor().execute(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        String token = XoApplication.getXoClient().generatePairingToken();
+                        String token = XoApplication.get().getXoClient().generatePairingToken();
 
                         if (!mIsInvitationCancelled) {
                             if (token != null) {
@@ -205,14 +205,14 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
 
     private void composeInviteSms(String[] phoneNumbers, String token) {
         String invitationServerUri = XoApplication.getConfiguration().getInvitationServerUri();
-        String selfName = XoApplication.getXoClient().getSelfContact().getName();
+        String selfName = XoApplication.get().getXoClient().getSelfContact().getName();
         String message = String.format(getString(R.string.sms_invitation_text), invitationServerUri, token, selfName);
         ContactOperations.sendSMS(getActivity(), message, phoneNumbers);
     }
 
     private void composeInviteEmail(String[] eMailAddresses, String token) {
         String invitationServerUri = XoApplication.getConfiguration().getInvitationServerUri();
-        String selfName = XoApplication.getXoClient().getSelfContact().getName();
+        String selfName = XoApplication.get().getXoClient().getSelfContact().getName();
         String subject = getString(R.string.email_invitation_subject);
         String message = String.format(getString(R.string.email_invitation_text), invitationServerUri, token, selfName);
         ContactOperations.sendEMail(getActivity(), subject, message, eMailAddresses);

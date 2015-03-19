@@ -9,7 +9,6 @@ import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentMediaType;
-import com.hoccer.talk.content.IContentObject;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -26,8 +25,8 @@ public class UserPlaylist extends MediaPlaylist implements IXoUploadListener, IX
     private static final Logger LOG = Logger.getLogger(UserPlaylist.class);
 
     private List<XoTransfer> mList;
-    private TalkClientContact mContact;
-    private XoClientDatabase mDatabase;
+    private final TalkClientContact mContact;
+    private final XoClientDatabase mDatabase;
 
     /*
      * Constructs a playlist filtered by the given contact.
@@ -41,10 +40,10 @@ public class UserPlaylist extends MediaPlaylist implements IXoUploadListener, IX
         mDatabase.registerDownloadListener(this);
 
         try {
-            if(contact != null) {
+            if (contact != null) {
                 mList = new ArrayList<XoTransfer>(mDatabase.findClientDownloadsByMediaTypeAndContactId(ContentMediaType.AUDIO, mContact.getClientContactId()));
             } else {
-                mList = mDatabase.findTransfersByMediaType(ContentMediaType.AUDIO);
+                mList = mDatabase.findTransfersByMediaTypeDistinct(ContentMediaType.AUDIO);
             }
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
@@ -66,19 +65,19 @@ public class UserPlaylist extends MediaPlaylist implements IXoUploadListener, IX
     }
 
     @Override
-    public boolean hasItem(IContentObject item) {
+    public boolean hasItem(XoTransfer item) {
         return mList.contains(item);
     }
 
     @Override
-    public int indexOf(IContentObject item) {
+    public int indexOf(XoTransfer item) {
         return mList.indexOf(item);
     }
 
     @Override
-    public Iterator<IContentObject> iterator() {
-        return new Iterator<IContentObject>() {
-            private Iterator<XoTransfer> mIterator = mList.iterator();
+    public Iterator<XoTransfer> iterator() {
+        return new Iterator<XoTransfer>() {
+            private final Iterator<XoTransfer> mIterator = mList.iterator();
 
             @Override
             public boolean hasNext() {
@@ -86,7 +85,7 @@ public class UserPlaylist extends MediaPlaylist implements IXoUploadListener, IX
             }
 
             @Override
-            public IContentObject next() {
+            public XoTransfer next() {
                 return mIterator.next();
             }
 
@@ -100,7 +99,7 @@ public class UserPlaylist extends MediaPlaylist implements IXoUploadListener, IX
     @Override
     public void onDownloadCreated(TalkClientDownload download) {
         // do nothing if the download is incomplete
-        if(download.getState() == TalkClientDownload.State.COMPLETE) {
+        if (download.getState() == TalkClientDownload.State.COMPLETE) {
             addItem(download);
         }
     }
@@ -108,7 +107,7 @@ public class UserPlaylist extends MediaPlaylist implements IXoUploadListener, IX
     @Override
     public void onDownloadUpdated(TalkClientDownload download) {
         // do nothing if the download is incomplete
-        if(download.getState() == TalkClientDownload.State.COMPLETE) {
+        if (download.getState() == TalkClientDownload.State.COMPLETE) {
             addItem(download);
         }
     }
@@ -132,20 +131,21 @@ public class UserPlaylist extends MediaPlaylist implements IXoUploadListener, IX
     public void onUploadDeleted(TalkClientUpload upload) {
         removeItem(upload);
     }
+
     private void addItem(XoTransfer transfer) {
         // check if the item is already in the playlist
-        if(mList.contains(transfer)) {
+        if (mList.contains(transfer)) {
             return;
         }
 
-        if(mContact != null) {
+        if (mContact != null) {
             // check if contact matches
             try {
                 TalkClientMessage message = transfer.isUpload() ?
                         mDatabase.findClientMessageByTalkClientUploadId(transfer.getUploadOrDownloadId()) :
                         mDatabase.findClientMessageByTalkClientDownloadId(transfer.getUploadOrDownloadId());
 
-                if(message != null && message.getConversationContact().getClientId() == mContact.getClientId()) {
+                if (message != null && message.getConversationContact().getClientContactId() == mContact.getClientContactId()) {
                     mList = new ArrayList<XoTransfer>(mDatabase.findClientDownloadsByMediaTypeAndContactId(ContentMediaType.AUDIO, mContact.getClientContactId()));
                     invokeItemAdded(transfer);
                 }
@@ -163,13 +163,13 @@ public class UserPlaylist extends MediaPlaylist implements IXoUploadListener, IX
     }
 
     private void removeItem(XoTransfer transfer) {
-        if(mContact != null) {
+        if (mContact != null) {
             try {
                 TalkClientMessage message = transfer.isUpload() ?
                         mDatabase.findClientMessageByTalkClientUploadId(transfer.getUploadOrDownloadId()) :
                         mDatabase.findClientMessageByTalkClientDownloadId(transfer.getUploadOrDownloadId());
 
-                if(message != null && message.getConversationContact().getClientId() == mContact.getClientId()) {
+                if (message != null && message.getConversationContact().getClientContactId() == mContact.getClientContactId()) {
                     mList = new ArrayList<XoTransfer>(mDatabase.findClientDownloadsByMediaTypeAndContactId(ContentMediaType.AUDIO, mContact.getClientContactId()));
                     invokeItemRemoved(transfer);
                 }

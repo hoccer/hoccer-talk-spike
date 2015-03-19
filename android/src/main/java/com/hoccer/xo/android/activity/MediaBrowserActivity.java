@@ -4,17 +4,18 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.view.Menu;
 import android.view.MenuItem;
+import com.artcom.hoccer.R;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.fragment.AttachmentListFragment;
 import com.hoccer.xo.android.fragment.MediaCollectionListFragment;
-import com.artcom.hoccer.R;
+
 
 public class MediaBrowserActivity extends ComposableActivity {
 
     @Override
     protected ActivityComponent[] createComponents() {
-        return new ActivityComponent[] { new MediaPlayerActivityComponent(this) };
+        return new ActivityComponent[]{new MediaPlayerActivityComponent(this)};
     }
 
     @Override

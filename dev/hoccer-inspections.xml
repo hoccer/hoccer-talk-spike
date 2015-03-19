@@ -123,7 +123,7 @@
     <option name="processLiterals" value="true" />
     <option name="processComments" value="true" />
   </inspection_tool>
-  <inspection_tool class="SwitchStatementsWithoutDefault" enabled="true" level="ERROR" enabled_by_default="true">
+  <inspection_tool class="SwitchStatementsWithoutDefault" enabled="false" level="ERROR" enabled_by_default="false">
     <option name="m_ignoreFullyCoveredEnums" value="true" />
   </inspection_tool>
   <inspection_tool class="UnnecessaryConstructor" enabled="true" level="WARNING" enabled_by_default="true" />

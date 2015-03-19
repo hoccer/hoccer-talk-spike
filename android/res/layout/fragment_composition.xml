@@ -5,12 +5,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@color/xo_main_background">
+        android:background="@color/background_default">
 
     <View
             android:layout_width="match_parent"
             android:layout_height="2dp"
-            android:background="@color/xo_compose_message_divider"/>
+            android:background="@color/separator"/>
 
     <LinearLayout
             android:layout_width="match_parent"
@@ -39,7 +39,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:scaleType="centerInside"
-                    android:tint="@color/xo_app_attachment_incoming_color"
+                    android:tint="@color/attachment_incoming"
                     android:visibility="gone"/>
 
             <ImageView
@@ -48,7 +48,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:scaleType="centerInside"
-                    android:tint="@color/xo_app_attachment_incoming_color"
+                    android:tint="@color/attachment_incoming"
                     android:visibility="gone"/>
 
             <ImageView
@@ -57,7 +57,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:scaleType="centerInside"
-                    android:tint="@color/xo_app_attachment_incoming_color"
+                    android:tint="@color/attachment_incoming"
                     android:visibility="gone"/>
 
             <ImageView
@@ -66,7 +66,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:scaleType="centerInside"
-                    android:tint="@color/xo_app_attachment_incoming_color"
+                    android:tint="@color/attachment_incoming"
                     android:visibility="gone"/>
 
             <ImageView
@@ -75,7 +75,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:scaleType="centerInside"
-                    android:tint="@color/xo_app_attachment_incoming_color"
+                    android:tint="@color/attachment_incoming"
                     android:visibility="gone"/>
 
             <ImageView
@@ -84,7 +84,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:scaleType="centerInside"
-                    android:tint="@color/xo_app_attachment_incoming_color"
+                    android:tint="@color/attachment_incoming"
                     android:visibility="gone"/>
 
             <ImageView
@@ -92,7 +92,7 @@
                     android:background="@drawable/circle"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:tint="@color/xo_app_attachment_incoming_color"
+                    android:tint="@color/attachment_incoming"
                     android:layout_margin="4dp"
                     android:visibility="gone"/>
 
@@ -102,7 +102,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:scaleType="centerInside"
-                    android:tint="@color/xo_app_attachment_incoming_color"
+                    android:tint="@color/attachment_incoming"
                     android:visibility="gone"/>
 
             <TextView
@@ -111,7 +111,7 @@
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
                     android:text=""
-                    android:textColor="@color/xo_compose_message_textColor"/>
+                    android:textColor="@color/compose_message_text"/>
         </RelativeLayout>
 
         <EditText

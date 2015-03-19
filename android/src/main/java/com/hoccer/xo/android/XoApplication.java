@@ -1,6 +1,7 @@
 package com.hoccer.xo.android;
 
 import android.app.Application;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Environment;
@@ -10,8 +11,7 @@ import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.credentialtransfer.SrpChangeListener;
-import com.hoccer.xo.android.error.EnvironmentUpdaterException;
-import com.hoccer.xo.android.nearby.EnvironmentUpdater;
+import com.hoccer.xo.android.service.XoClientService;
 import com.hoccer.xo.android.task.StartupTasks;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -30,7 +30,7 @@ import java.util.concurrent.ScheduledExecutorService;
  * for such things as initializing the logger and setting up the
  * XO client itself. All global initialization should go here.
  */
-public class XoApplication extends Application implements Thread.UncaughtExceptionHandler {
+public class XoApplication extends Application implements Thread.UncaughtExceptionHandler, BackgroundManager.Listener {
 
     private static Logger sLog;
 
@@ -54,7 +54,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     private static final int CLIENT_THREAD_COUNT = 100;
 
     // global executor for client background activity (initialized in onCreate)
-    private static ScheduledExecutorService sExecutor;
+    private ScheduledExecutorService mExecutor;
 
     // global executor for incoming connections
     private static ScheduledExecutorService sIncomingExecutor;
@@ -62,20 +62,25 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     private static Thread.UncaughtExceptionHandler sUncaughtExceptionHandler;
     private Thread.UncaughtExceptionHandler mPreviousHandler;
 
-    private static IXoClientHost sClientHost;
-    private static XoAndroidClient sClient;
+    private XoAndroidClient mClient;
     private static XoAndroidClientConfiguration sConfiguration;
     private static XoSoundPool sSoundPool;
-    private static EnvironmentUpdater sEnvironmentUpdater;
     private static DisplayImageOptions sImageOptions;
 
-    private static boolean sIsNearbySessionRunning;
-
     private static StartupTasks sStartupTasks;
+    private boolean mStayActiveInBackground;
+
+    private static XoApplication sInstance;
+
+    public static XoApplication get() {
+        return sInstance;
+    }
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        sInstance = this;
 
         // currently we use our own instance here
         sUncaughtExceptionHandler = this;
@@ -118,8 +123,8 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         Thread.setDefaultUncaughtExceptionHandler(this);
 
         // log storage roots
-        sLog.info("internal storage at " + sInternalStorage.toString());
-        sLog.info("external storage at " + sExternalStorage.toString());
+        sLog.info("internal storage at " + sInternalStorage);
+        sLog.info("external storage at " + sExternalStorage);
 
         // initialize version information
         XoVersion.initialize(this);
@@ -166,7 +171,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         ThreadFactoryBuilder tfb = new ThreadFactoryBuilder();
         tfb.setNameFormat("client-%d");
         tfb.setUncaughtExceptionHandler(this);
-        sExecutor = Executors.newScheduledThreadPool(CLIENT_THREAD_COUNT, tfb.build());
+        mExecutor = Executors.newScheduledThreadPool(CLIENT_THREAD_COUNT, tfb.build());
         ThreadFactoryBuilder tfb2 = new ThreadFactoryBuilder();
         tfb2.setNameFormat("receiving client-%d");
         tfb2.setUncaughtExceptionHandler(this);
@@ -174,49 +179,31 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
         // create client instance
         sLog.info("creating client");
-        sClientHost = new XoAndroidClientHost(this);
-        XoAndroidClient client = new XoAndroidClient(sClientHost, sConfiguration);
-        client.setAvatarDirectory(getAvatarDirectory().toString());
-        client.setRelativeAvatarDirectory(sConfiguration.getAvatarsDirectory());
-        client.setAttachmentDirectory(getAttachmentDirectory().toString());
-        client.setRelativeAttachmentDirectory(sConfiguration.getAttachmentsDirectory());
-        client.setEncryptedDownloadDirectory(getEncryptedDownloadDirectory().toString());
-        client.setExternalStorageDirectory(sExternalStorage.getAbsolutePath());
-        sClient = client;
+        IXoClientHost clientHost = new XoAndroidClientHost(this);
+        mClient = new XoAndroidClient(clientHost, sConfiguration);
+        mClient.setAvatarDirectory(getAvatarDirectory().toString());
+        mClient.setRelativeAvatarDirectory(sConfiguration.getAvatarsDirectory());
+        mClient.setAttachmentDirectory(getAttachmentDirectory().toString());
+        mClient.setRelativeAttachmentDirectory(sConfiguration.getAttachmentsDirectory());
+        mClient.setEncryptedDownloadDirectory(getEncryptedDownloadDirectory().toString());
+        mClient.setExternalStorageDirectory(sExternalStorage.getAbsolutePath());
+        mClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
 
         // add srp secret change listener
-        client.registerStateListener(new SrpChangeListener(this));
+        mClient.registerStateListener(new SrpChangeListener(this));
 
         // create sound pool instance
         sSoundPool = new XoSoundPool(this);
 
-        sEnvironmentUpdater = new EnvironmentUpdater(this, sClient);
+        BackgroundManager.get().registerListener(this);
 
         sStartupTasks = new StartupTasks(this);
         sStartupTasks.executeRegisteredTasks();
-    }
 
-    @Override
-    public void onTerminate() {
-        super.onTerminate();
+        mClient.connect();
 
-        sLog.info("deactivating client");
-        if (sClient != null) {
-            sClient.deactivateNow();
-            sClient = null;
-        }
-
-        sLog.info("removing uncaught exception handler");
-        if (mPreviousHandler != null) {
-            Thread.setDefaultUncaughtExceptionHandler(mPreviousHandler);
-            mPreviousHandler = null;
-        }
-
-        sLog.info("shutting down executor");
-        if (sExecutor != null) {
-            sExecutor.shutdownNow();
-            sExecutor = null;
-        }
+        Intent xoClientServiceIntent = new Intent(this, XoClientService.class);
+        startService(xoClientServiceIntent);
     }
 
     @Override
@@ -235,24 +222,24 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
     public static void ensureDirectory(File directory) {
         if (!directory.exists()) {
-            sLog.info("creating directory " + directory.toString());
+            sLog.info("creating directory " + directory);
             if (!directory.mkdirs()) {
-                sLog.info("Error creating directory " + directory.toString());
+                sLog.info("Error creating directory " + directory);
             }
         }
     }
 
-    public static void ensureNoMedia(File directory) {
+    private static void ensureNoMedia(File directory) {
         if (directory.exists()) {
             File noMedia = new File(directory, ".nomedia");
             if (!noMedia.exists()) {
-                sLog.info("creating noMedia marker " + noMedia.toString());
+                sLog.info("creating noMedia marker " + noMedia);
                 try {
                     if (!noMedia.createNewFile()) {
-                        sLog.info("Error creating directory " + noMedia.toString());
+                        sLog.info("Error creating directory " + noMedia);
                     }
                 } catch (IOException e) {
-                    sLog.error("error creating " + noMedia.toString(), e);
+                    sLog.error("error creating " + noMedia, e);
                 }
             }
         }
@@ -298,83 +285,16 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         return null;
     }
 
-    public static void reinitializeXoClient() {
-        if (sClient != null) {
-            sClient.initialize(sClientHost);
-        }
-    }
-
     public static void registerForNextStart(Class clazz) {
         sStartupTasks.registerForNextStart(clazz);
     }
 
-    /**
-     * Starts a nearby session if not yet started.
-     * Sets sIsNearbySessionRunning = true.
-     */
-    public static void startNearbySession(boolean force) {
-        if (!sEnvironmentUpdater.isEnabled() || force) {
-            try {
-                sEnvironmentUpdater.startEnvironmentTracking();
-                sIsNearbySessionRunning = true;
-            } catch (EnvironmentUpdaterException e) {
-                sLog.error("Error when starting EnvironmentUpdater: ", e);
-            }
-        }
+    public ScheduledExecutorService getExecutor() {
+        return mExecutor;
     }
 
-    /**
-     * Stops current nearby session if running.
-     */
-    public static void suspendNearbySession() {
-        if (sEnvironmentUpdater.isEnabled()) {
-            sIsNearbySessionRunning = true;
-            sEnvironmentUpdater.stopEnvironmentTracking();
-        }
-    }
-
-    /**
-     * Stops current nearby session if running.
-     */
-    public static void stopNearbySession() {
-        if (sIsNearbySessionRunning) {
-            suspendNearbySession();
-            sIsNearbySessionRunning = false;
-        }
-    }
-
-    public static void enterBackgroundMode() {
-        // set presence to inactive
-        sClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
-
-        // suspend nearby environment
-        suspendNearbySession();
-
-        sLog.info("Entered background mode");
-    }
-
-    public static void enterForegroundMode() {
-        // set presence to active
-        sClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
-
-        // wake up suspended nearby session
-        if (sIsNearbySessionRunning) {
-            startNearbySession(false);
-        }
-
-        sLog.info("Entered foreground mode");
-    }
-
-    public static void enterBackgroundActiveMode() {
-        sLog.info("Entered background active mode");
-    }
-
-    public static ScheduledExecutorService getExecutor() {
-        return sExecutor;
-    }
-
-    public static XoAndroidClient getXoClient() {
-        return sClient;
+    public XoAndroidClient getXoClient() {
+        return mClient;
     }
 
     public static XoAndroidClientConfiguration getConfiguration() {
@@ -383,10 +303,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
     public static XoSoundPool getXoSoundPool() {
         return sSoundPool;
-    }
-
-    public static EnvironmentUpdater getEnvironmentUpdater() {
-        return sEnvironmentUpdater;
     }
 
     public static File getExternalStorage() {
@@ -450,5 +366,28 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
                 }
             }
         }
+    }
+
+    public void stayActiveInBackground() {
+        mStayActiveInBackground = true;
+    }
+
+    @Override
+    public void onBecameForeground() {
+        sLog.debug("onBecameForeground()");
+        mClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
+        mStayActiveInBackground = false;
+    }
+
+    @Override
+    public void onBecameBackground() {
+        sLog.debug("onBecameBackground()");
+        if (!mStayActiveInBackground) {
+            mClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
+        }
+    }
+
+    public boolean getStayActiveInBackground() {
+        return mStayActiveInBackground;
     }
 }

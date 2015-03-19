@@ -6,6 +6,7 @@ import com.beust.jcommander.Parameter;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.content.SelectedFile;
 import com.hoccer.talk.crypto.CryptoUtils;
 import com.hoccer.talk.tool.TalkToolCommand;
 import com.hoccer.talk.tool.TalkToolContext;
@@ -23,16 +24,16 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 @CLICommand(name = "cmessage", description = "Send a text message from one client to another, " +
-                                             "use: cmessage <sender_id> <recipient_id> " +
-                                                   "-m <message_string> " +
-                                                   "-f <path_to_file> " +
-                                                   // the -n option is currently broken when running in non-ssl mode,
-                                                   // see: https://github.com/hoccer/scrum/issues/139
-                                                   "-n <number_of_messages_to_send>")
+        "use: cmessage <sender_id> <recipient_id> " +
+        "-m <message_string> " +
+        "-f <path_to_file> " +
+        // the -n option is currently broken when running in non-ssl mode,
+        // see: https://github.com/hoccer/scrum/issues/139
+        "-n <number_of_messages_to_send>")
 public class ClientMessage extends TalkToolCommand {
 
-    private final String DEFAULT_MESSAGE = "Hello World";
-    private final String ATTACHMENT_CLONES_PATH = "files/clones";
+    private static final String DEFAULT_MESSAGE = "Hello World";
+    private static final String ATTACHMENT_CLONES_PATH = "files/clones";
 
     private final Executor mExecutor = Executors.newScheduledThreadPool(16);
 
@@ -112,36 +113,25 @@ public class ClientMessage extends TalkToolCommand {
         return null;
     }
 
-    private String getContentHmac(String contentDataUrl) {
-        try {
-            return CryptoUtils.computeHmac(contentDataUrl);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    private TalkClientUpload createAttachment(File fileToUpload) {
+    private static TalkClientUpload createAttachment(File fileToUpload) {
         if (fileToUpload == null) {
             return null;
         } else {
             Console.info("<ClientMessage::createAttachment> Creating attachment for file: '" + fileToUpload.getAbsolutePath() + "'");
-            String url = fileToUpload.getAbsolutePath();
-            String fileName = fileToUpload.getName();
+            String filePath = fileToUpload.getAbsolutePath();
             String contentType = "image/*"; // XXX TODO: calculate filetype
             String mediaType = "image"; // seems to be only needed in android
             double aspectRatio = 1.0; // XXX TODO: calculate ((float)fileWidth) / ((float)fileHeight)
-            int contentLength = (int)fileToUpload.length();
-            String contentHmac = getContentHmac("file://" + url);
 
             TalkClientUpload attachmentUpload = new TalkClientUpload();
-            attachmentUpload.initializeAsAttachment(fileName, url, url, contentType, mediaType, aspectRatio, contentLength, contentHmac);
+            SelectedFile content = new SelectedFile(filePath, contentType, mediaType, aspectRatio);
+            attachmentUpload.initializeAsAttachment(content);
             return attachmentUpload;
         }
     }
 
     // TODO: put this into XOClient?!
-    private TalkClientContact getContactForClient(TalkToolClient client, String clientOrGroupId) {
+    private static TalkClientContact getContactForClient(TalkToolClient client, String clientOrGroupId) {
         TalkClientContact contact = null;
         try {
             contact = client.getDatabase().findContactByClientId(clientOrGroupId, false);
@@ -159,7 +149,7 @@ public class ClientMessage extends TalkToolCommand {
         return contact;
     }
 
-    private void sendMessage(TalkToolClient sender, String recipientId, String messageText, TalkClientUpload attachment) {
+    private static void sendMessage(TalkToolClient sender, String recipientId, String messageText, TalkClientUpload attachment) {
         Console.info("<ClientMessage::sendMessage> sender-id: '" + sender.getClientId() + "', recipient-id: '" + recipientId + "', message: '" + messageText + "'");
 
         TalkClientContact recipientContact = getContactForClient(sender, recipientId);

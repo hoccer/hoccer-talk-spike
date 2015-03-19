@@ -63,7 +63,7 @@ public abstract class GCMBaseIntentService extends IntentService {
     private final String[] mSenderIds;
 
     // instance counter
-    private static int sCounter = 0;
+    private static int sCounter;
 
     private static final Random sRandom = new Random();
 

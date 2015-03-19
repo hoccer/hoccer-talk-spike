@@ -13,7 +13,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.talk.model.TalkGroupPresence;
 import com.hoccer.talk.model.TalkRelationship;
@@ -22,7 +22,6 @@ import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupContactsAdapter;
-import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.dialog.GroupManageDialog;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.UriUtils;
@@ -33,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * Fragment for display and editing of group profiles.
@@ -64,8 +64,6 @@ public class GroupProfileFragment extends ProfileFragment
 
     private TalkClientContact mGroup;
 
-    private IContentObject mAvatarToSet;
-
     private Menu mOptionsMenu;
 
     private final List<TalkClientContact> mCurrentClientsInGroup = new ArrayList<TalkClientContact>();
@@ -91,9 +89,13 @@ public class GroupProfileFragment extends ProfileFragment
     };
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_group_profile, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_group_profile, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         view.setFocusableInTouchMode(true);
         view.setOnKeyListener(new BackPressListener());
 
@@ -108,8 +110,6 @@ public class GroupProfileFragment extends ProfileFragment
 
         mInviteAllButton = (Button) view.findViewById(R.id.profile_group_button_invite_all);
         mInviteAllButton.setOnClickListener(this);
-
-        return view;
     }
 
     @Override
@@ -273,7 +273,7 @@ public class GroupProfileFragment extends ProfileFragment
     @Override
     protected void updateMessageText() {
         try {
-            int count = (int) XoApplication.getXoClient().getDatabase().getMessageCountByContactId(mGroup.getClientContactId());
+            int count = (int) XoApplication.get().getXoClient().getDatabase().getMessageCountByContactId(mGroup.getClientContactId());
             super.updateMessageText(count);
         } catch (SQLException e) {
             LOG.error("Error fetching message count from database.");
@@ -337,6 +337,8 @@ public class GroupProfileFragment extends ProfileFragment
 
         Picasso.with(getActivity())
                 .load(avatarUri)
+                .centerCrop()
+                .fit()
                 .placeholder(R.drawable.avatar_default_group_large)
                 .error(R.drawable.avatar_default_group_large)
                 .into(mAvatarImage);
@@ -519,7 +521,7 @@ public class GroupProfileFragment extends ProfileFragment
 
     private void enterAvatarEditMode() {
         if (mGroup.isEditable()) {
-            if (mGroup.getAvatarContentUrl() != null) {
+            if (mGroup.getAvatarFilePath() != null) {
                 XoDialogs.showRadioSingleChoiceDialog("AvatarSelection",
                         R.string.dialog_avatar_options_title,
                         new String[]{
@@ -548,23 +550,15 @@ public class GroupProfileFragment extends ProfileFragment
     }
 
     @Override
-    public void onAvatarSelected(IContentObject contentObject) {
-        mAvatarToSet = contentObject;
+    public void onAvatarSelected(SelectedContent avatar) {
+        updateAvatar(avatar);
     }
 
-    @Override
-    public void onServiceConnected() {
-        LOG.debug("onServiceConnected()");
-        if (mAvatarToSet != null) {
-            updateAvatar(mAvatarToSet);
-            mAvatarToSet = null;
-        }
-    }
-
-    private void updateAvatar(final IContentObject avatar) {
+    private void updateAvatar(final SelectedContent avatar) {
         if (avatar != null) {
             LOG.debug("creating avatar upload");
-            TalkClientUpload upload = SelectedContent.createAvatarUpload(avatar);
+            TalkClientUpload upload = new TalkClientUpload();
+            upload.initializeAsAvatar(avatar);
             try {
                 getXoDatabase().saveClientUpload(upload);
                 getXoClient().setGroupAvatar(mGroup, upload);
@@ -619,7 +613,7 @@ public class GroupProfileFragment extends ProfileFragment
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
-                                XoApplication.getXoClient().deleteContact(mGroup);
+                                XoApplication.get().getXoClient().deleteContact(mGroup);
                                 getActivity().finish();
                             }
                         },

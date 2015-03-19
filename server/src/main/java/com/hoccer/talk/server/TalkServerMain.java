@@ -2,30 +2,16 @@ package com.hoccer.talk.server;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.health.HealthCheckRegistry;
-import com.codahale.metrics.servlets.HealthCheckServlet;
-import com.codahale.metrics.servlets.MetricsServlet;
 import com.hoccer.scm.GitInfo;
+import com.hoccer.talk.server.cryptoutils.P12CertificateChecker;
 import com.hoccer.talk.server.database.JongoDatabase;
 import com.hoccer.talk.server.database.migrations.DatabaseMigrationManager;
 import com.hoccer.talk.server.push.ApnsConfiguration;
 import com.hoccer.talk.server.push.PushAgent;
-import com.hoccer.talk.server.rpc.TalkRpcConnectionHandler;
-import com.hoccer.talk.server.cryptoutils.*;
-import com.hoccer.talk.servlets.CertificateInfoServlet;
-import com.hoccer.talk.servlets.InvitationServlet;
-import com.hoccer.talk.servlets.PushMessageServlet;
-import com.hoccer.talk.servlets.ServerInfoServlet;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ContextHandler;
-import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.eclipse.jetty.server.handler.ResourceHandler;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.websocket.WebSocketHandler;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -66,11 +52,11 @@ public class TalkServerMain {
         LOG.info("Initializing jetty");
         final Server webServer = new Server(new InetSocketAddress(config.getListenAddress(), config.getListenPort()));
         webServer.setStopAtShutdown(true);
-        setupServerHandlers(webServer, talkServer);
+        webServer.setHandler(new TalkServerHandler(talkServer));
 
         final Server managementServer = new Server(new InetSocketAddress(config.getManagementListenAddress(), config.getManagementListenPort()));
         managementServer.setStopAtShutdown(true);
-        setupManagementServerHandlers(managementServer, talkServer);
+        managementServer.setHandler(new TalkServerManagementHandler(talkServer));
 
         try {
             LOG.info("Starting server");
@@ -106,61 +92,6 @@ public class TalkServerMain {
                 }
             }
         }
-    }
-
-    private void setupServerHandlers(Server server, TalkServer talkServer) {
-        // all metrics servlets are handled here
-        ServletContextHandler metricsContextHandler = new ServletContextHandler();
-        metricsContextHandler.setContextPath("/metrics");
-        metricsContextHandler.setInitParameter("show-jvm-metrics", "true");
-
-        metricsContextHandler.addEventListener(new MyMetricsServletContextListener(talkServer.getMetrics()));
-        metricsContextHandler.addServlet(MetricsServlet.class, "/registry");
-
-        metricsContextHandler.addEventListener(new MyHealtchecksServletContextListener(talkServer.getHealthCheckRegistry()));
-        metricsContextHandler.addServlet(HealthCheckServlet.class, "/health");
-
-        // handler for additional status information about the server
-        ServletContextHandler serverInfoContextHandler = new ServletContextHandler();
-        serverInfoContextHandler.setContextPath("/server");
-        serverInfoContextHandler.setAttribute("server", talkServer);
-        serverInfoContextHandler.addServlet(ServerInfoServlet.class, "/info");
-        serverInfoContextHandler.addServlet(CertificateInfoServlet.class, "/certificates");
-
-        // handler for invitation landing pages
-        ServletContextHandler invitationContextHandler = new ServletContextHandler();
-        invitationContextHandler.setContextPath("/invite");
-        invitationContextHandler.setAttribute("server", talkServer);
-        invitationContextHandler.addServlet(InvitationServlet.class, "/*");
-
-        // handler for static files
-        ContextHandler staticHandler = new ContextHandler("/static");
-        ResourceHandler staticResourceHandler = new ResourceHandler();
-        staticResourceHandler.setResourceBase(getClass().getResource("/static").toExternalForm());
-        staticHandler.setHandler(staticResourceHandler);
-
-        // handler for talk websocket connections
-        WebSocketHandler clientHandler = new TalkRpcConnectionHandler(talkServer);
-
-        // set server handlers
-        HandlerCollection handlerCollection = new HandlerCollection();
-        handlerCollection.addHandler(clientHandler);
-        handlerCollection.addHandler(invitationContextHandler);
-        handlerCollection.addHandler(staticHandler);
-        handlerCollection.addHandler(serverInfoContextHandler);
-        handlerCollection.addHandler(metricsContextHandler);
-        server.setHandler(handlerCollection);
-    }
-
-    private void setupManagementServerHandlers(Server managementServer, TalkServer talkServer) {
-        ServletContextHandler pushMessageHandler = new ServletContextHandler();
-        pushMessageHandler.setContextPath("/push");
-        pushMessageHandler.setAttribute("server", talkServer);
-        pushMessageHandler.addServlet(PushMessageServlet.class, "/*");
-
-        HandlerCollection handlerCollection = new HandlerCollection();
-        handlerCollection.addHandler(pushMessageHandler);
-        managementServer.setHandler(handlerCollection);
     }
 
     private void migrateDatabase(ITalkServerDatabase database) {
@@ -224,31 +155,5 @@ public class TalkServerMain {
         // hand the property file over to log4j mechanism as well
         PropertyConfigurator.configure(main.config);
         main.run();
-    }
-
-    private static class MyMetricsServletContextListener extends MetricsServlet.ContextListener {
-        private final MetricRegistry _metricRegistry;
-
-        public MyMetricsServletContextListener(MetricRegistry metricRegistry) {
-            _metricRegistry = metricRegistry;
-        }
-
-        @Override
-        protected MetricRegistry getMetricRegistry() {
-            return _metricRegistry;
-        }
-    }
-
-    private static class MyHealtchecksServletContextListener extends HealthCheckServlet.ContextListener {
-        private final HealthCheckRegistry _healthCheckRegistry;
-
-        public MyHealtchecksServletContextListener(HealthCheckRegistry healthCheckRegistry) {
-            _healthCheckRegistry = healthCheckRegistry;
-        }
-
-        @Override
-        protected HealthCheckRegistry getHealthCheckRegistry() {
-            return _healthCheckRegistry;
-        }
     }
 }

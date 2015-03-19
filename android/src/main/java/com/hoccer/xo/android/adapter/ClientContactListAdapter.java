@@ -39,7 +39,7 @@ public class ClientContactListAdapter extends ContactListAdapter {
         List<TalkClientContact> blocked;
 
         try {
-            XoClientDatabase database = XoApplication.getXoClient().getDatabase();
+            XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
             invitedMe = database.findClientContactsByState(TalkRelationship.STATE_INVITED_ME);
             invited = database.findClientContactsByState(TalkRelationship.STATE_INVITED);
             friends = database.findClientContactsByState(TalkRelationship.STATE_FRIEND);
@@ -84,7 +84,7 @@ public class ClientContactListAdapter extends ContactListAdapter {
         viewHolder.acceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                XoApplication.getXoClient().acceptFriend(contact);
+                XoApplication.get().getXoClient().acceptFriend(contact);
             }
         });
         viewHolder.declineButton.setOnClickListener(new View.OnClickListener() {
@@ -132,8 +132,9 @@ public class ClientContactListAdapter extends ContactListAdapter {
 
     private String getMessageAndAttachmentCount(TalkClientContact contact) {
         try {
-            int messageCount = (int) XoApplication.getXoClient().getDatabase().getMessageCountByContactId(contact.getClientContactId());
-            int attachmentCount = (int) XoApplication.getXoClient().getDatabase().getAttachmentCountByContactId(contact.getClientContactId());
+            XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
+            int messageCount = (int) database.getMessageCountByContactId(contact.getClientContactId());
+            int attachmentCount = (int) database.getAttachmentCountByContactId(contact.getClientContactId());
 
             String messageCountString = mActivity.getResources().getQuantityString(R.plurals.message_count, messageCount, messageCount);
             String attachmentCountString = mActivity.getResources().getQuantityString(R.plurals.attachment_count, attachmentCount, attachmentCount);
@@ -158,7 +159,7 @@ public class ClientContactListAdapter extends ContactListAdapter {
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        XoApplication.getXoClient().declineFriend(contact);
+                        XoApplication.get().getXoClient().declineFriend(contact);
                     }
                 });
     }

@@ -1,21 +1,31 @@
 package com.hoccer.xo.android.util;
 
+import android.annotation.TargetApi;
+import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.BaseColumns;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.webkit.MimeTypeMap;
 import com.hoccer.xo.android.XoApplication;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 
 public class UriUtils {
+
+    private static final Logger LOG = Logger.getLogger(UriUtils.class);
+
     public static final String CONTENT_SCHEME = "content";
     public static final String FILE_SCHEME = "file";
-    public static final String HTTP_SCHEME = "http";
-    public static final String HTTPS_SCHEME = "https";
+
     public static final String CONTENT_URI_PREFIX = CONTENT_SCHEME + "://";
     public static final String FILE_URI_PREFIX = FILE_SCHEME + "://";
+
+    public static final String PUBLIC_DOWNLOADS_CONTENT_URI = "content://downloads/public_downloads";
 
     public static Uri getAbsoluteFileUri(String stringUri) {
         Uri uri = Uri.parse(stringUri);
@@ -39,13 +49,9 @@ public class UriUtils {
         return FILE_SCHEME.equals(uri.getScheme()) || uri.toString().startsWith("/");
     }
 
-    public static boolean isRemoteUri(Uri uri) {
-        return HTTP_SCHEME.equals(uri.getScheme()) || HTTPS_SCHEME.equals(uri.getScheme());
-    }
-
     public static Uri getContentUriByDataPath(Context context, Uri tableUri, String dataPath) {
         long contentId = getContentIdByDataPath(context, tableUri, dataPath);
-        if(contentId > 0) {
+        if (contentId > 0) {
             return Uri.parse(tableUri + File.separator + contentId);
         }
 
@@ -67,41 +73,61 @@ public class UriUtils {
         return contentId;
     }
 
-    public static boolean contentExists(Context context, Uri contentUri) {
-        Uri dataUri = getDataUriByContentUri(context, contentUri);
-        if (dataUri != null) {
-            if (isFileUri(dataUri)) {
-                return new File(dataUri.getPath()).exists();
-            } else if (isRemoteUri(dataUri)) {
-                return true;
+    public static String getFilePathByUri(Context context, Uri uri, String mediaColumn) {
+        String filePath = null;
+
+        if (isContentUri(uri)) {
+            uri = getPublicDownloadsUriFromDocumentUri(context, uri);
+            Cursor cursor = context.getContentResolver().query(uri, new String[]{mediaColumn}, null, null, null);
+            if (cursor == null) {
+                LOG.error("Query failed! Could not resolve cursor for content uri: " + uri);
+                return null;
+            }
+
+            cursor.moveToFirst();
+            filePath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+            cursor.close();
+        } else if (isFileUri(uri)) {
+            filePath = uri.getPath();
+        }
+
+        return filePath;
+    }
+
+    private static Uri getPublicDownloadsUriFromDocumentUri(Context context, Uri uri) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            if (isDocumentUri(context, uri)) {
+                uri = getContentUriByDocumentUri(uri);
+            }
+        }
+        return uri;
+    }
+
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    private static boolean isDocumentUri(Context context, Uri uri) {
+        return DocumentsContract.isDocumentUri(context, uri);
+    }
+
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    private static Uri getContentUriByDocumentUri(Uri uri) {
+        final String id = DocumentsContract.getDocumentId(uri);
+        uri = ContentUris.withAppendedId(Uri.parse(PUBLIC_DOWNLOADS_CONTENT_URI), Long.valueOf(id));
+        return uri;
+    }
+
+    public static String getMimeType(Context context, Uri uri) {
+        String mimeType = null;
+
+        if (isContentUri(uri)) {
+            mimeType = context.getContentResolver().getType(uri);
+        } else if (isFileUri(uri)) {
+            String extension = MimeTypeMap.getFileExtensionFromUrl(uri.getPath());
+            if (extension != null) {
+                MimeTypeMap mime = MimeTypeMap.getSingleton();
+                mimeType = mime.getMimeTypeFromExtension(extension);
             }
         }
 
-        return false;
-    }
-
-    public static Uri getFileUriByContentUri(Context context, Uri contentUri) {
-        Uri dataUri = getDataUriByContentUri(context, contentUri);
-        if (dataUri != null && isFileUri(dataUri)) {
-            return dataUri;
-        } else {
-            return null;
-        }
-    }
-
-    private static Uri getDataUriByContentUri(Context context, Uri contentUri) {
-        String[] projection = {
-                MediaStore.Images.Media.DATA,
-        };
-
-        try {
-            Cursor cursor = context.getContentResolver().query(contentUri, projection, null, null, null);
-            if (cursor != null && cursor.moveToFirst()) {
-                int dataIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
-                return Uri.parse(cursor.getString(dataIndex));
-            }
-        } catch (Exception ignored) {}
-
-        return null;
+        return mimeType;
     }
 }

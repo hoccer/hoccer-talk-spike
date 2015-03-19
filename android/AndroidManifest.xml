@@ -3,7 +3,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.artcom.hoccer"
 
-          android:versionCode="344"
+          android:versionCode="352"
           android:versionName="${project.version}">
 
     <!-- We run on 4.0 (14) and up, we use features from up to 4.2 (17) -->
@@ -69,8 +69,6 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <!-- Wifi-Scanning for location grouping -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <!-- Mediaplayer needs to check if Hoccer is running -->
-    <uses-permission android:name="android.permission.GET_TASKS"/>
     <!-- Camera is needed for QR-Code scanning -->
     <uses-permission android:name="android.permission.CAMERA"/>
 
@@ -79,14 +77,13 @@
             android:name="${apk.package.name}.permission.C2D_MESSAGE"
             android:protectionLevel="signature"/>
 
-    <!-- Declare our application -->
     <application
             android:name="com.hoccer.xo.android.XoApplication"
             android:allowBackup="false"
             android:icon="@drawable/ic_launcher"
             android:logo="@drawable/ic_launcher_plain"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme">
+            android:theme="@style/BaseTheme">
 
         <!-- Google Play Services -->
         <meta-data
@@ -98,7 +95,6 @@
                 android:name="com.google.android.maps.v2.API_KEY"
                 android:value="${google.maps.api.key}"/>
 
-        <!-- Chat list - our main activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.ChatsActivity"
                 android:label="@string/actionbar_default_title"
@@ -113,16 +109,6 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="image/*" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="video/*" />
-            </intent-filter>
-            <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
@@ -130,18 +116,16 @@
             </intent-filter>
         </activity>
 
-        <!-- Contacts activity -->
         <activity android:name="com.hoccer.xo.android.activity.ContactsActivity"
                   android:label="@string/contacts_title"
                   android:screenOrientation="portrait"
                   android:parentActivityName="com.hoccer.xo.android.activity.ChatsActivity"
                   android:windowSoftInputMode="adjustPan">
             <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.hoccer.xo.android.activity.ChatsActivity"/>
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="com.hoccer.xo.android.activity.ChatsActivity"/>
         </activity>
 
-        <!-- Messaging activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.MessagingActivity"
                 android:label="@string/actionbar_default_title"
@@ -150,7 +134,6 @@
                 android:configChanges="keyboardHidden|orientation|screenSize">
         </activity>
 
-        <!-- MediaBrowserActivity activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.MediaBrowserActivity"
                 android:parentActivityName="com.hoccer.xo.android.activity.ChatsActivity"
@@ -163,21 +146,37 @@
                     android:value="com.hoccer.xo.android.activity.ChatsActivity"/>
         </activity>
 
-        <!-- MediaCollectionSelection activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.MediaCollectionSelectionActivity"
                 android:label="@string/collections"
                 android:screenOrientation="portrait">
         </activity>
 
-        <!-- ContactSelectionActivity activity -->
         <activity
-                android:name="com.hoccer.xo.android.activity.ContactSelectionActivity"
+                android:name="com.hoccer.xo.android.activity.ContactSelectionSharingActivity"
+                android:parentActivityName="com.hoccer.xo.android.activity.ChatsActivity"
+                android:label="@string/select_recipients"
+                android:launchMode="singleTask">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="com.hoccer.xo.android.activity.ChatsActivity"/>
+            <intent-filter android:label="@string/app_name">
+                <action android:name="android.intent.action.SEND"/>
+                <action android:name="android.intent.action.SEND_MULTIPLE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="image/*"/>
+                <data android:mimeType="video/*"/>
+                <data android:mimeType="audio/*"/>
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
+
+        <activity
+                android:name="com.hoccer.xo.android.activity.ContactSelectionResultActivity"
                 android:label="@string/select_recipients"
                 android:screenOrientation="portrait">
         </activity>
 
-        <!-- FullscreenPlayerActivity activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.FullscreenPlayerActivity"
                 android:label="@string/actionbar_default_title"
@@ -191,14 +190,14 @@
                     android:value="com.hoccer.xo.android.activity.MediaBrowserActivity"/>
         </activity>
 
-        <!-- Registration activity -->
+        <activity android:name="com.hoccer.xo.android.activity.NotificationBridgeActivity"/>
+
         <activity
                 android:name="com.hoccer.xo.android.activity.RegistrationActivity"
                 android:label="@string/actionbar_default_title"
                 android:screenOrientation="portrait">
         </activity>
 
-        <!-- Single Profile activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.SingleProfileActivity"
                 android:label="@string/actionbar_default_title"
@@ -206,7 +205,6 @@
                 android:windowSoftInputMode="stateHidden">
         </activity>
 
-        <!-- Group Profile activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.GroupProfileActivity"
                 android:label="@string/actionbar_default_title"
@@ -214,13 +212,11 @@
                 android:windowSoftInputMode="stateHidden|adjustPan">
         </activity>
 
-        <!-- Invitation activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.DeviceContactsInvitationActivity"
                 android:label="@string/actionbar_default_title">
         </activity>
 
-        <!-- Preference activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.XoPreferenceActivity"
                 android:label="@string/actionbar_default_title"
@@ -231,7 +227,6 @@
                     android:value="com.hoccer.xo.android.activity.ChatsActivity"/>
         </activity>
 
-        <!--Legal Imprint activity-->
         <activity
                 android:name="com.hoccer.xo.android.activity.LegalImprintActivity"
                 android:label="@string/actionbar_default_title"
@@ -242,7 +237,6 @@
                     android:value="com.hoccer.xo.android.activity.XoPreferenceActivity"/>
         </activity>
 
-        <!--FAQ and Tutorial activity-->
         <activity
                 android:name="com.hoccer.xo.android.activity.FaqTutorialActivity"
                 android:label="@string/actionbar_default_title"
@@ -253,19 +247,16 @@
                     android:value="com.hoccer.xo.android.activity.XoPreferenceActivity"/>
         </activity>
 
-        <!-- Maps selection activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.MapsLocationActivity"
                 android:label="@string/selectlocation_title">
         </activity>
 
-        <!-- Multi Image Picker Activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.MultiImagePickerActivity"
                 android:label="@string/select_images_title">
         </activity>
 
-        <!-- QR code activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.QrCodeActivity"
                 android:label="@string/actionbar_default_title"
@@ -273,12 +264,10 @@
                 android:windowSoftInputMode="adjustResize">
         </activity>
 
-        <!-- Credential Export Service -->
         <service android:name="com.hoccer.xo.android.credentialtransfer.CredentialExportService"/>
 
         <service android:name="com.hoccer.xo.android.credentialtransfer.DisconnectService"/>
 
-        <!-- Credential Transfer Receiver -->
         <receiver
                 android:name="com.hoccer.xo.android.credentialtransfer.CredentialTransferReceiver">
             <intent-filter>
@@ -287,13 +276,10 @@
             </intent-filter>
         </receiver>
 
-        <!-- Connection and delivery service -->
         <service android:name="com.hoccer.xo.android.service.XoClientService"/>
 
-        <!-- GCM push service -->
         <service android:name="com.hoccer.talk.android.push.TalkPushService"/>
 
-        <!-- GCM broadcast receiver -->
         <receiver
                 android:name="com.hoccer.talk.android.push.TalkPushReceiver"
                 android:permission="com.google.android.c2dm.permission.SEND">
@@ -306,8 +292,6 @@
                 <category android:name="com.hoccer.talk.android"/>
             </intent-filter>
         </receiver>
-
-        <service android:name="com.hoccer.xo.android.service.MediaPlayerService"/>
 
         <service android:name="com.hoccer.xo.android.backup.BackupAndRestoreService" android:exported="false"/>
 

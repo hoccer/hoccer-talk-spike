@@ -34,8 +34,6 @@ public class TalkClientMediaCollection implements Iterable<XoTransfer> {
         void onCollectionCleared(TalkClientMediaCollection collection);
     }
 
-    private static final Logger LOG = Logger.getLogger(TalkClientMediaCollection.class);
-
     @DatabaseField(generatedId = true, columnName = "collectionId")
     private int mCollectionId;
 
@@ -178,7 +176,7 @@ public class TalkClientMediaCollection implements Iterable<XoTransfer> {
 
     // Remove all items from collection
     public void clear() {
-        if (mItemList.size() == 0) {
+        if (mItemList.isEmpty()) {
             return;
         }
 
@@ -225,7 +223,7 @@ public class TalkClientMediaCollection implements Iterable<XoTransfer> {
     @Override
     public Iterator<XoTransfer> iterator() {
         return new Iterator<XoTransfer>() {
-            private int mCurrentIndex = 0;
+            private int mCurrentIndex;
 
             @Override
             public boolean hasNext() {

@@ -1,33 +1,33 @@
 package com.hoccer.xo.android.content;
 
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.util.WeakListenerArray;
 
 /**
  * Base class for Playlist implementations.
  */
-public abstract class MediaPlaylist implements Iterable<IContentObject> {
+public abstract class MediaPlaylist implements Iterable<XoTransfer> {
 
-    private WeakListenerArray<Listener> mListenerArray = new WeakListenerArray<Listener>();
+    private final WeakListenerArray<Listener> mListenerArray = new WeakListenerArray<Listener>();
 
     // playlist update/change listener
     public interface Listener {
         void onItemOrderChanged(MediaPlaylist playlist);
 
-        void onItemRemoved(MediaPlaylist playlist, IContentObject itemRemoved);
+        void onItemRemoved(MediaPlaylist playlist, XoTransfer itemRemoved);
 
-        void onItemAdded(MediaPlaylist playlist, IContentObject itemAdded);
+        void onItemAdded(MediaPlaylist playlist, XoTransfer itemAdded);
 
         void onPlaylistCleared(MediaPlaylist playlist);
     }
 
-    public abstract IContentObject getItem(int index);
+    public abstract XoTransfer getItem(int index);
 
     public abstract int size();
 
-    public abstract boolean hasItem(IContentObject item);
+    public abstract boolean hasItem(XoTransfer item);
 
-    public abstract int indexOf(IContentObject item);
+    public abstract int indexOf(XoTransfer item);
 
     public void registerListener(Listener listener) {
         mListenerArray.registerListener(listener);
@@ -43,13 +43,13 @@ public abstract class MediaPlaylist implements Iterable<IContentObject> {
         }
     }
 
-    protected void invokeItemRemoved(IContentObject itemRemoved) {
+    protected void invokeItemRemoved(XoTransfer itemRemoved) {
         for(Listener listener : mListenerArray) {
             listener.onItemRemoved(this, itemRemoved);
         }
     }
 
-    protected void invokeItemAdded(IContentObject itemAdded) {
+    protected void invokeItemAdded(XoTransfer itemAdded) {
         for(Listener listener : mListenerArray) {
             listener.onItemAdded(this, itemAdded);
         }

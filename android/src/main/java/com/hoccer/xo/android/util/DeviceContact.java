@@ -7,13 +7,13 @@ import java.util.ArrayList;
  */
 public class DeviceContact {
 
-    private String mLookupKey;
+    private final String mLookupKey;
 
-    private String mDisplayName;
+    private final String mDisplayName;
 
     private String mThumbnailUri = "";
 
-    private ArrayList<String> mDataItems = new ArrayList<String>();
+    private final ArrayList<String> mDataItems = new ArrayList<String>();
 
     public DeviceContact(String lookupKey, String displayName) {
         mLookupKey = lookupKey;

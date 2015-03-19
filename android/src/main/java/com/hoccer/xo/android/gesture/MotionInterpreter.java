@@ -15,61 +15,36 @@ public class MotionInterpreter implements SensorEventListener {
 
     private static final Logger LOG = Logger.getLogger(MotionInterpreter.class);
 
-    //public static final int HISTORY_LENGTH = 20;
-    public static final long GESTURE_EXCLUSION_TIMESPAN = 1500;
-    private static final String LOG_TAG = "MotionInterpreter";
-
-    /*
-    public static final Map<Integer, String> AXIS_NAMES;
-
-    static {
-
-        HashMap<Integer, String> axisNames = new HashMap<Integer, String>(3);
-        axisNames.put(SensorConstants.X_AXIS, "X");
-        axisNames.put(SensorConstants.Y_AXIS, "Y");
-        axisNames.put(SensorConstants.Z_AXIS, "Z");
-        AXIS_NAMES = Collections.unmodifiableMap(axisNames);
-    }
-    */
+    private static final long GESTURE_EXCLUSION_TIMESPAN = 1500;
 
     private final Context mContext;
-    private MotionGestureListener mListener;
+    private final MotionGestureListener mListener;
     private List<Detector> mDetectors;
-
     private long mLastGestureTime;
-
     private final FeatureHistory mFeatureHistory;
-    //private Transaction pMode;
+    private boolean mActivated;
 
-    public boolean activated = false;
-
-    public MotionInterpreter(Transaction pMode, Context pContext,
-                             MotionGestureListener pOnShakeListener) {
-        LOG.debug(LOG_TAG + " Creating GestureInterpreter");
-        mContext = pContext;
+    public MotionInterpreter(Transaction mode, Context context, MotionGestureListener shakeListener) {
+        LOG.debug("Creating GestureInterpreter");
+        mContext = context;
 
         mFeatureHistory = new FeatureHistory();
-
         mLastGestureTime = 0;
-        setMode(pMode);
+        setMode(mode);
 
-        setGestureListener(pOnShakeListener);
+        mListener = shakeListener;
     }
 
     public FeatureHistory getFeatureHistory() {
         return mFeatureHistory;
     }
 
-    public void addGestureDetector(Detector pDetector) {
-        mDetectors.add(pDetector);
-    }
-
-    public void setGestureListener(MotionGestureListener pListener) {
-        mListener = pListener;
+    public void addGestureDetector(Detector detector) {
+        mDetectors.add(detector);
     }
 
     public void deactivate() {
-        if (mContext == null || !activated) {
+        if (mContext == null || !mActivated) {
             return;
         }
 
@@ -81,75 +56,67 @@ public class MotionInterpreter implements SensorEventListener {
             mLastGestureTime = 0;
         }
 
-        activated = false;
+        mActivated = false;
     }
 
     public void activate() {
-        if (mContext == null || activated) {
+        if (mContext == null || mActivated) {
             return;
         }
 
         SensorManager sensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
         sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST);
 
-        activated = true;
+        mActivated = true;
     }
 
     @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-    }
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 
     @Override
     public void onSensorChanged(SensorEvent event) {
         handleSensorChange(event.values, event.timestamp / 1000000);
     }
 
-    public void handleSensorChange(float[] pValues, long pTimestamp) {
-        handleSensorChange(new Vec3D(pValues[0], pValues[1], pValues[2]), pTimestamp);
+    public void handleSensorChange(float[] values, long timestamp) {
+        handleSensorChange(new Vec3D(values[0], values[1], values[2]), timestamp);
     }
 
-    public void handleSensorChange(Vec3D pMeasurement, long pTimestamp) {
-
+    public void handleSensorChange(Vec3D measurement, long timestamp) {
         synchronized (mFeatureHistory) {
-
-            mFeatureHistory.add(pMeasurement, pTimestamp);
+            mFeatureHistory.add(measurement, timestamp);
 
             for (Detector detector : mDetectors) {
-                handleGesture(pTimestamp, detector.detect(mFeatureHistory));
+                handleGesture(timestamp, detector.detect(mFeatureHistory));
             }
-
         }
-
     }
 
-    private void handleGesture(long pTimestamp, int pGesture) {
-        if (pGesture != Gestures.NO_GESTURE
-                && (pTimestamp - mLastGestureTime > GESTURE_EXCLUSION_TIMESPAN)) {
-            LOG.debug(LOG_TAG + " Gesture detected: " + Gestures.GESTURE_NAMES.get(pGesture));
+    private void handleGesture(long timestamp, int gesture) {
+        if (gesture != Gestures.NO_GESTURE && (timestamp - mLastGestureTime > GESTURE_EXCLUSION_TIMESPAN)) {
+            LOG.debug("Gesture detected: " + Gestures.GESTURE_NAMES.get(gesture));
 
-            if(mListener != null) {
-                mListener.onMotionGesture(pGesture);
+            if (mListener != null) {
+                mListener.onMotionGesture(gesture);
             }
 
-            mLastGestureTime = pTimestamp;
+            mLastGestureTime = timestamp;
             mFeatureHistory.clear();
         }
     }
 
-    public void setMode(Transaction pMode) {
-
+    private void setMode(Transaction mode) {
         mDetectors = new ArrayList<Detector>();
 
-        if (pMode == Transaction.SHARE || pMode == Transaction.SHARE_AND_RECEIVE) {
+        if (mode == Transaction.SHARE || mode == Transaction.SHARE_AND_RECEIVE) {
             addGestureDetector(new ThrowDetector());
         }
-        if (pMode == Transaction.RECEIVE || pMode == Transaction.SHARE_AND_RECEIVE) {
+        if (mode == Transaction.RECEIVE || mode == Transaction.SHARE_AND_RECEIVE) {
             addGestureDetector(new CatchDetector());
         }
     }
 
     public boolean isActivated() {
-        return activated;
+        return mActivated;
     }
-
 }

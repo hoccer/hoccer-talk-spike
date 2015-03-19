@@ -71,6 +71,7 @@ public class TalkDelivery {
     public static final String STATE_FAILED_ACKNOWLEDGED = "failedAcknowledged";
     public static final String STATE_ABORTED_ACKNOWLEDGED = "abortedAcknowledged";
     public static final String STATE_REJECTED_ACKNOWLEDGED = "rejectedAcknowledged";
+    public static final String STATE_EXPIRED = "expired";
 
     // Old states are only needed for Database migrations. Maybe we should collect them somewhere else?
     @Deprecated
@@ -101,7 +102,8 @@ public class TalkDelivery {
             STATE_ABORTED,
             STATE_ABORTED_ACKNOWLEDGED,
             STATE_REJECTED,
-            STATE_REJECTED_ACKNOWLEDGED
+            STATE_REJECTED_ACKNOWLEDGED,
+            STATE_EXPIRED
     };
     public static final Set<String> ALL_STATES_SET = new HashSet<String>(Arrays.asList(ALL_STATES));
 
@@ -172,7 +174,8 @@ public class TalkDelivery {
             STATE_DELIVERED_SEEN_ACKNOWLEDGED,
             STATE_FAILED_ACKNOWLEDGED,
             STATE_ABORTED_ACKNOWLEDGED,
-            STATE_REJECTED_ACKNOWLEDGED
+            STATE_REJECTED_ACKNOWLEDGED,
+            STATE_EXPIRED
     };
     public static final Set<String> FINAL_STATES_SET = new HashSet<String>(Arrays.asList(FINAL_STATES));
 
@@ -182,9 +185,19 @@ public class TalkDelivery {
             STATE_REJECTED,
             STATE_FAILED_ACKNOWLEDGED,
             STATE_ABORTED_ACKNOWLEDGED,
-            STATE_REJECTED_ACKNOWLEDGED
+            STATE_REJECTED_ACKNOWLEDGED,
+            STATE_EXPIRED
     };
     public static final Set<String> FAILED_STATES_SET = new HashSet<String>(Arrays.asList(FAILED_STATES));
+
+    public static final String[] FINAL_FAILED_STATES = {
+             STATE_FAILED_ACKNOWLEDGED,
+            STATE_ABORTED_ACKNOWLEDGED,
+            STATE_REJECTED_ACKNOWLEDGED,
+            STATE_EXPIRED
+    };
+    public static final Set<String> FINAL_FAILED_STATES_SET = new HashSet<String>(Arrays.asList(FINAL_FAILED_STATES));
+
 
     // the attachment delivery states
     public static final String ATTACHMENT_STATE_NONE = "none";
@@ -202,6 +215,7 @@ public class TalkDelivery {
     public static final String ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED = "downloadFailedAcknowledged";
     public static final String ATTACHMENT_STATE_DOWNLOAD_ABORTED = "downloadAborted";
     public static final String ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED = "downloadAbortedAcknowledged";
+    public static final String ATTACHMENT_STATE_EXPIRED = "expired";
 
     public static final String[] ALL_ATTACHMENT_STATES = {
             ATTACHMENT_STATE_NONE,
@@ -218,12 +232,19 @@ public class TalkDelivery {
             ATTACHMENT_STATE_DOWNLOAD_FAILED,
             ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED,
             ATTACHMENT_STATE_DOWNLOAD_ABORTED,
-            ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED
+            ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED,
+            ATTACHMENT_STATE_EXPIRED
     };
     public static final Set<String> ALL_ATTACHMENT_STATES_SET = new HashSet<String>(Arrays.asList(ALL_ATTACHMENT_STATES));
 
-    public static final String[] FINAL_ATTACHMENT_STATES = {ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED, ATTACHMENT_STATE_UPLOAD_FAILED_ACKNOWLEDGED,
-            ATTACHMENT_STATE_UPLOAD_ABORTED_ACKNOWLEDGED, ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED, ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED
+    public static final String[] FINAL_ATTACHMENT_STATES = {
+            ATTACHMENT_STATE_NONE,
+            ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED,
+            ATTACHMENT_STATE_UPLOAD_FAILED_ACKNOWLEDGED,
+            ATTACHMENT_STATE_UPLOAD_ABORTED_ACKNOWLEDGED,
+            ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED,
+            ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED,
+            ATTACHMENT_STATE_EXPIRED
     };
     public static final Set<String> FINAL_ATTACHMENT_STATES_SET = new HashSet<String>(Arrays.asList(FINAL_ATTACHMENT_STATES));
 
@@ -235,7 +256,8 @@ public class TalkDelivery {
             ATTACHMENT_STATE_DOWNLOAD_FAILED,
             ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED,
             ATTACHMENT_STATE_DOWNLOAD_ABORTED,
-            ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED
+            ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED,
+            ATTACHMENT_STATE_EXPIRED
     };
     public static final Set<String> FAILED_ATTACHMENT_STATES_SET = new HashSet<String>(Arrays.asList(FAILED_ATTACHMENT_STATES));
 
@@ -285,6 +307,7 @@ public class TalkDelivery {
         nextState.put(STATE_ABORTED_ACKNOWLEDGED, new HashSet<String>());
         nextState.put(STATE_REJECTED, new HashSet<String>(Arrays.asList(new String[]{STATE_REJECTED_ACKNOWLEDGED})));
         nextState.put(STATE_REJECTED_ACKNOWLEDGED, new HashSet<String>());
+        nextState.put(STATE_EXPIRED, new HashSet<String>());
 
         // transitions into silent states in case of unknown out deliveries on the client side
         nextUnknownOutState.put(STATE_DELIVERED_PRIVATE, STATE_DELIVERED_PRIVATE_ACKNOWLEDGED);
@@ -297,7 +320,7 @@ public class TalkDelivery {
         // transitions into silent states in case of unknown IN delivery updates on the client side
         // there are no such states
 
-        // transitions into silent attachment tates in case of unknown OUT delivery updates on the client side
+        // transitions into silent attachment states in case of unknown OUT delivery updates on the client side
         nextUnknownOutAttachmentState.put(ATTACHMENT_STATE_NEW, ATTACHMENT_STATE_UPLOAD_ABORTED);
         nextUnknownOutAttachmentState.put(ATTACHMENT_STATE_UPLOADING, ATTACHMENT_STATE_UPLOAD_ABORTED);
         nextUnknownOutAttachmentState.put(ATTACHMENT_STATE_UPLOAD_PAUSED, ATTACHMENT_STATE_UPLOAD_ABORTED);
@@ -305,7 +328,7 @@ public class TalkDelivery {
         nextUnknownOutAttachmentState.put(ATTACHMENT_STATE_DOWNLOAD_FAILED, ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED);
         nextUnknownOutAttachmentState.put(ATTACHMENT_STATE_DOWNLOAD_ABORTED, ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED);
 
-        // transitions into silent attachment tates in case of unknown IN delivery updates on the client side
+        // transitions into silent attachment states in case of unknown IN delivery updates on the client side
         nextUnknownInAttachmentState.put(ATTACHMENT_STATE_NEW, ATTACHMENT_STATE_DOWNLOAD_ABORTED);
         nextUnknownInAttachmentState.put(ATTACHMENT_STATE_UPLOADING, ATTACHMENT_STATE_DOWNLOAD_ABORTED);
         nextUnknownInAttachmentState.put(ATTACHMENT_STATE_UPLOAD_PAUSED, ATTACHMENT_STATE_DOWNLOAD_ABORTED);
@@ -329,6 +352,7 @@ public class TalkDelivery {
         nextAttachmentState.put(ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED, new HashSet<String>());
         nextAttachmentState.put(ATTACHMENT_STATE_DOWNLOAD_ABORTED, new HashSet<String>(Arrays.asList(new String[]{ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED})));
         nextAttachmentState.put(ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED, new HashSet<String>());
+        nextAttachmentState.put(ATTACHMENT_STATE_EXPIRED, new HashSet<String>());
     }
 
     static boolean statePathExists(final String stateA, final String stateB) {
@@ -389,7 +413,7 @@ public class TalkDelivery {
 
     @JsonIgnore
     public boolean isFinished() {
-        return isFinalState(state) && isFinalAttachmentState(attachmentState);
+        return isFinalState(state) && (isFailureState(state) || isFinalAttachmentState(attachmentState));
     }
 
     @JsonIgnore
@@ -471,6 +495,15 @@ public class TalkDelivery {
     public static boolean isRejectedState(String state) {
         return STATE_REJECTED.equals(state) || STATE_REJECTED_ACKNOWLEDGED.equals(state);
     }
+
+    public void expireDelivery() {
+        if (!isFinalState(state)) {
+            state = STATE_EXPIRED;
+        }
+        if (!isFinalAttachmentState(attachmentState)) {
+            attachmentState = ATTACHMENT_STATE_EXPIRED;
+        }
+   }
 
     public static boolean nextStateAllowed(String currentState, String nextState) {
         if (!isValidState(currentState)) {

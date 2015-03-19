@@ -20,30 +20,29 @@ import org.apache.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class GroupManageDialog extends DialogFragment {
 
     private static final Logger LOG = Logger.getLogger(GroupManageDialog.class);
 
-    private TalkClientContact mGroup;
+    private final TalkClientContact mGroup;
 
     private ContactsAdapter mAdapter;
-    private ArrayList<TalkClientContact> mContactsToInvite;
-    private ArrayList<TalkClientContact> mContactsToKick;
-    private List<TalkClientContact> mCurrentContactsInGroup = new ArrayList<TalkClientContact>();
+    private final ArrayList<TalkClientContact> mContactsToInvite = new ArrayList<TalkClientContact>();
+    private final ArrayList<TalkClientContact> mContactsToKick = new ArrayList<TalkClientContact>();
+    private final ArrayList<TalkClientContact> mCurrentContactsInGroup = new ArrayList<TalkClientContact>();
 
     public GroupManageDialog(TalkClientContact group, List<TalkClientContact> currentContactsInGroup) {
         super();
         mGroup = group;
-        mContactsToInvite = new ArrayList();
-        mContactsToKick = new ArrayList();
         mCurrentContactsInGroup.addAll(currentContactsInGroup);
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         LOG.debug("onCreateDialog()");
-        if(mAdapter == null) {
-            mAdapter = new GroupManagementContactsAdapter((XoActivity)getActivity(), mGroup, mContactsToInvite, mContactsToKick);
+        if (mAdapter == null) {
+            mAdapter = new GroupManagementContactsAdapter((XoActivity) getActivity(), mGroup, mContactsToInvite, mContactsToKick);
             mAdapter.onCreate();
             mAdapter.onResume();
             mAdapter.setFilter(new ContactsAdapter.Filter() {
@@ -82,12 +81,12 @@ public class GroupManageDialog extends DialogFragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int index, long id) {
                 LinearLayout contactView = (LinearLayout) view;
-                CheckedTextView checkedTextView = (CheckedTextView)contactView.findViewById(R.id.contact_name_checked);
+                CheckedTextView checkedTextView = (CheckedTextView) contactView.findViewById(R.id.contact_name_checked);
                 checkedTextView.setChecked(!checkedTextView.isChecked());
 
                 Object object = mAdapter.getItem(index);
                 if (object != null && object instanceof TalkClientContact) {
-                    TalkClientContact contact = (TalkClientContact)object;
+                    TalkClientContact contact = (TalkClientContact) object;
                     if (checkedTextView.isChecked()) {
 
                         mContactsToInvite.add(contact);
@@ -123,7 +122,7 @@ public class GroupManageDialog extends DialogFragment {
     @Override
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
-        if(mAdapter != null) {
+        if (mAdapter != null) {
             mAdapter.onPause();
             mAdapter.onDestroy();
         }

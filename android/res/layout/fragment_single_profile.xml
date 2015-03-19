@@ -2,7 +2,7 @@
 <ScrollView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:background="@color/xo_main_background"
+        android:background="@color/background_default"
         android:layout_height="match_parent">
 
     <RelativeLayout
@@ -12,7 +12,6 @@
 
         <ImageView
                 android:id="@+id/profile_avatar_image"
-                android:src="@drawable/avatar_default_contact_large"
                 android:scaleType="centerCrop"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
@@ -27,10 +26,18 @@
                 style="@style/ProfileContainerStyle"/>
 
         <include
-                android:id="@+id/inc_chat_stats"
+                android:id="@+id/inc_profile_contacts"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/inc_profile_name"
+                layout="@layout/profile_contacts_container"
+                style="@style/ProfileContainerStyle"/>
+
+        <include
+                android:id="@+id/inc_profile_chat_stats"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/inc_profile_contacts"
                 layout="@layout/profile_chat_stats_container"
                 style="@style/ProfileContainerStyle"/>
 
@@ -38,7 +45,7 @@
                 android:id="@+id/inc_profile_nickname"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/inc_chat_stats"
+                android:layout_below="@+id/inc_profile_chat_stats"
                 layout="@layout/profile_nickname_container"
                 style="@style/ProfileContainerStyle"/>
 
@@ -57,7 +64,6 @@
                 android:layout_below="@+id/inc_profile_request"
                 layout="@layout/profile_key_container"
                 style="@style/ProfileContainerStyle"/>
-
     </RelativeLayout>
-
 </ScrollView>
+

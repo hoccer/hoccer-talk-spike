@@ -21,8 +21,8 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
 
     private ContactListAdapter mContactListAdapter;
 
-    private int mTabNameId;
-    private Placeholder mPlaceholder;
+    private final int mTabNameId;
+    private final Placeholder mPlaceholder;
 
     private MenuItem mMenuItemPairing;
     private MenuItem mMenuItemNewGroup;
@@ -30,7 +30,7 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     private View mTabView;
     private NotificationBadgeTextView mNotificationBadgeTextView;
 
-    public ContactListFragment(int tabNameId, Placeholder placeholder) {
+    protected ContactListFragment(int tabNameId, Placeholder placeholder) {
         mTabNameId = tabNameId;
         mPlaceholder = placeholder;
     }
@@ -61,8 +61,8 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
         mContactListAdapter = createAdapter();
         setListAdapter(mContactListAdapter);
 
-        XoApplication.getXoClient().registerContactListener(mContactListAdapter);
-        XoApplication.getXoClient().registerContactListener(this);
+        XoApplication.get().getXoClient().registerContactListener(mContactListAdapter);
+        XoApplication.get().getXoClient().registerContactListener(this);
     }
 
     protected abstract ContactListAdapter createAdapter();
@@ -119,8 +119,8 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     @Override
     public void onDestroy() {
         super.onDestroy();
-        XoApplication.getXoClient().unregisterContactListener(mContactListAdapter);
-        XoApplication.getXoClient().unregisterContactListener(this);
+        XoApplication.get().getXoClient().unregisterContactListener(mContactListAdapter);
+        XoApplication.get().getXoClient().unregisterContactListener(this);
     }
 
     @Override

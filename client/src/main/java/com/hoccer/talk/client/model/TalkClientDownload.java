@@ -4,7 +4,6 @@ import com.google.appengine.api.blobstore.ByteRange;
 import com.hoccer.talk.client.IXoTransferListener;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.XoTransferAgent;
-import com.hoccer.talk.content.ContentDisposition;
 import com.hoccer.talk.content.ContentState;
 import com.hoccer.talk.crypto.AESCryptor;
 import com.hoccer.talk.model.TalkAttachment;
@@ -112,10 +111,11 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     private String fileName;
 
     @DatabaseField
+    @Deprecated
     private String contentUrl;
 
     @DatabaseField
-    private int contentLength;
+    private long contentLength;
 
     @DatabaseField(width = 128)
     private String contentType;
@@ -161,14 +161,16 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     @DatabaseField(width = 128)
     private String contentHmac;
 
-	@DatabaseField
+    @DatabaseField
     private ApprovalState approvalState;
 
-    private HttpGet mDownloadRequest = null;
+    private HttpGet mDownloadRequest;
 
-    /** Only for display purposes, the real content length will be retrieved from server since after encryption this value will differ */
+    /**
+     * Only for display purposes, the real content length will be retrieved from server since after encryption this value will differ
+     */
     @DatabaseField
-    private int transmittedContentLength = -1;
+    private long transmittedContentLength = -1;
 
     public TalkClientDownload() {
         super(Direction.DOWNLOAD);
@@ -197,14 +199,11 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         this.contentType = attachment.getMimeType();
         this.mediaType = attachment.getMediaType();
         this.aspectRatio = attachment.getAspectRatio();
-        this.transmittedContentLength = attachment.getContentSizeAsInt();
+        this.transmittedContentLength = Long.parseLong(attachment.getContentSize());
         this.downloadUrl = attachment.getUrl();
         this.downloadFile = id;
         this.decryptedFile = UUID.randomUUID().toString();
-        String fileName = attachment.getFileName();
-        if (fileName != null) {
-            this.fileName = fileName;
-        }
+        this.fileName = attachment.getFileName();
         this.decryptionKey = new String(Hex.encodeHex(key));
         this.contentHmac = attachment.getHmac();
         this.fileId = attachment.getFileId();
@@ -277,7 +276,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         }
     }
 
-	public TalkClientDownload.ApprovalState getApprovalState() {
+    public TalkClientDownload.ApprovalState getApprovalState() {
         if (approvalState == null) {
             return ApprovalState.PENDING;
         } else {
@@ -322,8 +321,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
         LOG.debug("performDownloadRequest(downloadId: '" + clientDownloadId + "', filename: '" + downloadFilename + "')");
         HttpClient client = mTransferAgent.getHttpClient();
-        RandomAccessFile randomAccessFile = null;
-        FileDescriptor fileDescriptor = null;
+        RandomAccessFile randomAccessFile;
+        FileDescriptor fileDescriptor;
         try {
             logGetDebug("downloading '" + downloadUrl + "'");
             // create the GET request
@@ -335,7 +334,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             mDownloadRequest = new HttpGet(downloadUrl);
 
             // determine the requested range
-            String range = null;
+            String range;
             if (contentLength != -1) {
                 long last = contentLength - 1;
                 range = "bytes=" + downloadProgress + "-" + last;
@@ -359,11 +358,11 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 return;
             }
 
-            int bytesToGo = getContentLengthFromResponse(response);
+            long bytesToGo = getContentLengthFromResponse(response);
             ByteRange contentRange = getContentRange(response);
             setContentTypeByResponse(response);
 
-            int bytesStart = downloadProgress;
+            long bytesStart = downloadProgress;
             if (!isValidContentRange(contentRange, bytesToGo) || contentLength == -1) {
                 LOG.debug("invalid contentRange or content length is -1 - contentLength: '" + contentLength + "'");
                 checkTransferFailure(transferFailures + 1, "invalid contentRange or content length is -1 - contentLength: '" + contentLength + "'");
@@ -413,10 +412,10 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         }
     }
 
-    private boolean copyData(int bytesToGo, RandomAccessFile randomAccessFile, FileDescriptor fileDescriptor, InputStream inputStream) throws IOException {
+    private boolean copyData(long bytesToGo, RandomAccessFile randomAccessFile, FileDescriptor fileDescriptor, InputStream inputStream) throws IOException {
         boolean success = false;
         try {
-            success = copyDataImpl(bytesToGo, randomAccessFile, fileDescriptor, inputStream);
+            success = copyDataImpl(bytesToGo, randomAccessFile, inputStream);
         } finally {
             try {
                 fileDescriptor.sync();
@@ -429,13 +428,13 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         return success;
     }
 
-    private boolean copyDataImpl(int bytesToGo, RandomAccessFile randomAccessFile, FileDescriptor fileDescriptor, InputStream inputStream) throws IOException {
+    private boolean copyDataImpl(long bytesToGo, RandomAccessFile randomAccessFile, InputStream inputStream) throws IOException {
         byte[] buffer = new byte[1 << 12]; // length == 4096 == 2^12
         while (bytesToGo > 0) {
             logGetTrace("bytesToGo: '" + bytesToGo + "'");
             logGetTrace("downloadProgress: '" + downloadProgress + "'");
             // determine how much to copy
-            int bytesToRead = Math.min(buffer.length, bytesToGo);
+            int bytesToRead = (int)Math.min((long)buffer.length, bytesToGo);
             // perform the copy
             int bytesRead = inputStream.read(buffer, 0, bytesToRead);
             logGetTrace("reading: '" + bytesToRead + "' bytes, returned: '" + bytesRead + "' bytes");
@@ -446,23 +445,21 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             randomAccessFile.write(buffer, 0, bytesRead);
             downloadProgress += bytesRead;
             bytesToGo -= bytesRead;
-            for (int i = 0; i < mTransferListeners.size(); i++) {
-                IXoTransferListener listener = mTransferListeners.get(i);
-                // TODO: try/catch here? What happens if a listener call produces exception?
-                listener.onProgressUpdated(downloadProgress, getTransferLength());
+            for (IXoTransferListener listener : mTransferListeners) {
+                listener.onProgressUpdated(downloadProgress, contentLength);
             }
         }
         return true;
     }
 
-    private boolean isValidContentRange(ByteRange contentRange, int bytesToGo) {
+    private boolean isValidContentRange(ByteRange contentRange, long bytesToGo) {
         if (contentRange != null) {
             if (contentRange.getStart() != downloadProgress) {
                 logGetError("server returned wrong offset");
                 return false;
             }
             if (contentRange.hasEnd()) {
-                int rangeSize = (int) (contentRange.getEnd() - contentRange.getStart() + 1);
+                long rangeSize = (int) (contentRange.getEnd() - contentRange.getStart() + 1);
                 if (rangeSize != bytesToGo) {
                     logGetError("server returned range not corresponding to content length");
                     return false;
@@ -472,7 +469,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 if (contentLength == -1) {
                     long total = contentRange.getTotal();
                     logGetDebug("inferred content length '" + total + "' from range");
-                    contentLength = (int) total;
+                    contentLength = total;
                 }
             }
         }
@@ -500,9 +497,9 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         return null;
     }
 
-    private int getContentLengthFromResponse(HttpResponse response) {
+    private long getContentLengthFromResponse(HttpResponse response) {
         Header contentLengthHeader = response.getFirstHeader("Content-Length");
-        int contentLengthValue = this.contentLength;
+        long contentLengthValue = this.contentLength;
         if (contentLengthHeader != null) {
             String contentLengthString = contentLengthHeader.getValue();
             contentLengthValue = Integer.valueOf(contentLengthString);
@@ -616,10 +613,10 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             fileInputStream.close();
 
             if (detectedMediaType != null) {
-                String detectedMediaTypeName = detectedMediaType.toString();
-                LOG.info("[downloadId: '" + clientDownloadId + "'] detected mime-type '" + detectedMediaTypeName + "'");
-                this.contentType = detectedMediaTypeName;
-                MimeType detectedMimeType = MimeTypes.getDefaultMimeTypes().getRegisteredMimeType(detectedMediaTypeName);
+                String mediaTypeName = detectedMediaType.toString();
+                LOG.info("[downloadId: '" + clientDownloadId + "'] detected mime-type '" + mediaTypeName + "'");
+                this.contentType = mediaTypeName;
+                MimeType detectedMimeType = MimeTypes.getDefaultMimeTypes().getRegisteredMimeType(mediaTypeName);
                 if (detectedMimeType != null) {
                     String extension = detectedMimeType.getExtension();
                     if (extension != null) {
@@ -753,7 +750,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     }
 
     private void saveToDatabase() {
-        LOG.debug("save TalkClientDownload (" + getClientDownloadId() + ") to database");
+        LOG.debug("save TalkClientDownload (" + clientDownloadId + ") to database");
         try {
             mTransferAgent.getDatabase().saveClientDownload(this);
         } catch (SQLException e) {
@@ -763,12 +760,12 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
     @Override
     public int getTransferId() {
-        return getClientDownloadId();
+        return clientDownloadId;
     }
 
     @Override
     public int getUploadOrDownloadId() {
-        return getClientDownloadId();
+        return clientDownloadId;
     }
 
     @Override
@@ -807,38 +804,23 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         }
     }
 
-	public enum ApprovalState {
+    public enum ApprovalState {
         APPROVED, DECLINED, PENDING
     }
 
     @Override
-    public ContentDisposition getContentDisposition() {
-        return ContentDisposition.DOWNLOAD;
-    }
-
-    @Override
-    public int getTransferLength() {
+    public long getTransferLength() {
         return contentLength;
     }
 
     @Override
-    public int getTransferProgress() {
+    public long getTransferProgress() {
         return downloadProgress;
-    }
-
-    @Override
-    public String getContentMediaType() {
-        return mediaType;
     }
 
     @Override
     public double getContentAspectRatio() {
         return aspectRatio;
-    }
-
-    @Override
-    public String getContentUrl() {
-        return contentUrl;
     }
 
     @Override
@@ -875,11 +857,11 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         this.fileId = fileId;
     }
 
-    public int getContentLength() {
+    public long getContentLength() {
         return contentLength;
     }
 
-    public String getContentType() {
+    public String getMimeType() {
         return contentType;
     }
 
@@ -899,7 +881,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         this.contentHmac = hmac;
     }
 
-    public int getTransmittedContentLength() {
+    public long getTransmittedContentLength() {
         return transmittedContentLength;
     }
 
@@ -913,18 +895,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
     public boolean isAttachment() {
         return type == Type.ATTACHMENT;
-    }
-
-    public void provideContentUrl(XoTransferAgent agent, String url) {
-        if (url.startsWith("file://")) {
-            return;
-        }
-        if (url.startsWith("content://media/external/file")) {
-            return;
-        }
-        this.contentUrl = url;
-        saveToDatabase();
-        agent.onDownloadStateChanged(this);
     }
 
     @Override
@@ -943,11 +913,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
     @Override
     public boolean equals(Object obj) {
-        if(obj instanceof TalkClientDownload && (clientDownloadId == ((TalkClientDownload)obj).getClientDownloadId())) {
-            return true;
-        } else {
-            return false;
-        }
+        return obj instanceof TalkClientDownload && (clientDownloadId == ((TalkClientDownload) obj).clientDownloadId);
     }
-
 }

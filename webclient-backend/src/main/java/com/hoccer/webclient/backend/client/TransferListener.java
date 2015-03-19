@@ -4,7 +4,10 @@ import com.hoccer.talk.client.IXoTransferListenerOld;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.webclient.backend.Configuration;
 import org.apache.log4j.Logger;
+
+import java.sql.SQLException;
 
 /**
  * Implements a tansfer handler.
@@ -12,10 +15,13 @@ import org.apache.log4j.Logger;
 public class TransferListener implements IXoTransferListenerOld {
 
     private static final Logger LOG = Logger.getLogger(TransferListener.class);
-    private XoClient mClient;
 
-    public TransferListener(XoClient client) {
+    private XoClient mClient;
+    private Configuration mConfiguration;
+
+    public TransferListener(XoClient client, Configuration configuration) {
         mClient = client;
+        mConfiguration = configuration;
     }
 
     public void onDownloadRegistered(TalkClientDownload download) {
@@ -33,6 +39,16 @@ public class TransferListener implements IXoTransferListenerOld {
 
     public void onDownloadFinished(TalkClientDownload download) {
         LOG.debug("TransferHandler::onDownloadFinished: " + download.getFileName());
+
+        if (mConfiguration.shouldApproveAllDownloads()) {
+            download.setApprovalState(TalkClientDownload.ApprovalState.APPROVED);
+
+            try {
+                mClient.getDatabase().saveClientDownload(download);
+            } catch (SQLException e) {
+                LOG.error("Error saving approved download", e);
+            }
+        }
     }
 
     public void onDownloadFailed(TalkClientDownload download) {

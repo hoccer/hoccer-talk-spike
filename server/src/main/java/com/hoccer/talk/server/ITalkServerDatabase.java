@@ -20,13 +20,25 @@ public interface ITalkServerDatabase {
 
     public TalkClient findClientById(String clientId);
 
+    public TalkClient findDeletedClientById(String clientId);
+
+    public boolean isDeletedClient(String clientId);
+
+    public String beforeDeletedId(String clientId);
+
     public TalkClient findClientByApnsToken(String apnsToken);
 
     public void saveClient(TalkClient client);
 
+    public void markClientDeleted(TalkClient client);
+
+    public void deleteClient(TalkClient client);
+
     public TalkMessage findMessageById(String messageId);
 
     public List<TalkMessage> findMessagesWithAttachmentFileId(String fileId);
+
+    public List<TalkMessage> findMessagesFromClient(String clientId);
 
     public void deleteMessage(TalkMessage message);
 
@@ -74,6 +86,8 @@ public interface ITalkServerDatabase {
 
     public void savePresence(TalkPresence presence);
 
+    public void deletePresence(TalkPresence presence);
+
     public List<TalkPresence> findPresencesChangedAfter(String clientId, Date lastKnown);
 
     public TalkKey findKey(String clientId, String keyId);
@@ -90,9 +104,15 @@ public interface ITalkServerDatabase {
 
     public List<TalkRelationship> findRelationshipsForClientInStates(String clientId, String[] states);
 
+    public List<TalkRelationship> findRelationshipsForOtherClientInStates(String clientId, String[] states);
+
     public List<TalkRelationship> findRelationshipsByOtherClient(String other);
 
     public List<TalkRelationship> findRelationshipsChangedAfter(String client, Date lastKnown);
+
+    public List<TalkRelationship> findRelationshipsWithStatesChangedBefore(String[] states, Date lastChanged);
+
+    public int deleteRelationshipsWithStatesChangedBefore(String[] states, Date lastChanged);
 
     @Nullable
     public TalkRelationship findRelationshipBetween(String client, String otherClient);
@@ -108,6 +128,16 @@ public interface ITalkServerDatabase {
     public List<TalkGroupPresence> findGroupPresencesByClientIdChangedAfter(String clientId, Date lastKnown);
 
     public List<TalkGroupMembership> findGroupMembershipsByIdWithStatesChangedAfter(String groupId, String[] states, Date lastKnown);
+
+    public List<TalkGroupMembership> findGroupMembershipsWithStatesChangedBefore(String[] states, Date lastChanged);
+
+    public int deleteGroupMembershipsWithStatesChangedBefore(String[] states, Date lastChanged);
+
+    public List<TalkGroupPresence> findGroupPresencesWithState(String state);
+
+    public List<TalkGroupPresence> findGroupPresencesWithStateChangedBefore(String state, Date changedDate);
+
+    public int deleteGroupPresencesWithStateChangedBefore(String state, Date changedDate);
 
     public void saveGroupPresence(TalkGroupPresence groupPresence);
 
@@ -127,11 +157,15 @@ public interface ITalkServerDatabase {
 
     public void saveGroupMembership(TalkGroupMembership membership);
 
+    public void deleteGroupMembership(TalkGroupMembership membership);
+
     public void saveEnvironment(TalkEnvironment environment);
 
     public TalkEnvironment findEnvironmentByClientId(String type, String clientId);
 
     public List<TalkEnvironment> findEnvironmentsForGroup(String groupId);
+
+    public List<TalkEnvironment> findEnvironmentsForClient(String clientId);
 
     public List<TalkEnvironment> findEnvironmentsMatching(TalkEnvironment environment);
 
@@ -146,6 +180,8 @@ public interface ITalkServerDatabase {
     public List<TalkClientHostInfo> findClientHostInfoByClientLanguageAndClientName(String clientLanguage, String clientName);
 
     public void saveClientHostInfo(TalkClientHostInfo clientHostInfo);
+
+    public void deleteClientHostInfo(TalkClientHostInfo clientHostInfo);
 
     public List<TalkDatabaseMigration> findDatabaseMigrations();
 

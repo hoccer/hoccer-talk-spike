@@ -10,7 +10,10 @@ import com.hoccer.talk.client.IXoDownloadListener;
 import com.hoccer.talk.client.IXoUploadListener;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
-import com.hoccer.talk.client.model.*;
+import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.client.model.TalkClientDownload;
+import com.hoccer.talk.client.model.TalkClientMessage;
+import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.view.AudioAttachmentView;
 import com.mobeta.android.dslv.DragSortListView;
@@ -22,14 +25,14 @@ import java.util.List;
 
 public class AttachmentListAdapter extends BaseAdapter implements DragSortListView.DropListener, IXoUploadListener, IXoDownloadListener {
 
-    protected Logger LOG = Logger.getLogger(AttachmentListAdapter.class);
+    private static final Logger LOG = Logger.getLogger(AttachmentListAdapter.class);
 
     private List<XoTransfer> mItems = new ArrayList<XoTransfer>();
 
-    private String mMediaType;
+    private final String mMediaType;
     private TalkClientContact mContact;
 
-    private List<Integer> mSelectedItemIds = new ArrayList<Integer>();
+    private final List<Integer> mSelectedItemIds = new ArrayList<Integer>();
 
     private boolean mShowDragHandle;
 
@@ -43,7 +46,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         mContact = contact;
         updateItems();
 
-        XoClientDatabase database = XoApplication.getXoClient().getDatabase();
+        XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
         database.registerUploadListener(this);
         database.registerDownloadListener(this);
     }
@@ -72,7 +75,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
 
         audioView.setMediaItem(mItems.get(position));
         audioView.updatePlayPauseView();
-        Integer itemId = (int)getItemId(position);
+        Integer itemId = (int) getItemId(position);
         audioView.getChildAt(0).setSelected(mSelectedItemIds.contains(itemId));
         audioView.showDragHandle(mShowDragHandle);
 
@@ -111,7 +114,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
 
     public void setContact(TalkClientContact contact) {
         // do nothing if already set
-        if(areEqual(mContact, contact)) {
+        if (areEqual(mContact, contact)) {
             return;
         }
 
@@ -128,22 +131,22 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
     }
 
     public void selectItem(int itemId) {
-        if(!mSelectedItemIds.contains(itemId)) {
+        if (!mSelectedItemIds.contains(itemId)) {
             mSelectedItemIds.add(itemId);
             refreshView();
         }
     }
 
     public void deselectItem(int itemId) {
-        if(mSelectedItemIds.contains(itemId)) {
-            mSelectedItemIds.remove((Integer)itemId);
+        if (mSelectedItemIds.contains(itemId)) {
+            mSelectedItemIds.remove((Integer) itemId);
             refreshView();
         }
     }
 
     public void selectAllItems() {
         deselectAllItems();
-        for(int i = 0; i < getCount(); i++) {
+        for (int i = 0; i < getCount(); i++) {
             selectItem((int) getItemId(i));
         }
     }
@@ -154,7 +157,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
 
     public List<XoTransfer> getSelectedItems() {
         List<XoTransfer> result = new ArrayList<XoTransfer>();
-        for(int itemId : mSelectedItemIds) {
+        for (int itemId : mSelectedItemIds) {
             result.add(getItemFromId(itemId));
         }
 
@@ -164,8 +167,8 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
     // Returns the item with the given id or null if not found
     public XoTransfer getItemFromId(int itemId) {
         XoTransfer result = null;
-        for(XoTransfer item : mItems) {
-            if(item.getTransferId() == itemId) {
+        for (XoTransfer item : mItems) {
+            if (item.getTransferId() == itemId) {
                 result = item;
                 break;
             }
@@ -195,7 +198,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
     @Override
     public void onDownloadCreated(TalkClientDownload download) {
         // do nothing if the download is incomplete
-        if(download.getState() == TalkClientDownload.State.COMPLETE) {
+        if (download.getState() == TalkClientDownload.State.COMPLETE) {
             addItem(download);
         }
     }
@@ -203,7 +206,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
     @Override
     public void onDownloadUpdated(TalkClientDownload download) {
         // do nothing if the download is incomplete
-        if(download.getState() == TalkClientDownload.State.COMPLETE) {
+        if (download.getState() == TalkClientDownload.State.COMPLETE) {
             addItem(download);
         }
     }
@@ -214,13 +217,13 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
     }
 
     private void addItem(XoTransfer item) {
-        if(shouldItemBeAdded(item)) {
+        if (shouldItemBeAdded(item)) {
             updateItems();
         }
     }
 
     private void removeItem(XoTransfer item) {
-        if(mItems.contains(item)) {
+        if (mItems.contains(item)) {
             mItems.remove(item);
             deselectItem(item.getTransferId());
             refreshView();
@@ -229,10 +232,11 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
 
     public void updateItems() {
         try {
+            XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
             if (mContact != null) {
-                mItems = new ArrayList<XoTransfer>(XoApplication.getXoClient().getDatabase().findClientDownloadsByMediaTypeAndContactId(mMediaType, mContact.getClientContactId()));
+                mItems = new ArrayList<XoTransfer>(database.findClientDownloadsByMediaTypeAndContactId(mMediaType, mContact.getClientContactId()));
             } else {
-                mItems = XoApplication.getXoClient().getDatabase().findTransfersByMediaType(mMediaType);
+                mItems = database.findTransfersByMediaTypeDistinct(mMediaType);
             }
         } catch (SQLException e) {
             LOG.error(e);
@@ -242,25 +246,25 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
     }
 
     private boolean shouldItemBeAdded(XoTransfer transfer) {
+        // check if mediaType matches
+        if (mMediaType != null && !mMediaType.equals(transfer.getMediaType())) {
+            return false;
+        }
+
         // check if item is already in the list
         if (mItems.contains(transfer)) {
             return false;
         }
 
-        // check if mediaType matches
-        if(mMediaType != null && !mMediaType.equals(transfer.getContentMediaType())) {
-            return false;
-        }
-
         // check if contact matches
-        if(mContact != null) {
+        if (mContact != null) {
             try {
-                XoClientDatabase database = XoApplication.getXoClient().getDatabase();
+                XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
                 TalkClientMessage message = transfer.isUpload() ?
                         database.findClientMessageByTalkClientUploadId(transfer.getUploadOrDownloadId()) :
                         database.findClientMessageByTalkClientDownloadId(transfer.getUploadOrDownloadId());
 
-                if(message == null || !mContact.equals(message.getSenderContact()) || !mContact.equals(message.getConversationContact())) {
+                if (message == null || !mContact.equals(message.getSenderContact()) || !mContact.equals(message.getConversationContact())) {
                     return false;
                 }
             } catch (SQLException e) {
@@ -268,16 +272,23 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
             }
         }
 
+        // check if it is a duplicate file
+        for (XoTransfer item : mItems) {
+            if (item.getFilePath().equals(transfer.getFilePath())) {
+                return false;
+            }
+        }
+
         return true;
     }
 
-    private boolean areEqual(Object obj1, Object obj2) {
-        if(obj1 != null) {
+    private static boolean areEqual(Object obj1, Object obj2) {
+        if (obj1 != null) {
             if (obj1.equals(obj2)) {
                 return true;
             }
         } else {
-            if(obj2 == null) {
+            if (obj2 == null) {
                 return true;
             }
         }

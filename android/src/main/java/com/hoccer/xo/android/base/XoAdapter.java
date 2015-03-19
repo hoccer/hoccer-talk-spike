@@ -58,7 +58,7 @@ public abstract class XoAdapter extends BaseAdapter {
         mDatabase = mActivity.getXoDatabase();
         mInflater = mActivity.getLayoutInflater();
         mResources = mActivity.getResources();
-        mExecutor = mActivity.getBackgroundExecutor();
+        mExecutor = XoApplication.get().getExecutor();
     }
 
     public void runOnUiThread(Runnable runnable) {
@@ -66,7 +66,7 @@ public abstract class XoAdapter extends BaseAdapter {
     }
 
     public XoClient getXoClient() {
-        return XoApplication.getXoClient();
+        return XoApplication.get().getXoClient();
     }
 
     public File getAvatarDirectory() {

@@ -58,8 +58,8 @@ public class ITTwoClientsMessage extends IntegrationTest {
         TestHelper.pairClients(sendingClient, receivingClient);
 
         // Taking recipient offline
-        receivingClient.deactivate();
-        await("receivingClient is inactive").untilCall(to(receivingClient).getState(), equalTo(XoClient.STATE_INACTIVE));
+        receivingClient.disconnect();
+        await("receivingClient is inactive").untilCall(to(receivingClient).getState(), equalTo(XoClient.STATE_DISCONNECTED));
 
         try {
             TestHelper.sendMessage(sendingClient, receivingClient, messageText);
@@ -74,8 +74,8 @@ public class ITTwoClientsMessage extends IntegrationTest {
         }
 
         // Taking recipient online again
-        receivingClient.wake();
-        await("receivingClient reaches active state").untilCall(to(receivingClient).getState(), equalTo(XoClient.STATE_ACTIVE));
+        receivingClient.connect();
+        await("receivingClient reaches active state").untilCall(to(receivingClient).getState(), equalTo(XoClient.STATE_READY));
 
         await().until(new Callable<Boolean>() {
             @Override

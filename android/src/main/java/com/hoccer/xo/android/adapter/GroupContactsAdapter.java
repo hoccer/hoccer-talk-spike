@@ -89,11 +89,11 @@ public class GroupContactsAdapter extends ContactsAdapter {
         }
 
         if (isContactInvitedToGroup(contact)) {
-            status.add(resources.getString(R.string.common_group_invite));
+            status.add(resources.getString(R.string.state_invited));
         }
 
         if (contact.isClientFriend()) {
-            status.add(resources.getString(R.string.common_friend));
+            status.add(resources.getString(R.string.state_friend));
         }
 
         return TextUtils.join("\n", status);

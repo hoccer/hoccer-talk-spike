@@ -8,7 +8,6 @@ import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.ContentMediaType;
-import com.hoccer.talk.content.IContentObject;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
@@ -33,7 +32,7 @@ public class MediaPlaylistTest {
     private JdbcConnectionSource mConnectionSource;
 
     @Before
-    public void testSetup() throws Exception {
+    public void setup() throws Exception {
         mConnectionSource = new JdbcConnectionSource("jdbc:h2:mem:account");
         mDatabase = new XoClientDatabase(new IXoClientDatabaseBackend() {
 
@@ -50,19 +49,17 @@ public class MediaPlaylistTest {
             }
         });
 
-        mDatabase.createTables(mConnectionSource);
+        XoClientDatabase.createTables(mConnectionSource);
         mDatabase.initialize();
     }
 
     @After
-    public void testCleanup() throws SQLException {
+    public void cleanup() throws SQLException {
         mConnectionSource.close();
     }
 
     @Test
-    public void testMediaCollectionPlaylist() {
-        LOG.info("testMediaCollectionPlaylist");
-
+    public void mediaCollectionPlaylist() {
         // create MediaCollection
         String collectionName = "testMediaCollectionPlaylist_collection";
 
@@ -118,13 +115,13 @@ public class MediaPlaylistTest {
             }
 
             @Override
-            public void onItemRemoved(com.hoccer.xo.android.content.MediaPlaylist playlist, IContentObject itemRemoved) {
+            public void onItemRemoved(com.hoccer.xo.android.content.MediaPlaylist playlist, XoTransfer itemRemoved) {
                 assertEquals(expectedItemRemoved, itemRemoved);
                 onItemRemovedCalled.value = true;
             }
 
             @Override
-            public void onItemAdded(com.hoccer.xo.android.content.MediaPlaylist playlist, IContentObject itemAdded) {
+            public void onItemAdded(com.hoccer.xo.android.content.MediaPlaylist playlist, XoTransfer itemAdded) {
                 assertEquals(expectedItemAdded, itemAdded);
                 onItemAddedCalled.value = true;
             }
@@ -203,9 +200,7 @@ public class MediaPlaylistTest {
     }
 
     @Test
-    public void testUserPlaylist() {
-        LOG.info("testUserPlaylist");
-
+    public void userPlaylist() {
         TalkClientContact user1 = new TalkClientContact(TalkClientContact.TYPE_CLIENT);
         TalkClientContact user2 = new TalkClientContact(TalkClientContact.TYPE_CLIENT);
         try {
@@ -254,12 +249,12 @@ public class MediaPlaylistTest {
             }
 
             @Override
-            public void onItemRemoved(com.hoccer.xo.android.content.MediaPlaylist playlist, IContentObject itemRemoved) {
+            public void onItemRemoved(com.hoccer.xo.android.content.MediaPlaylist playlist, XoTransfer itemRemoved) {
                 onItemRemovedCalled.value = true;
             }
 
             @Override
-            public void onItemAdded(com.hoccer.xo.android.content.MediaPlaylist playlist, IContentObject itemAdded) {
+            public void onItemAdded(com.hoccer.xo.android.content.MediaPlaylist playlist, XoTransfer itemAdded) {
                 onItemAddedCalled.value = true;
             }
 
@@ -304,9 +299,7 @@ public class MediaPlaylistTest {
     }
 
     @Test
-    public void testSingleItemPlaylist() {
-        LOG.info("testSingleItemPlaylist");
-
+    public void singleItemPlaylist() {
         TalkClientContact user = new TalkClientContact(TalkClientContact.TYPE_CLIENT);
         TalkClientDownload item = createAudioDownloadWithUser(user);
         TalkClientDownload otherItem = createAudioDownloadWithUser(user);
@@ -324,16 +317,15 @@ public class MediaPlaylistTest {
 
         assertEquals(1, playlist.size());
 
-        XoTransfer expectedItem = item;
-        IContentObject actualItem = playlist.getItem(0);
-        assertTrue(expectedItem.equals(actualItem));
+        XoTransfer actualItem = playlist.getItem(0);
+        assertTrue(item.equals(actualItem));
 
         // test iterator
         int expectedItemCount = 1;
         int actualItemCount = 0;
-        for (IContentObject playlistItem : playlist) {
+        for (XoTransfer playlistItem : playlist) {
             actualItemCount++;
-            assertTrue(expectedItem.equals(playlistItem));
+            assertTrue(item.equals(playlistItem));
         }
         assertEquals(expectedItemCount, actualItemCount);
 
@@ -359,12 +351,12 @@ public class MediaPlaylistTest {
             }
 
             @Override
-            public void onItemRemoved(com.hoccer.xo.android.content.MediaPlaylist playlist, IContentObject itemRemoved) {
+            public void onItemRemoved(com.hoccer.xo.android.content.MediaPlaylist playlist, XoTransfer itemRemoved) {
                 onItemRemovedCalled.value = true;
             }
 
             @Override
-            public void onItemAdded(com.hoccer.xo.android.content.MediaPlaylist playlist, IContentObject itemAdded) {
+            public void onItemAdded(com.hoccer.xo.android.content.MediaPlaylist playlist, XoTransfer itemAdded) {
                 onItemAddedCalled.value = true;
             }
 
@@ -403,21 +395,20 @@ public class MediaPlaylistTest {
     }
 
     @Test
-    public void testEmptyPlaylist() {
-        LOG.info("testEmptyPlaylist");
-
-        // create empty playlist
+    public void emptyPlaylist() {
         EmptyPlaylist playlist = new EmptyPlaylist();
 
         assertEquals(0, playlist.size());
 
         // test iterator
-        for (IContentObject item : playlist) {
+        for (XoTransfer item : playlist) {
             fail();
         }
     }
 
     //////// Helpers ////////
+
+    private static int mFilePathCounter;
 
     private TalkClientDownload createAudioDownloadWithUser(TalkClientContact user) {
         // create download
@@ -429,6 +420,10 @@ public class MediaPlaylistTest {
             Field mediaTypeField = downloadClass.getDeclaredField("mediaType");
             mediaTypeField.setAccessible(true);
             mediaTypeField.set(result, ContentMediaType.AUDIO);
+
+            Field dataFileField = downloadClass.getDeclaredField("dataFile");
+            dataFileField.setAccessible(true);
+            dataFileField.set(result, "filePath_" + mFilePathCounter++);
 
             // save first to set valid downloadId
             mDatabase.saveClientDownload(result);

@@ -3,21 +3,16 @@ package com.hoccer.xo.android.base;
 import android.app.Activity;
 import android.support.v4.app.ListFragment;
 import com.hoccer.talk.client.XoClientDatabase;
-import com.hoccer.talk.content.IContentObject;
-import com.hoccer.xo.android.service.IXoClientService;
+import com.hoccer.talk.content.SelectedContent;
 import org.apache.log4j.Logger;
 
 import java.io.File;
 
 public abstract class XoListFragment extends ListFragment implements IXoFragment {
 
-    protected Logger LOG = null;
+    private static final Logger LOG = Logger.getLogger(XoListFragment.class);
 
     protected XoActivity mActivity;
-
-    public XoListFragment() {
-        LOG = Logger.getLogger(((Object) this).getClass());
-    }
 
     public File getAvatarDirectory() {
         return new File(mActivity.getFilesDir(), "avatars");
@@ -29,10 +24,6 @@ public abstract class XoListFragment extends ListFragment implements IXoFragment
 
     public XoClientDatabase getXoDatabase() {
         return mActivity.getXoDatabase();
-    }
-
-    public IXoClientService getXoService() {
-        return mActivity.getXoService();
     }
 
     public void runOnUiThread(Runnable runnable) {
@@ -65,14 +56,6 @@ public abstract class XoListFragment extends ListFragment implements IXoFragment
     }
 
     @Override
-    public void onServiceConnected() {
-    }
-
-    @Override
-    public void onServiceDisconnected() {
-    }
-
-    @Override
-    public void onAvatarSelected(IContentObject co) {
+    public void onAvatarSelected(SelectedContent co) {
     }
 }

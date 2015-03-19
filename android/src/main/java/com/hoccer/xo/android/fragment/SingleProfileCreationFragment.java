@@ -14,16 +14,16 @@ import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.base.XoFragment;
-import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.UriUtils;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
+
 
 public class SingleProfileCreationFragment extends XoFragment implements IXoContactListener, View.OnClickListener, ActionMode.Callback {
 
@@ -35,8 +35,6 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
 
     private ImageView mAvatarImage;
     private EditText mEditName;
-
-    private IContentObject mAvatarToSet;
 
     private TalkClientContact mContact;
 
@@ -75,6 +73,7 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
         if (mActionMode == null) {
             mActionMode = getActivity().startActionMode(this);
         }
+
         updateAvatarView();
     }
 
@@ -95,23 +94,15 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
     }
 
     @Override
-    public void onAvatarSelected(IContentObject contentObject) {
-        mAvatarToSet = contentObject;
-    }
-
-    @Override
-    public void onServiceConnected() {
-        if (mAvatarToSet != null) {
-            uploadAvatar(mAvatarToSet);
-            mAvatarToSet = null;
-        }
+    public void onAvatarSelected(SelectedContent avatar) {
+        uploadAvatar(avatar);
     }
 
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.profile_avatar_image) {
             if (mContact != null && mContact.isEditable()) {
-                if (mContact.getAvatarContentUrl() != null) {
+                if (mContact.getAvatarFilePath() != null) {
                     XoDialogs.showRadioSingleChoiceDialog("AvatarSelection",
                             R.string.dialog_avatar_options_title,
                             new String[]{
@@ -156,18 +147,21 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
 
         Picasso.with(getActivity())
                 .load(avatarUri)
+                .centerCrop()
+                .fit()
                 .placeholder(R.drawable.avatar_default_contact_large)
                 .error(R.drawable.avatar_default_contact_large)
                 .into(mAvatarImage);
     }
 
-    private void uploadAvatar(final IContentObject avatar) {
+    private void uploadAvatar(final SelectedContent avatar) {
         if (avatar != null) {
-            XoApplication.getExecutor().execute(new Runnable() {
+            XoApplication.get().getExecutor().execute(new Runnable() {
                 @Override
                 public void run() {
                     LOG.debug("creating avatar upload");
-                    TalkClientUpload upload = SelectedContent.createAvatarUpload(avatar);
+                    TalkClientUpload upload = new TalkClientUpload();
+                    upload.initializeAsAvatar(avatar);
                     try {
                         getXoDatabase().saveClientUpload(upload);
                         if (mContact.isSelf()) {

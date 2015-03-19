@@ -2,8 +2,8 @@ package com.hoccer.xo.android.content;
 
 import com.hoccer.talk.client.IXoDownloadListener;
 import com.hoccer.talk.client.XoClientDatabase;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientDownload;
-import com.hoccer.talk.content.IContentObject;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -13,20 +13,20 @@ import java.util.NoSuchElementException;
  */
 public class SingleItemPlaylist extends MediaPlaylist implements IXoDownloadListener {
 
-    private IContentObject mItem;
+    private XoTransfer mItem;
 
     /*
      * Constructs a playlist containing only the given item.
      */
-    public SingleItemPlaylist(XoClientDatabase database, IContentObject item) {
+    public SingleItemPlaylist(XoClientDatabase database, XoTransfer item) {
         mItem = item;
         database.registerDownloadListener(this);
 
     }
 
     @Override
-    public IContentObject getItem(int index) {
-        if(index != 0 || mItem == null) {
+    public XoTransfer getItem(int index) {
+        if (index != 0 || mItem == null) {
             throw new IndexOutOfBoundsException();
         }
         return mItem;
@@ -38,19 +38,19 @@ public class SingleItemPlaylist extends MediaPlaylist implements IXoDownloadList
     }
 
     @Override
-    public boolean hasItem(IContentObject item) {
+    public boolean hasItem(XoTransfer item) {
         return item.equals(mItem);
     }
 
     @Override
-    public int indexOf(IContentObject item) {
+    public int indexOf(XoTransfer item) {
         return item.equals(mItem) ? 0 : -1;
     }
 
     @Override
-    public Iterator<IContentObject> iterator() {
-        return new Iterator<IContentObject>() {
-            private int mCurrentIndex = 0;
+    public Iterator<XoTransfer> iterator() {
+        return new Iterator<XoTransfer>() {
+            private int mCurrentIndex;
 
             @Override
             public boolean hasNext() {
@@ -58,7 +58,7 @@ public class SingleItemPlaylist extends MediaPlaylist implements IXoDownloadList
             }
 
             @Override
-            public IContentObject next() {
+            public XoTransfer next() {
                 if (hasNext()) {
                     mCurrentIndex++;
                     return mItem;
@@ -86,7 +86,7 @@ public class SingleItemPlaylist extends MediaPlaylist implements IXoDownloadList
 
     @Override
     public void onDownloadDeleted(TalkClientDownload download) {
-        if(mItem != null && mItem.equals(download)) {
+        if (mItem != null && mItem.equals(download)) {
             mItem = null;
             invokeItemRemoved(download);
         }

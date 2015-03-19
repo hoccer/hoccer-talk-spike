@@ -13,8 +13,6 @@ import org.apache.log4j.Logger;
 
 public class AboutFragment extends Fragment {
 
-    private static final Logger LOG = Logger.getLogger(AboutFragment.class);
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_about, container, false);

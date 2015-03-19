@@ -52,7 +52,7 @@ public class NearbyArchiveFragment extends ListFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        view.setBackgroundResource(R.color.xo_main_background);
+        view.setBackgroundResource(R.color.background_default);
         getListView().setStackFromBottom(true);
         getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -67,7 +67,7 @@ public class NearbyArchiveFragment extends ListFragment {
                                 @Override
                                 public void onClick(DialogInterface dialog, int id) {
                                     try {
-                                        XoApplication.getXoClient().getDatabase().deleteAllMessagesFromContactId(chatItem.getConversationContactId());
+                                        XoApplication.get().getXoClient().getDatabase().deleteAllMessagesFromContactId(chatItem.getConversationContactId());
                                         mAdapter.requestReload();
                                     } catch (SQLException e) {
                                         e.printStackTrace();

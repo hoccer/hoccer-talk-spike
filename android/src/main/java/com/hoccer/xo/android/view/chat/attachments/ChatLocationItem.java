@@ -12,12 +12,13 @@ import com.artcom.hoccer.R;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.maps.model.LatLng;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
+import org.apache.log4j.Logger;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -25,6 +26,8 @@ import java.io.InputStream;
 
 
 public class ChatLocationItem extends ChatMessageItem {
+
+    private final static Logger LOG = Logger.getLogger(ChatLocationItem.class);
 
     public ChatLocationItem(Context context, TalkClientMessage message) {
         super(context, message);
@@ -42,8 +45,8 @@ public class ChatLocationItem extends ChatMessageItem {
     }
 
     @Override
-    protected void displayAttachment(final IContentObject contentObject) {
-        super.displayAttachment(contentObject);
+    protected void displayAttachment(final XoTransfer attachment) {
+        super.displayAttachment(attachment);
 
         // add view lazily
         if (mContentWrapper.getChildCount() == 0) {
@@ -55,24 +58,23 @@ public class ChatLocationItem extends ChatMessageItem {
         TextView locationTitleView = (TextView) mContentWrapper.findViewById(R.id.tv_location_title);
         ImageButton locationButton = (ImageButton) mContentWrapper.findViewById(R.id.ib_content_location);
 
-        int textColor = (mMessage.isIncoming()) ? mContext.getResources().getColor(R.color.xo_incoming_message_textColor) : mContext.getResources().getColor(R.color.xo_compose_message_textColor);
+        int textColor = (mMessage.isIncoming()) ? mContext.getResources().getColor(R.color.message_incoming_text) : mContext.getResources().getColor(R.color.compose_message_text);
 
         locationTextView.setTextColor(textColor);
         locationTitleView.setTextColor(textColor);
 
-        locationButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(mContext, R.drawable.ic_light_location, mMessage.isIncoming()));
+        if (mMessage.isIncoming()) {
+            locationButton.setBackgroundDrawable(ColoredDrawable.getFromCache(R.drawable.ic_light_location, R.color.attachment_incoming));
+        } else {
+            locationButton.setBackgroundDrawable(ColoredDrawable.getFromCache(R.drawable.ic_light_location, R.color.attachment_outgoing));
+        }
+
 
         locationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (contentObject.isContentAvailable()) {
-                    Uri uri;
-                    if (contentObject.getContentUrl() != null) {
-                        uri = Uri.parse(contentObject.getContentUrl());
-                    } else {
-                        uri = UriUtils.getAbsoluteFileUri(contentObject.getFilePath());
-                    }
-
+                if (attachment.isContentAvailable()) {
+                    Uri uri = UriUtils.getAbsoluteFileUri(attachment.getFilePath());
                     LatLng location = loadGeoJson(uri);
                     if (location != null) {
                         String label = "Received Location";
@@ -86,7 +88,7 @@ public class ChatLocationItem extends ChatMessageItem {
         });
     }
 
-    private LatLng loadGeoJson(Uri uri) {
+    private static LatLng loadGeoJson(Uri uri) {
         LatLng result = null;
         try {
             InputStream is = new FileInputStream(uri.getPath());

@@ -18,7 +18,6 @@ import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Android-specific implementation of an XO client host
- *
  * This directs the client towards the android-specific ormlite backend,
  * and allows the client to read files from content providers.
  */
@@ -26,8 +25,8 @@ public class XoAndroidClientHost implements IXoClientHost {
 
     private static final String SYSTEM_NAME = "Android";
 
-    Context mContext = null;
-    PackageInfo mPackageInfo = null;
+    Context mContext;
+    PackageInfo mPackageInfo;
 
     public XoAndroidClientHost(Context context) {
         mContext = context;
@@ -43,7 +42,7 @@ public class XoAndroidClientHost implements IXoClientHost {
 
     @Override
     public ScheduledExecutorService getBackgroundExecutor() {
-        return XoApplication.getExecutor();
+        return XoApplication.get().getExecutor();
     }
 
     @Override

@@ -1,34 +1,46 @@
 <resources>
 
-    <!-- Application theme. -->
-    <style name="AppTheme" parent="AppBaseTheme">
-        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
-    </style>
+    <style name="BaseTheme" parent="@android:style/Theme.Holo.Light.DarkActionBar">
 
-    <style name="AppBaseTheme" parent="@android:style/Theme.Holo.Light.DarkActionBar">
         <item name="android:actionBarItemBackground">@drawable/selectable_background_appbasetheme</item>
+
         <item name="android:popupMenuStyle">@style/PopupMenu.AppBaseTheme</item>
-        <item name="android:textAppearanceLargePopupMenu">@style/PopupMenuTextAppearance.AppBaseTheme</item>
-        <item name="android:textAppearanceSmallPopupMenu">@style/PopupMenuTextAppearance.AppBaseTheme</item>
-        <item name="android:dropDownListViewStyle">@style/DropDownListView.AppBaseTheme</item>
         <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.AppBaseTheme</item>
+
+        <item name="android:textAppearanceLargePopupMenu">@style/PopupMenuTextAppearance.AppBaseTheme</item>
+
+        <item name="android:textAppearanceSmallPopupMenu">@style/PopupMenuTextAppearance.AppBaseTheme</item>
+
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.AppBaseTheme</item>
+
+
         <item name="android:actionDropDownStyle">@style/DropDownNav.AppBaseTheme</item>
+
         <item name="android:actionBarStyle">@style/ActionBar.Solid.AppBaseTheme</item>
+
         <item name="android:actionBarTabTextStyle">@style/ActionBarTabText.Solid.AppBaseTheme</item>
+
         <item name="android:actionModeBackground">@drawable/cab_background_top_appbasetheme</item>
+
         <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_appbasetheme</item>
+
         <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.AppBaseTheme</item>
+
         <item name="android:actionOverflowButtonStyle">@style/OverFlow.AppBaseTheme</item>
 
         <item name="android:editTextBackground">@drawable/apptheme_edit_text_holo_light</item>
 
         <!-- Light.DarkActionBar specific -->
         <item name="android:actionBarWidgetTheme">@style/Theme.AppBaseTheme.Widget</item>
+
         <item name="android:checkboxStyle">@style/CheckBoxAppBaseTheme</item>
+
         <item name="android:buttonStyle">@style/ButtonAppBaseTheme</item>
+
         <item name="android:imageButtonStyle">@style/ImageButtonAppBaseTheme</item>
 
     </style>
+
 
     <style name="CheckBoxAppBaseTheme" parent="android:Widget.CompoundButton.CheckBox">
         <item name="android:button">@drawable/appbasetheme_btn_check_holo_light</item>
@@ -73,7 +85,7 @@
 
     <style name="ParagraphText">
         <item name="android:layout_marginBottom">25dp</item>
-        <item name="android:textAppearance">@android:style/TextAppearance.DeviceDefault.Medium</item>
+        <item name="android:textAppearance">@android:style/TextAppearance.Medium</item>
     </style>
 
     <style name="OverFlow.AppBaseTheme" parent="@android:style/Widget.Holo.ActionButton.Overflow">

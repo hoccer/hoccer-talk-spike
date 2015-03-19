@@ -233,18 +233,20 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      * Disconnect the underlying connection and finish up
      */
     public void disconnect() {
-        if (mTalkClient != null && mTalkClient.isReady()) {
-            // set client to not ready
-            ITalkServerDatabase database = mServer.getDatabase();
-            TalkClient client = database.findClientById(mTalkClient.getClientId());
-            if (client != null) {
-                client.setTimeReady(null);
-                database.saveClient(client);
+        synchronized (this) {
+            if (mTalkClient != null && mTalkClient.isReady()) {
+                // set client to not ready
+                ITalkServerDatabase database = mServer.getDatabase();
+                TalkClient client = database.findClientById(mTalkClient.getClientId());
+                if (client != null) {
+                    client.setTimeReady(null);
+                    database.saveClient(client);
+                }
             }
-        }
 
-        mTalkClient = null;
-        mConnection.disconnect();
+            mTalkClient = null;
+            mConnection.disconnect();
+        }
     }
 
     /**
@@ -255,27 +257,29 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
         final ITalkServerDatabase database = mServer.getDatabase();
 
         // mark connection as logged in
-        mTalkClient = database.findClientById(clientId);
-        if (mTalkClient == null) {
-            throw new RuntimeException("Client does not exist");
-        } else {
-            mServer.identifyClient(mTalkClient, this);
-        }
+        synchronized (this) {
+            mTalkClient = database.findClientById(clientId);
+            if (mTalkClient == null) {
+                throw new RuntimeException("Client does not exist");
+            } else {
+                mServer.identifyClient(mTalkClient, this);
+            }
 
-        // update login time
-        mTalkClient.setTimeLastLogin(new Date());
-        database.saveClient(mTalkClient);
-
-        // tell the client if it doesn't have push
-        if (!mTalkClient.isPushCapable()) {
-            mClientRpc.pushNotRegistered();
-        }
-
-        // display missed push message as an alert
-        if (mTalkClient.getPushAlertMessage() != null) {
-            mServer.getUpdateAgent().requestUserAlert(mTalkClient.getClientId(), mTalkClient.getPushAlertMessage());
-            mTalkClient.setPushAlertMessage(null);
+            // update login time
+            mTalkClient.setTimeLastLogin(new Date());
             database.saveClient(mTalkClient);
+
+            // tell the client if it doesn't have push
+            if (!mTalkClient.isPushCapable()) {
+                mClientRpc.pushNotRegistered();
+            }
+
+            // display missed push message as an alert
+            if (mTalkClient.getPushAlertMessage() != null) {
+                mServer.getUpdateAgent().requestUserAlert(mTalkClient.getClientId(), mTalkClient.getPushAlertMessage());
+                mTalkClient.setPushAlertMessage(null);
+                database.saveClient(mTalkClient);
+            }
         }
     }
 
@@ -287,25 +291,27 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
         // A: Defensive programming in case someone makes changes that break the contract,
         //    or when strange things happen due to timing issues like spontaneous disconnection
         //    or bugs that cause this function to be called at the wrong time.
-        if (isLoggedIn() && mTalkClient != null) {
-            LOG.info("[connectionId: '" + getConnectionId() + "'] signalled Ready: " + mTalkClient.getClientId());
+        synchronized (this) {
+            if (isLoggedIn() && mTalkClient != null) {
+                LOG.info("[connectionId: '" + getConnectionId() + "'] signalled Ready: " + mTalkClient.getClientId());
 
-            // mark connection as logged in
-            ITalkServerDatabase database = mServer.getDatabase();
-            mTalkClient.setTimeReady(new Date());
-            mTalkClient.setLastPushMessage(null);
-            database.saveClient(mTalkClient);
+                // mark connection as logged in
+                ITalkServerDatabase database = mServer.getDatabase();
+                mTalkClient.setTimeReady(new Date());
+                mTalkClient.setLastPushMessage(null);
+                database.saveClient(mTalkClient);
 
-            // notify server abount ready state
-            mServer.readyClient(mTalkClient, this);
+                // notify server abount ready state
+                mServer.readyClient(mTalkClient, this);
 
-            // attempt to deliver anything we might have
-            mServer.getDeliveryAgent().requestDelivery(mTalkClient.getClientId(), true);
+                // attempt to deliver anything we might have
+                mServer.getDeliveryAgent().requestDelivery(mTalkClient.getClientId(), true);
 
-            // request a ping in a few seconds
-            mServer.getPingAgent().requestPing(mTalkClient.getClientId());
-        } else {
-            LOG.warn("[connectionId: '" + getConnectionId() + "'] client signalled ready but is actually NOT ready!");
+                // request a ping in a few seconds
+                mServer.getPingAgent().requestPing(mTalkClient.getClientId());
+            } else {
+                LOG.warn("[connectionId: '" + getConnectionId() + "'] client signalled ready but is actually NOT ready!");
+            }
         }
     }
 

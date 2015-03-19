@@ -17,33 +17,31 @@ import java.util.List;
  * A simple wrapper around a Camera and a SurfaceView that renders a centered preview of the Camera
  * to the surface. We need to center the SurfaceView because not all devices have cameras that
  * support preview sizes at the same aspect ratio as the device's display.
- *
  * Taken from ANDROID_SDK/samples/android-19/legacy/ApiDemos/src/com/example/android/apis/graphics/CameraPreview.java
  */
 public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callback {
     private static final Logger LOG = Logger.getLogger(CameraPreviewView.class);
 
-    private SurfaceView mSurfaceView;
-    private SurfaceHolder mHolder;
+    private final SurfaceHolder mHolder;
     private Camera.Size mPreviewSize;
     private List<Camera.Size> mSupportedPreviewSizes;
     private Camera mCamera;
-    private boolean mIsPortraitModeEnabled;
-    private boolean mIsEnabled;
+    private final boolean mIsPortraitModeEnabled;
     private boolean mIsSurfaceCreated;
 
-    private Handler mAutoFocusHandler = new Handler();
+    private final Handler mAutoFocusHandler = new Handler();
 
-    private Runnable mAutoFocusRunnable = new Runnable() {
+    private final Runnable mAutoFocusRunnable = new Runnable() {
         @Override
         public void run() {
             if (mCamera != null) {
+                mCamera.cancelAutoFocus();
                 mCamera.autoFocus(mAutoFocusCallback);
             }
         }
     };
 
-    private Camera.AutoFocusCallback mAutoFocusCallback = new Camera.AutoFocusCallback() {
+    private final Camera.AutoFocusCallback mAutoFocusCallback = new Camera.AutoFocusCallback() {
         @Override
         public void onAutoFocus(boolean success, final Camera camera) {
             mAutoFocusHandler.postDelayed(mAutoFocusRunnable, 1000);
@@ -53,16 +51,15 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
     public CameraPreviewView(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
 
-        mSurfaceView = new SurfaceView(context);
-        addView(mSurfaceView);
+        SurfaceView surfaceView = new SurfaceView(context);
+        addView(surfaceView);
 
         mIsPortraitModeEnabled = attributeSet.getAttributeBooleanValue(null, "portrait", false);
-        mIsEnabled = true;
         mIsSurfaceCreated = false;
 
         // Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.
-        mHolder = mSurfaceView.getHolder();
+        mHolder = surfaceView.getHolder();
         mHolder.addCallback(this);
     }
 
@@ -92,29 +89,33 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
         }
     }
 
-    private Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes, int w, int h) {
+    private Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes, int width, int height) {
         final double ASPECT_TOLERANCE = 0.1;
-        final int MIN_WIDTH = Math.max(w / 2, 640);
-        final int MIN_HEIGHT = Math.max(h / 2, 480);
+        final int MIN_WIDTH = Math.max(width / 2, 640);
+        final int MIN_HEIGHT = Math.max(height / 2, 480);
 
-        double targetRatio = (double) w / h;
-        if (sizes == null) return null;
+        double targetRatio = (double) width / height;
+        if (sizes == null) {
+            return null;
+        }
 
         Camera.Size optimalSize = null;
         double minDiff = Double.MAX_VALUE;
 
-        int targetHeight = h;
-
         // Try to find an size match aspect ratio and size
         for (Camera.Size size : sizes) {
-            if (size.width < MIN_WIDTH || size.height < MIN_HEIGHT) continue;
+            if (size.width < MIN_WIDTH || size.height < MIN_HEIGHT) {
+                continue;
+            }
 
             double ratio = (double) size.width / size.height;
-            if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) continue;
+            if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) {
+                continue;
+            }
 
-            if (Math.abs(size.height - targetHeight) < minDiff) {
+            if (Math.abs(size.height - height) < minDiff) {
                 optimalSize = size;
-                minDiff = Math.abs(size.height - targetHeight);
+                minDiff = Math.abs(size.height - height);
             }
         }
 
@@ -122,9 +123,9 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
         if (optimalSize == null) {
             minDiff = Double.MAX_VALUE;
             for (Camera.Size size : sizes) {
-                if (Math.abs(size.height - targetHeight) < minDiff) {
+                if (Math.abs(size.height - height) < minDiff) {
                     optimalSize = size;
-                    minDiff = Math.abs(size.height - targetHeight);
+                    minDiff = Math.abs(size.height - height);
                 }
             }
         }
@@ -184,7 +185,7 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
     }
 
     public void startPreview() {
-        if (mIsEnabled && mIsSurfaceCreated && mCamera != null) {
+        if (mIsSurfaceCreated && mCamera != null) {
             try {
                 mCamera.setPreviewDisplay(mHolder);
             } catch (IOException e) {
@@ -208,6 +209,8 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
             }
 
             mCamera.startPreview();
+            mCamera.cancelAutoFocus();
+            mAutoFocusHandler.removeCallbacks(mAutoFocusRunnable);
             mCamera.autoFocus(mAutoFocusCallback);
         }
     }
@@ -218,10 +221,5 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
             mCamera.cancelAutoFocus();
             mCamera.stopPreview();
         }
-    }
-
-    @Override
-    public void setEnabled(boolean isEnabled) {
-        mIsEnabled = isEnabled;
     }
 }

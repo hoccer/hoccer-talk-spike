@@ -2,7 +2,7 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:id="@+id/menu_collections_ok"
+    <item android:id="@+id/menu_contact_selection_ok"
           android:title="@string/common_ok"
           android:visible="false"
           android:showAsAction="always"

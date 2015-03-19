@@ -1,10 +1,10 @@
 package com.hoccer.xo.android.content.selector;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -12,15 +12,14 @@ import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.content.ContentMediaType;
-import com.hoccer.xo.android.content.SelectedContent;
-import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.talk.content.SelectedContent;
+import com.hoccer.talk.content.SelectedFile;
+import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.hoccer.xo.android.util.ImageUtils;
-import com.hoccer.xo.android.util.UriUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -36,7 +35,7 @@ public class CaptureSelector implements IContentSelector {
     public CaptureSelector(Context context) {
         mContext = context;
         mName = context.getResources().getString(R.string.content_capture);
-        mIcon = ColorSchemeManager.getRepaintedDrawable(context.getResources(), R.drawable.ic_attachment_select_video, true);
+        mIcon = ColoredDrawable.getFromCache(R.drawable.ic_attachment_select_video, R.color.primary);
     }
 
     @Override
@@ -77,39 +76,21 @@ public class CaptureSelector implements IContentSelector {
     @Override
     public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
         String filePath = mFileUri.getPath();
-        String filename = mFileUri.getLastPathSegment();
-
-        Uri contentUri;
-        try {
-            contentUri = Uri.parse(MediaStore.Images.Media.insertImage(context.getContentResolver(), filePath, filename, null));
-        } catch (FileNotFoundException e) {
-            LOG.error("Could not insert image into MediaStore", e);
-            return null;
-        }
-
         String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(FilenameUtils.getExtension(filePath));
 
         ImageUtils.ExifData exifData = ImageUtils.getExifData(filePath);
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.Images.ImageColumns.ORIENTATION, String.valueOf(exifData.orientation));
-        values.put(MediaStore.Images.ImageColumns.MIME_TYPE, mimeType);
-        values.put(MediaStore.Images.ImageColumns.DATE_TAKEN, String.valueOf(exifData.dateTime));
-        values.put(MediaStore.Images.ImageColumns.LATITUDE, String.valueOf(exifData.latitude));
-        values.put(MediaStore.Images.ImageColumns.LONGITUDE, String.valueOf(exifData.longitude));
-        context.getContentResolver().update(contentUri, values, null, null);
+        double aspectRatio = calculateAspectRatio(filePath, exifData.orientation);
 
-        File imageFile = new File(filePath);
-        int fileLength = (int) imageFile.length();
+        startMediaScannerForFile(context, filePath, mimeType);
 
-        float aspectRatio = (float) calculateAspectRatio(filePath, exifData.orientation);
+        return new SelectedFile(filePath, mimeType, ContentMediaType.IMAGE, aspectRatio);
+    }
 
-        SelectedContent contentObject = new SelectedContent(contentUri.toString(), UriUtils.FILE_URI_PREFIX + filePath);
-        contentObject.setFileName(filename);
-        contentObject.setContentMediaType(ContentMediaType.IMAGE);
-        contentObject.setContentType(mimeType);
-        contentObject.setContentLength(fileLength);
-        contentObject.setContentAspectRatio(aspectRatio);
-        return contentObject;
+    private static void startMediaScannerForFile(Context context, String filePath, String mimeType) {
+        String[] filePathes = new String[]{filePath};
+        String[] mimeTypes = new String[]{mimeType};
+        LOG.debug("requesting media scan of " + mimeTypes[0] + " at " + filePathes[0]);
+        MediaScannerConnection.scanFile(context, filePathes, mimeTypes, null);
     }
 
     private static double calculateAspectRatio(String filePath, int orientation) {
@@ -119,11 +100,6 @@ public class CaptureSelector implements IContentSelector {
         int imageHeight = options.outHeight;
         int imageWidth = options.outWidth;
         return ImageUtils.calculateAspectRatio(imageWidth, imageHeight, orientation);
-    }
-
-    @Override
-    public boolean isValidIntent(Context context, Intent intent) {
-        return true;
     }
 
     public class ExternalStorageNotMountedException extends Throwable {

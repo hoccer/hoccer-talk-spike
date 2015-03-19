@@ -7,6 +7,7 @@ package com.hoccer.talk.crypto;
 import org.apache.commons.codec.binary.Base64;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -158,8 +159,8 @@ public class CryptoUtils {
         }
     }
 
-    public static String computeHmac(String contentDataUrl) throws NoSuchAlgorithmException, IOException {
-        InputStream inputStream = new URL(contentDataUrl).openStream();
+    public static String computeHmac(String filePath) throws NoSuchAlgorithmException, IOException {
+        InputStream inputStream = new FileInputStream(filePath);
         return computeHmac(inputStream);
     }
 

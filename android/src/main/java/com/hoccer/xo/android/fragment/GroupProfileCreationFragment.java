@@ -16,14 +16,13 @@ import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.GroupProfileActivity;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupContactsAdapter;
 import com.hoccer.xo.android.base.XoFragment;
-import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.UriUtils;
 import com.squareup.picasso.Picasso;
 import org.apache.commons.collections4.CollectionUtils;
@@ -33,6 +32,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 
 /**
  * Fragment for display and editing of group profiles.
@@ -44,11 +44,9 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
 
     private EditText mGroupNameEdit;
     private Button mGroupCreateButton;
-    private TextView mGroupMembersTitle;
-    private ListView mGroupMembersList;
     private ContactsAdapter mGroupMemberAdapter;
 
-    private IContentObject mAvatar;
+    private SelectedContent mAvatar;
     private ImageView mAvatarImageView;
 
     private List<TalkClientContact> mContactsToInvite = Collections.emptyList();
@@ -87,9 +85,9 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
 
         mAvatarImageView = (ImageView) view.findViewById(R.id.profile_group_profile_image);
         mGroupNameEdit = (EditText) view.findViewById(R.id.profile_group_name_edit);
-        mGroupMembersTitle = (TextView) view.findViewById(R.id.profile_group_members_title);
-        mGroupMembersList = (ListView) view.findViewById(R.id.profile_group_members_list);
         mGroupCreateButton = (Button) view.findViewById(R.id.profile_group_button_create);
+        TextView groupMembersTitle = (TextView) view.findViewById(R.id.profile_group_members_title);
+        ListView groupMembersList = (ListView) view.findViewById(R.id.profile_group_members_list);
 
         mAvatarImageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -142,12 +140,14 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
             }
         });
         mGroupMemberAdapter.onCreate();
-        mGroupMembersList.setAdapter(mGroupMemberAdapter);
+        groupMembersList.setAdapter(mGroupMemberAdapter);
 
         if (mContactsToInvite.isEmpty()) {
-            mGroupMembersTitle.setVisibility(View.GONE);
-            mGroupMembersList.setVisibility(View.GONE);
+            groupMembersTitle.setVisibility(View.GONE);
+            groupMembersList.setVisibility(View.GONE);
         }
+
+        updateAvatarView(null);
     }
 
     @Override
@@ -223,15 +223,17 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
     }
 
     @Override
-    public void onAvatarSelected(IContentObject contentObject) {
-        updateAvatarView(contentObject);
+    public void onAvatarSelected(SelectedContent content) {
+        updateAvatarView(content);
     }
 
-    private void updateAvatarView(final IContentObject avatar) {
+    private void updateAvatarView(final SelectedContent avatar) {
         mAvatar = avatar;
         Uri avatarUri = mAvatar == null ? null : UriUtils.getAbsoluteFileUri(mAvatar.getFilePath());
         Picasso.with(getActivity())
                 .load(avatarUri)
+                .centerCrop()
+                .fit()
                 .placeholder(R.drawable.avatar_default_group_large)
                 .error(R.drawable.avatar_default_group_large)
                 .into(mAvatarImageView);
@@ -254,7 +256,8 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
 
     private void uploadAvatar(TalkClientContact group) {
         if (mAvatar != null) {
-            TalkClientUpload upload = SelectedContent.createAvatarUpload(mAvatar);
+            TalkClientUpload upload = new TalkClientUpload();
+            upload.initializeAsAvatar(mAvatar);
 
             try {
                 getXoDatabase().saveClientUpload(upload);

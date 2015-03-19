@@ -1,9 +1,10 @@
 package com.hoccer.xo.android.content;
 
-import com.hoccer.talk.content.ContentMediaType;
-import org.apache.tika.mime.MimeTypes;
+import com.hoccer.talk.content.SelectedContent;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.lang.reflect.Field;
 
 import static junit.framework.TestCase.*;
 
@@ -14,18 +15,29 @@ public class ClipboardTest {
 
     @Before
     public void setUp() throws Exception {
+        resetStaticClipboardInstance();
         mClipboard = Clipboard.getInstance();
-        mTestContent = createSelectedContentWithData();
+        mTestContent = new SelectedLocation("hello".getBytes());
+    }
+
+    private static void resetStaticClipboardInstance() {
+        try {
+            Field clipboardInstance = Clipboard.class.getDeclaredField("sInstance");
+            clipboardInstance.setAccessible(true);
+            clipboardInstance.set(null, null);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
     }
 
     @Test
-    public void testClipboardInitialization() {
+    public void clipboardInitialization() {
         assertFalse(mClipboard.hasContent());
         assertNull(mClipboard.getContent());
     }
 
     @Test
-    public void testClipboardSetContent() {
+    public void clipboardSetContent() {
         mClipboard.setContent(mTestContent);
 
         assertTrue(mClipboard.hasContent());
@@ -33,19 +45,11 @@ public class ClipboardTest {
     }
 
     @Test
-    public void testClipboardClearContent() {
+    public void clipboardClearContent() {
         mClipboard.setContent(mTestContent);
         mClipboard.clearContent();
 
         assertFalse(mClipboard.hasContent());
         assertNull(mClipboard.getContent());
-    }
-
-    private static SelectedContent createSelectedContentWithData() {
-        SelectedContent sc = new SelectedContent("hello".getBytes());
-        sc.setContentMediaType(ContentMediaType.DATA);
-        sc.setFileName("random_content.txt");
-        sc.setContentType(MimeTypes.PLAIN_TEXT);
-        return sc;
     }
 }

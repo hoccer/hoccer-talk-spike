@@ -1,50 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="AppBaseTheme.Group"/>
+    <style name="BaseTheme.Group"/>
 
-    <style name="AppBaseTheme.Group.ProfilePicture" parent="AppBaseTheme.Group">
+    <style name="AppBaseTheme.Group.ProfilePicture" parent="BaseTheme.Group">
     </style>
-    <style name="AppBaseTheme.Group.Title" parent="AppBaseTheme.DescriptiveText">
+    <style name="AppBaseTheme.Group.Title" parent="BaseTheme.DescriptiveText">
         <item name="android:layout_marginTop">15dp</item>
         <item name="android:layout_marginLeft">45dp</item>
     </style>
-    <style name="AppBaseTheme.Group.Name" parent="AppBaseTheme.Group">
+    <style name="AppBaseTheme.Group.Name" parent="BaseTheme.Group">
         <item name="android:textSize">24dp</item>
     </style>
-    <style name="AppBaseTheme.Group.HorizontalDivider" parent="AppBaseTheme.Group">
+    <style name="AppBaseTheme.Group.HorizontalDivider" parent="BaseTheme.Group">
         <item name="android:layout_marginLeft">30dp</item>
         <item name="android:layout_marginRight">30dp</item>
         <item name="android:layout_height">1dp</item>
-        <item name="android:background">@color/xo_content_horizontal_divider</item>
+        <item name="android:background">@color/content_horizontal_divider</item>
     </style>
-    <style name="AppBaseTheme.Group.CreateButton" parent="AppBaseTheme.Group">
+    <style name="AppBaseTheme.Group.CreateButton" parent="BaseTheme.Group">
         <item name="android:layout_marginLeft">30dp</item>
         <item name="android:layout_marginRight">30dp</item>
     </style>
 
-    <style name="AppBaseTheme.Group.Members.Title" parent="AppBaseTheme.DescriptiveText">
+    <style name="AppBaseTheme.Group.Members.Title" parent="BaseTheme.DescriptiveText">
         <item name="android:layout_marginTop">20dp</item>
         <item name="android:layout_marginLeft">45dp</item>
     </style>
-    <style name="AppBaseTheme.Group.Members.Dialog" parent="AppBaseTheme.Group">
-        <item name="android:background">@color/xo_app_main_color</item>
+    <style name="AppBaseTheme.Group.Members.Dialog" parent="BaseTheme.Group">
+        <item name="android:background">@color/primary</item>
     </style>
 
-    <style name="AppBaseTheme.Group.List" parent="AppBaseTheme.Group">
+    <style name="AppBaseTheme.Group.List" parent="BaseTheme.Group">
         <item name="android:dividerHeight">1dp</item>
-        <item name="android:divider">@color/xo_content_horizontal_divider</item>
+        <item name="android:divider">@color/content_horizontal_divider</item>
         <item name="android:layout_marginLeft">30dp</item>
         <item name="android:layout_marginRight">30dp</item>
     </style>
 
-    <style name="AppBaseTheme.Group.Members.MemberAvatar" parent="AppBaseTheme.Group">
+    <style name="AppBaseTheme.Group.Members.MemberAvatar" parent="BaseTheme.Group">
         <item name="android:layout_marginLeft">10dp</item>
         <item name="android:layout_marginRight">10dp</item>
         <item name="android:layout_marginTop">10dp</item>
         <item name="android:layout_marginBottom">10dp</item>
     </style>
-    <style name="AppBaseTheme.Group.Members.MemberName" parent="AppBaseTheme.Group">
+    <style name="AppBaseTheme.Group.Members.MemberName" parent="BaseTheme.Group">
         <item name="android:gravity">center_vertical</item>
         <item name="android:layout_marginLeft">10dp</item>
         <item name="android:layout_marginRight">10dp</item>

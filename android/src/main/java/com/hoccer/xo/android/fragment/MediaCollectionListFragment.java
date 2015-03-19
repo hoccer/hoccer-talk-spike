@@ -7,10 +7,10 @@ import android.view.*;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -22,9 +22,8 @@ public class MediaCollectionListFragment extends BaseMediaCollectionListFragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        View view = inflater.inflate(R.layout.fragment_media_collection_list, container, false);
 
-        return view;
+        return inflater.inflate(R.layout.fragment_media_collection_list, container, false);
     }
 
     @Override
@@ -114,8 +113,8 @@ public class MediaCollectionListFragment extends BaseMediaCollectionListFragment
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 try {
-                    for (TalkClientMediaCollection collection : mMediaCollectionListAdapter.getSelecteddItems()) {
-                        XoApplication.getXoClient().getDatabase().deleteMediaCollection(collection);
+                    for (TalkClientMediaCollection collection : mMediaCollectionListAdapter.getSelectedItems()) {
+                        XoApplication.get().getXoClient().getDatabase().deleteMediaCollection(collection);
                     }
                 } catch (SQLException e) {
                     LOG.error(e.getMessage());

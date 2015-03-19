@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -21,6 +20,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.hoccer.xo.android.base.XoActivity;
 import com.artcom.hoccer.R;
+import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
@@ -32,6 +32,8 @@ public class MapsLocationActivity extends XoActivity
                GoogleMap.OnMapLongClickListener,
                GoogleMap.OnMyLocationChangeListener,
                View.OnClickListener {
+
+    private static final Logger LOG = Logger.getLogger(MapsLocationActivity.class);
 
     public static final String EXTRA_GEOJSON = "com.hoccer.xo.android.GEOJSON";
 
@@ -83,21 +85,6 @@ public class MapsLocationActivity extends XoActivity
         }
         mMyLocation = mMap.getMyLocation();
         update();
-    }
-
-    @Override
-    protected void applicationWillEnterForeground() {
-
-    }
-
-    @Override
-    protected void applicationWillEnterBackground() {
-
-    }
-
-    @Override
-    protected void applicationWillEnterBackgroundActive() {
-
     }
 
     private void setupMap() {
@@ -201,10 +188,10 @@ public class MapsLocationActivity extends XoActivity
     }
 
 
-    private static String PREVIEW_IMAGE = null;
+    private static String mPreviewImage;
 
     private String getPreview() {
-        if(PREVIEW_IMAGE == null) {
+        if(mPreviewImage == null) {
             try {
                 ByteArrayOutputStream output = new ByteArrayOutputStream();
                 InputStream is = getResources().openRawResource(R.raw.location_preview_png);
@@ -216,11 +203,11 @@ public class MapsLocationActivity extends XoActivity
                 output.flush();
                 byte[] data = Base64.encode(output.toByteArray(), Base64.DEFAULT);
                 output.close();
-                PREVIEW_IMAGE = new String(data);
+                mPreviewImage = new String(data);
             } catch (IOException e) {
                 LOG.error("error reading location preview resource", e);
             }
         }
-        return PREVIEW_IMAGE;
+        return mPreviewImage;
     }
 }
