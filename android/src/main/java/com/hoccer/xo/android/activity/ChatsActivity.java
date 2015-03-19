@@ -1,8 +1,8 @@
 package com.hoccer.xo.android.activity;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -10,24 +10,21 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
-import com.hoccer.talk.content.SelectedContent;
-import com.hoccer.xo.android.MediaPlayer;
-import com.hoccer.xo.android.NearbyController;
-import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.XoDialogs;
+import com.hoccer.talk.model.TalkPresence;
+import com.hoccer.xo.android.*;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.activity.component.ViewPagerActivityComponent;
-import com.hoccer.xo.android.content.Clipboard;
-import com.hoccer.xo.android.content.selector.IContentSelector;
-import com.hoccer.xo.android.content.selector.ImageSelector;
-import com.hoccer.xo.android.content.selector.VideoSelector;
 import com.hoccer.xo.android.fragment.ChatListFragment;
 import com.hoccer.xo.android.fragment.NearbyChatListFragment;
+import com.hoccer.xo.android.passwordprotection.activity.PasswordPromptActivity;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.ContactsMenuItemActionProvider;
+import org.apache.log4j.Logger;
 
-public class ChatsActivity extends ComposableActivity implements IXoStateListener, IXoPairingListener {
+public class ChatsActivity extends ComposableActivity implements IXoStateListener, IXoPairingListener, BackgroundManager.Listener {
+
+    private static final Logger LOG = Logger.getLogger(ChatsActivity.class);
 
     private String mPairingToken;
     private ContactsMenuItemActionProvider mContactsMenuItemActionProvider;
@@ -60,6 +57,9 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         mContactsMenuItemActionProvider = new ContactsMenuItemActionProvider(this);
 
         handleIntent(getIntent());
+
+        BackgroundManager.get().registerListener(this);
+
     }
 
     @Override
@@ -81,6 +81,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         super.onDestroy();
         MediaPlayer.get().removeNotification();
         NearbyController.get().removeNotification();
+        BackgroundManager.get().unregisterListener(this);
     }
 
     @Override
@@ -201,5 +202,38 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private void startMediaBrowserActivity() {
         Intent intent = new Intent(this, MediaBrowserActivity.class);
         startActivity(intent);
+    }
+
+    @Override
+    public void onBecameForeground() {
+        LOG.debug("onBecameForeground()");
+        getXoClient().setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
+
+        if (isPasswordProtectionActive()) {
+            startPasswordPromptActivity();
+        }
+
+        ((XoApplication) getApplication()).setActiveInBackground(false);
+    }
+
+    private boolean isPasswordProtectionActive() {
+        return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.preference_key_activate_passcode), false);
+    }
+
+    private void startPasswordPromptActivity() {
+        if (getXoClient().getSelfContact().getSelf().isRegistrationConfirmed() && !((XoApplication) getApplication()).isActiveInBackground()) {
+            Intent intent = new Intent(this, PasswordPromptActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            intent.putExtra(PasswordPromptActivity.EXTRA_ENABLE_BACK_NAVIGATION, false);
+            startActivity(intent);
+        }
+    }
+
+    @Override
+    public void onBecameBackground() {
+        LOG.debug("onBecameBackground()");
+        if (!((XoApplication) getApplication()).isActiveInBackground()) {
+            getXoClient().setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
+        }
     }
 }

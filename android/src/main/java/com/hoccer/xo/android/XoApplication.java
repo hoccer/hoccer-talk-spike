@@ -30,7 +30,7 @@ import java.util.concurrent.ScheduledExecutorService;
  * for such things as initializing the logger and setting up the
  * XO client itself. All global initialization should go here.
  */
-public class XoApplication extends Application implements Thread.UncaughtExceptionHandler, BackgroundManager.Listener {
+public class XoApplication extends Application implements Thread.UncaughtExceptionHandler {
 
     private static Logger sLog;
 
@@ -68,7 +68,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     private static DisplayImageOptions sImageOptions;
 
     private static StartupTasks sStartupTasks;
-    private boolean mStayActiveInBackground;
+    private boolean mActiveInBackground;
 
     private static XoApplication sInstance;
 
@@ -194,8 +194,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
         // create sound pool instance
         sSoundPool = new XoSoundPool(this);
-
-        BackgroundManager.get().registerListener(this);
 
         sStartupTasks = new StartupTasks(this);
         sStartupTasks.executeRegisteredTasks();
@@ -368,26 +366,11 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         }
     }
 
-    public void stayActiveInBackground() {
-        mStayActiveInBackground = true;
+    public void setActiveInBackground(boolean active) {
+        mActiveInBackground = active;
     }
 
-    @Override
-    public void onBecameForeground() {
-        sLog.debug("onBecameForeground()");
-        mClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
-        mStayActiveInBackground = false;
-    }
-
-    @Override
-    public void onBecameBackground() {
-        sLog.debug("onBecameBackground()");
-        if (!mStayActiveInBackground) {
-            mClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
-        }
-    }
-
-    public boolean getStayActiveInBackground() {
-        return mStayActiveInBackground;
+    public boolean isActiveInBackground() {
+        return mActiveInBackground;
     }
 }

@@ -34,6 +34,18 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+            android:title="@string/password_protection">
+        <Preference
+                android:enabled="false"
+                android:title="@string/change_password"
+                android:key="@string/preference_key_change_passcode">
+        </Preference>
+        <SwitchPreference android:title="@string/activate"
+                          android:key="@string/preference_key_activate_passcode"
+                          android:defaultValue="false"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
             android:title="@string/pref_category_image_encoding">
 
         <ListPreference
@@ -157,8 +169,8 @@
             android:title="Development">
 
         <Preference
-            android:key="preference_database_dump"
-            android:title="Dump SQLite Database"/>
+                android:key="preference_database_dump"
+                android:title="Dump SQLite Database"/>
     </PreferenceCategory>
 
 </PreferenceScreen>
