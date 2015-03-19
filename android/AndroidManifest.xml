@@ -264,15 +264,15 @@
                 android:windowSoftInputMode="adjustResize">
         </activity>
 
-        <activity android:name="com.hoccer.xo.android.activity.PasswordPromptActivity"
+        <activity android:name="com.hoccer.xo.android.passwordprotection.activity.PasswordPromptActivity"
                   android:theme="@android:style/Theme.Holo.Light.NoActionBar"
                   android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
 
-        <activity android:name="com.hoccer.xo.android.activity.PasswordChangeActivity"
+        <activity android:name="com.hoccer.xo.android.passwordprotection.activity.PasswordChangeActivity"
                   android:label="@string/change_password"
                   android:windowSoftInputMode="stateAlwaysVisible|adjustResize"/>
 
-        <activity android:name="com.hoccer.xo.android.activity.PasswordSetActivity"
+        <activity android:name="com.hoccer.xo.android.passwordprotection.activity.PasswordSetActivity"
                   android:label="@string/set_password"
                   android:windowSoftInputMode="stateAlwaysVisible|adjustResize"/>
 

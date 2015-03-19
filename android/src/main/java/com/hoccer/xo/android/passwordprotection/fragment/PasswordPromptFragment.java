@@ -1,4 +1,4 @@
-package com.hoccer.xo.android.fragment;
+package com.hoccer.xo.android.passwordprotection.fragment;
 
 import android.app.Activity;
 import android.content.Context;

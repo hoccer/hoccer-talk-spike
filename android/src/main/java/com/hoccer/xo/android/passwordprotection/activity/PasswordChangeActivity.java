@@ -1,11 +1,11 @@
-package com.hoccer.xo.android.activity;
+package com.hoccer.xo.android.passwordprotection.activity;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import com.artcom.hoccer.R;
-import com.hoccer.xo.android.fragment.PasswordPromptFragment;
-import com.hoccer.xo.android.fragment.PasswordSetFragment;
+import com.hoccer.xo.android.passwordprotection.fragment.PasswordPromptFragment;
+import com.hoccer.xo.android.passwordprotection.fragment.PasswordSetFragment;
 
 public class PasswordChangeActivity extends FragmentActivity implements PasswordPromptFragment.OnPasswordProtectionUnlockListener {
 
