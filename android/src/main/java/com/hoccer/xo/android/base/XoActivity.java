@@ -195,6 +195,7 @@ public abstract class XoActivity extends FragmentActivity {
         if (requestCode == REQUEST_SELECT_AVATAR) {
             if (mAvatarSelection != null) {
                 final Intent finalIntent = intent;
+                // defer activity start after application came to foreground and XoApplication.setActiveInBackground() has been reset
                 new Handler().post(new Runnable() {
                     @Override
                     public void run() {
