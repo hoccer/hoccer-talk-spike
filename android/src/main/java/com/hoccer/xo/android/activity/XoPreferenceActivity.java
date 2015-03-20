@@ -89,7 +89,7 @@ public class XoPreferenceActivity extends PreferenceActivity
     }
 
     private boolean isPasswordSet() {
-        return getSharedPreferences(PasswordProtection.PASSWORD_PROTECTION_PREFERENCES, MODE_PRIVATE).contains(PasswordProtection.PASSWORD_KEY);
+        return getSharedPreferences(PasswordProtection.PASSWORD_PROTECTION_PREFERENCES, MODE_PRIVATE).contains(PasswordProtection.PASSWORD);
     }
 
     private void startSetPasswordActivityForResult() {

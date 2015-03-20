@@ -1,5 +1,7 @@
 package com.hoccer.xo.android.activity;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -17,6 +19,7 @@ import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.activity.component.ViewPagerActivityComponent;
 import com.hoccer.xo.android.fragment.ChatListFragment;
 import com.hoccer.xo.android.fragment.NearbyChatListFragment;
+import com.hoccer.xo.android.passwordprotection.PasswordProtection;
 import com.hoccer.xo.android.passwordprotection.activity.PasswordPromptActivity;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.ContactsMenuItemActionProvider;
@@ -28,6 +31,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     private String mPairingToken;
     private ContactsMenuItemActionProvider mContactsMenuItemActionProvider;
+    private PasswordProtection mPasswordProtection;
 
     @Override
     protected ActivityComponent[] createComponents() {
@@ -60,11 +64,13 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
         BackgroundManager.get().registerListener(this);
 
+        mPasswordProtection = new PasswordProtection();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
         showProfileIfClientIsNotRegistered();
         registerListeners();
         mContactsMenuItemActionProvider.updateNotificationBadge();
@@ -208,25 +214,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     public void onBecameForeground(Activity activity) {
         LOG.debug("onBecameForeground()");
         getXoClient().setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
-
-        if (isPasswordProtectionActive()) {
-            startPasswordPromptActivity();
-        }
-
         ((XoApplication) getApplication()).setActiveInBackground(false);
-    }
-
-    private boolean isPasswordProtectionActive() {
-        return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.preference_key_activate_passcode), false);
-    }
-
-    private void startPasswordPromptActivity() {
-        if (getXoClient().getSelfContact().getSelf().isRegistrationConfirmed() && !((XoApplication) getApplication()).isActiveInBackground()) {
-            Intent intent = new Intent(this, PasswordPromptActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            intent.putExtra(PasswordPromptActivity.EXTRA_ENABLE_BACK_NAVIGATION, false);
-            startActivity(intent);
-        }
     }
 
     @Override

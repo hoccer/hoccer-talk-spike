@@ -95,6 +95,7 @@ public class PasswordPromptFragment extends Fragment {
 
     private void verifyPassword() {
         if (isPasswordCorrect()) {
+            getActivity().getSharedPreferences(PasswordProtection.PASSWORD_PROTECTION_PREFERENCES, Context.MODE_PRIVATE).edit().putBoolean(PasswordProtection.LOCKED, false).apply();
             mListener.onPasswordProtectionUnlocked();
         } else {
             mPasswordInputView.getText().clear();
@@ -104,7 +105,7 @@ public class PasswordPromptFragment extends Fragment {
 
     private boolean isPasswordCorrect() {
         String passwordEntered = mPasswordInputView.getText().toString();
-        String password = getActivity().getSharedPreferences(PasswordProtection.PASSWORD_PROTECTION_PREFERENCES, Context.MODE_PRIVATE).getString(PasswordProtection.PASSWORD_KEY, null);
+        String password = getActivity().getSharedPreferences(PasswordProtection.PASSWORD_PROTECTION_PREFERENCES, Context.MODE_PRIVATE).getString(PasswordProtection.PASSWORD, null);
         return passwordEntered.equals(password);
     }
 

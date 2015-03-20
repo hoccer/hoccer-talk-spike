@@ -133,7 +133,7 @@ public class PasswordSetFragment extends Fragment {
 
     private void updatePasswordAndFinish() {
         String passCode = mEnterPasswordView.getText().toString();
-        getActivity().getSharedPreferences(PasswordProtection.PASSWORD_PROTECTION_PREFERENCES, Context.MODE_PRIVATE).edit().putString(PasswordProtection.PASSWORD_KEY, passCode).apply();
+        getActivity().getSharedPreferences(PasswordProtection.PASSWORD_PROTECTION_PREFERENCES, Context.MODE_PRIVATE).edit().putString(PasswordProtection.PASSWORD, passCode).apply();
         getActivity().setResult(Activity.RESULT_OK);
         getActivity().finish();
     }
