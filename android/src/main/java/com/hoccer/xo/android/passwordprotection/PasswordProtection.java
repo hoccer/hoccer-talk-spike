@@ -31,12 +31,10 @@ public class PasswordProtection implements Application.ActivityLifecycleCallback
     }
 
     @Override
-    public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-    }
+    public void onActivityCreated(Activity activity, Bundle savedInstanceState) {}
 
     @Override
-    public void onActivityStarted(Activity activity) {
-    }
+    public void onActivityStarted(Activity activity) {}
 
     @Override
     public void onActivityResumed(Activity activity) {
@@ -50,7 +48,8 @@ public class PasswordProtection implements Application.ActivityLifecycleCallback
     }
 
     private static void startPasswordPromptActivity(Activity activity) {
-        if (XoApplication.get().getXoClient().getSelfContact().getSelf().isRegistrationConfirmed() && !((XoApplication) activity.getApplication()).isActiveInBackground()) {
+        boolean isActiveInBackground = ((XoApplication) activity.getApplication()).isActiveInBackground();
+        if (!isActiveInBackground) {
             Intent intent = new Intent(activity, PasswordPromptActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION);
             intent.putExtra(PasswordPromptActivity.EXTRA_ENABLE_BACK_NAVIGATION, false);
