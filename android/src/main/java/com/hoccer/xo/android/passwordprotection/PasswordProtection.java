@@ -38,7 +38,7 @@ public class PasswordProtection implements Application.ActivityLifecycleCallback
 
     @Override
     public void onActivityResumed(Activity activity) {
-        if (isActive(activity) && mLocked) {
+        if (mLocked && isActive(activity) && !(activity instanceof PasswordPromptActivity)) {
             startPasswordPromptActivity(activity);
         }
     }
