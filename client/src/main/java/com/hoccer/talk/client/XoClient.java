@@ -611,11 +611,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     mDatabase.savePresence(presence);
 
                     if (TalkPresence.STATUS_ONLINE.equals(newStatus)) {
-                        LOG.debug("entering foreground");
                         cancelDisconnectTimeout();
                     } else if (TalkPresence.STATUS_BACKGROUND.equals(newStatus)) {
                         scheduleDisconnectTimeout();
-                        LOG.debug("entering background");
                     }
 
                     for (IXoContactListener listener : mContactListeners) {
