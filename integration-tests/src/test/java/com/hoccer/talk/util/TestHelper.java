@@ -38,7 +38,7 @@ public class TestHelper {
 
             client.connect();
 
-            await(clientName + " reaches active state").untilCall(to(client).getState(), equalTo(XoClient.STATE_READY));
+            await(clientName + " reaches active state").untilCall(to(client).getState(), equalTo(XoClient.State.READY));
             clients.put(clientName, client);
         }
 
@@ -50,7 +50,7 @@ public class TestHelper {
             XoClient client = entry.getValue();
             assertNotNull(client);
             client.disconnect();
-            await(entry.getKey() + " is inactive").untilCall(to(client).getState(), equalTo(XoClient.STATE_DISCONNECTED));
+            await(entry.getKey() + " is inactive").untilCall(to(client).getState(), equalTo(XoClient.State.DISCONNECTED));
         }
     }
 

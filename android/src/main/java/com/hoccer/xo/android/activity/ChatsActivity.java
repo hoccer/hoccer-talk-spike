@@ -3,6 +3,7 @@ package com.hoccer.xo.android.activity;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.Menu;
@@ -128,7 +129,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     }
 
     @Override
-    public void onClientStateChange(XoClient client, int state) {
+    public void onClientStateChange(XoClient client) {
         if (mPairingToken != null && client.isReady()) {
             performTokenPairing(mPairingToken);
             mPairingToken = null;
@@ -213,15 +214,27 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     @Override
     public void onBecameForeground(Activity activity) {
         LOG.debug("onBecameForeground()");
-        getXoClient().setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
+        getXoClient().setPresenceStatus(TalkPresence.STATUS_ONLINE);
+
+        if (getXoClient().isDisconnected()) {
+            connectClientIfNetworkAvailable();
+        }
+
         ((XoApplication) getApplication()).setActiveInBackground(false);
+    }
+
+    public void connectClientIfNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected()) {
+            getXoClient().connect();
+        }
     }
 
     @Override
     public void onBecameBackground(Activity activity) {
         LOG.debug("onBecameBackground()");
         if (!((XoApplication) getApplication()).isActiveInBackground()) {
-            getXoClient().setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
+            getXoClient().setPresenceStatus(TalkPresence.STATUS_BACKGROUND);
         }
     }
 }

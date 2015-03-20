@@ -24,7 +24,6 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.xo.android.BackgroundManager;
 import com.hoccer.xo.android.XoAndroidClient;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ChatsActivity;
@@ -354,15 +353,14 @@ public class XoClientService extends Service {
                     + " type " + activeNetwork.getTypeName()
                     + " state " + activeNetwork.getState().name());
 
-            if (activeNetwork.isConnected() || activeNetwork.isConnectedOrConnecting()) {
-                if (!BackgroundManager.get().isInBackground()) {
+            if (activeNetwork.isConnected()) {
+                if (!mClient.isTimedOut()) {
                     mClient.connect();
                 }
             } else {
                 mClient.disconnect();
             }
 
-            // TODO: is this check too early ? Last if-statement above deactivates client when network dead.
             mNetworkConnected = activeNetwork.isConnected();
             mNetworkConnectionType = activeNetwork.getType();
 
@@ -560,7 +558,6 @@ public class XoClientService extends Service {
     }
 
     private class ConnectivityReceiver extends BroadcastReceiver {
-
         @Override
         public void onReceive(Context context, Intent intent) {
             LOG.debug("onConnectivityChange()");
@@ -576,9 +573,9 @@ public class XoClientService extends Service {
             MediaScannerConnection.OnScanCompletedListener {
 
         @Override
-        public void onClientStateChange(XoClient client, int state) {
-            LOG.debug("onClientStateChange(" + XoClient.stateToString(state) + ")");
-            if (state == XoClient.STATE_READY) {
+        public void onClientStateChange(XoClient client) {
+            LOG.debug("onClientStateChange(" + client.getState() + ")");
+            if (client.isReady()) {
                 mExecutor.execute(new Runnable() {
                     @Override
                     public void run() {
