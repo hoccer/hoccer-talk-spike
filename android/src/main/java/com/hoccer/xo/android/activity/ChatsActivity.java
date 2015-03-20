@@ -32,7 +32,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     private String mPairingToken;
     private ContactsMenuItemActionProvider mContactsMenuItemActionProvider;
-    private PasswordProtection mPasswordProtection;
 
     @Override
     protected ActivityComponent[] createComponents() {
