@@ -111,6 +111,7 @@ public class XoPreferenceActivity extends PreferenceActivity
         if (requestCode == REQUEST_SET_AND_ACTIVATE_PASSWORD && resultCode == RESULT_OK) {
             PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(getString(R.string.preference_key_activate_passcode), true).apply();
             findPreference(getString(R.string.preference_key_change_passcode)).setEnabled(true);
+            PasswordProtection.get().unlock();
             restartActivityWithoutAnimation();
         }
         if (requestCode == REQUEST_ACTIVATE_PASSWORD && resultCode == RESULT_OK) {
