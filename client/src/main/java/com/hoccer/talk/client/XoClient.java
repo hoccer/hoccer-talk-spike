@@ -112,7 +112,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     List<IXoAlertListener> mAlertListeners = new ArrayList<IXoAlertListener>();
 
     // The current state of this client
-    State mState;
+    State mState = State.DISCONNECTED;
 
     // Count connections attempts for back-off
     int mConnectBackoffPotency;
