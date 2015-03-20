@@ -214,27 +214,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
-    /**
-     * Returns true if the client has been activated
-     * This is only true after an explicit call to connect().
-     *
-     * @return
-     */
-    public boolean isActivated() {
-        return mState.ordinal() > State.DISCONNECTED.ordinal();
-    }
-
-    /**
-     * Returns true if the client is ready
-     * This means that the client is logged in and synced.
-     */
     public boolean isReady() {
         return mState.ordinal() >= State.READY.ordinal();
     }
 
-    /**
-     * Returns true if the client is logged in
-     */
     public boolean isLoggedIn() {
         return mState.ordinal() >= State.SYNCING.ordinal();
     }
@@ -1044,7 +1027,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     private void switchState(State newState, String message) {
         if (mState != newState) {
-            LOG.info("[switchState() connection #" + mConnection.getConnectionId() + "]: state " + mState.toString() + " -> " + newState.toString() + " (" + message + ")");
+            LOG.info("switchState(): " + mState + " -> " + newState + " (" + message + ")");
 
             mState = newState;
 
@@ -1102,7 +1085,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 listener.onClientStateChange(XoClient.this);
             }
         } else {
-            LOG.debug("[switchState() connection #" + mConnection.getConnectionId() + "]: state remains " + mState.toString() + " (" + message + ")");
+            LOG.debug("switchState(): state remains " + mState + " (" + message + ")");
         }
     }
 
