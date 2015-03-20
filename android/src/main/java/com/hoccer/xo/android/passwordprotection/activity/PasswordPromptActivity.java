@@ -41,6 +41,14 @@ public class PasswordPromptActivity extends FragmentActivity implements Password
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+
+        // avoid transition animation when the activity is resumed->paused->resumed, when it was already on top
+        overridePendingTransition(0, 0);
+    }
+
+    @Override
     public void onBackPressed() {
         if (getIntent().getBooleanExtra(EXTRA_ENABLE_BACK_NAVIGATION, false)) {
             super.onBackPressed();
