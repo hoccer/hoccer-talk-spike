@@ -211,7 +211,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         LOG.debug("onBecameForeground()");
         getXoClient().setPresenceStatus(TalkPresence.STATUS_ONLINE);
 
-        if(getXoClient().isDisconnected()) {
+        if (getXoClient().isDisconnected()) {
             connectClientIfNetworkAvailable();
         }
 
@@ -222,8 +222,9 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         ((XoApplication) getApplication()).setActiveInBackground(false);
     }
 
-    public void connectClientIfNetworkAvailable() {ConnectivityManager connectivityManager= (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        if(connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected()) {
+    public void connectClientIfNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected()) {
             getXoClient().connect();
         }
     }
