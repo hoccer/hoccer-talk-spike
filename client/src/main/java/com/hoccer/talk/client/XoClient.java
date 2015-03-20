@@ -1470,7 +1470,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             if (mConnectBackoffPotency == 0) {
                 mConnectBackoffPotency = 1;
             }
-            switchState(STATE_CONNECTING, "reconnect after connection closed");
+
+            if (mState != State.CONNECTING) {
+                switchState(State.CONNECTING, "reconnect after connection closed");
+            } else {
+                scheduleConnect();
+            }
         }
     }
 
@@ -2101,15 +2106,15 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             public void run() {
                 try {
                     TalkDelivery result = null;
-                    if (delivery.getState().equals( TalkDelivery.STATE_DELIVERED_SEEN)) {
+                    if (delivery.getState().equals(TalkDelivery.STATE_DELIVERED_SEEN)) {
                         result = mServerRpc.outDeliveryAcknowledgeSeen(delivery.getMessageId(), delivery.getReceiverId());
-                    } else if (delivery.getState().equals( TalkDelivery.STATE_DELIVERED_UNSEEN)) {
+                    } else if (delivery.getState().equals(TalkDelivery.STATE_DELIVERED_UNSEEN)) {
                         result = mServerRpc.outDeliveryAcknowledgeUnseen(delivery.getMessageId(), delivery.getReceiverId());
-                    } else if (delivery.getState().equals( TalkDelivery.STATE_DELIVERED_PRIVATE)) {
+                    } else if (delivery.getState().equals(TalkDelivery.STATE_DELIVERED_PRIVATE)) {
                         result = mServerRpc.outDeliveryAcknowledgePrivate(delivery.getMessageId(), delivery.getReceiverId());
-                    } else if (delivery.getState().equals( TalkDelivery.STATE_FAILED)) {
+                    } else if (delivery.getState().equals(TalkDelivery.STATE_FAILED)) {
                         result = mServerRpc.outDeliveryAcknowledgeFailed(delivery.getMessageId(), delivery.getReceiverId());
-                    } else if (delivery.getState().equals( TalkDelivery.STATE_REJECTED)) {
+                    } else if (delivery.getState().equals(TalkDelivery.STATE_REJECTED)) {
                         result = mServerRpc.outDeliveryAcknowledgeRejected(delivery.getMessageId(), delivery.getReceiverId());
                     }
                     if (result != null && saveResult) {
@@ -2231,7 +2236,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             LOG.error("sql error", e);
         }
         if (!messageFailed) {
-            if (delivery.getState().equals( TalkDelivery.STATE_DELIVERING)) {
+            if (delivery.getState().equals(TalkDelivery.STATE_DELIVERING)) {
                 mExecutor.execute(new Runnable() {
                     @Override
                     public void run() {
@@ -2995,7 +3000,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     public void markMessageAsAborted(TalkClientMessage message) {
-        message.getOutgoingDelivery().setState( TalkDelivery.STATE_ABORTED); // TODO: ABORTED OR ABORTED_ACKNOWLEDGED?
+        message.getOutgoingDelivery().setState(TalkDelivery.STATE_ABORTED); // TODO: ABORTED OR ABORTED_ACKNOWLEDGED?
         try {
             mDatabase.saveDelivery(message.getOutgoingDelivery());
         } catch (SQLException e) {
