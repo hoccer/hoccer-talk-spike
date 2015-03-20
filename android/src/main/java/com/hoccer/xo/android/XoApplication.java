@@ -68,7 +68,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     private static DisplayImageOptions sImageOptions;
 
     private static StartupTasks sStartupTasks;
-    private boolean mActiveInBackground;
 
     private static XoApplication sInstance;
 
@@ -364,13 +363,5 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
                 }
             }
         }
-    }
-
-    public void setActiveInBackground(boolean active) {
-        mActiveInBackground = active;
-    }
-
-    public boolean isActiveInBackground() {
-        return mActiveInBackground;
     }
 }

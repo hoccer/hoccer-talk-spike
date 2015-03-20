@@ -1,10 +1,10 @@
 package com.hoccer.xo.android.activity;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -19,7 +19,7 @@ import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.activity.component.ViewPagerActivityComponent;
 import com.hoccer.xo.android.fragment.ChatListFragment;
 import com.hoccer.xo.android.fragment.NearbyChatListFragment;
-import com.hoccer.xo.android.passwordprotection.activity.PasswordPromptActivity;
+import com.hoccer.xo.android.passwordprotection.PasswordProtection;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.ContactsMenuItemActionProvider;
 import org.apache.log4j.Logger;
@@ -62,11 +62,13 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
         BackgroundManager.get().registerListener(this);
 
+        PasswordProtection.get();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
         showProfileIfClientIsNotRegistered();
         registerListeners();
         mContactsMenuItemActionProvider.updateNotificationBadge();
@@ -207,19 +209,13 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     }
 
     @Override
-    public void onBecameForeground() {
+    public void onBecameForeground(Activity activity) {
         LOG.debug("onBecameForeground()");
         getXoClient().setPresenceStatus(TalkPresence.STATUS_ONLINE);
 
         if (getXoClient().isDisconnected()) {
             connectClientIfNetworkAvailable();
         }
-
-        if (isPasswordProtectionActive()) {
-            startPasswordPromptActivity();
-        }
-
-        ((XoApplication) getApplication()).setActiveInBackground(false);
     }
 
     public void connectClientIfNetworkAvailable() {
@@ -229,24 +225,9 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         }
     }
 
-    private boolean isPasswordProtectionActive() {
-        return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.preference_key_activate_passcode), false);
-    }
-
-    private void startPasswordPromptActivity() {
-        if (getXoClient().getSelfContact().getSelf().isRegistrationConfirmed() && !((XoApplication) getApplication()).isActiveInBackground()) {
-            Intent intent = new Intent(this, PasswordPromptActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            intent.putExtra(PasswordPromptActivity.EXTRA_ENABLE_BACK_NAVIGATION, false);
-            startActivity(intent);
-        }
-    }
-
     @Override
-    public void onBecameBackground() {
+    public void onBecameBackground(Activity activity) {
         LOG.debug("onBecameBackground()");
-        if (!((XoApplication) getApplication()).isActiveInBackground()) {
-            getXoClient().setPresenceStatus(TalkPresence.STATUS_BACKGROUND);
-        }
+        getXoClient().setPresenceStatus(TalkPresence.STATUS_BACKGROUND);
     }
 }

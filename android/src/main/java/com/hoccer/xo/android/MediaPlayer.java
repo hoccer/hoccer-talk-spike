@@ -1,5 +1,6 @@
 package com.hoccer.xo.android;
 
+import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -453,7 +454,7 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
     }
 
     @Override
-    public void onBecameForeground() {
+    public void onBecameForeground(Activity activity) {
         removeNotification();
     }
 
@@ -463,7 +464,7 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
 
 
     @Override
-    public void onBecameBackground() {
+    public void onBecameBackground(Activity activity) {
         if (!mPaused && !mStopped) {
             mNotificationManager.notify(NotificationId.MUSIC_PLAYER, buildNotification());
         }
