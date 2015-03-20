@@ -40,20 +40,16 @@ public class PasswordProtection implements Application.ActivityLifecycleCallback
 
     @Override
     public void onActivityResumed(Activity activity) {
-        if (isActive(activity) && isLocked()) {
+        if (isActive(activity) && mLocked) {
             startPasswordPromptActivity(activity);
         }
     }
 
-    private boolean isActive(Activity activity) {
+    private static boolean isActive(Activity activity) {
         return PreferenceManager.getDefaultSharedPreferences(activity).getBoolean(activity.getString(R.string.preference_key_activate_passcode), false);
     }
 
-    private boolean isLocked() {
-        return mLocked;
-    }
-
-    private void startPasswordPromptActivity(Activity activity) {
+    private static void startPasswordPromptActivity(Activity activity) {
         if (XoApplication.get().getXoClient().getSelfContact().getSelf().isRegistrationConfirmed() && !((XoApplication) activity.getApplication()).isActiveInBackground()) {
             Intent intent = new Intent(activity, PasswordPromptActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION);
@@ -62,34 +58,29 @@ public class PasswordProtection implements Application.ActivityLifecycleCallback
         }
     }
 
-    @Override
-    public void onActivityPaused(Activity activity) {
+    public void unlock() {
+        mLocked = false;
     }
 
     @Override
-    public void onActivityStopped(Activity activity) {
-    }
+    public void onActivityPaused(Activity activity) {}
 
     @Override
-    public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-    }
+    public void onActivityStopped(Activity activity) {}
 
     @Override
-    public void onActivityDestroyed(Activity activity) {
-    }
+    public void onActivitySaveInstanceState(Activity activity, Bundle outState) {}
 
     @Override
-    public void onBecameForeground(Activity activity) {
-    }
+    public void onActivityDestroyed(Activity activity) {}
+
+    @Override
+    public void onBecameForeground(Activity activity) {}
 
     @Override
     public void onBecameBackground(Activity activity) {
         if (isActive(activity)) {
             mLocked = true;
         }
-    }
-
-    public void unlock() {
-        mLocked = false;
     }
 }
