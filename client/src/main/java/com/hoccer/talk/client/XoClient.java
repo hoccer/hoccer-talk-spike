@@ -1131,7 +1131,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         long backoffDelay;
         if (mConnectBackoffPotency > 0) {
             // compute the backoff factor
-            int variableFactor = 1 << mConnectBackoffPotency;
+            int variableFactor = 1 << (mConnectBackoffPotency - 1);
 
             // compute variable backoff component
             double variableBackoff = Math.min(mClientConfiguration.getReconnectBackoffVariableMaximum(), variableFactor * mClientConfiguration.getReconnectBackoffVariableFactor());
