@@ -64,7 +64,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
         BackgroundManager.get().registerListener(this);
 
-        mPasswordProtection = new PasswordProtection();
+        PasswordProtection.get();
     }
 
     @Override

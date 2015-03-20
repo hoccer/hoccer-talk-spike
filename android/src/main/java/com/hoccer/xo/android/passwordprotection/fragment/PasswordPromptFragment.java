@@ -95,7 +95,7 @@ public class PasswordPromptFragment extends Fragment {
 
     private void verifyPassword() {
         if (isPasswordCorrect()) {
-            getActivity().getSharedPreferences(PasswordProtection.PASSWORD_PROTECTION_PREFERENCES, Context.MODE_PRIVATE).edit().putBoolean(PasswordProtection.LOCKED, false).apply();
+            PasswordProtection.get().unlock();
             mListener.onPasswordProtectionUnlocked();
         } else {
             mPasswordInputView.getText().clear();

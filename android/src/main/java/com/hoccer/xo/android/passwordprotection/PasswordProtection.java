@@ -2,7 +2,6 @@ package com.hoccer.xo.android.passwordprotection;
 
 import android.app.Activity;
 import android.app.Application;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -15,9 +14,18 @@ public class PasswordProtection implements Application.ActivityLifecycleCallback
 
     public static final String PASSWORD_PROTECTION_PREFERENCES = "password_protection_preferences";
     public static final String PASSWORD = "password";
-    public static final String LOCKED = "is_locked";
 
-    public PasswordProtection() {
+    private static PasswordProtection sInstance;
+    private boolean mLocked = true;
+
+    public static PasswordProtection get() {
+        if (sInstance == null) {
+            sInstance = new PasswordProtection();
+        }
+        return sInstance;
+    }
+
+    private PasswordProtection() {
         XoApplication.get().registerActivityLifecycleCallbacks(this);
         BackgroundManager.get().registerListener(this);
     }
@@ -32,7 +40,7 @@ public class PasswordProtection implements Application.ActivityLifecycleCallback
 
     @Override
     public void onActivityResumed(Activity activity) {
-        if (isActive(activity) && isLocked(activity)) {
+        if (isActive(activity) && isLocked()) {
             startPasswordPromptActivity(activity);
         }
     }
@@ -41,8 +49,8 @@ public class PasswordProtection implements Application.ActivityLifecycleCallback
         return PreferenceManager.getDefaultSharedPreferences(activity).getBoolean(activity.getString(R.string.preference_key_activate_passcode), false);
     }
 
-    private boolean isLocked(Activity activity) {
-        return activity.getSharedPreferences(PasswordProtection.PASSWORD_PROTECTION_PREFERENCES, Context.MODE_PRIVATE).getBoolean(PasswordProtection.LOCKED, false);
+    private boolean isLocked() {
+        return mLocked;
     }
 
     private void startPasswordPromptActivity(Activity activity) {
@@ -77,7 +85,11 @@ public class PasswordProtection implements Application.ActivityLifecycleCallback
     @Override
     public void onBecameBackground(Activity activity) {
         if (isActive(activity)) {
-            activity.getSharedPreferences(PasswordProtection.PASSWORD_PROTECTION_PREFERENCES, Context.MODE_PRIVATE).edit().putBoolean(PasswordProtection.LOCKED, true).apply();
+            mLocked = true;
         }
+    }
+
+    public void unlock() {
+        mLocked = false;
     }
 }
