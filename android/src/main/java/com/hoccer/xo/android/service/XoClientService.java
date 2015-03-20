@@ -353,8 +353,8 @@ public class XoClientService extends Service {
                     + " type " + activeNetwork.getTypeName()
                     + " state " + activeNetwork.getState().name());
 
-            if (activeNetwork.isConnected() || activeNetwork.isConnectedOrConnecting()) {
-                if (!BackgroundManager.get().isInBackground()) {
+            if (activeNetwork.isConnected()) {
+                if (!mClient.isTimedOut()) {
                     mClient.connect();
                 }
             } else {

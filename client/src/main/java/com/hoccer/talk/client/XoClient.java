@@ -127,6 +127,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     private long serverTimeDiff;
 
+    private boolean mIsTimedOut;
+
     /**
      * Create a Hoccer Talk client using the given client database
      */
@@ -220,6 +222,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     public boolean isLoggedIn() {
         return mState.ordinal() >= State.SYNCING.ordinal();
+    }
+
+    public boolean isTimedOut() {
+        return mIsTimedOut;
     }
 
     /**
@@ -473,6 +479,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     public void connect() {
         LOG.debug("connect()");
         if (mState == State.DISCONNECTED) {
+            mIsTimedOut = false;
             switchState(State.CONNECTING, "connecting client");
         }
     }
@@ -1399,6 +1406,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             public void run() {
                 mDisconnectTimeoutFuture = null;
                 switchState(State.DISCONNECTED, "disconnect timeout");
+                mIsTimedOut = true;
             }
         }, timeout, TimeUnit.SECONDS);
     }
