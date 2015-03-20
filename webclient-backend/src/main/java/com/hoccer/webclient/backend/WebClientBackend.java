@@ -57,8 +57,8 @@ public class WebClientBackend implements IXoStateListener {
         mClient.connect();
     }
 
-    public void onClientStateChange(XoClient client, XoClient.State state) {
-        if(state == XoClient.State.READY) {
+    public void onClientStateChange(XoClient client) {
+        if(client.isReady()) {
             // send nearby environment
             mClient.sendEnvironmentUpdate(getEnvironment());
 

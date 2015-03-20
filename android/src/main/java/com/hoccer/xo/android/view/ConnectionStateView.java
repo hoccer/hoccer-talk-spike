@@ -74,7 +74,7 @@ public class ConnectionStateView extends LinearLayout implements IXoStateListene
     }
 
     @Override
-    public void onClientStateChange(XoClient client, XoClient.State state) {
+    public void onClientStateChange(XoClient client) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {

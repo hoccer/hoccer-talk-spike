@@ -1099,7 +1099,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             }
 
             for (IXoStateListener listener : mStateListeners) {
-                listener.onClientStateChange(XoClient.this, newState);
+                listener.onClientStateChange(XoClient.this);
             }
         } else {
             LOG.debug("[switchState() connection #" + mConnection.getConnectionId() + "]: state remains " + mState.toString() + " (" + message + ")");

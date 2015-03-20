@@ -200,8 +200,8 @@ public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment,
     public void onGroupMembershipChanged(final TalkClientContact contact) {}
 
     @Override
-    public void onClientStateChange(XoClient client, XoClient.State state) {
-        if (!isTokenGenerated() && state == XoClient.State.READY) {
+    public void onClientStateChange(XoClient client) {
+        if (!isTokenGenerated() && client.isReady()) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {

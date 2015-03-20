@@ -122,7 +122,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     }
 
     @Override
-    public void onClientStateChange(XoClient client, XoClient.State state) {
+    public void onClientStateChange(XoClient client) {
         if (mPairingToken != null && client.isReady()) {
             performTokenPairing(mPairingToken);
             mPairingToken = null;
