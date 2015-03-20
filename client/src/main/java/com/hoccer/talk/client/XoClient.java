@@ -483,7 +483,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     public void connect() {
         LOG.debug("connect()");
         if (mState == State.DISCONNECTED) {
-            mIsTimedOut = false;
             switchState(State.CONNECTING, "connecting client");
         }
     }
@@ -1413,6 +1412,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     private void cancelDisconnectTimeout() {
+        mIsTimedOut = false;
         if (mDisconnectTimeoutFuture != null) {
             mDisconnectTimeoutFuture.cancel(false);
             mDisconnectTimeoutFuture = null;
