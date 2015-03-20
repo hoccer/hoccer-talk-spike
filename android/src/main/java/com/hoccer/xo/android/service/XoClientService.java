@@ -576,9 +576,9 @@ public class XoClientService extends Service {
             MediaScannerConnection.OnScanCompletedListener {
 
         @Override
-        public void onClientStateChange(XoClient client, int state) {
-            LOG.debug("onClientStateChange(" + XoClient.stateToString(state) + ")");
-            if (state == XoClient.STATE_READY) {
+        public void onClientStateChange(XoClient client, XoClient.State state) {
+            LOG.debug("onClientStateChange(" + state.toString() + ")");
+            if (state == XoClient.State.READY) {
                 mExecutor.execute(new Runnable() {
                     @Override
                     public void run() {

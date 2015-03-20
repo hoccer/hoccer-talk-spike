@@ -48,12 +48,14 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     private static final Logger LOG = Logger.getLogger(XoClient.class);
 
-    public static final int STATE_DISCONNECTED = 0;
-    public static final int STATE_CONNECTING = 1;
-    public static final int STATE_REGISTERING = 2;
-    public static final int STATE_LOGIN = 3;
-    public static final int STATE_SYNCING = 4;
-    public static final int STATE_READY = 5;
+    public enum State {
+        DISCONNECTED,
+        CONNECTING,
+        REGISTERING,
+        LOGIN,
+        SYNCING,
+        READY
+    }
 
     // Digest instance used for SRP auth
     private static final Digest SRP_DIGEST = new SHA256Digest();
@@ -64,22 +66,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     // Constant SRP parameters
     private static final SRP6Parameters SRP_PARAMETERS = SRP6Parameters.CONSTANTS_1024;
 
-    // Names of our states for debugging
-    private static final String[] STATE_NAMES = {"disconnected", "connecting", "registering", "login", "syncing", "ready"};
-
     private int mUploadLimit = -1;
     private int mDownloadLimit = -1;
 
     private final Object mGroupCreationLock = new Object();
-
-    // Return the name of the given state
-    public static String stateToString(int state) {
-        if (state >= 0 && state < STATE_NAMES.length) {
-            return STATE_NAMES[state];
-        } else {
-            return "INVALID(" + state + ")";
-        }
-    }
 
     IXoClientHost mClientHost;
 
@@ -122,7 +112,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     List<IXoAlertListener> mAlertListeners = new ArrayList<IXoAlertListener>();
 
     // The current state of this client
-    int mState;
+    State mState;
 
     // Count connections attempts for back-off
     int mConnectBackoffPotency;
@@ -231,7 +221,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
      * @return
      */
     public boolean isActivated() {
-        return mState > STATE_DISCONNECTED;
+        return mState.ordinal() > State.DISCONNECTED.ordinal();
     }
 
     /**
@@ -239,14 +229,14 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
      * This means that the client is logged in and synced.
      */
     public boolean isReady() {
-        return mState >= STATE_READY;
+        return mState.ordinal() >= State.READY.ordinal();
     }
 
     /**
      * Returns true if the client is logged in
      */
     public boolean isLoggedIn() {
-        return mState >= STATE_SYNCING;
+        return mState.ordinal() >= State.SYNCING.ordinal();
     }
 
     /**
@@ -254,7 +244,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
      * This means that the client is trying to connect or connected.
      */
     public boolean isAwake() {
-        return mState > STATE_DISCONNECTED;
+        return mState.ordinal() > State.DISCONNECTED.ordinal();
     }
 
     public boolean isRegistered() {
@@ -352,15 +342,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     /**
      * @return the current state of this client (numerical)
      */
-    public synchronized int getState() {
+    public synchronized State getState() {
         return mState;
-    }
-
-    /**
-     * @return the current state of this client (textual)
-     */
-    public synchronized String getStateString() {
-        return stateToString(mState);
     }
 
     public synchronized void registerStateListener(IXoStateListener listener) {
@@ -459,7 +442,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         mDatabase.eraseAllGroupMemberships();
         mDatabase.eraseAllGroupContacts();
 
-        switchState(STATE_DISCONNECTED, "disconnect because of imported credentials");
+        switchState(State.DISCONNECTED, "disconnect because of imported credentials");
     }
 
     /**
@@ -504,22 +487,16 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
-    /**
-     * Connect the client, allowing it do operate
-     */
     public void connect() {
         LOG.debug("connect()");
-        if (mState == STATE_DISCONNECTED) {
-            switchState(STATE_CONNECTING, "connecting client");
+        if (mState == State.DISCONNECTED) {
+            switchState(State.CONNECTING, "connecting client");
         }
     }
 
-    /**
-     * Deactivate the client, shutting it down completely
-     */
     public void disconnect() {
         LOG.debug("disconnect()");
-        switchState(STATE_DISCONNECTED, "disconnecting client");
+        switchState(State.DISCONNECTED, "disconnecting client");
     }
 
     /**
@@ -1032,7 +1009,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     protected void requestDelivery(final TalkClientMessage message) {
-        if (mState < STATE_READY) {
+        if (mState.ordinal() < State.READY.ordinal()) {
             LOG.info("requestSendAllPendingMessages() - cannot perform delivery because the client is not in ready.");
             return;
         }
@@ -1048,7 +1025,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     private void requestSendAllPendingMessages() {
-        if (mState < STATE_READY) {
+        if (mState.ordinal() < State.READY.ordinal()) {
             LOG.info("requestSendAllPendingMessages() - cannot perform delivery because the client is not ready.");
             return;
         }
@@ -1065,44 +1042,44 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         });
     }
 
-    private void switchState(int newState, String message) {
+    private void switchState(State newState, String message) {
         if (mState != newState) {
-            LOG.info("[switchState() connection #" + mConnection.getConnectionId() + "]: state " + STATE_NAMES[mState] + " -> " + STATE_NAMES[newState] + " (" + message + ")");
+            LOG.info("[switchState() connection #" + mConnection.getConnectionId() + "]: state " + mState.toString() + " -> " + newState.toString() + " (" + message + ")");
 
             mState = newState;
 
-            if (mState == STATE_DISCONNECTED) {
+            if (mState == State.DISCONNECTED) {
                 mConnectBackoffPotency = 0;
                 scheduleDisconnect();
             } else {
                 cancelDisconnect();
             }
 
-            if (mState == STATE_CONNECTING) {
+            if (mState == State.CONNECTING) {
                 scheduleConnect();
             } else {
                 cancelConnect();
             }
 
-            if (mState == STATE_REGISTERING) {
+            if (mState == State.REGISTERING) {
                 scheduleRegistration();
             } else {
                 cancelRegistration();
             }
 
-            if (mState == STATE_LOGIN) {
+            if (mState == State.LOGIN) {
                 scheduleLogin();
             } else {
                 cancelLogin();
             }
 
-            if (mState == STATE_SYNCING) {
+            if (mState == State.SYNCING) {
                 scheduleSync();
             } else {
                 cancelSync();
             }
 
-            if (mState == STATE_READY) {
+            if (mState == State.READY) {
                 mConnectBackoffPotency = 0;
                 mExecutor.execute(new Runnable() {
                     @Override
@@ -1115,7 +1092,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 });
             }
 
-            if (mState >= STATE_SYNCING) {
+            if (mState.ordinal() >= State.SYNCING.ordinal()) {
                 scheduleKeepAlive();
             } else {
                 cancelKeepAlive();
@@ -1125,7 +1102,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 listener.onClientStateChange(XoClient.this, newState);
             }
         } else {
-            LOG.debug("[switchState() connection #" + mConnection.getConnectionId() + "]: state remains " + getStateString() + " (" + message + ")");
+            LOG.debug("[switchState() connection #" + mConnection.getConnectionId() + "]: state remains " + mState.toString() + " (" + message + ")");
         }
     }
 
@@ -1218,10 +1195,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 try {
                     mRegistrationFuture = null;
                     doRegistration(mSelfContact);
-                    switchState(STATE_LOGIN, "login after registration");
+                    switchState(State.LOGIN, "login after registration");
                 } catch (Exception e) {
                     LOG.error("Exception while registering", e);
-                    switchState(STATE_CONNECTING, "reconnect after registration failed");
+                    switchState(State.CONNECTING, "reconnect after registration failed");
                 }
             }
         }, 0, TimeUnit.SECONDS);
@@ -1280,10 +1257,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 try {
                     mLoginFuture = null;
                     doLogin(mSelfContact);
-                    switchState(STATE_SYNCING, "sync ofter login");
+                    switchState(State.SYNCING, "sync ofter login");
                 } catch (Exception e) {
                     LOG.error("Exception while logging in", e);
-                    switchState(STATE_CONNECTING, "reconnect after login failed");
+                    switchState(State.CONNECTING, "reconnect after login failed");
                 }
             }
         }, 0, TimeUnit.SECONDS);
@@ -1332,10 +1309,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 try {
                     mSyncFuture = null;
                     doSync();
-                    switchState(STATE_READY, "ready after sync");
+                    switchState(State.READY, "ready after sync");
                 } catch (Exception e) {
                     LOG.error("Exception while syncing", e);
-                    switchState(STATE_CONNECTING, "reconnect after sync failed");
+                    switchState(State.CONNECTING, "reconnect after sync failed");
                 }
             }
         }, 0, TimeUnit.SECONDS);
@@ -1437,7 +1414,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             @Override
             public void run() {
                 mDisconnectTimeoutFuture = null;
-                switchState(STATE_DISCONNECTED, "disconnect timout");
+                switchState(State.DISCONNECTED, "disconnect timeout");
             }
         }, timeoutInSeconds, TimeUnit.SECONDS);
     }
@@ -1484,9 +1461,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     public void onOpen(JsonRpcConnection connection) {
         LOG.debug("onOpen()");
         if (isRegistered()) {
-            switchState(STATE_LOGIN, "connected");
+            switchState(State.LOGIN, "connected");
         } else {
-            switchState(STATE_REGISTERING, "connected and unregistered");
+            switchState(State.REGISTERING, "connected and unregistered");
         }
     }
 
@@ -1496,7 +1473,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     @Override
     public void onClose(JsonRpcConnection connection) {
         LOG.debug("onClose()");
-        if (mState != STATE_DISCONNECTED) {
+        if (mState != State.DISCONNECTED) {
             // ensure backoff counter > 0 to delay reconnect
             if (mConnectBackoffPotency == 0) {
                 mConnectBackoffPotency = 1;
@@ -1964,7 +1941,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
-
     private void updateOutgoingDelivery(final TalkDelivery delivery) {
         LOG.debug("updateOutgoingDelivery(" + delivery.getMessageId() + ")");
 
@@ -2133,15 +2109,15 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             public void run() {
                 try {
                     TalkDelivery result = null;
-                    if (delivery.getState().equals(TalkDelivery.STATE_DELIVERED_SEEN)) {
+                    if (delivery.getState().equals( TalkDelivery.STATE_DELIVERED_SEEN)) {
                         result = mServerRpc.outDeliveryAcknowledgeSeen(delivery.getMessageId(), delivery.getReceiverId());
-                    } else if (delivery.getState().equals(TalkDelivery.STATE_DELIVERED_UNSEEN)) {
+                    } else if (delivery.getState().equals( TalkDelivery.STATE_DELIVERED_UNSEEN)) {
                         result = mServerRpc.outDeliveryAcknowledgeUnseen(delivery.getMessageId(), delivery.getReceiverId());
-                    } else if (delivery.getState().equals(TalkDelivery.STATE_DELIVERED_PRIVATE)) {
+                    } else if (delivery.getState().equals( TalkDelivery.STATE_DELIVERED_PRIVATE)) {
                         result = mServerRpc.outDeliveryAcknowledgePrivate(delivery.getMessageId(), delivery.getReceiverId());
-                    } else if (delivery.getState().equals(TalkDelivery.STATE_FAILED)) {
+                    } else if (delivery.getState().equals( TalkDelivery.STATE_FAILED)) {
                         result = mServerRpc.outDeliveryAcknowledgeFailed(delivery.getMessageId(), delivery.getReceiverId());
-                    } else if (delivery.getState().equals(TalkDelivery.STATE_REJECTED)) {
+                    } else if (delivery.getState().equals( TalkDelivery.STATE_REJECTED)) {
                         result = mServerRpc.outDeliveryAcknowledgeRejected(delivery.getMessageId(), delivery.getReceiverId());
                     }
                     if (result != null && saveResult) {
@@ -2263,7 +2239,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             LOG.error("sql error", e);
         }
         if (!messageFailed) {
-            if (delivery.getState().equals(TalkDelivery.STATE_DELIVERING)) {
+            if (delivery.getState().equals( TalkDelivery.STATE_DELIVERING)) {
                 mExecutor.execute(new Runnable() {
                     @Override
                     public void run() {
@@ -3027,7 +3003,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     public void markMessageAsAborted(TalkClientMessage message) {
-        message.getOutgoingDelivery().setState(TalkDelivery.STATE_ABORTED); // TODO: ABORTED OR ABORTED_ACKNOWLEDGED?
+        message.getOutgoingDelivery().setState( TalkDelivery.STATE_ABORTED); // TODO: ABORTED OR ABORTED_ACKNOWLEDGED?
         try {
             mDatabase.saveDelivery(message.getOutgoingDelivery());
         } catch (SQLException e) {
