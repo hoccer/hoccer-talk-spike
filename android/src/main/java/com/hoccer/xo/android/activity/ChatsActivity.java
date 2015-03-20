@@ -1,6 +1,8 @@
 package com.hoccer.xo.android.activity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.Menu;
@@ -208,6 +210,11 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     public void onBecameForeground() {
         LOG.debug("onBecameForeground()");
         getXoClient().setPresenceStatus(TalkPresence.STATUS_ONLINE);
+
+        ConnectivityManager connectivityManager= (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if(connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected()) {
+            getXoClient().connect();
+        }
 
         if (isPasswordProtectionActive()) {
             startPasswordPromptActivity();
