@@ -45,36 +45,36 @@ public class ConnectionStateView extends LinearLayout implements IXoStateListene
     }
 
     private void updateConnectionStateView() {
-        int connectionState = XoApplication.get().getXoClient().getState();
+        XoClient.State connectionState = XoApplication.get().getXoClient().getState();
 
         switch (connectionState) {
-            case XoClient.STATE_DISCONNECTED:
+            case DISCONNECTED:
                 this.setVisibility(View.VISIBLE);
                 mConnectionStateTextView.setText(R.string.connection_state_disconnected);
                 break;
-            case XoClient.STATE_CONNECTING:
+            case CONNECTING:
                 this.setVisibility(View.VISIBLE);
                 mConnectionStateTextView.setText(R.string.connection_state_disconnected);
                 break;
-            case XoClient.STATE_LOGIN:
-            this.setVisibility(View.VISIBLE);
+            case LOGIN:
+                this.setVisibility(View.VISIBLE);
                 mConnectionStateTextView.setText(R.string.connection_state_login);
                 break;
-            case XoClient.STATE_SYNCING:
+            case SYNCING:
                 this.setVisibility(View.VISIBLE);
                 mConnectionStateTextView.setText(R.string.connection_state_syncing);
                 break;
-            case XoClient.STATE_READY:
+            case READY:
                 this.setVisibility(View.GONE);
                 break;
-            case XoClient.STATE_REGISTERING:
+            case REGISTERING:
                 this.setVisibility(View.GONE);
                 break;
         }
     }
 
     @Override
-    public void onClientStateChange(XoClient client, int state) {
+    public void onClientStateChange(XoClient client) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {

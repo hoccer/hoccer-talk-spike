@@ -187,7 +187,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         mClient.setRelativeAttachmentDirectory(sConfiguration.getAttachmentsDirectory());
         mClient.setEncryptedDownloadDirectory(getEncryptedDownloadDirectory().toString());
         mClient.setExternalStorageDirectory(sExternalStorage.getAbsolutePath());
-        mClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
+        mClient.setPresenceStatus(TalkPresence.STATUS_BACKGROUND);
 
         // add srp secret change listener
         mClient.registerStateListener(new SrpChangeListener(this));
