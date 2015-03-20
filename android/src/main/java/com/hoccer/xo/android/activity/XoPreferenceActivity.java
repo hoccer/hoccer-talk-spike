@@ -36,7 +36,7 @@ public class XoPreferenceActivity extends PreferenceActivity
 
     private static final String CREDENTIALS_TRANSFER_FILE = "credentials.json";
 
-    private static final int REQUEST_SET_PASSWORD = 1;
+    private static final int REQUEST_SET_AND_ACTIVATE_PASSWORD = 1;
     private static final int REQUEST_ACTIVATE_PASSWORD = 2;
     private static final int REQUEST_DEACTIVATE_PASSWORD = 3;
 
@@ -94,7 +94,7 @@ public class XoPreferenceActivity extends PreferenceActivity
 
     private void startSetPasswordActivityForResult() {
         Intent intent = new Intent(this, PasswordSetActivity.class);
-        startActivityForResult(intent, REQUEST_SET_PASSWORD);
+        startActivityForResult(intent, REQUEST_SET_AND_ACTIVATE_PASSWORD);
     }
 
     private void startPasswordPromptActivityForResult(int requestCode) {
@@ -108,7 +108,7 @@ public class XoPreferenceActivity extends PreferenceActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == REQUEST_SET_PASSWORD && resultCode == RESULT_OK) {
+        if (requestCode == REQUEST_SET_AND_ACTIVATE_PASSWORD && resultCode == RESULT_OK) {
             PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(getString(R.string.preference_key_activate_passcode), true).apply();
             findPreference(getString(R.string.preference_key_change_passcode)).setEnabled(true);
             restartActivityWithoutAnimation();
