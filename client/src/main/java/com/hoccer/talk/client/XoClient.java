@@ -607,7 +607,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
-    public void setClientConnectionStatus(String newStatus) {
+    public void setPresenceStatus(String newStatus) {
         try {
             TalkPresence presence = mSelfContact.getClientPresence();
             if (presence != null && presence.getClientId() != null) {
@@ -638,7 +638,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         } catch (SQLException e) {
             LOG.error("sql error", e);
         } catch (Exception e) { // TODO: specify exception in XoClientDatabase.savePresence!
-            LOG.error("error in setClientConnectionStatus", e);
+            LOG.error("error in setPresenceStatus", e);
         }
     }
 

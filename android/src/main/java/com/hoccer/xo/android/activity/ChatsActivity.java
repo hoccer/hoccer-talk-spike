@@ -207,7 +207,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     @Override
     public void onBecameForeground() {
         LOG.debug("onBecameForeground()");
-        getXoClient().setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
+        getXoClient().setPresenceStatus(TalkPresence.STATUS_ONLINE);
 
         if (isPasswordProtectionActive()) {
             startPasswordPromptActivity();
@@ -233,7 +233,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     public void onBecameBackground() {
         LOG.debug("onBecameBackground()");
         if (!((XoApplication) getApplication()).isActiveInBackground()) {
-            getXoClient().setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
+            getXoClient().setPresenceStatus(TalkPresence.STATUS_BACKGROUND);
         }
     }
 }
