@@ -1,6 +1,7 @@
 package com.hoccer.xo.android;
 
 
+import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -67,7 +68,7 @@ public class NearbyController implements BackgroundManager.Listener {
     }
 
     @Override
-    public void onBecameForeground() {
+    public void onBecameForeground(Activity activity) {
         if (mNearbyTimeout != null) {
             mNearbyTimeoutHandler.removeCallbacks(mNearbyTimeout);
             mNearbyTimeout = null;
@@ -79,7 +80,7 @@ public class NearbyController implements BackgroundManager.Listener {
     }
 
     @Override
-    public void onBecameBackground() {
+    public void onBecameBackground(Activity activity) {
         if (mNearbyEnabled && !XoApplication.get().isActiveInBackground()) {
             final int timeout = XoApplication.getConfiguration().getBackgroundNearbyTimeoutSeconds();
             mNearbyTimeout = new Runnable() {

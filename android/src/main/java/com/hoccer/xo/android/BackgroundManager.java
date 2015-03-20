@@ -2,8 +2,14 @@ package com.hoccer.xo.android;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
+import com.artcom.hoccer.R;
+import com.hoccer.xo.android.passwordprotection.PasswordProtection;
+import com.hoccer.xo.android.passwordprotection.activity.PasswordPromptActivity;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -19,9 +25,9 @@ public class BackgroundManager implements Application.ActivityLifecycleCallbacks
     private static BackgroundManager sInstance;
 
     public interface Listener {
-        public void onBecameForeground();
+        public void onBecameForeground(Activity activity);
 
-        public void onBecameBackground();
+        public void onBecameBackground(Activity activity);
     }
 
     private boolean mInBackground = true;
@@ -61,15 +67,15 @@ public class BackgroundManager implements Application.ActivityLifecycleCallbacks
 
         if (mInBackground) {
             mInBackground = false;
-            notifyOnBecameForeground();
+            notifyOnBecameForeground(activity);
             LOG.info("Application went to foreground");
         }
     }
 
-    private void notifyOnBecameForeground() {
+    private void notifyOnBecameForeground(Activity activity) {
         for (Listener listener : listeners) {
             try {
-                listener.onBecameForeground();
+                listener.onBecameForeground(activity);
             } catch (Exception e) {
                 LOG.error("Listener threw exception!", e);
             }
@@ -77,14 +83,14 @@ public class BackgroundManager implements Application.ActivityLifecycleCallbacks
     }
 
     @Override
-    public void onActivityPaused(Activity activity) {
+    public void onActivityPaused(final Activity activity) {
         if (!mInBackground && mBackgroundTransition == null) {
             mBackgroundTransition = new Runnable() {
                 @Override
                 public void run() {
                     mInBackground = true;
                     mBackgroundTransition = null;
-                    notifyOnBecameBackground();
+                    notifyOnBecameBackground(activity);
                     LOG.info("Application went to background");
                 }
             };
@@ -92,10 +98,10 @@ public class BackgroundManager implements Application.ActivityLifecycleCallbacks
         }
     }
 
-    private void notifyOnBecameBackground() {
+    private void notifyOnBecameBackground(Activity activity) {
         for (Listener listener : listeners) {
             try {
-                listener.onBecameBackground();
+                listener.onBecameBackground(activity);
             } catch (Exception e) {
                 LOG.error("Listener threw exception!", e);
             }

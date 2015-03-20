@@ -205,7 +205,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     }
 
     @Override
-    public void onBecameForeground() {
+    public void onBecameForeground(Activity activity) {
         LOG.debug("onBecameForeground()");
         getXoClient().setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
 
@@ -230,7 +230,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     }
 
     @Override
-    public void onBecameBackground() {
+    public void onBecameBackground(Activity activity) {
         LOG.debug("onBecameBackground()");
         if (!((XoApplication) getApplication()).isActiveInBackground()) {
             getXoClient().setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
