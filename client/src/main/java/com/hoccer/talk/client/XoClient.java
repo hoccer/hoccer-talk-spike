@@ -599,13 +599,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     mSelfContact.updatePresence(presence);
                     mDatabase.savePresence(presence);
 
-                    if (TalkPresence.CONN_STATUS_ONLINE.equals(newStatus)) {
+                    if (TalkPresence.STATUS_ONLINE.equals(newStatus)) {
                         LOG.debug("entering foreground");
                         cancelDisconnectTimeout();
                         connect();
-                    } else if (TalkPresence.CONN_STATUS_BACKGROUND.equals(newStatus)) {
-                        int timeout = mClientConfiguration.getBackgroundDisconnectTimeoutSeconds();
-                        scheduleDisconnectTimeout(timeout);
+                    } else if (TalkPresence.STATUS_BACKGROUND.equals(newStatus)) {
+                        scheduleDisconnectTimeout();
                         LOG.debug("entering background");
                     }
 
@@ -1390,16 +1389,18 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         sendPresenceFuture.get();
     }
 
-    private void scheduleDisconnectTimeout(int timeoutInSeconds) {
+    private void scheduleDisconnectTimeout() {
         LOG.debug("scheduleDisconnectTimeout()");
         cancelDisconnectTimeout();
+
+        int timeout = mClientConfiguration.getBackgroundDisconnectTimeoutSeconds();
         mDisconnectTimeoutFuture = mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
                 mDisconnectTimeoutFuture = null;
                 switchState(State.DISCONNECTED, "disconnect timeout");
             }
-        }, timeoutInSeconds, TimeUnit.SECONDS);
+        }, timeout, TimeUnit.SECONDS);
     }
 
     private void cancelDisconnectTimeout() {
