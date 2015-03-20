@@ -216,6 +216,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
+    public boolean isDisconnected() {
+        return mState == State.DISCONNECTED;
+    }
+
     public boolean isReady() {
         return mState.ordinal() >= State.READY.ordinal();
     }
