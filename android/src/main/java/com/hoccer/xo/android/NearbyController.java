@@ -81,7 +81,7 @@ public class NearbyController implements BackgroundManager.Listener {
 
     @Override
     public void onBecameBackground(Activity activity) {
-        if (mNearbyEnabled && !XoApplication.get().isActiveInBackground()) {
+        if (mNearbyEnabled) {
             final int timeout = XoApplication.getConfiguration().getBackgroundNearbyTimeoutSeconds();
             mNearbyTimeout = new Runnable() {
                 @Override

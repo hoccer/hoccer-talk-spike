@@ -2,14 +2,8 @@ package com.hoccer.xo.android;
 
 import android.app.Activity;
 import android.app.Application;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
-import com.artcom.hoccer.R;
-import com.hoccer.xo.android.passwordprotection.PasswordProtection;
-import com.hoccer.xo.android.passwordprotection.activity.PasswordPromptActivity;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -23,6 +17,12 @@ public class BackgroundManager implements Application.ActivityLifecycleCallbacks
     public static final long BACKGROUND_DELAY = 500;
 
     private static BackgroundManager sInstance;
+
+    private boolean mIgnoreNextBackgroundPhase;
+
+    public void ignoreNextBackgroundPhase() {
+        mIgnoreNextBackgroundPhase = true;
+    }
 
     public interface Listener {
         public void onBecameForeground(Activity activity);
@@ -85,16 +85,20 @@ public class BackgroundManager implements Application.ActivityLifecycleCallbacks
     @Override
     public void onActivityPaused(final Activity activity) {
         if (!mInBackground && mBackgroundTransition == null) {
-            mBackgroundTransition = new Runnable() {
-                @Override
-                public void run() {
-                    mInBackground = true;
-                    mBackgroundTransition = null;
-                    notifyOnBecameBackground(activity);
-                    LOG.info("Application went to background");
-                }
-            };
-            mBackgroundDelayHandler.postDelayed(mBackgroundTransition, BACKGROUND_DELAY);
+            if (mIgnoreNextBackgroundPhase) {
+                mIgnoreNextBackgroundPhase = false;
+            } else {
+                mBackgroundTransition = new Runnable() {
+                    @Override
+                    public void run() {
+                        mInBackground = true;
+                        mBackgroundTransition = null;
+                        notifyOnBecameBackground(activity);
+                        LOG.info("Application went to background");
+                    }
+                };
+                mBackgroundDelayHandler.postDelayed(mBackgroundTransition, BACKGROUND_DELAY);
+            }
         }
     }
 

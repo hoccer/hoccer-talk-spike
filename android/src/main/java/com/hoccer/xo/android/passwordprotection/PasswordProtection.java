@@ -48,13 +48,10 @@ public class PasswordProtection implements Application.ActivityLifecycleCallback
     }
 
     private static void startPasswordPromptActivity(Activity activity) {
-        boolean isActiveInBackground = ((XoApplication) activity.getApplication()).isActiveInBackground();
-        if (!isActiveInBackground) {
-            Intent intent = new Intent(activity, PasswordPromptActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            intent.putExtra(PasswordPromptActivity.EXTRA_ENABLE_BACK_NAVIGATION, false);
-            activity.startActivity(intent);
-        }
+        Intent intent = new Intent(activity, PasswordPromptActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        intent.putExtra(PasswordPromptActivity.EXTRA_ENABLE_BACK_NAVIGATION, false);
+        activity.startActivity(intent);
     }
 
     public void unlock() {

@@ -31,6 +31,7 @@ import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.content.SelectedContent;
+import com.hoccer.xo.android.BackgroundManager;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.XoSoundPool;
@@ -116,7 +117,7 @@ public abstract class XoActivity extends FragmentActivity {
 
         try {
             startActivity(intent);
-            ((XoApplication) getApplication()).setActiveInBackground(true);
+            BackgroundManager.get().ignoreNextBackgroundPhase();
         } catch (ActivityNotFoundException e) {
             Toast.makeText(this, R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
             e.printStackTrace();
@@ -131,7 +132,7 @@ public abstract class XoActivity extends FragmentActivity {
 
         try {
             startActivityForResult(intent, requestCode);
-            ((XoApplication) getApplication()).setActiveInBackground(true);
+            BackgroundManager.get().ignoreNextBackgroundPhase();
         } catch (ActivityNotFoundException e) {
             Toast.makeText(this, R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
             e.printStackTrace();

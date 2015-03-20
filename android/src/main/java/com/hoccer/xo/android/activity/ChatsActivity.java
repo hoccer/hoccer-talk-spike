@@ -218,8 +218,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         if (getXoClient().isDisconnected()) {
             connectClientIfNetworkAvailable();
         }
-
-        ((XoApplication) getApplication()).setActiveInBackground(false);
     }
 
     public void connectClientIfNetworkAvailable() {
@@ -232,8 +230,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     @Override
     public void onBecameBackground(Activity activity) {
         LOG.debug("onBecameBackground()");
-        if (!((XoApplication) getApplication()).isActiveInBackground()) {
-            getXoClient().setPresenceStatus(TalkPresence.STATUS_BACKGROUND);
-        }
+        getXoClient().setPresenceStatus(TalkPresence.STATUS_BACKGROUND);
     }
 }
