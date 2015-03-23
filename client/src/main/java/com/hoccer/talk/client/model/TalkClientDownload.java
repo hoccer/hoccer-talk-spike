@@ -35,7 +35,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
     private static final Detector MIME_DETECTOR = new DefaultDetector(MimeTypes.getDefaultMimeTypes());
 
-    private static final int MAX_FAILURES = 16;
+    //TODO reset to 16
+    private static final int MAX_FAILURES = 0;
 
     private XoTransferAgent mTransferAgent;
 
@@ -85,7 +86,12 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             }
         },
         COMPLETE,
-        FAILED,
+        FAILED {
+            @Override
+            public Set<State> possibleFollowUps() {
+                return EnumSet.of(RETRYING);
+            }
+        },
         ON_HOLD {
             @Override
             public Set<State> possibleFollowUps() {
@@ -222,6 +228,11 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         switchState(State.PAUSED, "pausing");
     }
 
+    public void retry(XoTransferAgent agent) {
+        mTransferAgent = agent;
+        switchState(State.RETRYING, "retrying");
+    }
+
     @Override
     public void cancel(XoTransferAgent agent) {
         mTransferAgent = agent;
@@ -350,7 +361,9 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             StatusLine status = response.getStatusLine();
             int sc = status.getStatusCode();
             logGetDebug("got status '" + sc + "': " + status.getReasonPhrase());
-            if (sc != HttpStatus.SC_OK && sc != HttpStatus.SC_PARTIAL_CONTENT) {
+//            TODO debug
+            if (new Random().nextBoolean()) {
+//            if (sc != HttpStatus.SC_OK && sc != HttpStatus.SC_PARTIAL_CONTENT) {
                 LOG.debug("http status is not OK (" + HttpStatus.SC_OK + ") or partial content (" +
                         HttpStatus.SC_PARTIAL_CONTENT + ")");
                 checkTransferFailure(transferFailures + 1, "http status is not OK (" + HttpStatus.SC_OK + ") or partial content (" +

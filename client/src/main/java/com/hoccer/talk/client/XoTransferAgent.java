@@ -137,6 +137,13 @@ public class XoTransferAgent implements IXoTransferListenerOld {
         }
     }
 
+    public void retryDownload(TalkClientDownload download) {
+        LOG.info("retryDownload(" + download.getClientDownloadId() + ")");
+        download.retry(this);
+        mDownloadsById.remove(download.getClientDownloadId());
+        mDownloadRetryQueue.remove(download.getClientDownloadId());
+    }
+
     public void pauseDownload(TalkClientDownload download) {
         LOG.info("pauseDownload(" + download.getClientDownloadId() + ")");
         download.pause(this);

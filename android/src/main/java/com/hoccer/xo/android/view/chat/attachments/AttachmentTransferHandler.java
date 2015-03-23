@@ -27,6 +27,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
     public enum TransferAction {
         NONE,
         REQUEST_DOWNLOAD,
+        REQUEST_RETRY_DOWNLOAD,
         CANCEL_DOWNLOAD,
         REQUEST_UPLOAD,
         CANCEL_UPLOAD,
@@ -58,6 +59,13 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                                 LOG.debug("Will resume download for " + ((TalkClientDownload) mTransfer).getDownloadUrl());
                                 TalkClientDownload download = (TalkClientDownload) mTransfer;
                                 XoApplication.get().getXoClient().getTransferAgent().startOrRestartDownload(download, true);
+                            }
+                            break;
+                        case REQUEST_RETRY_DOWNLOAD:
+                            if (mTransfer instanceof TalkClientDownload) {
+                                LOG.debug("Will resume download for " + ((TalkClientDownload) mTransfer).getDownloadUrl());
+                                TalkClientDownload download = (TalkClientDownload) mTransfer;
+                                XoApplication.get().getXoClient().getTransferAgent().retryDownload(download);
                             }
                             break;
                         case CANCEL_DOWNLOAD:
@@ -107,8 +115,14 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
             case DOWNLOAD_DOWNLOADING:
                 mTransferAction = TransferAction.CANCEL_DOWNLOAD;
                 break;
+            case DOWNLOAD_COMPLETE:
+                break;
+            case DOWNLOAD_FAILED:
+                mTransferAction = TransferAction.REQUEST_RETRY_DOWNLOAD;
+                break;
             case UPLOAD_NEW:
             case UPLOAD_PAUSED:
+            case UPLOAD_FAILED:
                 mTransferAction = TransferAction.REQUEST_UPLOAD;
                 break;
             case UPLOAD_REGISTERING:
@@ -119,13 +133,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                 break;
             case SELECTED:
                 break;
-            case UPLOAD_FAILED:
-                break;
             case UPLOAD_COMPLETE:
-                break;
-            case DOWNLOAD_FAILED:
-                break;
-            case DOWNLOAD_COMPLETE:
                 break;
             default:
                 break;
@@ -198,6 +206,12 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                         mListener.onAttachmentTransferComplete(mTransfer);
                         break;
 
+                    case DOWNLOAD_FAILED:
+                        mTransferControl.prepareToDownload();
+                        mTransferControl.setText("Download failed. Retry?");
+                        mTransferControl.pause();
+                        break;
+
                     case UPLOAD_REGISTERING:
                         break;
 
@@ -235,6 +249,9 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                     case UPLOAD_COMPLETE:
                         mTransferControl.completeAndGone();
                         mListener.onAttachmentTransferComplete(mTransfer);
+                        break;
+
+                    case UPLOAD_FAILED:
                         break;
 
                     default:
