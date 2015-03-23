@@ -3055,8 +3055,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             @Override
             public void run() {
                 try {
-
-
                     if (download.getTransferType() == XoTransfer.Type.ATTACHMENT) {
                         String nextState = mServerRpc.receivedFile(download.getFileId());
                         updateDownloadDelivery(download, nextState);
@@ -3074,7 +3072,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             @Override
             public void run() {
                 try {
-
                     if (download.getTransferType() == XoTransfer.Type.ATTACHMENT) {
                         String nextState = mServerRpc.failedFileDownload(download.getFileId());
                         updateDownloadDelivery(download, nextState);
