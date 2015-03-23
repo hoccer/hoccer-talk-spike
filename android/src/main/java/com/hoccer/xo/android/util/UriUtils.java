@@ -28,6 +28,10 @@ public class UriUtils {
     public static final String PUBLIC_DOWNLOADS_CONTENT_URI = "content://downloads/public_downloads";
 
     public static Uri getAbsoluteFileUri(String stringUri) {
+        if (stringUri == null) {
+            return null;
+        }
+
         Uri uri = Uri.parse(stringUri);
 
         if (uri.getScheme() != null) {
