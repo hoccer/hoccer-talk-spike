@@ -138,6 +138,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
         mTransferControl.post(new Runnable() {
             @Override
             public void run() {
+                mTransferControl.invalidate();
                 long length;
                 long progress;
                 Resources res = mTransferControl.getResources();
