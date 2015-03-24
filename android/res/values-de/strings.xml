@@ -209,6 +209,8 @@
     <string name="transfer_state_downloading">Downloading…</string>
     <string name="transfer_state_uploading">Uploading…</string>
     <string name="transfer_state_pause">Pause</string>
+    <string name="transfer_state_downloading_failed">Download Fehler</string>
+    <string name="transfer_state_uploading_failed">Upload Fehler</string>
     <string name="dialog_attachment_choose_reselect_option">Anderen Anhang auswählen</string>
     <string name="dialog_attachment_choose_discard_option">Anhang verwerfen</string>
     <string name="dialog_attachment_title">Anhang bearbeiten</string>
