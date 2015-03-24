@@ -61,6 +61,9 @@ public class XoTransferAgent implements IXoTransferListenerOld {
         HttpParams httpParams = new BasicHttpParams();
         HttpConnectionParams.setTcpNoDelay(httpParams, true);
         httpParams.setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
+        HttpConnectionParams.setConnectionTimeout(httpParams, 3000);
+        HttpConnectionParams.setSoTimeout(httpParams, 5000);
+
         mHttpClient = new HttpClientWithKeyStore(httpParams);
     }
 
