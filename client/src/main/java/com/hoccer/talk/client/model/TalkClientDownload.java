@@ -361,9 +361,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             StatusLine status = response.getStatusLine();
             int sc = status.getStatusCode();
             logGetDebug("got status '" + sc + "': " + status.getReasonPhrase());
-//            TODO debug
-            if (new Random().nextBoolean()) {
-//            if (sc != HttpStatus.SC_OK && sc != HttpStatus.SC_PARTIAL_CONTENT) {
+
+            if (new Random().nextBoolean()/*TODO debug*/ && sc != HttpStatus.SC_OK && sc != HttpStatus.SC_PARTIAL_CONTENT) {
                 LOG.debug("http status is not OK (" + HttpStatus.SC_OK + ") or partial content (" +
                         HttpStatus.SC_PARTIAL_CONTENT + ")");
                 checkTransferFailure(transferFailures + 1, "http status is not OK (" + HttpStatus.SC_OK + ") or partial content (" +
@@ -376,7 +375,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             setContentTypeByResponse(response);
 
             long bytesStart = downloadProgress;
-            if (!isValidContentRange(contentRange, bytesToGo) || contentLength == -1) {
+            if (new Random().nextBoolean()/*TODO debug*/ && !isValidContentRange(contentRange, bytesToGo) || contentLength == -1) {
                 LOG.debug("invalid contentRange or content length is -1 - contentLength: '" + contentLength + "'");
                 checkTransferFailure(transferFailures + 1, "invalid contentRange or content length is -1 - contentLength: '" + contentLength + "'");
                 return;
@@ -393,7 +392,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             logGetDebug("will retrieve '" + bytesToGo + "' bytes");
             randomAccessFile.seek(bytesStart);
 
-            if (!copyData(bytesToGo, randomAccessFile, fileDescriptor, inputStream)) {
+            if (new Random().nextBoolean()/*TODO debug*/ && !copyData(bytesToGo, randomAccessFile, fileDescriptor, inputStream)) {
                 checkTransferFailure(transferFailures + 1, "copyData returned null.");
             }
 
