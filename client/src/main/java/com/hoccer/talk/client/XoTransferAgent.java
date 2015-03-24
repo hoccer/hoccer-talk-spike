@@ -137,13 +137,6 @@ public class XoTransferAgent implements IXoTransferListenerOld {
         }
     }
 
-    public void retryDownload(TalkClientDownload download) {
-        LOG.info("retryDownload(" + download.getClientDownloadId() + ")");
-        download.retry(this);
-        mDownloadsById.remove(download.getClientDownloadId());
-        mDownloadRetryQueue.remove(download.getClientDownloadId());
-    }
-
     public void pauseDownload(TalkClientDownload download) {
         LOG.info("pauseDownload(" + download.getClientDownloadId() + ")");
         download.pause(this);
@@ -165,6 +158,13 @@ public class XoTransferAgent implements IXoTransferListenerOld {
 
     public void deactivateDownload(TalkClientDownload download) {
         LOG.info("deactivateDownload(" + download.getClientDownloadId() + ")");
+        mDownloadsById.remove(download.getClientDownloadId());
+        mDownloadRetryQueue.remove(download.getClientDownloadId());
+    }
+
+    public void retryDownload(TalkClientDownload download) {
+        LOG.info("retryDownload(" + download.getClientDownloadId() + ")");
+        download.retry(this);
         mDownloadsById.remove(download.getClientDownloadId());
         mDownloadRetryQueue.remove(download.getClientDownloadId());
     }

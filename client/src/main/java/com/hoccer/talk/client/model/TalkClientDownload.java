@@ -14,6 +14,9 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.http.*;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.apache.log4j.Logger;
 import org.apache.tika.detect.DefaultDetector;
 import org.apache.tika.detect.Detector;
@@ -228,11 +231,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         switchState(State.PAUSED, "pausing");
     }
 
-    public void retry(XoTransferAgent agent) {
-        mTransferAgent = agent;
-        switchState(State.RETRYING, "retrying");
-    }
-
     @Override
     public void cancel(XoTransferAgent agent) {
         mTransferAgent = agent;
@@ -243,6 +241,12 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     public void hold(XoTransferAgent agent) {
         mTransferAgent = agent;
         switchState(State.ON_HOLD, "put on hold");
+    }
+
+    public void retry(XoTransferAgent agent) {
+        mTransferAgent = agent;
+        transferFailures = 0;
+        switchState(State.RETRYING, "retrying");
     }
 
     private void switchState(State newState, String reason) {
