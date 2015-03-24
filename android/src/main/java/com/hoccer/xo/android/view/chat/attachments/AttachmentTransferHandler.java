@@ -238,6 +238,16 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                         mListener.onAttachmentTransferComplete(mTransfer);
                         break;
 
+                    case DOWNLOAD_FAILED:
+                        mTransferControl.setOnClickListener(null);
+                        mTransferControl.setText(res.getString(R.string.transfer_state_downloading_failed));
+                        break;
+
+                    case UPLOAD_FAILED:
+                        mTransferControl.setOnClickListener(null);
+                        mTransferControl.setText(res.getString(R.string.transfer_state_uploading_failed));
+                        break;
+
                     default:
                         mTransferControl.setVisibility(View.GONE);
                         mListener.onAttachmentTransferComplete(mTransfer);
