@@ -59,7 +59,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
     public void loadChatItems() {
         try {
             final List<TalkClientContact> filteredContacts = filter(mDatabase.findAllContacts());
-            final long nearbyMessageCount = mDatabase.getNearbyMessageCount();
+            final long nearbyMessageCount = mDatabase.getNearbyGroupMessageCount();
 
             runOnUiThread(new Runnable() {
                 @Override

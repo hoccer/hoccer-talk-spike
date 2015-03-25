@@ -231,7 +231,7 @@ public abstract class ContactsAdapter extends XoAdapter
 
             // TODO: only if nearby history was found in db
             try {
-                mNearbyMessagesCount = mDatabase.getNearbyMessageCount();
+                mNearbyMessagesCount = mDatabase.getNearbyGroupMessageCount();
                 if (mNearbyMessagesCount > 0) {
                     count++;
                 }
