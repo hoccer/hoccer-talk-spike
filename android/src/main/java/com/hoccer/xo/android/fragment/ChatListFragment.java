@@ -190,14 +190,32 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
                 if (contact.isGroup()) {
                     return contact.isGroupJoined() && contact.isGroupExisting() && !(contact.getGroupPresence() != null && (contact.getGroupPresence().isTypeNearby() || contact.getGroupPresence().isKept()));
                 } else if (contact.isClient()) {
-                    return contact.isClientRelated() && (contact.getClientRelationship().isFriend() || contact.getClientRelationship().isBlocked());
+                    if (contact.isClientRelated()) {
+                        return (contact.getClientRelationship().isFriend() || contact.getClientRelationship().isBlocked());
+                    }
+
+                    if (contact.getClientRelationship() != null && !contact.getClientRelationship().isFriend()){
+                        try {
+                            long messageCount = mDatabase.getMessageCountByContactId(contact.getClientContactId());
+                            if (messageCount > 0) {
+                                return true;
+                            }
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
 
                 return false;
             }
         };
 
-        mAdapter = new ChatListAdapter((XoActivity) getActivity(), filter);
+        mAdapter = new
+
+                ChatListAdapter((XoActivity) getActivity
+
+                (), filter);
+
         setListAdapter(mAdapter);
     }
 
