@@ -5,7 +5,7 @@
     <color name="tertiary">#f10002</color>
 
     <color name="attachment_incoming">#dbbc6b</color>
-    <color name="attachment_outgoing">@android:color/black</color>
+    <color name="attachment_outgoing">#dbbc6b</color>
     <color name="attachment_transfer_control">#dbbc6b</color>
 
     <color name="message_incoming_text">@android:color/black</color>
