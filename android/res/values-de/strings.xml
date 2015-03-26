@@ -209,6 +209,8 @@
     <string name="transfer_state_downloading">Downloading…</string>
     <string name="transfer_state_uploading">Uploading…</string>
     <string name="transfer_state_pause">Pause</string>
+    <string name="transfer_state_downloading_failed">Download Fehler</string>
+    <string name="transfer_state_uploading_failed">Upload Fehler</string>
     <string name="dialog_attachment_choose_reselect_option">Anderen Anhang auswählen</string>
     <string name="dialog_attachment_choose_discard_option">Anhang verwerfen</string>
     <string name="dialog_attachment_title">Anhang bearbeiten</string>
@@ -396,6 +398,20 @@
     <string name="restore_restart_hoccer">Bitte ${app.name.short} neu starten, um die Wiederherstellung zu beenden.</string>
     <string name="restore_no_backups_found_title">Kein Backup vorhanden</string>
     <string name="restore_no_backups_found_message">Bitte bestehendes Backup nach\n%1$s\nkopieren um früheren ${app.name.short} Account wiederherstellen zu können.</string>
+
+    <!-- Passcode Protection -->
+    <string name="password_protection">Passwortschutz</string>
+    <string name="activate">Aktivieren</string>
+    <string name="unlock">Entsperren</string>
+    <string name="change_password">Passwort ändern</string>
+    <string name="set_password">Passwort setzen</string>
+    <string name="password">Passwort</string>
+    <string name="password_note">Bitte beachte, dass wir dein Passwort weder zurücksetzen noch wiederherstellen können.</string>
+    <string name="confirm_password">Wiederhole das Passwort</string>
+    <string name="password_prompt_retry">Passwort nicht korrekt, bitte erneut versuchen.</string>
+    <string name="passwords_not_matching">Die eingegebenen Passwörter stimmen nicht überein. Bitte Eingabe wiederholen.</string>
+    <string name="new_password">Neues Passwort</string>
+    <string name="old_password">Altes Passwort</string>
 
     <string name="connection_state_disconnected">nicht verbunden</string>
     <string name="connection_state_login">Anmeldung</string>

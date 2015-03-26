@@ -645,13 +645,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return ListUtils.union(uploads, downloads);
     }
 
-    public List<XoTransfer> findTransfersByMediaType(String mediaType) throws SQLException {
-        List<TalkClientUpload> uploads = findClientUploadsByMediaType(mediaType);
-        List<TalkClientDownload> downloads = findClientDownloadsByMediaType(mediaType);
-
-        return mergeUploadsAndDownloadsByMessageTimestamp(uploads, downloads);
-    }
-
     public List<XoTransfer> findTransfersByMediaTypeDistinct(String mediaType) throws SQLException {
         List<TalkClientUpload> uploads = findClientUploadsByMediaType(mediaType);
         List<TalkClientDownload> downloads = findClientDownloadsByMediaType(mediaType);
@@ -660,12 +653,12 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return filterDuplicateFiles(transfers);
     }
 
-    private static List<XoTransfer> filterDuplicateFiles(List<XoTransfer> transfers) {
-        List<XoTransfer> filteredTransfers = new ArrayList<XoTransfer>();
+    private static <T extends XoTransfer> List<T> filterDuplicateFiles(List<T> transfers) {
+        List<T> filteredTransfers = new ArrayList<T>();
         HashSet<String> filePathes = new HashSet<String>();
 
         for (int i = transfers.size() - 1; i >= 0; i--) {
-            XoTransfer transfer = transfers.get(i);
+            T transfer = transfers.get(i);
             if (!filePathes.contains(transfer.getFilePath())) {
                 filteredTransfers.add(0, transfer);
                 filePathes.add(transfer.getFilePath());
@@ -765,6 +758,11 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .eq("state", TalkClientDownload.State.COMPLETE);
 
         return downloadQb.join(messageQb).query();
+    }
+
+    public List<TalkClientDownload> findClientDownloadsByMediaTypeAndContactIdDistinct(String mediaType, int contactId) throws SQLException {
+        List<TalkClientDownload> downloads = findClientDownloadsByMediaTypeAndContactId(mediaType, contactId);
+        return filterDuplicateFiles(downloads);
     }
 
     public TalkPrivateKey findPrivateKeyByKeyId(String keyId) throws SQLException {

@@ -534,12 +534,12 @@ public class TalkRpcHandler implements ITalkRpcServer {
         if (fields == null || fields.contains(TalkPresence.FIELD_CONNECTION_STATUS)) {
             if (presence.isOffline()) {
                 // client os lying about it's presence
-                existing.setConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
+                existing.setConnectionStatus(TalkPresence.STATUS_ONLINE);
             } else if (presence.isConnected()) {
                 existing.setConnectionStatus(presence.getConnectionStatus());
             } else {
                 LOG.error("undefined connectionStatus in presence:" + presence.getConnectionStatus());
-                existing.setConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
+                existing.setConnectionStatus(TalkPresence.STATUS_ONLINE);
             }
         }
 
@@ -573,7 +573,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
             TalkPresence presence = presences.get(i);
             if (presence.getConnectionStatus() == null) {
                 presence.setConnectionStatus(mServer.isClientConnected(presence.getClientId())
-                        ? TalkPresence.CONN_STATUS_ONLINE : TalkPresence.CONN_STATUS_OFFLINE);
+                        ? TalkPresence.STATUS_ONLINE : TalkPresence.STATUS_OFFLINE);
             }
             result[i] = presences.get(i);
         }
@@ -670,7 +670,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         TalkKey key = null;
 
         TalkRelationship relationship = mDatabase.findRelationshipBetween(mConnection.getClientId(), clientId);
-        if (relationship != null && (relationship.isFriend() || relationship.invitedMe())) {
+        if (relationship != null && relationship.isRelated()) {
             key = mDatabase.findKey(clientId, keyId);
         } else {
             List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsForClient(mConnection.getClientId());

@@ -602,7 +602,7 @@ public class SingleProfileFragment extends ProfileFragment
 
     @Override
     public void onDestroyActionMode(ActionMode mode) {
-        String nameString = mNameEditText.getText().toString();
+        String nameString = mNameEditText.getText().toString().trim();
         String newUserName = nameString.isEmpty() ? getResources().getString(R.string.profile_self_initial_name) : nameString;
 
         mNameText.setText(newUserName);

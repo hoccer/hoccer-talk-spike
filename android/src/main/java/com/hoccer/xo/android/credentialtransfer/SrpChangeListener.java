@@ -18,9 +18,9 @@ public class SrpChangeListener implements IXoStateListener {
     }
 
     @Override
-    public void onClientStateChange(final XoClient client, final int state) {
+    public void onClientStateChange(final XoClient client) {
         // if we just successfully logged in
-        if (state == XoClient.STATE_SYNCING) {
+        if (client.getState() == XoClient.State.SYNCING) {
             final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
             final boolean changeSrpSecret = preferences.getBoolean(CredentialImporter.CHANGE_SRP_SECRET_PROPERTY, false);
             if (changeSrpSecret) {

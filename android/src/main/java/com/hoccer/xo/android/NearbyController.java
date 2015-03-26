@@ -1,6 +1,7 @@
 package com.hoccer.xo.android;
 
 
+import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -15,7 +16,6 @@ import com.hoccer.talk.client.XoClient;
 import com.hoccer.xo.android.activity.ChatsActivity;
 import com.hoccer.xo.android.nearby.EnvironmentUpdater;
 import com.hoccer.xo.android.service.NotificationId;
-import com.hoccer.xo.android.util.IntentHelper;
 import org.apache.log4j.Logger;
 
 public class NearbyController implements BackgroundManager.Listener {
@@ -45,9 +45,9 @@ public class NearbyController implements BackgroundManager.Listener {
         BackgroundManager.get().registerListener(this);
         XoApplication.get().getXoClient().registerStateListener(new IXoStateListener() {
             @Override
-            public void onClientStateChange(XoClient client, int state) {
+            public void onClientStateChange(XoClient client) {
                 if (mNearbyEnabled) {
-                    if (state == XoClient.STATE_READY) {
+                    if (client.isReady()) {
                         startEnvironmentUpdates();
                     } else {
                         pauseEnvironmentUpdates();
@@ -68,7 +68,7 @@ public class NearbyController implements BackgroundManager.Listener {
     }
 
     @Override
-    public void onBecameForeground() {
+    public void onBecameForeground(Activity activity) {
         if (mNearbyTimeout != null) {
             mNearbyTimeoutHandler.removeCallbacks(mNearbyTimeout);
             mNearbyTimeout = null;
@@ -80,8 +80,8 @@ public class NearbyController implements BackgroundManager.Listener {
     }
 
     @Override
-    public void onBecameBackground() {
-        if (mNearbyEnabled && !XoApplication.get().getStayActiveInBackground()) {
+    public void onBecameBackground(Activity activity) {
+        if (mNearbyEnabled) {
             final int timeout = XoApplication.getConfiguration().getBackgroundNearbyTimeoutSeconds();
             mNearbyTimeout = new Runnable() {
                 @Override
@@ -96,7 +96,7 @@ public class NearbyController implements BackgroundManager.Listener {
     }
 
     private void startEnvironmentUpdates() {
-        if (XoApplication.get().getXoClient().getState() == XoClient.STATE_READY) {
+        if (XoApplication.get().getXoClient().getState() == XoClient.State.READY) {
             LOG.info("start environment updates");
             mEnvironmentUpdater.start();
             showNotification();

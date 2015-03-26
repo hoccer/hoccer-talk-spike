@@ -18,10 +18,16 @@ public class BackgroundManager implements Application.ActivityLifecycleCallbacks
 
     private static BackgroundManager sInstance;
 
-    public interface Listener {
-        public void onBecameForeground();
+    private boolean mIgnoreNextBackgroundPhase;
 
-        public void onBecameBackground();
+    public void ignoreNextBackgroundPhase() {
+        mIgnoreNextBackgroundPhase = true;
+    }
+
+    public interface Listener {
+        public void onBecameForeground(Activity activity);
+
+        public void onBecameBackground(Activity activity);
     }
 
     private boolean mInBackground = true;
@@ -61,15 +67,15 @@ public class BackgroundManager implements Application.ActivityLifecycleCallbacks
 
         if (mInBackground) {
             mInBackground = false;
-            notifyOnBecameForeground();
+            notifyOnBecameForeground(activity);
             LOG.info("Application went to foreground");
         }
     }
 
-    private void notifyOnBecameForeground() {
+    private void notifyOnBecameForeground(Activity activity) {
         for (Listener listener : listeners) {
             try {
-                listener.onBecameForeground();
+                listener.onBecameForeground(activity);
             } catch (Exception e) {
                 LOG.error("Listener threw exception!", e);
             }
@@ -77,25 +83,29 @@ public class BackgroundManager implements Application.ActivityLifecycleCallbacks
     }
 
     @Override
-    public void onActivityPaused(Activity activity) {
+    public void onActivityPaused(final Activity activity) {
         if (!mInBackground && mBackgroundTransition == null) {
-            mBackgroundTransition = new Runnable() {
-                @Override
-                public void run() {
-                    mInBackground = true;
-                    mBackgroundTransition = null;
-                    notifyOnBecameBackground();
-                    LOG.info("Application went to background");
-                }
-            };
-            mBackgroundDelayHandler.postDelayed(mBackgroundTransition, BACKGROUND_DELAY);
+            if (mIgnoreNextBackgroundPhase) {
+                mIgnoreNextBackgroundPhase = false;
+            } else {
+                mBackgroundTransition = new Runnable() {
+                    @Override
+                    public void run() {
+                        mInBackground = true;
+                        mBackgroundTransition = null;
+                        notifyOnBecameBackground(activity);
+                        LOG.info("Application went to background");
+                    }
+                };
+                mBackgroundDelayHandler.postDelayed(mBackgroundTransition, BACKGROUND_DELAY);
+            }
         }
     }
 
-    private void notifyOnBecameBackground() {
+    private void notifyOnBecameBackground(Activity activity) {
         for (Listener listener : listeners) {
             try {
-                listener.onBecameBackground();
+                listener.onBecameBackground(activity);
             } catch (Exception e) {
                 LOG.error("Listener threw exception!", e);
             }

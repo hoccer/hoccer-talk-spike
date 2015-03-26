@@ -11,10 +11,10 @@ import java.util.Set;
 @DatabaseTable(tableName = "presence")
 public class TalkPresence {
 
-    public final static String CONN_STATUS_OFFLINE = "offline";
-    public final static String CONN_STATUS_BACKGROUND = "background";
-    public final static String CONN_STATUS_ONLINE = "online";
-    public final static String CONN_STATUS_TYPING = "typing";
+    public final static String STATUS_OFFLINE = "offline";
+    public final static String STATUS_BACKGROUND = "background";
+    public final static String STATUS_ONLINE = "online";
+    public final static String STATUS_TYPING = "typing";
 
     public final static String FIELD_CLIENT_ID = "clientId";
     public final static String FIELD_CLIENT_NAME = "clientName";
@@ -53,22 +53,22 @@ public class TalkPresence {
 
     @JsonIgnore
     public boolean isOffline() {
-        return (connectionStatus == null || (connectionStatus != null && connectionStatus.equals(CONN_STATUS_OFFLINE)));
+        return (connectionStatus == null || (connectionStatus != null && connectionStatus.equals(STATUS_OFFLINE)));
     }
 
     @JsonIgnore
     public boolean isBackground() {
-        return (connectionStatus != null && connectionStatus.equals(CONN_STATUS_BACKGROUND));
+        return (connectionStatus != null && connectionStatus.equals(STATUS_BACKGROUND));
     }
 
     @JsonIgnore
     public boolean isOnline() {
-        return (connectionStatus != null && connectionStatus.equals(CONN_STATUS_ONLINE));
+        return (connectionStatus != null && connectionStatus.equals(STATUS_ONLINE));
     }
 
     @JsonIgnore
     public boolean isTyping() {
-        return (connectionStatus != null && connectionStatus.equals(CONN_STATUS_TYPING));
+        return (connectionStatus != null && connectionStatus.equals(STATUS_TYPING));
     }
 
     @JsonIgnore

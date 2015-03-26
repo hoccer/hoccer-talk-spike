@@ -146,7 +146,7 @@ public class UserPlaylist extends MediaPlaylist implements IXoUploadListener, IX
                         mDatabase.findClientMessageByTalkClientDownloadId(transfer.getUploadOrDownloadId());
 
                 if (message != null && message.getConversationContact().getClientContactId() == mContact.getClientContactId()) {
-                    mList = new ArrayList<XoTransfer>(mDatabase.findClientDownloadsByMediaTypeAndContactId(ContentMediaType.AUDIO, mContact.getClientContactId()));
+                    mList = new ArrayList<XoTransfer>(mDatabase.findClientDownloadsByMediaTypeAndContactIdDistinct(ContentMediaType.AUDIO, mContact.getClientContactId()));
                     invokeItemAdded(transfer);
                 }
             } catch (SQLException e) {
@@ -154,7 +154,7 @@ public class UserPlaylist extends MediaPlaylist implements IXoUploadListener, IX
             }
         } else {
             try {
-                mList = mDatabase.findTransfersByMediaType(ContentMediaType.AUDIO);
+                mList = mDatabase.findTransfersByMediaTypeDistinct(ContentMediaType.AUDIO);
                 invokeItemAdded(transfer);
             } catch (SQLException e) {
                 LOG.error(e.getMessage(), e);
@@ -170,7 +170,7 @@ public class UserPlaylist extends MediaPlaylist implements IXoUploadListener, IX
                         mDatabase.findClientMessageByTalkClientDownloadId(transfer.getUploadOrDownloadId());
 
                 if (message != null && message.getConversationContact().getClientContactId() == mContact.getClientContactId()) {
-                    mList = new ArrayList<XoTransfer>(mDatabase.findClientDownloadsByMediaTypeAndContactId(ContentMediaType.AUDIO, mContact.getClientContactId()));
+                    mList = new ArrayList<XoTransfer>(mDatabase.findClientDownloadsByMediaTypeAndContactIdDistinct(ContentMediaType.AUDIO, mContact.getClientContactId()));
                     invokeItemRemoved(transfer);
                 }
             } catch (SQLException e) {
@@ -178,7 +178,7 @@ public class UserPlaylist extends MediaPlaylist implements IXoUploadListener, IX
             }
         } else {
             try {
-                mList = mDatabase.findTransfersByMediaType(ContentMediaType.AUDIO);
+                mList = mDatabase.findTransfersByMediaTypeDistinct(ContentMediaType.AUDIO);
                 invokeItemRemoved(transfer);
             } catch (SQLException e) {
                 LOG.error(e.getMessage(), e);

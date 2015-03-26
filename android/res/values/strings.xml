@@ -221,6 +221,8 @@
     <string name="transfer_state_downloading">Downloading…</string>
     <string name="transfer_state_uploading">Uploading…</string>
     <string name="transfer_state_pause">Pause</string>
+    <string name="transfer_state_downloading_failed">Download failed</string>
+    <string name="transfer_state_uploading_failed">Upload failed</string>
     <string name="dialog_attachment_choose_reselect_option">Choose another Attachment</string>
     <string name="dialog_attachment_choose_discard_option">Remove attachment</string>
     <string name="dialog_attachment_title">Edit Attachment</string>
@@ -410,6 +412,20 @@
     <string name="restore_restart_hoccer">Please re-start ${app.name.short} to complete restoring your account. </string>
     <string name="restore_no_backups_found_title">No backups found</string>
     <string name="restore_no_backups_found_message">Please copy a backup to\n%1$s\nto restore a former ${app.name.short} account.</string>
+
+    <!-- Passcode Protection -->
+    <string name="password_protection">Password protection</string>
+    <string name="activate">Activate</string>
+    <string name="unlock">Unlock</string>
+    <string name="change_password">Change password</string>
+    <string name="set_password">Set password</string>
+    <string name="password">Password</string>
+    <string name="password_note">Please note, that we cannot reset or restore your password.</string>
+    <string name="confirm_password">Confirm your password</string>
+    <string name="password_prompt_retry">Incorrect password. Please try again.</string>
+    <string name="passwords_not_matching">Passwords do not match. Please enter your password again.</string>
+    <string name="new_password">New password</string>
+    <string name="old_password">Old password</string>
 
     <string name="connection_state_disconnected">disconnected</string>
     <string name="connection_state_login">logging in</string>

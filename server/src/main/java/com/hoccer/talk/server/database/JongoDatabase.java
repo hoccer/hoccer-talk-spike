@@ -143,6 +143,7 @@ public class JongoDatabase implements ITalkServerDatabase {
         mDeliveries.ensureIndex("{receiverId:1, state:1, attachmentState:1}");
         mDeliveries.ensureIndex("{state:1}");
         mDeliveries.ensureIndex("{state:1, attachmentState:1}");
+        mDeliveries.ensureIndex("{timeAccepted:1}");
 
         mEnvironments.ensureIndex("{geoLocation: '2dsphere'}");
         mEnvironments.ensureIndex("{groupId: 1}");
@@ -402,6 +403,18 @@ public class JongoDatabase implements ITalkServerDatabase {
 
         return IteratorUtils.toList(it);
     }
+
+    @Override
+    @NotNull
+    public List<TalkDelivery> findDeliveriesAcceptedBefore(Date limit) {
+        Iterator<TalkDelivery> it = mDeliveries
+                .find("{timeAccepted: { $lt:# } }", limit)
+                .as(TalkDelivery.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
+    }
+
 
     @Override
     public void deleteDelivery(TalkDelivery delivery) {

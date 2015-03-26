@@ -31,6 +31,7 @@ import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.content.SelectedContent;
+import com.hoccer.xo.android.BackgroundManager;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.XoSoundPool;
@@ -114,9 +115,9 @@ public abstract class XoActivity extends FragmentActivity {
             return;
         }
 
-        ((XoApplication) getApplication()).stayActiveInBackground();
         try {
             startActivity(intent);
+            BackgroundManager.get().ignoreNextBackgroundPhase();
         } catch (ActivityNotFoundException e) {
             Toast.makeText(this, R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
             e.printStackTrace();
@@ -129,9 +130,9 @@ public abstract class XoActivity extends FragmentActivity {
             return;
         }
 
-        ((XoApplication) getApplication()).stayActiveInBackground();
         try {
             startActivityForResult(intent, requestCode);
+            BackgroundManager.get().ignoreNextBackgroundPhase();
         } catch (ActivityNotFoundException e) {
             Toast.makeText(this, R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
             e.printStackTrace();
@@ -194,7 +195,14 @@ public abstract class XoActivity extends FragmentActivity {
 
         if (requestCode == REQUEST_SELECT_AVATAR) {
             if (mAvatarSelection != null) {
-                startExternalActivityForResult(ImageSelector.createCropIntent(intent.getData()), REQUEST_CROP_AVATAR);
+                final Intent finalIntent = intent;
+                // defer activity start after application came to foreground and XoApplication.setActiveInBackground() has been reset
+                new Handler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        startExternalActivityForResult(ImageSelector.createCropIntent(finalIntent.getData()), REQUEST_CROP_AVATAR);
+                    }
+                });
             }
         } else if (requestCode == REQUEST_CROP_AVATAR) {
             intent = selectedAvatarPreProcessing(intent);
