@@ -17,9 +17,9 @@ import java.util.Date;
 import java.util.List;
 
 
-public class NearbyHistoryChatItem extends BaseChatItem implements SearchAdapter.Searchable {
+public class NearbyGroupHistoryChatItem extends BaseChatItem implements SearchAdapter.Searchable {
 
-    private static final Logger LOG = Logger.getLogger(NearbyHistoryChatItem.class);
+    private static final Logger LOG = Logger.getLogger(NearbyGroupHistoryChatItem.class);
 
     @Nullable
     private List<TalkClientMessage> mNearbyMessages;
@@ -28,7 +28,7 @@ public class NearbyHistoryChatItem extends BaseChatItem implements SearchAdapter
     private Date mLastMessageTimeStamp;
     private String mLastMessageText = "";
 
-    public NearbyHistoryChatItem() {
+    public NearbyGroupHistoryChatItem() {
         update();
     }
 
@@ -87,7 +87,6 @@ public class NearbyHistoryChatItem extends BaseChatItem implements SearchAdapter
     public long getContactCreationTimeStamp() {
         return 0;
     }
-
 
     private void setLastMessageTime(TextView lastMessageTime) {
         if (mLastMessageTimeStamp != null) {

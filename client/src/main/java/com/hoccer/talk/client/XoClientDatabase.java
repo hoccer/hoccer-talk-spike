@@ -389,6 +389,20 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return messages;
     }
 
+    public boolean hadFriendlessConversationInNearbyWith(TalkClientContact contact) {
+        if (contact.getClientRelationship() == null || (contact.getClientRelationship() != null && !contact.getClientRelationship().isFriend())) {
+            try {
+                long messageCount = getMessageCountByContactId(contact.getClientContactId());
+                if (messageCount > 0) {
+                    return true;
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
+
     public long getNearbyGroupMessageCount() throws SQLException {
         return getAllNearbyGroupMessages().size();
     }

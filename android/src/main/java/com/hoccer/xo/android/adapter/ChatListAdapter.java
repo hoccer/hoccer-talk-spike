@@ -13,7 +13,8 @@ import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.view.model.BaseChatItem;
-import com.hoccer.xo.android.view.model.NearbyHistoryChatItem;
+import com.hoccer.xo.android.view.model.NearbyClientHistoryChatItem;
+import com.hoccer.xo.android.view.model.NearbyGroupHistoryChatItem;
 import com.hoccer.xo.android.view.model.TalkClientChatItem;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -67,11 +68,15 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
                     mChatItems.clear();
 
                     for (final TalkClientContact contact : filteredContacts) {
-                        mChatItems.add(new TalkClientChatItem(contact, mActivity));
+                        if (mDatabase.hadFriendlessConversationInNearbyWith(contact)){
+                            mChatItems.add(new NearbyClientHistoryChatItem());
+                        } else {
+                            mChatItems.add(new TalkClientChatItem(contact, mActivity));
+                        }
                     }
 
                     if (nearbyMessageCount > 0) {
-                        mChatItems.add(new NearbyHistoryChatItem());
+                        mChatItems.add(new NearbyGroupHistoryChatItem());
                     }
 
                     notifyDataSetChanged();
