@@ -103,9 +103,12 @@ public class JongoDatabase implements ITalkServerDatabase {
         mMigrations = getCollection("migrations");
 
         mClients.ensureIndex("{clientId:1}");
+        mClients.ensureIndex("{apnsToken:1}");
+        mClients.ensureIndex("{timeRegistered:1}"); // for external statistics gathering
 
         mTokens.ensureIndex("{clientId:1}");
         mTokens.ensureIndex("{clientId:1, secret:1}");
+        mTokens.ensureIndex("{purpose:1, secret:1}");
 
         mRelationships.ensureIndex("{clientId:1, otherClientId:1}") ;
         mRelationships.ensureIndex("{clientId:1}") ;
@@ -138,6 +141,8 @@ public class JongoDatabase implements ITalkServerDatabase {
         mDeliveries.ensureIndex("{messageId:1, senderId:1, receiverId:1}");
         mDeliveries.ensureIndex("{messageId:1}");
         mDeliveries.ensureIndex("{senderId:1}");
+        mDeliveries.ensureIndex("{senderId:1, state:1}");
+        mDeliveries.ensureIndex("{senderId:1, state:1, attachmentState:1}");
         mDeliveries.ensureIndex("{receiverId:1}");
         mDeliveries.ensureIndex("{receiverId:1, state:1}");
         mDeliveries.ensureIndex("{receiverId:1, state:1, attachmentState:1}");
