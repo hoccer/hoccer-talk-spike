@@ -18,7 +18,7 @@ public class CompleteBackup extends DatabaseBackup {
     }
 
     public static Backup create(String password) throws Exception {
-        String filename = BackupFileUtils.createUniqueBackupFilename();
+        String filename = BackupFileUtils.createUniqueBackupFilename(XoApplication.getConfiguration().getAppName());
         File backupFile = new File(XoApplication.getBackupDirectory(), filename + "." + BackupFileUtils.FILE_EXTENSION_ZIP);
 
         File database = new File(DB_PATH_NAME);
