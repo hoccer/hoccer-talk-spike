@@ -22,7 +22,7 @@ public class DatabaseBackup extends Backup {
     static Backup create(String password) throws Exception {
         File database = new File(DB_PATH_NAME);
 
-        String filename = BackupFileUtils.createUniqueBackupFilename();
+        String filename = BackupFileUtils.createUniqueBackupFilename(XoApplication.getConfiguration().getAppName());
         File backupFile = new File(XoApplication.getBackupDirectory(), filename + "." + BackupFileUtils.FILE_EXTENSION_ZIP);
         String clientName = XoApplication.get().getXoClient().getSelfContact().getName();
 
