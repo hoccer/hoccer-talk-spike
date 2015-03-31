@@ -193,7 +193,9 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
                     if (contact.getClientRelationship() != null) {
                         return (contact.getClientRelationship().isFriend() || contact.getClientRelationship().isBlocked());
                     }
-                    return mDatabase.hadFriendlessConversationInNearbyWith(contact);
+                    if (!contact.isSelf()) {
+                        return mDatabase.hadFriendlessConversationInNearbyWith(contact);
+                    }
                 }
                 return false;
             }
