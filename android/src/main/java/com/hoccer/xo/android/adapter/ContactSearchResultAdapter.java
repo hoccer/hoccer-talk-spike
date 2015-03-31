@@ -10,6 +10,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
+import com.hoccer.xo.android.view.PresenceAvatarView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,7 +94,7 @@ public class ContactSearchResultAdapter extends ContactsAdapter {
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
         nameView.setText(getHighlightedSearchResult(contact.getName()));
 
-        AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
+        PresenceAvatarView avatarView = (PresenceAvatarView) view.findViewById(R.id.contact_icon);
         avatarView.setContact(contact);
     }
 

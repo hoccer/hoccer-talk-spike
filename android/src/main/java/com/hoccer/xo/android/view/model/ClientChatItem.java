@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.view.View;
 import android.widget.TextView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
@@ -14,7 +15,7 @@ import com.hoccer.xo.android.activity.GroupProfileActivity;
 import com.hoccer.xo.android.activity.SingleProfileActivity;
 import com.hoccer.xo.android.adapter.SearchAdapter;
 import com.hoccer.xo.android.view.AvatarView;
-import com.artcom.hoccer.R;
+import com.hoccer.xo.android.view.PresenceAvatarView;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,7 +23,7 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class ClientChatItem extends BaseChatItem implements SearchAdapter.Searchable{
+public class ClientChatItem extends BaseChatItem implements SearchAdapter.Searchable {
 
     private static final Logger LOG = Logger.getLogger(ClientChatItem.class);
 
@@ -94,7 +95,7 @@ public class ClientChatItem extends BaseChatItem implements SearchAdapter.Search
 
     @Override
     protected View configure(final Context context, View view) {
-        AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
+        PresenceAvatarView avatarView = (PresenceAvatarView) view.findViewById(R.id.contact_icon);
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
         TextView lastMessageTextView = (TextView) view.findViewById(R.id.contact_last_message);
         TextView lastMessageTimeView = (TextView) view.findViewById(R.id.contact_time);

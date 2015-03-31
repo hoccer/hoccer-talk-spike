@@ -9,13 +9,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.view.AvatarView;
-import com.artcom.hoccer.R;
+import com.hoccer.xo.android.view.PresenceAvatarView;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.log4j.Logger;
 
@@ -167,7 +167,7 @@ public class ClientContactListAdapter extends ContactListAdapter {
     private ViewHolder createAndInitViewHolder(View convertView) {
         ViewHolder viewHolder;
         viewHolder = new ViewHolder();
-        viewHolder.avatarView = (AvatarView) convertView.findViewById(R.id.contact_icon);
+        viewHolder.avatarView = (PresenceAvatarView) convertView.findViewById(R.id.contact_icon);
         viewHolder.contactNameTextView = (TextView) convertView.findViewById(R.id.contact_name);
         viewHolder.invitedMeLayout = (LinearLayout) convertView.findViewById(R.id.ll_invited_me);
         viewHolder.acceptButton = (Button) convertView.findViewById(R.id.btn_accept);
@@ -178,7 +178,7 @@ public class ClientContactListAdapter extends ContactListAdapter {
     }
 
     private class ViewHolder {
-        public AvatarView avatarView;
+        public PresenceAvatarView avatarView;
         public TextView contactNameTextView;
         public LinearLayout invitedMeLayout;
         public Button acceptButton;
