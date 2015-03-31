@@ -22,9 +22,9 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class TalkClientChatItem extends BaseChatItem implements SearchAdapter.Searchable{
+public class ClientChatItem extends BaseChatItem implements SearchAdapter.Searchable{
 
-    private static final Logger LOG = Logger.getLogger(TalkClientChatItem.class);
+    private static final Logger LOG = Logger.getLogger(ClientChatItem.class);
 
     private final Context mContext;
     private TalkClientContact mContact;
@@ -34,7 +34,7 @@ public class TalkClientChatItem extends BaseChatItem implements SearchAdapter.Se
     private String mLastMessageText;
     private Date mContactCreationTimeStamp;
 
-    public TalkClientChatItem(TalkClientContact contact, Context context) {
+    public ClientChatItem(TalkClientContact contact, Context context) {
         mContact = contact;
         mContext = context;
         update();

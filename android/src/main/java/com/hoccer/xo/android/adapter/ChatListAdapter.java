@@ -13,9 +13,9 @@ import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.view.model.BaseChatItem;
+import com.hoccer.xo.android.view.model.ClientChatItem;
 import com.hoccer.xo.android.view.model.NearbyClientHistoryChatItem;
 import com.hoccer.xo.android.view.model.NearbyGroupHistoryChatItem;
-import com.hoccer.xo.android.view.model.TalkClientChatItem;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -71,7 +71,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
                         if (mDatabase.hadFriendlessConversationInNearbyWith(contact)){
                             mChatItems.add(new NearbyClientHistoryChatItem());
                         } else {
-                            mChatItems.add(new TalkClientChatItem(contact, mActivity));
+                            mChatItems.add(new ClientChatItem(contact, mActivity));
                         }
                     }
 
@@ -211,7 +211,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
                         item.update();
                     } else {
                         if (mFilter == null || mFilter.shouldShow(contact)) {
-                            item = new TalkClientChatItem(contact, mActivity);
+                            item = new ClientChatItem(contact, mActivity);
                             mChatItems.add(item);
                         }
                     }
@@ -265,7 +265,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
             if (contact == null) {
                 return;
             }
-            TalkClientChatItem item = (TalkClientChatItem) findChatItemForContent(contact);
+            ClientChatItem item = (ClientChatItem) findChatItemForContent(contact);
             if (item != null) { // the contact is not in our list so we won't update anything
                 item.update();
 
