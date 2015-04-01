@@ -6,7 +6,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.view.AvatarView;
+import com.hoccer.xo.android.view.SimpleAvatarView;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -65,8 +65,8 @@ public class GroupManagementContactsAdapter extends ContactsAdapter {
         CheckedTextView checkedTextView = (CheckedTextView) view.findViewById(R.id.contact_name_checked);
         checkedTextView.setText(contact.getNickname());
 
-        AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
-        avatarView.setContact(contact);
+        SimpleAvatarView simpleAvatarView = (SimpleAvatarView) view.findViewById(R.id.contact_icon);
+        simpleAvatarView.setContact(contact);
 
         try {
             TalkGroupMembership membership = mDatabase.findMembershipInGroupByClientId(mGroup.getGroupId(), contact.getClientId());

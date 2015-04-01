@@ -12,10 +12,10 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
-import com.hoccer.xo.android.view.model.BaseChatItem;
+import com.hoccer.xo.android.view.model.ChatItem;
 import com.hoccer.xo.android.view.model.ClientChatItem;
-import com.hoccer.xo.android.view.model.NearbyClientHistoryChatItem;
-import com.hoccer.xo.android.view.model.NearbyGroupHistoryChatItem;
+import com.hoccer.xo.android.view.model.NearbyHistoryClientChatItem;
+import com.hoccer.xo.android.view.model.NearbyHistoryGroupChatItem;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,9 +30,9 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
 
     private static final Logger LOG = Logger.getLogger(ChatListAdapter.class);
 
-    private static final Comparator<BaseChatItem> LATEST_ITEM_COMPARATOR = new Comparator<BaseChatItem>() {
+    private static final Comparator<ChatItem> LATEST_ITEM_COMPARATOR = new Comparator<ChatItem>() {
         @Override
-        public int compare(BaseChatItem chatItem1, BaseChatItem chatItem2) {
+        public int compare(ChatItem chatItem1, ChatItem chatItem2) {
 
             long value1 = Math.max(chatItem1.getMessageTimeStamp(), chatItem1.getContactCreationTimeStamp());
             long value2 = Math.max(chatItem2.getMessageTimeStamp(), chatItem2.getContactCreationTimeStamp());
@@ -46,7 +46,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
         }
     };
 
-    final protected List<BaseChatItem> mChatItems = new ArrayList<BaseChatItem>();
+    final protected List<ChatItem> mChatItems = new ArrayList<ChatItem>();
 
     @Nullable
     private Filter mFilter;
@@ -69,14 +69,14 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
 
                     for (final TalkClientContact contact : filteredContacts) {
                         if (contact.isClient() && mDatabase.hadFriendlessConversationInNearbyWith(contact)){
-                            mChatItems.add(new NearbyClientHistoryChatItem(contact, mActivity));
+                            mChatItems.add(new NearbyHistoryClientChatItem(contact, mActivity));
                         } else {
                             mChatItems.add(new ClientChatItem(contact, mActivity));
                         }
                     }
 
                     if (nearbyMessageCount > 0) {
-                        mChatItems.add(new NearbyGroupHistoryChatItem());
+                        mChatItems.add(new NearbyHistoryGroupChatItem());
                     }
 
                     notifyDataSetChanged();
@@ -132,8 +132,8 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
         return res;
     }
 
-    private BaseChatItem findChatItemForContent(Object content) {
-        for (BaseChatItem item : mChatItems) {
+    private ChatItem findChatItemForContent(Object content) {
+        for (ChatItem item : mChatItems) {
             if (content.equals(item.getContent())) {
                 return item;
             }
@@ -180,7 +180,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                BaseChatItem item = findChatItemForContent(contact);
+                ChatItem item = findChatItemForContent(contact);
                 if (item == null) {
                     return;
                 }
@@ -200,13 +200,13 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
             @Override
             public void run() {
                 if (relationship.isNone()) {
-                    BaseChatItem item = findChatItemForContent(contact);
+                    ChatItem item = findChatItemForContent(contact);
                     if (item != null) {
                         mChatItems.remove(item);
 
                     }
                 } else {
-                    BaseChatItem item = findChatItemForContent(contact);
+                    ChatItem item = findChatItemForContent(contact);
                     if (item != null) {
                         item.update();
                     } else {
@@ -229,7 +229,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                BaseChatItem item = findChatItemForContent(contact);
+                ChatItem item = findChatItemForContent(contact);
                 if (item != null) {
                     item.update();
                     notifyDataSetChanged();

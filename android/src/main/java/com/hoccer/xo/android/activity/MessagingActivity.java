@@ -15,7 +15,7 @@ import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.content.Clipboard;
 import com.hoccer.xo.android.fragment.MessagingFragment;
-import com.hoccer.xo.android.fragment.NearbyArchiveFragment;
+import com.hoccer.xo.android.fragment.NearbyHistoryFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import org.apache.log4j.Logger;
@@ -25,7 +25,8 @@ public class MessagingActivity extends ComposableActivity {
 
     private static final Logger LOG = Logger.getLogger(MessagingActivity.class);
 
-    public static final String EXTRA_NEARBY_ARCHIVE = "com.hoccer.xo.android.intent.extra.NEARBY_ARCHIVE";
+    public static final String EXTRA_NEARBY_GROUP_HISTORY = "com.hoccer.xo.android.intent.extra.NEARBY_GROUP_HISTORY";
+    public static final String EXTRA_NEARBY_CLIENT_HISTORY = "com.hoccer.xo.android.intent.extra.NEARBY_CLIENT_HISTORY";;
 
     ActionBar mActionBar;
 
@@ -61,10 +62,14 @@ public class MessagingActivity extends ComposableActivity {
             if (contactId == -1) {
                 LOG.error("invalid contact id");
             } else {
-                showMessageFragment(contactId);
+                if (intent.hasExtra(EXTRA_NEARBY_CLIENT_HISTORY)) {
+                    showNearbyClientHistoryFragment(contactId);
+                } else {
+                    showMessageFragment(contactId);
+                }
             }
-        } else if (intent != null && intent.hasExtra(EXTRA_NEARBY_ARCHIVE)) {
-            showNearbyArchiveFragment();
+        } else if (intent != null && intent.hasExtra(EXTRA_NEARBY_GROUP_HISTORY)) {
+            showNearbyGroupHistoryFragment();
         } else {
             LOG.error("Neither contact ID nor nearby-archive specified");
         }
@@ -125,22 +130,32 @@ public class MessagingActivity extends ComposableActivity {
     }
 
     private void showMessageFragment(int contactId) {
-        Fragment messagingFragment = new MessagingFragment();
-
         Bundle bundle = new Bundle();
         bundle.putInt(MessagingFragment.ARG_CLIENT_CONTACT_ID, contactId);
-        messagingFragment.setArguments(bundle);
+
+        Fragment fragment = new MessagingFragment();
+        fragment.setArguments(bundle);
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, messagingFragment);
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, fragment);
         fragmentTransaction.commit();
     }
 
-    private void showNearbyArchiveFragment() {
-        Fragment nearbyArchiveFragment = new NearbyArchiveFragment();
+    private void showNearbyClientHistoryFragment(int contactId) {
+        Bundle bundle = new Bundle();
+        bundle.putInt(NearbyHistoryFragment.ARG_CLIENT_CONTACT_ID, contactId);
+
+        NearbyHistoryFragment fragment = new NearbyHistoryFragment();
+        fragment.setArguments(bundle);
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, nearbyArchiveFragment);
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, fragment);
+        fragmentTransaction.commit();
+    }
+
+    private void showNearbyGroupHistoryFragment() {
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, new NearbyHistoryFragment());
         fragmentTransaction.commit();
     }
 }

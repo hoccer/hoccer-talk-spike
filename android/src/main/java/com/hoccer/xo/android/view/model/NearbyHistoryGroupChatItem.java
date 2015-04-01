@@ -1,7 +1,8 @@
 package com.hoccer.xo.android.view.model;
 
-import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientMessage;
@@ -16,10 +17,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+public class NearbyHistoryGroupChatItem extends ChatItem implements SearchAdapter.Searchable {
 
-public class NearbyGroupHistoryChatItem extends BaseChatItem implements SearchAdapter.Searchable {
-
-    private static final Logger LOG = Logger.getLogger(NearbyGroupHistoryChatItem.class);
+    private static final Logger LOG = Logger.getLogger(NearbyHistoryGroupChatItem.class);
 
     @Nullable
     private List<TalkClientMessage> mNearbyMessages;
@@ -28,7 +28,7 @@ public class NearbyGroupHistoryChatItem extends BaseChatItem implements SearchAd
     private Date mLastMessageTimeStamp;
     private String mLastMessageText = "";
 
-    public NearbyGroupHistoryChatItem() {
+    public NearbyHistoryGroupChatItem() {
         update();
     }
 
@@ -55,8 +55,12 @@ public class NearbyGroupHistoryChatItem extends BaseChatItem implements SearchAd
     }
 
     @Override
-    protected View configure(Context context, View view) {
-        AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
+    public View getView(View view, ViewGroup parent) {
+        if (view == null) {
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_client_chat_client, null);
+        }
+
+        AvatarView simpleAvatarView = (AvatarView) view.findViewById(R.id.contact_icon);
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
         TextView lastMessageTextView = (TextView) view.findViewById(R.id.contact_last_message);
         TextView lastMessageTimeView = (TextView) view.findViewById(R.id.contact_time);
@@ -67,8 +71,8 @@ public class NearbyGroupHistoryChatItem extends BaseChatItem implements SearchAd
         lastMessageTextView.setText(mLastMessageText);
         setUnseenMessages(unseenView);
 
-        avatarView.setAvatarImage(R.drawable.avatar_default_location);
-        avatarView.setClickable(false);
+        simpleAvatarView.setAvatarImage(R.drawable.avatar_default_location);
+        simpleAvatarView.setClickable(false);
 
         return view;
     }

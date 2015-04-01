@@ -10,21 +10,23 @@ import android.support.v4.app.ListFragment;
 import android.view.View;
 import android.widget.AdapterView;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.adapter.NearbyChatAdapter;
+import com.hoccer.xo.android.adapter.NearbyHistoryChatAdapter;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 
-public class NearbyArchiveFragment extends ListFragment {
+public class NearbyHistoryFragment extends ListFragment {
 
-    static final Logger LOG = Logger.getLogger(NearbyArchiveFragment.class);
+    static final Logger LOG = Logger.getLogger(NearbyHistoryFragment.class);
+    public static final String ARG_CLIENT_CONTACT_ID = "com.hoccer.xo.android.fragment.ARG_CLIENT_CONTACT_ID";
 
-    private NearbyChatAdapter mAdapter;
+    private NearbyHistoryChatAdapter mAdapter;
 
     private final DataSetObserver mDataSetObserver = new DataSetObserver() {
         @Override
@@ -86,7 +88,18 @@ public class NearbyArchiveFragment extends ListFragment {
             }
         });
 
-        mAdapter = new NearbyChatAdapter(getListView(), (XoActivity) getActivity());
+        TalkClientContact contact = null;
+        if (getArguments() != null && getArguments().getInt(ARG_CLIENT_CONTACT_ID, 0) > 0) {
+            int contactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
+            try {
+                contact = XoApplication.get().getXoClient().getDatabase().findContactById(contactId);
+            } catch (SQLException e) {
+                LOG.error("Client contact with id '" + contactId + "' does not exist", e);
+                return;
+            }
+        }
+
+        mAdapter = new NearbyHistoryChatAdapter(getListView(), (XoActivity) getActivity(), contact);
         mAdapter.onCreate();
         setListAdapter(mAdapter);
     }

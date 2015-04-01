@@ -30,4 +30,5 @@
           android:layout_alignStart="@+id/avatar_image"
           android:layout_alignBottom="@+id/avatar_image"
           android:background="@drawable/presence_indicator_shape_inactive"/>
+
 </RelativeLayout>
