@@ -68,7 +68,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
                     mChatItems.clear();
 
                     for (final TalkClientContact contact : filteredContacts) {
-                        if (contact.isClient() && mDatabase.hadFriendlessConversationInNearbyWith(contact)){
+                        if (contact.isClient() && contact.isKept()){
                             mChatItems.add(new NearbyHistoryClientChatItem(contact, mActivity));
                         } else {
                             mChatItems.add(new ClientChatItem(contact, mActivity));

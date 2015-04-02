@@ -15,7 +15,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.view.PresenceAvatarView;
+import com.hoccer.xo.android.view.AvatarView;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.log4j.Logger;
 
@@ -61,16 +61,20 @@ public class ClientContactListAdapter extends ContactListAdapter {
 
         ViewHolder viewHolder;
 
+        TalkClientContact contact = (TalkClientContact) getItem(position);
+
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.item_contact_client, null);
+            if (!contact.isNearby() && contact.isKept()) {
+                convertView = inflater.inflate(R.layout.item_contact_client_nearby, null);
+            } else {
+                convertView = inflater.inflate(R.layout.item_contact_client_presence, null);
+            }
             viewHolder = createAndInitViewHolder(convertView);
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-
-        final TalkClientContact contact = (TalkClientContact) getItem(position);
 
         updateView(viewHolder, contact);
 
@@ -167,7 +171,7 @@ public class ClientContactListAdapter extends ContactListAdapter {
     private ViewHolder createAndInitViewHolder(View convertView) {
         ViewHolder viewHolder;
         viewHolder = new ViewHolder();
-        viewHolder.avatarView = (PresenceAvatarView) convertView.findViewById(R.id.contact_icon);
+        viewHolder.avatarView = (AvatarView) convertView.findViewById(R.id.contact_icon);
         viewHolder.contactNameTextView = (TextView) convertView.findViewById(R.id.contact_name);
         viewHolder.invitedMeLayout = (LinearLayout) convertView.findViewById(R.id.ll_invited_me);
         viewHolder.acceptButton = (Button) convertView.findViewById(R.id.btn_accept);
@@ -178,7 +182,7 @@ public class ClientContactListAdapter extends ContactListAdapter {
     }
 
     private class ViewHolder {
-        public PresenceAvatarView avatarView;
+        public AvatarView avatarView;
         public TextView contactNameTextView;
         public LinearLayout invitedMeLayout;
         public Button acceptButton;

@@ -1756,7 +1756,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         TalkDelivery[] resultingDeliveries = new TalkDelivery[0];
 
         try {
-
             try {
                 clientMessage.setProgressState(true);
                 mDatabase.saveClientMessage(clientMessage);
@@ -1953,6 +1952,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     LOG.warn("outgoing message for unknown client " + receiverId);
                     return;
                 }
+
+                if (clientContact.isNearby()) {
+                    keepContactWithoutRelation(clientContact);
+                }
             }
 
             String groupId = delivery.getGroupId();
@@ -2003,6 +2006,13 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
         for (IXoMessageListener listener : mMessageListeners) {
             listener.onMessageUpdated(clientMessage);
+        }
+    }
+
+    private void keepContactWithoutRelation(TalkClientContact clientContact) throws SQLException {
+        if (clientContact.getClientRelationship() == null || clientContact.getClientRelationship().isNone()) {
+            clientContact.setKept(true);
+            mDatabase.saveContact(clientContact);
         }
     }
 
@@ -2226,6 +2236,11 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             }
 
             messageFailed = false;
+
+            if (senderContact.isNearby()) {
+                keepContactWithoutRelation(senderContact);
+            }
+
         } catch (GeneralSecurityException e) {
             reason = "decryption problem" + e;
             LOG.error("decryption problem", e);
@@ -2700,6 +2715,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         try {
             mDatabase.saveRelationship(clientContact.getClientRelationship());
             mDatabase.saveContact(clientContact);
+            if (relationship.isBlocked() || relationship.isFriend()) {
+                clientContact.setKept(false);
+                mDatabase.saveContact(clientContact);
+            }
         } catch (SQLException e) {
             LOG.error("SQL error", e);
         }
