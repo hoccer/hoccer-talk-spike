@@ -367,7 +367,6 @@ public class SingleProfileFragment extends ProfileFragment
             mChatContainer.setVisibility(View.GONE);
         } else {
             updateMessageText();
-            mChatContainer.setVisibility(View.VISIBLE);
         }
     }
 
