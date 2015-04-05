@@ -2278,7 +2278,15 @@ public class TalkRpcHandler implements ITalkRpcServer {
         TalkGroupMembership membership = new TalkGroupMembership();
         membership.setClientId(mConnection.getClientId());
         membership.setGroupId(groupPresence.getGroupId());
-        membership.setRole(TalkGroupMembership.ROLE_NEARBY_MEMBER);
+
+        if (TalkEnvironment.TYPE_NEARBY.equals(environment.getType())) {
+            membership.setRole(TalkGroupMembership.ROLE_NEARBY_MEMBER);
+        } else if (TalkEnvironment.TYPE_WORLDWIDE.equals(environment.getType())) {
+            membership.setRole(TalkGroupMembership.ROLE_WORLDWIDE_MEMBER);
+        } else {
+            throw new RuntimeException("joinGroupWithEnvironment: illegal type "+environment.getType());
+        }
+
         membership.setState(TalkGroupMembership.STATE_JOINED);
         changedGroupPresence(groupPresence, new Date());
         changedGroupMembership(membership, groupPresence.getLastChanged());
@@ -2300,7 +2308,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
     }
 
     private void joinGroupWithEnvironment(TalkGroupPresence groupPresence, TalkEnvironment environment) {
-        LOG.info("joinGroupWithEnvironment: joining group " + groupPresence.getGroupId() + " with client id '" + mConnection.getClientId() + "'");
+        LOG.info("joinGroupWithEnvironment: type "+environment.getType()+" joining group " + groupPresence.getGroupId() + " with client id '" + mConnection.getClientId() + "'");
 
         TalkGroupMembership nearbyMembership = mDatabase.findGroupMembershipForClient(groupPresence.getGroupId(), mConnection.getClientId());
         if (nearbyMembership == null) {
@@ -2308,7 +2316,13 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
         nearbyMembership.setClientId(mConnection.getClientId());
         nearbyMembership.setGroupId(groupPresence.getGroupId());
-        nearbyMembership.setRole(TalkGroupMembership.ROLE_NEARBY_MEMBER);
+        if (TalkEnvironment.TYPE_NEARBY.equals(environment.getType())) {
+            nearbyMembership.setRole(TalkGroupMembership.ROLE_NEARBY_MEMBER);
+        } else if (TalkEnvironment.TYPE_WORLDWIDE.equals(environment.getType())) {
+            nearbyMembership.setRole(TalkGroupMembership.ROLE_WORLDWIDE_MEMBER);
+        } else {
+            throw new RuntimeException("joinGroupWithEnvironment: illegal type "+environment.getType());
+        }
         // TODO: Idea: if we would only invite here the client would only receive nearby group messages after joining, which
         // the clients could do on their discretion
         nearbyMembership.setState(TalkGroupMembership.STATE_JOINED);
@@ -2376,7 +2390,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 TalkGroupMembership myMembership = mDatabase.findGroupMembershipForClient(te.getGroupId(), te.getClientId());
                 TalkGroupPresence myGroupPresence = mDatabase.findGroupPresenceById(te.getGroupId());
                 if (myMembership != null && myGroupPresence != null) {
-                    if (myMembership.isNearby() && myMembership.isJoined() && myGroupPresence.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
+                    if ((myMembership.isNearby()||myMembership.isWorldwide()) && myMembership.isJoined() && myGroupPresence.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
                         // everything seems fine, but are we in the largest group?
                         if (environmentsPerGroup.size() > 1) {
                             if (!environmentsPerGroup.get(0).getLeft().equals(te.getGroupId())) {

@@ -25,6 +25,7 @@ public class TalkEnvironment {
     public final static String LOCATION_TYPE_NONE = "none";       // indicates that location is invalid
 
     public final static String TYPE_NEARBY = "nearby";            // a nearby grouping environment
+    public final static String TYPE_WORLDWIDE = "worldwide";      // a worldwide grouping environment
 
     private String _id;
 

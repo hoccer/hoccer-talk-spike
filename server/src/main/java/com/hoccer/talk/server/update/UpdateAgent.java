@@ -295,6 +295,10 @@ public class UpdateAgent extends NotificationDeferrer {
                         List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsById(groupId);
                         for (TalkGroupMembership membership : memberships) {
                             if (membership.isJoined() || membership.isInvited() || membership.isGroupRemoved()) {
+                                if (membership.getClientId() == null) {
+                                    LOG.error("requestGroupUpdate for group " + groupId + ", no clientID for a membership record");
+                                    continue;
+                                }
                                 TalkRpcConnection connection = mServer.getClientConnection(membership.getClientId());
                                 if (connection == null || !connection.isConnected()) {
                                     continue;
