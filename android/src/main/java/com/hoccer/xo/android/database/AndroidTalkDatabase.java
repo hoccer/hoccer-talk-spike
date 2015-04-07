@@ -29,7 +29,7 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
 
     private static final Logger LOG = Logger.getLogger(AndroidTalkDatabase.class);
 
-    private static final int DATABASE_VERSION = 25;
+    private static final int DATABASE_VERSION = 26;
 
     private static final String DATABASE_NAME_DEFAULT = "hoccer-talk.db";
 
@@ -93,8 +93,12 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
                 replaceFileUriFromImageUploadContentUrlColumn(mContext, db);
             }
 
-            if(oldVersion < 25) {
+            if (oldVersion < 25) {
                 db.execSQL("ALTER TABLE 'clientUpload' ADD COLUMN 'tempCompressedDataFile' TEXT");
+            }
+
+            if (oldVersion < 26) {
+                db.execSQL("ALTER TABLE 'clientContact' ADD COLUMN 'isKept' SMALLINT");
             }
 
         } catch (android.database.SQLException e) {
@@ -121,10 +125,10 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
 
     private static void replaceFileUriFromImageUploadContentUrlColumn(Context context, SQLiteDatabase db) {
         Cursor cursor = db.rawQuery("SELECT dataFile FROM clientUpload WHERE contentUrl LIKE 'file:///%' AND mediaType = 'image'", null);
-        while(cursor.moveToNext()) {
+        while (cursor.moveToNext()) {
             String dataFile = cursor.getString(cursor.getColumnIndex("dataFile"));
             Uri contentUri = UriUtils.getContentUriByDataPath(context, MediaStore.Images.Media.getContentUri("external"), UriUtils.getAbsoluteFileUri(dataFile).getPath());
-            if(contentUri != null) {
+            if (contentUri != null) {
                 db.execSQL("UPDATE clientUpload SET contentUrl = '" + contentUri + "' WHERE dataFile = '" + dataFile + "'");
             } else {
                 db.execSQL("UPDATE clientUpload SET contentUrl = null WHERE dataFile = '" + dataFile + "'");
