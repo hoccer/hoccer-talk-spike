@@ -308,7 +308,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         return mClientHost;
     }
 
-    public IXoClientConfiguration getConfiguration() { return mClientConfiguration; }
+    public IXoClientConfiguration getConfiguration() {
+        return mClientConfiguration;
+    }
 
     public XoClientDatabase getDatabase() {
         return mDatabase;
