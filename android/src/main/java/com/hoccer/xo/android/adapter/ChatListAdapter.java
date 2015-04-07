@@ -192,33 +192,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
 
     @Override
     public void onClientRelationshipChanged(final TalkClientContact contact) {
-        final TalkRelationship relationship = contact.getClientRelationship();
-        if (relationship == null) {
-            return;
-        }
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (relationship.isNone()) {
-                    ChatItem item = findChatItemForContent(contact);
-                    if (item != null) {
-                        mChatItems.remove(item);
-
-                    }
-                } else {
-                    ChatItem item = findChatItemForContent(contact);
-                    if (item != null) {
-                        item.update();
-                    } else {
-                        if (mFilter == null || mFilter.shouldShow(contact)) {
-                            item = new ClientChatItem(contact, mActivity);
-                            mChatItems.add(item);
-                        }
-                    }
-                }
-                notifyDataSetChanged();
-            }
-        });
+        loadChatItems();
     }
 
     @Override
