@@ -1,18 +1,15 @@
 package com.hoccer.xo.android.view.model;
 
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import com.hoccer.xo.android.base.XoActivity;
-import com.artcom.hoccer.R;
-
-import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
-
-import java.util.Date;
 
 
 public abstract class ChatItem {
+
+    public static final int TYPE_RELATED = 0;
+    public static final int TYPE_CLIENT_NEARBY_HISTORY = 1;
+    public static final int TYPE_GROUP_NEARBY_HISTORY = 2;
 
     protected long mUnseenMessageCount;
 

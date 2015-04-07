@@ -17,7 +17,6 @@ import com.hoccer.xo.android.activity.GroupProfileActivity;
 import com.hoccer.xo.android.activity.SingleProfileActivity;
 import com.hoccer.xo.android.adapter.SearchAdapter;
 import com.hoccer.xo.android.view.AvatarView;
-import com.hoccer.xo.android.view.PresenceAvatarView;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -72,10 +71,20 @@ public class ClientChatItem extends ChatItem implements SearchAdapter.Searchable
 
     @Override
     public View getView(View view, ViewGroup parent) {
-        if(view == null) {
+        if (view != null && view.getTag() != null) {
+            int type = (Integer) view.getTag();
+            if (type != ChatItem.TYPE_RELATED) {
+                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_client_chat_client, null);
+            }
+        } else {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_client_chat_client, null);
+            view.setTag(ChatItem.TYPE_RELATED);
         }
 
+        return updateView(view);
+    }
+
+    protected View updateView(View view) {
         AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
         TextView lastMessageTextView = (TextView) view.findViewById(R.id.contact_last_message);

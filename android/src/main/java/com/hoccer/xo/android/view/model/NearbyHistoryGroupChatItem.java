@@ -56,8 +56,14 @@ public class NearbyHistoryGroupChatItem extends ChatItem implements SearchAdapte
 
     @Override
     public View getView(View view, ViewGroup parent) {
-        if (view == null) {
+        if (view != null && view.getTag() != null) {
+            int type = (Integer) view.getTag();
+            if (type != ChatItem.TYPE_GROUP_NEARBY_HISTORY) {
+                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_client_chat_client, null);
+            }
+        } else {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_client_chat_client, null);
+            view.setTag(ChatItem.TYPE_GROUP_NEARBY_HISTORY);
         }
 
         AvatarView simpleAvatarView = (AvatarView) view.findViewById(R.id.contact_icon);
