@@ -944,46 +944,19 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     private List<TalkEnvironment> findEnvironmentsMatchingWorldwide(TalkEnvironment environment) {
 
-        final int MAX_WORLD_WIDE_MATCHES = 10;
         List<TalkEnvironment> res = new ArrayList<TalkEnvironment>();
 
         // do identifiers search first
-        if (environment.getIdentifiers() != null) {
-            List<String> identifiers = Arrays.asList(environment.getIdentifiers());
+        if (environment.getTag() != null) {
             Iterator<TalkEnvironment> it =
-                    mEnvironments.find("{ type:#, identifiers :{ $in: # } }", environment.getType(), identifiers)
+                    mEnvironments.find("{ type:#, tag :# }", environment.getType(), environment.getTag())
                             .as(TalkEnvironment.class).iterator();
             while (it.hasNext()) {
                 TalkEnvironment te = it.next();
                 res.add(te);
             }
-            LOG.debug("found " + res.size() + " worldwide environments by identifiers");
+            LOG.debug("found " + res.size() + " worldwide environments for tag "+environment.getTag());
         }
-        int totalFound = 0;
-        int newFound = 0;
-        if (res.size() < MAX_WORLD_WIDE_MATCHES) {
-            Iterator<TalkEnvironment> it = mEnvironments.find("{ type:# }", environment.getType() )
-                    .as(TalkEnvironment.class).iterator();
-            newFound = 0;
-            while (it.hasNext() && res.size() < MAX_WORLD_WIDE_MATCHES) {
-                TalkEnvironment te = it.next();
-                ++totalFound;
-                boolean found = false;
-                for (TalkEnvironment rte : res) {
-                    // do not add duplicates of environments already in result
-                    if (rte.getGroupId().equals(te.getGroupId()) && rte.getClientId().equals(te.getClientId())) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    res.add(te);
-                    ++newFound;
-                }
-            }
-            LOG.debug("found " + totalFound + " environments worldwide, " + newFound + " of them are new");
-        }
-
         LOG.debug("findEnvironmentsMatchingWorldwide: returning "+res.size()+ "environments");
         return res;
     }

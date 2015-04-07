@@ -28,8 +28,7 @@ public class DeliveryAgent extends NotificationDeferrer {
 
     public void requestDelivery(String clientId, boolean forceAll) {
         if (clientId == null) {
-            // TODO: throw new IllegalArgumentException("no clientId"); // <- do not throw manual Nullpointerexceptions
-            throw new NullPointerException("no clientId");
+            throw new IllegalArgumentException("no clientId");
         }
         final DeliveryRequest deliveryRequest = new DeliveryRequest(this, clientId, forceAll);
 

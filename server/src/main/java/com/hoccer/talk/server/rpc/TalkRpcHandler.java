@@ -2279,9 +2279,9 @@ public class TalkRpcHandler implements ITalkRpcServer {
         membership.setClientId(mConnection.getClientId());
         membership.setGroupId(groupPresence.getGroupId());
 
-        if (TalkEnvironment.TYPE_NEARBY.equals(environment.getType())) {
+        if (environment.isNearby()) {
             membership.setRole(TalkGroupMembership.ROLE_NEARBY_MEMBER);
-        } else if (TalkEnvironment.TYPE_WORLDWIDE.equals(environment.getType())) {
+        } else if (environment.isWorldwide()) {
             membership.setRole(TalkGroupMembership.ROLE_WORLDWIDE_MEMBER);
         } else {
             throw new RuntimeException("joinGroupWithEnvironment: illegal type "+environment.getType());
@@ -2316,9 +2316,9 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
         nearbyMembership.setClientId(mConnection.getClientId());
         nearbyMembership.setGroupId(groupPresence.getGroupId());
-        if (TalkEnvironment.TYPE_NEARBY.equals(environment.getType())) {
+        if (environment.isNearby()) {
             nearbyMembership.setRole(TalkGroupMembership.ROLE_NEARBY_MEMBER);
-        } else if (TalkEnvironment.TYPE_WORLDWIDE.equals(environment.getType())) {
+        } else if (environment.isWorldwide()) {
             nearbyMembership.setRole(TalkGroupMembership.ROLE_WORLDWIDE_MEMBER);
         } else {
             throw new RuntimeException("joinGroupWithEnvironment: illegal type "+environment.getType());
@@ -2363,6 +2363,9 @@ public class TalkRpcHandler implements ITalkRpcServer {
         return result;
     }
 
+    final int MIN_WORLD_WIDE_GROUP_SIZE = 5;
+    final int MAX_WORLD_WIDE_GROUP_SIZE = 10;
+
     @Override
     public String updateEnvironment(TalkEnvironment environment) {
         logCall("updateEnvironment(clientId: '" + mConnection.getClientId() + "')");
@@ -2375,6 +2378,9 @@ public class TalkRpcHandler implements ITalkRpcServer {
         if (environment.getType() == null) {
             LOG.warn("updateEnvironment: no environment type, defaulting to nearby. Please fix client");
             environment.setType(TalkEnvironment.TYPE_NEARBY);
+        }
+        if (environment.isWorldwide() && environment.getTag() == null) {
+            environment.setTag("*");
         }
 
         environment.setTimeReceived(new Date());
@@ -2391,16 +2397,43 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 TalkGroupPresence myGroupPresence = mDatabase.findGroupPresenceById(te.getGroupId());
                 if (myMembership != null && myGroupPresence != null) {
                     if ((myMembership.isNearby()||myMembership.isWorldwide()) && myMembership.isJoined() && myGroupPresence.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
-                        // everything seems fine, but are we in the largest group?
-                        if (environmentsPerGroup.size() > 1) {
-                            if (!environmentsPerGroup.get(0).getLeft().equals(te.getGroupId())) {
-                                // we are not in the largest group, lets move over
-                                destroyEnvironment(myEnvironment);
-                                // join the largest group
-                                TalkGroupPresence largestGroupPresence = mDatabase.findGroupPresenceById(environmentsPerGroup.get(0).getLeft());
-                                joinGroupWithEnvironment(largestGroupPresence, environment);
-                                return largestGroupPresence.getGroupId();
+                        // everything seems fine, but are we in the right group?
+                        if (myMembership.isNearby()) {
+                            // for nearby, we want to be in the largest group
+                            if (environmentsPerGroup.size() > 1) {
+                                if (!environmentsPerGroup.get(0).getLeft().equals(te.getGroupId())) {
+                                    // we are not in the largest group, lets move over
+                                    destroyEnvironment(myEnvironment);
+                                    // join the largest group
+                                    TalkGroupPresence largestGroup = mDatabase.findGroupPresenceById(environmentsPerGroup.get(0).getLeft());
+                                    joinGroupWithEnvironment(largestGroup, environment);
+                                    return largestGroup.getGroupId();
+                                }
                             }
+                        } else {
+                            // for worldwide, we want to make sure the group is neither too small nor too large
+                            int minNumberOfGroups = matching.size() / MAX_WORLD_WIDE_GROUP_SIZE + 1;
+                            int maxNumberOfGroups = matching.size() / MIN_WORLD_WIDE_GROUP_SIZE + 1;
+                            int targetGroupSize = matching.size() / environmentsPerGroup.size();
+
+                            if (minNumberOfGroups > environmentsPerGroup.size()) {
+                                // we have not enough groups, lets create a new group and join it
+                                destroyEnvironment(myEnvironment);
+                                createGroupWithEnvironment(environment);
+                                return environment.getGroupId();
+                            }
+                            if (environmentsPerGroup.size() > maxNumberOfGroups) {
+                                // we have too many groups, lets consolidate
+                                if (environmentsPerGroup.get(environmentsPerGroup.size()-1).getLeft().equals(te.getGroupId())) {
+                                    // we are in the smallest group, lets move to the second smallest
+                                    destroyEnvironment(myEnvironment);
+                                    String secondSmallestGroupId = environmentsPerGroup.get(environmentsPerGroup.size()-2).getLeft();
+                                    TalkGroupPresence secondSmallestGroup = mDatabase.findGroupPresenceById(secondSmallestGroupId);
+                                    joinGroupWithEnvironment(secondSmallestGroup, environment);
+                                    return secondSmallestGroup.getGroupId();
+                                }
+                            }
+                            // we are fine and in the right group
                         }
                         // group membership has not changed, we are still fine
                         // just update environment
@@ -2417,12 +2450,26 @@ public class TalkRpcHandler implements ITalkRpcServer {
                         myEnvironment.updateWith(environment);
                         mDatabase.saveEnvironment(myEnvironment);
                         return myGroupPresence.getGroupId();
+                    } else {
+                        // there is a group and a membership, but they seem to be tombstones, so lets ignore them, just get rid of the bad environment
+                        mDatabase.deleteEnvironment(te);
+                        if (environment.isNearby()) {
+                            String largestGroupId = environmentsPerGroup.get(0).getLeft();
+                            TalkGroupPresence largestGroup = mDatabase.findGroupPresenceById(largestGroupId);
+                            if (largestGroup.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
+                                joinGroupWithEnvironment(largestGroup, environment);
+                                return largestGroup.getGroupId();
+
+                            }
+                        } else if (environment.isWorldwide()) {
+                            String smallestGroupId = environmentsPerGroup.get(environmentsPerGroup.size()-1).getLeft();
+                            TalkGroupPresence smallestGroup = mDatabase.findGroupPresenceById(smallestGroupId);
+                            if (smallestGroup.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
+                                joinGroupWithEnvironment(smallestGroup, environment);
+                                return smallestGroup.getGroupId();
+                            }
+                        }
                     }
-                    // there is a group and a membership, but they seem to be tombstones, so lets ignore them, just get rid of the bad environment
-                    mDatabase.deleteEnvironment(te);
-                    TalkGroupPresence largestGroupPresence = mDatabase.findGroupPresenceById(environmentsPerGroup.get(0).getLeft());
-                    joinGroupWithEnvironment(largestGroupPresence, environment);
-                    return largestGroupPresence.getGroupId();
                 }
             }
         }
@@ -2432,10 +2479,23 @@ public class TalkRpcHandler implements ITalkRpcServer {
             destroyEnvironment(myEnvironment);
         }
         if (!matching.isEmpty()) {
-            // join the largest group
-            TalkGroupPresence largestGroupPresence = mDatabase.findGroupPresenceById(environmentsPerGroup.get(0).getLeft());
-            joinGroupWithEnvironment(largestGroupPresence, environment);
-            return largestGroupPresence.getGroupId();
+            if (environment.isNearby()) {
+                // join the largest group
+                String largestGroupId = environmentsPerGroup.get(0).getLeft();
+                TalkGroupPresence largestGroup = mDatabase.findGroupPresenceById(largestGroupId);
+                if (largestGroup.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
+                    joinGroupWithEnvironment(largestGroup, environment);
+                    return largestGroup.getGroupId();
+                }
+            } else if (environment.isWorldwide()) {
+                // join the smallest group
+                String smallestGroupId = environmentsPerGroup.get(environmentsPerGroup.size()-1).getLeft();
+                TalkGroupPresence smallestGroup = mDatabase.findGroupPresenceById(smallestGroupId);
+                if (smallestGroup.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
+                    joinGroupWithEnvironment(smallestGroup, environment);
+                    return smallestGroup.getGroupId();
+                }
+            }
         }
         // we are alone or first at the location, lets create a new group
         createGroupWithEnvironment(environment);
