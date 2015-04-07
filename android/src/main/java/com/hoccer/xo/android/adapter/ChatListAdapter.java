@@ -9,7 +9,6 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.view.model.ChatItem;
@@ -68,7 +67,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
                     mChatItems.clear();
 
                     for (final TalkClientContact contact : filteredContacts) {
-                        if (contact.isClient() && contact.isKept()){
+                        if (contact.isClient() && contact.isKept()) {
                             mChatItems.add(new NearbyHistoryClientChatItem(contact, mActivity));
                         } else {
                             mChatItems.add(new ClientChatItem(contact, mActivity));
