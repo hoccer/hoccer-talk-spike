@@ -1953,9 +1953,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     return;
                 }
 
-                if (clientContact.isNearby()) {
-                    keepContactWithoutRelation(clientContact);
-                }
+                keepNearByContactWithoutRelation(clientContact);
             }
 
             String groupId = delivery.getGroupId();
@@ -2009,8 +2007,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
-    private void keepContactWithoutRelation(TalkClientContact clientContact) throws SQLException {
-        if (clientContact.getClientRelationship() == null || clientContact.getClientRelationship().isNone()) {
+    private void keepNearByContactWithoutRelation(TalkClientContact clientContact) throws SQLException {
+        if (clientContact.isNearby() && (
+                clientContact.getClientRelationship() == null
+                        || clientContact.getClientRelationship().isNone()
+                        || clientContact.getClientRelationship().isInvited()
+                        || clientContact.getClientRelationship().invitedMe())) {
             clientContact.setKept(true);
             mDatabase.saveContact(clientContact);
         }
@@ -2237,9 +2239,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
             messageFailed = false;
 
-            if (senderContact.isNearby()) {
-                keepContactWithoutRelation(senderContact);
-            }
+            keepNearByContactWithoutRelation(senderContact);
 
         } catch (GeneralSecurityException e) {
             reason = "decryption problem" + e;
