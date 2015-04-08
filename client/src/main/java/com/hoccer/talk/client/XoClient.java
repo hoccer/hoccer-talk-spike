@@ -1943,8 +1943,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     private void updateOutgoingDelivery(final TalkDelivery delivery) {
         LOG.debug("updateOutgoingDelivery(" + delivery.getMessageId() + ")");
 
-        TalkClientContact clientContact;
-        TalkClientContact groupContact;
+        TalkClientContact clientContact = null;
+        TalkClientContact groupContact = null;
         TalkClientMessage clientMessage = null;
         try {
             String receiverId = delivery.getReceiverId();
@@ -1954,8 +1954,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     LOG.warn("outgoing message for unknown client " + receiverId);
                     return;
                 }
-
-                keepNearByContactWithoutRelation(clientContact);
             }
 
             String groupId = delivery.getGroupId();
@@ -1965,6 +1963,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     LOG.warn("outgoing message for unknown group " + groupId);
                     //TODO: return; ??
                 }
+            }
+
+            if (groupContact == null) {
+                keepNearByContactWithoutRelation(clientContact);
             }
 
             String messageId = delivery.getMessageId();
@@ -2241,8 +2243,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
             messageFailed = false;
 
-            keepNearByContactWithoutRelation(senderContact);
-
+            if (groupContact == null) {
+                keepNearByContactWithoutRelation(senderContact);
+            }
         } catch (GeneralSecurityException e) {
             reason = "decryption problem" + e;
             LOG.error("decryption problem", e);
