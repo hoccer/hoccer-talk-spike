@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.IXoMessageListener;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -14,7 +15,6 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.MessagingActivity;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.util.IntentHelper;
-import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -43,7 +43,6 @@ public abstract class ProfileFragment extends XoFragment implements IXoContactLi
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-
         setContact();
     }
 
@@ -62,6 +61,8 @@ public abstract class ProfileFragment extends XoFragment implements IXoContactLi
 
         getXoClient().registerContactListener(this);
         getXoClient().registerMessageListener(this);
+
+        updateMessageText();
     }
 
     @Override
@@ -91,7 +92,14 @@ public abstract class ProfileFragment extends XoFragment implements IXoContactLi
     protected void showMessagingActivity() {
         Intent intent = new Intent(getActivity(), MessagingActivity.class);
         intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, getClientContactId());
-        getXoActivity().startActivity(intent);
+        if ((mContact.getClientRelationship() == null
+                || mContact.getClientRelationship().isNone()
+                || mContact.getClientRelationship().invitedMe()
+                || mContact.getClientRelationship().isInvited())
+                && !mContact.isNearby()) {
+            intent.putExtra(MessagingActivity.EXTRA_NEARBY_CLIENT_HISTORY, true);
+        }
+        startActivity(intent);
     }
 
     private void updateMessageTextOnUiThread() {
@@ -104,7 +112,12 @@ public abstract class ProfileFragment extends XoFragment implements IXoContactLi
     }
 
     protected void updateMessageText(int count) {
-        mChatMessagesText.setText(getResources().getQuantityString(R.plurals.message_count, count, count));
+        if (count == 0) {
+            mChatContainer.setVisibility(View.GONE);
+        } else {
+            mChatContainer.setVisibility(View.VISIBLE);
+            mChatMessagesText.setText(getResources().getQuantityString(R.plurals.message_count, count, count));
+        }
     }
 
     protected abstract int getClientContactId();
@@ -129,14 +142,18 @@ public abstract class ProfileFragment extends XoFragment implements IXoContactLi
     }
 
     @Override
-    public void onClientPresenceChanged(TalkClientContact contact) {}
+    public void onClientPresenceChanged(TalkClientContact contact) {
+    }
 
     @Override
-    public void onClientRelationshipChanged(TalkClientContact contact) {}
+    public void onClientRelationshipChanged(TalkClientContact contact) {
+    }
 
     @Override
-    public void onGroupPresenceChanged(TalkClientContact contact) {}
+    public void onGroupPresenceChanged(TalkClientContact contact) {
+    }
 
     @Override
-    public void onGroupMembershipChanged(TalkClientContact contact) {}
+    public void onGroupMembershipChanged(TalkClientContact contact) {
+    }
 }

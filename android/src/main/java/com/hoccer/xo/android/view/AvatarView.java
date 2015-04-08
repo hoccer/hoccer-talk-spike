@@ -1,6 +1,7 @@
 package com.hoccer.xo.android.view;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.net.Uri;
 import android.util.AttributeSet;
@@ -9,46 +10,47 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.activity.GroupProfileActivity;
+import com.hoccer.xo.android.activity.SingleProfileActivity;
 import com.hoccer.xo.android.util.UriUtils;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
 
-/**
- * A view holding an AspectImageView and a presence indicator.
- */
-public class AvatarView extends LinearLayout implements IXoContactListener {
+public abstract class AvatarView extends LinearLayout {
 
     private Uri mDefaultAvatarImageUri;
     private DisplayImageOptions mDefaultOptions;
     private float mCornerRadius;
     private AspectImageView mAvatarImage;
-    private View mPresenceIndicatorActive;
-    private View mPresenceIndicatorInactive;
-    private boolean mIsAttachedToWindow;
 
+    protected TalkClientContact mContact;
 
-    private TalkClientContact mContact;
-
-    public AvatarView(Context context, AttributeSet attrs) {
+    public AvatarView(Context context, AttributeSet attrs, int layoutId) {
         super(context, attrs);
-
-        applyAttributes(attrs);
-        initializeView();
+        setAttributes(attrs);
+        initializeView(layoutId);
     }
 
-    private void initializeView() {
-        View layout = LayoutInflater.from(getContext()).inflate(R.layout.view_avatar, null);
+    private void setAttributes(AttributeSet attributes) {
+        TypedArray a = getContext().getTheme()
+                .obtainStyledAttributes(attributes, R.styleable.SimpleAvatarView, 0, 0);
+        try {
+            mDefaultAvatarImageUri = Uri.parse("drawable://" + a.getResourceId(R.styleable.SimpleAvatarView_defaultAvatarImageUrl, R.drawable.avatar_default_contact));
+            mCornerRadius = a.getFloat(R.styleable.SimpleAvatarView_cornerRadius, 0.0f);
+        } finally {
+            a.recycle();
+        }
+    }
+
+    private void initializeView(int layoutId) {
+        View layout = LayoutInflater.from(getContext()).inflate(layoutId, null);
         addView(layout);
 
         mAvatarImage = (AspectImageView) this.findViewById(R.id.avatar_image);
-        mPresenceIndicatorActive = this.findViewById(R.id.presence_indicator_view_active);
-        mPresenceIndicatorInactive = this.findViewById(R.id.presence_indicator_view_inactive);
 
         float scale = getResources().getDisplayMetrics().density;
         int pixel = (int) (mCornerRadius * scale + 0.5f);
@@ -61,36 +63,27 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
                     .displayer(new RoundedBitmapDisplayer(pixel)).build();
         }
         setAvatarImage(mDefaultAvatarImageUri);
+        setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent;
+                if (mContact.isGroup()) {
+                    intent = new Intent(getContext(), GroupProfileActivity.class)
+                            .setAction(GroupProfileActivity.ACTION_SHOW)
+                            .putExtra(GroupProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId());
+                } else {
+                    intent = new Intent(getContext(), SingleProfileActivity.class)
+                            .setAction(SingleProfileActivity.ACTION_SHOW)
+                            .putExtra(SingleProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId());
+                }
+                getContext().startActivity(intent);
+            }
+        });
     }
-
-    private void applyAttributes(AttributeSet attributes) {
-        TypedArray a = getContext().getTheme()
-                .obtainStyledAttributes(attributes, R.styleable.AvatarView, 0, 0);
-        try {
-            mDefaultAvatarImageUri = Uri.parse("drawable://" + a.getResourceId(R.styleable.AvatarView_defaultAvatarImageUrl, R.drawable.avatar_default_contact));
-            mCornerRadius = a.getFloat(R.styleable.AvatarView_cornerRadius, 0.0f);
-        } finally {
-            a.recycle();
-        }
-    }
-
 
     public void setContact(TalkClientContact contact) {
-        if (mIsAttachedToWindow) {
-            if (mContact == null) {
-                if(contact != null) {
-                    XoApplication.get().getXoClient().registerContactListener(this);
-                }
-            } else {
-                if(contact == null) {
-                    XoApplication.get().getXoClient().unregisterContactListener(this);
-                }
-            }
-        }
-
         mContact = contact;
         updateAvatar();
-        updatePresence();
     }
 
     private void updateAvatar() {
@@ -124,22 +117,6 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         updateAvatar();
-        updatePresence();
-
-        mIsAttachedToWindow = true;
-        if (mContact != null) {
-            XoApplication.get().getXoClient().registerContactListener(this);
-        }
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-
-        mIsAttachedToWindow = false;
-        if (mContact != null) {
-            XoApplication.get().getXoClient().unregisterContactListener(this);
-        }
     }
 
     /**
@@ -174,60 +151,5 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
 
     public void setAvatarImage(int resourceId) {
         setAvatarImage(Uri.parse("drawable://" + resourceId));
-    }
-
-    private void updatePresence() {
-        post(new Runnable() {
-            @Override
-            public void run() {
-
-                if (mContact != null && mContact.isClient()) {
-                    TalkPresence presence = mContact.getClientPresence();
-                    if (presence != null) {
-                        if (presence.isConnected()) {
-                            if (presence.isPresent()) {
-                                showPresenceIndicatorActive();
-                            } else {
-                                showPresenceIndicatorInactive();
-                            }
-                            return;
-                        }
-                    }
-                }
-                hidePresenceIndicator();
-            }
-        });
-    }
-
-    private void showPresenceIndicatorActive() {
-        mPresenceIndicatorActive.setVisibility(View.VISIBLE);
-        mPresenceIndicatorInactive.setVisibility(View.INVISIBLE);
-    }
-
-    private void showPresenceIndicatorInactive() {
-        mPresenceIndicatorActive.setVisibility(View.INVISIBLE);
-        mPresenceIndicatorInactive.setVisibility(View.VISIBLE);
-    }
-
-    private void hidePresenceIndicator() {
-        mPresenceIndicatorActive.setVisibility(View.INVISIBLE);
-        mPresenceIndicatorInactive.setVisibility(View.INVISIBLE);
-    }
-
-    @Override
-    public void onClientPresenceChanged(TalkClientContact contact) {
-        updatePresence();
-    }
-
-    @Override
-    public void onClientRelationshipChanged(TalkClientContact contact) {
-    }
-
-    @Override
-    public void onGroupPresenceChanged(TalkClientContact contact) {
-    }
-
-    @Override
-    public void onGroupMembershipChanged(TalkClientContact contact) {
     }
 }

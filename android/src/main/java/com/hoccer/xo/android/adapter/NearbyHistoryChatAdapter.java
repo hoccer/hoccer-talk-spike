@@ -18,32 +18,40 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NearbyChatAdapter extends ChatAdapter {
+public class NearbyHistoryChatAdapter extends ChatAdapter {
 
-    private static final Logger LOG = Logger.getLogger(NearbyChatAdapter.class);
+    private static final Logger LOG = Logger.getLogger(NearbyHistoryChatAdapter.class);
 
-    public NearbyChatAdapter(ListView listView, XoActivity activity) {
-        super(listView, activity, null);
+    public NearbyHistoryChatAdapter(ListView listView, XoActivity activity, TalkClientContact contact) {
+        super(listView, activity, contact);
     }
 
     @Override
     protected void initialize() {
-        try {
-            List<TalkClientMessage> messages = mDatabase.getAllNearbyGroupMessages();
-            mChatMessageItems = new ArrayList<ChatMessageItem>(messages.size());
-            for (TalkClientMessage message : messages) {
-                ChatMessageItem messageItem = getItemForMessage(message);
-                mChatMessageItems.add(messageItem);
+        if (mContact == null) {
+            try {
+                initializeNearbyGroupHistory();
+            } catch (SQLException e) {
+                LOG.error("SQLException while batch retrieving messages for nearby", e);
             }
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    notifyDataSetChanged();
-                }
-            });
-        } catch (SQLException e) {
-            LOG.error("SQLException while batch retrieving messages for nearby", e);
+        } else {
+            super.initialize();
         }
+    }
+
+    private void initializeNearbyGroupHistory() throws SQLException {
+        List<TalkClientMessage> messages = mDatabase.getAllNearbyGroupMessages();
+        mChatMessageItems = new ArrayList<ChatMessageItem>(messages.size());
+        for (TalkClientMessage message : messages) {
+            ChatMessageItem messageItem = getItemForMessage(message);
+            mChatMessageItems.add(messageItem);
+        }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                notifyDataSetChanged();
+            }
+        });
     }
 
     @Override

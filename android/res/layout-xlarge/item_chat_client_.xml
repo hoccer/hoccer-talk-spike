@@ -7,7 +7,7 @@
         android:paddingTop="5dp"
         android:paddingBottom="5dp">
 
-    <com.hoccer.xo.android.view.AvatarView
+    <com.hoccer.xo.android.view.PresenceAvatarView
             android:id="@+id/contact_icon"
             android:clickable="true"
             android:layout_width="65dp"
@@ -22,7 +22,7 @@
             android:layout_alignTop="@id/contact_icon"
             android:layout_marginRight="-3dp"
             android:visibility="gone"
-            android:background="@drawable/unread_messages_badge"
+            android:background="@drawable/shape_unread_messages_badge"
             style="@style/AppBaseTheme.Contact.UnreadMessagesChatItem"/>
 
     <TextView

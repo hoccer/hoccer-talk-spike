@@ -125,13 +125,13 @@ public class SingleProfileFragment extends ProfileFragment
             menu.findItem(R.id.menu_profile_delete).setVisible(false);
         } else {
             TalkRelationship relationship = mContact.getClientRelationship();
-            if ((relationship == null || relationship.isInvited() || relationship.invitedMe() || relationship.isNone()) && mContact.isNearby()) {
+            if (mContact.isKept() || relationship == null || (relationship.isInvited() || relationship.invitedMe() || relationship.isNone()) && mContact.isNearby()) {
                 menu.findItem(R.id.menu_profile_edit).setVisible(false);
                 menu.findItem(R.id.menu_profile_delete).setVisible(false);
                 menu.findItem(R.id.menu_profile_block).setVisible(false);
                 menu.findItem(R.id.menu_profile_unblock).setVisible(false);
             } else {
-                if (relationship == null || relationship.isBlocked()) { // todo != null correct
+                if (relationship.isBlocked()) {
                     menu.findItem(R.id.menu_profile_block).setVisible(false);
                     menu.findItem(R.id.menu_profile_unblock).setVisible(true);
                     menu.findItem(R.id.menu_audio_attachment_list).setVisible(true);
@@ -367,7 +367,6 @@ public class SingleProfileFragment extends ProfileFragment
             mChatContainer.setVisibility(View.GONE);
         } else {
             updateMessageText();
-            mChatContainer.setVisibility(View.VISIBLE);
         }
     }
 
@@ -410,7 +409,7 @@ public class SingleProfileFragment extends ProfileFragment
             LOG.error("Error while refreshing client contact: " + contact.getClientId(), e);
         }
 
-        if (contact.getClientRelationship() == null || (contact.getClientRelationship().getState() != null && contact.getClientRelationship().getState().equals(TalkRelationship.STATE_NONE))) {
+        if (contact.getClientRelationship() == null || (contact.getClientRelationship().isNone())) {
             inviteButton.setText(R.string.friend_request_add_as_friend);
             inviteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -418,7 +417,7 @@ public class SingleProfileFragment extends ProfileFragment
                     getXoActivity().getXoClient().inviteFriend(contact);
                 }
             });
-        } else if (contact.getClientRelationship().getState() != null && contact.getClientRelationship().getState().equals(TalkRelationship.STATE_INVITED)) {
+        } else if (contact.getClientRelationship().isInvited()) {
             inviteButton.setText(R.string.friend_request_cancel_invitation);
             inviteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -426,7 +425,7 @@ public class SingleProfileFragment extends ProfileFragment
                     getXoActivity().getXoClient().disinviteFriend(contact);
                 }
             });
-        } else if (contact.getClientRelationship().getState() != null && contact.getClientRelationship().getState().equals(TalkRelationship.STATE_INVITED_ME)) {
+        } else if (contact.getClientRelationship().invitedMe()) {
             inviteButton.setText(R.string.friend_request_accept_invitation);
             inviteButton.setOnClickListener(new View.OnClickListener() {
                 @Override

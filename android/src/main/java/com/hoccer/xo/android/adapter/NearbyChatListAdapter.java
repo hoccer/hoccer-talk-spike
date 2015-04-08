@@ -20,6 +20,7 @@ import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
+import com.hoccer.xo.android.view.SimpleAvatarView;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -72,7 +73,7 @@ public class NearbyChatListAdapter extends BaseAdapter implements IXoContactList
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
-            convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat_client, null);
+            convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_client_chat_client, null);
         }
         updateContact(convertView, (TalkClientContact) getItem(position));
         return convertView;

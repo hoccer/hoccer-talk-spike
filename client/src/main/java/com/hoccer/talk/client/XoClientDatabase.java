@@ -389,7 +389,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return messages;
     }
 
-    public long getNearbyMessageCount() throws SQLException {
+    public long getNearbyGroupMessageCount() throws SQLException {
         return getAllNearbyGroupMessages().size();
     }
 

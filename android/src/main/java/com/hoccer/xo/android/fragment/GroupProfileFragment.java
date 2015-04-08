@@ -20,6 +20,7 @@ import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
+import com.hoccer.xo.android.activity.MessagingActivity;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupContactsAdapter;
 import com.hoccer.xo.android.dialog.GroupManageDialog;
@@ -654,6 +655,12 @@ public class GroupProfileFragment extends ProfileFragment
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         TalkClientContact contact = (TalkClientContact) adapterView.getItemAtPosition(i);
-        getXoActivity().showContactConversation(contact);
+        showContactConversation(contact);
+    }
+
+    public void showContactConversation(TalkClientContact contact) {
+        Intent intent = new Intent(getActivity(), MessagingActivity.class);
+        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contact.getClientContactId());
+        startActivity(intent);
     }
 }

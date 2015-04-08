@@ -511,17 +511,6 @@ public abstract class XoActivity extends FragmentActivity {
                 .setAction(GroupProfileActivity.ACTION_CREATE));
     }
 
-    public void showContactConversation(TalkClientContact contact) {
-        showContactConversation(contact.getClientContactId());
-    }
-
-    public void showContactConversation(int contactId) {
-        LOG.debug("showContactConversation(" + contactId + ")");
-        Intent intent = new Intent(this, MessagingActivity.class);
-        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contactId);
-        startActivity(intent);
-    }
-
     public void showPairing() {
         LOG.debug("showPairing()");
         XoDialogs.showSingleChoiceDialog(

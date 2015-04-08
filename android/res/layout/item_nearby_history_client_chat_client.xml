@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:custom="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:minHeight="80dp"
+        android:paddingTop="16dp"
+        android:paddingLeft="16dp"
+        android:paddingStart="16dp"
+        android:paddingRight="12dp"
+        android:paddingEnd="12dp"
+        android:orientation="horizontal"
+        android:clipToPadding="false"
+        android:clipChildren="false">
+
+    <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="8dp"
+            android:layout_marginEnd="8dp"
+            android:clipToPadding="false"
+            android:clipChildren="false">
+
+        <com.hoccer.xo.android.view.NearbyHistoryAvatarView
+                android:id="@+id/contact_icon"
+                android:clickable="true"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                custom:cornerRadius="65"
+                custom:defaultAvatarImageUrl="@drawable/avatar_default_contact"/>
+        <TextView
+                android:id="@+id/contact_unseen_messages"
+                android:layout_alignRight="@+id/contact_icon"
+                android:layout_alignTop="@id/contact_icon"
+                android:layout_marginRight="-8dp"
+                android:visibility="visible"
+                android:background="@drawable/shape_unread_messages_badge"
+                android:text="99"
+                android:textSize="10sp"
+                android:layout_width="16sp"
+                android:layout_height="16sp"
+                android:textColor="@android:color/white"
+                android:gravity="center"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-4dp">
+        <LinearLayout
+                android:id="@+id/text_wrapper"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+            <TextView
+                    android:id="@+id/contact_name"
+                    android:text="Lorem Ipsum"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:textSize="16sp"
+                    android:layout_marginRight="64dp"
+                    android:textColor="@android:color/black"/>
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/contact_last_message"
+                    android:text="Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore."
+                    android:lineSpacingExtra="2sp"
+                    android:layout_marginRight="32dp"
+                    android:layout_marginTop="-2dp"
+                    style="@style/AppBaseTheme.Contact.LastMessage"/>
+        </LinearLayout>
+        <TextView
+                android:id="@+id/contact_time"
+                android:text="2pm"
+                android:layout_alignParentRight="true"
+                android:layout_alignTop="@id/text_wrapper"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/notification_badge_text"/>
+    </RelativeLayout>
+</LinearLayout>

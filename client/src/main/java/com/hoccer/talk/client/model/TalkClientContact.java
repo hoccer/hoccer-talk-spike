@@ -1,16 +1,13 @@
 package com.hoccer.talk.client.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hoccer.talk.client.XoTransfer;
-import com.hoccer.talk.crypto.AESCryptor;
 import com.hoccer.talk.model.*;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
-import org.apache.commons.codec.binary.Base64;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
-import java.nio.charset.Charset;
-import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Set;
 
@@ -96,6 +93,9 @@ public class TalkClientContact implements Serializable {
 
     @DatabaseField(canBeNull = true)
     private Date createdTimeStamp;
+
+    @DatabaseField
+    private boolean isKept;
 
     public TalkClientContact() {
     }
@@ -375,6 +375,15 @@ public class TalkClientContact implements Serializable {
 
     public void setNearby(boolean isNearby) {
         this.isNearby = isNearby;
+    }
+
+    @JsonIgnore
+    public boolean isKept() {
+        return isKept;
+    }
+
+    public void setKept(boolean isKept) {
+        this.isKept = isKept;
     }
 
     @SelfMethodOnly

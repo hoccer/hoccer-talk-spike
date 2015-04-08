@@ -82,7 +82,7 @@ public class ChatVideoItem extends ChatMessageItem {
         });
 
         // calc default view size
-        double width_scale_factor = mAvatarView.getVisibility() == View.VISIBLE ? ChatImageItem.WIDTH_AVATAR_SCALE_FACTOR : ChatImageItem.WIDTH_SCALE_FACTOR;
+        double width_scale_factor = mSimpleAvatarView.getVisibility() == View.VISIBLE ? ChatImageItem.WIDTH_AVATAR_SCALE_FACTOR : ChatImageItem.WIDTH_SCALE_FACTOR;
         int maxWidth = (int) (DisplayUtils.getDisplaySize(mContext).x * width_scale_factor);
         int width = maxWidth;
         int maxHeight = (int) (DisplayUtils.getDisplaySize(mContext).y * ChatImageItem.HEIGHT_SCALE_FACTOR);

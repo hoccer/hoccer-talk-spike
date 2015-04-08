@@ -12,6 +12,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
+import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.*;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
@@ -157,6 +158,12 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private void handleContactIdIntent(Intent intent) {
         int contactId = intent.getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
         showContactConversation(contactId);
+    }
+
+    public void showContactConversation(int contactId) {
+        Intent intent = new Intent(this, MessagingActivity.class);
+        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contactId);
+        startActivity(intent);
     }
 
     private void handlePushMessageIntent(Intent intent) {

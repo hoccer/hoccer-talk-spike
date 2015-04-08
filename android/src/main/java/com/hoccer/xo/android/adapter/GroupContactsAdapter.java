@@ -8,7 +8,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.view.AvatarView;
+import com.hoccer.xo.android.view.PresenceAvatarView;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -68,7 +68,7 @@ public class GroupContactsAdapter extends ContactsAdapter {
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
         nameView.setText(contact.getNickname());
 
-        AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
+        PresenceAvatarView avatarView = (PresenceAvatarView) view.findViewById(R.id.contact_icon);
         avatarView.setContact(contact);
         avatarView.setOnClickListener(new View.OnClickListener() {
             @Override
