@@ -16,6 +16,7 @@ import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.view.AvatarView;
+import com.hoccer.xo.android.view.model.ChatItem;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.log4j.Logger;
 
@@ -63,14 +64,11 @@ public class ClientContactListAdapter extends ContactListAdapter {
 
         TalkClientContact contact = (TalkClientContact) getItem(position);
 
-        if (convertView == null) {
-            LayoutInflater inflater = (LayoutInflater) parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            if (!contact.isNearby() && contact.isKept()) {
-                convertView = inflater.inflate(R.layout.item_contact_client_nearby, null);
-            } else {
-                convertView = inflater.inflate(R.layout.item_contact_client_presence, null);
-            }
+        int viewType = getViewTypeForContact(contact);
+        if (convertView == null || getViewType(convertView) != viewType) {
+            convertView = inflate(viewType, parent);
             viewHolder = createAndInitViewHolder(convertView);
+            viewHolder.type = viewType;
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
@@ -78,6 +76,30 @@ public class ClientContactListAdapter extends ContactListAdapter {
 
         updateView(viewHolder, contact);
 
+        return convertView;
+    }
+
+    private int getViewType(View convertView) {
+        return ((ViewHolder) convertView.getTag()).type;
+    }
+
+    private int getViewTypeForContact(TalkClientContact contact) {
+        int type;
+        if (!contact.isNearby() && contact.isKept()) {
+            type = ChatItem.TYPE_CLIENT_NEARBY_HISTORY;
+        } else {
+            type = ChatItem.TYPE_RELATED;
+        }
+        return type;
+    }
+
+    private View inflate(int type, ViewGroup parent) {
+        View convertView;LayoutInflater inflater = (LayoutInflater) parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        if (type == ChatItem.TYPE_CLIENT_NEARBY_HISTORY) {
+            convertView = inflater.inflate(R.layout.item_contact_client_nearby, null);
+        } else {
+            convertView = inflater.inflate(R.layout.item_contact_client_presence, null);
+        }
         return convertView;
     }
 
@@ -189,5 +211,6 @@ public class ClientContactListAdapter extends ContactListAdapter {
         public Button declineButton;
         public TextView isInvitedTextView;
         public TextView isFriendTextView;
+        public int type;
     }
 }
