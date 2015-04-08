@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#202968</color>
+    <color name="secondary">#e3e3e3</color>
+    <color name="tertiary">#f10002</color>
+
+    <color name="attachment_incoming">#dbbc6b</color>
+    <color name="attachment_outgoing">#dbbc6b</color>
+    <color name="attachment_transfer_control">#dbbc6b</color>
+
+    <color name="message_incoming_text">@android:color/black</color>
+    <color name="message_outgoing_text">@android:color/white</color>
+</resources>

@@ -22,8 +22,7 @@ public class BackupFileUtils {
     public static final String FILE_EXTENSION_ZIP = "zip";
     public static final String FILE_EXTENSION_DB = "db";
     public static final String TIMESTAMP_FORMAT = "yyyyMMdd_HHmmss";
-    public static final String BACKUP_FILENAME_PREFIX = "hoccer_backup_";
-    public static final String BACKUP_FILENAME_PATTERN = BACKUP_FILENAME_PREFIX + "%s";
+    public static final String BACKUP_FILENAME_PATTERN = "%s_backup_%s";
     public static final String DB_CONTENT_TYPE = "database";
     public static final String DB_FILENAME_ENCRYPTED = "database.json";
     public static final String METADATA_FILENAME = "metadata.json";
@@ -188,9 +187,9 @@ public class BackupFileUtils {
         return backups;
     }
 
-    public static String createUniqueBackupFilename() {
+    public static String createUniqueBackupFilename(String appName) {
         String timestamp = new SimpleDateFormat(TIMESTAMP_FORMAT).format(new Date());
-        return String.format(BACKUP_FILENAME_PATTERN, timestamp);
+        return String.format(BACKUP_FILENAME_PATTERN, appName, timestamp);
     }
 
     public static long getUncompressedSize(File zipFile) throws IOException {
