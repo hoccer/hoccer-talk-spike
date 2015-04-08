@@ -28,26 +28,30 @@ public class NearbyHistoryChatAdapter extends ChatAdapter {
 
     @Override
     protected void initialize() {
-        if (mContact != null) {
-            super.initialize();
-        } else {
+        if (mContact == null) {
             try {
-                List<TalkClientMessage> messages = mDatabase.getAllNearbyGroupMessages();
-                mChatMessageItems = new ArrayList<ChatMessageItem>(messages.size());
-                for (TalkClientMessage message : messages) {
-                    ChatMessageItem messageItem = getItemForMessage(message);
-                    mChatMessageItems.add(messageItem);
-                }
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        notifyDataSetChanged();
-                    }
-                });
+                initializeNearbyGroupHistory();
             } catch (SQLException e) {
                 LOG.error("SQLException while batch retrieving messages for nearby", e);
             }
+        } else {
+            super.initialize();
         }
+    }
+
+    private void initializeNearbyGroupHistory() throws SQLException {
+        List<TalkClientMessage> messages = mDatabase.getAllNearbyGroupMessages();
+        mChatMessageItems = new ArrayList<ChatMessageItem>(messages.size());
+        for (TalkClientMessage message : messages) {
+            ChatMessageItem messageItem = getItemForMessage(message);
+            mChatMessageItems.add(messageItem);
+        }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                notifyDataSetChanged();
+            }
+        });
     }
 
     @Override

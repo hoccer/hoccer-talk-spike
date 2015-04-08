@@ -88,18 +88,19 @@ public class NearbyHistoryFragment extends ListFragment {
             }
         });
 
-        TalkClientContact contact = null;
         if (getArguments() != null && getArguments().getInt(ARG_CLIENT_CONTACT_ID, 0) > 0) {
             int contactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
             try {
-                contact = XoApplication.get().getXoClient().getDatabase().findContactById(contactId);
+                TalkClientContact contact = XoApplication.get().getXoClient().getDatabase().findContactById(contactId);
+                mAdapter = new NearbyHistoryChatAdapter(getListView(), (XoActivity) getActivity(), contact);
             } catch (SQLException e) {
                 LOG.error("Client contact with id '" + contactId + "' does not exist", e);
                 return;
             }
+        } else if (getArguments() == null) {
+            mAdapter = new NearbyHistoryChatAdapter(getListView(), (XoActivity) getActivity(), null);
         }
 
-        mAdapter = new NearbyHistoryChatAdapter(getListView(), (XoActivity) getActivity(), contact);
         mAdapter.onCreate();
         setListAdapter(mAdapter);
     }
