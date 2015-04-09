@@ -92,12 +92,8 @@ public abstract class ProfileFragment extends XoFragment implements IXoContactLi
     protected void showMessagingActivity() {
         Intent intent = new Intent(getActivity(), MessagingActivity.class);
         intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, getClientContactId());
-        if ((mContact.getClientRelationship() == null
-                || mContact.getClientRelationship().isNone()
-                || mContact.getClientRelationship().invitedMe()
-                || mContact.getClientRelationship().isInvited())
-                && !mContact.isNearby()) {
-            intent.putExtra(MessagingActivity.EXTRA_NEARBY_CLIENT_HISTORY, true);
+        if (mContact.isKept() && !(mContact.getClientRelationship().isFriend() || mContact.getClientRelationship().isBlocked())) {
+            intent.putExtra(MessagingActivity.EXTRA_CLIENT_HISTORY, true);
         }
         startActivity(intent);
     }

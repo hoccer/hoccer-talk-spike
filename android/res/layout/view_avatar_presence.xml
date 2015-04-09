@@ -13,7 +13,7 @@
           android:layout_alignLeft="@+id/avatar_image"
           android:layout_alignStart="@+id/avatar_image"
           android:layout_alignBottom="@+id/avatar_image"
-          android:background="@drawable/presence_indicator_shape_active"/>
+          android:background="@drawable/shape_presence_indicator_active"/>
 
     <View android:id="@+id/presence_indicator_view_inactive"
           android:layout_width="12dp"
@@ -22,6 +22,6 @@
           android:layout_alignLeft="@+id/avatar_image"
           android:layout_alignStart="@+id/avatar_image"
           android:layout_alignBottom="@+id/avatar_image"
-          android:background="@drawable/presence_indicator_shape_inactive"/>
+          android:background="@drawable/shape_presence_indicator_inactive"/>
 
 </RelativeLayout>

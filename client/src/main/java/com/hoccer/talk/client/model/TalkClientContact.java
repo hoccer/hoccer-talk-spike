@@ -97,6 +97,9 @@ public class TalkClientContact implements Serializable {
     @DatabaseField
     private boolean isKept;
 
+    @DatabaseField
+    private boolean isNearbyAcquaintance;
+
     public TalkClientContact() {
     }
 
@@ -378,12 +381,23 @@ public class TalkClientContact implements Serializable {
     }
 
     @JsonIgnore
+    public boolean isNearbyAcquaintance() {
+        return isNearbyAcquaintance;
+    }
+
+    @JsonIgnore
+    public void setNearbyAcquaintance(boolean isNearbyAcquaintance) {
+        this.isNearbyAcquaintance = isNearbyAcquaintance;
+    }
+
+    @JsonIgnore
     public boolean isKept() {
         return isKept;
     }
 
-    public void setKept(boolean isKept) {
-        this.isKept = isKept;
+    @JsonIgnore
+    public void setKept(boolean kept) {
+        this.isKept = kept;
     }
 
     @SelfMethodOnly

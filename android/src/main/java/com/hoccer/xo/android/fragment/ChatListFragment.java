@@ -19,10 +19,7 @@ import com.hoccer.xo.android.adapter.SearchAdapter;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.Placeholder;
-import com.hoccer.xo.android.view.model.ChatItem;
-import com.hoccer.xo.android.view.model.ClientChatItem;
-import com.hoccer.xo.android.view.model.NearbyHistoryClientChatItem;
-import com.hoccer.xo.android.view.model.NearbyHistoryGroupChatItem;
+import com.hoccer.xo.android.view.model.*;
 import org.apache.log4j.Logger;
 
 import java.lang.ref.WeakReference;
@@ -221,9 +218,9 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
         super.onListItemClick(listView, view, position, id);
 
         ChatItem item = ((ChatItem) listView.getItemAtPosition(position));
-        if (item instanceof NearbyHistoryClientChatItem) {
+        if (item instanceof NearbyHistoryClientChatItem || item instanceof HistoryClientChatItem) {
             TalkClientContact contact = (TalkClientContact) item.getContent();
-            showNearbyHistoryClientConversation(contact);
+            showHistoryClientConversation(contact);
         } else if (item instanceof ClientChatItem) {
             TalkClientContact contact = (TalkClientContact) item.getContent();
             showContactConversation(contact);
@@ -232,16 +229,18 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
         }
     }
 
-    private void showNearbyHistoryClientConversation(TalkClientContact contact) {
-        Intent intent = new Intent(getActivity(), MessagingActivity.class);
-        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contact.getClientContactId());
-        intent.putExtra(MessagingActivity.EXTRA_NEARBY_CLIENT_HISTORY, true);
-        startActivity(intent);
-    }
 
     public void showContactConversation(TalkClientContact contact) {
         Intent intent = new Intent(getActivity(), MessagingActivity.class);
         intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contact.getClientContactId());
+        startActivity(intent);
+    }
+
+
+    private void showHistoryClientConversation(TalkClientContact contact) {
+        Intent intent = new Intent(getActivity(), MessagingActivity.class);
+        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contact.getClientContactId());
+        intent.putExtra(MessagingActivity.EXTRA_CLIENT_HISTORY, true);
         startActivity(intent);
     }
 

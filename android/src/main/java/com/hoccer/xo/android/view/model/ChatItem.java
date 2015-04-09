@@ -8,8 +8,9 @@ import android.widget.TextView;
 public abstract class ChatItem {
 
     public static final int TYPE_RELATED = 0;
-    public static final int TYPE_CLIENT_NEARBY_HISTORY = 1;
-    public static final int TYPE_GROUP_NEARBY_HISTORY = 2;
+    public static final int TYPE_CLIENT_HISTORY = 1;
+    public static final int TYPE_CLIENT_NEARBY_HISTORY = 2;
+    public static final int TYPE_GROUP_NEARBY_HISTORY = 3;
 
     protected long mUnseenMessageCount;
 

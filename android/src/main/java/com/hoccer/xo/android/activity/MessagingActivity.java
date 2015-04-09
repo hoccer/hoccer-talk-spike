@@ -26,7 +26,7 @@ public class MessagingActivity extends ComposableActivity {
     private static final Logger LOG = Logger.getLogger(MessagingActivity.class);
 
     public static final String EXTRA_NEARBY_GROUP_HISTORY = "com.hoccer.xo.android.intent.extra.NEARBY_GROUP_HISTORY";
-    public static final String EXTRA_NEARBY_CLIENT_HISTORY = "com.hoccer.xo.android.intent.extra.NEARBY_CLIENT_HISTORY";;
+    public static final String EXTRA_CLIENT_HISTORY = "com.hoccer.xo.android.intent.extra.NEARBY_CLIENT_HISTORY";;
 
     ActionBar mActionBar;
 
@@ -62,7 +62,7 @@ public class MessagingActivity extends ComposableActivity {
             if (contactId == -1) {
                 LOG.error("invalid contact id");
             } else {
-                if (intent.hasExtra(EXTRA_NEARBY_CLIENT_HISTORY)) {
+                if (intent.hasExtra(EXTRA_CLIENT_HISTORY)) {
                     showNearbyClientHistoryFragment(contactId);
                 } else {
                     showMessageFragment(contactId);

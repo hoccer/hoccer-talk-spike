@@ -827,6 +827,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     public void inviteFriend(final TalkClientContact contact) {
         if (contact.isClient()) {
+            contact.setKept(true);
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -849,6 +850,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     public void acceptFriend(final TalkClientContact contact) {
         if (contact.isClient()) {
+            contact.setKept(true);
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -1966,7 +1968,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             }
 
             if (groupContact == null) {
-                keepNearByContactWithoutRelation(clientContact);
+                keepNearbyAcquaintance(clientContact);
             }
 
             String messageId = delivery.getMessageId();
@@ -2011,13 +2013,14 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
-    private void keepNearByContactWithoutRelation(TalkClientContact clientContact) throws SQLException {
+    private void keepNearbyAcquaintance(TalkClientContact clientContact) throws SQLException {
         if (clientContact.isNearby() && (
                 clientContact.getClientRelationship() == null
                         || clientContact.getClientRelationship().isNone()
                         || clientContact.getClientRelationship().isInvited()
                         || clientContact.getClientRelationship().invitedMe())) {
             clientContact.setKept(true);
+            clientContact.setNearbyAcquaintance(true);
             mDatabase.saveContact(clientContact);
         }
     }
@@ -2244,7 +2247,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             messageFailed = false;
 
             if (groupContact == null) {
-                keepNearByContactWithoutRelation(senderContact);
+                keepNearbyAcquaintance(senderContact);
             }
         } catch (GeneralSecurityException e) {
             reason = "decryption problem" + e;
@@ -2718,12 +2721,11 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         clientContact.updateRelationship(relationship);
 
         try {
+            if (relationship.isNone()) {
+                clientContact.setNearbyAcquaintance(false);
+            }
             mDatabase.saveRelationship(clientContact.getClientRelationship());
             mDatabase.saveContact(clientContact);
-            if (relationship.isBlocked() || relationship.isFriend()) {
-                clientContact.setKept(false);
-                mDatabase.saveContact(clientContact);
-            }
         } catch (SQLException e) {
             LOG.error("SQL error", e);
         }

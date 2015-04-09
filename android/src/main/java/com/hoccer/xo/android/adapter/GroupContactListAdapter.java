@@ -169,11 +169,6 @@ public class GroupContactListAdapter extends ContactListAdapter {
         updateContactsAndView();
     }
 
-    @Override
-    public void onGroupMembershipChanged(TalkClientContact contact) {
-        updateContactsAndView();
-    }
-
     private ViewHolder createAndInitViewHolder(View convertView) {
         ViewHolder viewHolder = new ViewHolder();
         viewHolder.avatarView = (SimpleAvatarView) convertView.findViewById(R.id.contact_icon);

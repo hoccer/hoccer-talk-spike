@@ -22,13 +22,14 @@
             android:clipToPadding="false"
             android:clipChildren="false">
 
-        <com.hoccer.xo.android.view.avatar.SimpleAvatarView
+        <com.hoccer.xo.android.view.avatar.HistoryAvatarView
                 android:id="@+id/contact_icon"
                 android:clickable="true"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 custom:cornerRadius="65"
                 custom:defaultAvatarImageUrl="@drawable/avatar_default_contact"/>
+
         <TextView
                 android:id="@+id/contact_unseen_messages"
                 android:layout_alignRight="@+id/contact_icon"

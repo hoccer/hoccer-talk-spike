@@ -11,10 +11,7 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
-import com.hoccer.xo.android.view.model.ChatItem;
-import com.hoccer.xo.android.view.model.ClientChatItem;
-import com.hoccer.xo.android.view.model.NearbyHistoryClientChatItem;
-import com.hoccer.xo.android.view.model.NearbyHistoryGroupChatItem;
+import com.hoccer.xo.android.view.model.*;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -67,10 +64,15 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
                     mChatItems.clear();
 
                     for (final TalkClientContact contact : filteredContacts) {
-                        if (contact.isClient() && contact.isKept()) {
-                            mChatItems.add(new NearbyHistoryClientChatItem(contact, mActivity));
-                        } else {
+
+                        if (contact.isClient() && contact.getClientRelationship() != null && (contact.getClientRelationship().isFriend() || contact.getClientRelationship().isBlocked())) {
                             mChatItems.add(new ClientChatItem(contact, mActivity));
+                        } else if (contact.isClient() && contact.isKept()) {
+                            if (contact.isNearbyAcquaintance()) {
+                                mChatItems.add(new NearbyHistoryClientChatItem(contact, mActivity));
+                            } else {
+                                mChatItems.add(new HistoryClientChatItem(contact, mActivity));
+                            }
                         }
                     }
 

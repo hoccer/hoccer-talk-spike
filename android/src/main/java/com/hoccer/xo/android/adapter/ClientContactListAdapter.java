@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.model.TalkClient;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
@@ -21,8 +22,7 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class ClientContactListAdapter extends ContactListAdapter {
 
@@ -85,18 +85,26 @@ public class ClientContactListAdapter extends ContactListAdapter {
 
     private int getViewTypeForContact(TalkClientContact contact) {
         int type;
-        if (!contact.isNearby() && contact.isKept()) {
-            type = ChatItem.TYPE_CLIENT_NEARBY_HISTORY;
-        } else {
+
+        if (contact.getClientRelationship().isFriend() || contact.getClientRelationship().isBlocked() || contact.isNearby()) {
             type = ChatItem.TYPE_RELATED;
+        } else {
+            if (contact.isNearbyAcquaintance()) {
+                type = ChatItem.TYPE_CLIENT_NEARBY_HISTORY;
+            } else {
+                type = ChatItem.TYPE_CLIENT_HISTORY;
+            }
         }
         return type;
     }
 
     private View inflate(int type, ViewGroup parent) {
-        View convertView;LayoutInflater inflater = (LayoutInflater) parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View convertView;
+        LayoutInflater inflater = (LayoutInflater) parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         if (type == ChatItem.TYPE_CLIENT_NEARBY_HISTORY) {
-            convertView = inflater.inflate(R.layout.item_contact_client_nearby, null);
+            convertView = inflater.inflate(R.layout.item_contact_client_history_nearby, null);
+        } else if (type == ChatItem.TYPE_CLIENT_HISTORY) {
+            convertView = inflater.inflate(R.layout.item_contact_client_history, null);
         } else {
             convertView = inflater.inflate(R.layout.item_contact_client_presence, null);
         }
