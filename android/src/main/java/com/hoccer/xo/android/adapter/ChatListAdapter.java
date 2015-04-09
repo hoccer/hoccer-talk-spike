@@ -64,7 +64,6 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
                     mChatItems.clear();
 
                     for (final TalkClientContact contact : filteredContacts) {
-
                         if (contact.isClient() && contact.getClientRelationship() != null && (contact.getClientRelationship().isFriend() || contact.getClientRelationship().isBlocked())) {
                             mChatItems.add(new ClientChatItem(contact, mActivity));
                         } else if (contact.isClient() && contact.isKept()) {
