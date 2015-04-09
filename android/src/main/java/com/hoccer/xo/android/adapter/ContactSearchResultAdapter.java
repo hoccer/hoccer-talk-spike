@@ -9,7 +9,7 @@ import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.view.PresenceAvatarView;
+import com.hoccer.xo.android.view.avatar.PresenceAvatarView;
 
 import java.util.ArrayList;
 import java.util.List;

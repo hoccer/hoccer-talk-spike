@@ -16,7 +16,7 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.GroupProfileActivity;
 import com.hoccer.xo.android.activity.SingleProfileActivity;
 import com.hoccer.xo.android.adapter.SearchAdapter;
-import com.hoccer.xo.android.view.AvatarView;
+import com.hoccer.xo.android.view.avatar.AvatarView;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -71,13 +71,8 @@ public class ClientChatItem extends ChatItem implements SearchAdapter.Searchable
 
     @Override
     public View getView(View view, ViewGroup parent) {
-        if (view != null && view.getTag() != null) {
-            int type = (Integer) view.getTag();
-            if (type != ChatItem.TYPE_RELATED) {
-                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_client_chat_client, null);
-            }
-        } else {
-            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_client_chat_client, null);
+        if (view == null || view.getTag() == null || (Integer) view.getTag() != ChatItem.TYPE_RELATED) {
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat_client, null);
             view.setTag(ChatItem.TYPE_RELATED);
         }
 

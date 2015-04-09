@@ -6,7 +6,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="15dp">
 
-    <com.hoccer.xo.android.view.PresenceAvatarView
+    <com.hoccer.xo.android.view.avatar.PresenceAvatarView
             android:id="@+id/contact_icon"
             android:clickable="true"
             android:layout_width="45dp"

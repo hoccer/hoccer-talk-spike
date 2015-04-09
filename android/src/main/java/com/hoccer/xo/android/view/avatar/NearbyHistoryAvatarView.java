@@ -1,9 +1,9 @@
-package com.hoccer.xo.android.view;
+package com.hoccer.xo.android.view.avatar;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
 import com.artcom.hoccer.R;
+import com.hoccer.xo.android.view.avatar.AvatarView;
 
 public class NearbyHistoryAvatarView extends AvatarView {
 

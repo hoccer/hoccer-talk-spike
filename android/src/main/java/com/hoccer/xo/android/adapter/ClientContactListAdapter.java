@@ -15,7 +15,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.view.AvatarView;
+import com.hoccer.xo.android.view.avatar.AvatarView;
 import com.hoccer.xo.android.view.model.ChatItem;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.log4j.Logger;

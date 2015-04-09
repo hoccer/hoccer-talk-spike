@@ -12,7 +12,7 @@
         android:paddingRight="12dp"
         android:orientation="horizontal">
 
-    <com.hoccer.xo.android.view.PresenceAvatarView
+    <com.hoccer.xo.android.view.avatar.PresenceAvatarView
             android:id="@+id/contact_icon"
             android:clickable="false"
             android:layout_width="48dp"

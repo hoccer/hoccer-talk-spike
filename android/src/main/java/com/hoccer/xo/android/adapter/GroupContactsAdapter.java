@@ -8,7 +8,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.view.PresenceAvatarView;
+import com.hoccer.xo.android.view.avatar.PresenceAvatarView;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 

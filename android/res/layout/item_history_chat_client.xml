@@ -22,7 +22,7 @@
             android:clipToPadding="false"
             android:clipChildren="false">
 
-        <com.hoccer.xo.android.view.NearbyHistoryAvatarView
+        <com.hoccer.xo.android.view.avatar.SimpleAvatarView
                 android:id="@+id/contact_icon"
                 android:clickable="true"
                 android:layout_width="48dp"

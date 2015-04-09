@@ -17,13 +17,8 @@ public class NearbyHistoryClientChatItem extends ClientChatItem implements Searc
 
     @Override
     public View getView(View view, ViewGroup parent) {
-        if (view != null && view.getTag() != null) {
-            int type = (Integer) view.getTag();
-            if (type != ChatItem.TYPE_CLIENT_NEARBY_HISTORY) {
-                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_nearby_history_client_chat_client, null);
-            }
-        } else {
-            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_nearby_history_client_chat_client, null);
+        if (view == null || view.getTag() == null || (Integer) view.getTag() != ChatItem.TYPE_CLIENT_NEARBY_HISTORY) {
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_nearby_history_chat_client, null);
             view.setTag(ChatItem.TYPE_CLIENT_NEARBY_HISTORY);
         }
 

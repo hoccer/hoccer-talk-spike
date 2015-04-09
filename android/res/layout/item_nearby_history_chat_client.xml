@@ -11,14 +11,18 @@
         android:paddingRight="12dp"
         android:paddingEnd="12dp"
         android:orientation="horizontal"
-        android:clipToPadding="false">
+        android:clipToPadding="false"
+        android:clipChildren="false">
 
     <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="8dp"
-            android:layout_marginEnd="8dp">
-        <com.hoccer.xo.android.view.PresenceAvatarView
+            android:layout_marginEnd="8dp"
+            android:clipToPadding="false"
+            android:clipChildren="false">
+
+        <com.hoccer.xo.android.view.avatar.NearbyHistoryAvatarView
                 android:id="@+id/contact_icon"
                 android:clickable="true"
                 android:layout_width="48dp"

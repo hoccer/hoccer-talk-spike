@@ -1,4 +1,4 @@
-package com.hoccer.xo.android.view;
+package com.hoccer.xo.android.view.avatar;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -8,6 +8,7 @@ import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.view.avatar.AvatarView;
 
 public class PresenceAvatarView extends AvatarView implements IXoContactListener {
 

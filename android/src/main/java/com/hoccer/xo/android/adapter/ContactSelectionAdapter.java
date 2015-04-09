@@ -13,7 +13,7 @@ import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.view.SimpleAvatarView;
+import com.hoccer.xo.android.view.avatar.SimpleAvatarView;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 

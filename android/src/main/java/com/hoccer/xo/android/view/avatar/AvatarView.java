@@ -1,4 +1,4 @@
-package com.hoccer.xo.android.view;
+package com.hoccer.xo.android.view.avatar;
 
 import android.content.Context;
 import android.content.Intent;
@@ -16,6 +16,7 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.GroupProfileActivity;
 import com.hoccer.xo.android.activity.SingleProfileActivity;
 import com.hoccer.xo.android.util.UriUtils;
+import com.hoccer.xo.android.view.AspectImageView;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;

@@ -13,7 +13,7 @@
         android:orientation="horizontal"
         android:clipToPadding="false">
 
-    <com.hoccer.xo.android.view.SimpleAvatarView
+    <com.hoccer.xo.android.view.avatar.SimpleAvatarView
             android:id="@+id/contact_icon"
             android:clickable="false"
             android:layout_width="48dp"

@@ -6,7 +6,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.view.SimpleAvatarView;
+import com.hoccer.xo.android.view.avatar.SimpleAvatarView;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;

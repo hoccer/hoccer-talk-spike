@@ -8,7 +8,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.adapter.SearchAdapter;
-import com.hoccer.xo.android.view.AvatarView;
+import com.hoccer.xo.android.view.avatar.AvatarView;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,13 +56,8 @@ public class NearbyHistoryGroupChatItem extends ChatItem implements SearchAdapte
 
     @Override
     public View getView(View view, ViewGroup parent) {
-        if (view != null && view.getTag() != null) {
-            int type = (Integer) view.getTag();
-            if (type != ChatItem.TYPE_GROUP_NEARBY_HISTORY) {
-                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_client_chat_client, null);
-            }
-        } else {
-            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_client_chat_client, null);
+        if (view == null || view.getTag() == null || (Integer) view.getTag() != ChatItem.TYPE_GROUP_NEARBY_HISTORY) {
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat_client, null);
             view.setTag(ChatItem.TYPE_GROUP_NEARBY_HISTORY);
         }
 
