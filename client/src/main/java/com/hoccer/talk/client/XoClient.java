@@ -2718,12 +2718,13 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             return;
         }
 
-        clientContact.updateRelationship(relationship);
+        TalkRelationship oldRelationShip = clientContact.getClientRelationship();
 
         try {
-            if (relationship.isNone()) {
+            if (oldRelationShip.isFriend() && relationship.isNone()) {
                 clientContact.setNearbyAcquaintance(false);
             }
+            clientContact.updateRelationship(relationship);
             mDatabase.saveRelationship(clientContact.getClientRelationship());
             mDatabase.saveContact(clientContact);
         } catch (SQLException e) {
