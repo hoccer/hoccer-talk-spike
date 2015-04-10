@@ -827,7 +827,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     public void inviteFriend(final TalkClientContact contact) {
         if (contact.isClient()) {
-            contact.setKept(true);
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
