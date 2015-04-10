@@ -12,21 +12,24 @@ import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.model.TalkClient;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.view.avatar.AvatarView;
-import com.hoccer.xo.android.view.model.ChatItem;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 
 public class ClientContactListAdapter extends ContactListAdapter {
 
     private static final Logger LOG = Logger.getLogger(ClientContactListAdapter.class);
+    private static final int TYPE_PRESENCE = 0;
+    private static final int TYPE_NEARBY_HISTORY = 1;
+    private static final int TYPE_HISTORY = 2;
+    private static final int TYPE_SIMPLE = 3;
 
     public ClientContactListAdapter(Activity activity) {
         super(activity);
@@ -87,13 +90,13 @@ public class ClientContactListAdapter extends ContactListAdapter {
         int type;
 
         if (contact.getClientRelationship().isFriend() || contact.getClientRelationship().isBlocked() || contact.isNearby()) {
-            type = ChatItem.TYPE_RELATED;
+            type = TYPE_PRESENCE;
+        } else if (contact.isKept() && contact.isNearbyAcquaintance()) {
+            type = TYPE_NEARBY_HISTORY;
+        } else if (contact.isKept()) {
+            type = TYPE_HISTORY;
         } else {
-            if (contact.isNearbyAcquaintance()) {
-                type = ChatItem.TYPE_CLIENT_NEARBY_HISTORY;
-            } else {
-                type = ChatItem.TYPE_CLIENT_HISTORY;
-            }
+            type = TYPE_SIMPLE;
         }
         return type;
     }
@@ -101,12 +104,14 @@ public class ClientContactListAdapter extends ContactListAdapter {
     private View inflate(int type, ViewGroup parent) {
         View convertView;
         LayoutInflater inflater = (LayoutInflater) parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        if (type == ChatItem.TYPE_CLIENT_NEARBY_HISTORY) {
+        if (type == TYPE_PRESENCE) {
+            convertView = inflater.inflate(R.layout.item_contact_client_presence, null);
+        } else if (type == TYPE_NEARBY_HISTORY) {
             convertView = inflater.inflate(R.layout.item_contact_client_history_nearby, null);
-        } else if (type == ChatItem.TYPE_CLIENT_HISTORY) {
+        } else if (type == TYPE_HISTORY) {
             convertView = inflater.inflate(R.layout.item_contact_client_history, null);
         } else {
-            convertView = inflater.inflate(R.layout.item_contact_client_presence, null);
+            convertView = inflater.inflate(R.layout.item_contact_client_simple, null);
         }
         return convertView;
     }
