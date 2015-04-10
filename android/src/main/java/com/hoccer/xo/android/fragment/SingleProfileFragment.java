@@ -207,11 +207,6 @@ public class SingleProfileFragment extends ProfileFragment
         );
     }
 
-    private void deleteAndDiscardContact() {
-        getXoActivity().getXoClient().deleteContact(mContact);
-        mContact.setKept(false);
-    }
-
     private void showDiscardContactDialog() {
         XoDialogs.showYesNoDialog("RemoveContactFromListDialog",
                 R.string.dialog_discard_contact_title,
@@ -220,12 +215,7 @@ public class SingleProfileFragment extends ProfileFragment
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        mContact.setKept(false);
-                        try {
-                            getXoClient().getDatabase().saveContact(mContact);
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
+                        discardContact();
                         getActivity().finish();
                     }
                 },
@@ -236,6 +226,20 @@ public class SingleProfileFragment extends ProfileFragment
                     }
                 }
         );
+    }
+
+    private void deleteAndDiscardContact() {
+        getXoClient().deleteContact(mContact);
+        discardContact();
+    }
+
+    private void discardContact() {
+        mContact.setKept(false);
+        try {
+            getXoClient().getDatabase().saveContact(mContact);
+        } catch (SQLException e) {
+            LOG.error("sql error", e);
+        }
     }
 
     @Override
