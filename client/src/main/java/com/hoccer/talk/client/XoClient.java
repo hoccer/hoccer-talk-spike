@@ -2702,11 +2702,11 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
-    private void updateClientRelationship(TalkRelationship relationship) {
-        LOG.debug("updateClientRelationship(" + relationship.getOtherClientId() + ")");
+    private void updateClientRelationship(TalkRelationship newRelationship) {
+        LOG.debug("updateClientRelationship(" + newRelationship.getOtherClientId() + ")");
         TalkClientContact clientContact;
         try {
-            clientContact = mDatabase.findContactByClientId(relationship.getOtherClientId(), relationship.isRelated());
+            clientContact = mDatabase.findContactByClientId(newRelationship.getOtherClientId(), newRelationship.isRelated());
         } catch (SQLException e) {
             LOG.error("SQL error", e);
             return;
@@ -2719,16 +2719,13 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         TalkRelationship oldRelationShip = clientContact.getClientRelationship();
 
         try {
-            if (!relationship.invitedMe()) {
-                keepNearbyAcquaintance(clientContact);
-            }
-            if ((oldRelationShip == null || oldRelationShip.isNone()) && relationship.isFriend()) {
+            if (immediatelyBecameFriends(newRelationship, oldRelationShip)) {
                 clientContact.setKept(true);
             }
-            if (relationship.isNone() && oldRelationShip != null && (oldRelationShip.isFriend() || oldRelationShip.isBlocked())) {
+            if (friendshipCancelled(newRelationship, oldRelationShip)) {
                 clientContact.setNearbyAcquaintance(false);
             }
-            clientContact.updateRelationship(relationship);
+            clientContact.updateRelationship(newRelationship);
             mDatabase.saveRelationship(clientContact.getClientRelationship());
             mDatabase.saveContact(clientContact);
         } catch (SQLException e) {
@@ -2738,6 +2735,14 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         for (final IXoContactListener listener : mContactListeners) {
             listener.onClientRelationshipChanged(clientContact);
         }
+    }
+
+    private boolean friendshipCancelled(TalkRelationship newRelationship, TalkRelationship oldRelationShip) {
+        return newRelationship.isNone() && oldRelationShip != null && (oldRelationShip.isFriend() || oldRelationShip.isBlocked());
+    }
+
+    private boolean immediatelyBecameFriends(TalkRelationship relationship, TalkRelationship oldRelationShip) {
+        return (oldRelationShip == null || oldRelationShip.isNone()) && relationship.isFriend();
     }
 
     private void updateGroupPresence(TalkGroupPresence groupPresence) {
