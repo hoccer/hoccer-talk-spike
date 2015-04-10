@@ -173,7 +173,7 @@
 
     <!-- Contact remove dialog -->
     <string name="dialog_discard_contact_title">Kontakt wirklich entfernen?</string>
-    <string name="dialog_discard_contact_message">Bist du sicher, dass du diesen Kontakt löschen möchtest?</string>
+    <string name="dialog_discard_contact_message">Bist du sicher, dass du diesen Kontakt entfernen möchtest?</string>
 
     <!-- Group manage selection dialog -->
     <string name="dialog_manage_group_title">Gruppenmitglieder verwalten</string>
