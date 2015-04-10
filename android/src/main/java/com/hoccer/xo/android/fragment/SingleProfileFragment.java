@@ -9,6 +9,7 @@ import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -216,6 +217,11 @@ public class SingleProfileFragment extends ProfileFragment
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
                         mContact.setKept(false);
+                        try {
+                            getXoClient().getDatabase().saveContact(mContact);
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
                         getActivity().finish();
                     }
                 },
