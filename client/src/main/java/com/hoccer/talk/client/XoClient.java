@@ -2721,7 +2721,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         TalkRelationship oldRelationShip = clientContact.getClientRelationship();
 
         try {
-            if (oldRelationShip.isFriend() && relationship.isNone()) {
+            keepNearbyAcquaintance(clientContact);
+            if (relationship.isNone() && oldRelationShip != null && (oldRelationShip.isFriend() || oldRelationShip.isBlocked())) {
                 clientContact.setNearbyAcquaintance(false);
             }
             clientContact.updateRelationship(relationship);
