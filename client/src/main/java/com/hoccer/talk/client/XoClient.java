@@ -849,7 +849,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     public void acceptFriend(final TalkClientContact contact) {
         if (contact.isClient()) {
-            contact.setKept(true);
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -2720,7 +2719,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         TalkRelationship oldRelationShip = clientContact.getClientRelationship();
 
         try {
-            keepNearbyAcquaintance(clientContact);
+            if (!relationship.invitedMe()) {
+                keepNearbyAcquaintance(clientContact);
+            }
+            if ((oldRelationShip == null || oldRelationShip.isNone()) && relationship.isFriend()) {
+                clientContact.setKept(true);
+            }
             if (relationship.isNone() && oldRelationShip != null && (oldRelationShip.isFriend() || oldRelationShip.isBlocked())) {
                 clientContact.setNearbyAcquaintance(false);
             }
