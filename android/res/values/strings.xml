@@ -182,6 +182,11 @@
         from and to it will be deleted.
     </string>
 
+    <!-- Contact remove dialog -->
+    <string name="dialog_discard_contact_title">Remove contact?</string>
+    <string name="dialog_discard_contact_message">Are you sure you want to remove this contact?
+    </string>
+
     <!-- Group manage selection dialog -->
     <string name="dialog_manage_group_title">Manage Members</string>
 

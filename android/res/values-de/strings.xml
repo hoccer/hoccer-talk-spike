@@ -171,6 +171,10 @@
     <string name="dialog_delete_contact_message">Bist du sicher, dass du diesen Kontakt löschen möchtest? Alle Nachrichten werden dann unwiderruflich gelöscht.
     </string>
 
+    <!-- Contact remove dialog -->
+    <string name="dialog_discard_contact_title">Kontakt wirklich entfernen?</string>
+    <string name="dialog_discard_contact_message">Bist du sicher, dass du diesen Kontakt löschen möchtest?</string>
+
     <!-- Group manage selection dialog -->
     <string name="dialog_manage_group_title">Gruppenmitglieder verwalten</string>
 

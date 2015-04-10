@@ -125,9 +125,14 @@ public class SingleProfileFragment extends ProfileFragment
             menu.findItem(R.id.menu_profile_delete).setVisible(false);
         } else {
             TalkRelationship relationship = mContact.getClientRelationship();
-            if (relationship == null || (relationship.isInvited() || relationship.invitedMe() || relationship.isNone()) && mContact.isNearby() || (mContact.isKept() && !(relationship.isFriend() || relationship.isBlocked()))) {
+            if (relationship == null || (relationship.isInvited() || relationship.invitedMe() || relationship.isNone()) && mContact.isNearby()) {
                 menu.findItem(R.id.menu_profile_edit).setVisible(false);
                 menu.findItem(R.id.menu_profile_delete).setVisible(false);
+                menu.findItem(R.id.menu_profile_block).setVisible(false);
+                menu.findItem(R.id.menu_profile_unblock).setVisible(false);
+            } else if (mContact.isKept() && !(relationship.isFriend() || relationship.isBlocked())) {
+                menu.findItem(R.id.menu_profile_edit).setVisible(false);
+                menu.findItem(R.id.menu_profile_delete).setVisible(true);
                 menu.findItem(R.id.menu_profile_block).setVisible(false);
                 menu.findItem(R.id.menu_profile_unblock).setVisible(false);
             } else {
@@ -157,26 +162,11 @@ public class SingleProfileFragment extends ProfileFragment
                 isSelectionHandled = true;
                 break;
             case R.id.menu_profile_delete:
-                XoDialogs.showYesNoDialog("ContactDeleteDialog",
-                        R.string.dialog_delete_contact_title,
-                        R.string.dialog_delete_contact_message,
-                        getActivity(),
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int id) {
-                                getXoActivity().getXoClient().deleteContact(mContact);
-                                mContact.setKept(false);
-                                getActivity().finish();
-                            }
-                        },
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int id) {
-
-                            }
-                        }
-                );
-
+                if (mContact.isKept() && !(mContact.getClientRelationship().isFriend() || mContact.getClientRelationship().isBlocked())){
+                    showDiscardContactDialog();
+                } else {
+                    showDeleteContactDialog();
+                }
                 isSelectionHandled = true;
                 break;
             case R.id.menu_profile_edit:
@@ -195,6 +185,48 @@ public class SingleProfileFragment extends ProfileFragment
         return isSelectionHandled;
     }
 
+    private void showDeleteContactDialog() {
+        XoDialogs.showYesNoDialog("ContactDeleteDialog",
+                R.string.dialog_delete_contact_title,
+                R.string.dialog_delete_contact_message,
+                getActivity(),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        getXoActivity().getXoClient().deleteContact(mContact);
+                        mContact.setKept(false);
+                        getActivity().finish();
+                    }
+                },
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+
+                    }
+                }
+        );
+    }
+
+    private void showDiscardContactDialog() {
+        XoDialogs.showYesNoDialog("RemoveContactFromListDialog",
+                R.string.dialog_discard_contact_title,
+                R.string.dialog_discard_contact_message,
+                getActivity(),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        mContact.setKept(false);
+                        getActivity().finish();
+                    }
+                },
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+
+                    }
+                }
+        );
+    }
 
     @Override
     public void onClick(View v) {
