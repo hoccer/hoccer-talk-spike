@@ -9,7 +9,6 @@ import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -131,7 +130,7 @@ public class SingleProfileFragment extends ProfileFragment
                 menu.findItem(R.id.menu_profile_delete).setVisible(false);
                 menu.findItem(R.id.menu_profile_block).setVisible(false);
                 menu.findItem(R.id.menu_profile_unblock).setVisible(false);
-            } else if (mContact.getClientPresence().isKept() && !(relationship.isFriend() || relationship.isBlocked())) {
+            } else if (!relationship.isFriend() && !relationship.isBlocked()) {
                 menu.findItem(R.id.menu_profile_edit).setVisible(false);
                 menu.findItem(R.id.menu_profile_delete).setVisible(true);
                 menu.findItem(R.id.menu_profile_block).setVisible(false);
@@ -163,7 +162,7 @@ public class SingleProfileFragment extends ProfileFragment
                 isSelectionHandled = true;
                 break;
             case R.id.menu_profile_delete:
-                if (mContact.getClientPresence().isKept() && !(mContact.getClientRelationship().isFriend() || mContact.getClientRelationship().isBlocked())){
+                if (!(mContact.getClientRelationship().isFriend() || mContact.getClientRelationship().isBlocked())){
                     showDiscardContactDialog();
                 } else {
                     showDeleteContactDialog();
@@ -215,7 +214,7 @@ public class SingleProfileFragment extends ProfileFragment
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        discardContact();
+                        declineAndDiscardContact();
                         getActivity().finish();
                     }
                 },
@@ -230,6 +229,15 @@ public class SingleProfileFragment extends ProfileFragment
 
     private void deleteAndDiscardContact() {
         getXoClient().deleteContact(mContact);
+        discardContact();
+    }
+
+    private void declineAndDiscardContact() {
+        if (mContact.getClientRelationship() != null && mContact.getClientRelationship().invitedMe()) {
+            getXoClient().declineFriend(mContact);
+        } else if (mContact.getClientRelationship() != null && mContact.getClientRelationship().isInvited()) {
+            getXoClient().disinviteFriend(mContact);
+        }
         discardContact();
     }
 
