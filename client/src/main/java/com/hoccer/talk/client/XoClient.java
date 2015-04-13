@@ -2719,7 +2719,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         TalkRelationship oldRelationShip = clientContact.getClientRelationship();
 
         try {
-            if (immediatelyBecameFriends(newRelationship, oldRelationShip)) {
+            if (becameFriend(newRelationship, oldRelationShip)) {
                 clientContact.setKept(true);
             }
             if (friendshipCancelled(newRelationship, oldRelationShip)) {
@@ -2741,8 +2741,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         return newRelationship.isNone() && oldRelationShip != null && (oldRelationShip.isFriend() || oldRelationShip.isBlocked());
     }
 
-    private boolean immediatelyBecameFriends(TalkRelationship relationship, TalkRelationship oldRelationShip) {
-        return (oldRelationShip == null || oldRelationShip.isNone()) && relationship.isFriend();
+    private boolean becameFriend(TalkRelationship newRelationship, TalkRelationship oldRelationShip) {
+        return (oldRelationShip == null || !(oldRelationShip.isFriend() || oldRelationShip.isBlocked())) && newRelationship.isFriend();
     }
 
     private void updateGroupPresence(TalkGroupPresence groupPresence) {
