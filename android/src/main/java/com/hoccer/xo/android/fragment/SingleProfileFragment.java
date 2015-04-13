@@ -131,7 +131,7 @@ public class SingleProfileFragment extends ProfileFragment
                 menu.findItem(R.id.menu_profile_delete).setVisible(false);
                 menu.findItem(R.id.menu_profile_block).setVisible(false);
                 menu.findItem(R.id.menu_profile_unblock).setVisible(false);
-            } else if (mContact.isKept() && !(relationship.isFriend() || relationship.isBlocked())) {
+            } else if (mContact.getClientPresence().isKept() && !(relationship.isFriend() || relationship.isBlocked())) {
                 menu.findItem(R.id.menu_profile_edit).setVisible(false);
                 menu.findItem(R.id.menu_profile_delete).setVisible(true);
                 menu.findItem(R.id.menu_profile_block).setVisible(false);
@@ -163,7 +163,7 @@ public class SingleProfileFragment extends ProfileFragment
                 isSelectionHandled = true;
                 break;
             case R.id.menu_profile_delete:
-                if (mContact.isKept() && !(mContact.getClientRelationship().isFriend() || mContact.getClientRelationship().isBlocked())){
+                if (mContact.getClientPresence().isKept() && !(mContact.getClientRelationship().isFriend() || mContact.getClientRelationship().isBlocked())){
                     showDiscardContactDialog();
                 } else {
                     showDeleteContactDialog();
@@ -234,7 +234,7 @@ public class SingleProfileFragment extends ProfileFragment
     }
 
     private void discardContact() {
-        mContact.setKept(false);
+        mContact.getClientPresence().setKept(false);
         try {
             getXoClient().getDatabase().saveContact(mContact);
         } catch (SQLException e) {

@@ -66,8 +66,8 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
                     for (final TalkClientContact contact : filteredContacts) {
                         if (contact.isClient() && contact.getClientRelationship() != null && (contact.getClientRelationship().isFriend() || contact.getClientRelationship().isBlocked())) {
                             mChatItems.add(new ClientChatItem(contact, mActivity));
-                        } else if (contact.isClient() && contact.isKept()) {
-                            if (contact.isNearbyAcquaintance()) {
+                        } else if (contact.isClient() && contact.getClientPresence().isKept()) {
+                            if (contact.getClientPresence().isNearbyAcquaintance()) {
                                 mChatItems.add(new NearbyHistoryClientChatItem(contact, mActivity));
                             } else {
                                 mChatItems.add(new HistoryClientChatItem(contact, mActivity));

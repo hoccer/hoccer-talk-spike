@@ -91,9 +91,9 @@ public class ClientContactListAdapter extends ContactListAdapter {
 
         if (contact.getClientRelationship().isFriend() || contact.getClientRelationship().isBlocked() || contact.isNearby()) {
             type = TYPE_PRESENCE;
-        } else if (contact.isKept() && contact.isNearbyAcquaintance()) {
+        } else if (contact.getClientPresence().isKept() && contact.getClientPresence().isNearbyAcquaintance()) {
             type = TYPE_NEARBY_HISTORY;
-        } else if (contact.isKept()) {
+        } else if (contact.getClientPresence().isKept()) {
             type = TYPE_HISTORY;
         } else {
             type = TYPE_SIMPLE;

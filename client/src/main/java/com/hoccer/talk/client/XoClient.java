@@ -1965,9 +1965,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 }
             }
 
-            if (groupContact == null) {
-                keepNearbyAcquaintance(clientContact);
-            }
+            keepNearbyAcquaintance(clientContact);
 
             String messageId = delivery.getMessageId();
             String messageTag = delivery.getMessageTag();
@@ -2012,13 +2010,13 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     private void keepNearbyAcquaintance(TalkClientContact clientContact) throws SQLException {
-        if (clientContact.isNearby() && (
+        if (clientContact.isClient() && clientContact.isNearby() && (
                 clientContact.getClientRelationship() == null
                         || clientContact.getClientRelationship().isNone()
                         || clientContact.getClientRelationship().isInvited()
                         || clientContact.getClientRelationship().invitedMe())) {
-            clientContact.setKept(true);
-            clientContact.setNearbyAcquaintance(true);
+            clientContact.getClientPresence().setKept(true);
+            clientContact.getClientPresence().setNearbyAcquaintance(true);
             mDatabase.saveContact(clientContact);
         }
     }
@@ -2244,9 +2242,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
             messageFailed = false;
 
-            if (groupContact == null) {
-                keepNearbyAcquaintance(senderContact);
-            }
+            keepNearbyAcquaintance(senderContact);
+
         } catch (GeneralSecurityException e) {
             reason = "decryption problem" + e;
             LOG.error("decryption problem", e);
@@ -2720,10 +2717,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
         try {
             if (becameFriend(newRelationship, oldRelationShip)) {
-                clientContact.setKept(true);
+                clientContact.getClientPresence().setKept(true);
             }
             if (friendshipCancelled(newRelationship, oldRelationShip)) {
-                clientContact.setNearbyAcquaintance(false);
+                clientContact.getClientPresence().setNearbyAcquaintance(false);
             }
             clientContact.updateRelationship(newRelationship);
             mDatabase.saveRelationship(clientContact.getClientRelationship());
