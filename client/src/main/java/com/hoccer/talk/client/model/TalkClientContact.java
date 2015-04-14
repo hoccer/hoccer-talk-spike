@@ -29,9 +29,9 @@ public class TalkClientContact implements Serializable {
     public @interface SelfMethodOnly {}
 
     public static final String TYPE_SELF = "self";
+
     public static final String TYPE_CLIENT = "client";
     public static final String TYPE_GROUP = "group";
-
     @DatabaseField(generatedId = true)
     private int clientContactId;
 
@@ -50,9 +50,9 @@ public class TalkClientContact implements Serializable {
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
     private TalkPrivateKey privateKey;
 
-
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
     private TalkClientSelf self;
+
 
     @DatabaseField(canBeNull = true)
     private String clientId;
@@ -163,6 +163,10 @@ public class TalkClientContact implements Serializable {
 
     public boolean isKept() {
         return isClient() && this.clientPresence.isKept();
+    }
+
+    public boolean isNearbyAcquaintance() {
+        return isClient() && this.clientPresence.isNearbyAcquaintance();
     }
 
     public boolean isGroup() {

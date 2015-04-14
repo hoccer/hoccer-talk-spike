@@ -6,7 +6,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.model.TalkGroupPresence;
 
 
 public abstract class ChatItem {
@@ -58,9 +57,9 @@ public abstract class ChatItem {
 
     public static ChatItem create(TalkClientContact contact, Context context) {
         ChatItem chatItem;
-        if (!contact.isFriendOrBlocked() && contact.getClientPresence().isNearbyAcquaintance()) {
+        if (!contact.isFriendOrBlocked() && contact.isNearbyAcquaintance()) {
             chatItem = createNearbyHistoryChatItem(contact, context);
-        } else if (!contact.isFriendOrBlocked()) {
+        } else if (contact.isClient() && !contact.isFriendOrBlocked() || contact.isGroup() && contact.getGroupPresence() != null && contact.getGroupPresence().isKept()) {
             chatItem = createHistoryChatItem(contact, context);
         } else {
             chatItem = createContactChatItem(contact, context);

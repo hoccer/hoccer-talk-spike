@@ -2899,6 +2899,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             clientContact.setCreatedTimeStamp(new Date());
         }
 
+        if (membership.isGroupRemoved() && groupContact.getGroupPresence() != null) {
+            groupContact.getGroupPresence().setState(TalkGroupPresence.STATE_KEPT);
+        }
+
         try {
             // update membership in database
             TalkGroupMembership dbMembership = mDatabase.findMembershipInGroupByClientId(membership.getGroupId(), membership.getClientId());
