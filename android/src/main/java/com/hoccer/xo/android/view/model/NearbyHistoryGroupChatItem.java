@@ -30,6 +30,7 @@ public class NearbyHistoryGroupChatItem extends ChatItem implements SearchAdapte
 
     public NearbyHistoryGroupChatItem() {
         update();
+        setType(ChatItem.TYPE_GROUP_NEARBY_HISTORY);
     }
 
     @Override
