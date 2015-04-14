@@ -24,9 +24,9 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class ClientChatItem extends ChatItem implements SearchAdapter.Searchable {
+public class ContactChatItem extends ChatItem implements SearchAdapter.Searchable {
 
-    private static final Logger LOG = Logger.getLogger(ClientChatItem.class);
+    private static final Logger LOG = Logger.getLogger(ContactChatItem.class);
 
     private final Context mContext;
     private TalkClientContact mContact;
@@ -36,7 +36,7 @@ public class ClientChatItem extends ChatItem implements SearchAdapter.Searchable
     private String mLastMessageText;
     private Date mContactCreationTimeStamp;
 
-    public ClientChatItem(TalkClientContact contact, Context context) {
+    public ContactChatItem(TalkClientContact contact, Context context) {
         mContact = contact;
         mContext = context;
         update();
@@ -71,9 +71,9 @@ public class ClientChatItem extends ChatItem implements SearchAdapter.Searchable
 
     @Override
     public View getView(View view, ViewGroup parent) {
-        if (view == null || view.getTag() == null || (Integer) view.getTag() != ChatItem.TYPE_RELATED) {
-            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat_client, null);
-            view.setTag(ChatItem.TYPE_RELATED);
+        if (view == null || view.getTag() == null || (Integer) view.getTag() != getType()) {
+            view = LayoutInflater.from(parent.getContext()).inflate(getLayout(), null);
+            view.setTag(getType());
         }
 
         return updateView(view);

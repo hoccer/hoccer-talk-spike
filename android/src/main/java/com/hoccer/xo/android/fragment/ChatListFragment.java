@@ -218,13 +218,13 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
         super.onListItemClick(listView, view, position, id);
 
         ChatItem item = ((ChatItem) listView.getItemAtPosition(position));
-        if (item instanceof NearbyHistoryClientChatItem || item instanceof HistoryClientChatItem) {
+        if (item.getType() == ChatItem.TYPE_CLIENT_NEARBY_HISTORY || item.getType() == ChatItem.TYPE_CLIENT_HISTORY) {
             TalkClientContact contact = (TalkClientContact) item.getContent();
             showHistoryClientConversation(contact);
-        } else if (item instanceof ClientChatItem) {
+        } else if (item.getType() == ChatItem.TYPE_RELATED) {
             TalkClientContact contact = (TalkClientContact) item.getContent();
             showContactConversation(contact);
-        } else if (item instanceof NearbyHistoryGroupChatItem) {
+        } else if (item.getType() == ChatItem.TYPE_GROUP_NEARBY_HISTORY) {
             showNearbyHistoryGroupConversation();
         }
     }

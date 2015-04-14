@@ -11,7 +11,9 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
-import com.hoccer.xo.android.view.model.*;
+import com.hoccer.xo.android.view.model.ChatItem;
+import com.hoccer.xo.android.view.model.ContactChatItem;
+import com.hoccer.xo.android.view.model.NearbyHistoryGroupChatItem;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -64,14 +66,9 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
                     mChatItems.clear();
 
                     for (final TalkClientContact contact : filteredContacts) {
-                        if (contact.isGroup() || (contact.isClient() && contact.getClientRelationship() != null && (contact.getClientRelationship().isFriend() || contact.getClientRelationship().isBlocked()))) {
-                            mChatItems.add(new ClientChatItem(contact, mActivity));
-                        } else if (contact.isClient() && contact.getClientPresence().isKept()) {
-                            if (contact.getClientPresence().isNearbyAcquaintance()) {
-                                mChatItems.add(new NearbyHistoryClientChatItem(contact, mActivity));
-                            } else {
-                                mChatItems.add(new HistoryClientChatItem(contact, mActivity));
-                            }
+                        ChatItem chatItem = ChatItem.create(contact, mActivity);
+                        if (chatItem != null) {
+                            mChatItems.add(chatItem);
                         }
                     }
 
@@ -239,7 +236,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
             if (contact == null) {
                 return;
             }
-            ClientChatItem item = (ClientChatItem) findChatItemForContent(contact);
+            ContactChatItem item = (ContactChatItem) findChatItemForContent(contact);
             if (item != null) { // the contact is not in our list so we won't update anything
                 item.update();
 
