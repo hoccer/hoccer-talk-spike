@@ -191,6 +191,7 @@ public class GroupProfileFragment extends ProfileFragment
         MenuItem editGroupItem = menu.findItem(R.id.menu_group_profile_edit);
         MenuItem leaveGroupItem = menu.findItem(R.id.menu_group_profile_leave);
         MenuItem listAttachmentsItem = menu.findItem(R.id.menu_audio_attachment_list);
+        MenuItem removeGroupItem = menu.findItem(R.id.menu_group_profile_remove);
 
         editGroupItem.setVisible(false);
         leaveGroupItem.setVisible(false);
@@ -204,6 +205,8 @@ public class GroupProfileFragment extends ProfileFragment
                 if (mGroup.isGroupJoined()) {
                     leaveGroupItem.setVisible(true);
                     listAttachmentsItem.setVisible(true);
+                } else if (mGroup.getGroupMembership() != null && mGroup.getGroupMembership().isGroupRemoved()) {
+                    removeGroupItem.setVisible(true);
                 }
             }
         }
@@ -228,11 +231,6 @@ public class GroupProfileFragment extends ProfileFragment
                                 getXoActivity().getXoClient().leaveGroup(mGroup.getGroupId());
                                 getActivity().finish();
                             }
-                        },
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int id) {
-                            }
                         });
                 isSelectionHandled = true;
                 break;
@@ -242,10 +240,35 @@ public class GroupProfileFragment extends ProfileFragment
                 startActivity(intent);
                 isSelectionHandled = true;
                 break;
+            case R.id.menu_group_profile_remove:
+                XoDialogs.showYesNoDialog("RemoveGroupDialog",
+                        R.string.dialog_remove_group_title,
+                        R.string.dialog_remove_group_message,
+                        getXoActivity(),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                removeGroup();
+                                getActivity().finish();
+                            }
+                        });
+                isSelectionHandled = true;
+                break;
             default:
                 isSelectionHandled = super.onOptionsItemSelected(item);
         }
         return isSelectionHandled;
+    }
+
+    private void removeGroup() {
+        if (mGroup.getGroupPresence() != null) {
+            mGroup.getGroupPresence().setState(TalkGroupPresence.STATE_DELETED);
+            try {
+                getXoDatabase().saveGroupPresence(mGroup.getGroupPresence());
+            } catch (SQLException e) {
+                LOG.error("SQL error", e);
+            }
+        }
     }
 
     private void saveEditedGroup() {

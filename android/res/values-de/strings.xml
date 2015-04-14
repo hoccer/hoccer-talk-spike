@@ -188,6 +188,8 @@
     <!-- Group leave dialog -->
     <string name="dialog_delete_group_title">Gruppe löschen</string>
     <string name="dialog_delete_group_message">Bist du dir sicher, dass du die Gruppe löschen möchtest?</string>
+    <string name="dialog_remove_group_title">Gruppe entfernen</string>
+    <string name="dialog_remove_group_message">Bist du dir sicher, dass du die Gruppe entfernen möchtest?</string>
     <string name="dialog_leave_group_title">Gruppe verlassen</string>
     <string name="dialog_leave_group_message">Bist du dir sicher, dass du die Gruppe verlassen möchtest? Du musst erneut eingeladen werden, um wieder teilnehmen zu können.
     </string>
@@ -201,6 +203,7 @@
     <string name="menu_group_edit_profile">Gruppe bearbeiten</string>
     <string name="menu_group_profile_leave">Gruppe verlassen</string>
     <string name="menu_group_profile_permanent">Permanente Gruppe erstellen</string>
+    <string name="menu_group_remove">Gruppe entfernen</string>
 
     <string name="location">Standort</string>
     <string name="show_location_instruction">Standort anzeigen</string>

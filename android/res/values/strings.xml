@@ -200,6 +200,8 @@
     <!-- Group leave dialog -->
     <string name="dialog_delete_group_title">Delete group</string>
     <string name="dialog_delete_group_message">Are you sure you want to delete this group?</string>
+    <string name="dialog_remove_group_title">Remove group</string>
+    <string name="dialog_remove_group_message">Are you sure you want to remove this group?</string>
     <string name="dialog_leave_group_title">Leave group</string>
     <string name="dialog_leave_group_message">Are you sure you want to leave this group? You will have to be
         re-invited to participate again.
@@ -214,6 +216,7 @@
     <string name="menu_group_edit_profile">Edit group</string>
     <string name="menu_group_profile_leave">Leave group</string>
     <string name="menu_group_profile_permanent">Create permanent group</string>
+    <string name="menu_group_remove">Remove group</string>
 
     <string name="location">Location</string>
     <string name="show_location_instruction">Use button to show on map</string>
