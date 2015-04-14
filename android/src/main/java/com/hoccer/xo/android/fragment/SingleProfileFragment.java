@@ -193,7 +193,7 @@ public class SingleProfileFragment extends ProfileFragment
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        deleteAndDiscardContact();
+                        deleteContact();
                         getActivity().finish();
                     }
                 },
@@ -227,9 +227,8 @@ public class SingleProfileFragment extends ProfileFragment
         );
     }
 
-    private void deleteAndDiscardContact() {
+    private void deleteContact() {
         getXoClient().deleteContact(mContact);
-        discardContact();
     }
 
     private void declineAndDiscardContact() {
