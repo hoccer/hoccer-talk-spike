@@ -57,23 +57,38 @@ public abstract class ChatItem {
     }
 
     public static ChatItem create(TalkClientContact contact, Context context) {
-        ChatItem chatItem = null;
-
-        if ((contact.isGroup() && contact.getGroupPresence() != null && !TalkGroupPresence.GROUP_TYPE_NEARBY.equals(contact.getGroupPresence().getGroupType()) || (contact.isClient() && contact.getClientRelationship() != null && (contact.getClientRelationship().isFriend() || contact.getClientRelationship().isBlocked())))) {
-            chatItem = new ContactChatItem(contact, context);
-            chatItem.setType(ChatItem.TYPE_RELATED);
-            chatItem.setLayout(R.layout.item_chat_client);
-        } else if (contact.isClient() && contact.getClientPresence().isKept()) {
-            if (contact.getClientPresence().isNearbyAcquaintance()) {
-                chatItem = new ContactChatItem(contact, context);
-                chatItem.setType(ChatItem.TYPE_CLIENT_NEARBY_HISTORY);
-                chatItem.setLayout(R.layout.item_nearby_history_chat_client);
-            } else {
-                chatItem = new ContactChatItem(contact, context);
-                chatItem.setType(ChatItem.TYPE_CLIENT_HISTORY);
-                chatItem.setLayout(R.layout.item_history_chat_client);
-            }
+        ChatItem chatItem;
+        if (!contact.isFriendOrBlocked() && contact.getClientPresence().isNearbyAcquaintance()) {
+            chatItem = createNearbyHistoryChatItem(contact, context);
+        } else if (!contact.isFriendOrBlocked()) {
+            chatItem = createHistoryChatItem(contact, context);
+        } else {
+            chatItem = createContactChatItem(contact, context);
         }
+        return chatItem;
+    }
+
+    private static ChatItem createHistoryChatItem(TalkClientContact contact, Context context) {
+        ChatItem chatItem;
+        chatItem = new ContactChatItem(contact, context);
+        chatItem.setType(ChatItem.TYPE_CLIENT_HISTORY);
+        chatItem.setLayout(R.layout.item_history_chat_client);
+        return chatItem;
+    }
+
+    private static ChatItem createNearbyHistoryChatItem(TalkClientContact contact, Context context) {
+        ChatItem chatItem;
+        chatItem = new ContactChatItem(contact, context);
+        chatItem.setType(ChatItem.TYPE_CLIENT_NEARBY_HISTORY);
+        chatItem.setLayout(R.layout.item_nearby_history_chat_client);
+        return chatItem;
+    }
+
+    private static ChatItem createContactChatItem(TalkClientContact contact, Context context) {
+        ChatItem chatItem;
+        chatItem = new ContactChatItem(contact, context);
+        chatItem.setType(ChatItem.TYPE_RELATED);
+        chatItem.setLayout(R.layout.item_chat_client);
         return chatItem;
     }
 

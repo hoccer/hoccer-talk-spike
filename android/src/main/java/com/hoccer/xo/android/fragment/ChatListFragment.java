@@ -19,7 +19,7 @@ import com.hoccer.xo.android.adapter.SearchAdapter;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.Placeholder;
-import com.hoccer.xo.android.view.model.*;
+import com.hoccer.xo.android.view.model.ChatItem;
 import org.apache.log4j.Logger;
 
 import java.lang.ref.WeakReference;
@@ -191,7 +191,7 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
                 if (contact.isGroup()) {
                     return contact.isGroupJoined() && contact.isGroupExisting() && !(contact.getGroupPresence() != null && (contact.getGroupPresence().isTypeNearby() || contact.getGroupPresence().isKept()));
                 } else if (contact.isClient()) {
-                    return (contact.getClientPresence().isKept() || (contact.getClientRelationship() != null && (contact.getClientRelationship().isFriend() || contact.getClientRelationship().isBlocked())));
+                    return (contact.getClientPresence().isKept() || contact.isFriendOrBlocked());
                 }
                 return false;
             }

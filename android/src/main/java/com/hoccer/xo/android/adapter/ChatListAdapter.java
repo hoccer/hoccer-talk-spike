@@ -67,9 +67,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
 
                     for (final TalkClientContact contact : filteredContacts) {
                         ChatItem chatItem = ChatItem.create(contact, mActivity);
-                        if (chatItem != null) {
-                            mChatItems.add(chatItem);
-                        }
+                        mChatItems.add(chatItem);
                     }
 
                     if (nearbyMessageCount > 0) {
