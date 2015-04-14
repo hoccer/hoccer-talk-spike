@@ -162,7 +162,7 @@ public class SingleProfileFragment extends ProfileFragment
                 isSelectionHandled = true;
                 break;
             case R.id.menu_profile_delete:
-                if (!(mContact.getClientRelationship().isFriend() || mContact.getClientRelationship().isBlocked())){
+                if (!(mContact.getClientRelationship().isFriend() || mContact.getClientRelationship().isBlocked())) {
                     showDiscardContactDialog();
                 } else {
                     showDeleteContactDialog();
@@ -605,6 +605,11 @@ public class SingleProfileFragment extends ProfileFragment
 
     private boolean isCurrentContact(TalkClientContact contact) {
         return mContact == contact || mContact.getClientContactId() == contact.getClientContactId();
+    }
+
+    @Override
+    protected boolean shouldShowChatContainer(int count) {
+        return mContact.isClient() && mContact.getClientRelationship() != null && (mContact.getClientRelationship().isFriend() || mContact.getClientRelationship().isBlocked());
     }
 
     @Override

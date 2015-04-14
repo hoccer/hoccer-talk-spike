@@ -397,6 +397,17 @@ public class GroupProfileFragment extends ProfileFragment
     }
 
     @Override
+    protected boolean shouldShowChatContainer(int count) {
+        int membershipCount = 0;
+        try {
+            membershipCount = XoApplication.get().getXoClient().getDatabase().findMembershipsInGroup(mContact.getGroupId()).size();
+        } catch (SQLException e) {
+            LOG.error("SQL error", e);
+        }
+        return mContact.isGroupJoined() && membershipCount > 1;
+    }
+
+    @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
         if (mGroupMemberAdapter == null) {
             return;

@@ -92,7 +92,7 @@ public abstract class ProfileFragment extends XoFragment implements IXoContactLi
     protected void showMessagingActivity() {
         Intent intent = new Intent(getActivity(), MessagingActivity.class);
         intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, getClientContactId());
-        if (mContact.getClientPresence().isKept() && !(mContact.getClientRelationship().isFriend() || mContact.getClientRelationship().isBlocked())) {
+        if (mContact.isClient() && mContact.getClientPresence().isKept() && !(mContact.getClientRelationship().isFriend() || mContact.getClientRelationship().isBlocked())) {
             intent.putExtra(MessagingActivity.EXTRA_CLIENT_HISTORY, true);
         }
         startActivity(intent);
@@ -108,13 +108,15 @@ public abstract class ProfileFragment extends XoFragment implements IXoContactLi
     }
 
     protected void updateMessageText(int count) {
-        if (count == 0) {
-            mChatContainer.setVisibility(View.GONE);
-        } else {
+        if (shouldShowChatContainer(count)) {
             mChatContainer.setVisibility(View.VISIBLE);
             mChatMessagesText.setText(getResources().getQuantityString(R.plurals.message_count, count, count));
+        } else {
+            mChatContainer.setVisibility(View.GONE);
         }
     }
+
+    protected abstract boolean shouldShowChatContainer(int count);
 
     protected abstract int getClientContactId();
 
