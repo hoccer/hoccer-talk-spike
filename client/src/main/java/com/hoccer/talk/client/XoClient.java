@@ -2724,9 +2724,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             }
             clientContact.updateRelationship(newRelationship);
             mDatabase.saveRelationship(clientContact.getClientRelationship());
+            mDatabase.savePresence(clientContact.getClientPresence());
             mDatabase.saveContact(clientContact);
         } catch (SQLException e) {
             LOG.error("SQL error", e);
+        } catch (NoClientIdInPresenceException e) {
+            LOG.error(e.getMessage(), e);
         }
 
         for (final IXoContactListener listener : mContactListeners) {

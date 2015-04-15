@@ -11,6 +11,7 @@ import android.widget.*;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
+import com.hoccer.talk.client.exceptions.NoClientIdInPresenceException;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
@@ -243,9 +244,11 @@ public class SingleProfileFragment extends ProfileFragment
     private void discardContact() {
         mContact.getClientPresence().setKept(false);
         try {
-            getXoClient().getDatabase().saveContact(mContact);
+            getXoClient().getDatabase().savePresence(mContact.getClientPresence());
         } catch (SQLException e) {
             LOG.error("sql error", e);
+        } catch (NoClientIdInPresenceException e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 
