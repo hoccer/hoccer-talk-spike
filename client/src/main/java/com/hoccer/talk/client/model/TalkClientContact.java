@@ -161,16 +161,16 @@ public class TalkClientContact implements Serializable {
         return isClient() && this.clientRelationship != null && (this.clientRelationship.isFriend() || this.clientRelationship.isBlocked());
     }
 
-    public boolean isKept() {
-        return isClient() && this.clientPresence.isKept();
-    }
-
     public boolean isNearbyAcquaintance() {
         return isClient() && this.clientPresence.isNearbyAcquaintance();
     }
 
+    public boolean isKept() {
+        return isClient() && this.clientPresence != null && this.clientPresence.isKept();
+    }
+
     public boolean isKeptGroup() {
-        return isGroup() && groupPresence != null && groupPresence.isKept();
+        return isGroup() && this.groupPresence != null && this.groupPresence.isKept();
     }
 
     public boolean isGroup() {
