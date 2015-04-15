@@ -59,7 +59,7 @@ public abstract class ChatItem {
         ChatItem chatItem;
         if (!contact.isFriendOrBlocked() && contact.isNearbyAcquaintance()) {
             chatItem = createNearbyHistoryChatItem(contact, context);
-        } else if (contact.isClient() && !contact.isFriendOrBlocked() || contact.isGroup() && contact.getGroupPresence() != null && contact.getGroupPresence().isKept()) {
+        } else if (contact.isClient() && !contact.isFriendOrBlocked() || contact.isKeptGroup()) {
             chatItem = createHistoryChatItem(contact, context);
         } else {
             chatItem = createContactChatItem(contact, context);
