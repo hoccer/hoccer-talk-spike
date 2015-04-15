@@ -593,11 +593,20 @@ public class UpdateAgent extends NotificationDeferrer {
                 LOG.info("requestGroupKeys, calling getEncryptedGroupKeys(" + forGroupId + ") on client for " + forClientIds.length + " client(s)");
                 // temporarily add penalty so this client won't be selected again unless there is no other who can do the work
                 connection.penalizePriorization(1000);
-                newKeyBoxes = rpc.getEncryptedGroupKeys(forGroupId, forSharedKeyId, withSharedKeyIdSalt, forClientIds, withPublicKeyIds);
-                connection.penalizePriorization(-1000);
-                LOG.info("requestGroupKeys, call of getEncryptedGroupKeys(" + forGroupId + ") returned " + newKeyBoxes.length + " items)");
+                try {
+                    newKeyBoxes = rpc.getEncryptedGroupKeys(forGroupId, forSharedKeyId, withSharedKeyIdSalt, forClientIds, withPublicKeyIds);
+                    connection.penalizePriorization(-1000);
+                    LOG.info("requestGroupKeys, call of getEncryptedGroupKeys(" + forGroupId + ") returned " + newKeyBoxes.length + " items)");
+                } catch (Exception e) {
+                    LOG.error("An error occured for calling getEncryptedGroupKeys -> most proably because the connection is actually not valid anymore.");
+                    e.printStackTrace();
+                    // The connection itself is making problems - penalize it marking basically the connection itself as defunct.
+                    connection.penalizePriorization(5000);
+                    newKeyBoxes = new String[0];
+                }
+
             }
-            if (newKeyBoxes != null) {
+            if (newKeyBoxes != null) { // FIXME: This cannot happen!
                 boolean responseLengthOk;
                 if ("RENEW".equals(forSharedKeyId)) {
                     // call return array with two additional
