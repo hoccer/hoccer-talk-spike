@@ -2717,9 +2717,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
         try {
             if (becameFriend(newRelationship, oldRelationShip)) {
+                clientContact.getClientPresence().setKept(false);
+            } else if (friendshipCancelled(newRelationship, oldRelationShip)) {
                 clientContact.getClientPresence().setKept(true);
-            }
-            if (friendshipCancelled(newRelationship, oldRelationShip)) {
                 clientContact.getClientPresence().setNearbyAcquaintance(false);
             }
             clientContact.updateRelationship(newRelationship);
