@@ -2811,7 +2811,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 LOG.error("Can not destroy nearby group since groupPresence is null");
                 return;
             }
-            groupPresence.setState(TalkGroupPresence.STATE_KEPT);
+            groupPresence.setKept(true);
 
             // save group
             mDatabase.saveContact(groupContact);
@@ -2903,8 +2903,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
 
         try {
-            if (membership.isGroupRemoved() && groupContact.getGroupPresence() != null) {
-                groupContact.getGroupPresence().setState(TalkGroupPresence.STATE_KEPT);
+            if ((membership.isGroupRemoved() || clientContact.isSelf() && !membership.isInvolved())) {
+                groupContact.getGroupPresence().setKept(true);
                 mDatabase.saveGroupPresence(groupContact.getGroupPresence());
             }
 

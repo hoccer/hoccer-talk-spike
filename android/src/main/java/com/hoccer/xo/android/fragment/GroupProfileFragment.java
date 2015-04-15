@@ -205,7 +205,7 @@ public class GroupProfileFragment extends ProfileFragment
                 if (mGroup.isGroupJoined()) {
                     leaveGroupItem.setVisible(true);
                     listAttachmentsItem.setVisible(true);
-                } else if (mGroup.getGroupMembership() != null && mGroup.getGroupMembership().isGroupRemoved()) {
+                } else if (mGroup.isKeptGroup()) {
                     removeGroupItem.setVisible(true);
                 }
             }
@@ -262,7 +262,7 @@ public class GroupProfileFragment extends ProfileFragment
 
     private void removeGroup() {
         if (mGroup.getGroupPresence() != null) {
-            mGroup.getGroupPresence().setState(TalkGroupPresence.STATE_DELETED);
+            mGroup.getGroupPresence().setKept(false);
             try {
                 getXoDatabase().saveGroupPresence(mGroup.getGroupPresence());
             } catch (SQLException e) {
