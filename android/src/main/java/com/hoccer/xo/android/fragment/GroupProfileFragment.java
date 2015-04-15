@@ -296,12 +296,17 @@ public class GroupProfileFragment extends ProfileFragment
 
     @Override
     protected void updateMessageText() {
+        super.updateMessageText(getMessageCount());
+    }
+
+    private int getMessageCount() {
+        int count = 0;
         try {
-            int count = (int) XoApplication.get().getXoClient().getDatabase().getMessageCountByContactId(mGroup.getClientContactId());
-            super.updateMessageText(count);
+            count = (int) XoApplication.get().getXoClient().getDatabase().getMessageCountByContactId(mGroup.getClientContactId());
         } catch (SQLException e) {
-            LOG.error("Error fetching message count from database.");
+            LOG.error("SQL Error fetching message count from database.", e);
         }
+        return count;
     }
 
     private void updateContentVisibility() {
@@ -421,13 +426,17 @@ public class GroupProfileFragment extends ProfileFragment
 
     @Override
     protected boolean shouldShowChatContainer(int count) {
-        int membershipCount = 0;
-        try {
-            membershipCount = XoApplication.get().getXoClient().getDatabase().findMembershipsInGroup(mContact.getGroupId()).size();
-        } catch (SQLException e) {
-            LOG.error("SQL error", e);
+        if (mGroup.getGroupPresence() != null && mGroup.getGroupPresence().isKept() && getMessageCount() > 0) {
+            return true;
+        } else {
+            int membershipCount = 0;
+            try {
+                membershipCount = XoApplication.get().getXoClient().getDatabase().findMembershipsInGroup(mContact.getGroupId()).size();
+            } catch (SQLException e) {
+                LOG.error("SQL error", e);
+            }
+            return mContact.isGroupJoined() && membershipCount > 1;
         }
-        return mContact.isGroupJoined() && membershipCount > 1;
     }
 
     @Override
