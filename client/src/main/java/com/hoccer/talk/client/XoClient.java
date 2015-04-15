@@ -2908,6 +2908,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 mDatabase.saveGroupPresence(groupContact.getGroupPresence());
             }
 
+            if (clientContact.isSelf() && membership.isJoined()) {
+                groupContact.getGroupPresence().setKept(false);
+            }
+
             // update membership in database
             TalkGroupMembership dbMembership = mDatabase.findMembershipInGroupByClientId(membership.getGroupId(), membership.getClientId());
 
