@@ -22,7 +22,7 @@ import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.UriUtils;
-import com.hoccer.xo.android.view.chat.ChatMessageItem;
+import com.hoccer.xo.android.view.chat.MessageItem;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
@@ -31,7 +31,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
 
-public class ChatVideoItem extends ChatMessageItem {
+public class ChatVideoItem extends MessageItem {
 
     private final static Logger LOG = Logger.getLogger(ChatVideoItem.class);
 
@@ -82,10 +82,10 @@ public class ChatVideoItem extends ChatMessageItem {
         });
 
         // calc default view size
-        double width_scale_factor = mSimpleAvatarView.getVisibility() == View.VISIBLE ? ChatImageItem.WIDTH_AVATAR_SCALE_FACTOR : ChatImageItem.WIDTH_SCALE_FACTOR;
+        double width_scale_factor = mSimpleAvatarView.getVisibility() == View.VISIBLE ? ImageMessageItem.WIDTH_AVATAR_SCALE_FACTOR : ImageMessageItem.WIDTH_SCALE_FACTOR;
         int maxWidth = (int) (DisplayUtils.getDisplaySize(mContext).x * width_scale_factor);
         int width = maxWidth;
-        int maxHeight = (int) (DisplayUtils.getDisplaySize(mContext).y * ChatImageItem.HEIGHT_SCALE_FACTOR);
+        int maxHeight = (int) (DisplayUtils.getDisplaySize(mContext).y * ImageMessageItem.HEIGHT_SCALE_FACTOR);
         int height = maxHeight;
 
         // retrieve thumbnail path if not set already
@@ -132,7 +132,7 @@ public class ChatVideoItem extends ChatMessageItem {
         Picasso.with(mContext).setLoggingEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
         Picasso.with(mContext).load("file://" + mThumbnailPath)
                 .error(R.drawable.ic_img_placeholder)
-                .resize((int) (width * ChatImageItem.IMAGE_SCALE_FACTOR), (int) (height * ChatImageItem.IMAGE_SCALE_FACTOR))
+                .resize((int) (width * ImageMessageItem.IMAGE_SCALE_FACTOR), (int) (height * ImageMessageItem.IMAGE_SCALE_FACTOR))
                 .centerInside()
                 .into(mTargetView);
         LOG.trace(Picasso.with(mContext).getSnapshot().toString());

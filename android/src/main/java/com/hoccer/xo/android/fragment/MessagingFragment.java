@@ -21,7 +21,7 @@ import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionInterpreter;
 import com.hoccer.xo.android.util.IntentHelper;
-import com.hoccer.xo.android.view.chat.ChatMessageItem;
+import com.hoccer.xo.android.view.chat.MessageItem;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import org.apache.log4j.Logger;
 
@@ -166,7 +166,7 @@ public class MessagingFragment extends XoListFragment
         // Ensure that all items receive the detach call
         if (mMessageListView != null) {
             for (int i = 0; i < mMessageListView.getChildCount(); i++) {
-                ChatMessageItem item = (ChatMessageItem) mMessageListView.getChildAt(i).getTag();
+                MessageItem item = (MessageItem) mMessageListView.getChildAt(i).getTag();
                 if (item != null) {
                     item.detachView();
                 }

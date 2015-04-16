@@ -38,9 +38,9 @@ import java.util.Date;
 /**
  * This class creates and configures layouts for incoming and outgoing messages.
  */
-public class ChatMessageItem implements AttachmentTransferListener {
+public class MessageItem implements AttachmentTransferListener {
 
-    private final static Logger LOG = Logger.getLogger(ChatMessageItem.class);
+    private final static Logger LOG = Logger.getLogger(MessageItem.class);
 
     protected Context mContext;
     protected AttachmentTransferHandler mAttachmentTransferHandler;
@@ -56,7 +56,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
     protected AttachmentTransferControlView mContentTransferControl;
     protected SimpleAvatarView mSimpleAvatarView;
 
-    public ChatMessageItem(Context context, TalkClientMessage message) {
+    public MessageItem(Context context, TalkClientMessage message) {
         super();
         mContext = context;
         mMessage = message;
@@ -131,7 +131,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
      */
     protected void configureViewForMessage(View view) {
         // if there is an old item attached to this view destroy it now
-        ChatMessageItem item = (ChatMessageItem) view.getTag();
+        MessageItem item = (MessageItem) view.getTag();
         if (item != null) {
             item.detachView();
         }
@@ -540,7 +540,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
     }
 
     private void configureContextMenu(View view) {
-        final ChatMessageItem messageItem = this;
+        final MessageItem messageItem = this;
         view.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -561,11 +561,11 @@ public class ChatMessageItem implements AttachmentTransferListener {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ChatMessageItem)) {
+        if (!(o instanceof MessageItem)) {
             return false;
         }
 
-        ChatMessageItem that = (ChatMessageItem) o;
+        MessageItem that = (MessageItem) o;
 
         return mMessage != null && that.mMessage != null && mMessage.equals(that.mMessage);
     }

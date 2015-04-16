@@ -17,14 +17,14 @@ import com.hoccer.xo.android.content.MediaPlaylist;
 import com.hoccer.xo.android.content.SingleItemPlaylist;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
-import com.hoccer.xo.android.view.chat.ChatMessageItem;
+import com.hoccer.xo.android.view.chat.MessageItem;
 
 
-public class ChatAudioItem extends ChatMessageItem implements MediaPlayer.Listener {
+public class AudioMessageItem extends MessageItem implements MediaPlayer.Listener {
 
     private ImageButton mPlayPauseButton;
 
-    public ChatAudioItem(Context context, TalkClientMessage message) {
+    public AudioMessageItem(Context context, TalkClientMessage message) {
         super(context, message);
     }
 

@@ -14,10 +14,10 @@ import com.artcom.hoccer.R;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.content.Clipboard;
+import com.hoccer.xo.android.fragment.HistoryFragment;
 import com.hoccer.xo.android.fragment.MessagingFragment;
-import com.hoccer.xo.android.fragment.NearbyHistoryFragment;
 import com.hoccer.xo.android.util.IntentHelper;
-import com.hoccer.xo.android.view.chat.ChatMessageItem;
+import com.hoccer.xo.android.view.chat.MessageItem;
 import org.apache.log4j.Logger;
 
 
@@ -63,9 +63,9 @@ public class MessagingActivity extends ComposableActivity {
                 LOG.error("invalid contact id");
             } else {
                 if (intent.hasExtra(EXTRA_CLIENT_HISTORY)) {
-                    showNearbyClientHistoryFragment(contactId);
+                    showHistoryFragment(contactId);
                 } else {
-                    showMessageFragment(contactId);
+                    showMessagingFragment(contactId);
                 }
             }
         } else if (intent != null && intent.hasExtra(EXTRA_NEARBY_GROUP_HISTORY)) {
@@ -96,7 +96,7 @@ public class MessagingActivity extends ComposableActivity {
     }
 
     @Override
-    public void showPopupForMessageItem(final ChatMessageItem messageItem, View messageItemView) {
+    public void showPopupForMessageItem(final MessageItem messageItem, View messageItemView) {
         PopupMenu popup = new PopupMenu(this, messageItemView);
         popup.getMenuInflater().inflate(R.menu.popup_menu_messaging, popup.getMenu());
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -108,7 +108,7 @@ public class MessagingActivity extends ComposableActivity {
         popup.show();
     }
 
-    private void popupItemSelected(MenuItem item, ChatMessageItem messageItem) {
+    private void popupItemSelected(MenuItem item, MessageItem messageItem) {
         switch (item.getItemId()) {
             case R.id.menu_copy_message:
                 if (messageItem.getAttachment() != null && messageItem.getAttachment().isContentAvailable()) {
@@ -123,13 +123,13 @@ public class MessagingActivity extends ComposableActivity {
         }
     }
 
-    private void putMessageTextInSystemClipboard(ChatMessageItem messageItem) {
+    private void putMessageTextInSystemClipboard(MessageItem messageItem) {
         ClipboardManager clipboardText = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText("simple text", messageItem.getText());
         clipboardText.setPrimaryClip(clip);
     }
 
-    private void showMessageFragment(int contactId) {
+    private void showMessagingFragment(int contactId) {
         Bundle bundle = new Bundle();
         bundle.putInt(MessagingFragment.ARG_CLIENT_CONTACT_ID, contactId);
 
@@ -141,11 +141,11 @@ public class MessagingActivity extends ComposableActivity {
         fragmentTransaction.commit();
     }
 
-    private void showNearbyClientHistoryFragment(int contactId) {
+    private void showHistoryFragment(int contactId) {
         Bundle bundle = new Bundle();
-        bundle.putInt(NearbyHistoryFragment.ARG_CLIENT_CONTACT_ID, contactId);
+        bundle.putInt(HistoryFragment.ARG_CLIENT_CONTACT_ID, contactId);
 
-        NearbyHistoryFragment fragment = new NearbyHistoryFragment();
+        HistoryFragment fragment = new HistoryFragment();
         fragment.setArguments(bundle);
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
@@ -155,7 +155,7 @@ public class MessagingActivity extends ComposableActivity {
 
     private void showNearbyGroupHistoryFragment() {
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, new NearbyHistoryFragment());
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, new HistoryFragment());
         fragmentTransaction.commit();
     }
 }

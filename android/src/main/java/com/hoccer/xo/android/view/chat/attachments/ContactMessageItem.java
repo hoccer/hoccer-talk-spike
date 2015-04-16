@@ -15,7 +15,7 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.hoccer.xo.android.util.UriUtils;
-import com.hoccer.xo.android.view.chat.ChatMessageItem;
+import com.hoccer.xo.android.view.chat.MessageItem;
 import ezvcard.Ezvcard;
 import ezvcard.VCard;
 import org.apache.log4j.Logger;
@@ -24,13 +24,13 @@ import java.io.IOException;
 import java.io.InputStream;
 
 
-public class ChatContactItem extends ChatMessageItem {
+public class ContactMessageItem extends MessageItem {
 
-    private final static Logger LOG = Logger.getLogger(ChatContactItem.class);
+    private final static Logger LOG = Logger.getLogger(ContactMessageItem.class);
 
     private VCard mVCard;
 
-    public ChatContactItem(Context context, TalkClientMessage message) {
+    public ContactMessageItem(Context context, TalkClientMessage message) {
         super(context, message);
     }
 
