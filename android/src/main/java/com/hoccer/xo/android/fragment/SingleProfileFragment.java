@@ -611,7 +611,7 @@ public class SingleProfileFragment extends ProfileFragment
 
     @Override
     protected boolean shouldShowChatContainer(int count) {
-        return mContact.isClient() && mContact.getClientRelationship() != null && (mContact.getClientRelationship().isFriend() || mContact.getClientRelationship().isBlocked());
+        return (mContact.isClient() && mContact.getClientRelationship() != null && mContact.isFriendOrBlocked()) || mContact.isKept() && count > 0 || mContact.isNearby();
     }
 
     @Override
