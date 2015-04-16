@@ -425,6 +425,8 @@
     <string name="progress_cancelling">Beende..</string>
 
     <string name="nearby">in der Nähe</string>
+    <string name="dialog_delete_account_warning">text coming soon...</string>
+    <string name="dialog_delete_account_title">title coming soo...</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Kontakt</item>
