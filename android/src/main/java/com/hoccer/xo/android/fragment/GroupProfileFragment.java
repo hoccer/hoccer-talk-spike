@@ -698,10 +698,10 @@ public class GroupProfileFragment extends ProfileFragment
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         TalkClientContact contact = (TalkClientContact) adapterView.getItemAtPosition(i);
-        showContactConversation(contact);
+        showChat(contact);
     }
 
-    public void showContactConversation(TalkClientContact contact) {
+    private void showChat(TalkClientContact contact) {
         Intent intent = new Intent(getActivity(), ChatActivity.class);
         intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contact.getClientContactId());
         startActivity(intent);
