@@ -14,8 +14,8 @@ import com.artcom.hoccer.R;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.content.Clipboard;
+import com.hoccer.xo.android.fragment.ChatFragment;
 import com.hoccer.xo.android.fragment.HistoryFragment;
-import com.hoccer.xo.android.fragment.MessagingFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.MessageItem;
 import org.apache.log4j.Logger;
@@ -131,9 +131,9 @@ public class ChatActivity extends ComposableActivity {
 
     private void showChatFragment(int contactId) {
         Bundle bundle = new Bundle();
-        bundle.putInt(MessagingFragment.ARG_CLIENT_CONTACT_ID, contactId);
+        bundle.putInt(ChatFragment.ARG_CLIENT_CONTACT_ID, contactId);
 
-        Fragment fragment = new MessagingFragment();
+        Fragment fragment = new ChatFragment();
         fragment.setArguments(bundle);
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();

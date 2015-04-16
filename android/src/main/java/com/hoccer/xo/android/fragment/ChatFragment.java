@@ -31,13 +31,13 @@ import java.util.List;
 /**
  * Fragment for conversations
  */
-public class MessagingFragment extends XoListFragment
+public class ChatFragment extends XoListFragment
         implements SearchView.OnQueryTextListener,
         XoAdapter.AdapterReloadListener, IXoContactListener {
 
     public static final String ARG_CLIENT_CONTACT_ID = "com.hoccer.xo.android.fragment.ARG_CLIENT_CONTACT_ID";
 
-    private static final Logger LOG = Logger.getLogger(MessagingFragment.class);
+    private static final Logger LOG = Logger.getLogger(ChatFragment.class);
 
     private ListView mMessageListView;
 
