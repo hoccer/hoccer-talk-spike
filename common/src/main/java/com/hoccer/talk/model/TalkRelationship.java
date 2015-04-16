@@ -9,8 +9,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-//import org.jetbrains.annotations.Nullable;
-
 @DatabaseTable(tableName = "relationship")
 public class TalkRelationship {
 

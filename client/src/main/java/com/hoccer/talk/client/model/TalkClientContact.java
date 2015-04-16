@@ -29,15 +29,15 @@ public class TalkClientContact implements Serializable {
     public @interface SelfMethodOnly {}
 
     public static final String TYPE_SELF = "self";
-
     public static final String TYPE_CLIENT = "client";
-
     public static final String TYPE_GROUP = "group";
 
     @DatabaseField(generatedId = true)
     private int clientContactId;
+
     @DatabaseField
     private String contactType;
+
     @Deprecated @DatabaseField
     private boolean deleted;
 
@@ -58,7 +58,6 @@ public class TalkClientContact implements Serializable {
 
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
     private TalkPresence clientPresence;
-
 
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
     private TalkRelationship clientRelationship;

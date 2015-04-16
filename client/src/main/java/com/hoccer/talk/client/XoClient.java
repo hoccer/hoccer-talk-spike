@@ -1944,8 +1944,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         LOG.debug("updateOutgoingDelivery(" + delivery.getMessageId() + ")");
 
         TalkClientContact clientContact = null;
-        TalkClientContact groupContact = null;
         TalkClientMessage clientMessage = null;
+        TalkClientContact groupContact;
         try {
             String receiverId = delivery.getReceiverId();
             if (receiverId != null) {
