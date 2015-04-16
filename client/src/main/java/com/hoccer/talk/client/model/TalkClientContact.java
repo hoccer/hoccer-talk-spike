@@ -189,10 +189,6 @@ public class TalkClientContact implements Serializable {
         return isGroup() && this.groupMembership != null && this.groupMembership.isInvolved();
     }
 
-    public boolean isGroupInvited() {
-        return isGroup() && this.groupMembership != null && this.groupMembership.isInvited();
-    }
-
     public boolean isGroupJoined() {
         return isGroup() && this.groupMembership != null && this.groupMembership.isJoined();
     }
