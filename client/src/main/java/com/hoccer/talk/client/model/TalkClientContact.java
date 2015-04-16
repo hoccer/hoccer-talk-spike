@@ -33,11 +33,11 @@ public class TalkClientContact implements Serializable {
     public static final String TYPE_CLIENT = "client";
 
     public static final String TYPE_GROUP = "group";
+
     @DatabaseField(generatedId = true)
     private int clientContactId;
     @DatabaseField
     private String contactType;
-
     @Deprecated @DatabaseField
     private boolean deleted;
 
@@ -56,9 +56,9 @@ public class TalkClientContact implements Serializable {
     @DatabaseField(canBeNull = true)
     private String clientId;
 
-
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
     private TalkPresence clientPresence;
+
 
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
     private TalkRelationship clientRelationship;
@@ -195,6 +195,10 @@ public class TalkClientContact implements Serializable {
 
     public boolean isGroupJoined() {
         return isGroup() && this.groupMembership != null && this.groupMembership.isJoined();
+    }
+
+    public boolean isNearbyGroup() {
+        return isGroup() && this.groupPresence != null && this.groupPresence.isTypeNearby();
     }
 
     public String getName() {

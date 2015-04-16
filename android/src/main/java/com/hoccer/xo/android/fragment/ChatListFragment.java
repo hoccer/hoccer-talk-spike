@@ -189,7 +189,7 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
             @Override
             public boolean shouldShow(TalkClientContact contact) {
                 if (contact.isGroup()) {
-                    return ((isKeptGroup(contact)) || (contact.isGroupJoined() && contact.isGroupExisting())) && !isNearbyGroup(contact);
+                    return ((contact.isKeptGroup()) || (contact.isGroupJoined() && contact.isGroupExisting())) && !contact.isNearbyGroup();
                 } else if (contact.isClient()) {
                     return contact.isKept() || contact.isFriendOrBlocked();
                 }
@@ -200,14 +200,6 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
         mAdapter = new ChatListAdapter((XoActivity) getActivity(), filter);
 
         setListAdapter(mAdapter);
-    }
-
-    private boolean isKeptGroup(TalkClientContact contact) {
-        return contact.getGroupPresence() != null && contact.getGroupPresence().isKept();
-    }
-
-    private boolean isNearbyGroup(TalkClientContact contact) {
-        return contact.getGroupPresence() != null && contact.getGroupPresence().isTypeNearby();
     }
 
     public void onGroupCreationSucceeded(int contactId) {
