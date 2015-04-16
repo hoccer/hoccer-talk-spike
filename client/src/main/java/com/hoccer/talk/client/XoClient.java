@@ -1945,7 +1945,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
         TalkClientContact clientContact = null;
         TalkClientMessage clientMessage = null;
-        TalkClientContact groupContact;
+        TalkClientContact groupContact = null;
         try {
             String receiverId = delivery.getReceiverId();
             if (receiverId != null) {
@@ -1965,7 +1965,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 }
             }
 
-            keepNearbyAcquaintance(clientContact);
+            if (groupContact == null) {
+                keepNearbyAcquaintance(clientContact);
+            }
 
             String messageId = delivery.getMessageId();
             String messageTag = delivery.getMessageTag();
@@ -1990,6 +1992,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         } catch (SQLException e) {
             LOG.error("SQL error", e);
             return;
+        } catch (NoClientIdInPresenceException e) {
+            LOG.error(e.getMessage(), e);
+            return;
         }
 
         clientMessage.updateOutgoing(delivery);
@@ -2006,18 +2011,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
         for (IXoMessageListener listener : mMessageListeners) {
             listener.onMessageUpdated(clientMessage);
-        }
-    }
-
-    private void keepNearbyAcquaintance(TalkClientContact clientContact) throws SQLException {
-        if (clientContact.isClient() && clientContact.isNearby() && (
-                clientContact.getClientRelationship() == null
-                        || clientContact.getClientRelationship().isNone()
-                        || clientContact.getClientRelationship().isInvited()
-                        || clientContact.getClientRelationship().invitedMe())) {
-            clientContact.getClientPresence().setKept(true);
-            clientContact.getClientPresence().setNearbyAcquaintance(true);
-            mDatabase.saveContact(clientContact);
         }
     }
 
@@ -2242,7 +2235,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
             messageFailed = false;
 
-            keepNearbyAcquaintance(senderContact);
+            if (groupContact == null) {
+                keepNearbyAcquaintance(senderContact);
+            }
 
         } catch (GeneralSecurityException e) {
             reason = "decryption problem" + e;
@@ -2253,6 +2248,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         } catch (SQLException e) {
             reason = "sql error" + e;
             LOG.error("sql error", e);
+        } catch (NoClientIdInPresenceException e) {
+            reason = "No client id in presence" + e;
+            LOG.error("No client id in presence", e);
         }
         if (!messageFailed) {
             if (delivery.getState().equals(TalkDelivery.STATE_DELIVERING)) {
@@ -2292,6 +2290,19 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
 
         sendDownloadAttachmentDeliveryConfirmation(delivery);
+    }
+
+    private void keepNearbyAcquaintance(TalkClientContact clientContact) throws SQLException, NoClientIdInPresenceException {
+        if (clientContact.isClient() && clientContact.isNearby() && (
+                clientContact.getClientRelationship() == null
+                        || clientContact.getClientRelationship().isNone()
+                        || clientContact.getClientRelationship().isInvited()
+                        || clientContact.getClientRelationship().invitedMe())) {
+            clientContact.getClientPresence().setKept(true);
+            clientContact.getClientPresence().setNearbyAcquaintance(true);
+            mDatabase.savePresence(clientContact.getClientPresence());
+            mDatabase.saveContact(clientContact);
+        }
     }
 
     private void decryptMessage(TalkClientMessage clientMessage, TalkDelivery delivery, TalkMessage message) throws GeneralSecurityException, IOException, SQLException {
