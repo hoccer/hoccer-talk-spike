@@ -131,7 +131,7 @@ public class SingleProfileFragment extends ProfileFragment
                 menu.findItem(R.id.menu_profile_delete).setVisible(false);
                 menu.findItem(R.id.menu_profile_block).setVisible(false);
                 menu.findItem(R.id.menu_profile_unblock).setVisible(false);
-            } else if (!relationship.isFriend() && !relationship.isBlocked()) {
+            } else if (!mContact.isFriendOrBlocked()) {
                 menu.findItem(R.id.menu_profile_edit).setVisible(false);
                 menu.findItem(R.id.menu_profile_delete).setVisible(true);
                 menu.findItem(R.id.menu_profile_block).setVisible(false);
@@ -163,10 +163,10 @@ public class SingleProfileFragment extends ProfileFragment
                 isSelectionHandled = true;
                 break;
             case R.id.menu_profile_delete:
-                if (!(mContact.getClientRelationship().isFriend() || mContact.getClientRelationship().isBlocked())) {
-                    showDiscardContactDialog();
-                } else {
+                if (mContact.isFriendOrBlocked()) {
                     showDeleteContactDialog();
+                } else {
+                    showDiscardContactDialog();
                 }
                 isSelectionHandled = true;
                 break;
