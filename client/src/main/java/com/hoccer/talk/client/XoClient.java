@@ -2903,14 +2903,23 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
 
         try {
-            if ((membership.isGroupRemoved() || clientContact.isSelf() && !membership.isInvolved())) {
+
+            TalkGroupMembership oldMemebership = clientContact.getGroupMembership();
+
+
+            if ((membership.isGroupRemoved()  || clientContact.isSelf() && !membership.isInvolved())) {
                 groupContact.getGroupPresence().setKept(true);
-                mDatabase.saveGroupPresence(groupContact.getGroupPresence());
+            }
+
+            if (hasDeclined(oldMemebership ,membership)) {
+                groupContact.getGroupPresence().setKept(false);
             }
 
             if (clientContact.isSelf() && membership.isJoined()) {
                 groupContact.getGroupPresence().setKept(false);
             }
+
+            mDatabase.saveGroupPresence(groupContact.getGroupPresence());
 
             // update membership in database
             TalkGroupMembership dbMembership = mDatabase.findMembershipInGroupByClientId(membership.getGroupId(), membership.getClientId());
@@ -2954,6 +2963,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         for (IXoContactListener listener : mContactListeners) {
             listener.onGroupMembershipChanged(groupContact);
         }
+    }
+
+    private boolean hasDeclined(TalkGroupMembership oldMemebership, TalkGroupMembership newMembership) {
+        return oldMemebership.isInvited() && !newMembership.isInvolved();
     }
 
     private void decryptGroupKey(TalkClientContact group, TalkGroupMembership membership) {
