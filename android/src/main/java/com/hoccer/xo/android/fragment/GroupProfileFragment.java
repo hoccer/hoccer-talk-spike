@@ -426,7 +426,7 @@ public class GroupProfileFragment extends ProfileFragment
 
     @Override
     protected boolean shouldShowChatContainer(int count) {
-        if (mGroup.getGroupPresence() != null && mGroup.getGroupPresence().isKept() && getMessageCount() > 0) {
+        if (mGroup.isKeptGroup() && getMessageCount() > 0) {
             return true;
         } else {
             int membershipCount = 0;
