@@ -2917,16 +2917,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
 
         try {
-
             TalkGroupMembership oldMemebership = groupContact.getGroupMembership();
-
-            if (selfHasDeclined(oldMemebership, newMembership) || selfHasJoinedGroup(newMembership, clientContact)) {
-                groupContact.getGroupPresence().setKept(false);
-            } else if ((newMembership.isGroupRemoved() || selfHasLeftGroup(newMembership, clientContact))) {
-                groupContact.getGroupPresence().setKept(true);
-            }
-
-            mDatabase.saveGroupPresence(groupContact.getGroupPresence());
 
             // update membership in database
             TalkGroupMembership dbMembership = mDatabase.findMembershipInGroupByClientId(newMembership.getGroupId(), newMembership.getClientId());
@@ -2963,6 +2954,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
                 mDatabase.saveContact(clientContact);
             }
+
+            updateGroupKeptState(oldMemebership, newMembership, groupContact, clientContact);
+
         } catch (SQLException e) {
             LOG.error("sql error", e);
         }
@@ -2970,6 +2964,15 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         for (IXoContactListener listener : mContactListeners) {
             listener.onGroupMembershipChanged(groupContact);
         }
+    }
+
+    private void updateGroupKeptState(TalkGroupMembership oldMemebership, TalkGroupMembership newMembership, TalkClientContact groupContact, TalkClientContact clientContact) throws SQLException {
+        if (selfHasDeclined(oldMemebership, newMembership) || selfHasJoinedGroup(newMembership, clientContact)) {
+            groupContact.getGroupPresence().setKept(false);
+        } else if (newMembership.isGroupRemoved() || selfHasLeftGroup(newMembership, clientContact)) {
+            groupContact.getGroupPresence().setKept(true);
+        }
+        mDatabase.saveGroupPresence(groupContact.getGroupPresence());
     }
 
     private boolean selfHasLeftGroup(TalkGroupMembership newMembership, TalkClientContact clientContact) {
