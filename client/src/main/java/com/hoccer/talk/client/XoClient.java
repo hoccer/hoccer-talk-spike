@@ -2904,19 +2904,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
         try {
 
-            TalkGroupMembership oldMemebership = clientContact.getGroupMembership();
+            TalkGroupMembership oldMemebership = groupContact.getGroupMembership();
 
-
-            if ((newMembership.isGroupRemoved()  || clientContact.isSelf() && !newMembership.isInvolved())) {
+            if (selfHasDeclined(oldMemebership, newMembership) || selfHasJoinedGroup(newMembership, clientContact)) {
+                groupContact.getGroupPresence().setKept(false);
+            } else if ((newMembership.isGroupRemoved() || selfHasLeftGroup(newMembership, clientContact))) {
                 groupContact.getGroupPresence().setKept(true);
-            }
-
-            if (hasDeclined(oldMemebership ,newMembership)) {
-                groupContact.getGroupPresence().setKept(false);
-            }
-
-            if (clientContact.isSelf() && newMembership.isJoined()) {
-                groupContact.getGroupPresence().setKept(false);
             }
 
             mDatabase.saveGroupPresence(groupContact.getGroupPresence());
@@ -2965,8 +2958,16 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
-    private boolean hasDeclined(TalkGroupMembership oldMemebership, TalkGroupMembership newMembership) {
-        return oldMemebership.isInvited() && !newMembership.isInvolved();
+    private boolean selfHasLeftGroup(TalkGroupMembership newMembership, TalkClientContact clientContact) {
+        return clientContact.isSelf() && !newMembership.isInvolved();
+    }
+
+    private boolean selfHasJoinedGroup(TalkGroupMembership newMembership, TalkClientContact clientContact) {
+        return clientContact.isSelf() && newMembership.isJoined();
+    }
+
+    private boolean selfHasDeclined(TalkGroupMembership oldMemebership, TalkGroupMembership newMembership) {
+        return oldMemebership != null && oldMemebership.isInvited() && !newMembership.isInvolved();
     }
 
     private void decryptGroupKey(TalkClientContact group, TalkGroupMembership membership) {
