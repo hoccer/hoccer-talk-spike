@@ -47,6 +47,7 @@ public class SingleProfileFragment extends ProfileFragment
     private EditText mNicknameEditText;
     private ImageButton mNicknameEditButton;
     private LinearLayout mInviteButtonContainer;
+    private Button mAccountDeletionButton;
 
     private RelativeLayout mContactsContainer;
     private TextView mContactsText;
@@ -70,6 +71,7 @@ public class SingleProfileFragment extends ProfileFragment
         mContactsContainer = (RelativeLayout) view.findViewById(R.id.inc_profile_contacts);
         mContactsText = (TextView) view.findViewById(R.id.tv_profile_contacts_text);
         mInviteButtonContainer = (LinearLayout) view.findViewById(R.id.inc_profile_request);
+        mAccountDeletionButton = (Button) view.findViewById(R.id.btn_profile_delete_account);
     }
 
     @Override

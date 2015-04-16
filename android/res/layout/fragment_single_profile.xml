@@ -64,6 +64,14 @@
                 android:layout_below="@+id/inc_profile_request"
                 layout="@layout/profile_key_container"
                 style="@style/ProfileContainerStyle"/>
+
+        <include
+                android:id="@+id/inc_profile_account_delete"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/inc_profile_key"
+                layout="@layout/profile_account_delete_container"
+                style="@style/ProfileContainerStyle"/>
     </RelativeLayout>
 </ScrollView>
 
