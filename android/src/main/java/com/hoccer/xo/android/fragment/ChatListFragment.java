@@ -13,7 +13,7 @@ import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.activity.MessagingActivity;
+import com.hoccer.xo.android.activity.ChatActivity;
 import com.hoccer.xo.android.adapter.ChatListAdapter;
 import com.hoccer.xo.android.adapter.SearchAdapter;
 import com.hoccer.xo.android.base.XoActivity;
@@ -228,33 +228,33 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
         ChatItem item = ((ChatItem) listView.getItemAtPosition(position));
         if (item.getType() == ChatItem.TYPE_CLIENT_NEARBY_HISTORY || item.getType() == ChatItem.TYPE_CLIENT_HISTORY) {
             TalkClientContact contact = (TalkClientContact) item.getContent();
-            showHistoryClientConversation(contact);
+            showHistory(contact);
         } else if (item.getType() == ChatItem.TYPE_RELATED) {
             TalkClientContact contact = (TalkClientContact) item.getContent();
-            showContactConversation(contact);
+            showChat(contact);
         } else if (item.getType() == ChatItem.TYPE_GROUP_NEARBY_HISTORY) {
-            showNearbyHistoryGroupConversation();
+            showNearbyGroupHistory();
         }
     }
 
 
-    public void showContactConversation(TalkClientContact contact) {
-        Intent intent = new Intent(getActivity(), MessagingActivity.class);
+    public void showChat(TalkClientContact contact) {
+        Intent intent = new Intent(getActivity(), ChatActivity.class);
         intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contact.getClientContactId());
         startActivity(intent);
     }
 
 
-    private void showHistoryClientConversation(TalkClientContact contact) {
-        Intent intent = new Intent(getActivity(), MessagingActivity.class);
+    private void showHistory(TalkClientContact contact) {
+        Intent intent = new Intent(getActivity(), ChatActivity.class);
         intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contact.getClientContactId());
-        intent.putExtra(MessagingActivity.EXTRA_CLIENT_HISTORY, true);
+        intent.putExtra(ChatActivity.EXTRA_CLIENT_HISTORY, true);
         startActivity(intent);
     }
 
-    private void showNearbyHistoryGroupConversation() {
-        Intent intent = new Intent(getActivity(), MessagingActivity.class);
-        intent.putExtra(MessagingActivity.EXTRA_NEARBY_GROUP_HISTORY, true);
+    private void showNearbyGroupHistory() {
+        Intent intent = new Intent(getActivity(), ChatActivity.class);
+        intent.putExtra(ChatActivity.EXTRA_NEARBY_GROUP_HISTORY, true);
         startActivity(intent);
     }
 

@@ -21,9 +21,9 @@ import com.hoccer.xo.android.view.chat.MessageItem;
 import org.apache.log4j.Logger;
 
 
-public class MessagingActivity extends ComposableActivity {
+public class ChatActivity extends ComposableActivity {
 
-    private static final Logger LOG = Logger.getLogger(MessagingActivity.class);
+    private static final Logger LOG = Logger.getLogger(ChatActivity.class);
 
     public static final String EXTRA_NEARBY_GROUP_HISTORY = "com.hoccer.xo.android.intent.extra.NEARBY_GROUP_HISTORY";
     public static final String EXTRA_CLIENT_HISTORY = "com.hoccer.xo.android.intent.extra.NEARBY_CLIENT_HISTORY";;
@@ -65,7 +65,7 @@ public class MessagingActivity extends ComposableActivity {
                 if (intent.hasExtra(EXTRA_CLIENT_HISTORY)) {
                     showHistoryFragment(contactId);
                 } else {
-                    showMessagingFragment(contactId);
+                    showChatFragment(contactId);
                 }
             }
         } else if (intent != null && intent.hasExtra(EXTRA_NEARBY_GROUP_HISTORY)) {
@@ -129,7 +129,7 @@ public class MessagingActivity extends ComposableActivity {
         clipboardText.setPrimaryClip(clip);
     }
 
-    private void showMessagingFragment(int contactId) {
+    private void showChatFragment(int contactId) {
         Bundle bundle = new Bundle();
         bundle.putInt(MessagingFragment.ARG_CLIENT_CONTACT_ID, contactId);
 

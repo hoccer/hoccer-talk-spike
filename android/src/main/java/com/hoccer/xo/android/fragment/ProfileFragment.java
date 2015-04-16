@@ -12,7 +12,7 @@ import com.hoccer.talk.client.IXoMessageListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.activity.MessagingActivity;
+import com.hoccer.xo.android.activity.ChatActivity;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import org.apache.log4j.Logger;
@@ -90,10 +90,10 @@ public abstract class ProfileFragment extends XoFragment implements IXoContactLi
     }
 
     protected void showMessagingActivity() {
-        Intent intent = new Intent(getActivity(), MessagingActivity.class);
+        Intent intent = new Intent(getActivity(), ChatActivity.class);
         intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, getClientContactId());
         if (mContact.isKept() || mContact.isKeptGroup()) {
-            intent.putExtra(MessagingActivity.EXTRA_CLIENT_HISTORY, true);
+            intent.putExtra(ChatActivity.EXTRA_CLIENT_HISTORY, true);
         }
         startActivity(intent);
     }

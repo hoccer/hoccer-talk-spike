@@ -19,8 +19,8 @@ import com.hoccer.talk.model.TalkGroupPresence;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
+import com.hoccer.xo.android.activity.ChatActivity;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
-import com.hoccer.xo.android.activity.MessagingActivity;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupContactsAdapter;
 import com.hoccer.xo.android.dialog.GroupManageDialog;
@@ -702,7 +702,7 @@ public class GroupProfileFragment extends ProfileFragment
     }
 
     public void showContactConversation(TalkClientContact contact) {
-        Intent intent = new Intent(getActivity(), MessagingActivity.class);
+        Intent intent = new Intent(getActivity(), ChatActivity.class);
         intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contact.getClientContactId());
         startActivity(intent);
     }
