@@ -1374,6 +1374,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                         destroyNearbyGroup(groupContact);
                     } else {
                         if (groupPresence != null) {
+                            if (groupContact.getGroupMembership().isInvolved()) {
+                                groupContact.getGroupPresence().setKept(true);
+                            }
                             groupPresence.setState(TalkGroupPresence.STATE_DELETED);
                             mDatabase.saveGroupPresence(groupPresence);
                         }
