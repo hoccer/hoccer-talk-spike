@@ -1,6 +1,7 @@
 package com.hoccer.xo.android.view.model;
 
 import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -22,7 +23,16 @@ public abstract class ChatItem {
 
     public abstract void update();
 
-    public abstract View getView(View view, ViewGroup parent);
+    public View getView(View view, ViewGroup parent) {
+        if (view == null || view.getTag() == null || (Integer) view.getTag() != getType()) {
+            view = LayoutInflater.from(parent.getContext()).inflate(getLayout(), null);
+            view.setTag(getType());
+        }
+
+        return updateView(view);
+    }
+
+    protected abstract View updateView(View view);
 
     public abstract Object getContent();
 
@@ -64,6 +74,13 @@ public abstract class ChatItem {
         } else {
             chatItem = createContactChatItem(contact, context);
         }
+        return chatItem;
+    }
+
+    public static ChatItem createNearbyGroupHistory() {
+        ChatItem chatItem = new NearbyGroupHistoryChatItem();
+        chatItem.setType(ChatItem.TYPE_GROUP_NEARBY_HISTORY);
+        chatItem.setLayout(R.layout.item_chat_client);
         return chatItem;
     }
 

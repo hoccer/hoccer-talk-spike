@@ -17,9 +17,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-public class NearbyHistoryGroupChatItem extends ChatItem implements SearchAdapter.Searchable {
+public class NearbyGroupHistoryChatItem extends ChatItem implements SearchAdapter.Searchable {
 
-    private static final Logger LOG = Logger.getLogger(NearbyHistoryGroupChatItem.class);
+    private static final Logger LOG = Logger.getLogger(NearbyGroupHistoryChatItem.class);
 
     @Nullable
     private List<TalkClientMessage> mNearbyMessages;
@@ -28,9 +28,8 @@ public class NearbyHistoryGroupChatItem extends ChatItem implements SearchAdapte
     private Date mLastMessageTimeStamp;
     private String mLastMessageText = "";
 
-    public NearbyHistoryGroupChatItem() {
+    public NearbyGroupHistoryChatItem() {
         update();
-        setType(ChatItem.TYPE_GROUP_NEARBY_HISTORY);
     }
 
     @Override
@@ -56,12 +55,7 @@ public class NearbyHistoryGroupChatItem extends ChatItem implements SearchAdapte
     }
 
     @Override
-    public View getView(View view, ViewGroup parent) {
-        if (view == null || view.getTag() == null || (Integer) view.getTag() != ChatItem.TYPE_GROUP_NEARBY_HISTORY) {
-            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat_client, null);
-            view.setTag(ChatItem.TYPE_GROUP_NEARBY_HISTORY);
-        }
-
+    protected View updateView(View view) {
         AvatarView simpleAvatarView = (AvatarView) view.findViewById(R.id.contact_icon);
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
         TextView lastMessageTextView = (TextView) view.findViewById(R.id.contact_last_message);

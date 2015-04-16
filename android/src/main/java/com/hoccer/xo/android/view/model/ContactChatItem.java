@@ -69,16 +69,6 @@ public class ContactChatItem extends ChatItem implements SearchAdapter.Searchabl
         }
     }
 
-    @Override
-    public View getView(View view, ViewGroup parent) {
-        if (view == null || view.getTag() == null || (Integer) view.getTag() != getType()) {
-            view = LayoutInflater.from(parent.getContext()).inflate(getLayout(), null);
-            view.setTag(getType());
-        }
-
-        return updateView(view);
-    }
-
     protected View updateView(View view) {
         AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
