@@ -22,18 +22,18 @@ import java.util.ArrayList;
  * <p/>
  * It is used mostly for selecting users in a group context.
  */
-public class GroupContactsAdapter extends ContactsAdapter {
+public class GroupMemberContactsAdapter extends ContactsAdapter {
 
-    private static final Logger LOG = Logger.getLogger(GroupContactsAdapter.class);
+    private static final Logger LOG = Logger.getLogger(GroupMemberContactsAdapter.class);
 
     @Nullable
     private final String mGroupId;
 
-    public GroupContactsAdapter(XoActivity activity) {
+    public GroupMemberContactsAdapter(XoActivity activity) {
         this(activity, null);
     }
 
-    public GroupContactsAdapter(XoActivity activity, @Nullable String groupId) {
+    public GroupMemberContactsAdapter(XoActivity activity, @Nullable String groupId) {
         super(activity);
         mGroupId = groupId;
     }
@@ -67,6 +67,7 @@ public class GroupContactsAdapter extends ContactsAdapter {
         LOG.debug("updateContact(" + contact.getClientContactId() + ")");
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
         nameView.setText(contact.getNickname());
+
 
         PresenceAvatarView avatarView = (PresenceAvatarView) view.findViewById(R.id.contact_icon);
         avatarView.setContact(contact);
