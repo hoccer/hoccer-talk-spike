@@ -279,6 +279,14 @@ public class GroupProfileFragment extends ProfileFragment
         updateChatContainer();
         updateGroupName();
         updateContentVisibility();
+        updateMemberContentVisibility();
+    }
+
+    private void updateMemberContentVisibility() {
+        if (mGroupMemberAdapter == null || mGroupMemberAdapter.getContacts().isEmpty()) {
+            mGroupMembersContainer.setVisibility(View.GONE);
+            mInviteAllButton.setVisibility(View.GONE);
+        }
     }
 
     private void updateChatContainer() {
