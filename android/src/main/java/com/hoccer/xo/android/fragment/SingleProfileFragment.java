@@ -273,7 +273,9 @@ public class SingleProfileFragment extends ProfileFragment
         builder.setPositiveButton(R.string.common_ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                //getXoClient().deleteAccount(getXoActivity());
+                getXoClient().deleteAccount(getXoActivity());
+                getXoActivity().finish();
+                System.exit(0);
             }
         });
         builder.setNegativeButton(R.string.common_cancel, null);
