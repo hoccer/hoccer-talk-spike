@@ -119,14 +119,14 @@ public abstract class ContactsAdapter extends XoAdapter
         });
     }
 
-    private static List<TalkClientContact> filter(List<TalkClientContact> in, Filter filter) {
-        ArrayList<TalkClientContact> res = new ArrayList<TalkClientContact>();
-        for (TalkClientContact contact : in) {
+    private static List<TalkClientContact> filter(List<TalkClientContact> contacts, Filter filter) {
+        ArrayList<TalkClientContact> result = new ArrayList<TalkClientContact>();
+        for (TalkClientContact contact : contacts) {
             if (filter.shouldShow(contact)) {
-                res.add(contact);
+                result.add(contact);
             }
         }
-        return res;
+        return result;
     }
 
     @Override
@@ -281,38 +281,38 @@ public abstract class ContactsAdapter extends XoAdapter
     public View getView(int position, View convertView, ViewGroup parent) {
         int type = getItemViewType(position);
 
-        View v = convertView;
+        View view = convertView;
         switch (type) {
             case VIEW_TYPE_CLIENT:
-                if (v == null) {
-                    v = mInflater.inflate(getClientLayout(), null);
+                if (view == null) {
+                    view = mInflater.inflate(getClientLayout(), null);
                 }
-                updateContact(v, (TalkClientContact) getItem(position));
+                updateContact(view, (TalkClientContact) getItem(position));
                 break;
             case VIEW_TYPE_GROUP:
-                if (v == null) {
-                    v = mInflater.inflate(getGroupLayout(), null);
+                if (view == null) {
+                    view = mInflater.inflate(getGroupLayout(), null);
                 }
-                updateContact(v, (TalkClientContact) getItem(position));
+                updateContact(view, (TalkClientContact) getItem(position));
                 break;
             case VIEW_TYPE_SEPARATOR:
-                if (v == null) {
-                    v = mInflater.inflate(getSeparatorLayout(), null);
+                if (view == null) {
+                    view = mInflater.inflate(getSeparatorLayout(), null);
                 }
-                updateSeparator(v, position);
+                updateSeparator(view, position);
                 break;
             case VIEW_TYPE_NEARBY_HISTORY:
-                if (v == null) {
-                    v = mInflater.inflate(getNearbyHistoryLayout(), null);
+                if (view == null) {
+                    view = mInflater.inflate(getNearbyHistoryLayout(), null);
                 }
-                updateNearbyHistoryLayout(v);
+                updateNearbyHistoryLayout(view);
                 break;
             default:
-                v = mInflater.inflate(getSeparatorLayout(), null);
+                view = mInflater.inflate(getSeparatorLayout(), null);
                 break;
         }
 
-        return v;
+        return view;
     }
 
     protected abstract int getClientLayout();
