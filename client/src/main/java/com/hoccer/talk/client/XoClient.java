@@ -1374,7 +1374,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                         destroyNearbyGroup(groupContact);
                     } else {
                         if (groupPresence != null) {
-                            if (groupContact.getGroupMembership().isInvolved() && (hasMembers(groupContact) || hasMessages(groupContact))) {
+                            if (groupContact.getGroupMembership().isInvolved() && hasMembersOrMessages(groupContact)) {
                                 groupContact.getGroupPresence().setKept(true);
                             }
                             groupPresence.setState(TalkGroupPresence.STATE_DELETED);
@@ -2970,13 +2970,17 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         if (selfHasDeclined(oldMemebership, newMembership) || selfHasJoinedGroup(newMembership, clientContact)) {
             groupContact.getGroupPresence().setKept(false);
         } else {
-            if (((newMembership.isGroupRemoved() || selfHasLeftGroup(newMembership, clientContact)) && (hasMembers(groupContact) || hasMessages(groupContact)))) {
+            if (((newMembership.isGroupRemoved() || selfHasLeftGroup(newMembership, clientContact)) && hasMembersOrMessages(groupContact))) {
                 groupContact.getGroupPresence().setKept(true);
-            } else {
+            } else if (!hasMembersOrMessages(groupContact)) {
                 groupContact.getGroupPresence().setKept(false);
             }
         }
         mDatabase.saveGroupPresence(groupContact.getGroupPresence());
+    }
+
+    private boolean hasMembersOrMessages(TalkClientContact groupContact) {
+        return hasMembers(groupContact) || hasMessages(groupContact);
     }
 
     private boolean hasMembers(TalkClientContact groupContact) {
