@@ -182,6 +182,11 @@
         from and to it will be deleted.
     </string>
 
+    <!-- Account deletion dialog -->
+    <string name="dialog_delete_account_warning">Do you really want to delete your Account? All your contacts, group memberships and your account will be gone forever. The data already on your phone will also be affected.</string>
+    <string name="button_delete_account_title">Delete Account on Server</string>
+    <string name="dialog_delete_account_ok">Delete</string>
+
     <!-- Group manage selection dialog -->
     <string name="dialog_manage_group_title">Manage Members</string>
 

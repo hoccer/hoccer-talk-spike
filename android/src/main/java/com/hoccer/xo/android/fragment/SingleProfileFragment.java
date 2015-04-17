@@ -1,13 +1,5 @@
 package com.hoccer.xo.android.fragment;
 
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
-import android.view.*;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.*;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
@@ -24,8 +16,31 @@ import com.hoccer.xo.android.activity.MediaBrowserActivity;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.UriUtils;
 import com.squareup.picasso.Picasso;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
+
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.view.ActionMode;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -47,9 +62,10 @@ public class SingleProfileFragment extends ProfileFragment
     private EditText mNicknameEditText;
     private ImageButton mNicknameEditButton;
     private LinearLayout mInviteButtonContainer;
-
+    private Button mAccountDeletionButton;
     private RelativeLayout mContactsContainer;
     private TextView mContactsText;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -70,6 +86,7 @@ public class SingleProfileFragment extends ProfileFragment
         mContactsContainer = (RelativeLayout) view.findViewById(R.id.inc_profile_contacts);
         mContactsText = (TextView) view.findViewById(R.id.tv_profile_contacts_text);
         mInviteButtonContainer = (LinearLayout) view.findViewById(R.id.inc_profile_request);
+        mAccountDeletionButton = (Button) view.findViewById(R.id.btn_profile_delete_account);
     }
 
     @Override
@@ -197,36 +214,61 @@ public class SingleProfileFragment extends ProfileFragment
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.profile_avatar_image) {
-            if (mContact.isEditable()) {
-                if (mContact.getAvatarFilePath() != null) {
-                    XoDialogs.showRadioSingleChoiceDialog("AvatarSelection",
-                            R.string.dialog_avatar_options_title,
-                            new String[]{
-                                    getResources().getString(R.string.dialog_set_avatar_option),
-                                    getResources().getString(R.string.dialog_delete_avatar_option)
-                            },
-                            getActivity(),
-                            new XoDialogs.OnSingleSelectionFinishedListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int id, int selectedItem) {
-                                    switch (selectedItem) {
-                                        case 0: {
-                                            getXoActivity().selectAvatar();
-                                        }
-                                        break;
-                                        case 1: {
-                                            updateAvatar(null);
-                                        }
+        switch (v.getId()) {
+            case R.id.profile_avatar_image:
+                onAvatarClick();
+                break;
+            case R.id.btn_profile_delete_account:
+                onAccountDeletionButtonClick();
+                break;
+        }
+    }
+
+    private void onAvatarClick() {
+        if (mContact.isEditable()) {
+            if (mContact.getAvatarFilePath() != null) {
+                XoDialogs.showRadioSingleChoiceDialog("AvatarSelection",
+                        R.string.dialog_avatar_options_title,
+                        new String[]{
+                                getResources().getString(R.string.dialog_set_avatar_option),
+                                getResources().getString(R.string.dialog_delete_avatar_option)
+                        },
+                        getActivity(),
+                        new XoDialogs.OnSingleSelectionFinishedListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id, int selectedItem) {
+                                switch (selectedItem) {
+                                    case 0: {
+                                        getXoActivity().selectAvatar();
+                                    }
+                                    break;
+                                    case 1: {
+                                        updateAvatar(null);
                                     }
                                 }
                             }
-                    );
-                } else {
-                    getXoActivity().selectAvatar();
-                }
+                        }
+                );
+            } else {
+                getXoActivity().selectAvatar();
             }
         }
+    }
+
+    private void onAccountDeletionButtonClick() {
+        XoDialogs.showPositiveNegativeDialog("AccountDeletionDialog",
+                R.string.button_delete_account_title,
+                R.string.dialog_delete_account_warning,
+                getActivity(),
+                R.string.dialog_delete_account_ok,
+                R.string.common_cancel,
+                new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                getXoClient().deleteAccountAndLocalDatabase(getActivity());
+                XoApplication.restartApplication();
+            }
+        }, null);
     }
 
     @Override
@@ -355,8 +397,10 @@ public class SingleProfileFragment extends ProfileFragment
             }
 
             int clientContactsCount = friendsCount + blockedCount;
-            mContactsText.setText(clientContactsCount + " " + getResources().getQuantityString(R.plurals.profile_contacts_text_friends, clientContactsCount) + "   " +
-                    groupsCount + " " + getResources().getQuantityString(R.plurals.profile_contacts_text_groups, groupsCount));
+            mContactsText.setText(
+                    clientContactsCount + " " + getResources().getQuantityString(R.plurals.profile_contacts_text_friends, clientContactsCount) + "   "
+                            +
+                            groupsCount + " " + getResources().getQuantityString(R.plurals.profile_contacts_text_groups, groupsCount));
         } else {
             mContactsContainer.setVisibility(View.GONE);
         }
@@ -410,7 +454,8 @@ public class SingleProfileFragment extends ProfileFragment
             LOG.error("Error while refreshing client contact: " + contact.getClientId(), e);
         }
 
-        if (contact.getClientRelationship() == null || (contact.getClientRelationship().getState() != null && contact.getClientRelationship().getState().equals(TalkRelationship.STATE_NONE))) {
+        if (contact.getClientRelationship() == null || (contact.getClientRelationship().getState() != null && contact.getClientRelationship()
+                .getState().equals(TalkRelationship.STATE_NONE))) {
             inviteButton.setText(R.string.friend_request_add_as_friend);
             inviteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -418,7 +463,8 @@ public class SingleProfileFragment extends ProfileFragment
                     getXoActivity().getXoClient().inviteFriend(contact);
                 }
             });
-        } else if (contact.getClientRelationship().getState() != null && contact.getClientRelationship().getState().equals(TalkRelationship.STATE_INVITED)) {
+        } else if (contact.getClientRelationship().getState() != null && contact.getClientRelationship().getState()
+                .equals(TalkRelationship.STATE_INVITED)) {
             inviteButton.setText(R.string.friend_request_cancel_invitation);
             inviteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -426,7 +472,8 @@ public class SingleProfileFragment extends ProfileFragment
                     getXoActivity().getXoClient().disinviteFriend(contact);
                 }
             });
-        } else if (contact.getClientRelationship().getState() != null && contact.getClientRelationship().getState().equals(TalkRelationship.STATE_INVITED_ME)) {
+        } else if (contact.getClientRelationship().getState() != null && contact.getClientRelationship().getState()
+                .equals(TalkRelationship.STATE_INVITED_ME)) {
             inviteButton.setText(R.string.friend_request_accept_invitation);
             inviteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -591,7 +638,11 @@ public class SingleProfileFragment extends ProfileFragment
         mNameEditText.setVisibility(View.VISIBLE);
         mNameText.setVisibility(View.INVISIBLE);
         mNameEditText.setText(mNameText.getText());
+        mAccountDeletionButton.setVisibility(View.VISIBLE);
+
         mAvatarImage.setOnClickListener(this);
+        mAccountDeletionButton.setOnClickListener(this);
+
         return true;
     }
 
@@ -608,6 +659,8 @@ public class SingleProfileFragment extends ProfileFragment
         mNameText.setText(newUserName);
         mNameEditText.setVisibility(View.GONE);
         mNameText.setVisibility(View.VISIBLE);
+        mAccountDeletionButton.setVisibility(View.GONE);
+        mAccountDeletionButton.setOnClickListener(null);
         mAvatarImage.setOnClickListener(null);
 
         getXoClient().setClientString(newUserName, "happier");

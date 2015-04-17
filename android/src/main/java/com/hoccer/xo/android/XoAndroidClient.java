@@ -2,7 +2,11 @@ package com.hoccer.xo.android;
 
 import com.hoccer.talk.client.IXoClientHost;
 import com.hoccer.talk.client.XoClient;
+import com.hoccer.xo.android.database.AndroidTalkDatabase;
+
 import org.apache.log4j.Logger;
+
+import android.content.Context;
 
 public class XoAndroidClient extends XoClient {
 
@@ -45,4 +49,10 @@ public class XoAndroidClient extends XoClient {
         mImageUploadMaxPixelCount = imageUploadMaxPixelCount;
         LOG.info("Image encoding quality set to " + mImageUploadEncodingQuality);
     }
+
+    public void deleteAccountAndLocalDatabase(Context context) {
+        super.deleteAccount();
+        context.deleteDatabase(AndroidTalkDatabase.DATABASE_NAME_DEFAULT);
+    }
+
 }
