@@ -65,14 +65,15 @@
                 layout="@layout/profile_key_container"
                 style="@style/ProfileContainerStyle"/>
 
-        <include
-                android:id="@+id/inc_profile_account_delete"
+        <Button
+                android:id="@+id/btn_profile_delete_account"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/inc_profile_key"
                 android:visibility="gone"
-                layout="@layout/profile_account_delete_container"
+                android:text="@string/button_delete_account_title"
                 style="@style/ProfileContainerStyle"/>
+
     </RelativeLayout>
 </ScrollView>
 

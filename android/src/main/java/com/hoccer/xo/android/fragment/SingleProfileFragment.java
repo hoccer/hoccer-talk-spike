@@ -55,27 +55,15 @@ public class SingleProfileFragment extends ProfileFragment
     private static final Logger LOG = Logger.getLogger(SingleProfileFragment.class);
 
     private TextView mNameText;
-
     private EditText mNameEditText;
-
     private ImageView mAvatarImage;
-
     private TextView mKeyText;
-
     private TextView mNicknameTextView;
-
     private EditText mNicknameEditText;
-
     private ImageButton mNicknameEditButton;
-
     private LinearLayout mInviteButtonContainer;
-
     private Button mAccountDeletionButton;
-
-    private View mAccoundDeletionContainer;
-
     private RelativeLayout mContactsContainer;
-
     private TextView mContactsText;
 
 
@@ -99,7 +87,6 @@ public class SingleProfileFragment extends ProfileFragment
         mContactsText = (TextView) view.findViewById(R.id.tv_profile_contacts_text);
         mInviteButtonContainer = (LinearLayout) view.findViewById(R.id.inc_profile_request);
         mAccountDeletionButton = (Button) view.findViewById(R.id.btn_profile_delete_account);
-        mAccoundDeletionContainer = view.findViewById(R.id.inc_profile_account_delete);
     }
 
     @Override
@@ -269,20 +256,19 @@ public class SingleProfileFragment extends ProfileFragment
     }
 
     private void onAccountDeletionButtonClick() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getXoActivity());
-        builder.setPositiveButton(R.string.common_ok, new DialogInterface.OnClickListener() {
+        XoDialogs.showPositiveNegativeDialog("AccountDeletionDialog",
+                R.string.button_delete_account_title,
+                R.string.dialog_delete_account_warning,
+                getActivity(),
+                R.string.dialog_delete_account_ok,
+                R.string.common_cancel,
+                new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                getXoClient().deleteAccount(getXoActivity());
-                getXoActivity().finish();
-                System.exit(0);
+                getXoClient().deleteAccountAndLocalDatabase(getActivity());
+                XoApplication.restartApplication();
             }
-        });
-        builder.setNegativeButton(R.string.common_cancel, null);
-        builder.setMessage(R.string.dialog_delete_account_warning);
-        builder.setTitle(R.string.button_delete_account_title);
-        builder.show();
-
+        }, null);
     }
 
     @Override
@@ -652,7 +638,7 @@ public class SingleProfileFragment extends ProfileFragment
         mNameEditText.setVisibility(View.VISIBLE);
         mNameText.setVisibility(View.INVISIBLE);
         mNameEditText.setText(mNameText.getText());
-        mAccoundDeletionContainer.setVisibility(View.VISIBLE);
+        mAccountDeletionButton.setVisibility(View.VISIBLE);
 
         mAvatarImage.setOnClickListener(this);
         mAccountDeletionButton.setOnClickListener(this);
@@ -673,7 +659,7 @@ public class SingleProfileFragment extends ProfileFragment
         mNameText.setText(newUserName);
         mNameEditText.setVisibility(View.GONE);
         mNameText.setVisibility(View.VISIBLE);
-        mAccoundDeletionContainer.setVisibility(View.GONE);
+        mAccountDeletionButton.setVisibility(View.GONE);
         mAccountDeletionButton.setOnClickListener(null);
         mAvatarImage.setOnClickListener(null);
 

@@ -50,8 +50,9 @@ public class XoAndroidClient extends XoClient {
         LOG.info("Image encoding quality set to " + mImageUploadEncodingQuality);
     }
 
-    public void deleteAccount(Context context) {
+    public void deleteAccountAndLocalDatabase(Context context) {
         super.deleteAccount();
         context.deleteDatabase(AndroidTalkDatabase.DATABASE_NAME_DEFAULT);
     }
+
 }
