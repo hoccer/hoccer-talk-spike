@@ -1374,7 +1374,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                         destroyNearbyGroup(groupContact);
                     } else {
                         if (groupPresence != null) {
-                            if (groupContact.getGroupMembership().isInvolved()) {
+                            if (groupContact.getGroupMembership().isInvolved() && (hasMembers(groupContact) || hasMessages(groupContact))) {
                                 groupContact.getGroupPresence().setKept(true);
                             }
                             groupPresence.setState(TalkGroupPresence.STATE_DELETED);
@@ -2969,10 +2969,34 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     private void updateGroupKeptState(TalkGroupMembership oldMemebership, TalkGroupMembership newMembership, TalkClientContact groupContact, TalkClientContact clientContact) throws SQLException {
         if (selfHasDeclined(oldMemebership, newMembership) || selfHasJoinedGroup(newMembership, clientContact)) {
             groupContact.getGroupPresence().setKept(false);
-        } else if (newMembership.isGroupRemoved() || selfHasLeftGroup(newMembership, clientContact)) {
-            groupContact.getGroupPresence().setKept(true);
+        } else {
+            if (((newMembership.isGroupRemoved() || selfHasLeftGroup(newMembership, clientContact)) && (hasMembers(groupContact) || hasMessages(groupContact)))) {
+                groupContact.getGroupPresence().setKept(true);
+            } else {
+                groupContact.getGroupPresence().setKept(false);
+            }
         }
         mDatabase.saveGroupPresence(groupContact.getGroupPresence());
+    }
+
+    private boolean hasMembers(TalkClientContact groupContact) {
+        try {
+            return mDatabase.findMembershipsInGroupByState(groupContact.getGroupId(), TalkGroupMembership.STATE_INVITED).size() + mDatabase.findMembershipsInGroupByState(groupContact.getGroupId(), TalkGroupMembership.STATE_JOINED).size() > 1;
+        } catch (SQLException e) {
+            LOG.error("SQL error", e);
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private boolean hasMessages(TalkClientContact groupContact) {
+        try {
+            return mDatabase.getMessageCountByContactId(groupContact.getClientContactId()) > 0;
+        } catch (SQLException e) {
+            LOG.error("SQL error", e);
+            e.printStackTrace();
+        }
+        return false;
     }
 
     private boolean selfHasLeftGroup(TalkGroupMembership newMembership, TalkClientContact clientContact) {
