@@ -802,6 +802,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     public void deleteAccount() {
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                mServerRpc.deleteAccount("user request");
+            }
+        });
     }
 
     public void blockContact(final TalkClientContact contact) {

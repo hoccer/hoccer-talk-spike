@@ -280,7 +280,7 @@ public class SingleProfileFragment extends ProfileFragment
         });
         builder.setNegativeButton(R.string.common_cancel, null);
         builder.setMessage(R.string.dialog_delete_account_warning);
-        builder.setTitle(R.string.dialog_delete_account_title);
+        builder.setTitle(R.string.button_delete_account_title);
         builder.show();
 
     }
