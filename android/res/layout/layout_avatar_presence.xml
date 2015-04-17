@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+    <include android:id="@+id/avatar_image" layout="@layout/view_avatar"/>
+
+    <View android:id="@+id/presence_indicator_view_active"
+          android:layout_width="12dp"
+          android:layout_height="12dp"
+          android:visibility="invisible"
+          android:layout_alignLeft="@+id/avatar_image"
+          android:layout_alignStart="@+id/avatar_image"
+          android:layout_alignBottom="@+id/avatar_image"
+          android:background="@drawable/shape_presence_indicator_active"/>
+
+    <View android:id="@+id/presence_indicator_view_inactive"
+          android:layout_width="12dp"
+          android:layout_height="12dp"
+          android:visibility="invisible"
+          android:layout_alignLeft="@+id/avatar_image"
+          android:layout_alignStart="@+id/avatar_image"
+          android:layout_alignBottom="@+id/avatar_image"
+          android:background="@drawable/shape_presence_indicator_inactive"/>
+
+</RelativeLayout>

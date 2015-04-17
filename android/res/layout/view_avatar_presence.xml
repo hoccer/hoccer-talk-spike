@@ -1,27 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-    <include android:id="@+id/avatar_image" layout="@layout/view_avatar"/>
-
-    <View android:id="@+id/presence_indicator_view_active"
-          android:layout_width="12dp"
-          android:layout_height="12dp"
-          android:visibility="invisible"
-          android:layout_alignLeft="@+id/avatar_image"
-          android:layout_alignStart="@+id/avatar_image"
-          android:layout_alignBottom="@+id/avatar_image"
-          android:background="@drawable/shape_presence_indicator_active"/>
-
-    <View android:id="@+id/presence_indicator_view_inactive"
-          android:layout_width="12dp"
-          android:layout_height="12dp"
-          android:visibility="invisible"
-          android:layout_alignLeft="@+id/avatar_image"
-          android:layout_alignStart="@+id/avatar_image"
-          android:layout_alignBottom="@+id/avatar_image"
-          android:background="@drawable/shape_presence_indicator_inactive"/>
-
-</RelativeLayout>
+<com.hoccer.xo.android.view.avatar.PresenceAvatarView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:custom="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/contact_icon"
+        android:clickable="true"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        custom:cornerRadius="65"
+        custom:defaultAvatarImageUrl="@drawable/avatar_default_contact"
+        tools:showIn="@layout/item_chat_client"/>
