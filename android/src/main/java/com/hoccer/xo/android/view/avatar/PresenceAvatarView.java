@@ -8,7 +8,6 @@ import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.view.avatar.AvatarView;
 
 public class PresenceAvatarView extends AvatarView implements IXoContactListener {
 
@@ -18,7 +17,7 @@ public class PresenceAvatarView extends AvatarView implements IXoContactListener
     private boolean mIsAttachedToWindow;
 
     public PresenceAvatarView(Context context, AttributeSet attrs) {
-        super(context, attrs, R.layout.view_avatar_presence);
+        super(context, attrs, R.layout.layout_avatar_presence);
         mPresenceIndicatorActive = this.findViewById(R.id.presence_indicator_view_active);
         mPresenceIndicatorInactive = this.findViewById(R.id.presence_indicator_view_inactive);
     }

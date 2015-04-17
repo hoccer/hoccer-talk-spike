@@ -1,20 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:custom="http://schemas.android.com/apk/res-auto"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="15dp">
 
-    <com.hoccer.xo.android.view.avatar.PresenceAvatarView
-            android:id="@+id/contact_icon"
-            android:clickable="true"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            custom:cornerRadius="45"
-            custom:defaultAvatarImageUrl="@drawable/avatar_default_contact"
-            android:layout_centerVertical="true"
-            style="@style/AppBaseTheme.Contact.Avatar"/>
+    <FrameLayout android:layout_width="45dp"
+          android:layout_height="45dp"
+          android:id="@+id/avatar_layout"/>
 
     <TextView
             android:id="@+id/contact_name"
@@ -26,7 +19,7 @@
             android:maxLines="1"
             android:singleLine="true"
             android:layout_marginRight="85dp"
-            android:layout_toRightOf="@+id/contact_icon"
+            android:layout_toRightOf="@+id/avatar_layout"
             android:layout_centerVertical="true"
             style="@style/AppBaseTheme.Contact.Name"/>
 
