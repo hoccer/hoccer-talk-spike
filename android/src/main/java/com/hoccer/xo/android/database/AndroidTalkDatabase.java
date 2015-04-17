@@ -31,7 +31,7 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
 
     private static final int DATABASE_VERSION = 26;
 
-    private static final String DATABASE_NAME_DEFAULT = "hoccer-talk.db";
+    public static final String DATABASE_NAME_DEFAULT = "hoccer-talk.db";
 
     private static AndroidTalkDatabase sInstance;
 

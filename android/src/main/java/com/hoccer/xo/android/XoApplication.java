@@ -350,6 +350,10 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         return sIncomingExecutor;
     }
 
+    public static void restartApplication() {
+        android.os.Process.killProcess(android.os.Process.myPid());
+    }
+
     private static void renameHoccerClassicAttachmentDirectory() {
         if (sExternalStorage.list() != null) {
             if (Arrays.asList(sExternalStorage.list()).contains(HOCCER_CLASSIC_ATTACHMENTS_DIRECTORY)) {

@@ -291,13 +291,9 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
         XoDialogs.showOkDialog("BackupRestoredDialog", mActivity.getString(R.string.restore_success_title), message, mActivity, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                restartApplication();
+                XoApplication.restartApplication();
             }
         });
-    }
-
-    private static void restartApplication() {
-        android.os.Process.killProcess(android.os.Process.myPid());
     }
 
     private void handleRestoreCanceled() {
