@@ -1,6 +1,5 @@
 package com.hoccer.xo.android.fragment;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -499,9 +498,9 @@ public class GroupProfileFragment extends ProfileFragment
                 break;
             case R.id.profile_group_button_invite_all:
                 if (mContactsToDisinviteAsFriend.isEmpty()) {
-                    inviteAllMemberAsFriends();
+                    inviteAllMembersAsFriends();
                 } else {
-                    disinviteAllMemberAsFriends();
+                    disinviteAllMembersAsFriends();
                 }
                 break;
         }
@@ -543,7 +542,7 @@ public class GroupProfileFragment extends ProfileFragment
         }
     }
 
-    private void inviteAllMemberAsFriends() {
+    private void inviteAllMembersAsFriends() {
         if (mContactsToInviteAsFriend.isEmpty()) {
             return;
         }
@@ -555,7 +554,7 @@ public class GroupProfileFragment extends ProfileFragment
         updateInviteButton();
     }
 
-    private void disinviteAllMemberAsFriends() {
+    private void disinviteAllMembersAsFriends() {
         for (TalkClientContact contact : mContactsToDisinviteAsFriend) {
             getXoClient().disinviteFriend(contact);
         }
