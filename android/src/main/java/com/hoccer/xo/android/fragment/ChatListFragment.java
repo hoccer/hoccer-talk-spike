@@ -229,13 +229,11 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
         }
     }
 
-
     public void showChat(TalkClientContact contact) {
         Intent intent = new Intent(getActivity(), ChatActivity.class);
         intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contact.getClientContactId());
         startActivity(intent);
     }
-
 
     private void showHistory(TalkClientContact contact) {
         Intent intent = new Intent(getActivity(), ChatActivity.class);
