@@ -21,7 +21,9 @@
             android:clipToPadding="false"
             android:clipChildren="false">
 
-        <include layout="@layout/view_avatar_history"/>
+        <include layout="@layout/view_avatar_history"
+                android:layout_width="48dp"
+                android:layout_height="48dp"/>
 
         <TextView
                 android:id="@+id/contact_unseen_messages"

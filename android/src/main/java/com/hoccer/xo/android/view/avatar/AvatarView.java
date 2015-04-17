@@ -155,14 +155,15 @@ public abstract class AvatarView extends LinearLayout {
     }
 
     public static AvatarView inflate(TalkClientContact contact, Context context) {
-        AvatarView avatarView;
+        int layoutId;
         if (!contact.isFriendOrBlocked() && contact.isNearbyAcquaintance()) {
-            avatarView = (AvatarView) LayoutInflater.from(context).inflate(R.layout.view_avatar_nearby_history, null);
+            layoutId = R.layout.view_avatar_nearby_history;
         } else if (contact.isClient() && !contact.isFriendOrBlocked() || contact.isKeptGroup()) {
-            avatarView = (AvatarView) LayoutInflater.from(context).inflate(R.layout.view_avatar_history, null);
+            layoutId = R.layout.view_avatar_history;
         } else {
-            avatarView = (AvatarView) LayoutInflater.from(context).inflate(R.layout.view_avatar_presence, null);
+            layoutId = R.layout.view_avatar_presence;
         }
+        AvatarView avatarView = (AvatarView) LayoutInflater.from(context).inflate(layoutId, null);
         avatarView.setContact(contact);
         return avatarView;
     }

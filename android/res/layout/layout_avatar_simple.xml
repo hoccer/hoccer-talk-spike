@@ -4,6 +4,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-    <include android:id="@+id/avatar_image" layout="@layout/view_avatar"/>
+    <include android:id="@+id/avatar_image" layout="@layout/layout_avatar"/>
 
 </RelativeLayout>
