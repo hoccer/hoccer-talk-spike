@@ -1,11 +1,13 @@
 package com.hoccer.xo.android.adapter;
 
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.CheckedTextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.view.avatar.AvatarView;
 import com.hoccer.xo.android.view.avatar.SimpleAvatarView;
 import org.apache.log4j.Logger;
 
@@ -65,8 +67,8 @@ public class GroupManagementContactsAdapter extends ContactsAdapter {
         CheckedTextView checkedTextView = (CheckedTextView) view.findViewById(R.id.contact_name_checked);
         checkedTextView.setText(contact.getNickname());
 
-        SimpleAvatarView simpleAvatarView = (SimpleAvatarView) view.findViewById(R.id.contact_icon);
-        simpleAvatarView.setContact(contact);
+        ViewGroup avatarContainer = (ViewGroup) view.findViewById(R.id.fl_avatar);
+        avatarContainer.addView(AvatarView.inflate(contact, mActivity));
 
         try {
             TalkGroupMembership membership = mDatabase.findMembershipInGroupByClientId(mGroup.getGroupId(), contact.getClientId());
