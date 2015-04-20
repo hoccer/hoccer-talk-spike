@@ -587,7 +587,7 @@ public class UpdateAgent extends NotificationDeferrer {
             }
             ITalkRpcClient rpc = connection.getClientRpc();
             LOG.info("requestGroupKeys, acquiring lock for calling getEncryptedGroupKeys(" + forGroupId + ") on client for " + forClientIds.length + " client(s)");
-            String[] newKeyBoxes;
+            String[] newKeyBoxes = null;
             // serialize encrypted key request for one client
             synchronized (connection.keyRequestLock) {
                 LOG.info("requestGroupKeys, calling getEncryptedGroupKeys(" + forGroupId + ") on client for " + forClientIds.length + " client(s)");
@@ -600,13 +600,9 @@ public class UpdateAgent extends NotificationDeferrer {
                 } catch (Exception e) {
                     LOG.error("An error occured for calling getEncryptedGroupKeys -> most proably because the connection is actually not valid anymore.");
                     e.printStackTrace();
-                    // The connection itself is making problems - penalize it marking basically the connection itself as defunct.
-                    connection.penalizePriorization(5000);
-                    newKeyBoxes = new String[0];
                 }
-
             }
-            if (newKeyBoxes != null) { // FIXME: This cannot happen!
+            if (newKeyBoxes != null) {
                 boolean responseLengthOk;
                 if ("RENEW".equals(forSharedKeyId)) {
                     // call return array with two additional
