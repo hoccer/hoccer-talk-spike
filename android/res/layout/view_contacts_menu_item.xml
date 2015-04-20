@@ -19,7 +19,7 @@
             android:layout_marginLeft="20dp"
             android:layout_gravity="start"
             android:visibility="gone"
-            android:background="@drawable/unconfirmed_invitations_badge_menu"
+            android:background="@drawable/shape_unconfirmed_invitations_badge_menu"
             android:textSize="10sp"
             android:layout_width="16sp"
             android:layout_height="16sp"

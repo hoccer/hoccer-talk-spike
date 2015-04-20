@@ -24,7 +24,7 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
-import com.hoccer.xo.android.view.AvatarView;
+import com.hoccer.xo.android.view.avatar.SimpleAvatarView;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferHandler;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferListener;
@@ -38,9 +38,9 @@ import java.util.Date;
 /**
  * This class creates and configures layouts for incoming and outgoing messages.
  */
-public class ChatMessageItem implements AttachmentTransferListener {
+public class MessageItem implements AttachmentTransferListener {
 
-    private final static Logger LOG = Logger.getLogger(ChatMessageItem.class);
+    private final static Logger LOG = Logger.getLogger(MessageItem.class);
 
     protected Context mContext;
     protected AttachmentTransferHandler mAttachmentTransferHandler;
@@ -54,9 +54,9 @@ public class ChatMessageItem implements AttachmentTransferListener {
     protected RelativeLayout mAttachmentView;
     protected LinearLayout mContentWrapper;
     protected AttachmentTransferControlView mContentTransferControl;
-    protected AvatarView mAvatarView;
+    protected SimpleAvatarView mSimpleAvatarView;
 
-    public ChatMessageItem(Context context, TalkClientMessage message) {
+    public MessageItem(Context context, TalkClientMessage message) {
         super();
         mContext = context;
         mMessage = message;
@@ -131,24 +131,24 @@ public class ChatMessageItem implements AttachmentTransferListener {
      */
     protected void configureViewForMessage(View view) {
         // if there is an old item attached to this view destroy it now
-        ChatMessageItem item = (ChatMessageItem) view.getTag();
+        MessageItem item = (MessageItem) view.getTag();
         if (item != null) {
             item.detachView();
         }
 
-        mAvatarView = (AvatarView) view.findViewById(R.id.av_message_avatar);
+        mSimpleAvatarView = (SimpleAvatarView) view.findViewById(R.id.av_message_avatar);
         TextView messageTime = (TextView) view.findViewById(R.id.tv_message_time);
         TextView messageText = (TextView) view.findViewById(R.id.tv_message_text);
         TextView messageContactInfo = (TextView) view.findViewById(R.id.tv_message_contact_info);
         TextView messageDeliveryInfo = (TextView) view.findViewById(R.id.tv_message_delivery_info);
 
         // Adjust layout for incoming / outgoing message
-        setAvatar(mAvatarView, mMessage.getSenderContact());
+        setAvatar(mSimpleAvatarView, mMessage.getSenderContact());
         if (mMessage.isIncoming()) {
             if (mMessage.getConversationContact().isGroup()) {
-                mAvatarView.setVisibility(View.VISIBLE);
+                mSimpleAvatarView.setVisibility(View.VISIBLE);
             } else {
-                mAvatarView.setVisibility(View.GONE);
+                mSimpleAvatarView.setVisibility(View.GONE);
             }
             updateIncomingMessageStatus(view);
 
@@ -175,7 +175,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
             messageText.setLayoutParams(layoutParams);
 
         } else {
-            mAvatarView.setVisibility(View.GONE);
+            mSimpleAvatarView.setVisibility(View.GONE);
             updateOutgoingMessageStatus(view);
 
             messageContactInfo.setVisibility(View.GONE);
@@ -362,7 +362,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
         return calendar.getTimeInMillis();
     }
 
-    private void setAvatar(AvatarView avatarView, final TalkClientContact sendingContact) {
+    private void setAvatar(SimpleAvatarView avatarView, final TalkClientContact sendingContact) {
         avatarView.setContact(sendingContact);
         avatarView.setVisibility(View.VISIBLE);
         if (sendingContact != null) {
@@ -540,7 +540,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
     }
 
     private void configureContextMenu(View view) {
-        final ChatMessageItem messageItem = this;
+        final MessageItem messageItem = this;
         view.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -561,11 +561,11 @@ public class ChatMessageItem implements AttachmentTransferListener {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ChatMessageItem)) {
+        if (!(o instanceof MessageItem)) {
             return false;
         }
 
-        ChatMessageItem that = (ChatMessageItem) o;
+        MessageItem that = (MessageItem) o;
 
         return mMessage != null && that.mMessage != null && mMessage.equals(that.mMessage);
     }

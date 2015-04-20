@@ -3,6 +3,7 @@ package com.hoccer.xo.android.fragment;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
+import com.hoccer.talk.client.exceptions.NoClientIdInPresenceException;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
@@ -147,8 +148,13 @@ public class SingleProfileFragment extends ProfileFragment
                 menu.findItem(R.id.menu_profile_delete).setVisible(false);
                 menu.findItem(R.id.menu_profile_block).setVisible(false);
                 menu.findItem(R.id.menu_profile_unblock).setVisible(false);
+            } else if (!mContact.isFriendOrBlocked()) {
+                menu.findItem(R.id.menu_profile_edit).setVisible(false);
+                menu.findItem(R.id.menu_profile_delete).setVisible(true);
+                menu.findItem(R.id.menu_profile_block).setVisible(false);
+                menu.findItem(R.id.menu_profile_unblock).setVisible(false);
             } else {
-                if (relationship == null || relationship.isBlocked()) { // todo != null correct
+                if (relationship.isBlocked()) {
                     menu.findItem(R.id.menu_profile_block).setVisible(false);
                     menu.findItem(R.id.menu_profile_unblock).setVisible(true);
                     menu.findItem(R.id.menu_audio_attachment_list).setVisible(true);
@@ -174,25 +180,11 @@ public class SingleProfileFragment extends ProfileFragment
                 isSelectionHandled = true;
                 break;
             case R.id.menu_profile_delete:
-                XoDialogs.showYesNoDialog("ContactDeleteDialog",
-                        R.string.dialog_delete_contact_title,
-                        R.string.dialog_delete_contact_message,
-                        getActivity(),
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int id) {
-                                getXoActivity().getXoClient().deleteContact(mContact);
-                                getActivity().finish();
-                            }
-                        },
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int id) {
-
-                            }
-                        }
-                );
-
+                if (mContact.isFriendOrBlocked()) {
+                    showDeleteContactDialog();
+                } else {
+                    showDiscardContactDialog();
+                }
                 isSelectionHandled = true;
                 break;
             case R.id.menu_profile_edit:
@@ -211,6 +203,71 @@ public class SingleProfileFragment extends ProfileFragment
         return isSelectionHandled;
     }
 
+    private void showDeleteContactDialog() {
+        XoDialogs.showYesNoDialog("ContactDeleteDialog",
+                R.string.dialog_delete_contact_title,
+                R.string.dialog_delete_contact_message,
+                getActivity(),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        deleteContact();
+                        getActivity().finish();
+                    }
+                },
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+
+                    }
+                }
+        );
+    }
+
+    private void showDiscardContactDialog() {
+        XoDialogs.showYesNoDialog("RemoveContactFromListDialog",
+                R.string.dialog_discard_contact_title,
+                R.string.dialog_discard_contact_message,
+                getActivity(),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        declineAndDiscardContact();
+                        getActivity().finish();
+                    }
+                },
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+
+                    }
+                }
+        );
+    }
+
+    private void deleteContact() {
+        getXoClient().deleteContact(mContact);
+    }
+
+    private void declineAndDiscardContact() {
+        if (mContact.getClientRelationship() != null && mContact.getClientRelationship().invitedMe()) {
+            getXoClient().declineFriend(mContact);
+        } else if (mContact.getClientRelationship() != null && mContact.getClientRelationship().isInvited()) {
+            getXoClient().disinviteFriend(mContact);
+        }
+        discardContact();
+    }
+
+    private void discardContact() {
+        mContact.getClientPresence().setKept(false);
+        try {
+            getXoClient().getDatabase().savePresence(mContact.getClientPresence());
+        } catch (SQLException e) {
+            LOG.error("sql error", e);
+        } catch (NoClientIdInPresenceException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
 
     @Override
     public void onClick(View v) {
@@ -411,7 +468,6 @@ public class SingleProfileFragment extends ProfileFragment
             mChatContainer.setVisibility(View.GONE);
         } else {
             updateMessageText();
-            mChatContainer.setVisibility(View.VISIBLE);
         }
     }
 
@@ -454,8 +510,7 @@ public class SingleProfileFragment extends ProfileFragment
             LOG.error("Error while refreshing client contact: " + contact.getClientId(), e);
         }
 
-        if (contact.getClientRelationship() == null || (contact.getClientRelationship().getState() != null && contact.getClientRelationship()
-                .getState().equals(TalkRelationship.STATE_NONE))) {
+        if (contact.getClientRelationship() == null || contact.getClientRelationship().isNone()) {
             inviteButton.setText(R.string.friend_request_add_as_friend);
             inviteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -463,8 +518,7 @@ public class SingleProfileFragment extends ProfileFragment
                     getXoActivity().getXoClient().inviteFriend(contact);
                 }
             });
-        } else if (contact.getClientRelationship().getState() != null && contact.getClientRelationship().getState()
-                .equals(TalkRelationship.STATE_INVITED)) {
+        } else if (contact.getClientRelationship().isInvited()) {
             inviteButton.setText(R.string.friend_request_cancel_invitation);
             inviteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -472,8 +526,7 @@ public class SingleProfileFragment extends ProfileFragment
                     getXoActivity().getXoClient().disinviteFriend(contact);
                 }
             });
-        } else if (contact.getClientRelationship().getState() != null && contact.getClientRelationship().getState()
-                .equals(TalkRelationship.STATE_INVITED_ME)) {
+        } else if (contact.getClientRelationship().invitedMe()) {
             inviteButton.setText(R.string.friend_request_accept_invitation);
             inviteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -598,6 +651,11 @@ public class SingleProfileFragment extends ProfileFragment
 
     private boolean isCurrentContact(TalkClientContact contact) {
         return mContact == contact || mContact.getClientContactId() == contact.getClientContactId();
+    }
+
+    @Override
+    protected boolean shouldShowChatContainer(int count) {
+        return (mContact.isClient() && mContact.getClientRelationship() != null && mContact.isFriendOrBlocked()) || mContact.isKept() && count > 0 || mContact.isNearby();
     }
 
     @Override

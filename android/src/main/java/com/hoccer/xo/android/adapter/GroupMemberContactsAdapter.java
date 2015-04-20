@@ -3,12 +3,13 @@ package com.hoccer.xo.android.adapter;
 import android.content.res.Resources;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.view.AvatarView;
+import com.hoccer.xo.android.view.avatar.AvatarView;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,18 +23,18 @@ import java.util.ArrayList;
  * <p/>
  * It is used mostly for selecting users in a group context.
  */
-public class GroupContactsAdapter extends ContactsAdapter {
+public class GroupMemberContactsAdapter extends ContactsAdapter {
 
-    private static final Logger LOG = Logger.getLogger(GroupContactsAdapter.class);
+    private static final Logger LOG = Logger.getLogger(GroupMemberContactsAdapter.class);
 
     @Nullable
     private final String mGroupId;
 
-    public GroupContactsAdapter(XoActivity activity) {
+    public GroupMemberContactsAdapter(XoActivity activity) {
         this(activity, null);
     }
 
-    public GroupContactsAdapter(XoActivity activity, @Nullable String groupId) {
+    public GroupMemberContactsAdapter(XoActivity activity, @Nullable String groupId) {
         super(activity);
         mGroupId = groupId;
     }
@@ -68,9 +69,9 @@ public class GroupContactsAdapter extends ContactsAdapter {
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
         nameView.setText(contact.getNickname());
 
-        AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
-        avatarView.setContact(contact);
-        avatarView.setOnClickListener(new View.OnClickListener() {
+        ViewGroup avatarContainer = (ViewGroup) view.findViewById(R.id.fl_avatar);
+        avatarContainer.addView(AvatarView.inflate(contact, mActivity));
+        avatarContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mActivity.showContactProfile(contact);

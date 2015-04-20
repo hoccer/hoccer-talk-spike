@@ -19,7 +19,7 @@
             android:textSize="10dp"
             tools:ignore="HardcodedText"/>
 
-    <com.hoccer.xo.android.view.AvatarView
+    <com.hoccer.xo.android.view.avatar.SimpleAvatarView
             android:id="@+id/av_message_avatar"
             android:padding="2dp"
             android:layout_width="45dp"

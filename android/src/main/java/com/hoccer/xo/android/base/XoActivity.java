@@ -40,8 +40,7 @@ import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.content.ContentSelection;
 import com.hoccer.xo.android.content.selector.ImageSelector;
 import com.hoccer.xo.android.fragment.DeviceContactsInvitationFragment;
-import com.hoccer.xo.android.util.IntentHelper;
-import com.hoccer.xo.android.view.chat.ChatMessageItem;
+import com.hoccer.xo.android.view.chat.MessageItem;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import net.hockeyapp.android.CrashManager;
 import net.hockeyapp.android.CrashManagerListener;
@@ -511,17 +510,6 @@ public abstract class XoActivity extends FragmentActivity {
                 .setAction(GroupProfileActivity.ACTION_CREATE));
     }
 
-    public void showContactConversation(TalkClientContact contact) {
-        showContactConversation(contact.getClientContactId());
-    }
-
-    public void showContactConversation(int contactId) {
-        LOG.debug("showContactConversation(" + contactId + ")");
-        Intent intent = new Intent(this, MessagingActivity.class);
-        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contactId);
-        startActivity(intent);
-    }
-
     public void showPairing() {
         LOG.debug("showPairing()");
         XoDialogs.showSingleChoiceDialog(
@@ -584,7 +572,7 @@ public abstract class XoActivity extends FragmentActivity {
         mAvatarSelection = ContentRegistry.get(this).selectAvatar(this, REQUEST_SELECT_AVATAR);
     }
 
-    public void showPopupForMessageItem(ChatMessageItem messageItem, View messageItemView) {
+    public void showPopupForMessageItem(MessageItem messageItem, View messageItemView) {
     }
 
     /**

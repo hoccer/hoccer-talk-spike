@@ -18,7 +18,7 @@ import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.view.AvatarView;
+import com.hoccer.xo.android.view.avatar.SimpleAvatarView;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.log4j.Logger;
@@ -169,14 +169,9 @@ public class GroupContactListAdapter extends ContactListAdapter {
         updateContactsAndView();
     }
 
-    @Override
-    public void onGroupMembershipChanged(TalkClientContact contact) {
-        updateContactsAndView();
-    }
-
     private ViewHolder createAndInitViewHolder(View convertView) {
         ViewHolder viewHolder = new ViewHolder();
-        viewHolder.avatarView = (AvatarView) convertView.findViewById(R.id.contact_icon);
+        viewHolder.avatarView = (SimpleAvatarView) convertView.findViewById(R.id.contact_icon);
         viewHolder.contactNameTextView = (TextView) convertView.findViewById(R.id.contact_name);
         viewHolder.invitedMeLayout = (LinearLayout) convertView.findViewById(R.id.ll_invited_me);
         viewHolder.acceptButton = (Button) convertView.findViewById(R.id.btn_accept);
@@ -186,7 +181,7 @@ public class GroupContactListAdapter extends ContactListAdapter {
     }
 
     private class ViewHolder {
-        AvatarView avatarView;
+        SimpleAvatarView avatarView;
         TextView contactNameTextView;
         LinearLayout invitedMeLayout;
         Button acceptButton;

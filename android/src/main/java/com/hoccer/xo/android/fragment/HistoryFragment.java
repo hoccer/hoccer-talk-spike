@@ -7,24 +7,28 @@ import android.database.DataSetObserver;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.adapter.NearbyChatAdapter;
+import com.hoccer.xo.android.adapter.HistoryAdapter;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.view.chat.ChatMessageItem;
+import com.hoccer.xo.android.view.chat.MessageItem;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 
-public class NearbyArchiveFragment extends ListFragment {
+public class HistoryFragment extends ListFragment {
 
-    static final Logger LOG = Logger.getLogger(NearbyArchiveFragment.class);
+    static final Logger LOG = Logger.getLogger(HistoryFragment.class);
+    public static final String ARG_CLIENT_CONTACT_ID = "com.hoccer.xo.android.fragment.ARG_CLIENT_CONTACT_ID";
 
-    private NearbyChatAdapter mAdapter;
+    private HistoryAdapter mAdapter;
 
     private final DataSetObserver mDataSetObserver = new DataSetObserver() {
         @Override
@@ -58,7 +62,7 @@ public class NearbyArchiveFragment extends ListFragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (view.getTag().equals(TalkClientMessage.TYPE_SEPARATOR)) {
-                    final ChatMessageItem chatItem = mAdapter.getItem(position);
+                    final MessageItem chatItem = mAdapter.getItem(position);
                     XoDialogs.showYesNoDialog("ConfirmDeletion",
                             R.string.dialog_confirm_nearby_deletion_title,
                             R.string.dialog_confirm_nearby_deletion_message,
@@ -86,7 +90,19 @@ public class NearbyArchiveFragment extends ListFragment {
             }
         });
 
-        mAdapter = new NearbyChatAdapter(getListView(), (XoActivity) getActivity());
+        if (getArguments() != null && getArguments().getInt(ARG_CLIENT_CONTACT_ID, 0) > 0) {
+            int contactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
+            try {
+                TalkClientContact contact = XoApplication.get().getXoClient().getDatabase().findContactById(contactId);
+                mAdapter = new HistoryAdapter(getListView(), (XoActivity) getActivity(), contact);
+            } catch (SQLException e) {
+                LOG.error("Client contact with id '" + contactId + "' does not exist", e);
+                return;
+            }
+        } else if (getArguments() == null) {
+            mAdapter = new HistoryAdapter(getListView(), (XoActivity) getActivity(), null);
+        }
+
         mAdapter.onCreate();
         setListAdapter(mAdapter);
     }

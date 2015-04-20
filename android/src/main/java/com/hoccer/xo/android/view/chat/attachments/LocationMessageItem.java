@@ -17,7 +17,7 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.hoccer.xo.android.util.UriUtils;
-import com.hoccer.xo.android.view.chat.ChatMessageItem;
+import com.hoccer.xo.android.view.chat.MessageItem;
 import org.apache.log4j.Logger;
 
 import java.io.FileInputStream;
@@ -25,11 +25,11 @@ import java.io.IOException;
 import java.io.InputStream;
 
 
-public class ChatLocationItem extends ChatMessageItem {
+public class LocationMessageItem extends MessageItem {
 
-    private final static Logger LOG = Logger.getLogger(ChatLocationItem.class);
+    private final static Logger LOG = Logger.getLogger(LocationMessageItem.class);
 
-    public ChatLocationItem(Context context, TalkClientMessage message) {
+    public LocationMessageItem(Context context, TalkClientMessage message) {
         super(context, message);
     }
 

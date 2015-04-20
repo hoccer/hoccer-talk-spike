@@ -21,7 +21,7 @@ import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.GroupProfileActivity;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
-import com.hoccer.xo.android.adapter.GroupContactsAdapter;
+import com.hoccer.xo.android.adapter.GroupMemberContactsAdapter;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.util.UriUtils;
 import com.squareup.picasso.Picasso;
@@ -87,7 +87,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
         mGroupNameEdit = (EditText) view.findViewById(R.id.profile_group_name_edit);
         mGroupCreateButton = (Button) view.findViewById(R.id.profile_group_button_create);
         TextView groupMembersTitle = (TextView) view.findViewById(R.id.profile_group_members_title);
-        ListView groupMembersList = (ListView) view.findViewById(R.id.profile_group_members_list);
+        ListView groupMemberList = (ListView) view.findViewById(R.id.profile_group_members_list);
 
         mAvatarImageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -132,7 +132,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
             public void afterTextChanged(Editable editable) {}
         });
 
-        mGroupMemberAdapter = new GroupContactsAdapter(getXoActivity());
+        mGroupMemberAdapter = new GroupMemberContactsAdapter(getXoActivity());
         mGroupMemberAdapter.setFilter(new ContactsAdapter.Filter() {
             @Override
             public boolean shouldShow(TalkClientContact contact) {
@@ -140,11 +140,11 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
             }
         });
         mGroupMemberAdapter.onCreate();
-        groupMembersList.setAdapter(mGroupMemberAdapter);
+        groupMemberList.setAdapter(mGroupMemberAdapter);
 
         if (mContactsToInvite.isEmpty()) {
             groupMembersTitle.setVisibility(View.GONE);
-            groupMembersList.setVisibility(View.GONE);
+            groupMemberList.setVisibility(View.GONE);
         }
 
         updateAvatarView(null);

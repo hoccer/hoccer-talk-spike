@@ -159,6 +159,12 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         showContactConversation(contactId);
     }
 
+    public void showContactConversation(int contactId) {
+        Intent intent = new Intent(this, ChatActivity.class);
+        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contactId);
+        startActivity(intent);
+    }
+
     private void handlePushMessageIntent(Intent intent) {
         String message = intent.getStringExtra(IntentHelper.EXTRA_PUSH_MESSAGE);
         XoDialogs.showOkDialog("PushMessage", "", message, this);

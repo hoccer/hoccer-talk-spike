@@ -13,12 +13,13 @@ import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.activity.MessagingActivity;
+import com.hoccer.xo.android.activity.ChatActivity;
 import com.hoccer.xo.android.adapter.ChatListAdapter;
 import com.hoccer.xo.android.adapter.SearchAdapter;
 import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.Placeholder;
-import com.hoccer.xo.android.view.model.BaseChatItem;
+import com.hoccer.xo.android.view.model.ChatItem;
 import org.apache.log4j.Logger;
 
 import java.lang.ref.WeakReference;
@@ -100,7 +101,7 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
         super.onCreateContextMenu(menu, view, menuInfo);
         if (menuInfo != null) {
             AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-            Object object = ((BaseChatItem) mAdapter.getItem(info.position)).getContent();
+            Object object = ((ChatItem) mAdapter.getItem(info.position)).getContent();
             if (object instanceof TalkClientContact) {
                 MenuInflater inflater = getActivity().getMenuInflater();
                 inflater.inflate(R.menu.context_menu_contacts, menu);
@@ -150,7 +151,7 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
     }
 
     private void deleteChatHistoryAt(int position) {
-        Object item = ((BaseChatItem) mAdapter.getItem(position)).getContent();
+        Object item = ((ChatItem) mAdapter.getItem(position)).getContent();
         if (item instanceof TalkClientContact) {
             clearConversationForContact((TalkClientContact) item);
         } else if (item instanceof String) {
@@ -188,16 +189,16 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
             @Override
             public boolean shouldShow(TalkClientContact contact) {
                 if (contact.isGroup()) {
-                    return contact.isGroupJoined() && contact.isGroupExisting() && !(contact.getGroupPresence() != null && (contact.getGroupPresence().isTypeNearby() || contact.getGroupPresence().isKept()));
+                    return ((contact.isKeptGroup()) || (contact.isGroupJoined() && contact.isGroupExisting())) && !contact.isNearbyGroup();
                 } else if (contact.isClient()) {
-                    return contact.isClientRelated() && (contact.getClientRelationship().isFriend() || contact.getClientRelationship().isBlocked());
+                    return contact.isKept() || contact.isFriendOrBlocked();
                 }
-
                 return false;
             }
         };
 
         mAdapter = new ChatListAdapter((XoActivity) getActivity(), filter);
+
         setListAdapter(mAdapter);
     }
 
@@ -216,20 +217,35 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
     public void onListItemClick(ListView listView, View view, int position, long id) {
         super.onListItemClick(listView, view, position, id);
 
-        Object item = ((BaseChatItem) listView.getItemAtPosition(position)).getContent();
-        if (item instanceof TalkClientContact) {
-            TalkClientContact contact = (TalkClientContact) item;
-            if (contact.isGroup() && contact.isGroupInvited()) {
-                ((XoActivity) getActivity()).showContactProfile(contact);
-            } else {
-                ((XoActivity) getActivity()).showContactConversation(contact);
-            }
+        ChatItem item = ((ChatItem) listView.getItemAtPosition(position));
+        if (item.getType() == ChatItem.TYPE_CLIENT_NEARBY_HISTORY || item.getType() == ChatItem.TYPE_CLIENT_HISTORY) {
+            TalkClientContact contact = (TalkClientContact) item.getContent();
+            showHistory(contact);
+        } else if (item.getType() == ChatItem.TYPE_RELATED) {
+            TalkClientContact contact = (TalkClientContact) item.getContent();
+            showChat(contact);
+        } else if (item.getType() == ChatItem.TYPE_GROUP_NEARBY_HISTORY) {
+            showNearbyGroupHistory();
         }
-        if (item instanceof String) { // item can only be an instance of string if the user pressed on the nearby saved option
-            Intent intent = new Intent(getActivity(), MessagingActivity.class);
-            intent.putExtra(MessagingActivity.EXTRA_NEARBY_ARCHIVE, true);
-            startActivity(intent);
-        }
+    }
+
+    public void showChat(TalkClientContact contact) {
+        Intent intent = new Intent(getActivity(), ChatActivity.class);
+        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contact.getClientContactId());
+        startActivity(intent);
+    }
+
+    private void showHistory(TalkClientContact contact) {
+        Intent intent = new Intent(getActivity(), ChatActivity.class);
+        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contact.getClientContactId());
+        intent.putExtra(ChatActivity.EXTRA_CLIENT_HISTORY, true);
+        startActivity(intent);
+    }
+
+    private void showNearbyGroupHistory() {
+        Intent intent = new Intent(getActivity(), ChatActivity.class);
+        intent.putExtra(ChatActivity.EXTRA_NEARBY_GROUP_HISTORY, true);
+        startActivity(intent);
     }
 
     @Override
@@ -243,7 +259,8 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
     }
 
     @Override
-    public void onPageSelected() {}
+    public void onPageSelected() {
+    }
 
     @Override
     public void onPageUnselected() {
@@ -251,11 +268,14 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
     }
 
     @Override
-    public void onPageResume() {}
+    public void onPageResume() {
+    }
 
     @Override
-    public void onPagePause() {}
+    public void onPagePause() {
+    }
 
     @Override
-    public void onPageScrollStateChanged(int state) {}
+    public void onPageScrollStateChanged(int state) {
+    }
 }
