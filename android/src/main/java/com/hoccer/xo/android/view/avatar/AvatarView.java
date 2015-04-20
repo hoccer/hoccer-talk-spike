@@ -158,7 +158,7 @@ public abstract class AvatarView extends LinearLayout {
         int layoutId;
         if (!contact.isFriendOrBlocked() && contact.isNearbyAcquaintance()) {
             layoutId = R.layout.view_avatar_nearby_history;
-        } else if (contact.isClient() && !contact.isFriendOrBlocked() || contact.isKeptGroup()) {
+        } else if (!(contact.isFriendOrBlocked() || contact.isNearby()) || contact.isKeptGroup()) {
             layoutId = R.layout.view_avatar_history;
         } else {
             layoutId = R.layout.view_avatar_presence;
