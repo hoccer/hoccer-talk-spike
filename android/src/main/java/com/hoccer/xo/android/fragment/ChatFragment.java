@@ -21,7 +21,7 @@ import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionInterpreter;
 import com.hoccer.xo.android.util.IntentHelper;
-import com.hoccer.xo.android.view.chat.ChatMessageItem;
+import com.hoccer.xo.android.view.chat.MessageItem;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import org.apache.log4j.Logger;
 
@@ -31,13 +31,13 @@ import java.util.List;
 /**
  * Fragment for conversations
  */
-public class MessagingFragment extends XoListFragment
+public class ChatFragment extends XoListFragment
         implements SearchView.OnQueryTextListener,
         XoAdapter.AdapterReloadListener, IXoContactListener {
 
     public static final String ARG_CLIENT_CONTACT_ID = "com.hoccer.xo.android.fragment.ARG_CLIENT_CONTACT_ID";
 
-    private static final Logger LOG = Logger.getLogger(MessagingFragment.class);
+    private static final Logger LOG = Logger.getLogger(ChatFragment.class);
 
     private ListView mMessageListView;
 
@@ -166,7 +166,7 @@ public class MessagingFragment extends XoListFragment
         // Ensure that all items receive the detach call
         if (mMessageListView != null) {
             for (int i = 0; i < mMessageListView.getChildCount(); i++) {
-                ChatMessageItem item = (ChatMessageItem) mMessageListView.getChildAt(i).getTag();
+                MessageItem item = (MessageItem) mMessageListView.getChildAt(i).getTag();
                 if (item != null) {
                     item.detachView();
                 }

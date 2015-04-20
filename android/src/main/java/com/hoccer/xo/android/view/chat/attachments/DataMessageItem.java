@@ -4,12 +4,12 @@ import android.content.Context;
 import android.view.View;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.xo.android.view.chat.ChatMessageItem;
+import com.hoccer.xo.android.view.chat.MessageItem;
 
 
-public class ChatDataItem extends ChatMessageItem {
+public class DataMessageItem extends MessageItem {
 
-    public ChatDataItem(Context context, TalkClientMessage message) {
+    public DataMessageItem(Context context, TalkClientMessage message) {
         super(context, message);
     }
 

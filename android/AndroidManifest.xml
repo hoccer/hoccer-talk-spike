@@ -127,7 +127,7 @@
         </activity>
 
         <activity
-                android:name="com.hoccer.xo.android.activity.MessagingActivity"
+                android:name="com.hoccer.xo.android.activity.ChatActivity"
                 android:label="@string/actionbar_default_title"
                 android:windowSoftInputMode="stateHidden"
                 android:exported="true"

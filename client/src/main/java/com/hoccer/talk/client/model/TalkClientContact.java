@@ -1,16 +1,13 @@
 package com.hoccer.talk.client.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hoccer.talk.client.XoTransfer;
-import com.hoccer.talk.crypto.AESCryptor;
 import com.hoccer.talk.model.*;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
-import org.apache.commons.codec.binary.Base64;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
-import java.nio.charset.Charset;
-import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Set;
 
@@ -52,7 +49,6 @@ public class TalkClientContact implements Serializable {
 
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
     private TalkPrivateKey privateKey;
-
 
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
     private TalkClientSelf self;
@@ -160,6 +156,22 @@ public class TalkClientContact implements Serializable {
         return isClient() && this.clientRelationship != null && this.clientRelationship.isFriend();
     }
 
+    public boolean isFriendOrBlocked() {
+        return isClient() && this.clientRelationship != null && (this.clientRelationship.isFriend() || this.clientRelationship.isBlocked());
+    }
+
+    public boolean isNearbyAcquaintance() {
+        return isClient() && this.clientPresence.isNearbyAcquaintance();
+    }
+
+    public boolean isKept() {
+        return isClient() && this.clientPresence != null && this.clientPresence.isKept();
+    }
+
+    public boolean isKeptGroup() {
+        return isGroup() && this.groupPresence != null && this.groupPresence.isKept();
+    }
+
     public boolean isGroup() {
         return this.contactType.equals(TYPE_GROUP);
     }
@@ -176,12 +188,12 @@ public class TalkClientContact implements Serializable {
         return isGroup() && this.groupMembership != null && this.groupMembership.isInvolved();
     }
 
-    public boolean isGroupInvited() {
-        return isGroup() && this.groupMembership != null && this.groupMembership.isInvited();
-    }
-
     public boolean isGroupJoined() {
         return isGroup() && this.groupMembership != null && this.groupMembership.isJoined();
+    }
+
+    public boolean isNearbyGroup() {
+        return isGroup() && this.groupPresence != null && this.groupPresence.isTypeNearby();
     }
 
     public String getName() {

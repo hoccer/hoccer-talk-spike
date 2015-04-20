@@ -1,13 +1,14 @@
 package com.hoccer.xo.android.view.model;
 
-import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.adapter.SearchAdapter;
-import com.hoccer.xo.android.view.AvatarView;
+import com.hoccer.xo.android.view.avatar.AvatarView;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,10 +17,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+public class NearbyGroupHistoryChatItem extends ChatItem implements SearchAdapter.Searchable {
 
-public class NearbyHistoryChatItem extends BaseChatItem implements SearchAdapter.Searchable {
-
-    private static final Logger LOG = Logger.getLogger(NearbyHistoryChatItem.class);
+    private static final Logger LOG = Logger.getLogger(NearbyGroupHistoryChatItem.class);
 
     @Nullable
     private List<TalkClientMessage> mNearbyMessages;
@@ -28,7 +28,7 @@ public class NearbyHistoryChatItem extends BaseChatItem implements SearchAdapter
     private Date mLastMessageTimeStamp;
     private String mLastMessageText = "";
 
-    public NearbyHistoryChatItem() {
+    public NearbyGroupHistoryChatItem() {
         update();
     }
 
@@ -55,8 +55,8 @@ public class NearbyHistoryChatItem extends BaseChatItem implements SearchAdapter
     }
 
     @Override
-    protected View configure(Context context, View view) {
-        AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
+    protected View updateView(View view) {
+        AvatarView simpleAvatarView = (AvatarView) view.findViewById(R.id.contact_icon);
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
         TextView lastMessageTextView = (TextView) view.findViewById(R.id.contact_last_message);
         TextView lastMessageTimeView = (TextView) view.findViewById(R.id.contact_time);
@@ -67,8 +67,8 @@ public class NearbyHistoryChatItem extends BaseChatItem implements SearchAdapter
         lastMessageTextView.setText(mLastMessageText);
         setUnseenMessages(unseenView);
 
-        avatarView.setAvatarImage(R.drawable.avatar_default_location);
-        avatarView.setClickable(false);
+        simpleAvatarView.setAvatarImage(R.drawable.avatar_default_location);
+        simpleAvatarView.setClickable(false);
 
         return view;
     }
@@ -87,7 +87,6 @@ public class NearbyHistoryChatItem extends BaseChatItem implements SearchAdapter
     public long getContactCreationTimeStamp() {
         return 0;
     }
-
 
     private void setLastMessageTime(TextView lastMessageTime) {
         if (mLastMessageTimeStamp != null) {

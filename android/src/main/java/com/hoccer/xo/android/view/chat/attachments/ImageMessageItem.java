@@ -17,14 +17,14 @@ import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.util.UriUtils;
-import com.hoccer.xo.android.view.chat.ChatMessageItem;
+import com.hoccer.xo.android.view.chat.MessageItem;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
 
-public class ChatImageItem extends ChatMessageItem {
+public class ImageMessageItem extends MessageItem {
 
-    private final static Logger LOG = Logger.getLogger(ChatImageItem.class);
+    private final static Logger LOG = Logger.getLogger(ImageMessageItem.class);
 
     public static final double HEIGHT_SCALE_FACTOR = 0.6;
     public static final double WIDTH_SCALE_FACTOR = 0.85;
@@ -33,7 +33,7 @@ public class ChatImageItem extends ChatMessageItem {
 
     private ImageView mTargetView;
 
-    public ChatImageItem(Context context, TalkClientMessage message) {
+    public ImageMessageItem(Context context, TalkClientMessage message) {
         super(context, message);
     }
 
@@ -66,7 +66,7 @@ public class ChatImageItem extends ChatMessageItem {
         });
 
         // calc view size
-        double widthScaleFactor = mAvatarView.getVisibility() == View.VISIBLE ? WIDTH_AVATAR_SCALE_FACTOR : WIDTH_SCALE_FACTOR;
+        double widthScaleFactor = mSimpleAvatarView.getVisibility() == View.VISIBLE ? WIDTH_AVATAR_SCALE_FACTOR : WIDTH_SCALE_FACTOR;
         int maxWidth = (int) (DisplayUtils.getDisplaySize(mContext).x * widthScaleFactor);
         int maxHeight = (int) (DisplayUtils.getDisplaySize(mContext).y * HEIGHT_SCALE_FACTOR);
         double aspectRatio = attachment.getContentAspectRatio();
