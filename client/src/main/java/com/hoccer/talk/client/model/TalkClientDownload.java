@@ -14,9 +14,6 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.http.*;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
 import org.apache.log4j.Logger;
 import org.apache.tika.detect.DefaultDetector;
 import org.apache.tika.detect.Detector;
@@ -38,8 +35,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
     private static final Detector MIME_DETECTOR = new DefaultDetector(MimeTypes.getDefaultMimeTypes());
 
-    //TODO reset to 16
-    private static final int MAX_FAILURES = 0;
+    private static final int MAX_FAILURES = 1;
 
     private XoTransferAgent mTransferAgent;
 
@@ -173,7 +169,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     @DatabaseField
     private ApprovalState approvalState;
 
-    private HttpGet mDownloadRequest;
+    private HttpGet mDownloadHttpGet;
 
     /**
      * Only for display purposes, the real content length will be retrieved from server since after encryption this value will differ
@@ -318,12 +314,11 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     }
 
     private void doOnHoldAction() {
-        if (mDownloadRequest != null) {
-            mDownloadRequest.abort();
-            mDownloadRequest = null;
+        if (mDownloadHttpGet != null) {
+            mDownloadHttpGet.abort();
+            mDownloadHttpGet = null;
             LOG.debug("aborted current Download request. Download can still resume.");
         }
-        mTransferAgent.deactivateDownload(this);
         mTransferAgent.onDownloadStateChanged(this);
     }
 
@@ -341,12 +336,12 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         try {
             logGetDebug("downloading '" + downloadUrl + "'");
             // create the GET request
-            //synchronized (mDownloadRequest) {
-            if (mDownloadRequest != null) {
+            //synchronized (mDownloadHttpGet) {
+            if (mDownloadHttpGet != null) {
                 LOG.warn("Found running mDownloadRequest. Aborting.");
-                mDownloadRequest.abort();
+                mDownloadHttpGet.abort();
             }
-            mDownloadRequest = new HttpGet(downloadUrl);
+            mDownloadHttpGet = new HttpGet(downloadUrl);
 
             // determine the requested range
             String range;
@@ -354,19 +349,18 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 long last = contentLength - 1;
                 range = "bytes=" + downloadProgress + "-" + last;
                 logGetDebug("requesting range '" + range + "'");
-                mDownloadRequest.addHeader("Range", range);
+                mDownloadHttpGet.addHeader("Range", range);
             }
             //}
             mTransferAgent.onDownloadStarted(this);
 
             // start performing the request
-            HttpResponse response = client.execute(mDownloadRequest);
+            HttpResponse response = client.execute(mDownloadHttpGet);
             // process status line
             StatusLine status = response.getStatusLine();
             int sc = status.getStatusCode();
             logGetDebug("got status '" + sc + "': " + status.getReasonPhrase());
-
-            if (new Random().nextBoolean()/*TODO debug*/ && sc != HttpStatus.SC_OK && sc != HttpStatus.SC_PARTIAL_CONTENT) {
+            if (new Random().nextBoolean() || sc != HttpStatus.SC_OK && sc != HttpStatus.SC_PARTIAL_CONTENT) {
                 LOG.debug("http status is not OK (" + HttpStatus.SC_OK + ") or partial content (" +
                         HttpStatus.SC_PARTIAL_CONTENT + ")");
                 checkTransferFailure(transferFailures + 1, "http status is not OK (" + HttpStatus.SC_OK + ") or partial content (" +
@@ -379,7 +373,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             setContentTypeByResponse(response);
 
             long bytesStart = downloadProgress;
-            if (new Random().nextBoolean()/*TODO debug*/ && !isValidContentRange(contentRange, bytesToGo) || contentLength == -1) {
+            if (!isValidContentRange(contentRange, bytesToGo) || contentLength == -1) {
                 LOG.debug("invalid contentRange or content length is -1 - contentLength: '" + contentLength + "'");
                 checkTransferFailure(transferFailures + 1, "invalid contentRange or content length is -1 - contentLength: '" + contentLength + "'");
                 return;
@@ -396,7 +390,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             logGetDebug("will retrieve '" + bytesToGo + "' bytes");
             randomAccessFile.seek(bytesStart);
 
-            if (new Random().nextBoolean()/*TODO debug*/ && !copyData(bytesToGo, randomAccessFile, fileDescriptor, inputStream)) {
+            if (!copyData(bytesToGo, randomAccessFile, fileDescriptor, inputStream)) {
                 checkTransferFailure(transferFailures + 1, "copyData returned null.");
             }
 
@@ -409,12 +403,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                     switchState(State.DETECTING, "downloading of unencrypted file finished");
                 }
             }
-
-        } catch (IOException e) {
-            LOG.error("IOException in copyData while reading ", e);
-            checkTransferFailure(transferFailures + 1, "download exception!");
         } catch (Exception e) {
-            LOG.error("download exception", e);
             checkTransferFailure(transferFailures + 1, "download exception!");
         }
     }
@@ -525,22 +514,20 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     }
 
     private void doPausedAction() {
-        if (mDownloadRequest != null) {
-            mDownloadRequest.abort();
-            mDownloadRequest = null;
+        if (mDownloadHttpGet != null) {
+            mDownloadHttpGet.abort();
+            mDownloadHttpGet = null;
             LOG.debug("aborted current Download request. Download can still resume.");
         }
-        mTransferAgent.deactivateDownload(this);
         mTransferAgent.onDownloadStateChanged(this);
     }
 
     private void doRetryingAction() {
-        if (mDownloadRequest != null) {
-            mDownloadRequest.abort();
-            mDownloadRequest = null;
+        if (mDownloadHttpGet != null) {
+            mDownloadHttpGet.abort();
+            mDownloadHttpGet = null;
             LOG.debug("aborted current Download request. Download can still resume.");
         }
-        mTransferAgent.deactivateDownload(this);
         mTransferAgent.onDownloadStateChanged(this);
         mTransferAgent.scheduleDownloadAttempt(this);
     }

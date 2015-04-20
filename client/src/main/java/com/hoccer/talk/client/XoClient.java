@@ -2234,7 +2234,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             mDatabase.saveClientMessage(clientMessage);
 
 //            if(attachmentDownload != null) {
-//                mTransferAgent.startOrRestartDownload(attachmentDownload);
+//                mTransferAgent.startDownload(attachmentDownload);
 //            }
 
             for (IXoMessageListener listener : mMessageListeners) {
@@ -2288,14 +2288,13 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 });
             }
         } else {
-            final XoClient that = this;
             final String finalReason = reason;
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     LOG.debug("rejecting " + delivery.getMessageId());
                     TalkDelivery result = mServerRpc.inDeliveryReject(delivery.getMessageId(), finalReason);
-                    that.updateIncomingDelivery(result);
+                    XoClient.this.updateIncomingDelivery(result);
                 }
             });
         }
@@ -2629,7 +2628,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             LOG.error("updateClientPresence", e);
         }
         if (avatarDownload != null && wantDownload) {
-            mTransferAgent.startOrRestartDownload(avatarDownload, true);
+            mTransferAgent.startDownload(avatarDownload, true);
         }
 
         final TalkClientContact fContact = clientContact;
@@ -2868,7 +2867,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             LOG.error("SQL Error when saving avatar download", e);
         }
         if (avatarDownload != null) {
-            mTransferAgent.startOrRestartDownload(avatarDownload, true);
+            mTransferAgent.startDownload(avatarDownload, true);
         }
     }
 
@@ -3079,7 +3078,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     public void requestDownload(TalkClientDownload download, boolean forcedDownload) {
-        mTransferAgent.startOrRestartDownload(download, forcedDownload);
+        mTransferAgent.startDownload(download, forcedDownload);
     }
 
     public void pauseDownload(TalkClientDownload download) {

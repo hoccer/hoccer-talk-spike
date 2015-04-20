@@ -58,7 +58,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                             if (mTransfer instanceof TalkClientDownload) {
                                 LOG.debug("Will resume download for " + ((TalkClientDownload) mTransfer).getDownloadUrl());
                                 TalkClientDownload download = (TalkClientDownload) mTransfer;
-                                XoApplication.get().getXoClient().getTransferAgent().startOrRestartDownload(download, true);
+                                XoApplication.get().getXoClient().getTransferAgent().startDownload(download, true);
                             }
                             break;
                         case REQUEST_RETRY_DOWNLOAD:
