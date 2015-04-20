@@ -410,11 +410,6 @@ public class XoClientService extends Service {
                     continue;
                 }
 
-                // ignore clients with whom we are not befriended
-                if (contact.isClient() && !contact.isClientFriend()) {
-                    continue;
-                }
-
                 // ignore groups which we are not joined with yet
                 if (contact.isGroup() && !contact.isGroupJoined()) {
                     continue;

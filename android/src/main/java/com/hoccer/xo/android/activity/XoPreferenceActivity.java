@@ -338,7 +338,7 @@ public class XoPreferenceActivity extends PreferenceActivity
     private void dumpDatabase() {
         try {
             File database = new File("/data/data/" + getPackageName() + "/databases/hoccer-talk.db");
-            String filename = BackupFileUtils.createUniqueBackupFilename() + ".db";
+            String filename = BackupFileUtils.createUniqueBackupFilename(XoApplication.getConfiguration().getAppName()) + ".db";
             File target = new File(XoApplication.getExternalStorage(), filename);
             FileUtils.copyFile(database, target);
         } catch (IOException e) {

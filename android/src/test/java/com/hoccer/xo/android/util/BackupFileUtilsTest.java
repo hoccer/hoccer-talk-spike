@@ -26,12 +26,14 @@ public class BackupFileUtilsTest {
     private static final File BACKUP_CREDENTIALS_FILE = BackupTestResources.getResourceFile(BackupTestResources.RESOURCE_BACKUP_CREDENTIALS_PATH);
     private static final File BACKUP_DB_FILE = BackupTestResources.getResourceFile(BackupTestResources.RESOURCE_BACKUP_DB_PATH);
     private static final File BACKUP_COMPLETE_FILE = BackupTestResources.getResourceFile(BackupTestResources.RESOURCE_BACKUP_COMPLETE_PATH);
-
     private static final File DATABASE_FILE = BackupTestResources.getResourceFile(BackupTestResources.RESOURCE_DB_FILE);
-    private static final List<File> ATTACHMENT_FILES = BackupTestResources.getAttachmentFiles();
 
+    private static final List<File> ATTACHMENT_FILES = BackupTestResources.getAttachmentFiles();
     private static final File ATTACHMENTS_TARGET_DIR = BackupTestResources.getAttachmentsTargetDirectory();
+
     private static final File DB_TARGET_FILE = BackupTestResources.getDatabaseTargetFile();
+
+    private static final String APP_NAME = "Hoccer";
 
     public static final String CLIENT_NAME = "clientName";
     public static final String PASSWORD = "12345678";
@@ -54,7 +56,7 @@ public class BackupFileUtilsTest {
 
     @Test
     public void testCreateDatabaseBackupFile() throws Exception {
-        String filename = BackupFileUtils.createUniqueBackupFilename() + ".zip";
+        String filename = BackupFileUtils.createUniqueBackupFilename(APP_NAME) + ".zip";
         File backupFile = new File(getClass().getResource("").getFile(), filename);
 
         BackupMetadata metadata = new BackupMetadata(BackupType.DATABASE, CLIENT_NAME, new Date());
@@ -69,7 +71,7 @@ public class BackupFileUtilsTest {
 
     @Test
     public void testCreateDatabaseBackupFileWithAttachments() throws Exception {
-        String filename = BackupFileUtils.createUniqueBackupFilename() + ".zip";
+        String filename = BackupFileUtils.createUniqueBackupFilename(APP_NAME) + ".zip";
         File backupFile = new File(getClass().getResource("").getFile(), filename);
 
         BackupMetadata metadata = new BackupMetadata(BackupType.COMPLETE, CLIENT_NAME, new Date());
@@ -84,7 +86,7 @@ public class BackupFileUtilsTest {
 
     @Test
     public void testCancelCreateDatabaseBackupFileWithAttachments() throws Exception {
-        String filename = BackupFileUtils.createUniqueBackupFilename() + ".zip";
+        String filename = BackupFileUtils.createUniqueBackupFilename(APP_NAME) + ".zip";
         final File backupFile = new File(getClass().getResource("").getFile(), filename);
 
         final BackupMetadata metadata = new BackupMetadata(BackupType.COMPLETE, CLIENT_NAME, new Date());

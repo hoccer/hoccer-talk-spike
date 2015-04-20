@@ -146,6 +146,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
         mTransferControl.post(new Runnable() {
             @Override
             public void run() {
+                mTransferControl.invalidate();
                 long length;
                 long progress;
                 Resources res = mTransferControl.getResources();
@@ -206,12 +207,6 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                         mListener.onAttachmentTransferComplete(mTransfer);
                         break;
 
-                    case DOWNLOAD_FAILED:
-                        mTransferControl.prepareToDownload();
-                        mTransferControl.setText("Download failed. Retry?");
-                        mTransferControl.pause();
-                        break;
-
                     case UPLOAD_REGISTERING:
                         break;
 
@@ -251,7 +246,14 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                         mListener.onAttachmentTransferComplete(mTransfer);
                         break;
 
+                    case DOWNLOAD_FAILED:
+                        mTransferControl.setOnClickListener(null);
+                        mTransferControl.setText(res.getString(R.string.transfer_state_downloading_failed));
+                        break;
+
                     case UPLOAD_FAILED:
+                        mTransferControl.setOnClickListener(null);
+                        mTransferControl.setText(res.getString(R.string.transfer_state_uploading_failed));
                         break;
 
                     default:

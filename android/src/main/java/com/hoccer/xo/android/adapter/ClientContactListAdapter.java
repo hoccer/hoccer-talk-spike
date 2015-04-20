@@ -9,13 +9,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.view.AvatarView;
-import com.artcom.hoccer.R;
+import com.hoccer.xo.android.view.avatar.AvatarView;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.log4j.Logger;
 
@@ -26,6 +26,10 @@ import java.util.List;
 public class ClientContactListAdapter extends ContactListAdapter {
 
     private static final Logger LOG = Logger.getLogger(ClientContactListAdapter.class);
+    private static final int TYPE_PRESENCE = 0;
+    private static final int TYPE_NEARBY_HISTORY = 1;
+    private static final int TYPE_HISTORY = 2;
+    private static final int TYPE_SIMPLE = 3;
 
     public ClientContactListAdapter(Activity activity) {
         super(activity);
@@ -61,19 +65,54 @@ public class ClientContactListAdapter extends ContactListAdapter {
 
         ViewHolder viewHolder;
 
-        if (convertView == null) {
-            LayoutInflater inflater = (LayoutInflater) parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.item_contact_client, null);
+        TalkClientContact contact = (TalkClientContact) getItem(position);
+
+        int viewType = getViewTypeForContact(contact);
+        if (convertView == null || getViewType(convertView) != viewType) {
+            convertView = inflate(viewType, parent);
             viewHolder = createAndInitViewHolder(convertView);
+            viewHolder.type = viewType;
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        final TalkClientContact contact = (TalkClientContact) getItem(position);
-
         updateView(viewHolder, contact);
 
+        return convertView;
+    }
+
+    private int getViewType(View convertView) {
+        return ((ViewHolder) convertView.getTag()).type;
+    }
+
+    private int getViewTypeForContact(TalkClientContact contact) {
+        int type;
+
+        if (contact.getClientRelationship().isFriend() || contact.getClientRelationship().isBlocked() || contact.isNearby()) {
+            type = TYPE_PRESENCE;
+        } else if (contact.isKept() && contact.isNearbyAcquaintance()) {
+            type = TYPE_NEARBY_HISTORY;
+        } else if (contact.isKept()) {
+            type = TYPE_HISTORY;
+        } else {
+            type = TYPE_SIMPLE;
+        }
+        return type;
+    }
+
+    private View inflate(int type, ViewGroup parent) {
+        View convertView;
+        LayoutInflater inflater = (LayoutInflater) parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        if (type == TYPE_PRESENCE) {
+            convertView = inflater.inflate(R.layout.item_contact_client_presence, null);
+        } else if (type == TYPE_NEARBY_HISTORY) {
+            convertView = inflater.inflate(R.layout.item_contact_client_history_nearby, null);
+        } else if (type == TYPE_HISTORY) {
+            convertView = inflater.inflate(R.layout.item_contact_client_history, null);
+        } else {
+            convertView = inflater.inflate(R.layout.item_contact_client_simple, null);
+        }
         return convertView;
     }
 
@@ -185,5 +224,6 @@ public class ClientContactListAdapter extends ContactListAdapter {
         public Button declineButton;
         public TextView isInvitedTextView;
         public TextView isFriendTextView;
+        public int type;
     }
 }

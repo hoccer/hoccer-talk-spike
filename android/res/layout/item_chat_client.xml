@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:custom="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="80dp"
         android:minHeight="80dp"
@@ -18,20 +17,18 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="8dp"
             android:layout_marginEnd="8dp">
-        <com.hoccer.xo.android.view.AvatarView
-                android:id="@+id/contact_icon"
-                android:clickable="true"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                custom:cornerRadius="65"
-                custom:defaultAvatarImageUrl="@drawable/avatar_default_contact"/>
+
+        <include layout="@layout/view_avatar_presence"
+                 android:layout_width="48dp"
+                 android:layout_height="48dp"/>
+
         <TextView
                 android:id="@+id/contact_unseen_messages"
                 android:layout_alignRight="@+id/contact_icon"
                 android:layout_alignTop="@id/contact_icon"
                 android:layout_marginRight="-8dp"
                 android:visibility="visible"
-                android:background="@drawable/unread_messages_badge"
+                android:background="@drawable/shape_unread_messages_badge"
                 android:text="99"
                 android:textSize="10sp"
                 android:layout_width="16sp"
