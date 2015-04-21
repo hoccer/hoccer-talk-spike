@@ -361,6 +361,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             int sc = status.getStatusCode();
             logGetDebug("got status '" + sc + "': " + status.getReasonPhrase());
             if (new Random().nextBoolean() || sc != HttpStatus.SC_OK && sc != HttpStatus.SC_PARTIAL_CONTENT) {
+                closeResponse(response);
                 LOG.debug("http status is not OK (" + HttpStatus.SC_OK + ") or partial content (" +
                         HttpStatus.SC_PARTIAL_CONTENT + ")");
                 checkTransferFailure(transferFailures + 1, "http status is not OK (" + HttpStatus.SC_OK + ") or partial content (" +
@@ -374,6 +375,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
             long bytesStart = downloadProgress;
             if (!isValidContentRange(contentRange, bytesToGo) || contentLength == -1) {
+                closeResponse(response);
                 LOG.debug("invalid contentRange or content length is -1 - contentLength: '" + contentLength + "'");
                 checkTransferFailure(transferFailures + 1, "invalid contentRange or content length is -1 - contentLength: '" + contentLength + "'");
                 return;
@@ -405,6 +407,13 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             }
         } catch (Exception e) {
             checkTransferFailure(transferFailures + 1, "download exception!");
+            LOG.error("Download error", e);
+        }
+    }
+
+    private void closeResponse(HttpResponse response) throws IOException {
+        if (response.getEntity() != null && response.getEntity().getContent() != null) {
+            response.getEntity().consumeContent();
         }
     }
 
