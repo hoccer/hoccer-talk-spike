@@ -262,7 +262,6 @@ public class CleaningAgent {
                 LOG.info("expiring unfinished deliveries: "+counter+ "/" + expiredDeliveries.size() + " done");
             }
         }
-        expiredDeliveries = null;
 
         List<TalkDelivery> finishedDeliveries = mDatabase.findDeliveriesInStatesAndAttachmentStates(TalkDelivery.FINAL_STATES, TalkDelivery.FINAL_ATTACHMENT_STATES);
         LOG.info("cleanup found " + finishedDeliveries.size() + " finished deliveries");
@@ -273,8 +272,6 @@ public class CleaningAgent {
                 LOG.info("cleanup finished deliveries: "+counter+ "/" + finishedDeliveries.size() + " done");
             }
         }
-        int finishedDeliveriesSize = finishedDeliveries.size();
-        finishedDeliveries = null;
 
         // we need to clean failed deliveries regardless of attachment state
         List<TalkDelivery> finalFailedDeliveries = mDatabase.findDeliveriesInStates(TalkDelivery.FINAL_FAILED_STATES);
