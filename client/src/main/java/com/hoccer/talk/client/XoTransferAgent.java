@@ -173,7 +173,7 @@ public class XoTransferAgent implements IXoTransferListenerOld {
         return mDownloadExecutorService.schedule(new Runnable() {
             @Override
             public void run() {
-                startDownload(download, true);
+                download.start(XoTransferAgent.this);
             }
         }, delay, TimeUnit.SECONDS);
     }
