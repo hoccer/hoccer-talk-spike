@@ -30,7 +30,7 @@ public class ClientStatus extends TalkToolClientCommand {
             printInd("client id: not yet generated - register first!", 1);
         }
 
-        printInd("state: '" + client.getClient().getStateString() + "'", 1);
+        printInd("state: '" + client.getClient().getState() + "'", 1);
 
         try {
             List<TalkClientContact> contacts = client.getDatabase().findAllContacts();

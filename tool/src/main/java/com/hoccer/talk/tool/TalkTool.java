@@ -35,9 +35,9 @@ public class TalkTool extends CommandLineApplication<TalkToolContext> {
     private String filesdir = DEFAULT_FILES_DIR;
 
     @Parameter(names = "-sslenabled",
-            description = "Enables ssl. By default is false.",
+            description = "Enables ssl. By default is true.",
             arity = 1)
-    private boolean sslenabled = false;
+    private boolean sslenabled = true;
 
     public TalkTool() throws CLIInitException {
         super();
