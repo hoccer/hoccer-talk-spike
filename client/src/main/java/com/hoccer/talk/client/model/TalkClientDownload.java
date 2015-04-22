@@ -431,13 +431,9 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         try {
             success = copyDataImpl(bytesToGo, randomAccessFile, inputStream);
         } finally {
-            try {
-                fileDescriptor.sync();
-                randomAccessFile.close();
-                inputStream.close();
-            } catch (Exception e) {
-                LOG.error("IOException in copyDataImpl while closing streams ", e);
-            }
+            fileDescriptor.sync();
+            IOUtils.closeQuietly(randomAccessFile);
+            IOUtils.closeQuietly(inputStream);
         }
         return success;
     }
@@ -448,7 +444,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             logGetTrace("bytesToGo: '" + bytesToGo + "'");
             logGetTrace("downloadProgress: '" + downloadProgress + "'");
             // determine how much to copy
-            int bytesToRead = (int)Math.min((long)buffer.length, bytesToGo);
+            int bytesToRead = (int) Math.min((long) buffer.length, bytesToGo);
             // perform the copy
             int bytesRead = inputStream.read(buffer, 0, bytesToRead);
             logGetTrace("reading: '" + bytesToRead + "' bytes, returned: '" + bytesRead + "' bytes");

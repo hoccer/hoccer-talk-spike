@@ -31,8 +31,6 @@ public class XoTransferAgent implements IXoTransferListenerOld {
     private HttpClient mHttpClient;
 
     private final Map<Integer, TalkClientUpload> mUploadsById = new ConcurrentHashMap<Integer, TalkClientUpload>();
-//    private final Map<Integer, TalkClientDownload> mDownloadsById = new ConcurrentHashMap<Integer, TalkClientDownload>();
-//    private final Map<Integer, ScheduledFuture> mDownloadRetryQueue = new ConcurrentHashMap<Integer, ScheduledFuture>();
     private final Map<Integer, Future> mDownloadQueue = new ConcurrentHashMap<Integer, Future>();
 
     public XoTransferAgent(XoClient client) {
@@ -41,7 +39,7 @@ public class XoTransferAgent implements IXoTransferListenerOld {
         mUploadExecutorService = createScheduledThreadPool("upload-%d");
         mDownloadExecutorService = createScheduledThreadPool("download-%d");
         mListeners = new ArrayList<IXoTransferListenerOld>();
-        initializeHttpClient();
+        mHttpClient = createHttpClient();
     }
 
     private ScheduledExecutorService createScheduledThreadPool(final String name) {
@@ -51,7 +49,7 @@ public class XoTransferAgent implements IXoTransferListenerOld {
         return Executors.newScheduledThreadPool(mClient.getConfiguration().getTransferThreads(), threadFactoryBuilder.build());
     }
 
-    private void initializeHttpClient() {
+    private HttpClient createHttpClient() {
         // FYI: http://stackoverflow.com/questions/12451687/http-requests-with-httpclient-too-slow
         // && http://stackoverflow.com/questions/3046424/http-post-requests-using-httpclient-take-2-seconds-why
         HttpParams httpParams = new BasicHttpParams();
@@ -60,7 +58,7 @@ public class XoTransferAgent implements IXoTransferListenerOld {
         HttpConnectionParams.setConnectionTimeout(httpParams, 3000);
         HttpConnectionParams.setSoTimeout(httpParams, 5000);
 
-        mHttpClient = new HttpClientWithKeyStore(httpParams);
+        return new HttpClientWithKeyStore(httpParams);
     }
 
     public XoClient getClient() {
