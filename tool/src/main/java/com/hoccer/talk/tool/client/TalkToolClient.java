@@ -66,11 +66,19 @@ public class TalkToolClient {
         mClient.connect();
     }
 
-    public void setNearby(boolean enabled, boolean schedule) {
+    public void setNearby(final boolean enabled, final boolean schedule) {
         if (enabled) {
             enableNearby(schedule);
         } else {
             disableNearby();
+        }
+    }
+
+    public void setWorldwide(final boolean enabled, final String tag) {
+        if (enabled) {
+            enableWorldwide(tag);
+        } else {
+            disableWorldwide();
         }
     }
 
@@ -88,7 +96,19 @@ public class TalkToolClient {
         mGeoLocation = new Double[]{longitude, latitude};
     }
 
-    private void enableNearby(boolean schedule) {
+    private void enableWorldwide(final String tag) {
+        final TalkEnvironment environment = new TalkEnvironment();
+        environment.setTimestamp(new Date());
+        environment.setType(TalkEnvironment.TYPE_WORLDWIDE);
+        environment.setTag(tag);
+        mClient.sendEnvironmentUpdate(environment);
+    }
+
+    private void disableWorldwide() {
+        mClient.sendDestroyEnvironment(TalkEnvironment.TYPE_WORLDWIDE);
+    }
+
+    private void enableNearby(final boolean schedule) {
         if (mNearbyUpdater != null) {
             Console.warn("Environment updates are already running - IGNORING");
             return;
@@ -98,7 +118,7 @@ public class TalkToolClient {
             mNearbyUpdater = mLocationUpdater.scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
-                    updateEnvironment();
+                    updateNearbyEnvironment();
                 }
             }, 0, NEARBY_UPDATE_RATE, TimeUnit.SECONDS);
         } else {
@@ -106,22 +126,21 @@ public class TalkToolClient {
             mNearbyUpdater = mLocationUpdater.schedule(new Runnable() {
                 @Override
                 public void run() {
-                    updateEnvironment();
+                    updateNearbyEnvironment();
                 }
             }, 0, TimeUnit.SECONDS);
         }
 
     }
 
-    private void updateEnvironment() {
-        Console.debug("updating environment...");
-        TalkEnvironment environment = new TalkEnvironment();
+    private void updateNearbyEnvironment() {
+        Console.debug("updating nearby environment...");
+        final TalkEnvironment environment = new TalkEnvironment();
         environment.setGeoLocation(getGeoLocation());
         environment.setAccuracy(NEARBY_ACCURACY);
         environment.setLocationType(TalkEnvironment.LOCATION_TYPE_GPS);
         environment.setTimestamp(new Date());
         environment.setType(TalkEnvironment.TYPE_NEARBY);
-
         mClient.sendEnvironmentUpdate(environment);
     }
 
