@@ -24,6 +24,7 @@ public class TalkGroupPresence {
 
     public static final String GROUP_TYPE_USER = "user";
     public static final String GROUP_TYPE_NEARBY = "nearby";
+    public static final String GROUP_TYPE_WORLDWIDE = "worldwide";
 
     // needed for ormlight database
     private String _id;
@@ -67,6 +68,11 @@ public class TalkGroupPresence {
     @JsonIgnore
     public boolean isTypeNearby() {
         return GROUP_TYPE_NEARBY.equals(this.groupType);
+    }
+
+    @JsonIgnore
+    public boolean isTypeWorldwide() {
+        return GROUP_TYPE_WORLDWIDE.equals(this.groupType);
     }
 
     @JsonIgnore

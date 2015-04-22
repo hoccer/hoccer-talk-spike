@@ -1883,7 +1883,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }, 0, TimeUnit.SECONDS);
     }
 
-    public void sendEnvironmentUpdate(TalkEnvironment environment) {
+    public void sendEnvironmentUpdate(final TalkEnvironment environment) {
         LOG.debug("sendEnvironmentUpdate()");
         if (isReady() && environment != null) {
             if (mEnvironmentUpdateCallPending.compareAndSet(false, true)) {
@@ -1910,16 +1910,42 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
-    public TalkClientContact getCurrentNearbyGroup() {
-        TalkClientContact currentNearbyGroup = null;
+    public TalkClientContact getCurrentEnvironmentGroup() {
+        TalkClientContact currentEnvironmentGroup = null;
         try {
             if (mEnvironmentGroupId != null) {
-                currentNearbyGroup = mDatabase.findGroupContactByGroupId(mEnvironmentGroupId, false);
+                currentEnvironmentGroup = mDatabase.findGroupContactByGroupId(mEnvironmentGroupId, false);
             }
         } catch (SQLException e) {
-            LOG.error("SQL Error while retrieving current nearby group ", e);
+            LOG.error("SQL Error while retrieving current environment group ", e);
         }
-        return currentNearbyGroup;
+        return currentEnvironmentGroup;
+    }
+
+    public TalkClientContact getCurrentNearbyGroup() {
+        final TalkClientContact currentNearbyGroup = getCurrentEnvironmentGroup();
+        final TalkGroupPresence groupPresence = currentNearbyGroup.getGroupPresence();
+        if (groupPresence == null) {
+            return null;
+        }
+        if (groupPresence.isTypeNearby()) {
+            return currentNearbyGroup;
+        } else {
+            return null;
+        }
+    }
+
+    public TalkClientContact getCurrentWorldwideGroup() {
+        final TalkClientContact currentWorldwideGroup = getCurrentEnvironmentGroup();
+        final TalkGroupPresence groupPresence = currentWorldwideGroup.getGroupPresence();
+        if (groupPresence == null) {
+            return null;
+        }
+        if (groupPresence.isTypeNearby()) {
+            return currentWorldwideGroup;
+        } else {
+            return null;
+        }
     }
 
 
