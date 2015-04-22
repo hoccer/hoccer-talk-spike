@@ -11,6 +11,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.*;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -27,6 +28,7 @@ import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @DatabaseTable(tableName = "clientDownload")
 public class TalkClientDownload extends XoTransfer implements IXoTransferObject {
@@ -35,7 +37,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
     private static final Detector MIME_DETECTOR = new DefaultDetector(MimeTypes.getDefaultMimeTypes());
 
-    private static final int MAX_FAILURES = 1;
+    private static final int MAX_FAILURES = 0;
 
     private XoTransferAgent mTransferAgent;
 
