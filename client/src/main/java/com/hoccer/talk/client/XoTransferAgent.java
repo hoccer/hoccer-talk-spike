@@ -281,6 +281,9 @@ public class XoTransferAgent implements IXoTransferListenerOld {
         LOG.info("onDownloadFinished(" + download.getClientDownloadId() + ")");
         mDownloadQueue.get(download.getClientDownloadId()).cancel(false);
         mDownloadQueue.remove(download.getClientDownloadId());
+        if (mDownloadQueue.isEmpty()) {
+            mDownloadExecutorService.shutdown();
+        }
         LOG.info("removed Download with id (" + download.getClientDownloadId() + ") from HashMap");
         for (IXoTransferListenerOld listener : mListeners) {
             listener.onDownloadFinished(download);
@@ -290,6 +293,7 @@ public class XoTransferAgent implements IXoTransferListenerOld {
     @Override
     public void onDownloadFailed(TalkClientDownload download) {
         LOG.info("onDownloadFailed(" + download.getClientDownloadId() + ")");
+        mHttpClient.getConnectionManager().closeExpiredConnections();
         mDownloadQueue.get(download.getClientDownloadId()).cancel(true);
         mDownloadQueue.remove(download.getClientDownloadId());
         for (IXoTransferListenerOld listener : mListeners) {
