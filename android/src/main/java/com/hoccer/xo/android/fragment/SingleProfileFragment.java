@@ -325,13 +325,16 @@ public class SingleProfileFragment extends ProfileFragment
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 getXoClient().deleteAccountAndLocalDatabase(getActivity());
-
-                Intent intent = new Intent(getActivity(), ChatsActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.putExtra("exit", true);
-                startActivity(intent);
+                exitApplication();
             }
         }, null);
+    }
+
+    private void exitApplication() {
+        Intent intent = new Intent(getActivity(), ChatsActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra(ChatsActivity.INTENT_EXTRA_EXIT, true);
+        startActivity(intent);
     }
 
     @Override

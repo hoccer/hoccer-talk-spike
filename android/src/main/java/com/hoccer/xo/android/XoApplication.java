@@ -10,7 +10,6 @@ import com.hoccer.talk.client.IXoClientHost;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.model.TalkPresence;
-import com.hoccer.xo.android.activity.ChatsActivity;
 import com.hoccer.xo.android.credentialtransfer.SrpChangeListener;
 import com.hoccer.xo.android.service.XoClientService;
 import com.hoccer.xo.android.task.StartupTasks;
