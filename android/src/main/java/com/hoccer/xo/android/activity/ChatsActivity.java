@@ -68,7 +68,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     @Override
     protected void onResume() {
         super.onResume();
-
         showProfileIfClientIsNotRegistered();
         registerListeners();
         mContactsMenuItemActionProvider.updateNotificationBadge();
@@ -111,6 +110,9 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
             handleContactIdIntent(intent);
         } else if (intent.hasExtra(IntentHelper.EXTRA_PUSH_MESSAGE)) {
             handlePushMessageIntent(intent);
+        } else if(intent.getBooleanExtra("exit", false)) {
+            finish();
+            XoApplication.restartApplication();
         }
     }
 

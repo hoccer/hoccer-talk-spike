@@ -11,8 +11,10 @@ import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.talk.model.TalkRelationship;
+import com.hoccer.xo.android.NearbyController;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
+import com.hoccer.xo.android.activity.ChatsActivity;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.UriUtils;
@@ -323,7 +325,11 @@ public class SingleProfileFragment extends ProfileFragment
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 getXoClient().deleteAccountAndLocalDatabase(getActivity());
-                XoApplication.restartApplication();
+
+                Intent intent = new Intent(getActivity(), ChatsActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.putExtra("exit", true);
+                startActivity(intent);
             }
         }, null);
     }
