@@ -13,7 +13,6 @@ import java.util.List;
 @CLICommand(name = "clist", description = "List clients")
 public class ClientList extends TalkToolCommand {
 
-    static final int COLUMN_COUNT = 4;
     final String[] COLUMN_NAMES = new String[]{
         "id", "state", "environment", "clientId"
     };
@@ -39,7 +38,7 @@ public class ClientList extends TalkToolCommand {
         rows[0] = COLUMN_NAMES;
         for (int i = 1; i < numLines; i++) {
             final TalkToolClient client = clients.get(i - 1);
-            final String[] columns = new String[COLUMN_COUNT];
+            final String[] columns = new String[COLUMN_NAMES.length];
             columns[0] = Integer.toString(client.getId());
             columns[1] = client.getClient().getState().toString();
             columns[2] = getEnvironmentType(client);
