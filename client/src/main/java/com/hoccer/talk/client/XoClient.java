@@ -1924,6 +1924,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     public TalkClientContact getCurrentNearbyGroup() {
         final TalkClientContact currentNearbyGroup = getCurrentEnvironmentGroup();
+        if (currentNearbyGroup == null) {
+            return null;
+        }
         final TalkGroupPresence groupPresence = currentNearbyGroup.getGroupPresence();
         if (groupPresence == null) {
             return null;
@@ -1937,6 +1940,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     public TalkClientContact getCurrentWorldwideGroup() {
         final TalkClientContact currentWorldwideGroup = getCurrentEnvironmentGroup();
+        if (currentWorldwideGroup == null) {
+            return null;
+        }
         final TalkGroupPresence groupPresence = currentWorldwideGroup.getGroupPresence();
         if (groupPresence == null) {
             return null;
