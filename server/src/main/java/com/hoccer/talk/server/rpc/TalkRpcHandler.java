@@ -34,19 +34,23 @@ import java.util.*;
  */
 public class TalkRpcHandler implements ITalkRpcServer {
 
-    private static final Logger LOG =
-            Logger.getLogger(TalkRpcHandler.class);
+    private static final Logger LOG = Logger.getLogger(TalkRpcHandler.class);
 
     private static final Hex HEX = new Hex();
     private final Digest SRP_DIGEST = new SHA256Digest();
     private static final SecureRandom SRP_RANDOM = new SecureRandom();
     private static final SRP6Parameters SRP_PARAMETERS = SRP6Parameters.CONSTANTS_1024;
+
+    // TODO: make configurable via TalkServerConfiguration
     private static final int TOKEN_LIFETIME_MIN = 60; // (seconds) at least 1 minute
     private static final int TOKEN_LIFETIME_MAX = 7 * 24 * 3600; // (seconds) at most 1 week
     private static final int TOKEN_MAX_USAGE = 1;
     private static final int PAIRING_TOKEN_MAX_USAGE_RANGE_MIN = 1;
     private static final int PAIRING_TOKEN_MAX_USAGE_RANGE_MAX = 50;
 
+    // TODO: make configurable via TalkServerConfiguration
+    private static final int MIN_WORLD_WIDE_GROUP_SIZE = 5;
+    private static final int MAX_WORLD_WIDE_GROUP_SIZE = 10;
 
     /**
      * Reference to server
@@ -2362,9 +2366,6 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
         return result;
     }
-
-    final int MIN_WORLD_WIDE_GROUP_SIZE = 5;
-    final int MAX_WORLD_WIDE_GROUP_SIZE = 10;
 
     @Override
     public String updateEnvironment(TalkEnvironment environment) {
