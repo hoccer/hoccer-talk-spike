@@ -1947,7 +1947,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         if (groupPresence == null) {
             return null;
         }
-        if (groupPresence.isTypeNearby()) {
+        if (groupPresence.isTypeWorldwide()) {
             return currentWorldwideGroup;
         } else {
             return null;
