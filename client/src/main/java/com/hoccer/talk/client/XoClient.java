@@ -1246,7 +1246,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 try {
                     mLoginFuture = null;
                     doLogin(mSelfContact);
-                    switchState(State.SYNCING, "sync ofter login");
+                    switchState(State.SYNCING, "sync after login");
                 } catch (Exception e) {
                     LOG.error("Exception while logging in", e);
                     switchState(State.CONNECTING, "reconnect after login failed");
