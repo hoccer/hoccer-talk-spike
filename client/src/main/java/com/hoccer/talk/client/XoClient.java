@@ -702,6 +702,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     public void setGroupAvatar(final TalkClientContact group, final TalkClientUpload upload) {
         if (upload != null) {
             LOG.debug("new group avatar as upload " + upload);
+            mUploadAgent.register(upload);
             mUploadAgent.startUpload(upload);
         }
         sendGroupPresenceUpdateWithNewAvatar(group, upload);
