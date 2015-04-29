@@ -577,10 +577,6 @@ public class XoClientService extends Service {
 
         @Override
         public void onDownloadRegistered(TalkClientDownload download) {
-            LOG.debug("onDownloadRegistered(" + download.getClientDownloadId() + ")");
-            if (download.isAttachment()) {
-                mClient.requestDownload(download, false);
-            }
         }
 
         @Override
