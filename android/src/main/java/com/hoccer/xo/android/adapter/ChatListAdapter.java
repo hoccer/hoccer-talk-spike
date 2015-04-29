@@ -4,7 +4,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.IXoMessageListener;
-import com.hoccer.talk.client.IXoTransferListenerOld;
+import com.hoccer.talk.client.TransferListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
@@ -24,7 +24,7 @@ import java.util.Comparator;
 import java.util.List;
 
 
-public class ChatListAdapter extends XoAdapter implements IXoContactListener, IXoMessageListener, IXoTransferListenerOld {
+public class ChatListAdapter extends XoAdapter implements IXoContactListener, IXoMessageListener, TransferListener {
 
     private static final Logger LOG = Logger.getLogger(ChatListAdapter.class);
 
@@ -87,7 +87,6 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
     public void onResume() {
         super.onResume();
         getXoClient().registerContactListener(this);
-        getXoClient().registerTransferListener(this);
         getXoClient().registerMessageListener(this);
     }
 
@@ -95,7 +94,6 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
     public void onPause() {
         super.onPause();
         getXoClient().unregisterContactListener(this);
-        getXoClient().unregisterTransferListener(this);
         getXoClient().unregisterMessageListener(this);
     }
 

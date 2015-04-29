@@ -44,7 +44,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class XoClient implements JsonRpcConnection.Listener, IXoTransferListenerOld {
+public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
     private static final Logger LOG = Logger.getLogger(XoClient.class);
 
@@ -369,14 +369,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     public synchronized void unregisterMessageListener(IXoMessageListener listener) {
         mMessageListeners.remove(listener);
-    }
-
-    public synchronized void registerTransferListener(IXoTransferListenerOld listener) {
-        mTransferAgent.registerListener(listener);
-    }
-
-    public synchronized void unregisterTransferListener(IXoTransferListenerOld listener) {
-        mTransferAgent.unregisterListener(listener);
     }
 
     public synchronized void registerAlertListener(IXoAlertListener listener) {
@@ -2532,7 +2524,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
             LOG.debug("attachment download url is '" + upload.getDownloadUrl() + "'");
             attachment = new TalkAttachment();
-            attachment.setFileName(upload.getFileName());
+            attachment.setFileName(upload.getFilename());
             attachment.setUrl(upload.getDownloadUrl());
             attachment.setContentSize(Long.toString(upload.getContentLength()));
             attachment.setMediaType(upload.getMediaType());

@@ -123,7 +123,6 @@ public class XoClientService extends Service {
             mClient.registerStateListener(mClientListener);
             mClient.registerMessageListener(mClientListener);
             mClient.registerContactListener(mClientListener);
-            mClient.registerTransferListener(mClientListener);
         }
 
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -170,7 +169,6 @@ public class XoClientService extends Service {
         if (mClientListener != null) {
             mClient.unregisterStateListener(mClientListener);
             mClient.unregisterMessageListener(mClientListener);
-            mClient.unregisterTransferListener(mClientListener);
             mClientListener = null;
         }
 
@@ -564,7 +562,7 @@ public class XoClientService extends Service {
             IXoStateListener,
             IXoMessageListener,
             IXoContactListener,
-            IXoTransferListenerOld,
+            TransferListener,
             MediaScannerConnection.OnScanCompletedListener {
 
         @Override
