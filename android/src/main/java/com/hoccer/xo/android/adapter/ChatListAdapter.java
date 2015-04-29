@@ -13,7 +13,6 @@ import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.view.model.ChatItem;
 import com.hoccer.xo.android.view.model.ContactChatItem;
-import com.hoccer.xo.android.view.model.NearbyGroupHistoryChatItem;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
