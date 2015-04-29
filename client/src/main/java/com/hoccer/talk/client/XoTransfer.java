@@ -35,7 +35,7 @@ public abstract class XoTransfer {
 
     public abstract String getMimeType();
 
-    public abstract String getFileName();
+    public abstract String getFilename();
 
     public abstract String getFilePath();
 
