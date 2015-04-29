@@ -29,7 +29,6 @@ public class UploadAgent extends TransferAgent {
 
     public void startUpload(final TalkClientUpload upload) {
         final UploadAction uploadAction = mUploadActions.get(upload.getClientUploadId());
-
         Future future = mExecutorService.submit(new Runnable() {
             @Override
             public void run() {

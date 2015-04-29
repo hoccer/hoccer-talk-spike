@@ -292,7 +292,7 @@ public class TalkClientDownload extends XoTransfer {
     }
 
     public enum ApprovalState {
-        APPROVED, DECLINED, PENDING;
+        APPROVED, DECLINED, PENDING
     }
 
     @Override
