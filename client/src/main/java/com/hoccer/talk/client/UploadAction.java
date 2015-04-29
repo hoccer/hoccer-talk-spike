@@ -94,7 +94,8 @@ public class UploadAction implements TransferStateListener {
         try {
             ITalkRpcServer.FileHandles handles;
             if (mUpload.isAvatar()) {
-                handles = mUploadAgent.getXoClient().getServerRpc().createFileForStorage((int) mUpload.getContentLength());
+                mUpload.setUploadLength(mUpload.getContentLength());
+                handles = mUploadAgent.getXoClient().getServerRpc().createFileForStorage((int) mUpload.getUploadLength());
             } else {
                 int encryptedLength = AESCryptor.calcEncryptedSize((int) mUpload.getContentLength(), AESCryptor.NULL_SALT, AESCryptor.NULL_SALT);
                 mUpload.setTransferLength(encryptedLength);
