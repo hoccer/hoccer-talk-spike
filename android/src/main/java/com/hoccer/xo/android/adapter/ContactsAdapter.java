@@ -72,6 +72,8 @@ public abstract class ContactsAdapter extends XoAdapter
         super.onCreate();
         getXoClient().registerContactListener(this);
         getXoClient().registerMessageListener(this);
+        getXoClient().getDownloadAgent().registerListener(this);
+        getXoClient().getUploadAgent().registerListener(this);
     }
 
     @Override
@@ -80,6 +82,8 @@ public abstract class ContactsAdapter extends XoAdapter
         super.onDestroy();
         getXoClient().unregisterContactListener(this);
         getXoClient().unregisterMessageListener(this);
+        getXoClient().getDownloadAgent().unregisterListener(this);
+        getXoClient().getUploadAgent().unregisterListener(this);
     }
 
     @Override

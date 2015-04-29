@@ -47,7 +47,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
     private static final Logger LOG = Logger.getLogger(XoClient.class);
-
+    
     public enum State {
         DISCONNECTED,
         CONNECTING,
@@ -87,7 +87,8 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     String mEncryptedDownloadDirectory;
     String mExternalStorageDirectory;
 
-    XoTransferAgent mTransferAgent;
+    UploadAgent mUploadAgent;
+    DownloadAgent mDownloadAgent;
 
     private JavaWebSocket mWebSocket;
     protected JsonRpcWsConnection mConnection;
@@ -179,9 +180,9 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         // create RPC proxy
         mServerRpc = mConnection.makeProxy(ITalkRpcServer.class);
 
-        // create transfer agent
-        mTransferAgent = new XoTransferAgent(this);
-        mTransferAgent.registerListener(this);
+        // create transfer agents
+        mDownloadAgent = new DownloadAgent(this);
+        mUploadAgent = new UploadAgent(this);
 
         // ensure we have a self contact
         ensureSelfContact();
@@ -316,8 +317,12 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         return mDatabase;
     }
 
-    public XoTransferAgent getTransferAgent() {
-        return mTransferAgent;
+    public DownloadAgent getDownloadAgent() {
+        return mDownloadAgent;
+    }
+
+    public UploadAgent getUploadAgent() {
+        return mUploadAgent;
     }
 
     /**
@@ -631,7 +636,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     public void setClientAvatar(final TalkClientUpload upload) {
         if (upload != null) {
             LOG.debug("new client avatar as upload " + upload);
-            mTransferAgent.startOrRestartUpload(upload);
+            mUploadAgent.startUpload(upload);
         }
         sendPresenceUpdateWithNewAvatar(upload);
     }
@@ -696,7 +701,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     public void setGroupAvatar(final TalkClientContact group, final TalkClientUpload upload) {
         if (upload != null) {
             LOG.debug("new group avatar as upload " + upload);
-            mTransferAgent.startOrRestartUpload(upload);
+            mUploadAgent.startUpload(upload);
         }
         sendGroupPresenceUpdateWithNewAvatar(group, upload);
     }
@@ -1737,7 +1742,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         for (final TalkClientMessage clientMessage : clientMessages) {
             final TalkClientUpload upload = clientMessage.getAttachmentUpload();
             if (upload != null) {
-                upload.register(mTransferAgent);
+                mUploadAgent.register(upload);
             }
             performDelivery(clientMessage);
         }
@@ -1768,7 +1773,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 resultingDeliveries = mServerRpc.outDeliveryRequest(message, deliveries);
                 TalkClientUpload upload = clientMessage.getAttachmentUpload();
                 if (upload != null) {
-                    mTransferAgent.startOrRestartUpload(upload);
+                    mUploadAgent.startUpload(upload);
                 }
             } catch (Exception e) {
                 LOG.error("error while performing delivery request for message " + clientMessage.getClientMessageId(), e);
@@ -2155,12 +2160,15 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
         try {
             clientMessage.updateIncoming(delivery);
-            TalkClientDownload attachmentDownload = clientMessage.getAttachmentDownload();
+            TalkClientDownload download = clientMessage.getAttachmentDownload();
             mDatabase.updateDelivery(clientMessage.getIncomingDelivery());
 
-            if (attachmentDownload != null && !mTransferAgent.isDownloadActive(attachmentDownload) && attachmentDownload.getState() != TalkClientDownload.State.PAUSED) {
-                mTransferAgent.onDownloadRegistered(attachmentDownload);
+            if (download != null) {
+                if (download.isAttachment()) { // TODO check this condition
+                    mDownloadAgent.startDownload(download);
+                }
             }
+
             for (IXoMessageListener listener : mMessageListeners) {
                 listener.onMessageUpdated(clientMessage);
             }
@@ -2424,7 +2432,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
         if (decryptedAttachment != null) {
             TalkClientDownload download = new TalkClientDownload();
-            download.initializeAsAttachment(mTransferAgent, decryptedAttachment, message.getMessageId(), decryptedKey);
+            download.initializeAsAttachment(decryptedAttachment, message.getMessageId(), decryptedKey);
             clientMessage.setAttachmentDownload(download);
         }
     }
@@ -2620,7 +2628,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             LOG.error("updateClientPresence", e);
         }
         if (avatarDownload != null && wantDownload) {
-            mTransferAgent.startDownload(avatarDownload, true);
+            mDownloadAgent.startDownloadTask(avatarDownload);
         }
 
         final TalkClientContact fContact = clientContact;
@@ -2651,7 +2659,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         if (avatarDownload == null) {
             LOG.debug("new avatar for contact " + contact.getClientContactId());
             avatarDownload = new TalkClientDownload();
-            avatarDownload.initializeAsAvatar(mTransferAgent, avatarUrl, avatarId, avatarTimestamp);
+            avatarDownload.initializeAsAvatar(avatarUrl, avatarId, avatarTimestamp);
             wantDownload = true;
         } else {
             try {
@@ -2664,7 +2672,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             if (downloadUrl == null || !downloadUrl.equals(avatarUrl)) {
                 LOG.debug("new avatar for contact " + contact.getClientContactId());
                 avatarDownload = new TalkClientDownload();
-                avatarDownload.initializeAsAvatar(mTransferAgent, avatarUrl, avatarId, avatarTimestamp);
+                avatarDownload.initializeAsAvatar(avatarUrl, avatarId, avatarTimestamp);
                 wantDownload = true;
             } else {
                 LOG.debug("avatar not changed for contact " + contact.getClientContactId());
@@ -2859,7 +2867,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             LOG.error("SQL Error when saving avatar download", e);
         }
         if (avatarDownload != null) {
-            mTransferAgent.startDownload(avatarDownload, true);
+            mDownloadAgent.startDownloadTask(avatarDownload);
         }
     }
 
@@ -3069,12 +3077,12 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         }
     }
 
-    public void requestDownload(TalkClientDownload download, boolean forcedDownload) {
-        mTransferAgent.startDownload(download, forcedDownload);
+    public void forceDownload(TalkClientDownload download) {
+        mDownloadAgent.startDownloadTask(download);
     }
 
     public void pauseDownload(TalkClientDownload download) {
-        mTransferAgent.pauseDownload(download);
+        mDownloadAgent.pauseDownload(download);
     }
 
     public void markAsSeen(final TalkClientMessage message) {

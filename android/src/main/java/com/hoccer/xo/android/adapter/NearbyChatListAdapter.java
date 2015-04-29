@@ -81,11 +81,15 @@ public class NearbyChatListAdapter extends BaseAdapter implements IXoContactList
     public void registerListeners() {
         mXoActivity.getXoClient().registerContactListener(this);
         mXoActivity.getXoClient().registerMessageListener(this);
+        mXoActivity.getXoClient().getDownloadAgent().registerListener(this);
+        mXoActivity.getXoClient().getUploadAgent().registerListener(this);
     }
 
     public void unregisterListeners() {
         mXoActivity.getXoClient().unregisterContactListener(this);
         mXoActivity.getXoClient().unregisterMessageListener(this);
+        mXoActivity.getXoClient().getDownloadAgent().unregisterListener(this);
+        mXoActivity.getXoClient().getUploadAgent().unregisterListener(this);
     }
 
     private void updateContact(final View view, final TalkClientContact contact) {

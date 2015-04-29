@@ -225,17 +225,13 @@ public class XoClientService extends Service {
     private void loadPreference(SharedPreferences preferences, String key) {
         if (key != null) {
             if (key.equals(sPreferenceUploadLimitMobileKey)) {
-                String uploadLimitString = preferences.getString(key, DEFAULT_TRANSFER_LIMIT);
-                mClient.setUploadLimit(Integer.parseInt(uploadLimitString));
+                mClient.setUploadLimit(preferences.getInt(key, TransferAgent.UNLIMITED));
             } else if (key.equals(sPreferenceDownloadLimitMobileKey)) {
-                String downloadLimitString = preferences.getString(key, DEFAULT_TRANSFER_LIMIT);
-                mClient.setDownloadLimit(Integer.parseInt(downloadLimitString));
+                mClient.setDownloadLimit(preferences.getInt(key, TransferAgent.UNLIMITED));
             } else if (key.equals(sPreferenceUploadLimitWifiKey)) {
-                String uploadLimitString = preferences.getString(key, DEFAULT_TRANSFER_LIMIT);
-                mClient.setUploadLimit(Integer.parseInt(uploadLimitString));
+                mClient.setUploadLimit(preferences.getInt(key, TransferAgent.UNLIMITED));
             } else if (key.equals(sPreferenceDownloadLimitWifiKey)) {
-                String downloadLimitString = preferences.getString(key, DEFAULT_TRANSFER_LIMIT);
-                mClient.setDownloadLimit(Integer.parseInt(downloadLimitString));
+                mClient.setDownloadLimit(preferences.getInt(key, TransferAgent.UNLIMITED));
             } else if (key.equals(sPreferenceImageUploadPixelCountKey)) {
                 String maxPixelCount = mPreferences.getString(sPreferenceImageUploadPixelCountKey,
                         Integer.toString(DEFAULT_IMAGE_UPLOAD_MAX_PIXEL_COUNT));
