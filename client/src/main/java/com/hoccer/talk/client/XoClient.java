@@ -2233,10 +2233,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             mDatabase.saveDelivery(clientMessage.getIncomingDelivery());
             mDatabase.saveClientMessage(clientMessage);
 
-//            if(attachmentDownload != null) {
-//                mTransferAgent.startDownload(attachmentDownload);
-//            }
-
             for (IXoMessageListener listener : mMessageListeners) {
                 if (newMessage) {
                     listener.onMessageCreated(clientMessage);
@@ -2522,7 +2518,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         if (upload != null) {
             LOG.debug("generating attachment");
 
-            upload.provideEncryptionKey(new String(Hex.encodeHex(plainKey)));
+            upload.setEncryptionKey(new String(Hex.encodeHex(plainKey)));
 
             try {
                 mDatabase.saveClientUpload(upload);
