@@ -131,12 +131,7 @@ public class DownloadAction implements TransferStateListener {
                 return;
             }
 
-            Header contentLengthHeader = response.getFirstHeader("Content-Length");
-            if (contentLengthHeader != null) {
-                String contentLengthString = contentLengthHeader.getValue();
-                mDownload.setContentLength(Integer.valueOf(contentLengthString));
-            }
-            long bytesToGo = mDownload.getContentLength();
+            long bytesToGo = getContentLenghtFromResponse(response);
 
             String contentRangeString = response.getFirstHeader("Content-Range").getValue();
             ByteRange contentRange = ByteRange.parseContentRange(contentRangeString);
@@ -181,6 +176,17 @@ public class DownloadAction implements TransferStateListener {
             checkTransferFailure(mDownload.getTransferFailures() + 1, "startDownload exception!", mDownload);
             LOG.error("Download error", e);
         }
+    }
+
+    private long getContentLenghtFromResponse(HttpResponse response) {
+        Header contentLengthHeader = response.getFirstHeader("Content-Length");
+        long contentLengthValue = mDownload.getContentLength();
+        if (contentLengthHeader != null) {
+            String contentLengthString = contentLengthHeader.getValue();
+            contentLengthValue = Integer.valueOf(contentLengthString);
+        }
+
+        return contentLengthValue;
     }
 
     public void doDecryptingAction() {
