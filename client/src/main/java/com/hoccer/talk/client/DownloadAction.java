@@ -161,7 +161,7 @@ public class DownloadAction implements TransferStateListener {
             randomAccessFile.seek(bytesStart);
 
             if (!copyData(bytesToGo, randomAccessFile, fileDescriptor, inputStream, mDownload)) {
-                checkTransferFailure(mDownload.getTransferFailures() + 1, "copyData returned null.", mDownload);
+                checkTransferFailure(mDownload.getTransferFailures() + 1, "copyData failed", mDownload);
             }
 
             if (mDownload.getTransferProgress() == mDownload.getContentLength()) {
@@ -173,8 +173,8 @@ public class DownloadAction implements TransferStateListener {
                 }
             }
         } catch (Exception e) {
-            checkTransferFailure(mDownload.getTransferFailures() + 1, "startDownload exception!", mDownload);
             LOG.error("Download error", e);
+            checkTransferFailure(mDownload.getTransferFailures() + 1, "startDownload exception!", mDownload);
         }
     }
 
@@ -358,10 +358,10 @@ public class DownloadAction implements TransferStateListener {
 
     public void doRetryingAction() {
         mHttpGet.abort();
-        mDownloadAgent.onDownloadStateChanged(mDownload);
-
         mFuture.cancel(true);
         mDownloadAgent.scheduleDownloadTask(mDownload);
+
+        mDownloadAgent.onDownloadStateChanged(mDownload);
     }
 
     public void doCompleteAction() {
@@ -439,6 +439,7 @@ public class DownloadAction implements TransferStateListener {
     }
 
     private void checkTransferFailure(int failures, String failureDescription, TalkClientDownload download) {
+        LOG.error(download.getClientDownloadId() + " " + failureDescription);
         download.setTransferFailures(failures);
         if (failures <= MAX_FAILURES) {
             download.switchState(RETRYING);

@@ -118,7 +118,7 @@ public class DownloadAgent extends TransferAgent {
             listener.onDownloadStateChanged(download);
         }
     }
-    
+
     @Override
     public void onClientStateChange(XoClient client) {
         if (client.isReady()) {
