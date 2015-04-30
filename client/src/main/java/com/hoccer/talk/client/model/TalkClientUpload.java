@@ -35,7 +35,7 @@ public class TalkClientUpload extends XoTransfer implements IProgressListener {
         REGISTERING {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(PAUSED, NEW, UPLOADING);
+                return EnumSet.of(PAUSED, NEW);
             }
         },
         UPLOADING {
