@@ -37,7 +37,6 @@ public abstract class TransferAgent implements IXoStateListener {
         mClient = client;
         mExecutorService = createScheduledThreadPool(executorName);
         mHttpClient = createHttpClient();
-        mClient.registerStateListener(this);
     }
 
     protected ScheduledExecutorService createScheduledThreadPool(final String name) {

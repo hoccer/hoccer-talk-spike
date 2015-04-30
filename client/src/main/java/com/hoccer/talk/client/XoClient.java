@@ -187,6 +187,9 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
         // ensure we have a self contact
         ensureSelfContact();
+
+        registerStateListener(mDownloadAgent);
+        registerStateListener(mUploadAgent);
     }
 
     private static ObjectMapper createObjectMapper(JsonFactory jsonFactory) {
