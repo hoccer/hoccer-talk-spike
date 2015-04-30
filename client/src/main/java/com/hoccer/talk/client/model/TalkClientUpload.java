@@ -1,6 +1,7 @@
 package com.hoccer.talk.client.model;
 
 import com.hoccer.talk.client.TransferStateListener;
+import com.hoccer.talk.client.UploadAction;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.content.ContentState;
 import com.hoccer.talk.content.SelectedContent;
@@ -173,8 +174,13 @@ public class TalkClientUpload extends XoTransfer implements IProgressListener {
     private void setState(State state) {
         this.state = state;
 
-        for (TransferStateListener listener : mTransferListeners) {
-            listener.onStateChanged(this);
+        if (mTransferListeners.get(0) instanceof UploadAction) {
+            TransferStateListener uploadAction = mTransferListeners.remove(0);
+            mTransferListeners.add(uploadAction);
+        }
+
+        for (final TransferStateListener listener : mTransferListeners) {
+            listener.onStateChanged(TalkClientUpload.this);
         }
     }
 

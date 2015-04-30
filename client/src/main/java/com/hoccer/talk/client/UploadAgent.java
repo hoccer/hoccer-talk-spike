@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
 import static com.hoccer.talk.client.model.TalkClientUpload.State.PAUSED;
+import static com.hoccer.talk.client.model.TalkClientUpload.State.UPLOADING;
 
 public class UploadAgent extends TransferAgent {
 
@@ -46,8 +47,12 @@ public class UploadAgent extends TransferAgent {
         return mUploadActions.get(upload.getClientUploadId());
     }
 
-    public void resumeUpload(TalkClientUpload upload) {
-        startUpload(upload);
+    public void resumeUpload(final TalkClientUpload upload) {
+        if (mUploadActions.containsKey(upload.getClientUploadId())) {
+            upload.switchState(UPLOADING);
+        } else {
+            startUpload(upload);
+        }
     }
 
     public void pauseUpload(TalkClientUpload upload) {
