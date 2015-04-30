@@ -3,11 +3,12 @@ package com.hoccer.talk.client;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import org.apache.log4j.Logger;
 
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
-import static com.hoccer.talk.client.model.TalkClientUpload.State.*;
+import static com.hoccer.talk.client.model.TalkClientUpload.State.PAUSED;
 
 public class UploadAgent extends TransferAgent {
 
@@ -28,7 +29,7 @@ public class UploadAgent extends TransferAgent {
     }
 
     public void startUpload(final TalkClientUpload upload) {
-        final UploadAction uploadAction = mUploadActions.get(upload.getClientUploadId());
+        final UploadAction uploadAction = getOrCreateUploadAction(upload);
         Future future = mExecutorService.submit(new Runnable() {
             @Override
             public void run() {
@@ -36,6 +37,13 @@ public class UploadAgent extends TransferAgent {
             }
         });
         uploadAction.setFuture(future);
+    }
+
+    private UploadAction getOrCreateUploadAction(TalkClientUpload upload) {
+        if (!mUploadActions.containsKey(upload.getClientUploadId())) {
+            mUploadActions.put(upload.getClientUploadId(), new UploadAction(this, upload));
+        }
+        return mUploadActions.get(upload.getClientUploadId());
     }
 
     public void resumeUpload(TalkClientUpload upload) {
@@ -94,5 +102,24 @@ public class UploadAgent extends TransferAgent {
 
     public boolean isUploadActive(TalkClientUpload upload) {
         return mUploadActions.containsKey(upload.getClientUploadId());
+    }
+
+    @Override
+    public void onClientStateChange(XoClient client) {
+        if (client.isReady()) {
+            try {
+                startPendingUploads();
+            } catch (SQLException e) {
+                e.printStackTrace();
+                LOG.error("SQL error", e);
+            }
+        }
+    }
+
+    private void startPendingUploads() throws SQLException {
+        for (TalkClientUpload upload : mClient.getDatabase().findAllPendingUploads()) {
+            upload.switchState(PAUSED);
+            startUpload(upload);
+        }
     }
 }

@@ -134,8 +134,13 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
      * Create a Hoccer Talk client using the given client database
      */
     public XoClient(IXoClientHost host, IXoClientConfiguration configuration) {
+
         mClientHost = host;
         mClientConfiguration = configuration;
+
+        // create transfer agents
+        mDownloadAgent = new DownloadAgent(this);
+        mUploadAgent = new UploadAgent(this);
 
         // fetch executor and db immediately
         mExecutor = host.getBackgroundExecutor();
@@ -179,10 +184,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
         // create RPC proxy
         mServerRpc = mConnection.makeProxy(ITalkRpcServer.class);
-
-        // create transfer agents
-        mDownloadAgent = new DownloadAgent(this);
-        mUploadAgent = new UploadAgent(this);
 
         // ensure we have a self contact
         ensureSelfContact();

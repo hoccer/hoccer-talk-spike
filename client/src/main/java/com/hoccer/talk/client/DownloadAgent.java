@@ -3,6 +3,7 @@ package com.hoccer.talk.client;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import org.apache.log4j.Logger;
 
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
@@ -42,7 +43,7 @@ public class DownloadAgent extends TransferAgent {
     }
 
     public void startDownloadTask(final TalkClientDownload download) {
-        final DownloadAction downloadAction = new DownloadAction(this, download);
+        final DownloadAction downloadAction = getOrCreateDownloadAction(download);
         Future downloadFuture = mExecutorService.submit(new Runnable() {
             @Override
             public void run() {
@@ -50,7 +51,13 @@ public class DownloadAgent extends TransferAgent {
             }
         });
         downloadAction.setFuture(downloadFuture);
-        mDownloadActions.put(download.getClientDownloadId(), downloadAction);
+    }
+
+    private DownloadAction getOrCreateDownloadAction(TalkClientDownload download) {
+        if (!mDownloadActions.containsKey(download.getClientDownloadId())) {
+            mDownloadActions.put(download.getClientDownloadId(), new DownloadAction(this, download));
+        }
+        return mDownloadActions.get(download.getClientDownloadId());
     }
 
     public void scheduleDownloadTask(TalkClientDownload download) {
@@ -111,6 +118,26 @@ public class DownloadAgent extends TransferAgent {
             listener.onDownloadStateChanged(download);
         }
     }
+    
+    @Override
+    public void onClientStateChange(XoClient client) {
+        if (client.isReady()) {
+            try {
+                startPendingDownloads();
+            } catch (SQLException e) {
+                e.printStackTrace();
+                LOG.error("SQL error", e);
+            }
+        }
+    }
+
+    private void startPendingDownloads() throws SQLException {
+        for (TalkClientDownload download : mClient.getDatabase().findAllPendingDownloads()) {
+            download.switchState(PAUSED);
+            startDownload(download);
+        }
+    }
+
 
 //    public void onDownloadReceived(TalkClientDownload download) {
 //        if (download.isAttachment()) {

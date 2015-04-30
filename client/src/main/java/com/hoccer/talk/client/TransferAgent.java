@@ -3,6 +3,8 @@ package com.hoccer.talk.client;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hoccer.talk.client.model.IXoTransferState;
 import com.hoccer.talk.client.model.TalkClientDownload;
+import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.content.ContentState;
 import org.apache.http.HttpVersion;
 import org.apache.http.client.HttpClient;
 import org.apache.http.params.BasicHttpParams;
@@ -19,7 +21,7 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-public abstract class TransferAgent {
+public abstract class TransferAgent implements IXoStateListener {
 
     public static final int UNLIMITED = -1;
     public static final int MANUAL = -2;
@@ -35,6 +37,7 @@ public abstract class TransferAgent {
         mClient = client;
         mExecutorService = createScheduledThreadPool(executorName);
         mHttpClient = createHttpClient();
+        mClient.registerStateListener(this);
     }
 
     protected ScheduledExecutorService createScheduledThreadPool(final String name) {
