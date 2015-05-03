@@ -113,6 +113,7 @@ public class PushRequest {
         String clientName = mConfig.getApnsDefaultClientName();
         PushAgent.APNS_SERVICE_TYPE type = PushAgent.APNS_SERVICE_TYPE.PRODUCTION;
 
+        boolean backgroundPush = false;
         if (mClientHostInfo != null) {
             clientName = mClientHostInfo.getClientName();
 
@@ -127,16 +128,26 @@ public class PushRequest {
             LOG.info("APNS push for " + mClientId + " using " + type + " type");
 
             PayloadBuilder b = APNS.newPayload();
-            int messageCount = deliveringCount + mClient.getApnsUnreadMessages();
-            if (messageCount > 1) {
-                b.localizedKey("apn_new_messages");
-                b.localizedArguments(String.valueOf(messageCount));
-            } else {
-                b.localizedKey("apn_one_new_message");
-            }
 
-            b.badge(messageCount);
-            b.sound("default");
+            int messageCount = deliveringCount + mClient.getApnsUnreadMessages();
+
+            if (TalkClient.APNS_MODE_BACKGROUND.equals(mClient.getApnsMode())) {
+                // background message
+                LOG.info("APNS background push configured for clientName '" + clientName + "' and type '" + type + "'");
+                b.badge(messageCount);
+                b.forNewsstand();
+            }  else {
+                // default message
+                if (messageCount > 1) {
+                    b.localizedKey("apn_new_messages");
+                    b.localizedArguments(String.valueOf(messageCount));
+                } else {
+                    b.localizedKey("apn_one_new_message");
+                }
+
+                b.badge(messageCount);
+                b.sound("default");
+            }
             apnsService.push(mClient.getApnsToken(), b.build());
         } else {
             LOG.error("APNS push skipped, no service configured for clientName '" + clientName + "' and type '" + type + "'");
