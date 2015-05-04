@@ -17,6 +17,7 @@ import static org.junit.Assert.*;
 
 @RunWith(JUnit4.class)
 public class ITWorldWide extends IntegrationTest {
+    
     private TestTalkServer talkServer;
     private HashMap<String, XoClient> clients;
 
