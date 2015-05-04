@@ -123,6 +123,8 @@ public class XoClientService extends Service {
             mClient.registerStateListener(mClientListener);
             mClient.registerMessageListener(mClientListener);
             mClient.registerContactListener(mClientListener);
+            mClient.getDownloadAgent().registerListener(mClientListener);
+            mClient.getUploadAgent().registerListener(mClientListener);
         }
 
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -169,6 +171,8 @@ public class XoClientService extends Service {
         if (mClientListener != null) {
             mClient.unregisterStateListener(mClientListener);
             mClient.unregisterMessageListener(mClientListener);
+            mClient.getDownloadAgent().unregisterListener(mClientListener);
+            mClient.getUploadAgent().unregisterListener(mClientListener);
             mClientListener = null;
         }
 
