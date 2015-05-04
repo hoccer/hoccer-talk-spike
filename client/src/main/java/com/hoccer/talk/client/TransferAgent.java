@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-public abstract class TransferAgent implements IXoStateListener {
+public abstract class TransferAgent {
 
     public static final int UNLIMITED = -1;
     public static final int MANUAL = -2;

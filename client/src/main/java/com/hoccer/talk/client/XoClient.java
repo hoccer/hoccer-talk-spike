@@ -47,7 +47,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
     private static final Logger LOG = Logger.getLogger(XoClient.class);
-    
+
     public enum State {
         DISCONNECTED,
         CONNECTING,
@@ -187,9 +187,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
         // ensure we have a self contact
         ensureSelfContact();
-
-        registerStateListener(mDownloadAgent);
-        registerStateListener(mUploadAgent);
     }
 
     private static ObjectMapper createObjectMapper(JsonFactory jsonFactory) {
@@ -1091,6 +1088,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                         LOG.info("[connection #" + mConnection.getConnectionId() + "] connected and ready");
                         LOG.info("Delivering potentially unsent messages.");
                         requestSendAllPendingMessages();
+                        resumeAllPendingTransfers();
                     }
                 });
             }
@@ -1104,8 +1102,19 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             for (IXoStateListener listener : mStateListeners) {
                 listener.onClientStateChange(XoClient.this);
             }
+
         } else {
             LOG.debug("switchState(): state remains " + mState + " (" + message + ")");
+        }
+    }
+
+    private void resumeAllPendingTransfers() {
+        try {
+            mUploadAgent.startPendingUploads();
+            mDownloadAgent.startPendingDownloads();
+        } catch (SQLException e) {
+            LOG.error("SQL error", e);
+            e.printStackTrace();
         }
     }
 

@@ -105,7 +105,6 @@ public class DownloadAgent extends TransferAgent {
 
     public void onDownloadFailed(TalkClientDownload download) {
         LOG.info("onDownloadFailed(" + download.getClientDownloadId() + ")");
-//        mHttpClient.getConnectionManager().closeExpiredConnections();
         mDownloadActions.remove(download.getClientDownloadId());
         for (TransferListener listener : mListeners) {
             listener.onDownloadFailed(download);
@@ -119,19 +118,7 @@ public class DownloadAgent extends TransferAgent {
         }
     }
 
-    @Override
-    public void onClientStateChange(XoClient client) {
-        if (client.isReady()) {
-            try {
-                startPendingDownloads();
-            } catch (SQLException e) {
-                e.printStackTrace();
-                LOG.error("SQL error", e);
-            }
-        }
-    }
-
-    private void startPendingDownloads() throws SQLException {
+    public void startPendingDownloads() throws SQLException {
         for (TalkClientDownload download : mClient.getDatabase().findAllPendingDownloads()) {
             download.switchState(PAUSED);
             startDownload(download);

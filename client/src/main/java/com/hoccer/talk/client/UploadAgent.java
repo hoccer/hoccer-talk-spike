@@ -106,19 +106,7 @@ public class UploadAgent extends TransferAgent {
         return mUploadActions.containsKey(upload.getClientUploadId());
     }
 
-    @Override
-    public void onClientStateChange(XoClient client) {
-        if (client.isReady()) {
-            try {
-                startPendingUploads();
-            } catch (SQLException e) {
-                e.printStackTrace();
-                LOG.error("SQL error", e);
-            }
-        }
-    }
-
-    private void startPendingUploads() throws SQLException {
+    public void startPendingUploads() throws SQLException {
         for (TalkClientUpload upload : mClient.getDatabase().findAllPendingUploads()) {
             upload.switchState(PAUSED);
             startUpload(upload);
