@@ -124,25 +124,4 @@ public class DownloadAgent extends TransferAgent {
             startDownload(download);
         }
     }
-
-
-//    public void onDownloadReceived(TalkClientDownload download) {
-//        if (download.isAttachment()) {
-//            startDownload(download);
-//        } else {
-//            startDownloadTask(download);
-//        }
-//    }
-//
-//    public void onDownloadRegistered(TalkClientDownload download) {
-//        for (TransferListener listener : mListeners) {
-//            listener.onDownloadRegistered(download);
-//        }
-//    }
-//
-//    public void onDownloadProgress(TalkClientDownload download) {
-//        for (TransferListener listener : mListeners) {
-//            listener.onDownloadProgress(download);
-//        }
-//    }
 }
