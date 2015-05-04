@@ -129,8 +129,8 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, Transf
     public void onDestroy() {
         super.onDestroy();
         getXoClient().unregisterMessageListener(this);
-        getXoClient().getDownloadAgent().registerListener(this);
-        getXoClient().getUploadAgent().registerListener(this);
+        getXoClient().getDownloadAgent().unregisterListener(this);
+        getXoClient().getUploadAgent().unregisterListener(this);
     }
 
     @Override
