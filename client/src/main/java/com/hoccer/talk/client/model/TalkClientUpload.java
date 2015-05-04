@@ -174,7 +174,7 @@ public class TalkClientUpload extends XoTransfer implements IProgressListener {
     private void setState(State state) {
         this.state = state;
 
-        if (mTransferListeners.get(0) instanceof UploadAction) {
+        if (!mTransferListeners.isEmpty() && mTransferListeners.get(0) instanceof UploadAction) {
             TransferStateListener uploadAction = mTransferListeners.remove(0);
             mTransferListeners.add(uploadAction);
         }
