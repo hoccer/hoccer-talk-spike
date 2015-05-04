@@ -23,9 +23,7 @@ public class UploadAgent extends TransferAgent {
     }
 
     public void register(TalkClientUpload upload) {
-        final UploadAction uploadAction = new UploadAction(this, upload);
-        mUploadActions.put(upload.getClientUploadId(), uploadAction);
-
+        final UploadAction uploadAction = getOrCreateUploadAction(upload);
         uploadAction.register();
     }
 
