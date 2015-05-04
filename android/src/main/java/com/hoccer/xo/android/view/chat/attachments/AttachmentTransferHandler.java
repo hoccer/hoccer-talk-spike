@@ -26,7 +26,6 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
     public enum TransferAction {
         NONE,
         REQUEST_DOWNLOAD,
-        REQUEST_RETRY_DOWNLOAD,
         CANCEL_DOWNLOAD,
         REQUEST_UPLOAD,
         CANCEL_UPLOAD,
@@ -58,13 +57,6 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
                                 LOG.debug("Will resume download for " + ((TalkClientDownload) mTransfer).getDownloadUrl());
                                 TalkClientDownload download = (TalkClientDownload) mTransfer;
                                 XoApplication.get().getXoClient().getDownloadAgent().startDownloadTask(download);
-                            }
-                            break;
-                        case REQUEST_RETRY_DOWNLOAD:
-                            if (mTransfer instanceof TalkClientDownload) {
-                                LOG.debug("Will resume download for " + ((TalkClientDownload) mTransfer).getDownloadUrl());
-                                TalkClientDownload download = (TalkClientDownload) mTransfer;
-                                XoApplication.get().getXoClient().getDownloadAgent().retryDownload(download);
                             }
                             break;
                         case CANCEL_DOWNLOAD:
@@ -117,7 +109,6 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
             case DOWNLOAD_COMPLETE:
                 break;
             case DOWNLOAD_FAILED:
-                mTransferAction = TransferAction.REQUEST_RETRY_DOWNLOAD;
                 break;
             case UPLOAD_NEW:
             case UPLOAD_PAUSED:
