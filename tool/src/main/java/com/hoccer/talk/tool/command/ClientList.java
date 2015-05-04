@@ -26,7 +26,7 @@ public class ClientList extends TalkToolCommand {
             TalkToolClient client = clients.get(i - 1);
             String[] columns = new String[COLUMN_COUNT];
             columns[0] = Integer.toString(client.getId());
-            columns[1] = client.getClient().getStateString();
+            columns[1] = client.getClient().getState().toString();
             String c = client.getDatabase().findSelfContact(true).getClientId();
             columns[2] = (c == null) ? "" : c;
             rows[i] = columns;
