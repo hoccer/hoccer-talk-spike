@@ -1,6 +1,5 @@
 package com.hoccer.webclient.backend.client;
 
-import com.hoccer.talk.client.IXoTransferListenerOld;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
@@ -12,7 +11,7 @@ import java.sql.SQLException;
 /**
  * Implements a tansfer handler.
  */
-public class TransferListener implements IXoTransferListenerOld {
+public class TransferListener implements com.hoccer.talk.client.TransferListener {
 
     private static final Logger LOG = Logger.getLogger(TransferListener.class);
 
@@ -25,20 +24,20 @@ public class TransferListener implements IXoTransferListenerOld {
     }
 
     public void onDownloadRegistered(TalkClientDownload download) {
-        LOG.debug("TransferHandler::onDownloadRegistered: " + download.getFileName());
-        mClient.requestDownload(download, true);
+        LOG.debug("TransferHandler::onDownloadRegistered: " + download.getFilename());
+        mClient.forceDownload(download);
     }
 
     public void onDownloadStarted(TalkClientDownload download) {
-        LOG.debug("TransferHandler::onDownloadStarted: " + download.getFileName());
+        LOG.debug("TransferHandler::onDownloadStarted: " + download.getFilename());
     }
 
     public void onDownloadProgress(TalkClientDownload download) {
-        LOG.debug("TransferHandler::onDownloadProgress: " + download.getFileName());
+        LOG.debug("TransferHandler::onDownloadProgress: " + download.getFilename());
     }
 
     public void onDownloadFinished(TalkClientDownload download) {
-        LOG.debug("TransferHandler::onDownloadFinished: " + download.getFileName());
+        LOG.debug("TransferHandler::onDownloadFinished: " + download.getFilename());
 
         if (mConfiguration.shouldApproveAllDownloads()) {
             download.setApprovalState(TalkClientDownload.ApprovalState.APPROVED);
@@ -52,11 +51,11 @@ public class TransferListener implements IXoTransferListenerOld {
     }
 
     public void onDownloadFailed(TalkClientDownload download) {
-        LOG.debug("TransferHandler::onDownloadFailed" + download.getFileName());
+        LOG.debug("TransferHandler::onDownloadFailed" + download.getFilename());
     }
 
     public void onDownloadStateChanged(TalkClientDownload download) {
-        LOG.debug("TransferHandler::onDownloadStateChanged: " + download.getFileName());
+        LOG.debug("TransferHandler::onDownloadStateChanged: " + download.getFilename());
     }
 
     public void onUploadStarted(TalkClientUpload upload) {}

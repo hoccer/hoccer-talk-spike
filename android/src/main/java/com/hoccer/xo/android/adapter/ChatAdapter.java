@@ -4,7 +4,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import com.hoccer.talk.client.IXoMessageListener;
-import com.hoccer.talk.client.IXoTransferListenerOld;
+import com.hoccer.talk.client.TransferListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
@@ -31,7 +31,7 @@ import java.util.List;
  * <p/>
  * To configure list items it uses instances of ChatMessageItem and its subtypes.
  */
-public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTransferListenerOld {
+public class ChatAdapter extends XoAdapter implements IXoMessageListener, TransferListener {
 
     private static final Logger LOG = Logger.getLogger(ChatAdapter.class);
 
@@ -121,14 +121,16 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
     public void onCreate() {
         super.onCreate();
         getXoClient().registerMessageListener(this);
-        getXoClient().registerTransferListener(this);
+        getXoClient().getDownloadAgent().registerListener(this);
+        getXoClient().getUploadAgent().registerListener(this);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         getXoClient().unregisterMessageListener(this);
-        getXoClient().unregisterTransferListener(this);
+        getXoClient().getDownloadAgent().unregisterListener(this);
+        getXoClient().getUploadAgent().unregisterListener(this);
     }
 
     @Override

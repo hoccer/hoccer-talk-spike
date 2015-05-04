@@ -190,7 +190,7 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
         if (title.isEmpty() && artist.isEmpty()) {
             mRemoteViews.setViewVisibility(R.id.ll_media_metadata, View.GONE);
             mRemoteViews.setViewVisibility(R.id.tv_filename, View.VISIBLE);
-            mRemoteViews.setTextViewText(R.id.tv_filename, mCurrentItem.getFileName());
+            mRemoteViews.setTextViewText(R.id.tv_filename, mCurrentItem.getFilename());
         } else {
             mRemoteViews.setViewVisibility(R.id.ll_media_metadata, View.VISIBLE);
             mRemoteViews.setViewVisibility(R.id.tv_filename, View.GONE);
