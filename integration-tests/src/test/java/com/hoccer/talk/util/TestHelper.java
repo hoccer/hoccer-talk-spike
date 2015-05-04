@@ -137,13 +137,13 @@ public class TestHelper {
         setEnvironmentToWorldwide(theClient, "*");
     }
 
-    public static void setEnvironmentToWorldwide(final XoClient theClient, final String theTag) {
+    public static void setEnvironmentToWorldwide(final XoClient theClient, final String tag) {
         assertNotNull(theClient);
-        assertNotNull(theTag);
+        assertNotNull(tag);
         final TalkEnvironment environment = new TalkEnvironment();
         environment.setTimestamp(new Date());
         environment.setType(TalkEnvironment.TYPE_WORLDWIDE);
-        environment.setTag(theTag);
+        environment.setTag(tag);
         theClient.sendEnvironmentUpdate(environment);
 
         await("client1 has received a worldwide group").until(new Callable<Boolean>() {
