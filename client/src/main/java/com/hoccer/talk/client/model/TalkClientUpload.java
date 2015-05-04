@@ -107,7 +107,7 @@ public class TalkClientUpload extends XoTransfer implements IProgressListener {
     private String uploadUrl;
 
     /**
-     * URL for startDownload
+     * URL for download
      */
     @DatabaseField(width = 2000)
     private String downloadUrl;
