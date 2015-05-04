@@ -76,7 +76,6 @@ public class UploadAgent extends TransferAgent {
 
     public void onUploadFinished(TalkClientUpload upload) {
         mUploadActions.remove(upload.getClientUploadId());
-//        mHttpClient.getConnectionManager().closeExpiredConnections();
 
         for (TransferListener listener : mListeners) {
             listener.onUploadFinished(upload);
