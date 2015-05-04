@@ -35,7 +35,7 @@ public abstract class XoTransfer {
 
     public abstract String getMimeType();
 
-    public abstract String getFilename();
+    public abstract String getFileName();
 
     public abstract String getFilePath();
 
@@ -69,7 +69,7 @@ public abstract class XoTransfer {
         return getTransferType() == Type.ATTACHMENT;
     }
 
-    public abstract void registerTransferListener(TransferStateListener listener);
+    public abstract void registerTransferListener(IXoTransferListener listener);
 
-    public abstract void unregisterTransferListener(TransferStateListener listener);
+    public abstract void unregisterTransferListener(IXoTransferListener listener);
 }

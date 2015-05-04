@@ -123,8 +123,7 @@ public class XoClientService extends Service {
             mClient.registerStateListener(mClientListener);
             mClient.registerMessageListener(mClientListener);
             mClient.registerContactListener(mClientListener);
-            mClient.getDownloadAgent().registerListener(mClientListener);
-            mClient.getUploadAgent().registerListener(mClientListener);
+            mClient.registerTransferListener(mClientListener);
         }
 
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -171,8 +170,7 @@ public class XoClientService extends Service {
         if (mClientListener != null) {
             mClient.unregisterStateListener(mClientListener);
             mClient.unregisterMessageListener(mClientListener);
-            mClient.getDownloadAgent().unregisterListener(mClientListener);
-            mClient.getUploadAgent().unregisterListener(mClientListener);
+            mClient.unregisterTransferListener(mClientListener);
             mClientListener = null;
         }
 
@@ -229,13 +227,17 @@ public class XoClientService extends Service {
     private void loadPreference(SharedPreferences preferences, String key) {
         if (key != null) {
             if (key.equals(sPreferenceUploadLimitMobileKey)) {
-                mClient.setUploadLimit(preferences.getInt(key, TransferAgent.UNLIMITED));
+                String uploadLimitString = preferences.getString(key, DEFAULT_TRANSFER_LIMIT);
+                mClient.setUploadLimit(Integer.parseInt(uploadLimitString));
             } else if (key.equals(sPreferenceDownloadLimitMobileKey)) {
-                mClient.setDownloadLimit(preferences.getInt(key, TransferAgent.UNLIMITED));
+                String downloadLimitString = preferences.getString(key, DEFAULT_TRANSFER_LIMIT);
+                mClient.setDownloadLimit(Integer.parseInt(downloadLimitString));
             } else if (key.equals(sPreferenceUploadLimitWifiKey)) {
-                mClient.setUploadLimit(preferences.getInt(key, TransferAgent.UNLIMITED));
+                String uploadLimitString = preferences.getString(key, DEFAULT_TRANSFER_LIMIT);
+                mClient.setUploadLimit(Integer.parseInt(uploadLimitString));
             } else if (key.equals(sPreferenceDownloadLimitWifiKey)) {
-                mClient.setDownloadLimit(preferences.getInt(key, TransferAgent.UNLIMITED));
+                String downloadLimitString = preferences.getString(key, DEFAULT_TRANSFER_LIMIT);
+                mClient.setDownloadLimit(Integer.parseInt(downloadLimitString));
             } else if (key.equals(sPreferenceImageUploadPixelCountKey)) {
                 String maxPixelCount = mPreferences.getString(sPreferenceImageUploadPixelCountKey,
                         Integer.toString(DEFAULT_IMAGE_UPLOAD_MAX_PIXEL_COUNT));
@@ -562,7 +564,7 @@ public class XoClientService extends Service {
             IXoStateListener,
             IXoMessageListener,
             IXoContactListener,
-            TransferListener,
+            IXoTransferListenerOld,
             MediaScannerConnection.OnScanCompletedListener {
 
         @Override
@@ -581,6 +583,10 @@ public class XoClientService extends Service {
 
         @Override
         public void onDownloadRegistered(TalkClientDownload download) {
+            LOG.debug("onDownloadRegistered(" + download.getClientDownloadId() + ")");
+            if (download.isAttachment()) {
+                mClient.requestDownload(download, false);
+            }
         }
 
         @Override

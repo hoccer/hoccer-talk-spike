@@ -583,29 +583,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return mClientDownloads.queryForAll();
     }
 
-    public List<TalkClientDownload> findAllPendingDownloads() throws SQLException {
-        QueryBuilder<TalkClientDownload, Integer> downloads = mClientDownloads.queryBuilder();
-        downloads.where()
-                .ne("state", TalkClientDownload.State.COMPLETE).and()
-                .ne("state", TalkClientDownload.State.ON_HOLD).and()
-                .ne("state", TalkClientDownload.State.PAUSED);
-        QueryBuilder<TalkClientMessage, Integer> clientMessages = mClientMessages.queryBuilder();
-        clientMessages.where()
-                .eq("deleted", false);
-        return downloads.join(clientMessages).query();
-    }
-
-    public List<TalkClientUpload> findAllPendingUploads() throws SQLException {
-        QueryBuilder<TalkClientUpload, Integer> uploads = mClientUploads.queryBuilder();
-        uploads.where()
-                .ne("state", TalkClientUpload.State.COMPLETE).and()
-                .ne("state", TalkClientUpload.State.PAUSED);
-        QueryBuilder<TalkClientMessage, Integer> clientMessages = mClientMessages.queryBuilder();
-        clientMessages.where()
-                .eq("deleted", false);
-        return uploads.join(clientMessages).query();
-    }
-
     public TalkClientUpload findClientUploadById(int clientUploadId) throws SQLException {
         return mClientUploads.queryForId(clientUploadId);
     }

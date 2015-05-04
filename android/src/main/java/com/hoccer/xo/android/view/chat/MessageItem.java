@@ -13,10 +13,14 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoTransfer;
+import com.hoccer.talk.client.XoTransferAgent;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
+import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentState;
 import com.hoccer.talk.model.TalkDelivery;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
@@ -428,7 +432,7 @@ public class MessageItem implements AttachmentTransferListener {
 
         setContentDescription();
 
-        if (shouldDisplayTransferControl(mAttachment.getContentState())) {
+        if (shouldDisplayTransferControl(getTransferState(mAttachment))) {
             mContentTransferProgress.setVisibility(View.VISIBLE);
             mContentWrapper.setVisibility(View.GONE);
 
@@ -494,13 +498,45 @@ public class MessageItem implements AttachmentTransferListener {
     }
 
     /**
-     * Returns true when the transfer (upload or startDownload) of the attachment is not completed.
+     * Returns true when the transfer (upload or download) of the attachment is not completed.
      *
      * @param state The current state of the content object
      * @return true if the transfer control should be displayed for a incomplete transfer
      */
     protected boolean shouldDisplayTransferControl(ContentState state) {
         return !(state == ContentState.SELECTED || state == ContentState.UPLOAD_COMPLETE || state == ContentState.DOWNLOAD_COMPLETE);
+    }
+
+    protected ContentState getTransferState(XoTransfer object) {
+        XoTransferAgent agent = XoApplication.get().getXoClient().getTransferAgent();
+        ContentState state = object.getContentState();
+        if (object instanceof TalkClientDownload) {
+            TalkClientDownload download = (TalkClientDownload) object;
+            switch (state) {
+                case DOWNLOAD_DOWNLOADING:
+                case DOWNLOAD_DECRYPTING:
+                case DOWNLOAD_DETECTING:
+                    if (agent.isDownloadActive(download)) {
+                        return state;
+                    } else {
+                        return ContentState.DOWNLOAD_PAUSED;
+                    }
+            }
+        }
+        if (object instanceof TalkClientUpload) {
+            TalkClientUpload upload = (TalkClientUpload) object;
+            switch (state) {
+                case UPLOAD_REGISTERING:
+                case UPLOAD_ENCRYPTING:
+                case UPLOAD_UPLOADING:
+                    if (agent.isUploadActive(upload)) {
+                        return state;
+                    } else {
+                        return ContentState.UPLOAD_PAUSED;
+                    }
+            }
+        }
+        return state;
     }
 
     private void configureContextMenu(View view) {

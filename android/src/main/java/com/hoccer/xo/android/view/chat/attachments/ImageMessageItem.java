@@ -99,7 +99,6 @@ public class ImageMessageItem extends MessageItem {
 
         Uri imageUri = UriUtils.getAbsoluteFileUri(attachment.getFilePath());
         Picasso.with(mContext).load(imageUri)
-                .placeholder(R.drawable.ic_img_placeholder)
                 .error(R.drawable.ic_img_placeholder)
                 .resize((int) (width * IMAGE_SCALE_FACTOR), (int) (height * IMAGE_SCALE_FACTOR))
                 .centerInside()
