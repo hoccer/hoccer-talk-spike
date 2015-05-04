@@ -1887,15 +1887,13 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         LOG.debug("sendEnvironmentUpdate()");
         if (isReady() && environment != null) {
             if (mEnvironmentUpdateCallPending.compareAndSet(false, true)) {
-
-                final TalkEnvironment environmentToSend = environment;
                 mExecutor.execute(new Runnable() {
                     @Override
                     public void run() {
                         try {
-                            environmentToSend.setClientId(mSelfContact.getClientId());
-                            environmentToSend.setGroupId(mEnvironmentGroupId);
-                            mEnvironmentGroupId = mServerRpc.updateEnvironment(environmentToSend);
+                            environment.setClientId(mSelfContact.getClientId());
+                            environment.setGroupId(mEnvironmentGroupId);
+                            mEnvironmentGroupId = mServerRpc.updateEnvironment(environment);
                         } catch (Throwable t) {
                             LOG.error("sendEnvironmentUpdate: other error", t);
                         }
