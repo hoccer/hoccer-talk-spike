@@ -5,7 +5,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.IXoMessageListener;
-import com.hoccer.talk.client.TransferListener;
+import com.hoccer.talk.client.IXoTransferListenerOld;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
@@ -27,7 +27,7 @@ import java.util.List;
  * It also has a filter feature that allows restricting the displayed set of contacts.
  */
 public abstract class ContactsAdapter extends XoAdapter
-        implements IXoContactListener, IXoMessageListener, TransferListener {
+        implements IXoContactListener, IXoMessageListener, IXoTransferListenerOld {
 
     private static final Logger LOG = Logger.getLogger(ContactsAdapter.class);
 
@@ -71,9 +71,8 @@ public abstract class ContactsAdapter extends XoAdapter
         LOG.debug("onCreate()");
         super.onCreate();
         getXoClient().registerContactListener(this);
+        getXoClient().registerTransferListener(this);
         getXoClient().registerMessageListener(this);
-        getXoClient().getDownloadAgent().registerListener(this);
-        getXoClient().getUploadAgent().registerListener(this);
     }
 
     @Override
@@ -81,9 +80,8 @@ public abstract class ContactsAdapter extends XoAdapter
         LOG.debug("onDestroy()");
         super.onDestroy();
         getXoClient().unregisterContactListener(this);
+        getXoClient().unregisterTransferListener(this);
         getXoClient().unregisterMessageListener(this);
-        getXoClient().getDownloadAgent().unregisterListener(this);
-        getXoClient().getUploadAgent().unregisterListener(this);
     }
 
     @Override

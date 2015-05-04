@@ -230,7 +230,7 @@ public class AttachmentListFragment extends SearchableListFragment {
                 List<String> addedFilenames = new ArrayList<String>();
                 for (XoTransfer item : mSelectedAttachments) {
                     mediaCollection.addItem(item);
-                    addedFilenames.add(item.getFilename());
+                    addedFilenames.add(item.getFileName());
                 }
                 Toast.makeText(getActivity(), String.format(getString(R.string.added_attachment_to_collection), addedFilenames, mediaCollection.getName()), Toast.LENGTH_LONG).show();
             } catch (SQLException e) {

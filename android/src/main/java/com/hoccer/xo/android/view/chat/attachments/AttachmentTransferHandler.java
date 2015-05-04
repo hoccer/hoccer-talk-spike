@@ -5,8 +5,9 @@ import android.content.res.Resources;
 import android.text.format.Formatter;
 import android.view.View;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.client.TransferStateListener;
+import com.hoccer.talk.client.IXoTransferListener;
 import com.hoccer.talk.client.XoTransfer;
+import com.hoccer.talk.client.model.IXoTransferState;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentState;
@@ -19,7 +20,7 @@ import org.apache.log4j.Logger;
  * <p/>
  * It receives click events and pauses / resumes the transfer of the given attachment.
  */
-public class AttachmentTransferHandler implements View.OnClickListener, TransferStateListener {
+public class AttachmentTransferHandler implements View.OnClickListener, IXoTransferListener {
 
     private static final Logger LOG = Logger.getLogger(AttachmentTransferHandler.class);
 
@@ -56,28 +57,28 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
                             if (mTransfer instanceof TalkClientDownload) {
                                 LOG.debug("Will resume download for " + ((TalkClientDownload) mTransfer).getDownloadUrl());
                                 TalkClientDownload download = (TalkClientDownload) mTransfer;
-                                XoApplication.get().getXoClient().getDownloadAgent().startDownloadTask(download);
+                                XoApplication.get().getXoClient().requestDownload(download, true);
                             }
                             break;
                         case CANCEL_DOWNLOAD:
                             if (mTransfer instanceof TalkClientDownload) {
                                 LOG.debug("Will pause download for " + ((TalkClientDownload) mTransfer).getDownloadUrl());
                                 TalkClientDownload download = (TalkClientDownload) mTransfer;
-                                XoApplication.get().getXoClient().getDownloadAgent().pauseDownload(download);
+                                XoApplication.get().getXoClient().getTransferAgent().pauseDownload(download);
                             }
                             break;
                         case REQUEST_UPLOAD:
                             if (mTransfer instanceof TalkClientUpload) {
                                 LOG.debug("Will resume upload for " + ((TalkClientUpload) mTransfer).getUploadUrl());
                                 TalkClientUpload upload = (TalkClientUpload) mTransfer;
-                                XoApplication.get().getXoClient().getUploadAgent().resumeUpload(upload);
+                                XoApplication.get().getXoClient().getTransferAgent().startOrRestartUpload(upload);
                             }
                             break;
                         case CANCEL_UPLOAD:
                             if (mTransfer instanceof TalkClientUpload) {
                                 LOG.debug("Will pause upload for " + ((TalkClientUpload) mTransfer).getUploadUrl());
                                 TalkClientUpload upload = (TalkClientUpload) mTransfer;
-                                XoApplication.get().getXoClient().getUploadAgent().pauseUpload(upload);
+                                XoApplication.get().getXoClient().getTransferAgent().pauseUpload(upload);
                             }
                     }
                     mTransferControl.post(new Runnable() {
@@ -106,13 +107,8 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
             case DOWNLOAD_DOWNLOADING:
                 mTransferAction = TransferAction.CANCEL_DOWNLOAD;
                 break;
-            case DOWNLOAD_COMPLETE:
-                break;
-            case DOWNLOAD_FAILED:
-                break;
             case UPLOAD_NEW:
             case UPLOAD_PAUSED:
-            case UPLOAD_FAILED:
                 mTransferAction = TransferAction.REQUEST_UPLOAD;
                 break;
             case UPLOAD_REGISTERING:
@@ -123,7 +119,13 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
                 break;
             case SELECTED:
                 break;
+            case UPLOAD_FAILED:
+                break;
             case UPLOAD_COMPLETE:
+                break;
+            case DOWNLOAD_FAILED:
+                break;
+            case DOWNLOAD_COMPLETE:
                 break;
             default:
                 break;
@@ -256,8 +258,8 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
     }
 
     @Override
-    public void onStateChanged(XoTransfer transfer) {
-        LOG.debug("transfer state changed to " + transfer.getContentState() + ". Update ControlView");
+    public void onStateChanged(IXoTransferState state) {
+        LOG.debug("transfer state changed to " + state + ". Update ControlView");
         setTransferAction(mTransfer.getContentState());
     }
 

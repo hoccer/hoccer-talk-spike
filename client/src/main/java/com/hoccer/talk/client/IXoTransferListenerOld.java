@@ -4,7 +4,7 @@ import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
 
 @Deprecated
-public interface TransferListener {
+public interface IXoTransferListenerOld {
 
     public void onDownloadRegistered(TalkClientDownload download);
     public void onDownloadStarted(TalkClientDownload download);

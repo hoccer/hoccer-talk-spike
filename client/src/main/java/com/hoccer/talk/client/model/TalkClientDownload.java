@@ -1,23 +1,45 @@
 package com.hoccer.talk.client.model;
 
 import com.google.appengine.api.blobstore.ByteRange;
-import com.hoccer.talk.client.TransferStateListener;
+import com.hoccer.talk.client.IXoTransferListener;
 import com.hoccer.talk.client.XoTransfer;
+import com.hoccer.talk.client.XoTransferAgent;
 import com.hoccer.talk.content.ContentState;
+import com.hoccer.talk.crypto.AESCryptor;
 import com.hoccer.talk.model.TalkAttachment;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.http.*;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.log4j.Logger;
+import org.apache.tika.detect.DefaultDetector;
+import org.apache.tika.detect.Detector;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.mime.MediaType;
+import org.apache.tika.mime.MimeType;
+import org.apache.tika.mime.MimeTypes;
 
+import java.io.*;
+import java.security.DigestOutputStream;
+import java.security.MessageDigest;
+import java.sql.SQLException;
 import java.util.*;
 
 @DatabaseTable(tableName = "clientDownload")
-public class TalkClientDownload extends XoTransfer {
+public class TalkClientDownload extends XoTransfer implements IXoTransferObject {
 
     private final static Logger LOG = Logger.getLogger(TalkClientDownload.class);
 
-    private List<TransferStateListener> mTransferListeners = new ArrayList<TransferStateListener>();
+    private static final Detector MIME_DETECTOR = new DefaultDetector(MimeTypes.getDefaultMimeTypes());
+
+    private static final int MAX_FAILURES = 16;
+
+    private XoTransferAgent mTransferAgent;
+
+    private List<IXoTransferListener> mTransferListeners = new ArrayList<IXoTransferListener>();
 
     public enum State implements IXoTransferState {
         INITIALIZING {
@@ -84,6 +106,7 @@ public class TalkClientDownload extends XoTransfer {
 
     @DatabaseField
     private State state;
+
     @DatabaseField
     private String fileName;
 
@@ -141,6 +164,8 @@ public class TalkClientDownload extends XoTransfer {
     @DatabaseField
     private ApprovalState approvalState;
 
+    private HttpGet mDownloadRequest;
+
     /**
      * Only for display purposes, the real content length will be retrieved from server since after encryption this value will differ
      */
@@ -154,20 +179,22 @@ public class TalkClientDownload extends XoTransfer {
         this.aspectRatio = 1.0;
         this.downloadProgress = 0;
         this.contentLength = -1;
-        mTransferListeners = new ArrayList<TransferStateListener>();
+        mTransferListeners = new ArrayList<IXoTransferListener>();
     }
 
-    public void initializeAsAvatar(String url, String id, Date timestamp) {
+    public void initializeAsAvatar(XoTransferAgent agent, String url, String id, Date timestamp) {
         LOG.info("[new] initializeAsAvatar(url: '" + url + "')");
+        mTransferAgent = agent;
         this.type = Type.AVATAR;
         this.downloadUrl = url;
         this.downloadFile = id + "-" + timestamp.getTime();
         this.fileName = this.downloadFile;
-        switchState(State.NEW);
+        switchState(State.NEW, "new avatar");
     }
 
-    public void initializeAsAttachment(TalkAttachment attachment, String id, byte[] key) {
+    public void initializeAsAttachment(XoTransferAgent agent, TalkAttachment attachment, String id, byte[] key) {
         LOG.info("[new] initializeAsAttachment(url: '" + attachment.getUrl() + "')");
+        mTransferAgent = agent;
         this.type = Type.ATTACHMENT;
         this.contentType = attachment.getMimeType();
         this.mediaType = attachment.getMediaType();
@@ -180,15 +207,73 @@ public class TalkClientDownload extends XoTransfer {
         this.decryptionKey = new String(Hex.encodeHex(key));
         this.contentHmac = attachment.getHmac();
         this.fileId = attachment.getFileId();
-        switchState(State.NEW);
+        switchState(State.NEW, "new attachment");
     }
 
-    public void switchState(State newState) {
+    @Override
+    public void start(XoTransferAgent agent) {
+        mTransferAgent = agent;
+        switchState(State.DOWNLOADING, "starting");
+    }
+
+    @Override
+    public void pause(XoTransferAgent agent) {
+        mTransferAgent = agent;
+        switchState(State.PAUSED, "pausing");
+    }
+
+    @Override
+    public void cancel(XoTransferAgent agent) {
+        mTransferAgent = agent;
+        switchState(State.PAUSED, "cancelling");
+    }
+
+    @Override
+    public void hold(XoTransferAgent agent) {
+        mTransferAgent = agent;
+        switchState(State.ON_HOLD, "put on hold");
+    }
+
+    private void switchState(State newState, String reason) {
         if (!state.possibleFollowUps().contains(newState)) {
             LOG.warn("State " + newState + " is no possible followup to " + state);
             return;
         }
+        LOG.info("switching to state '" + newState + "' - supplied reason: '" + reason + "'");
         setState(newState);
+
+        switch (state) {
+            case INITIALIZING:
+                switchState(State.NEW, "initializing done");
+                break;
+            case NEW:
+                // DO NOTHING
+                break;
+            case DOWNLOADING:
+                doDownloadingAction();
+                break;
+            case PAUSED:
+                doPausedAction();
+                break;
+            case RETRYING:
+                doRetryingAction();
+                break;
+            case DECRYPTING:
+                doDecryptingAction();
+                break;
+            case DETECTING:
+                doDetectingAction();
+                break;
+            case COMPLETE:
+                doCompleteAction();
+                break;
+            case FAILED:
+                doFailedAction();
+                break;
+            case ON_HOLD:
+                doOnHoldAction();
+                break;
+        }
     }
 
     public TalkClientDownload.ApprovalState getApprovalState() {
@@ -203,31 +288,187 @@ public class TalkClientDownload extends XoTransfer {
         this.approvalState = approvalState;
     }
 
-    private void setState(State newState) {
-        this.state = newState;
 
-        for (TransferStateListener listener : mTransferListeners) {
-            listener.onStateChanged(this);
+    private void setState(State newState) {
+        LOG.info("[download " + clientDownloadId + "] switching to new state '" + newState + "'");
+        state = newState;
+
+        saveToDatabase();
+
+        for (int i = 0; i < mTransferListeners.size(); i++) {
+            IXoTransferListener listener = mTransferListeners.get(i);
+            // TODO: try/catch here? What happens if a listener call produces exception?
+            listener.onStateChanged(state);
         }
     }
 
-    public boolean isValidContentRange(ByteRange contentRange, long bytesToGo) {
+    private void doOnHoldAction() {
+        if (mDownloadRequest != null) {
+            mDownloadRequest.abort();
+            mDownloadRequest = null;
+            LOG.debug("aborted current Download request. Download can still resume.");
+        }
+        mTransferAgent.deactivateDownload(this);
+        mTransferAgent.onDownloadStateChanged(this);
+    }
+
+    private void doDownloadingAction() {
+        String downloadFilename = computeDownloadFile();
+        if (downloadFilename == null) {
+            LOG.error("[downloadId: '" + clientDownloadId + "'] could not determine download filename");
+            return;
+        }
+
+        LOG.debug("performDownloadRequest(downloadId: '" + clientDownloadId + "', filename: '" + downloadFilename + "')");
+        HttpClient client = mTransferAgent.getHttpClient();
+        RandomAccessFile randomAccessFile;
+        FileDescriptor fileDescriptor;
+        try {
+            logGetDebug("downloading '" + downloadUrl + "'");
+            // create the GET request
+            //synchronized (mDownloadRequest) {
+            if (mDownloadRequest != null) {
+                LOG.warn("Found running mDownloadRequest. Aborting.");
+                mDownloadRequest.abort();
+            }
+            mDownloadRequest = new HttpGet(downloadUrl);
+
+            // determine the requested range
+            String range;
+            if (contentLength != -1) {
+                long last = contentLength - 1;
+                range = "bytes=" + downloadProgress + "-" + last;
+                logGetDebug("requesting range '" + range + "'");
+                mDownloadRequest.addHeader("Range", range);
+            }
+            //}
+            mTransferAgent.onDownloadStarted(this);
+
+            // start performing the request
+            HttpResponse response = client.execute(mDownloadRequest);
+            // process status line
+            StatusLine status = response.getStatusLine();
+            int sc = status.getStatusCode();
+            logGetDebug("got status '" + sc + "': " + status.getReasonPhrase());
+            if (sc != HttpStatus.SC_OK && sc != HttpStatus.SC_PARTIAL_CONTENT) {
+                LOG.debug("http status is not OK (" + HttpStatus.SC_OK + ") or partial content (" +
+                        HttpStatus.SC_PARTIAL_CONTENT + ")");
+                checkTransferFailure(transferFailures + 1, "http status is not OK (" + HttpStatus.SC_OK + ") or partial content (" +
+                        HttpStatus.SC_PARTIAL_CONTENT + ")");
+                return;
+            }
+
+            long bytesToGo = getContentLengthFromResponse(response);
+            ByteRange contentRange = getContentRange(response);
+            setContentTypeByResponse(response);
+
+            long bytesStart = downloadProgress;
+            if (!isValidContentRange(contentRange, bytesToGo) || contentLength == -1) {
+                LOG.debug("invalid contentRange or content length is -1 - contentLength: '" + contentLength + "'");
+                checkTransferFailure(transferFailures + 1, "invalid contentRange or content length is -1 - contentLength: '" + contentLength + "'");
+                return;
+            }
+
+            HttpEntity entity = response.getEntity();
+            InputStream inputStream = entity.getContent();
+            File file = new File(downloadFilename);
+            logGetDebug("destination: '" + file + "'");
+            file.createNewFile();
+            randomAccessFile = new RandomAccessFile(file, "rw");
+            fileDescriptor = randomAccessFile.getFD();
+            randomAccessFile.setLength(contentLength);
+            logGetDebug("will retrieve '" + bytesToGo + "' bytes");
+            randomAccessFile.seek(bytesStart);
+
+            if (!copyData(bytesToGo, randomAccessFile, fileDescriptor, inputStream)) {
+                checkTransferFailure(transferFailures + 1, "copyData returned null.");
+            }
+
+            LOG.debug("doDownloadingAction - ensuring file handles are closed...");
+            if (downloadProgress == contentLength) {
+                if (decryptionKey != null) {
+                    switchState(State.DECRYPTING, "downloading of encrypted file finished");
+                } else {
+                    dataFile = downloadFilename;
+                    switchState(State.DETECTING, "downloading of unencrypted file finished");
+                }
+            }
+
+        } catch (IOException e) {
+            LOG.error("IOException in copyData while reading ", e);
+            checkTransferFailure(transferFailures + 1, "download exception!");
+        } catch (Exception e) {
+            LOG.error("download exception", e);
+            checkTransferFailure(transferFailures + 1, "download exception!");
+        }
+    }
+
+    private void checkTransferFailure(int failures, String failureDescription) {
+        transferFailures = failures;
+        if (transferFailures <= MAX_FAILURES) {
+            switchState(State.RETRYING, "pausing because transfer failures still allow resuming (" + transferFailures + "/" + MAX_FAILURES + " transferFailures), cause: '" + failureDescription + "'");
+        } else {
+            switchState(State.FAILED, "failing because transfer failures reached max count (" + transferFailures + "/" + MAX_FAILURES + " transferFailures), cause: '" + failureDescription + "'");
+        }
+    }
+
+    private boolean copyData(long bytesToGo, RandomAccessFile randomAccessFile, FileDescriptor fileDescriptor, InputStream inputStream) throws IOException {
+        boolean success = false;
+        try {
+            success = copyDataImpl(bytesToGo, randomAccessFile, inputStream);
+        } finally {
+            try {
+                fileDescriptor.sync();
+                randomAccessFile.close();
+                inputStream.close();
+            } catch (Exception e) {
+                LOG.error("IOException in copyDataImpl while closing streams ", e);
+            }
+        }
+        return success;
+    }
+
+    private boolean copyDataImpl(long bytesToGo, RandomAccessFile randomAccessFile, InputStream inputStream) throws IOException {
+        byte[] buffer = new byte[1 << 12]; // length == 4096 == 2^12
+        while (bytesToGo > 0) {
+            logGetTrace("bytesToGo: '" + bytesToGo + "'");
+            logGetTrace("downloadProgress: '" + downloadProgress + "'");
+            // determine how much to copy
+            int bytesToRead = (int)Math.min((long)buffer.length, bytesToGo);
+            // perform the copy
+            int bytesRead = inputStream.read(buffer, 0, bytesToRead);
+            logGetTrace("reading: '" + bytesToRead + "' bytes, returned: '" + bytesRead + "' bytes");
+            if (bytesRead == -1) {
+                logGetWarning("eof with '" + bytesToGo + "' bytes to go");
+                return false;
+            }
+            randomAccessFile.write(buffer, 0, bytesRead);
+            downloadProgress += bytesRead;
+            bytesToGo -= bytesRead;
+            for (IXoTransferListener listener : mTransferListeners) {
+                listener.onProgressUpdated(downloadProgress, contentLength);
+            }
+        }
+        return true;
+    }
+
+    private boolean isValidContentRange(ByteRange contentRange, long bytesToGo) {
         if (contentRange != null) {
             if (contentRange.getStart() != downloadProgress) {
-                LOG.error("[downloadId: '" + clientDownloadId + "'] GET " + "server returned wrong offset");
+                logGetError("server returned wrong offset");
                 return false;
             }
             if (contentRange.hasEnd()) {
                 long rangeSize = (int) (contentRange.getEnd() - contentRange.getStart() + 1);
                 if (rangeSize != bytesToGo) {
-                    LOG.error("[downloadId: '" + clientDownloadId + "'] GET " + "server returned range not corresponding to content length");
+                    logGetError("server returned range not corresponding to content length");
                     return false;
                 }
             }
             if (contentRange.hasTotal()) {
                 if (contentLength == -1) {
                     long total = contentRange.getTotal();
-                    LOG.debug("[downloadId: '" + clientDownloadId + "'] GET " + "inferred content length '" + total + "' from range");
+                    logGetDebug("inferred content length '" + total + "' from range");
                     contentLength = total;
                 }
             }
@@ -235,8 +476,286 @@ public class TalkClientDownload extends XoTransfer {
         return true;
     }
 
-    public String getDownloadFile() {
-        return downloadFile;
+    private void setContentTypeByResponse(HttpResponse response) {
+        Header contentTypeHeader = response.getFirstHeader("Content-Type");
+        if (contentTypeHeader != null) {
+            String contentTypeValue = contentTypeHeader.getValue();
+            if (contentType == null) {
+                logGetDebug("got content type '" + contentTypeValue + "'");
+                contentType = contentTypeValue;
+            }
+        }
+    }
+
+    private ByteRange getContentRange(HttpResponse response) {
+        Header contentRangeHeader = response.getFirstHeader("Content-Range");
+        if (contentRangeHeader != null) {
+            String contentRangeString = contentRangeHeader.getValue();
+            logGetDebug("got range '" + contentRangeString + "'");
+            return ByteRange.parseContentRange(contentRangeString);
+        }
+        return null;
+    }
+
+    private long getContentLengthFromResponse(HttpResponse response) {
+        Header contentLengthHeader = response.getFirstHeader("Content-Length");
+        long contentLengthValue = this.contentLength;
+        if (contentLengthHeader != null) {
+            String contentLengthString = contentLengthHeader.getValue();
+            contentLengthValue = Integer.valueOf(contentLengthString);
+            logGetDebug("got content length '" + contentLengthValue + "'");
+        }
+        return contentLengthValue;
+    }
+
+    private void doPausedAction() {
+        if (mDownloadRequest != null) {
+            mDownloadRequest.abort();
+            mDownloadRequest = null;
+            LOG.debug("aborted current Download request. Download can still resume.");
+        }
+        mTransferAgent.deactivateDownload(this);
+        mTransferAgent.onDownloadStateChanged(this);
+    }
+
+    private void doRetryingAction() {
+        if (mDownloadRequest != null) {
+            mDownloadRequest.abort();
+            mDownloadRequest = null;
+            LOG.debug("aborted current Download request. Download can still resume.");
+        }
+        mTransferAgent.deactivateDownload(this);
+        mTransferAgent.onDownloadStateChanged(this);
+        mTransferAgent.scheduleDownloadAttempt(this);
+    }
+
+    private void doDecryptingAction() {
+        String sourceFile = computeDownloadFile();
+        String destinationFile = computeDecryptionFile();
+
+        LOG.debug("performDecryption(downloadId: '" + clientDownloadId + "', sourceFile: '" + sourceFile + "', " + "destinationFile: '" + destinationFile + "')");
+
+        File source = new File(sourceFile);
+        File destination = new File(destinationFile);
+        if (destination.exists()) {
+            destination.delete();
+        }
+
+        try {
+            byte[] key = Hex.decodeHex(decryptionKey.toCharArray());
+            int bytesToDecrypt = (int) source.length();
+            byte[] buffer = new byte[1 << 16];
+            InputStream inputStream = new FileInputStream(source);
+            OutputStream fileOutputStream = new FileOutputStream(destination);
+            MessageDigest digest = MessageDigest.getInstance("SHA256");
+            OutputStream digestOutputStream = new DigestOutputStream(fileOutputStream, digest);
+            OutputStream decryptingOutputStream = AESCryptor.decryptingOutputStream(digestOutputStream, key, AESCryptor.NULL_SALT);
+
+            int bytesToGo = bytesToDecrypt;
+            while (bytesToGo > 0) {
+                int bytesToCopy = Math.min(buffer.length, bytesToGo);
+                int bytesRead = inputStream.read(buffer, 0, bytesToCopy);
+                decryptingOutputStream.write(buffer, 0, bytesRead);
+                bytesToGo -= bytesRead;
+            }
+
+            decryptingOutputStream.flush();
+            decryptingOutputStream.close();
+            digestOutputStream.flush();
+            digestOutputStream.close();
+            inputStream.close();
+
+            String computedHMac = new String(Base64.encodeBase64(digest.digest()));
+            if (this.contentHmac != null) {
+                if (this.contentHmac.equals(computedHMac)) {
+                    LOG.info("download hmac ok");
+                } else {
+                    LOG.error("download hmac mismatch, computed hmac: '" + computedHMac + "', should be: '" + this.contentHmac + "'");
+                }
+            }
+
+            dataFile = destinationFile;
+            switchState(State.DETECTING, "decryption finished successfully");
+        } catch (Exception e) {
+            LOG.error("decryption error", e);
+            checkTransferFailure(transferFailures + 1, "failure during decryption");
+        }
+    }
+
+    private void doDetectingAction() {
+        String tempDestinationFilePath;
+        String destinationDirectory;
+        if (this.decryptedFile != null) {
+            tempDestinationFilePath = computeDecryptionFile();
+            destinationDirectory = computeDecryptionDirectory();
+        } else {
+            tempDestinationFilePath = computeDownloadFile();
+            destinationDirectory = computeDownloadDirectory();
+        }
+
+        LOG.debug("performDetection(downloadId: '" + clientDownloadId + "', destinationFile: '" + tempDestinationFilePath + "')");
+        File destination = new File(tempDestinationFilePath);
+
+        try {
+            InputStream fileInputStream = new FileInputStream(destination);
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
+
+            Metadata metadata = new Metadata();
+            if (contentType != null && !"application/octet-stream".equals(contentType)) {
+                metadata.add(Metadata.CONTENT_TYPE, contentType);
+            }
+            if (decryptedFile != null) {
+                metadata.add(Metadata.RESOURCE_NAME_KEY, decryptedFile);
+            }
+
+            MediaType detectedMediaType = MIME_DETECTOR.detect(bufferedInputStream, metadata);
+
+            fileInputStream.close();
+
+            if (detectedMediaType != null) {
+                String mediaTypeName = detectedMediaType.toString();
+                LOG.info("[downloadId: '" + clientDownloadId + "'] detected mime-type '" + mediaTypeName + "'");
+                this.contentType = mediaTypeName;
+                MimeType detectedMimeType = MimeTypes.getDefaultMimeTypes().getRegisteredMimeType(mediaTypeName);
+                if (detectedMimeType != null) {
+                    String extension = detectedMimeType.getExtension();
+                    if (extension != null) {
+                        LOG.info("[downloadId: '" + clientDownloadId + "'] renaming to extension '" + detectedMimeType.getExtension() + "'");
+
+                        String destinationFileName = createUniqueFileNameInDirectory(this.fileName, extension, destinationDirectory);
+                        String destinationPath = destinationDirectory + File.separator + destinationFileName;
+
+                        File newName = new File(destinationPath);
+                        if (destination.renameTo(newName)) {
+                            this.decryptedFile = destinationFileName;
+                            this.fileName = destinationFileName;
+                            this.dataFile = computeRelativeDownloadDirectory() + File.separator + destinationFileName;
+                        } else {
+                            LOG.warn("could not rename file");
+                        }
+                    }
+                }
+            }
+            switchState(State.COMPLETE, "detection successful");
+        } catch (Exception e) {
+            LOG.error("detection error", e);
+            checkTransferFailure(transferFailures + 1, "detection failed");
+        }
+    }
+
+    private void doCompleteAction() {
+        mTransferAgent.onDownloadFinished(this);
+    }
+
+    private void doFailedAction() {
+        mTransferAgent.onDownloadFailed(this);
+    }
+
+    private String computeDecryptionDirectory() {
+        String directory = null;
+        switch (this.type) {
+            case ATTACHMENT:
+                directory = mTransferAgent.getClient().getAttachmentDirectory();
+                break;
+        }
+        return directory;
+    }
+
+    private String computeDownloadDirectory() {
+        String directory = null;
+        switch (this.type) {
+            case AVATAR:
+                directory = mTransferAgent.getClient().getAvatarDirectory();
+                break;
+            case ATTACHMENT:
+                directory = mTransferAgent.getClient().getEncryptedDownloadDirectory();
+                break;
+        }
+        return directory;
+    }
+
+    private String computeRelativeDownloadDirectory() {
+        switch (this.type) {
+            case ATTACHMENT:
+                return mTransferAgent.getClient().getRelativeAttachmentDirectory();
+            case AVATAR:
+                return mTransferAgent.getClient().getRelativeAvatarDirectory();
+        }
+        return null;
+    }
+
+    private String computeDecryptionFile() {
+        String file = null;
+        String directory = computeDecryptionDirectory();
+        if (directory != null) {
+            file = directory + File.separator + this.decryptedFile;
+        }
+        return file;
+    }
+
+    private String computeDownloadFile() {
+        String file = null;
+        String directory = computeDownloadDirectory();
+        if (directory != null) {
+            file = directory + File.separator + this.downloadFile;
+        }
+        return file;
+    }
+
+    private void logGetDebug(String message) {
+        LOG.debug("[downloadId: '" + clientDownloadId + "'] GET " + message);
+    }
+
+    private void logGetTrace(String message) {
+        LOG.trace("[downloadId: '" + clientDownloadId + "'] GET " + message);
+    }
+
+    private void logGetWarning(String message) {
+        LOG.warn("[downloadId: '" + clientDownloadId + "'] GET " + message);
+    }
+
+    private void logGetError(String message) {
+        LOG.error("[downloadId: '" + clientDownloadId + "'] GET " + message);
+    }
+
+    /**
+     * Creates a unique file name by checking whether a file already exists in a given directory.
+     * In case a file with the same name already exists the given file name will be expanded by an underscore and
+     * a running number (foo_1.bar) to prevent the existing file from being overwritten.
+     *
+     * @param file      The given file name
+     * @param extension The given file extension
+     * @param directory The directory to check
+     * @return The file name including running number and extension (foo_1.bar)
+     */
+    private static String createUniqueFileNameInDirectory(String file, String extension, String directory) {
+        if (file == null) {
+            file = "unknown_file";
+        }
+        String newFileName = file;
+        String path;
+        File f;
+        int i = 0;
+        while (true) {
+            path = directory + File.separator + newFileName + extension;
+            f = new File(path);
+            if (f.exists()) {
+                i++;
+                newFileName = file + "_" + i;
+            } else {
+                break;
+            }
+        }
+        return newFileName + extension;
+    }
+
+    private void saveToDatabase() {
+        LOG.debug("save TalkClientDownload (" + clientDownloadId + ") to database");
+        try {
+            mTransferAgent.getDatabase().saveClientDownload(this);
+        } catch (SQLException e) {
+            LOG.error("sql error", e);
+        }
     }
 
     @Override
@@ -294,17 +813,6 @@ public class TalkClientDownload extends XoTransfer {
         return contentLength;
     }
 
-    public void setContentLength(Integer contentLength) {
-        this.contentLength = contentLength;
-    }
-
-    public void setTransferProgress(int transferProgress) {
-        downloadProgress = transferProgress;
-        for (TransferStateListener listener : mTransferListeners) {
-            listener.onProgressUpdated(downloadProgress, contentLength);
-        }
-    }
-
     @Override
     public long getTransferProgress() {
         return downloadProgress;
@@ -315,17 +823,9 @@ public class TalkClientDownload extends XoTransfer {
         return aspectRatio;
     }
 
-    public void setFilename(String filename) {
-        this.fileName = filename;
-    }
-
     @Override
-    public String getFilename() {
+    public String getFileName() {
         return fileName;
-    }
-
-    public void setFilePath(String filePath) {
-        dataFile = filePath;
     }
 
     @Override
@@ -365,10 +865,6 @@ public class TalkClientDownload extends XoTransfer {
         return contentType;
     }
 
-    public void setMimeType(String contentType) {
-        this.contentType = contentType;
-    }
-
     public String getMediaType() {
         return this.mediaType;
     }
@@ -389,10 +885,6 @@ public class TalkClientDownload extends XoTransfer {
         return transmittedContentLength;
     }
 
-    public void setTransferFailures(int transferFailures) {
-        this.transferFailures = transferFailures;
-    }
-
     public int getTransferFailures() {
         return transferFailures;
     }
@@ -405,27 +897,15 @@ public class TalkClientDownload extends XoTransfer {
         return type == Type.ATTACHMENT;
     }
 
-    public String getDecryptionKey() {
-        return decryptionKey;
-    }
-
-    public void setDecryptedFile(String decryptedFile) {
-        this.decryptedFile = decryptedFile;
-    }
-
-    public String getDecryptedFile() {
-        return decryptedFile;
-    }
-
     @Override
-    public void registerTransferListener(TransferStateListener listener) {
+    public void registerTransferListener(IXoTransferListener listener) {
         if (!mTransferListeners.contains(listener)) {
             mTransferListeners.add(listener);
         }
     }
 
     @Override
-    public void unregisterTransferListener(TransferStateListener listener) {
+    public void unregisterTransferListener(IXoTransferListener listener) {
         if (mTransferListeners.contains(listener)) {
             mTransferListeners.remove(listener);
         }
