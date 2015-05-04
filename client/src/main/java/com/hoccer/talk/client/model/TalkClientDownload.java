@@ -63,12 +63,7 @@ public class TalkClientDownload extends XoTransfer {
             }
         },
         COMPLETE,
-        FAILED {
-            @Override
-            public Set<State> possibleFollowUps() {
-                return EnumSet.of(RETRYING);
-            }
-        },
+        FAILED,
         ON_HOLD {
             @Override
             public Set<State> possibleFollowUps() {
@@ -79,7 +74,6 @@ public class TalkClientDownload extends XoTransfer {
         public Set<State> possibleFollowUps() {
             return EnumSet.noneOf(State.class);
         }
-
     }
 
     @DatabaseField(generatedId = true)
@@ -110,7 +104,7 @@ public class TalkClientDownload extends XoTransfer {
     private String dataFile;
 
     /**
-     * URL to startDownload
+     * URL to download
      */
     @DatabaseField(width = 2000)
     private String downloadUrl;
@@ -119,7 +113,7 @@ public class TalkClientDownload extends XoTransfer {
     private String fileId;
 
     /**
-     * Name of the file the startDownload itself will go to
+     * Name of the file the download itself will go to
      * <p/>
      * This is relative to the result of computeDownloadDirectory().
      */
@@ -287,7 +281,7 @@ public class TalkClientDownload extends XoTransfer {
             case ON_HOLD:
                 return ContentState.DOWNLOAD_ON_HOLD;
             default:
-                throw new RuntimeException("Unknown startDownload state '" + state + "'");
+                throw new RuntimeException("Unknown download state '" + state + "'");
         }
     }
 
