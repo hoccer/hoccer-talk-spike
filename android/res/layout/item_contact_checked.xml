@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        android:gravity="center|left"
+        android:gravity="center|start"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content">
 
-    <FrameLayout
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:id="@+id/fl_avatar"
-            style="@style/AppBaseTheme.Group.Members.MemberAvatar"/>
+    <include android:layout_width="45dp"
+             android:layout_height="45dp"
+             style="@style/AppBaseTheme.Group.Members.MemberAvatar"
+             layout="@layout/view_avatar_presence"/>
 
     <CheckedTextView
             android:id="@+id/contact_name_checked"

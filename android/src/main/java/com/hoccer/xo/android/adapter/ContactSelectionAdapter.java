@@ -13,6 +13,8 @@ import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.view.avatar.AvatarView;
+import com.hoccer.xo.android.view.avatar.PresenceAvatarView;
 import com.hoccer.xo.android.view.avatar.SimpleAvatarView;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
@@ -63,7 +65,7 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
             convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_contact_checked, parent, false);
 
             viewHolder = new ViewHolder();
-            viewHolder.avatarView = (SimpleAvatarView) (convertView.findViewById(R.id.contact_icon));
+            viewHolder.avatarView = (PresenceAvatarView) (convertView.findViewById(R.id.contact_icon));
             viewHolder.checkedNameTextView = (CheckedTextView) (convertView.findViewById(R.id.contact_name_checked));
             convertView.setTag(viewHolder);
         } else {
@@ -208,7 +210,7 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
     }
 
     private class ViewHolder {
-        public SimpleAvatarView avatarView;
+        public AvatarView avatarView;
         public CheckedTextView checkedNameTextView;
         public TalkClientContact contact;
     }
