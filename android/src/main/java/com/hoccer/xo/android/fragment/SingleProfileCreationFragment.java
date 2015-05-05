@@ -67,18 +67,12 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
         mAvatarImage = (ImageView) view.findViewById(R.id.profile_avatar_image);
         mEditName = (EditText) view.findViewById(R.id.et_profile_name);
 
-        hideView(view.findViewById(R.id.tv_profile_name));
-
         mContact = getXoClient().getSelfContact();
         if (mActionMode == null) {
             mActionMode = getActivity().startActionMode(this);
         }
 
         updateAvatarView();
-    }
-
-    private static void hideView(View view) {
-        view.setVisibility(View.GONE);
     }
 
     @Override
@@ -179,13 +173,14 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
 
     @Override
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        // In 5.1 it no longer calls callback.onPrepareActionMode
+        mEditName.setVisibility(View.VISIBLE);
+        mAvatarImage.setOnClickListener(this);
         return true;
     }
 
     @Override
     public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-        mEditName.setVisibility(View.VISIBLE);
-        mAvatarImage.setOnClickListener(this);
         return true;
     }
 

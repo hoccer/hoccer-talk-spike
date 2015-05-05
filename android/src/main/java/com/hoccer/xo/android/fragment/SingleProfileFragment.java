@@ -697,11 +697,6 @@ public class SingleProfileFragment extends ProfileFragment
 
     @Override
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-        return true;
-    }
-
-    @Override
-    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
         mNameEditText.setVisibility(View.VISIBLE);
         mNameText.setVisibility(View.INVISIBLE);
         mNameEditText.setText(mNameText.getText());
@@ -710,6 +705,11 @@ public class SingleProfileFragment extends ProfileFragment
         mAvatarImage.setOnClickListener(this);
         mAccountDeletionButton.setOnClickListener(this);
 
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
         return true;
     }
 

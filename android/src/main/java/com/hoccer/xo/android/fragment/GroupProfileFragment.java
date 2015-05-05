@@ -631,17 +631,17 @@ public class GroupProfileFragment extends ProfileFragment
 
     @Override
     public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
-        return true;
-    }
-
-    @Override
-    public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
         actionMode.getMenuInflater().inflate(R.menu.fragment_group_profile_edit, menu);
 
         mMode = Mode.EDIT_GROUP;
         configureActionMenuItems(menu);
         updateView();
 
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
         return true;
     }
 
