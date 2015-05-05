@@ -229,13 +229,13 @@ public class XoClientService extends Service {
     private void loadPreference(SharedPreferences preferences, String key) {
         if (key != null) {
             if (key.equals(sPreferenceUploadLimitMobileKey)) {
-                mClient.setUploadLimit(preferences.getInt(key, TransferAgent.UNLIMITED));
+                mClient.setUploadLimit(Integer.parseInt(preferences.getString(key, Integer.toString(TransferAgent.UNLIMITED))));
             } else if (key.equals(sPreferenceDownloadLimitMobileKey)) {
-                mClient.setDownloadLimit(preferences.getInt(key, TransferAgent.UNLIMITED));
+                mClient.setDownloadLimit(Integer.parseInt(preferences.getString(key, Integer.toString(TransferAgent.UNLIMITED))));
             } else if (key.equals(sPreferenceUploadLimitWifiKey)) {
-                mClient.setUploadLimit(preferences.getInt(key, TransferAgent.UNLIMITED));
+                mClient.setUploadLimit(Integer.parseInt(preferences.getString(key, Integer.toString(TransferAgent.UNLIMITED))));
             } else if (key.equals(sPreferenceDownloadLimitWifiKey)) {
-                mClient.setDownloadLimit(preferences.getInt(key, TransferAgent.UNLIMITED));
+                mClient.setDownloadLimit(Integer.parseInt(preferences.getString(key, Integer.toString(TransferAgent.UNLIMITED))));
             } else if (key.equals(sPreferenceImageUploadPixelCountKey)) {
                 String maxPixelCount = mPreferences.getString(sPreferenceImageUploadPixelCountKey,
                         Integer.toString(DEFAULT_IMAGE_UPLOAD_MAX_PIXEL_COUNT));
@@ -584,13 +584,16 @@ public class XoClientService extends Service {
         }
 
         @Override
-        public void onDownloadStateChanged(TalkClientDownload download) {}
+        public void onDownloadStateChanged(TalkClientDownload download) {
+        }
 
         @Override
-        public void onDownloadStarted(TalkClientDownload download) {}
+        public void onDownloadStarted(TalkClientDownload download) {
+        }
 
         @Override
-        public void onDownloadProgress(TalkClientDownload download) {}
+        public void onDownloadProgress(TalkClientDownload download) {
+        }
 
         @Override
         public void onDownloadFinished(TalkClientDownload download) {
@@ -608,13 +611,16 @@ public class XoClientService extends Service {
         }
 
         @Override
-        public void onDownloadFailed(TalkClientDownload download) {}
+        public void onDownloadFailed(TalkClientDownload download) {
+        }
 
         @Override
-        public void onUploadStarted(TalkClientUpload upload) {}
+        public void onUploadStarted(TalkClientUpload upload) {
+        }
 
         @Override
-        public void onUploadProgress(TalkClientUpload upload) {}
+        public void onUploadProgress(TalkClientUpload upload) {
+        }
 
         @Override
         public void onUploadFinished(TalkClientUpload upload) {
@@ -632,10 +638,12 @@ public class XoClientService extends Service {
         }
 
         @Override
-        public void onUploadFailed(TalkClientUpload upload) {}
+        public void onUploadFailed(TalkClientUpload upload) {
+        }
 
         @Override
-        public void onUploadStateChanged(TalkClientUpload upload) {}
+        public void onUploadStateChanged(TalkClientUpload upload) {
+        }
 
         @Override
         public void onScanCompleted(String filePath, Uri contentUri) {
@@ -667,7 +675,8 @@ public class XoClientService extends Service {
         }
 
         @Override
-        public void onClientPresenceChanged(TalkClientContact contact) {}
+        public void onClientPresenceChanged(TalkClientContact contact) {
+        }
 
         @Override
         public void onClientRelationshipChanged(TalkClientContact contact) {
@@ -675,7 +684,8 @@ public class XoClientService extends Service {
         }
 
         @Override
-        public void onGroupPresenceChanged(TalkClientContact contact) {}
+        public void onGroupPresenceChanged(TalkClientContact contact) {
+        }
 
         @Override
         public void onGroupMembershipChanged(TalkClientContact contact) {
