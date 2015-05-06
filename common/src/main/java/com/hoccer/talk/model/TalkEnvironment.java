@@ -25,6 +25,7 @@ public class TalkEnvironment {
     public final static String LOCATION_TYPE_NONE = "none";       // indicates that location is invalid
 
     public final static String TYPE_NEARBY = "nearby";            // a nearby grouping environment
+    public final static String TYPE_WORLDWIDE = "worldwide";      // a worldwide grouping environment
 
     private String _id;
 
@@ -72,7 +73,21 @@ public class TalkEnvironment {
     @DatabaseField
     String[] identifiers;
 
+    // a group tag for worldwide grouping
+    @DatabaseField
+    String tag;
+
     public TalkEnvironment() {
+    }
+
+    @JsonIgnore
+    public boolean isNearby() {
+        return TYPE_NEARBY.equals(this.type);
+    }
+
+    @JsonIgnore
+    public boolean isWorldwide() {
+        return TYPE_WORLDWIDE.equals(this.type);
     }
 
     public String getType() {
@@ -167,6 +182,15 @@ public class TalkEnvironment {
         this.geoLocation = geoLocation;
     }
 
+    @Nullable
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
     public void updateWith(TalkEnvironment environment) {
         this.type = environment.type;
         this.name = environment.name;
@@ -179,19 +203,24 @@ public class TalkEnvironment {
         this.accuracy = environment.accuracy;
         this.bssids = environment.bssids;
         this.identifiers = environment.identifiers;
+        this.tag = environment.tag;
     }
 
     @JsonIgnore
     public boolean isValid() {
-        if (bssids != null && bssids.length > 0) {
-            return true;
-        }
+        if (isNearby()) {
+            if (bssids != null && bssids.length > 0) {
+                return true;
+            }
 
-        if (geoLocation != null && geoLocation.length == 2) {
-            return true;
-        }
+            if (geoLocation != null && geoLocation.length == 2) {
+                return true;
+            }
 
-        if (identifiers != null && identifiers.length > 0) {
+            if (identifiers != null && identifiers.length > 0) {
+                return true;
+            }
+        } else if (isWorldwide()) {
             return true;
         }
 

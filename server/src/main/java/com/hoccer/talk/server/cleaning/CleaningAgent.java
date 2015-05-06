@@ -249,12 +249,15 @@ public class CleaningAgent {
 
         long counter = 0;
         Date oldDate = new Date(new Date().getTime() - UNFINISHED_DELIVERY_LIFE_TIME);
+
         List<TalkDelivery> expiredDeliveries = mDatabase.findDeliveriesAcceptedBefore(oldDate);
         LOG.info("cleanup found " + expiredDeliveries.size() + " expired unfinished deliveries");
         counter = 0;
         for (TalkDelivery delivery : expiredDeliveries) {
-            delivery.expireDelivery();
-            mDatabase.saveDelivery(delivery);
+            if (!delivery.isFinished()) {
+                delivery.expireDelivery();
+                mDatabase.saveDelivery(delivery);
+            }
             if (counter++ % 100 == 0) {
                 LOG.info("expiring unfinished deliveries: "+counter+ "/" + expiredDeliveries.size() + " done");
             }
@@ -270,6 +273,7 @@ public class CleaningAgent {
             }
         }
 
+        // we need to clean failed deliveries regardless of attachment state
         List<TalkDelivery> finalFailedDeliveries = mDatabase.findDeliveriesInStates(TalkDelivery.FINAL_FAILED_STATES);
         LOG.info("cleanup found " + finalFailedDeliveries.size() + " final failed deliveries");
         counter = 0;
@@ -280,7 +284,7 @@ public class CleaningAgent {
             }
         }
 
-        int totalDeliveriesCleaned = finishedDeliveries.size() + finalFailedDeliveries.size();
+        int totalDeliveriesCleaned = finishedDeliveriesSize + finalFailedDeliveries.size();
 
         long endTime = System.currentTimeMillis();
         LOG.info("Cleaning of '" + totalDeliveriesCleaned + "' deliveries done (took '" + (endTime - startTime) + "ms'). rescheduling next run...");

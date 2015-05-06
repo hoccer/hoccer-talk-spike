@@ -17,9 +17,14 @@ import org.eclipse.jetty.websocket.WebSocketHandler;
 public class TestTalkServer {
 
     private final Server s;
+    private final TalkServer talkServer;
 
     public Connector getServerConnector() {
         return serverConnector;
+    }
+
+    public TalkServer getTalkServer() {
+        return talkServer;
     }
 
     @SuppressWarnings("FieldMayBeFinal")
@@ -29,11 +34,11 @@ public class TestTalkServer {
 
         ITalkServerDatabase db = new JongoDatabase(configuration, mongo);
         db.reportPing();
-        TalkServer ts = new TalkServer(configuration, db);
+        talkServer = new TalkServer(configuration, db);
         // create jetty instance
 
         s = new Server();
-        WebSocketHandler clientHandler = new TalkRpcConnectionHandler(ts);
+        WebSocketHandler clientHandler = new TalkRpcConnectionHandler(talkServer);
         s.setHandler(clientHandler);
         // loop until we find a free port
         int port = 3000;

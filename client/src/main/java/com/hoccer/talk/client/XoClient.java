@@ -1269,7 +1269,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 try {
                     mLoginFuture = null;
                     doLogin(mSelfContact);
-                    switchState(State.SYNCING, "sync ofter login");
+                    switchState(State.SYNCING, "sync after login");
                 } catch (Exception e) {
                     LOG.error("Exception while logging in", e);
                     switchState(State.CONNECTING, "reconnect after login failed");
@@ -1707,6 +1707,11 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         }
 
         @Override
+        public void deliveriesReady() {
+            LOG.debug("server: deliveriesReady()");
+        }
+
+        @Override
         public void incomingDeliveryUpdated(TalkDelivery d) {
             LOG.debug("server: incomingDeliveryUpdate()");
             updateIncomingDelivery(d);
@@ -1908,19 +1913,17 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         }, 0, TimeUnit.SECONDS);
     }
 
-    public void sendEnvironmentUpdate(TalkEnvironment environment) {
+    public void sendEnvironmentUpdate(final TalkEnvironment environment) {
         LOG.debug("sendEnvironmentUpdate()");
         if (isReady() && environment != null) {
             if (mEnvironmentUpdateCallPending.compareAndSet(false, true)) {
-
-                final TalkEnvironment environmentToSend = environment;
                 mExecutor.execute(new Runnable() {
                     @Override
                     public void run() {
                         try {
-                            environmentToSend.setClientId(mSelfContact.getClientId());
-                            environmentToSend.setGroupId(mEnvironmentGroupId);
-                            mEnvironmentGroupId = mServerRpc.updateEnvironment(environmentToSend);
+                            environment.setClientId(mSelfContact.getClientId());
+                            environment.setGroupId(mEnvironmentGroupId);
+                            mEnvironmentGroupId = mServerRpc.updateEnvironment(environment);
                         } catch (Throwable t) {
                             LOG.error("sendEnvironmentUpdate: other error", t);
                         }
@@ -1935,16 +1938,48 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         }
     }
 
-    public TalkClientContact getCurrentNearbyGroup() {
-        TalkClientContact currentNearbyGroup = null;
+    public TalkClientContact getCurrentEnvironmentGroup() {
+        TalkClientContact currentEnvironmentGroup = null;
         try {
             if (mEnvironmentGroupId != null) {
-                currentNearbyGroup = mDatabase.findGroupContactByGroupId(mEnvironmentGroupId, false);
+                currentEnvironmentGroup = mDatabase.findGroupContactByGroupId(mEnvironmentGroupId, false);
             }
         } catch (SQLException e) {
-            LOG.error("SQL Error while retrieving current nearby group ", e);
+            LOG.error("SQL Error while retrieving current environment group ", e);
         }
-        return currentNearbyGroup;
+        return currentEnvironmentGroup;
+    }
+
+    public TalkClientContact getCurrentNearbyGroup() {
+        final TalkClientContact currentNearbyGroup = getCurrentEnvironmentGroup();
+        if (currentNearbyGroup == null) {
+            return null;
+        }
+        final TalkGroupPresence groupPresence = currentNearbyGroup.getGroupPresence();
+        if (groupPresence == null) {
+            return null;
+        }
+        if (groupPresence.isTypeNearby()) {
+            return currentNearbyGroup;
+        } else {
+            return null;
+        }
+    }
+
+    public TalkClientContact getCurrentWorldwideGroup() {
+        final TalkClientContact currentWorldwideGroup = getCurrentEnvironmentGroup();
+        if (currentWorldwideGroup == null) {
+            return null;
+        }
+        final TalkGroupPresence groupPresence = currentWorldwideGroup.getGroupPresence();
+        if (groupPresence == null) {
+            return null;
+        }
+        if (groupPresence.isTypeWorldwide()) {
+            return currentWorldwideGroup;
+        } else {
+            return null;
+        }
     }
 
 
