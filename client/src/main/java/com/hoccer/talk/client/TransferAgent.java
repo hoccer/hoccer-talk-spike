@@ -37,6 +37,7 @@ public abstract class TransferAgent {
         mClient = client;
         mExecutorService = createScheduledThreadPool(executorName);
         mHttpClient = createHttpClient();
+        mListeners.add(client);
     }
 
     protected ScheduledExecutorService createScheduledThreadPool(final String name) {
