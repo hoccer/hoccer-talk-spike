@@ -42,6 +42,19 @@ public interface ITalkRpcServer {
     void ready();
 
     /**
+     * The client can signal by calling finishedIncoming() that is has completed processing an incoming delivery
+     * and the delivery state change has been received by the server
+     *
+     * @talk.preconditions Client is logged in
+     * @talk.behavior Server responds with null result or error and schedules another delivery agent perform in order to check if there are more deliveries; if there are none, the server will send a deliveriesReady notification
+     * @talk.statechanges.clientobjects none
+     * @talk.statechanges.serverobjects none
+     * @talk.ui.client none
+     * @talk.errors.client Error response when not connected or logged in
+     */
+    void finishedIncoming();
+
+    /**
      * Generate a new client ID for registration
      *
      * The ID will be remembered as part of connection state,
@@ -186,6 +199,8 @@ public interface ITalkRpcServer {
      * @talk.errors.server
      */
     void hintApnsUnreadMessage(int numUnreadMessages);
+
+    void setApnsMode(String mode);
 
     /** Update public encryption key on the server for this client
      * @param key the public key as b64 encoded binary representation opaque to the server; currently an X.509 RSA key

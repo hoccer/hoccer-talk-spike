@@ -1681,6 +1681,11 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
 
         @Override
+        public void deliveriesReady() {
+            LOG.debug("server: deliveriesReady()");
+        }
+
+        @Override
         public void incomingDeliveryUpdated(TalkDelivery d) {
             LOG.debug("server: incomingDeliveryUpdate()");
             updateIncomingDelivery(d);

@@ -72,6 +72,13 @@ public interface ITalkRpcClient {
     void pushNotRegistered();
 
     /**
+     * This notification will be sent to the client when there are no more incoming deliveries found by the delivery agent
+     * The notification can be used by the client to close the connection after being launched in background by a push notification
+     */
+    @JsonRpcNotification
+    void deliveriesReady();
+
+    /**
      * Delivers a message from the server that has been sent by another client
      *
      * @param d delivery object for M towards this client
@@ -87,6 +94,7 @@ public interface ITalkRpcClient {
      */
 	@JsonRpcNotification
     void incomingDelivery(TalkDelivery d, TalkMessage m);
+
 
     @JsonRpcNotification
     void incomingDeliveryUpdated(TalkDelivery d);

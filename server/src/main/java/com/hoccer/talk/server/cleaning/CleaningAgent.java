@@ -284,7 +284,7 @@ public class CleaningAgent {
             }
         }
 
-        int totalDeliveriesCleaned = finishedDeliveries.size() + finalFailedDeliveries.size();
+        int totalDeliveriesCleaned = finishedDeliveriesSize + finalFailedDeliveries.size();
 
         long endTime = System.currentTimeMillis();
         LOG.info("Cleaning of '" + totalDeliveriesCleaned + "' deliveries done (took '" + (endTime - startTime) + "ms'). rescheduling next run...");

@@ -133,6 +133,14 @@ public class TalkRpcHandler implements ITalkRpcServer {
     }
 
     @Override
+    public void finishedIncoming() {
+        logCall("finishedIncoming()");
+        requireIdentification(true);
+        mServer.getDeliveryAgent().requestDelivery(mConnection.getClientId(), false);
+    }
+
+
+    @Override
     public Date getTime() {
         logCall("getTime()");
         return new Date();
@@ -469,6 +477,20 @@ public class TalkRpcHandler implements ITalkRpcServer {
         client.setLastPushMessage(null);
         mDatabase.saveClient(client);
     }
+
+    @Override
+    public void setApnsMode(String mode) {
+        requireIdentification(true);
+        logCall("setApnsMode('" + mode + "')");
+        if (TalkClient.APNS_MODE_DEFAULT.equals(mode) || TalkClient.APNS_MODE_BACKGROUND.equals(mode)) {
+            TalkClient client = mConnection.getClient();
+            client.setApnsMode(mode);
+            mDatabase.saveClient(client);
+        } else {
+            throw new RuntimeException("Illegal apns mode:"+mode);
+        }
+    }
+
 
     @Override
     public TalkRelationship[] getRelationships(Date lastKnown) {
