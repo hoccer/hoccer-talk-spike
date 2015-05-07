@@ -26,7 +26,10 @@ public class DownloadAgent extends TransferAgent {
         if (manualDownloadActivated() || exceedsTransferLimit(download)) {
             holdDownload(download);
         } else {
-            startDownloadTask(download);
+            DownloadAction downloadAction = mDownloadActions.get(download.getClientDownloadId());
+            if (downloadAction == null || downloadAction.getDownload().getState() != PAUSED) {
+                startDownloadTask(download);
+            }
         }
     }
 

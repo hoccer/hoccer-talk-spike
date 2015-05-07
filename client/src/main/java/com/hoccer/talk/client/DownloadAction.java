@@ -476,4 +476,8 @@ public class DownloadAction implements TransferStateListener {
     public void onProgressUpdated(long progress, long contentLength) {
 
     }
+
+    public TalkClientDownload getDownload() {
+        return mDownload;
+    }
 }
