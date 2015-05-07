@@ -160,9 +160,7 @@ public class DownloadAction implements TransferStateListener {
 
             randomAccessFile.seek(bytesStart);
 
-            if (!copyData(bytesToGo, randomAccessFile, fileDescriptor, inputStream, mDownload)) {
-                checkTransferFailure(mDownload.getTransferFailures() + 1, "copyData failed", mDownload);
-            }
+            copyData(randomAccessFile, fileDescriptor, inputStream);
 
             if (mDownload.getTransferProgress() == mDownload.getContentLength()) {
                 if (mDownload.getDecryptionKey() != null) {
@@ -171,6 +169,8 @@ public class DownloadAction implements TransferStateListener {
                     mDownload.setFilePath(downloadFilename);
                     mDownload.switchState(DETECTING);
                 }
+            } else {
+                checkTransferFailure(mDownload.getTransferFailures() + 1, "Download not completed: " + mDownload.getTransferProgress() + " / " + mDownload.getContentLength() + ", retrying...", mDownload);
             }
         } catch (Exception e) {
             LOG.error("Download error", e);
@@ -405,37 +405,20 @@ public class DownloadAction implements TransferStateListener {
         return newFileName + extension;
     }
 
-    private boolean copyData(long bytesToGo, RandomAccessFile randomAccessFile, FileDescriptor fileDescriptor, InputStream inputStream, TalkClientDownload download) throws IOException {
-        boolean success = false;
+    private void copyData(RandomAccessFile randomAccessFile, FileDescriptor fileDescriptor, InputStream inputStream) throws IOException {
         try {
-            success = copyDataImpl(bytesToGo, randomAccessFile, inputStream, download);
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                randomAccessFile.write(buffer, 0, bytesRead);
+                mDownload.setTransferProgress((int) (mDownload.getTransferProgress() + bytesRead));
+            }
         } finally {
             fileDescriptor.sync();
             IOUtils.closeQuietly(randomAccessFile);
             IOUtils.closeQuietly(inputStream);
         }
-        return success;
-    }
 
-    private boolean copyDataImpl(long bytesToGo, RandomAccessFile randomAccessFile, InputStream inputStream, TalkClientDownload download) throws IOException {
-        byte[] buffer = new byte[1 << 12]; // length == 4096 == 2^12
-        while (bytesToGo > 0) {
-            LOG.trace("[downloadId: '" + download.getClientDownloadId() + "'] GET " + ("bytesToGo: '" + bytesToGo + "'"));
-            LOG.trace("[downloadId: '" + download.getClientDownloadId() + "'] GET " + "downloadProgress: '" + download.getTransferProgress() + "'");
-            // determine how much to copy
-            int bytesToRead = (int) Math.min((long) buffer.length, bytesToGo);
-            // perform the copy
-            int bytesRead = inputStream.read(buffer, 0, bytesToRead);
-            logGetTrace("reading: '" + bytesToRead + "' bytes, returned: '" + bytesRead + "' bytes", download.getClientDownloadId());
-            if (bytesRead == -1) {
-                logGetWarning("eof with '" + bytesToGo + "' bytes to go", download.getClientDownloadId());
-                return false;
-            }
-            randomAccessFile.write(buffer, 0, bytesRead);
-            download.setTransferProgress((int) (download.getTransferProgress() + bytesRead));
-            bytesToGo -= bytesRead;
-        }
-        return true;
     }
 
     private void checkTransferFailure(int failures, String failureDescription, TalkClientDownload download) {
