@@ -50,10 +50,6 @@ public class DownloadAction implements TransferStateListener {
         mDownload.switchState(DOWNLOADING);
     }
 
-    public void cancel() {
-        mDownload.switchState(PAUSED);
-    }
-
     @Override
     public void onStateChanged(XoTransfer transfer) {
         mDownload = (TalkClientDownload) transfer;
@@ -346,12 +342,16 @@ public class DownloadAction implements TransferStateListener {
     }
 
     public void doOnHoldAction() {
-        mHttpGet.abort();
+        if (mHttpGet != null) {
+            mHttpGet.abort();
+        }
         mDownloadAgent.onDownloadStateChanged(mDownload);
     }
 
     public void doPausedAction() {
-        mHttpGet.abort();
+        if (mHttpGet != null) {
+            mHttpGet.abort();
+        }
         mFuture.cancel(true);
         mDownloadAgent.onDownloadStateChanged(mDownload);
     }

@@ -85,11 +85,7 @@ public class DownloadAgent extends TransferAgent {
     }
 
     public void pauseDownload(TalkClientDownload download) {
-        mDownloadActions.get(download.getClientDownloadId()).cancel();
-    }
-
-    public void retryDownload(TalkClientDownload download) {
-        download.switchState(RETRYING);
+        download.switchState(PAUSED);
     }
 
     public void onDownloadStarted(TalkClientDownload download) {
