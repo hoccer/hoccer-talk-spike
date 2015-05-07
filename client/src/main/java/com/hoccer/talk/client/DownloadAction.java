@@ -124,7 +124,7 @@ public class DownloadAction implements TransferStateListener {
             int sc = status.getStatusCode();
             if (sc != HttpStatus.SC_OK && sc != HttpStatus.SC_PARTIAL_CONTENT) {
                 closeResponse(response);
-                LOG.debug("http status is not OK (" + HttpStatus.SC_OK + ") or partial content (" +
+                LOG.debug("Http status code (" + sc + ") is not OK (" + HttpStatus.SC_OK + ") or partial content (" +
                         HttpStatus.SC_PARTIAL_CONTENT + ")");
                 checkTransferFailure(mDownload.getTransferFailures() + 1, "http status is not OK (" + HttpStatus.SC_OK + ") or partial content (" +
                         HttpStatus.SC_PARTIAL_CONTENT + ")", mDownload);
