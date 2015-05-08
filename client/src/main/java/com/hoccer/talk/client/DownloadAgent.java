@@ -9,7 +9,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import static com.hoccer.talk.client.model.TalkClientDownload.State.*;
+import static com.hoccer.talk.client.model.TalkClientDownload.State.ON_HOLD;
+import static com.hoccer.talk.client.model.TalkClientDownload.State.PAUSED;
 
 public class DownloadAgent extends TransferAgent {
 
