@@ -36,6 +36,8 @@ public class DownloadAction implements TransferStateListener {
     private HttpGet mHttpGet;
     private Future mFuture;
 
+    private boolean mActive;
+
     public DownloadAction(DownloadAgent downloadAgent, TalkClientDownload download) {
         mDownloadAgent = downloadAgent;
         mDownload = download;
@@ -56,27 +58,35 @@ public class DownloadAction implements TransferStateListener {
         saveToDatabase(mDownload);
         switch (mDownload.getState()) {
             case DOWNLOADING:
+                mActive = true;
                 doDownloadingAction();
                 break;
             case PAUSED:
+                mActive = false;
                 doPausedAction();
                 break;
             case RETRYING:
+                mActive = true;
                 doRetryingAction();
                 break;
             case DECRYPTING:
+                mActive = true;
                 doDecryptingAction();
                 break;
             case DETECTING:
+                mActive = true;
                 doDetectingAction();
                 break;
             case COMPLETE:
+                mActive = false;
                 doCompleteAction();
                 break;
             case FAILED:
+                mActive = false;
                 doFailedAction();
                 break;
             case ON_HOLD:
+                mActive = false;
                 doOnHoldAction();
                 break;
         }
@@ -479,5 +489,9 @@ public class DownloadAction implements TransferStateListener {
 
     public TalkClientDownload getDownload() {
         return mDownload;
+    }
+
+    public boolean isActive() {
+        return mActive;
     }
 }
