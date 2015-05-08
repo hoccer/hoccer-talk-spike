@@ -108,8 +108,11 @@ public class UploadAgent extends TransferAgent {
 
     public void startPendingUploads() throws SQLException {
         for (TalkClientUpload upload : mClient.getDatabase().findAllPendingUploads()) {
-            upload.switchState(PAUSED);
-            startUpload(upload);
+            getOrCreateUploadAction(upload);
+            if (upload.getState() != TalkClientUpload.State.PAUSED) {
+                upload.switchState(PAUSED);
+                startUpload(upload);
+            }
         }
     }
 }
