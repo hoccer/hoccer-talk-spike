@@ -214,7 +214,7 @@ public class TalkClientDownload extends XoTransfer {
     public boolean isValidContentRange(ByteRange contentRange, long bytesToGo) {
         if (contentRange != null) {
             if (contentRange.getStart() != downloadProgress) {
-                LOG.error("[downloadId: '" + clientDownloadId + "'] GET " + "server returned wrong offset");
+                LOG.error("[downloadId: '" + clientDownloadId + "'] GET " + "server returned wrong offset: contentRange.getStart() [" + contentRange.getStart() + "] != downloadProgress [" + downloadProgress + "]");
                 return false;
             }
             if (contentRange.hasEnd()) {
