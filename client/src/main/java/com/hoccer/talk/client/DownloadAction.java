@@ -148,7 +148,6 @@ public class DownloadAction implements TransferStateListener {
             long bytesStart = mDownload.getTransferProgress();
             if (!mDownload.isValidContentRange(contentRange, bytesToGo) || mDownload.getContentLength() == -1) {
                 closeResponse(response);
-                LOG.debug("invalid contentRange or content length is -1 - contentLength: '" + mDownload.getContentLength() + "'");
                 checkTransferFailure(mDownload.getTransferFailures() + 1, "invalid contentRange or content length is -1 - contentLength: '" + mDownload.getContentLength() + "'", mDownload);
                 return;
             }
