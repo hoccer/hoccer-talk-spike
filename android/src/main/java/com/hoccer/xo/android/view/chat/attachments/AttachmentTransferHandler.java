@@ -197,6 +197,11 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
                         mListener.onAttachmentTransferComplete(mTransfer);
                         break;
 
+                    case DOWNLOAD_FAILED:
+                        mTransferControl.setOnClickListener(null);
+                        mTransferControl.setText(res.getString(R.string.transfer_state_downloading_failed));
+                        break;
+
                     case UPLOAD_REGISTERING:
                         break;
 
@@ -234,11 +239,6 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
                     case UPLOAD_COMPLETE:
                         mTransferControl.completeAndGone();
                         mListener.onAttachmentTransferComplete(mTransfer);
-                        break;
-
-                    case DOWNLOAD_FAILED:
-                        mTransferControl.setOnClickListener(null);
-                        mTransferControl.setText(res.getString(R.string.transfer_state_downloading_failed));
                         break;
 
                     case UPLOAD_FAILED:
