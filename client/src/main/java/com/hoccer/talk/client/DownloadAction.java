@@ -362,13 +362,19 @@ public class DownloadAction implements TransferStateListener {
         if (mHttpGet != null) {
             mHttpGet.abort();
         }
-        mFuture.cancel(true);
+        if (mFuture != null) {
+            mFuture.cancel(true);
+        }
         mDownloadAgent.onDownloadStateChanged(mDownload);
     }
 
     public void doRetryingAction() {
-        mHttpGet.abort();
-        mFuture.cancel(true);
+        if (mHttpGet != null) {
+            mHttpGet.abort();
+        }
+        if (mFuture != null) {
+            mFuture.cancel(true);
+        }
         mDownloadAgent.scheduleDownloadTask(mDownload);
 
         mDownloadAgent.onDownloadStateChanged(mDownload);
