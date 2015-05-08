@@ -4,37 +4,24 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ListView;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.model.TalkEnvironment;
 import com.hoccer.xo.android.NearbyController;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.activity.ChatActivity;
-import com.hoccer.xo.android.adapter.NearbyChatListAdapter;
-import com.hoccer.xo.android.base.XoListFragment;
-import com.hoccer.xo.android.util.IntentHelper;
+import com.hoccer.xo.android.adapter.EnvironmentChatListAdapter;
 import com.hoccer.xo.android.view.Placeholder;
 
 
-public class NearbyChatListFragment extends XoListFragment implements IPagerFragment {
+public class NearbyChatListFragment extends EnvironmentChatListFragment {
 
-    private static final Placeholder PLACEHOLDER = new Placeholder(
-            R.drawable.placeholder_nearby,
-            R.drawable.placeholder_nearby_point,
-            R.string.placeholder_nearby_text);
+    private EnvironmentChatListAdapter mNearbyAdapter;
 
-    private NearbyChatListAdapter mNearbyAdapter;
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_contacts, container, false);
-
-        PLACEHOLDER.applyToView(view);
-        return view;
+    public NearbyChatListFragment() {
+        mPlaceholder = new Placeholder(
+                R.drawable.placeholder_nearby,
+                R.drawable.placeholder_nearby_point,
+                R.string.placeholder_nearby_text);
     }
 
     @Override
@@ -55,7 +42,7 @@ public class NearbyChatListFragment extends XoListFragment implements IPagerFrag
 
     private void createAdapter() {
         if (mNearbyAdapter == null) {
-            mNearbyAdapter = new NearbyChatListAdapter(getXoDatabase(), getXoActivity());
+            mNearbyAdapter = new EnvironmentChatListAdapter(TalkEnvironment.TYPE_NEARBY, mActivity);
             mNearbyAdapter.registerListeners();
             setListAdapter(mNearbyAdapter);
         }
@@ -70,22 +57,6 @@ public class NearbyChatListFragment extends XoListFragment implements IPagerFrag
     }
 
     @Override
-    public void onListItemClick(ListView listView, View v, int position, long id) {
-        super.onListItemClick(listView, v, position, id);
-        Object item = listView.getItemAtPosition(position);
-        if (item instanceof TalkClientContact) {
-            TalkClientContact contact = (TalkClientContact) item;
-            showContactConversation(contact);
-        }
-    }
-
-    public void showContactConversation(TalkClientContact contact) {
-        Intent intent = new Intent(getActivity(), ChatActivity.class);
-        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contact.getClientContactId());
-        startActivity(intent);
-    }
-
-    @Override
     public View getCustomTabView(Context context) {
         return null;
     }
@@ -96,7 +67,8 @@ public class NearbyChatListFragment extends XoListFragment implements IPagerFrag
     }
 
     @Override
-    public void onPageSelected() {}
+    public void onPageSelected() {
+    }
 
     @Override
     public void onPageUnselected() {
@@ -127,8 +99,10 @@ public class NearbyChatListFragment extends XoListFragment implements IPagerFrag
     }
 
     @Override
-    public void onPagePause() {}
+    public void onPagePause() {
+    }
 
     @Override
-    public void onPageScrollStateChanged(int state) {}
+    public void onPageScrollStateChanged(int state) {
+    }
 }
