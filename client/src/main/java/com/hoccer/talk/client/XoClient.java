@@ -2214,7 +2214,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             mDatabase.updateDelivery(clientMessage.getIncomingDelivery());
 
             if (download != null) {
-                if (download.isAttachment()) { // TODO check this condition
+                if (download.isAttachment() && TalkDelivery.ATTACHMENT_STATE_UPLOADING.equals(delivery.getAttachmentState())) {
                     mDownloadAgent.startDownload(download);
                 }
             }
