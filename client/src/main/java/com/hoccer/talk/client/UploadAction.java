@@ -259,12 +259,8 @@ public class UploadAction implements TransferStateListener {
                 LOG.warn("[uploadId: '" + mUpload.getClientUploadId() + "'] no range header in upload response");
                 mUpload.switchState(PAUSED);
             }
-        } catch (IOException e) {
-            LOG.error("IOException while performing upload request: ", e);
-            mUpload.switchState(PAUSED);
         } catch (Exception e) {
             LOG.error("Exception while performing upload request: ", e);
-            mUpload.switchState(PAUSED);
         }
     }
 
@@ -342,13 +338,17 @@ public class UploadAction implements TransferStateListener {
 
     public void doCompleteAction() {
         deleteTemporaryFile(mUpload.getEncryptedFile());
-        mFuture.cancel(false);
+        if (mFuture != null){
+            mFuture.cancel(false);
+        }
         mUploadAgent.onUploadFinished(mUpload);
     }
 
     public void doFailedAction() {
         deleteTemporaryFile(mUpload.getEncryptedFile());
-        mFuture.cancel(false);
+        if (mFuture != null){
+            mFuture.cancel(false);
+        }
         mUploadAgent.onUploadFailed(mUpload);
     }
 
