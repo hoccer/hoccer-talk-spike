@@ -33,6 +33,14 @@ public class DownloadAgent extends TransferAgent {
         }
     }
 
+    public void forceStartDownload(TalkClientDownload download) {
+        if (manualDownloadActivated() || exceedsTransferLimit(download)) {
+            holdDownload(download);
+        } else {
+            startDownloadTask(download);
+        }
+    }
+
     private boolean manualDownloadActivated() {
         return mClient.getDownloadLimit() == MANUAL;
     }
@@ -119,8 +127,11 @@ public class DownloadAgent extends TransferAgent {
 
     public void startPendingDownloads() throws SQLException {
         for (TalkClientDownload download : mClient.getDatabase().findAllPendingDownloads()) {
-            download.switchState(PAUSED);
-            startDownload(download);
+            getOrCreateDownloadAction(download);
+            if (download.getState() != PAUSED && download.getState() != ON_HOLD) {
+                download.switchState(PAUSED);
+                forceStartDownload(download);
+            }
         }
     }
 }
