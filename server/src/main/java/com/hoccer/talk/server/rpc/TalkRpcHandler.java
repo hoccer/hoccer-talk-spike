@@ -2460,10 +2460,13 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 if (!te.getClientId().equals(mConnection.getClientId())) {
                     // only expire other client's environments
                     if (te.hasExpired()) {
+                        LOG.info("updateEnvironment: destroying expired environment for client "+te.getClientId());
                         destroyEnvironment(te);
                     } else {
                         matching.add(te);
                     }
+                } else {
+                    matching.add(te);
                 }
             }
         } else {
@@ -2617,9 +2620,24 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 TalkGroupMembership otherMembership = membershipsLeft.get(i);
                 boolean isConnected = mServer.isClientConnected(otherMembership.getClientId());
                 if (!isConnected) {
-                    // remove offline member from group
-                    removeGroupMembership(otherMembership, now);
-                    ++removedCount;
+                    boolean keep = false;
+                    if (!groupPresence.isTypeNearby()) {
+                        // check for not expired environment
+                        TalkEnvironment otherEnvironment = mDatabase.findEnvironmentByClientIdForGroup(otherMembership.getClientId(), otherMembership.getGroupId());
+                        if (otherEnvironment != null) {
+                            if (!otherEnvironment.hasExpired()) {
+                                keep = true;
+                            } else {
+                                logCall("destroyEnvironment: deleting otherClient's expired environment: " + removedCount);
+                                mDatabase.deleteEnvironment(otherEnvironment);
+                            }
+                        }
+                    }
+                    if (!keep) {
+                        // remove offline member from group
+                        removeGroupMembership(otherMembership, now);
+                        ++removedCount;
+                    }
                 }
             }
             logCall("destroyEnvironment: offline members removed: " + removedCount);
@@ -2668,16 +2686,39 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
         List<TalkEnvironment> myEnvironments = mDatabase.findEnvironmentsForClient(mConnection.getClientId());
 
+        TalkEnvironment mostRecentEnvironment = null;
         for (TalkEnvironment myEnvironment : myEnvironments) {
             if (type.equals(myEnvironment.getType())) {
-                if (!myEnvironment.willLiveAfterRelease()) {
-                    LOG.info("releaseEnvironment: destroying expired environment with ttl " + myEnvironment.getTimeToLive());
+                if (mostRecentEnvironment == null || mostRecentEnvironment.getTimeReceived().getTime() < myEnvironment.getTimeReceived().getTime()) {
+                    mostRecentEnvironment = myEnvironment;
+                }
+            }
+        }
+
+        for (TalkEnvironment myEnvironment : myEnvironments) {
+            if (type.equals(myEnvironment.getType())) {
+                if (!myEnvironment.willLiveAfterRelease() || myEnvironment.getTimeReceived().getTime() != (mostRecentEnvironment.getTimeReceived().getTime())) {
+                    LOG.info("releaseEnvironment: destroying expired or not latest environment with ttl " + myEnvironment.getTimeToLive());
                     destroyEnvironment(myEnvironment);
                 } else {
                     LOG.info("releaseEnvironment: releasing environment with ttl " + myEnvironment.getTimeToLive());
                     myEnvironment.setTimeReleased(new Date());
                     mDatabase.saveEnvironment(myEnvironment);
                 }
+            }
+        }
+
+        // clean left over groups
+        List<TalkGroupMembership> myMemberships =
+                mDatabase.findGroupMembershipsForClientWithStatesAndRoles(
+                        mConnection.getClientId(),
+                        new String[]{TalkGroupMembership.STATE_JOINED},
+                        new String[]{TalkGroupMembership.ROLE_WORLDWIDE_MEMBER});
+        for (TalkGroupMembership membership : myMemberships) {
+            TalkEnvironment myEnvironment = mDatabase.findEnvironmentByClientIdForGroup(membership.getClientId(), membership.getGroupId());
+            if (myEnvironment == null) {
+                LOG.warn("releaseEnvironment: removing group membership without environment for client" + membership.getClientId()+" group "+ membership.getGroupId());
+                removeGroupMembership(membership, new Date());
             }
         }
     }
