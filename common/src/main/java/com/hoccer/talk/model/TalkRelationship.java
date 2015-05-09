@@ -18,6 +18,13 @@ public class TalkRelationship {
     public static final String STATE_FRIEND = "friend";
     public static final String STATE_BLOCKED = "blocked";
 
+    public static final String NOTIFICATIONS_DISABLED = "disabled";
+    public static final String NOTIFICATIONS_ENABLED = "enabled";
+
+    public static boolean isValidNotificationPreference(String preference) {
+        return NOTIFICATIONS_DISABLED.equals(preference) || NOTIFICATIONS_ENABLED.equals(preference);
+    }
+
     public static final String LOCK_PREFIX = "rel-";
 
     public static final String[] STATES_VALID = {STATE_NONE, STATE_FRIEND, STATE_BLOCKED, STATE_INVITED, STATE_INVITED_ME};
@@ -50,6 +57,9 @@ public class TalkRelationship {
 
     @DatabaseField
     Date lastChanged;
+
+    @DatabaseField
+    String notificationPreference;
 
     @JsonIgnore
     public boolean isRelated() {
@@ -129,11 +139,20 @@ public class TalkRelationship {
         this.lastChanged = lastChanged;
     }
 
+    public String getNotificationPreference() {
+        return notificationPreference;
+    }
+
+    public void setNotificationPreference(String notificationPreference) {
+        this.notificationPreference = notificationPreference;
+    }
+
     @JsonIgnore
     public void updateWith(TalkRelationship r) {
         this.setClientId(r.getClientId());
         this.setOtherClientId(r.getOtherClientId());
         this.setState(r.getState());
         this.setLastChanged(r.getLastChanged());
+        this.setNotificationPreference(r.getNotificationPreference());
     }
 }

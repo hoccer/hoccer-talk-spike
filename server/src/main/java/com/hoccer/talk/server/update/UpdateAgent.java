@@ -322,6 +322,26 @@ public class UpdateAgent extends NotificationDeferrer {
         queueOrExecute(context, notification);
     }
 
+    // will just send out a change to the single client the membership belongs to
+    public void requestGroupMembershipUpdate(final TalkGroupMembership membership) {
+        Runnable notificationGenerator = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    TalkRpcConnection clientConnection = mServer.getClientConnection(membership.getClientId());
+                    if (clientConnection != null && clientConnection.isLoggedIn()) {
+                        // Calling Client via RPC
+                        clientConnection.getClientRpc().groupMemberUpdated(membership);
+                    }
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                }
+            }
+        };
+        queueOrExecute(context, notificationGenerator);
+    }
+
+
     public void requestGroupMembershipUpdate(final String groupId, final String clientId) {
         LOG.debug("requestGroupMembershipUpdate for group " + groupId + " client " + clientId);
         Runnable notificationGenerator = new Runnable() {

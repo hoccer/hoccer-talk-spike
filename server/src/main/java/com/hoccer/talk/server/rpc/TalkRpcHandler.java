@@ -1149,6 +1149,29 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
     }
 
+    @Override
+    public void setClientNotifications(String otherClientId, String preference) {
+        logCall("setClientNotifications(otherClientId: '" + otherClientId + ","+preference+"')");
+        requireIdentification(true);
+        if (TalkGroupMembership.isValidNotificationPreference(preference)) {
+            String myId = mConnection.getClientId();
+
+            synchronized (mServer.dualIdLock(TalkRelationship.LOCK_PREFIX, myId, otherClientId)) {
+                logCall("performing setClientNotifications(otherClientId: '" + otherClientId + ","+preference+"')");
+                TalkRelationship relationship = mDatabase.findRelationshipBetween(myId, otherClientId);
+
+                if (relationship == null) {
+                    throw new RuntimeException("No relationship exists with client with id '" + otherClientId + "'");
+                }
+                relationship.setLastChanged(new Date());
+                mDatabase.saveRelationship(relationship);
+                mServer.getUpdateAgent().requestRelationshipUpdate(relationship);
+            }
+        } else {
+            throw new RuntimeException("Illegal notification preference:"+preference);
+        }
+    }
+
     private void setRelationship(String thisClientId, String otherClientId, String state, String unblockState, boolean notify) {
         if (!TalkRelationship.isValidState(state)) {
             throw new RuntimeException("Invalid state '" + state + "'");
@@ -1973,6 +1996,21 @@ public class TalkRpcHandler implements ITalkRpcServer {
         changedGroupMembership(membership, new Date());
     }
 
+    @Override
+    public void setGroupNotifications(String groupId, String preference) {
+        logCall("setGroupNotifications(groupId: '" + groupId + ","+preference+"')");
+        requireIdentification(true);
+        if (TalkGroupMembership.isValidNotificationPreference(preference)) {
+            TalkGroupMembership membership = requiredGroupInvitedOrMember(groupId);
+            membership.setNotificationPreference(preference);
+            membership.setLastChanged(new Date());
+            mDatabase.saveGroupMembership(membership);
+            mServer.getUpdateAgent().requestGroupMembershipUpdate(membership);
+        } else {
+            throw new RuntimeException("Illegal preference:"+preference);
+        }
+    }
+
 
     @Override
     public void removeGroupMember(String groupId, String clientId) {
@@ -2300,17 +2338,18 @@ public class TalkRpcHandler implements ITalkRpcServer {
             groupPresence.setGroupName(environment.getName());
         }
         groupPresence.setGroupType(environment.getType());
-        LOG.info("updateEnvironment: creating new group for client with id '" + mConnection.getClientId() + "' with type " + environment.getType());
+        LOG.info("createGroupWithEnvironment: creating new group for client with id '" + mConnection.getClientId() + "' with type " + environment.getType());
         TalkGroupMembership membership = new TalkGroupMembership();
         membership.setClientId(mConnection.getClientId());
         membership.setGroupId(groupPresence.getGroupId());
+        membership.setNotificationPreference(environment.getNotificationPreference());
 
         if (environment.isNearby()) {
             membership.setRole(TalkGroupMembership.ROLE_NEARBY_MEMBER);
         } else if (environment.isWorldwide()) {
             membership.setRole(TalkGroupMembership.ROLE_WORLDWIDE_MEMBER);
         } else {
-            throw new RuntimeException("joinGroupWithEnvironment: illegal type "+environment.getType());
+            throw new RuntimeException("createGroupWithEnvironment: illegal type "+environment.getType());
         }
 
         membership.setState(TalkGroupMembership.STATE_JOINED);
@@ -2342,10 +2381,13 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
         nearbyMembership.setClientId(mConnection.getClientId());
         nearbyMembership.setGroupId(groupPresence.getGroupId());
+
         if (environment.isNearby()) {
             nearbyMembership.setRole(TalkGroupMembership.ROLE_NEARBY_MEMBER);
+            nearbyMembership.setNotificationPreference(TalkGroupMembership.NOTIFICATIONS_DISABLED);
         } else if (environment.isWorldwide()) {
             nearbyMembership.setRole(TalkGroupMembership.ROLE_WORLDWIDE_MEMBER);
+            nearbyMembership.setNotificationPreference(environment.getNotificationPreference());
         } else {
             throw new RuntimeException("joinGroupWithEnvironment: illegal type "+environment.getType());
         }
@@ -2409,7 +2451,25 @@ public class TalkRpcHandler implements ITalkRpcServer {
         environment.setTimeReceived(new Date());
         environment.setClientId(mConnection.getClientId());
 
-        List<TalkEnvironment> matching = mDatabase.findEnvironmentsMatching(environment);
+        List<TalkEnvironment> matching_found = mDatabase.findEnvironmentsMatching(environment);
+        List<TalkEnvironment> matching = new ArrayList<TalkEnvironment>();
+
+        if (!environment.isNearby()) {
+            // make an worldwide expiry run first
+            for (TalkEnvironment te : matching_found) {
+                if (!te.getClientId().equals(mConnection.getClientId())) {
+                    // only expire other client's environments
+                    if (te.hasExpired()) {
+                        destroyEnvironment(te);
+                    } else {
+                        matching.add(te);
+                    }
+                }
+            }
+        } else {
+            matching = matching_found;
+        }
+
         TalkEnvironment myEnvironment = mDatabase.findEnvironmentByClientId(environment.getType(), mConnection.getClientId());
         ArrayList<Pair<String, Integer>> environmentsPerGroup = findGroupSortedBySize(matching);
 
@@ -2587,9 +2647,38 @@ public class TalkRpcHandler implements ITalkRpcServer {
             type = TalkEnvironment.TYPE_NEARBY;
         }
 
-        TalkEnvironment myEnvironment;
-        while ((myEnvironment = mDatabase.findEnvironmentByClientId(type, mConnection.getClientId())) != null) {
-            destroyEnvironment(myEnvironment);
+        List<TalkEnvironment> myEnvironments = mDatabase.findEnvironmentsForClient(mConnection.getClientId());
+
+        for (TalkEnvironment myEnvironment : myEnvironments) {
+            if (type.equals(myEnvironment.getType())) {
+                destroyEnvironment(myEnvironment);
+            }
+        }
+    }
+
+    @Override
+    public void releaseEnvironment(String type) {
+        requirePastIdentification();
+        logCall("releaseEnvironment(clientId: '" + mConnection.getClientId() + "')");
+
+        if (type == null) {
+            LOG.warn("releaseEnvironment: no environment type, defaulting to nearby. Please fix client");
+            type = TalkEnvironment.TYPE_NEARBY;
+        }
+
+        List<TalkEnvironment> myEnvironments = mDatabase.findEnvironmentsForClient(mConnection.getClientId());
+
+        for (TalkEnvironment myEnvironment : myEnvironments) {
+            if (type.equals(myEnvironment.getType())) {
+                if (!myEnvironment.willLiveAfterRelease()) {
+                    LOG.info("releaseEnvironment: destroying expired environment with ttl " + myEnvironment.getTimeToLive());
+                    destroyEnvironment(myEnvironment);
+                } else {
+                    LOG.info("releaseEnvironment: releasing environment with ttl " + myEnvironment.getTimeToLive());
+                    myEnvironment.setTimeReleased(new Date());
+                    mDatabase.saveEnvironment(myEnvironment);
+                }
+            }
         }
     }
 
