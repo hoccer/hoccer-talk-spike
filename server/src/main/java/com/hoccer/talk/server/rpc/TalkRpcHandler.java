@@ -1164,6 +1164,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                     throw new RuntimeException("No relationship exists with client with id '" + otherClientId + "'");
                 }
                 relationship.setLastChanged(new Date());
+                relationship.setNotificationPreference(preference);
                 mDatabase.saveRelationship(relationship);
                 mServer.getUpdateAgent().requestRelationshipUpdate(relationship);
             }
