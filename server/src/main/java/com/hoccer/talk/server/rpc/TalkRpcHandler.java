@@ -2346,8 +2346,10 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
         if (environment.isNearby()) {
             membership.setRole(TalkGroupMembership.ROLE_NEARBY_MEMBER);
+            membership.setNotificationPreference(TalkGroupMembership.NOTIFICATIONS_DISABLED);
         } else if (environment.isWorldwide()) {
             membership.setRole(TalkGroupMembership.ROLE_WORLDWIDE_MEMBER);
+            membership.setNotificationPreference(environment.getNotificationPreference());
         } else {
             throw new RuntimeException("createGroupWithEnvironment: illegal type "+environment.getType());
         }
@@ -2708,7 +2710,9 @@ public class TalkRpcHandler implements ITalkRpcServer {
             }
         }
 
-        // clean left over groups
+        // Clean left over worldwide groups without environment
+        // This might not be required for normal operations and could be moved
+        // to the cleaning agent if it causes performance problems
         List<TalkGroupMembership> myMemberships =
                 mDatabase.findGroupMembershipsForClientWithStatesAndRoles(
                         mConnection.getClientId(),
