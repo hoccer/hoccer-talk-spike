@@ -2537,7 +2537,15 @@ public class TalkRpcHandler implements ITalkRpcServer {
                         }
                         myEnvironment.updateWith(environment);
                         mDatabase.saveEnvironment(myEnvironment);
-                        return myGroupPresence.getGroupId();
+                        // update worldwide notification preference if necessary
+                       if (environment.isWorldwide() && environment.getNotificationPreference() != null) {
+                           if (environment.getNotificationPreference().equals(myMembership.getNotificationPreference())) {
+                               myMembership.setNotificationPreference(environment.getNotificationPreference());
+                               mDatabase.saveGroupMembership(myMembership);
+                               mServer.getUpdateAgent().requestGroupMembershipUpdate(myMembership);
+                           }
+                       }
+                       return myGroupPresence.getGroupId();
                     } else {
                         // there is a group and a membership, but they seem to be tombstones, so lets ignore them, just get rid of the bad environment
                         mDatabase.deleteEnvironment(te);
@@ -2721,7 +2729,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         for (TalkGroupMembership membership : myMemberships) {
             TalkEnvironment myEnvironment = mDatabase.findEnvironmentByClientIdForGroup(membership.getClientId(), membership.getGroupId());
             if (myEnvironment == null) {
-                LOG.warn("releaseEnvironment: removing group membership without environment for client" + membership.getClientId()+" group "+ membership.getGroupId());
+                LOG.warn("releaseEnvironment: removing group membership without environment for client" + membership.getClientId() + " group " + membership.getGroupId());
                 removeGroupMembership(membership, new Date());
             }
         }

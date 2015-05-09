@@ -254,7 +254,12 @@ public class DeliveryRequest {
                     LOG.info("notifications disabled for sender "+delivery.getSenderId()+ " by " + mClientId);
                 } else if (delivery.getGroupId() != null) {
                      TalkGroupMembership membership = mDatabase.findGroupMembershipForClient(delivery.getGroupId(), mClientId);
-                     if (membership == null || !TalkGroupMembership.NOTIFICATIONS_DISABLED.equals(membership.getNotificationPreference())) {
+                    if (membership == null) {
+                        LOG.info("notifications: no membership for group " + delivery.getGroupId() + " by " + mClientId);
+                    } else {
+                        LOG.info("notifications: preferences are '"+membership.getNotificationPreference()+"' for group " + delivery.getGroupId() + " by " + mClientId);
+                    }
+                     if (membership == null || TalkGroupMembership.NOTIFICATIONS_DISABLED.equals(membership.getNotificationPreference())) {
                          LOG.info("notifications disabled for group "+delivery.getGroupId()+ " by " + mClientId);
                      } else {
                          LOG.info("notifications not disabled for group "+delivery.getGroupId()+ " by " + mClientId);
