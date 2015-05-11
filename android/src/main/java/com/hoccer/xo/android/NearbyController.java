@@ -14,7 +14,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.xo.android.activity.ChatsActivity;
-import com.hoccer.xo.android.nearby.EnvironmentUpdater;
+import com.hoccer.xo.android.nearby.NearbyEnvironmentUpdater;
 import com.hoccer.xo.android.service.NotificationId;
 import org.apache.log4j.Logger;
 
@@ -29,7 +29,7 @@ public class NearbyController implements BackgroundManager.Listener {
     private final Handler mNearbyTimeoutHandler = new Handler();
 
     private final NotificationManager mNotificationManager;
-    private final EnvironmentUpdater mEnvironmentUpdater;
+    private final NearbyEnvironmentUpdater mNearbyEnvironmentUpdater;
 
     public static NearbyController get() {
         if (sInstance == null) {
@@ -39,7 +39,7 @@ public class NearbyController implements BackgroundManager.Listener {
     }
 
     private NearbyController() {
-        mEnvironmentUpdater = new EnvironmentUpdater(XoApplication.get(), XoApplication.get().getXoClient());
+        mNearbyEnvironmentUpdater = new NearbyEnvironmentUpdater(XoApplication.get(), XoApplication.get().getXoClient());
         mNotificationManager = (NotificationManager) XoApplication.get().getSystemService(Context.NOTIFICATION_SERVICE);
 
         BackgroundManager.get().registerListener(this);
@@ -98,20 +98,20 @@ public class NearbyController implements BackgroundManager.Listener {
     private void startEnvironmentUpdates() {
         if (XoApplication.get().getXoClient().getState() == XoClient.State.READY) {
             LOG.info("start environment updates");
-            mEnvironmentUpdater.start();
+            mNearbyEnvironmentUpdater.start();
             showNotification();
         }
     }
 
     private void pauseEnvironmentUpdates() {
         LOG.info("pause environment updates");
-        mEnvironmentUpdater.pause();
+        mNearbyEnvironmentUpdater.pause();
         removeNotification();
     }
 
     private void stopEnvironmentUpdates() {
         LOG.info("stop environment updates");
-        mEnvironmentUpdater.stop();
+        mNearbyEnvironmentUpdater.stop();
         removeNotification();
     }
 
@@ -139,6 +139,6 @@ public class NearbyController implements BackgroundManager.Listener {
     }
 
     public boolean locationServicesEnabled() {
-        return mEnvironmentUpdater.locationServicesEnabled();
+        return mNearbyEnvironmentUpdater.locationServicesEnabled();
     }
 }

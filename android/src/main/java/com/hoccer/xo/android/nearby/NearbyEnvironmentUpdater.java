@@ -20,9 +20,9 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
-public class EnvironmentUpdater {
+public class NearbyEnvironmentUpdater {
 
-    private static final Logger LOG = Logger.getLogger(EnvironmentUpdater.class);
+    private static final Logger LOG = Logger.getLogger(NearbyEnvironmentUpdater.class);
 
     private static final long MIN_UPDATE_TIME = 1000;
     private static final long MIN_UPDATE_MOVED = 5;
@@ -37,7 +37,7 @@ public class EnvironmentUpdater {
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
 
-    public EnvironmentUpdater(Context context, XoClient client) {
+    public NearbyEnvironmentUpdater(Context context, XoClient client) {
         mClient = client;
 
         mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
