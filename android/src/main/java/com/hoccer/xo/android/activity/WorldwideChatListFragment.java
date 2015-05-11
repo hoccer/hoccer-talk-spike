@@ -89,7 +89,7 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
 
     @Override
     public void onPageUnselected() {
-//        XoApplication.get().getXoClient().sendDestroyEnvironment(TalkEnvironment.TYPE_NEARBY); // TODO Pavel: do not call!
+        XoApplication.get().getXoClient().sendDestroyEnvironment(TalkEnvironment.TYPE_WORLDWIDE);
     }
 
     @Override
