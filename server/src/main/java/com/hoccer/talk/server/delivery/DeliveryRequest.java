@@ -1,14 +1,13 @@
 package com.hoccer.talk.server.delivery;
 
-import com.hoccer.talk.model.TalkClient;
-import com.hoccer.talk.model.TalkDelivery;
-import com.hoccer.talk.model.TalkMessage;
+import com.hoccer.talk.model.*;
 import com.hoccer.talk.rpc.ITalkRpcClient;
 import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServer;
 import com.hoccer.talk.server.rpc.TalkRpcConnection;
 import org.apache.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -182,7 +181,6 @@ public class DeliveryRequest {
 
     void perform() {
         LOG.info("DeliverRequest.perform for clientId: '" + mClientId);
-        boolean needToNotify = false;
         boolean currentlyConnected = false;
 
         // determine if the client is currently connected
@@ -192,17 +190,18 @@ public class DeliveryRequest {
             currentlyConnected = true;
             rpc = connection.getClientRpc();
         }
+        List<TalkDelivery> inDeliveries = new ArrayList<TalkDelivery>();
+
         LOG.info("DeliverRequest.perform for clientId: '" + mClientId + ", currentlyConnected=" + currentlyConnected);
         boolean deliveryReady = false;
         if (currentlyConnected) {
 
             // get all outstanding deliveries for the client
-            List<TalkDelivery> inDeliveries =
-                    mDatabase.findDeliveriesForClientInState(mClientId, TalkDelivery.STATE_DELIVERING);
+            inDeliveries = mDatabase.findDeliveriesForClientInState(mClientId, TalkDelivery.STATE_DELIVERING);
             LOG.info("clientId: '" + mClientId + "' has " + inDeliveries.size() + " incoming deliveries");
             if (!inDeliveries.isEmpty()) {
                 // we will need to push if we don't succeed
-                needToNotify = true;
+                //needToNotify = true;
                 // deliver one by one
                 currentlyConnected = performIncoming(inDeliveries,rpc,connection);
             }
@@ -239,19 +238,46 @@ public class DeliveryRequest {
             }
             mForceAll = false;
         } else {
-            List<TalkDelivery> inDeliveries =
-                    mDatabase.findDeliveriesForClientInState(mClientId, TalkDelivery.STATE_DELIVERING);
+            inDeliveries = mDatabase.findDeliveriesForClientInState(mClientId, TalkDelivery.STATE_DELIVERING);
             LOG.info("unconnected clientId: '" + mClientId + "' has " + inDeliveries.size() + " incoming deliveries");
-            if (!inDeliveries.isEmpty()) {
-                needToNotify = true;
+          }
+
+        // initiate push delivery if needed
+        if (!inDeliveries.isEmpty() && !currentlyConnected) {
+            LOG.info("check if push-notify " + mClientId);
+
+            boolean needToNotify = false;
+
+            for (TalkDelivery delivery : inDeliveries) {
+                TalkRelationship relationship = mDatabase.findRelationshipBetween(delivery.getReceiverId(), delivery.getSenderId());
+                if (relationship != null && TalkRelationship.NOTIFICATIONS_DISABLED.equals(relationship.getNotificationPreference())) {
+                    LOG.info("notifications disabled for sender "+delivery.getSenderId()+ " by " + mClientId);
+                } else if (delivery.getGroupId() != null) {
+                     TalkGroupMembership membership = mDatabase.findGroupMembershipForClient(delivery.getGroupId(), mClientId);
+                    if (membership == null) {
+                        LOG.info("notifications: no membership for group " + delivery.getGroupId() + " by " + mClientId);
+                    } else {
+                        LOG.info("notifications: preferences are '"+membership.getNotificationPreference()+"' for group " + delivery.getGroupId() + " by " + mClientId);
+                    }
+                     if (membership == null || TalkGroupMembership.NOTIFICATIONS_DISABLED.equals(membership.getNotificationPreference())) {
+                         LOG.info("notifications disabled for group "+delivery.getGroupId()+ " by " + mClientId);
+                     } else {
+                         LOG.info("notifications not disabled for group "+delivery.getGroupId()+ " by " + mClientId);
+                         needToNotify = true;
+                         break;
+                     }
+                 } else {
+                    LOG.info("notifications not disabled for sender "+delivery.getSenderId()+ " by " + mClientId);
+                    needToNotify = true;
+                    break;
+                }
+            }
+            if (needToNotify) {
+                LOG.info("pushing " + mClientId);
+                performPush();
             }
         }
-        // initiate push delivery if needed
-        if (needToNotify && !currentlyConnected) {
-            LOG.info("pushing " + mClientId);
-            performPush();
-        }
-        if (currentlyConnected && !needToNotify) {
+        if (currentlyConnected && inDeliveries.isEmpty()) {
             rpc.deliveriesReady();
         }
     }

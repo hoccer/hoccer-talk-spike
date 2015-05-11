@@ -131,6 +131,7 @@ public class JongoDatabase implements ITalkServerDatabase {
         mGroupMemberships.ensureIndex("{groupId:1, state:1, role:1}");
         mGroupMemberships.ensureIndex("{groupId:1, state:1, lastChanged:1}");
         mGroupMemberships.ensureIndex("{clientId:1, state:1}");
+        mGroupMemberships.ensureIndex("{clientId:1, state:1, role:1}");
         mGroupMemberships.ensureIndex("{state:1, lastChanged:1}");
 
         mMessages.ensureIndex("{messageId:1, senderId:1}");
@@ -153,6 +154,8 @@ public class JongoDatabase implements ITalkServerDatabase {
         mEnvironments.ensureIndex("{geoLocation: '2dsphere'}");
         mEnvironments.ensureIndex("{groupId: 1}");
         mEnvironments.ensureIndex("{clientId: 1}");
+        mEnvironments.ensureIndex("{groupId: 1, clientId: 1}");
+        mEnvironments.ensureIndex("{type: 1, clientId: 1}");
 
         mClientHostInfos.ensureIndex("{clientId: 1}");
         mClientHostInfos.ensureIndex("{clientLanguage: 1, clientName:1}");
@@ -838,6 +841,16 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public List<TalkGroupMembership> findGroupMembershipsForClientWithStatesAndRoles(String clientId, String[] states, String[] roles) {
+        Iterator<TalkGroupMembership> it = mGroupMemberships
+                .find("{clientId:#, state: { $in: # }, role: { $in: # }}", clientId, Arrays.asList(states),  Arrays.asList(roles))
+                .as(TalkGroupMembership.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
+    }
+
+    @Override
     public TalkGroupMembership findGroupMembershipForClient(String groupId, String clientId) {
         return mGroupMemberships.findOne("{groupId:#,clientId:#}", groupId, clientId)
                 .as(TalkGroupMembership.class);
@@ -864,6 +877,12 @@ public class JongoDatabase implements ITalkServerDatabase {
     @Override
     public TalkEnvironment findEnvironmentByClientId(String type, String clientId) {
         return mEnvironments.findOne("{type:#, clientId:#}", type, clientId)
+                .as(TalkEnvironment.class);
+    }
+
+    @Override
+    public TalkEnvironment findEnvironmentByClientIdForGroup(String clientId, String groupId) {
+        return mEnvironments.findOne("{clientId:#, groupId:#}", clientId, groupId)
                 .as(TalkEnvironment.class);
     }
 
