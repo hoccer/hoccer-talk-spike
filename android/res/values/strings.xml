@@ -334,8 +334,8 @@
     <string name="qr_code_tab_scan">SCAN</string>
     <string name="qr_code_tab_generate">GENERATE</string>
 
-    <string name="placeholder_conversations_text">Invite friends to chat with!</string>
-    <string name="placeholder_groups_text">Create groups to chat with many friends at once.</string>
+    <string name="placeholder_conversations_text"><![CDATA[<a href="http://faq.hoccer.com/tutorial-xo/#invite">Invite friends</a>]]> to chat with!</string>
+    <string name="placeholder_groups_text"><![CDATA[<a href="http://faq.hoccer.com/tutorial-xo/#groups">Create groups</a>]]> to chat with many friends at once.</string>
     <string name="placeholder_nearby_text">Waiting for others <![CDATA[<a href="http://faq.hoccer.com/tutorial-xo/#nearby">nearby</a>]]>…</string>
     <string name="actionbar_default_title">${app.name.short}</string>
     <string name="content_audio_caption">Media</string>
