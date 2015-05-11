@@ -7,8 +7,8 @@ import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.artcom.hoccer.R;
+import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 
 public class Placeholder {
 
@@ -23,6 +23,10 @@ public class Placeholder {
     }
 
     public void applyToView(View view) {
+        applyToView(view, null);
+    }
+
+    public void applyToView(View view, View.OnClickListener onClickListener) {
         ImageView placeholderImageFrame = (ImageView) view.findViewById(R.id.iv_contacts_placeholder_frame);
         ImageView placeholderImage = (ImageView) view.findViewById(R.id.iv_contacts_placeholder);
         TextView placeholderText = (TextView) view.findViewById(R.id.tv_contacts_placeholder);
@@ -35,6 +39,8 @@ public class Placeholder {
             placeholderImageFrame.setBackgroundDrawable(resources.getDrawable(mImageId));
             placeholderImage.setBackgroundDrawable(ColoredDrawable.getFromCache(mHeadImageId, R.color.primary));
         }
+
+        placeholderImageFrame.setOnClickListener(onClickListener);
 
         String text = resources.getString(mTextId);
         placeholderText.setMovementMethod(LinkMovementMethod.getInstance());
