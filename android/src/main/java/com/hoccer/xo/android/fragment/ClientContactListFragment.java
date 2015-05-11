@@ -15,10 +15,7 @@ import java.sql.SQLException;
 public class ClientContactListFragment extends ContactListFragment {
 
     private static final Logger LOG = Logger.getLogger(ClientContactListFragment.class);
-    private static final Placeholder PLACEHOLDER = new Placeholder(
-            R.drawable.placeholder_chats,
-            R.drawable.placeholder_chats_head,
-            R.string.placeholder_conversations_text);
+    private static final Placeholder PLACEHOLDER = new Placeholder(R.drawable.placeholder_chats, R.string.placeholder_conversations_text);
 
     public ClientContactListFragment() {
         super(R.string.contacts_tab_friends, PLACEHOLDER);

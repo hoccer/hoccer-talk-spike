@@ -30,10 +30,7 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
 
     private static final Logger LOG = Logger.getLogger(ChatListFragment.class);
 
-    private static final Placeholder PLACEHOLDER = new Placeholder(
-            R.drawable.placeholder_chats,
-            R.drawable.placeholder_chats_head,
-            R.string.placeholder_conversations_text);
+    private static final Placeholder PLACEHOLDER = new Placeholder(R.drawable.placeholder_chats, R.string.placeholder_conversations_text);
 
     private XoClientDatabase mDatabase;
     private ChatListAdapter mAdapter;

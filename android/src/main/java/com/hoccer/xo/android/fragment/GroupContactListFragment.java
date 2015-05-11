@@ -15,10 +15,7 @@ import java.sql.SQLException;
 public class GroupContactListFragment extends ContactListFragment {
 
     private static final Logger LOG = Logger.getLogger(GroupContactListFragment.class);
-    private static final Placeholder PLACEHOLDER = new Placeholder(
-            R.drawable.placeholder_group,
-            R.drawable.placeholder_group_head,
-            R.string.placeholder_groups_text);
+    private static final Placeholder PLACEHOLDER = new Placeholder(R.drawable.placeholder_group, R.string.placeholder_groups_text);
 
     public GroupContactListFragment() {
         super(R.string.contacts_tab_groups, PLACEHOLDER);

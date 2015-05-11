@@ -18,10 +18,7 @@ public class NearbyChatListFragment extends EnvironmentChatListFragment {
     private EnvironmentChatListAdapter mNearbyAdapter;
 
     public NearbyChatListFragment() {
-        mPlaceholder = new Placeholder(
-                R.drawable.placeholder_nearby,
-                R.drawable.placeholder_nearby_point,
-                R.string.placeholder_nearby_text);
+        mPlaceholder = new Placeholder(R.drawable.placeholder_nearby, R.string.placeholder_nearby_text);
     }
 
     @Override

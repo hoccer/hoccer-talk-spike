@@ -19,11 +19,7 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
     private EnvironmentChatListAdapter mListAdapter;
 
     public WorldwideChatListFragment() {
-        // TODO: use placeholder resources for worldwide
-        mPlaceholder = new Placeholder(
-                R.drawable.placeholder_nearby,
-                R.drawable.placeholder_nearby_point,
-                R.string.placeholder_nearby_text);
+        mPlaceholder = new Placeholder(R.drawable.placeholder_world, R.string.placeholder_worldwide_text);
     }
 
     @Override
