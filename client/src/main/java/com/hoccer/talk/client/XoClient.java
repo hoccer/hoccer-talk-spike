@@ -2789,6 +2789,11 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
         try {
             if (becameFriend(newRelationship, oldRelationShip)) {
+                // presence can be null on what score we need a simple presence object saving the kept state
+                if (clientContact.getClientPresence() == null) {
+                    TalkPresence keptPresence = new TalkPresence();
+                    clientContact.updatePresence(keptPresence);
+                }
                 clientContact.getClientPresence().setKept(false);
             } else if (friendshipCancelled(newRelationship, oldRelationShip)) {
                 clientContact.getClientPresence().setKept(true);

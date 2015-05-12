@@ -1,13 +1,16 @@
 package com.hoccer.xo.android.fragment;
 
 import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.GroupProfileActivity;
 import com.hoccer.xo.android.adapter.ContactListAdapter;
 import com.hoccer.xo.android.adapter.GroupContactListAdapter;
+import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.Placeholder;
-import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -18,7 +21,18 @@ public class GroupContactListFragment extends ContactListFragment {
     private static final Placeholder PLACEHOLDER = new Placeholder(R.drawable.placeholder_group, R.string.placeholder_groups_text);
 
     public GroupContactListFragment() {
-        super(R.string.contacts_tab_groups, PLACEHOLDER);
+        super(R.string.contacts_tab_groups);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        PLACEHOLDER.applyToView(view, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((XoActivity) getActivity()).showNewGroup();
+            }
+        });
     }
 
     @Override
