@@ -11,7 +11,6 @@ import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.talk.model.TalkRelationship;
-import com.hoccer.xo.android.NearbyController;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.ChatsActivity;
@@ -23,7 +22,6 @@ import com.squareup.picasso.Picasso;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -423,8 +421,8 @@ public class SingleProfileFragment extends ProfileFragment
                 .load(avatarUri)
                 .centerCrop()
                 .fit()
-                .placeholder(R.drawable.avatar_default_contact_large)
-                .error(R.drawable.avatar_default_contact_large)
+                .placeholder(R.drawable.avatar_contact_large)
+                .error(R.drawable.avatar_contact_large)
                 .into(mAvatarImage);
     }
 

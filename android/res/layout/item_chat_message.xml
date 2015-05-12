@@ -30,7 +30,7 @@
             android:layout_marginRight="5dp"
             android:scaleType="centerCrop"
             custom:cornerRadius="60"
-            custom:defaultAvatarImageUrl="@drawable/avatar_default_contact"/>
+            custom:defaultAvatarImageUrl="@drawable/avatar_contact"/>
 
     <RelativeLayout
             android:id="@+id/rl_container"

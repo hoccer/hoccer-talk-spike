@@ -40,7 +40,7 @@ public abstract class AvatarView extends LinearLayout {
         TypedArray a = getContext().getTheme()
                 .obtainStyledAttributes(attributes, R.styleable.SimpleAvatarView, 0, 0);
         try {
-            mDefaultAvatarImageUri = Uri.parse("drawable://" + a.getResourceId(R.styleable.SimpleAvatarView_defaultAvatarImageUrl, R.drawable.avatar_default_contact));
+            mDefaultAvatarImageUri = Uri.parse("drawable://" + a.getResourceId(R.styleable.SimpleAvatarView_defaultAvatarImageUrl, R.drawable.avatar_contact));
             mCornerRadius = a.getFloat(R.styleable.SimpleAvatarView_cornerRadius, 0.0f);
         } finally {
             a.recycle();
@@ -103,7 +103,7 @@ public abstract class AvatarView extends LinearLayout {
                     setAvatarImage(R.drawable.avatar_default_group);
                 }
             } else {
-                setAvatarImage(R.drawable.avatar_default_contact);
+                setAvatarImage(R.drawable.avatar_contact);
             }
         } else {
             setAvatarImage(avatarUri);
@@ -132,7 +132,7 @@ public abstract class AvatarView extends LinearLayout {
             public void run() {
                 if (isInEditMode()) {
                     ImageView avatar = (ImageView) findViewById(R.id.avatar_image);
-                    avatar.setImageResource(R.drawable.avatar_default_contact);
+                    avatar.setImageResource(R.drawable.avatar_contact);
                 } else {
                     mAvatarImage.setVisibility(View.VISIBLE);
                     if (avatarImageUri != null) {
