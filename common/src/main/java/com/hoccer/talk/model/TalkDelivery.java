@@ -1018,4 +1018,24 @@ public class TalkDelivery {
             this.attachmentState = delivery.getAttachmentState();
         }
     }
+    public String dump() {
+        String delim = "\n";
+        String delim2 = ":";
+        return("TalkDelivery:"+
+                delim+FIELD_MESSAGE_ID + delim2 + messageId +
+                delim+FIELD_MESSAGE_TAG + delim2 + messageTag +
+                delim+FIELD_SENDER_ID + delim2 + senderId +
+                delim+FIELD_RECEIVER_ID + delim2 + receiverId +
+                delim+FIELD_GROUP_ID + delim2 + groupId +
+                delim+FIELD_STATE + delim2 + state +
+                delim+FIELD_KEY_ID + delim2 + keyId +
+                delim+FIELD_KEY_CIPHERTEXT + delim2 + keyCiphertext +
+                delim+FIELD_TIME_ACCEPTED + delim2 + timeAccepted +
+                delim+FIELD_TIME_CHANGED + delim2 + timeChanged +
+                delim+FIELD_TIME_UPDATED_OUT + delim2 + timeUpdatedOut +
+                delim+FIELD_TIME_UPDATED_IN + delim2 + timeUpdatedIn +
+                delim+FIELD_TIME_ATTACHMENT_RECEIVED + delim2 + timeAttachmentReceived +
+                delim+FIELD_ATTACHMENT_STATE + delim2 + attachmentState);
+
+    }
 }
