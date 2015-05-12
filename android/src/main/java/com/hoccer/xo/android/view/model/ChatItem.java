@@ -85,24 +85,21 @@ public abstract class ChatItem {
     }
 
     private static ChatItem createHistoryChatItem(TalkClientContact contact, Context context) {
-        ChatItem chatItem;
-        chatItem = new ContactChatItem(contact, context);
+        ChatItem chatItem = new ContactChatItem(contact, context);
         chatItem.setType(ChatItem.TYPE_CLIENT_HISTORY);
         chatItem.setLayout(R.layout.item_history_chat_client);
         return chatItem;
     }
 
     private static ChatItem createNearbyHistoryChatItem(TalkClientContact contact, Context context) {
-        ChatItem chatItem;
-        chatItem = new ContactChatItem(contact, context);
+        ChatItem chatItem = new ContactChatItem(contact, context);
         chatItem.setType(ChatItem.TYPE_CLIENT_NEARBY_HISTORY);
         chatItem.setLayout(R.layout.item_nearby_history_chat_client);
         return chatItem;
     }
 
     private static ChatItem createContactChatItem(TalkClientContact contact, Context context) {
-        ChatItem chatItem;
-        chatItem = new ContactChatItem(contact, context);
+        ChatItem chatItem = new ContactChatItem(contact, context);
         chatItem.setType(ChatItem.TYPE_RELATED);
         chatItem.setLayout(R.layout.item_chat_client);
         return chatItem;
