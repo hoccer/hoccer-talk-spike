@@ -16,8 +16,6 @@ import static com.hoccer.talk.model.TalkEnvironment.*;
 
 public class WorldwideChatListFragment extends EnvironmentChatListFragment {
 
-    private EnvironmentChatListAdapter mListAdapter;
-
     public WorldwideChatListFragment() {
         mPlaceholder = new Placeholder(R.drawable.placeholder_world, R.string.placeholder_worldwide_text);
     }

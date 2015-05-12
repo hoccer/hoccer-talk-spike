@@ -9,6 +9,7 @@ import android.widget.ListView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.activity.ChatActivity;
+import com.hoccer.xo.android.adapter.EnvironmentChatListAdapter;
 import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.Placeholder;
@@ -16,6 +17,7 @@ import com.hoccer.xo.android.view.Placeholder;
 public abstract class EnvironmentChatListFragment extends XoListFragment implements IPagerFragment {
 
     protected Placeholder mPlaceholder;
+    protected EnvironmentChatListAdapter mListAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

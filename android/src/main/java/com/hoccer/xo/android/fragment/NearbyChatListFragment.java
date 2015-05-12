@@ -15,8 +15,6 @@ import com.hoccer.xo.android.view.Placeholder;
 
 public class NearbyChatListFragment extends EnvironmentChatListFragment {
 
-    private EnvironmentChatListAdapter mNearbyAdapter;
-
     public NearbyChatListFragment() {
         mPlaceholder = new Placeholder(R.drawable.placeholder_nearby, R.string.placeholder_nearby_text);
     }
@@ -29,8 +27,8 @@ public class NearbyChatListFragment extends EnvironmentChatListFragment {
 
     @Override
     public void onDestroy() {
-        if (mNearbyAdapter != null) {
-            mNearbyAdapter.unregisterListeners();
+        if (mListAdapter != null) {
+            mListAdapter.unregisterListeners();
         }
 
         destroyAdapter();
@@ -38,18 +36,18 @@ public class NearbyChatListFragment extends EnvironmentChatListFragment {
     }
 
     private void createAdapter() {
-        if (mNearbyAdapter == null) {
-            mNearbyAdapter = new EnvironmentChatListAdapter(TalkEnvironment.TYPE_NEARBY, mActivity);
-            mNearbyAdapter.registerListeners();
-            setListAdapter(mNearbyAdapter);
+        if (mListAdapter == null) {
+            mListAdapter = new EnvironmentChatListAdapter(TalkEnvironment.TYPE_NEARBY, mActivity);
+            mListAdapter.registerListeners();
+            setListAdapter(mListAdapter);
         }
     }
 
     private void destroyAdapter() {
-        if (mNearbyAdapter != null) {
+        if (mListAdapter != null) {
             setListAdapter(null);
-            mNearbyAdapter.unregisterListeners();
-            mNearbyAdapter = null;
+            mListAdapter.unregisterListeners();
+            mListAdapter = null;
         }
     }
 
