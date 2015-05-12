@@ -25,7 +25,8 @@
                 android:layout_centerInParent="true"
                 android:layout_marginLeft="33dp"
                 android:layout_marginRight="33dp"
-                android:layout_marginTop="80dp"/>
+                android:layout_marginTop="80dp"
+                android:src="@drawable/placeholder_chats"/>
             <TextView
                 android:id="@+id/tv_contacts_placeholder"
                 android:layout_width="wrap_content"
