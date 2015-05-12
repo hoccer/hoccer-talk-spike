@@ -56,8 +56,12 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        PLACEHOLDER.applyToView(view);
+        PLACEHOLDER.applyToView(view, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((XoActivity) getActivity()).showPairing();
+            }
+        });
 
         initAdapter();
         ListView listView = (ListView) view.findViewById(android.R.id.list);
