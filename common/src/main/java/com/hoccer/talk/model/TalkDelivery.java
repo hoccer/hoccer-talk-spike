@@ -923,6 +923,7 @@ public class TalkDelivery {
         this.timeUpdatedIn = delivery.getTimeUpdatedIn();
         this.timeAttachmentReceived = delivery.getTimeAttachmentReceived();
         this.attachmentState = delivery.getAttachmentState();
+        this.reason = delivery.getReason();
     }
 
     @JsonIgnore
@@ -970,6 +971,10 @@ public class TalkDelivery {
         if (this.attachmentState != null) {
             result.add(TalkDelivery.FIELD_ATTACHMENT_STATE);
         }
+        if (this.reason != null) {
+            result.add(TalkDelivery.FIELD_REASON);
+        }
+
         return result;
     }
 
@@ -1017,6 +1022,9 @@ public class TalkDelivery {
         if (fields == null || fields.contains(TalkDelivery.FIELD_ATTACHMENT_STATE)) {
             this.attachmentState = delivery.getAttachmentState();
         }
+        if (fields == null || fields.contains(TalkDelivery.FIELD_REASON)) {
+            this.reason = delivery.getReason();
+        }
     }
     public String dump() {
         String delim = "\n";
@@ -1035,7 +1043,7 @@ public class TalkDelivery {
                 delim+FIELD_TIME_UPDATED_OUT + delim2 + timeUpdatedOut +
                 delim+FIELD_TIME_UPDATED_IN + delim2 + timeUpdatedIn +
                 delim+FIELD_TIME_ATTACHMENT_RECEIVED + delim2 + timeAttachmentReceived +
-                delim+FIELD_ATTACHMENT_STATE + delim2 + attachmentState);
-
+                delim+FIELD_ATTACHMENT_STATE + delim2 + attachmentState +
+                delim+FIELD_REASON + delim2 + reason);
     }
 }
