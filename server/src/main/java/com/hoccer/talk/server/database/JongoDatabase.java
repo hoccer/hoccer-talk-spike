@@ -253,9 +253,9 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     @NotNull
-    public List<TalkMessage> findMessagesFromClient(String clientId) {
+    public List<TalkMessage> findMessagesFromClient(String senderId) {
         Iterator<TalkMessage> it = mMessages
-                .find("{senderId:#}", clientId)
+                .find("{senderId:#}", senderId)
                 .as(TalkMessage.class)
                 .iterator();
 
@@ -274,8 +274,8 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     @Nullable
-    public TalkDelivery findDelivery(String messageId, String clientId) {
-        return mDeliveries.findOne("{messageId:#,receiverId:#}", messageId, clientId)
+    public TalkDelivery findDelivery(String messageId, String receiverId) {
+        return mDeliveries.findOne("{messageId:#,receiverId:#}", messageId, receiverId)
                 .as(TalkDelivery.class);
     }
 
@@ -326,9 +326,9 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     @NotNull
-    public List<TalkDelivery> findDeliveriesForClient(String clientId) {
+    public List<TalkDelivery> findDeliveriesForClient(String receiverId) {
         Iterator<TalkDelivery> it = mDeliveries
-                .find("{receiverId:#}", clientId)
+                .find("{receiverId:#}", receiverId)
                 .as(TalkDelivery.class)
                 .iterator();
 
@@ -337,9 +337,9 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     @NotNull
-    public List<TalkDelivery> findDeliveriesFromClient(String clientId) {
+    public List<TalkDelivery> findDeliveriesFromClient(String senderId) {
         Iterator<TalkDelivery> it = mDeliveries
-                .find("{senderId:#}", clientId)
+                .find("{senderId:#}", senderId)
                 .as(TalkDelivery.class)
                 .iterator();
 
@@ -348,9 +348,9 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     @NotNull
-    public List<TalkDelivery> findDeliveriesForClientInState(String clientId, String state) {
+    public List<TalkDelivery> findDeliveriesForClientInState(String receiverId, String state) {
         Iterator<TalkDelivery> it = mDeliveries
-                .find("{receiverId:#,state:#}", clientId, state)
+                .find("{receiverId:#,state:#}", receiverId, state)
                 .as(TalkDelivery.class)
                 .iterator();
 
@@ -359,9 +359,9 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     @NotNull
-    public List<TalkDelivery> findDeliveriesForClientInDeliveryAndAttachmentStates(String clientId, String[] deliveryStates, String[] attachmentStates) {
+    public List<TalkDelivery> findDeliveriesForClientInDeliveryAndAttachmentStates(String receiverId, String[] deliveryStates, String[] attachmentStates) {
         Iterator<TalkDelivery> it = mDeliveries
-                .find("{receiverId:#, state: { $in: # }, attachmentState: {$in: # } }", clientId, Arrays.asList(deliveryStates), Arrays.asList(attachmentStates))
+                .find("{receiverId:#, state: { $in: # }, attachmentState: {$in: # } }", receiverId, Arrays.asList(deliveryStates), Arrays.asList(attachmentStates))
                 .as(TalkDelivery.class)
                 .iterator();
 
@@ -370,9 +370,9 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     @NotNull
-    public List<TalkDelivery> findDeliveriesFromClientInState(String clientId, String state) {
+    public List<TalkDelivery> findDeliveriesFromClientInState(String senderId, String state) {
         Iterator<TalkDelivery> it = mDeliveries
-                .find("{senderId:#,state:#}", clientId, state)
+                .find("{senderId:#,state:#}", senderId, state)
                 .as(TalkDelivery.class)
                 .iterator();
 
@@ -381,9 +381,9 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     @NotNull
-    public List<TalkDelivery> findDeliveriesFromClientInStates(String clientId, String[] deliveryStates) {
+    public List<TalkDelivery> findDeliveriesFromClientInStates(String senderId, String[] deliveryStates) {
         Iterator<TalkDelivery> it = mDeliveries
-                .find("{senderId:#, state: { $in: # } }", clientId, Arrays.asList(deliveryStates))
+                .find("{senderId:#, state: { $in: # } }", senderId, Arrays.asList(deliveryStates))
                 .as(TalkDelivery.class)
                 .iterator();
 
@@ -392,9 +392,9 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     @NotNull
-    public List<TalkDelivery> findDeliveriesFromClientInDeliveryAndAttachmentStates(String clientId, String[] deliveryStates, String[] attachmentStates) {
+    public List<TalkDelivery> findDeliveriesFromClientInDeliveryAndAttachmentStates(String senderId, String[] deliveryStates, String[] attachmentStates) {
         Iterator<TalkDelivery> it = mDeliveries
-                .find("{senderId:#, state: { $in: # }, attachmentState: {$in: #} }", clientId, Arrays.asList(deliveryStates), Arrays.asList(attachmentStates))
+                .find("{senderId:#, state: { $in: # }, attachmentState: {$in: #} }", senderId, Arrays.asList(deliveryStates), Arrays.asList(attachmentStates))
                 .as(TalkDelivery.class)
                 .iterator();
 
@@ -406,6 +406,16 @@ public class JongoDatabase implements ITalkServerDatabase {
     public List<TalkDelivery> findDeliveriesForMessage(String messageId) {
         Iterator<TalkDelivery> it = mDeliveries
                 .find("{messageId:#}", messageId)
+                .as(TalkDelivery.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
+    }
+    @Override
+    @NotNull
+    public List<TalkDelivery> findDeliveriesFromClientForMessage(String senderId, String messageId) {
+        Iterator<TalkDelivery> it = mDeliveries
+                .find("{senderId:#, messageId:#}", senderId, messageId)
                 .as(TalkDelivery.class)
                 .iterator();
 

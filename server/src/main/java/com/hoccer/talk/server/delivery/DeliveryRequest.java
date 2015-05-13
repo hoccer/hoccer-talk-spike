@@ -157,7 +157,10 @@ public class DeliveryRequest {
                 // notify it
                 try {
                     TalkDelivery filtered = new TalkDelivery();
+                    //LOG.info("Delivery orig:"+delivery.dump());
                     filtered.updateWith(delivery, TalkDelivery.REQUIRED_OUT_UPDATE_FIELDS_SET);
+                    //LOG.info("Delivery filtered:"+delivery.dump());
+                    //LOG.info("Delivery filtered: hasValidRecipient:"+filtered.hasValidRecipient()+", isExpandedGroupDelivery:"+filtered.isExpandedGroupDelivery());
                     if (filtered.hasValidRecipient() || filtered.isExpandedGroupDelivery()) {
                         rpc.outgoingDeliveryUpdated(filtered);
                         delivery.setTimeUpdatedOut(new Date());

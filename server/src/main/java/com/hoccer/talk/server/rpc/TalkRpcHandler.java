@@ -1519,7 +1519,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         requireIdentification(true);
         logCall("deliveryAcknowledge '"+acknowledgeState+"' (messageId: '" + messageId + "', recipientId: '" + recipientId + "')");
         synchronized (mServer.idLock(messageId)) {
-            TalkDelivery delivery = mDatabase.findDelivery(messageId, recipientId);
+            TalkDelivery delivery = findDelivery(messageId, recipientId);
             if (delivery != null) {
                 String state = delivery.getState();
                 if (acknowledgeState.equals(state) || acknowledgedState.equals(state)) {
@@ -1551,11 +1551,33 @@ public class TalkRpcHandler implements ITalkRpcServer {
         return outDeliveryAcknowledge(messageId, recipientId, TalkDelivery.STATE_DELIVERED_PRIVATE, TalkDelivery.STATE_DELIVERED_PRIVATE_ACKNOWLEDGED);
     }
 
+    // handle finding failed group deliveries without a recipientId
+    private TalkDelivery findDelivery(String messageId, String recipientId) {
+        if (messageId == null) {
+            throw new RuntimeException("messageId is null");
+        }
+        if (recipientId == null) {
+            throw new RuntimeException("recipientId is null");
+        }
+        if (recipientId.length() > 0) {
+            return mDatabase.findDelivery(messageId, recipientId);
+        } else {
+            String clientId = mConnection.getClientId();
+            List<TalkDelivery> deliveries = mDatabase.findDeliveriesFromClientForMessage(clientId, messageId);
+            if (deliveries.size() == 1) {
+                return deliveries.get(0);
+            }
+            if (deliveries.size() == 0) {
+                return null;
+            }
+            throw new RuntimeException("multiple deliveries found for this messageId, must supply a recipient id");
+        }
+    }
 
     private TalkDelivery deliverySenderChangeState(String messageId, String recipientId, String newState) {
         synchronized (mServer.idLock(messageId)) {
             String clientId = mConnection.getClientId();
-            TalkDelivery delivery = mDatabase.findDelivery(messageId, recipientId);
+            TalkDelivery delivery = findDelivery(messageId, recipientId);
             if (delivery != null) {
                 if (delivery.getSenderId().equals(clientId)) {
                     setDeliveryState(delivery, newState, false, true);
@@ -1590,7 +1612,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         logCall("outDeliveryUnknown(messageId: '" + messageId + "', recipientId: '" + recipientId + "'");
         synchronized (mServer.idLock(messageId)) {
             String clientId = mConnection.getClientId();
-            TalkDelivery delivery = mDatabase.findDelivery(messageId, recipientId);
+            TalkDelivery delivery = findDelivery(messageId, recipientId);
             if (delivery != null) {
                 if (delivery.getSenderId().equals(clientId)) {
                     // make sure the delivery will be set to a good possibly final state and the clients won't be bothered again
