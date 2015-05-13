@@ -518,9 +518,11 @@ public class JongoDatabase implements ITalkServerDatabase {
         // collect clients known through relationships
         List<TalkRelationship> relationships = findRelationshipsByOtherClient(clientId);
         for (TalkRelationship relationship : relationships) {
-            if (relationship.isDirectlyRelated()) {
+            if (relationship.isRelated()) {
+                LOG.info("including "+relationship.getClientId()+" because related");
                 clients.add(relationship.getClientId());
                 if (relationship.getLastChanged().after(lastKnown)) {
+                    LOG.info("must include "+relationship.getClientId()+" because related");
                     mustInclude.add(relationship.getClientId());
                 }
             }
@@ -534,7 +536,9 @@ public class JongoDatabase implements ITalkServerDatabase {
                 for (TalkGroupMembership otherMembership : otherMemberships) {
                     if (otherMembership.isInvited() || otherMembership.isJoined()) {
                         clients.add(otherMembership.getClientId());
+                        LOG.info("include "+otherMembership.getClientId()+" because common membership");
                         if (otherMembership.getLastChanged().after(lastKnown) || ownMembership.getLastChanged().after(lastKnown)) {
+                            LOG.info("must include "+otherMembership.getClientId()+" because memberships changed");
                             mustInclude.add(otherMembership.getClientId());
                         }
                     }
@@ -546,9 +550,7 @@ public class JongoDatabase implements ITalkServerDatabase {
         // collect presences
         for (String client : clients) {
             TalkPresence pres = findPresenceForClient(client);
-            if (pres != null &&
-                    (pres.getTimestamp().after(lastKnown) ||
-                            mustInclude.contains(client))) {
+            if (pres != null && (pres.getTimestamp().after(lastKnown) || mustInclude.contains(client))) {
                 res.add(pres);
             }
         }

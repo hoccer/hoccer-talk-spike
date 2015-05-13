@@ -9,6 +9,12 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+/* A TalkRelationship has the following semantics:
+ *  Normally on the server there should be always two relationship records with reversed "clientId" and "otherClientId"
+ *  The "clientId" denotes the client that receives and stores the particular TalkRelationship record
+ *  TODO: more documentation
+ */
+
 @DatabaseTable(tableName = "relationship")
 public class TalkRelationship {
 
@@ -67,6 +73,11 @@ public class TalkRelationship {
     }
 
     @JsonIgnore
+    public boolean hasNotificationPreference() {
+        return NOTIFICATIONS_DISABLED.equals(notificationPreference);
+    }
+
+    @JsonIgnore
     public boolean isNone() {
         return STATE_NONE.equals(state);
     }
@@ -90,12 +101,12 @@ public class TalkRelationship {
     public boolean invitedMe() {
         return STATE_INVITED_ME.equals(state);
     }
-
+ /*
     @JsonIgnore
     public boolean isDirectlyRelated() {
         return isFriend() || isInvited() || isBlocked() || invitedMe();
     }
-
+*/
     public String getClientId() {
         return clientId;
     }

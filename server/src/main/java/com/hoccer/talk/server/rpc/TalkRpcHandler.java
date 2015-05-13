@@ -712,7 +712,8 @@ public class TalkRpcHandler implements ITalkRpcServer {
         TalkKey key = null;
 
         TalkRelationship relationship = mDatabase.findRelationshipBetween(mConnection.getClientId(), clientId);
-        if (relationship != null && relationship.isRelated()) {
+        TalkRelationship otherRelationship = mDatabase.findRelationshipBetween(clientId, mConnection.getClientId());
+        if ((relationship != null && relationship.isRelated()) || (otherRelationship != null && otherRelationship.isRelated())) {
             key = mDatabase.findKey(clientId, keyId);
         } else {
             List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsForClient(mConnection.getClientId());
@@ -948,6 +949,14 @@ public class TalkRpcHandler implements ITalkRpcServer {
         return true;
     }
 
+    // TODO: blocking can cause unidirectional relationsShips to be created that cause problems in some cases
+    // TODO: e.g. we will get presence updates causing a blocked contact to be created, but when requesting isContactOf they will be
+    // TODO: immediately deleted; we might either not send out presence information for blocked contacts, but this might cause other
+    // TODO: problems, e.g. a stuck online indicator or not being able to unblock a contact after a client database loss
+    // TODO: Possible alternative solutions:
+    // TODO:    a) always maintain bidirectional relationships
+    // TODO:    b) make sure unidirectional relationships are properly handled everywhere (e.g. getPresences(), isContactOf, delivery, invitations, etc...)
+    // TODO: a) seems to be much easier
     @Override
     public void blockClient(String clientId) {
         requireIdentification(true);
@@ -2888,10 +2897,33 @@ public class TalkRpcHandler implements ITalkRpcServer {
         final List<TalkRelationship> relationships =
                 mDatabase.findRelationshipsForClientInStates(clientId, TalkRelationship.STATES_RELATED);
 
+        final HashMap<String,TalkRelationship> relationshipHashMap = new HashMap<String, TalkRelationship>();
+
         Set<String> myContactIds = new HashSet<String>();
         for (TalkRelationship relationship : relationships) {
             myContactIds.add(relationship.getOtherClientId());
+            relationshipHashMap.put(relationship.getOtherClientId(), relationship);
         }
+
+        // we do this to check if the relationsships are symmetrical
+        final List<TalkRelationship> otherRelationships =
+                mDatabase.findRelationshipsForOtherClientInStates(clientId, TalkRelationship.STATES_RELATED);
+
+        Set<String> myOtherContactIds = new HashSet<String>();
+        for (TalkRelationship relationship : otherRelationships) {
+            if (!myContactIds.contains(relationship.getClientId())) {
+                // we have only a reverse relationship pointing to us, but none pointing to the other client
+                LOG.error("isContactOf: missing relationship from us (" + clientId + ") to contact " + relationship.getClientId() + " who has a relationship pointing to us with state '" + relationship.getState() + "'");
+            }
+            myOtherContactIds.add(relationship.getClientId());
+        }
+        for (String otherClientId : myContactIds) {
+            if (!myOtherContactIds.contains(otherClientId)) {
+                // we have a relationship pointing to otherClientId, but he has no contact point to us
+                LOG.error("isContactOf: missing relationship from contact " + otherClientId + " to us (" + clientId + ") while we have a relationship pointing to him with state '"+relationshipHashMap.get(otherClientId).getState()+"'");
+            }
+        }
+        // TODO: automatically fix missing relationship when above error cases are encountered
 
         final List<TalkGroupMembership> clientMemberships = mDatabase.findGroupMembershipsForClientWithStates(clientId, TalkGroupMembership.ACTIVE_STATES);
 

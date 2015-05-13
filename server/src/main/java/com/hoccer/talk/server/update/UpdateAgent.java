@@ -161,8 +161,8 @@ public class UpdateAgent extends NotificationDeferrer {
         List<TalkRelationship> relationships = mDatabase.findRelationshipsByOtherClient(selfClientId);
         for (TalkRelationship relationship : relationships) {
             // if the other clients relation is friendly to or has been invited by present client
-            // Clients that have blocked present client therefore will not be included here
-            if (relationship.isDirectlyRelated()) {
+            // Clients that have blocked present client therefore will also be included here
+            if (relationship.isRelated()) {
                 LOG.trace(tag + "including friend " + relationship.getClientId());
                 clientIds.add(relationship.getClientId());
             }
