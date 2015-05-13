@@ -142,10 +142,12 @@ public class JongoDatabase implements ITalkServerDatabase {
         mDeliveries.ensureIndex("{messageId:1, senderId:1, receiverId:1}");
         mDeliveries.ensureIndex("{messageId:1}");
         mDeliveries.ensureIndex("{senderId:1}");
+        mDeliveries.ensureIndex("{groupId:1}");
         mDeliveries.ensureIndex("{senderId:1, state:1}");
         mDeliveries.ensureIndex("{senderId:1, state:1, attachmentState:1}");
         mDeliveries.ensureIndex("{receiverId:1}");
         mDeliveries.ensureIndex("{receiverId:1, state:1}");
+        mDeliveries.ensureIndex("{receiverId:1, groupId:1, state:1}");
         mDeliveries.ensureIndex("{receiverId:1, state:1, attachmentState:1}");
         mDeliveries.ensureIndex("{state:1}");
         mDeliveries.ensureIndex("{state:1, attachmentState:1}");
@@ -351,6 +353,17 @@ public class JongoDatabase implements ITalkServerDatabase {
     public List<TalkDelivery> findDeliveriesForClientInState(String receiverId, String state) {
         Iterator<TalkDelivery> it = mDeliveries
                 .find("{receiverId:#,state:#}", receiverId, state)
+                .as(TalkDelivery.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
+    }
+
+    @Override
+    @NotNull
+    public List<TalkDelivery> findDeliveriesForClientInGroupInState(String receiverId, String groupId, String state) {
+        Iterator<TalkDelivery> it = mDeliveries
+                .find("{receiverId:#, groupId:#, state:#}", receiverId, groupId, state)
                 .as(TalkDelivery.class)
                 .iterator();
 

@@ -58,6 +58,8 @@ public interface ITalkServerDatabase {
 
     public List<TalkDelivery> findDeliveriesForClientInState(String receiverId, String state);
 
+    public List<TalkDelivery> findDeliveriesForClientInGroupInState(String receiverId, String groupId, String state);
+
     public List<TalkDelivery> findDeliveriesForClientInDeliveryAndAttachmentStates(String receiverId, String[] deliveryStates, String[] attachmentStates);
 
     public List<TalkDelivery> findDeliveriesFromClient(String senderId);

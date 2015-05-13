@@ -2352,19 +2352,6 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
     }
 
-
-    // should be called by the sender of an transfer file after upload has been finished
-    //void finishedFileUpload(String fileId);
-
-    /*
-    @Override
-    public void deleteFile(String fileId) {
-        requireIdentification();
-        logCall("deleteFile(fileId: '" + fileId + "')");
-        mServer.getFilecacheClient().deleteFile(fileId);
-        // TODO: notify receivers
-    }
-    */
     private void createGroupWithEnvironment(TalkEnvironment environment) {
         LOG.info("createGroupWithEnvironment: creating new group for client with id '" + mConnection.getClientId() + "'");
         TalkGroupPresence groupPresence = new TalkGroupPresence();
@@ -2501,12 +2488,19 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
         if (!environment.isNearby()) {
             // make an worldwide expiry run first
+            // TODO: should perform other client expiry elsewhere periodically for performance reasons
             for (TalkEnvironment te : matching_found) {
                 if (!te.getClientId().equals(mConnection.getClientId())) {
                     // only expire other client's environments
                     if (te.hasExpired()) {
-                        LOG.info("updateEnvironment: destroying expired environment for client "+te.getClientId());
-                        destroyEnvironment(te);
+                        LOG.info("updateEnvironment: worldwide: expired environment for client "+te.getClientId());
+                        // but before we can destroy, we need to check if there are undelivered messages
+                        List<TalkDelivery> deliveries = mDatabase.findDeliveriesForClientInGroupInState(te.getClientId(),te.getGroupId(),TalkDelivery.STATE_DELIVERING);
+                        if (deliveries.size() == 0) {
+                            destroyEnvironment(te);
+                        } else {
+                            LOG.info("updateEnvironment: worldwide: can remove expired worldwide environment for client="+ te.getClientId() + " from groupId=" + te.getGroupId()+", there are "+ deliveries.size()+" deliveries to be delivered");
+                        }
                     } else {
                         matching.add(te);
                     }
@@ -2604,14 +2598,22 @@ public class TalkRpcHandler implements ITalkRpcServer {
                                     if (environmentsPerGroup.get(environmentsPerGroup.size() - 1 - n).getLeft().equals(te.getGroupId())) {
                                         // we are in an an abandoned group, lets move the smallest non-abandoned group
                                         LOG.info("updateEnvironment: worldwide: too many groups and we are in an abandoned group ("+n+"-smallest),joining "+abandonedGroups+"-smallest group,clientId=" + mConnection.getClientId() + ",groupId=" + myMembership.getGroupId());
-                                        destroyEnvironment(myEnvironment);
-                                        String nThSmallestGroupId = environmentsPerGroup.get(environmentsPerGroup.size() - 1 - abandonedGroups).getLeft();
-                                        TalkGroupPresence nThSmallestGroup = mDatabase.findGroupPresenceById(nThSmallestGroupId);
-                                        if (nThSmallestGroup == null) {
-                                            LOG.error("updateEnvironment: worldwide: secondSmallestGroup presence not found, id=" + nThSmallestGroup.getGroupId() + ",clientId=" + mConnection.getClientId() + ",groupId=" + myMembership.getGroupId());
+
+                                        // but before we can move, we need to check if there are undelivered messages
+                                        List<TalkDelivery> deliveries = mDatabase.findDeliveriesForClientInGroupInState(mConnection.getClientId(),myGroupPresence.getGroupId(),TalkDelivery.STATE_DELIVERING);
+                                        if (deliveries.size() == 0) {
+
+                                            destroyEnvironment(myEnvironment);
+                                            String nThSmallestGroupId = environmentsPerGroup.get(environmentsPerGroup.size() - 1 - abandonedGroups).getLeft();
+                                            TalkGroupPresence nThSmallestGroup = mDatabase.findGroupPresenceById(nThSmallestGroupId);
+                                            if (nThSmallestGroup == null) {
+                                                LOG.error("updateEnvironment: worldwide: secondSmallestGroup presence not found, id=" + nThSmallestGroup.getGroupId() + ",clientId=" + mConnection.getClientId() + ",groupId=" + myMembership.getGroupId());
+                                            } else {
+                                                joinGroupWithEnvironment(nThSmallestGroup, environment);
+                                                return nThSmallestGroup.getGroupId();
+                                            }
                                         } else {
-                                            joinGroupWithEnvironment(nThSmallestGroup, environment);
-                                            return nThSmallestGroup.getGroupId();
+                                            LOG.info("updateEnvironment: worldwide: can not move client="+ mConnection.getClientId() + " from groupId=" + myMembership.getGroupId()+", there are "+ deliveries.size()+" deliveries to be delivered");
                                         }
                                     }
                                 }
@@ -2713,29 +2715,39 @@ public class TalkRpcHandler implements ITalkRpcServer {
             // we already have a list of all remaining members, so it will be faster
             // and should cause less trouble than doing it on joining
             int removedCount = 0;
-            for (int i = 0; i < membershipsLeft.size(); ++i) {
-                // cleanup other offline members
-                TalkGroupMembership otherMembership = membershipsLeft.get(i);
-                boolean isConnected = mServer.isClientConnected(otherMembership.getClientId());
-                if (!isConnected) {
-                    boolean keep = false;
-                    if (!groupPresence.isTypeNearby()) {
-                        // check for not expired environment
-                        TalkEnvironment otherEnvironment = mDatabase.findEnvironmentByClientIdForGroup(otherMembership.getClientId(), otherMembership.getGroupId());
-                        if (otherEnvironment != null) {
-                            if (!otherEnvironment.hasExpired()) {
-                                keep = true;
-                            } else {
-                                logCall("destroyEnvironment: deleting otherClient's expired environment: " + removedCount);
-                                mDatabase.deleteEnvironment(otherEnvironment);
-                            }
-                        }
-                    }
-                    if (!keep) {
+            if (environment.isNearby()) {
+                // cleanup other offline members for nearby only
+                for (int i = 0; i < membershipsLeft.size(); ++i) {
+
+                    TalkGroupMembership otherMembership = membershipsLeft.get(i);
+                    boolean isConnected = mServer.isClientConnected(otherMembership.getClientId());
+                    if (!isConnected) {
                         // remove offline member from group
                         removeGroupMembership(otherMembership, now);
                         ++removedCount;
                     }
+            /*
+                    if (!isConnected) {
+                        boolean keep = false;
+                        if (!groupPresence.isTypeNearby()) {
+                            // check for not expired environment
+                            TalkEnvironment otherEnvironment = mDatabase.findEnvironmentByClientIdForGroup(otherMembership.getClientId(), otherMembership.getGroupId());
+                            if (otherEnvironment != null) {
+                                if (!otherEnvironment.hasExpired()) {
+                                    keep = true;
+                                } else {
+                                    logCall("destroyEnvironment: deleting otherClient's expired environment: " + removedCount);
+                                    mDatabase.deleteEnvironment(otherEnvironment);
+                                }
+                            }
+                        }
+                        if (!keep) {
+                            // remove offline member from group
+                            removeGroupMembership(otherMembership, now);
+                            ++removedCount;
+                        }
+                    }
+                    */
                 }
             }
             logCall("destroyEnvironment: offline members removed: " + removedCount);
