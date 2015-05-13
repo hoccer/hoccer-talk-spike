@@ -196,6 +196,10 @@ public class TalkClientContact implements Serializable {
         return isGroup() && this.groupPresence != null && this.groupPresence.isTypeNearby();
     }
 
+    public boolean isWorldwideGroup() {
+        return isGroup() && this.groupPresence != null && this.groupPresence.isTypeWorldwide();
+    }
+
     public String getName() {
         if (isClient() || isSelf()) {
             if (clientPresence != null) {
