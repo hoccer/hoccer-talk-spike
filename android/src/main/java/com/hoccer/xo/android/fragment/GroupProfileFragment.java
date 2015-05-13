@@ -401,8 +401,10 @@ public class GroupProfileFragment extends ProfileFragment
             public void run() {
                 if (mContact.getGroupPresence() == null) {
                     getActivity().getActionBar().setTitle("");
-                } else if (mContact.getGroupPresence().isTypeNearby()) {
-                    getActivity().getActionBar().setTitle(getActivity().getResources().getString(R.string.all_nearby));
+                } else if (mContact.isNearbyGroup()) {
+                    getActivity().getActionBar().setTitle(getString(R.string.all_nearby));
+                } else if (mContact.isWorldwideGroup()) {
+                    getActivity().getActionBar().setTitle(getString(R.string.all_worldwide));
                 } else {
                     getActivity().getActionBar().setTitle(mContact.getNickname());
                 }
