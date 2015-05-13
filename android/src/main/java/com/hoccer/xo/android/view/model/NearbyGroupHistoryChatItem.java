@@ -65,7 +65,7 @@ public class NearbyGroupHistoryChatItem extends ChatItem implements SearchAdapte
         lastMessageTextView.setText(mLastMessageText);
         setUnseenMessages(unseenView);
 
-        simpleAvatarView.setAvatarImage(R.drawable.avatar_default_location);
+        simpleAvatarView.setAvatarImage(R.drawable.avatar_location);
         simpleAvatarView.setClickable(false);
 
         return view;

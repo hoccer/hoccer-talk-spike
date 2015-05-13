@@ -98,9 +98,10 @@ public abstract class AvatarView extends LinearLayout {
         if (avatarUri == null) {
             if (mContact.isGroup()) {
                 if (mContact.getGroupPresence() != null && mContact.getGroupPresence().isTypeNearby()) {
-                    setAvatarImage(R.drawable.avatar_default_location);
-                } else {
-                    setAvatarImage(R.drawable.avatar_default_group);
+                    setAvatarImage(R.drawable.avatar_location);
+                }
+                else {
+                    setAvatarImage(R.drawable.avatar_group);
                 }
             } else {
                 setAvatarImage(R.drawable.avatar_contact);

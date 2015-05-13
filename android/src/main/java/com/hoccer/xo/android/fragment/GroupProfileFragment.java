@@ -367,8 +367,8 @@ public class GroupProfileFragment extends ProfileFragment
                 .load(avatarUri)
                 .centerCrop()
                 .fit()
-                .placeholder(R.drawable.avatar_default_group_large)
-                .error(R.drawable.avatar_default_group_large)
+                .placeholder(R.drawable.avatar_group_large)
+                .error(R.drawable.avatar_group_large)
                 .into(mAvatarImage);
     }
 
