@@ -319,8 +319,8 @@
     <string name="content_audio_caption">Medien</string>
     <string name="content_audio_by_contact_caption">Medien von %1$s</string>
     <string name="profile_nickname_text">Anzeigename</string>
-    <string name="nearby_text">Alle nahebei</string>
-    <string name="worldwide_text">Alle weltweit</string>
+    <string name="all_nearby">Alle nahebei</string>
+    <string name="all_worldwide">Alle weltweit</string>
     <string name="pref_privacy_title">Privatspähre</string>
     <string name="error_send_message_blocked">Du hast diesen Kontakt blockiert. Die Nachricht wird nicht gesendet.</string>
     <string name="multi_invitation_button">weiter</string>

@@ -526,7 +526,7 @@ public class XoClientService extends Service {
 
     private String getContactName(TalkClientContact contact) {
         if (contact.isGroup() && contact.getGroupPresence() != null && contact.getGroupPresence().isTypeNearby()) {
-            return getString(R.string.nearby_text);
+            return getString(R.string.all_nearby);
         } else {
             return contact.getNickname();
         }

@@ -15,7 +15,6 @@ import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.view.avatar.AvatarView;
 import com.hoccer.xo.android.view.avatar.PresenceAvatarView;
-import com.hoccer.xo.android.view.avatar.SimpleAvatarView;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 
@@ -77,7 +76,7 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
         viewHolder.avatarView.setContact(contact);
 
         if (contact.isGroup() && contact.getGroupPresence() != null && contact.getGroupPresence().isTypeNearby()) {
-            viewHolder.checkedNameTextView.setText(R.string.nearby_text);
+            viewHolder.checkedNameTextView.setText(R.string.all_nearby);
         } else {
             viewHolder.checkedNameTextView.setText(contact.getNickname());
             if (!contact.isClientRelated() && contact.isNearby()) {

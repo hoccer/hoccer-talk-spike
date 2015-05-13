@@ -342,7 +342,7 @@ public class GroupProfileFragment extends ProfileFragment
         }
 
         if (mContact.getGroupPresence() != null && mContact.getGroupPresence().isTypeNearby()) {
-            mNameText.setText(R.string.nearby_text);
+            mNameText.setText(R.string.all_nearby);
         } else {
             mNameText.setText(name);
         }
@@ -402,7 +402,7 @@ public class GroupProfileFragment extends ProfileFragment
                 if (mContact.getGroupPresence() == null) {
                     getActivity().getActionBar().setTitle("");
                 } else if (mContact.getGroupPresence().isTypeNearby()) {
-                    getActivity().getActionBar().setTitle(getActivity().getResources().getString(R.string.nearby_text));
+                    getActivity().getActionBar().setTitle(getActivity().getResources().getString(R.string.all_nearby));
                 } else {
                     getActivity().getActionBar().setTitle(mContact.getNickname());
                 }
