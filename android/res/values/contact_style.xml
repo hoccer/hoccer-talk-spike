@@ -21,12 +21,12 @@
     </style>
 
     <style name="AppBaseTheme.Contact.UnreadMessagesChatItem" parent="BaseTheme.Contact">
-        <item name="android:text">55</item>
-        <item name="android:textColor">@android:color/white</item>
         <item name="android:layout_width">20dp</item>
         <item name="android:layout_height">20dp</item>
         <item name="android:textSize">13sp</item>
         <item name="android:gravity">center</item>
+        <item name="android:text">55</item>
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
     <style name="AppBaseTheme.Contact.UnreadMessagesBadge" parent="BaseTheme.Contact">

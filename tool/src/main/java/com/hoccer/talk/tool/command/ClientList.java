@@ -2,6 +2,8 @@ package com.hoccer.talk.tool.command;
 
 import better.cli.annotations.CLICommand;
 import better.cli.utils.PrintUtils;
+import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.model.TalkGroupPresence;
 import com.hoccer.talk.tool.TalkToolCommand;
 import com.hoccer.talk.tool.TalkToolContext;
 import com.hoccer.talk.tool.client.TalkToolClient;
@@ -11,24 +13,37 @@ import java.util.List;
 @CLICommand(name = "clist", description = "List clients")
 public class ClientList extends TalkToolCommand {
 
-    final int COLUMN_COUNT = 3;
     final String[] COLUMN_NAMES = new String[]{
-            "id", "state", "clientId"
+        "id", "state", "environment", "clientId"
     };
 
+    private static String getEnvironmentType(final TalkToolClient client) {
+        final TalkClientContact envGroup = client.getClient().getCurrentEnvironmentGroup();
+        if (envGroup == null) {
+            return "none";
+        }
+        final TalkGroupPresence groupPresence = envGroup.getGroupPresence();
+        if (groupPresence != null) {
+            return groupPresence.getGroupType();
+        } else {
+            return "none";
+        }
+    }
+
     @Override
-    protected void run(TalkToolContext context) throws Exception {
-        List<TalkToolClient> clients = context.getClients();
-        int numLines = clients.size() + 1;
-        String[][] rows = new String[numLines][];
+    protected void run(final TalkToolContext context) throws Exception {
+        final List<TalkToolClient> clients = context.getClients();
+        final int numLines = clients.size() + 1;
+        final String[][] rows = new String[numLines][];
         rows[0] = COLUMN_NAMES;
         for (int i = 1; i < numLines; i++) {
-            TalkToolClient client = clients.get(i - 1);
-            String[] columns = new String[COLUMN_COUNT];
+            final TalkToolClient client = clients.get(i - 1);
+            final String[] columns = new String[COLUMN_NAMES.length];
             columns[0] = Integer.toString(client.getId());
-            columns[1] = client.getClient().getStateString();
-            String c = client.getDatabase().findSelfContact(true).getClientId();
-            columns[2] = (c == null) ? "" : c;
+            columns[1] = client.getClient().getState().toString();
+            columns[2] = getEnvironmentType(client);
+            final String c = client.getDatabase().findSelfContact(true).getClientId();
+            columns[3] = (c == null) ? "" : c;
             rows[i] = columns;
         }
         PrintUtils.printTable(rows);

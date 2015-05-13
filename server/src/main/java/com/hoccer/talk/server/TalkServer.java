@@ -418,6 +418,7 @@ public class TalkServer {
             oldConnection.disconnect();
         }
         connection.getServerHandler().destroyEnvironment(TalkEnvironment.TYPE_NEARBY);  // after logon, destroy possibly left over environments
+        connection.getServerHandler().destroyEnvironment(TalkEnvironment.TYPE_WORLDWIDE);  // after logon, destroy possibly left over environments
         mConnectionsByClientId.put(clientId, connection);
     }
 
@@ -455,13 +456,15 @@ public class TalkServer {
         // remove connection from list
         mConnections.remove(connection);
         // remove connection from table
-        if (connection.getClientId() != null) {
-            String clientId = connection.getClientId();
+        String clientId = connection.getClientId();
+        if (clientId != null) {
             // remove connection from table
             mConnectionsByClientId.remove(clientId);
             // update presence for connection status change
             mUpdateAgent.requestPresenceUpdate(clientId, CONNECTION_STATUS_UPDATE_FIELDS);
             connection.getServerHandler().destroyEnvironment(TalkEnvironment.TYPE_NEARBY);
+            connection.getServerHandler().destroyEnvironment(TalkEnvironment.TYPE_WORLDWIDE);
+            mDeliveryAgent.requestDelivery(clientId, false);
         }
         // disconnect if we still are
         if (connection.isConnected()) {

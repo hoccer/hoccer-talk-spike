@@ -1,18 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:custom="http://schemas.android.com/apk/res-auto"
-        android:gravity="center|left"
+        android:gravity="center|start"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content">
 
-    <com.hoccer.xo.android.view.AvatarView
-            android:id="@+id/contact_icon"
-            android:clickable="true"
+    <FrameLayout
             android:layout_width="45dp"
             android:layout_height="45dp"
-            custom:cornerRadius="45"
-            custom:defaultAvatarImageUrl="@drawable/avatar_default_contact"
+            android:id="@+id/fl_avatar"
             style="@style/AppBaseTheme.Group.Members.MemberAvatar"/>
 
     <CheckedTextView

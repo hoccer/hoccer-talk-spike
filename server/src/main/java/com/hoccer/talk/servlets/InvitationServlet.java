@@ -30,7 +30,8 @@ public class InvitationServlet extends HttpServlet {
         HOCCER,
         HOCCME,
         SIMSME,
-        STROEER
+        STROEER,
+        STARMEO
     }
 
     private static final HashMap<String, Label> LABELS = new HashMap<String, Label>();
@@ -44,6 +45,8 @@ public class InvitationServlet extends HttpServlet {
         LABELS.put("hcrsmsd", Label.SIMSME);
         LABELS.put("strm", Label.STROEER);
         LABELS.put("strmd", Label.STROEER);
+        LABELS.put("starmeo", Label.STARMEO);
+        LABELS.put("starmeod", Label.STARMEO);
     }
 
     private final Engine mEngine = new Engine();

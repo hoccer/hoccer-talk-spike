@@ -103,9 +103,12 @@ public class JongoDatabase implements ITalkServerDatabase {
         mMigrations = getCollection("migrations");
 
         mClients.ensureIndex("{clientId:1}");
+        mClients.ensureIndex("{apnsToken:1}");
+        mClients.ensureIndex("{timeRegistered:1}"); // for external statistics gathering
 
         mTokens.ensureIndex("{clientId:1}");
         mTokens.ensureIndex("{clientId:1, secret:1}");
+        mTokens.ensureIndex("{purpose:1, secret:1}");
 
         mRelationships.ensureIndex("{clientId:1, otherClientId:1}") ;
         mRelationships.ensureIndex("{clientId:1}") ;
@@ -138,6 +141,8 @@ public class JongoDatabase implements ITalkServerDatabase {
         mDeliveries.ensureIndex("{messageId:1, senderId:1, receiverId:1}");
         mDeliveries.ensureIndex("{messageId:1}");
         mDeliveries.ensureIndex("{senderId:1}");
+        mDeliveries.ensureIndex("{senderId:1, state:1}");
+        mDeliveries.ensureIndex("{senderId:1, state:1, attachmentState:1}");
         mDeliveries.ensureIndex("{receiverId:1}");
         mDeliveries.ensureIndex("{receiverId:1, state:1}");
         mDeliveries.ensureIndex("{receiverId:1, state:1, attachmentState:1}");
@@ -882,9 +887,8 @@ public class JongoDatabase implements ITalkServerDatabase {
         return IteratorUtils.toList(it);
     }
 
-    @Override
-    public List<TalkEnvironment> findEnvironmentsMatching(TalkEnvironment environment) {
-        mEnvironments.ensureIndex("{geoLocation: '2dsphere'}");
+
+    private List<TalkEnvironment> findEnvironmentsMatchingNearby(TalkEnvironment environment) {
         List<TalkEnvironment> res = new ArrayList<TalkEnvironment>();
 
         // do geospatial search
@@ -934,34 +938,38 @@ public class JongoDatabase implements ITalkServerDatabase {
             LOG.debug("found " + totalFound + " environments by bssid, " + newFound + " of them are new");
         }
 
-        // do identifiers search
-        if (environment.getIdentifiers() != null) {
-            List<String> identifiers = Arrays.asList(environment.getIdentifiers());
+        return res;
+
+    }
+
+    private List<TalkEnvironment> findEnvironmentsMatchingWorldwide(TalkEnvironment environment) {
+
+        List<TalkEnvironment> res = new ArrayList<TalkEnvironment>();
+
+        // do identifiers search first
+        if (environment.getTag() != null) {
             Iterator<TalkEnvironment> it =
-                    mEnvironments.find("{ identifiers :{ $in: # } }", identifiers)
+                    mEnvironments.find("{ type:#, tag :# }", environment.getType(), environment.getTag())
                             .as(TalkEnvironment.class).iterator();
-            int totalFound = 0;
-            int newFound = 0;
             while (it.hasNext()) {
                 TalkEnvironment te = it.next();
-                ++totalFound;
-                boolean found = false;
-                for (TalkEnvironment rte : res) {
-                    if (rte.getGroupId().equals(te.getGroupId()) && rte.getClientId().equals(te.getClientId())) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    res.add(te);
-                    ++newFound;
-                }
+                res.add(te);
             }
-
-            LOG.debug("found " + totalFound + " environments by identifiers, " + newFound + " of them are new");
+            LOG.debug("found " + res.size() + " worldwide environments for tag "+environment.getTag());
         }
-
+        LOG.debug("findEnvironmentsMatchingWorldwide: returning "+res.size()+ "environments");
         return res;
+    }
+
+
+    @Override
+    public List<TalkEnvironment> findEnvironmentsMatching(TalkEnvironment environment) {
+        if (TalkEnvironment.TYPE_NEARBY.equals(environment.getType())) {
+            return findEnvironmentsMatchingNearby(environment);
+        } else if (TalkEnvironment.TYPE_WORLDWIDE.equals(environment.getType())) {
+            return findEnvironmentsMatchingWorldwide(environment);
+        }
+        throw new RuntimeException("findEnvironmentsMatching: unknown environment type "+environment.getType());
     }
 
     @Override

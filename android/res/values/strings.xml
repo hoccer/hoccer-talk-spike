@@ -178,9 +178,17 @@
 
     <!-- Contact deletion dialog -->
     <string name="dialog_delete_contact_title">Delete contact?</string>
-    <string name="dialog_delete_contact_message">Are you sure you want to delete this contact? All messages
-        from and to it will be deleted.
-    </string>
+    <string name="dialog_delete_contact_message">Are you sure you want to delete this contact?</string>
+
+    <!-- Contact remove dialog -->
+    <string name="dialog_discard_contact_title">Remove contact?</string>
+    <string name="dialog_discard_contact_message">Are you sure you want to remove this contact? All messages
+        from and to it will be deleted.</string>
+
+    <!-- Account deletion dialog -->
+    <string name="dialog_delete_account_warning">Do you really want to delete your Account? All your contacts, group memberships and your account will be gone forever. The data already on your phone will also be affected.</string>
+    <string name="button_delete_account_title">Delete Account on Server</string>
+    <string name="dialog_delete_account_ok">Delete</string>
 
     <!-- Group manage selection dialog -->
     <string name="dialog_manage_group_title">Manage Members</string>
@@ -195,6 +203,8 @@
     <!-- Group leave dialog -->
     <string name="dialog_delete_group_title">Delete group</string>
     <string name="dialog_delete_group_message">Are you sure you want to delete this group?</string>
+    <string name="dialog_remove_group_title">Remove group</string>
+    <string name="dialog_remove_group_message">Are you sure you want to remove this group?</string>
     <string name="dialog_leave_group_title">Leave group</string>
     <string name="dialog_leave_group_message">Are you sure you want to leave this group? You will have to be
         re-invited to participate again.
@@ -209,6 +219,7 @@
     <string name="menu_group_edit_profile">Edit group</string>
     <string name="menu_group_profile_leave">Leave group</string>
     <string name="menu_group_profile_permanent">Create permanent group</string>
+    <string name="menu_group_remove">Remove group</string>
 
     <string name="location">Location</string>
     <string name="show_location_instruction">Use button to show on map</string>
@@ -220,7 +231,7 @@
     <string name="transfer_state_decrypting">Decrypting…</string>
     <string name="transfer_state_downloading">Downloading…</string>
     <string name="transfer_state_uploading">Uploading…</string>
-    <string name="transfer_state_pause">Pause</string>
+    <string name="transfer_state_pause">Paused</string>
     <string name="transfer_state_downloading_failed">Download failed</string>
     <string name="transfer_state_uploading_failed">Upload failed</string>
     <string name="dialog_attachment_choose_reselect_option">Choose another Attachment</string>
@@ -323,8 +334,8 @@
     <string name="qr_code_tab_scan">SCAN</string>
     <string name="qr_code_tab_generate">GENERATE</string>
 
-    <string name="placeholder_conversations_text">Invite friends to chat with!</string>
-    <string name="placeholder_groups_text">Create groups to chat with many friends at once.</string>
+    <string name="placeholder_conversations_text"><![CDATA[<a href="http://faq.hoccer.com/tutorial-xo/#invite">Invite friends</a>]]> to chat with!</string>
+    <string name="placeholder_groups_text"><![CDATA[<a href="http://faq.hoccer.com/tutorial-xo/#groups">Create groups</a>]]> to chat with many friends at once.</string>
     <string name="placeholder_nearby_text">Waiting for others <![CDATA[<a href="http://faq.hoccer.com/tutorial-xo/#nearby">nearby</a>]]>…</string>
     <string name="actionbar_default_title">${app.name.short}</string>
     <string name="content_audio_caption">Media</string>

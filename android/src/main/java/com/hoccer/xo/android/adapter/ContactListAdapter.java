@@ -101,8 +101,11 @@ public abstract class ContactListAdapter extends BaseAdapter implements IXoConta
     }
 
     @Override
-    public void onGroupPresenceChanged(TalkClientContact contact) {}
+    public void onGroupMembershipChanged(TalkClientContact contact) {
+        updateContactsAndView();
+    }
 
     @Override
-    public void onGroupMembershipChanged(TalkClientContact contact) {}
+    public void onGroupPresenceChanged(TalkClientContact contact) {
+    }
 }

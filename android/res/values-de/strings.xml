@@ -168,8 +168,16 @@
 
     <!-- Contact deletion dialog -->
     <string name="dialog_delete_contact_title">Kontakt wirklich löschen?</string>
-    <string name="dialog_delete_contact_message">Bist du sicher, dass du diesen Kontakt löschen möchtest? Alle Nachrichten werden dann unwiderruflich gelöscht.
-    </string>
+    <string name="dialog_delete_contact_message">Bist du sicher, dass du diesen Kontakt löschen möchtest?</string>
+
+    <!-- Contact remove dialog -->
+    <string name="dialog_discard_contact_title">Kontakt wirklich entfernen?</string>
+    <string name="dialog_discard_contact_message">Bist du sicher, dass du diesen Kontakt entfernen möchtest? Alle Nachrichten werden dann unwiderruflich gelöscht.</string>
+
+    <!-- Account deletion dialog -->
+    <string name="dialog_delete_account_warning">Willst du wirklich dein Nutzerkonto löschen? All deine Kontakte, Gruppenmitgliedschaften und dieser Zugang werden unwideruflich gelöscht. Die Daten auf deinem Telefon werden ebenfalls gelöscht.</string>
+    <string name="button_delete_account_title">Nutzerkonto auf Server löschen</string>
+    <string name="dialog_delete_account_ok">Löschen</string>
 
     <!-- Group manage selection dialog -->
     <string name="dialog_manage_group_title">Gruppenmitglieder verwalten</string>
@@ -184,6 +192,8 @@
     <!-- Group leave dialog -->
     <string name="dialog_delete_group_title">Gruppe löschen</string>
     <string name="dialog_delete_group_message">Bist du dir sicher, dass du die Gruppe löschen möchtest?</string>
+    <string name="dialog_remove_group_title">Gruppe entfernen</string>
+    <string name="dialog_remove_group_message">Bist du dir sicher, dass du die Gruppe entfernen möchtest?</string>
     <string name="dialog_leave_group_title">Gruppe verlassen</string>
     <string name="dialog_leave_group_message">Bist du dir sicher, dass du die Gruppe verlassen möchtest? Du musst erneut eingeladen werden, um wieder teilnehmen zu können.
     </string>
@@ -197,6 +207,7 @@
     <string name="menu_group_edit_profile">Gruppe bearbeiten</string>
     <string name="menu_group_profile_leave">Gruppe verlassen</string>
     <string name="menu_group_profile_permanent">Permanente Gruppe erstellen</string>
+    <string name="menu_group_remove">Gruppe entfernen</string>
 
     <string name="location">Standort</string>
     <string name="show_location_instruction">Standort anzeigen</string>
@@ -208,7 +219,7 @@
     <string name="transfer_state_decrypting">Entschlüsseln…</string>
     <string name="transfer_state_downloading">Downloading…</string>
     <string name="transfer_state_uploading">Uploading…</string>
-    <string name="transfer_state_pause">Pause</string>
+    <string name="transfer_state_pause">Pausiert</string>
     <string name="transfer_state_downloading_failed">Download Fehler</string>
     <string name="transfer_state_uploading_failed">Upload Fehler</string>
     <string name="dialog_attachment_choose_reselect_option">Anderen Anhang auswählen</string>
@@ -300,8 +311,8 @@
     <string name="no_password">Bitte gib ein Passwort ein.</string>
     <string name="cant_find_credentials">Kann die Datei "credentials.json" mit den Zugangsdaten nicht finden.</string>
 
-    <string name="placeholder_conversations_text">Lade deine Freunde zum Chatten ein!</string>
-    <string name="placeholder_groups_text">Lege Gruppen an um mit vielen Freunden gleichzeitig zu chatten.</string>
+    <string name="placeholder_conversations_text"><![CDATA[<a href="http://faq.hoccer.com/de/tutorial-xo/#freunde-einladen">Lade deine Freunde</a>]]> zum Chatten ein!</string>
+    <string name="placeholder_groups_text"><![CDATA[<a href="http://faq.hoccer.com/de/tutorial-xo/#gruppen">Lege Gruppen an</a>]]> um mit vielen Freunden gleichzeitig zu chatten.</string>
     <string name="placeholder_nearby_text">Warten auf Kontakte <![CDATA[<a href="http://faq.hoccer.com/de/tutorial-xo/#in-der-naehe">in der Nähe</a>]]>…</string>
     <string name="actionbar_default_title">${app.name.short}</string>
     <string name="content_audio_caption">Medien</string>

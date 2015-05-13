@@ -4,7 +4,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import com.hoccer.talk.client.IXoMessageListener;
-import com.hoccer.talk.client.IXoTransferListenerOld;
+import com.hoccer.talk.client.TransferListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
@@ -13,7 +13,7 @@ import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
-import com.hoccer.xo.android.view.chat.ChatMessageItem;
+import com.hoccer.xo.android.view.chat.MessageItem;
 import com.hoccer.xo.android.view.chat.attachments.*;
 import org.apache.log4j.Logger;
 
@@ -31,7 +31,7 @@ import java.util.List;
  * <p/>
  * To configure list items it uses instances of ChatMessageItem and its subtypes.
  */
-public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTransferListenerOld {
+public class ChatAdapter extends XoAdapter implements IXoMessageListener, TransferListener {
 
     private static final Logger LOG = Logger.getLogger(ChatAdapter.class);
 
@@ -49,7 +49,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
 
     protected TalkClientContact mContact;
 
-    protected List<ChatMessageItem> mChatMessageItems;
+    protected List<MessageItem> mMessageItems;
 
     private final ListView mListView;
 
@@ -64,9 +64,9 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
         int totalMessageCount = 0;
         try {
             final List<TalkClientMessage> messages = mDatabase.findMessagesByContactId(mContact.getClientContactId(), -1, -1);
-            mChatMessageItems = Collections.synchronizedList(new ArrayList<ChatMessageItem>(totalMessageCount));
+            mMessageItems = Collections.synchronizedList(new ArrayList<MessageItem>(totalMessageCount));
             for (TalkClientMessage message : messages) {
-                mChatMessageItems.add(getItemForMessage(message));
+                mMessageItems.add(getItemForMessage(message));
             }
         } catch (SQLException e) {
             LOG.error("SQLException while loading message count: " + mContact.getClientId(), e);
@@ -96,9 +96,9 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
             LOG.debug("loading Messages " + offset + "-" + Math.max((offset - batchSize - 1), 0));
             final List<TalkClientMessage> messagesBatch = mDatabase.findMessagesByContactId(mContact.getClientContactId(), batchSize, offset);
             for (int i = 0; i < messagesBatch.size(); i++) {
-                ChatMessageItem messageItem = getItemForMessage(messagesBatch.get(i));
+                MessageItem messageItem = getItemForMessage(messagesBatch.get(i));
 
-                mChatMessageItems.set(offset + i, messageItem);
+                mMessageItems.set(offset + i, messageItem);
             }
             runOnUiThread(new Runnable() {
                 @Override
@@ -121,28 +121,30 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
     public void onCreate() {
         super.onCreate();
         getXoClient().registerMessageListener(this);
-        getXoClient().registerTransferListener(this);
+        getXoClient().getDownloadAgent().registerListener(this);
+        getXoClient().getUploadAgent().registerListener(this);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         getXoClient().unregisterMessageListener(this);
-        getXoClient().unregisterTransferListener(this);
+        getXoClient().getDownloadAgent().unregisterListener(this);
+        getXoClient().getUploadAgent().unregisterListener(this);
     }
 
     @Override
     public int getCount() {
-        return mChatMessageItems.size();
+        return mMessageItems.size();
     }
 
     @Override
-    public ChatMessageItem getItem(int position) {
-        if (mChatMessageItems.get(position) == null) {
+    public MessageItem getItem(int position) {
+        if (mMessageItems.get(position) == null) {
             int offset = position - (int) BATCH_SIZE + 1;
             loadNextMessages(offset);
         }
-        return mChatMessageItems.get(position);
+        return mMessageItems.get(position);
     }
 
     @Override
@@ -152,7 +154,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        ChatMessageItem chatItem = getItem(position);
+        MessageItem chatItem = getItem(position);
 
         if (!chatItem.getMessage().isSeen()) {
             markMessageAsSeen(chatItem.getMessage());
@@ -174,7 +176,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
 
     @Override
     public int getItemViewType(int position) {
-        ChatMessageItem item = getItem(position);
+        MessageItem item = getItem(position);
         return item.getType().ordinal();
     }
 
@@ -212,23 +214,23 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
         return chatItemType;
     }
 
-    protected ChatMessageItem getItemForMessage(TalkClientMessage message) {
+    protected MessageItem getItemForMessage(TalkClientMessage message) {
         ChatItemType itemType = getListItemTypeForMessage(message);
 
         if (itemType == ChatItemType.ChatItemWithImage) {
-            return new ChatImageItem(mActivity, message);
+            return new ImageMessageItem(mActivity, message);
         } else if (itemType == ChatItemType.ChatItemWithVideo) {
             return new ChatVideoItem(mActivity, message);
         } else if (itemType == ChatItemType.ChatItemWithAudio) {
-            return new ChatAudioItem(mActivity, message);
+            return new AudioMessageItem(mActivity, message);
         } else if (itemType == ChatItemType.ChatItemWithData) {
-            return new ChatDataItem(mActivity, message);
+            return new DataMessageItem(mActivity, message);
         } else if (itemType == ChatItemType.ChatItemWithContact) {
-            return new ChatContactItem(mActivity, message);
+            return new ContactMessageItem(mActivity, message);
         } else if (itemType == ChatItemType.ChatItemWithLocation) {
-            return new ChatLocationItem(mActivity, message);
+            return new LocationMessageItem(mActivity, message);
         } else {
-            return new ChatMessageItem(mActivity, message);
+            return new MessageItem(mActivity, message);
         }
     }
 
@@ -260,9 +262,9 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    ChatMessageItem messageItem = getItemForMessage(message);
-                    if (!mChatMessageItems.contains(messageItem)) {
-                        mChatMessageItems.add(messageItem);
+                    MessageItem messageItem = getItemForMessage(message);
+                    if (!mMessageItems.contains(messageItem)) {
+                        mMessageItems.add(messageItem);
                         notifyDataSetChanged();
 
                         // autoscroll to new item
@@ -284,8 +286,8 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    ChatMessageItem item = new ChatMessageItem(mActivity, message);
-                    mChatMessageItems.remove(item);
+                    MessageItem item = new MessageItem(mActivity, message);
+                    mMessageItems.remove(item);
                     notifyDataSetChanged();
                 }
             });

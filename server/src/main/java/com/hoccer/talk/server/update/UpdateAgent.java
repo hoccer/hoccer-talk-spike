@@ -295,6 +295,10 @@ public class UpdateAgent extends NotificationDeferrer {
                         List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsById(groupId);
                         for (TalkGroupMembership membership : memberships) {
                             if (membership.isJoined() || membership.isInvited() || membership.isGroupRemoved()) {
+                                if (membership.getClientId() == null) {
+                                    LOG.error("requestGroupUpdate for group " + groupId + ", no clientID for a membership record");
+                                    continue;
+                                }
                                 TalkRpcConnection connection = mServer.getClientConnection(membership.getClientId());
                                 if (connection == null || !connection.isConnected()) {
                                     continue;
@@ -587,15 +591,20 @@ public class UpdateAgent extends NotificationDeferrer {
             }
             ITalkRpcClient rpc = connection.getClientRpc();
             LOG.info("requestGroupKeys, acquiring lock for calling getEncryptedGroupKeys(" + forGroupId + ") on client for " + forClientIds.length + " client(s)");
-            String[] newKeyBoxes;
+            String[] newKeyBoxes = null;
             // serialize encrypted key request for one client
             synchronized (connection.keyRequestLock) {
                 LOG.info("requestGroupKeys, calling getEncryptedGroupKeys(" + forGroupId + ") on client for " + forClientIds.length + " client(s)");
                 // temporarily add penalty so this client won't be selected again unless there is no other who can do the work
                 connection.penalizePriorization(1000);
-                newKeyBoxes = rpc.getEncryptedGroupKeys(forGroupId, forSharedKeyId, withSharedKeyIdSalt, forClientIds, withPublicKeyIds);
-                connection.penalizePriorization(-1000);
-                LOG.info("requestGroupKeys, call of getEncryptedGroupKeys(" + forGroupId + ") returned " + newKeyBoxes.length + " items)");
+                try {
+                    newKeyBoxes = rpc.getEncryptedGroupKeys(forGroupId, forSharedKeyId, withSharedKeyIdSalt, forClientIds, withPublicKeyIds);
+                    connection.penalizePriorization(-1000);
+                    LOG.info("requestGroupKeys, call of getEncryptedGroupKeys(" + forGroupId + ") returned " + newKeyBoxes.length + " items)");
+                } catch (Exception e) {
+                    LOG.error("An error occured for calling getEncryptedGroupKeys -> most proably because the connection is actually not valid anymore.");
+                    e.printStackTrace();
+                }
             }
             if (newKeyBoxes != null) {
                 boolean responseLengthOk;

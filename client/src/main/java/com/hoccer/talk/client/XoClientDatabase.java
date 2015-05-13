@@ -389,7 +389,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return messages;
     }
 
-    public long getNearbyMessageCount() throws SQLException {
+    public long getNearbyGroupMessageCount() throws SQLException {
         return getAllNearbyGroupMessages().size();
     }
 
@@ -581,6 +581,26 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     public List<TalkClientDownload> findAllClientDownloads() throws SQLException {
         return mClientDownloads.queryForAll();
+    }
+
+    public List<TalkClientDownload> findAllPendingDownloads() throws SQLException {
+        QueryBuilder<TalkClientDownload, Integer> downloads = mClientDownloads.queryBuilder();
+        downloads.where()
+                .ne("state", TalkClientDownload.State.COMPLETE);
+        QueryBuilder<TalkClientMessage, Integer> clientMessages = mClientMessages.queryBuilder();
+        clientMessages.where()
+                .eq("deleted", false);
+        return downloads.join(clientMessages).query();
+    }
+
+    public List<TalkClientUpload> findAllPendingUploads() throws SQLException {
+        QueryBuilder<TalkClientUpload, Integer> uploads = mClientUploads.queryBuilder();
+        uploads.where()
+                .ne("state", TalkClientUpload.State.COMPLETE);
+        QueryBuilder<TalkClientMessage, Integer> clientMessages = mClientMessages.queryBuilder();
+        clientMessages.where()
+                .eq("deleted", false);
+        return uploads.join(clientMessages).query();
     }
 
     public TalkClientUpload findClientUploadById(int clientUploadId) throws SQLException {

@@ -9,7 +9,7 @@ import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.IXoMessageListener;
-import com.hoccer.talk.client.IXoTransferListenerOld;
+import com.hoccer.talk.client.TransferListener;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
@@ -19,7 +19,7 @@ import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.view.AvatarView;
+import com.hoccer.xo.android.view.avatar.AvatarView;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -33,7 +33,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public class NearbyChatListAdapter extends BaseAdapter implements IXoContactListener, IXoMessageListener, IXoTransferListenerOld {
+public class NearbyChatListAdapter extends BaseAdapter implements IXoContactListener, IXoMessageListener, TransferListener {
 
     private static final Logger LOG = Logger.getLogger(NearbyChatListAdapter.class);
     private static final long RATE_LIMIT_MSECS = 1000;
@@ -80,14 +80,16 @@ public class NearbyChatListAdapter extends BaseAdapter implements IXoContactList
 
     public void registerListeners() {
         mXoActivity.getXoClient().registerContactListener(this);
-        mXoActivity.getXoClient().registerTransferListener(this);
         mXoActivity.getXoClient().registerMessageListener(this);
+        mXoActivity.getXoClient().getDownloadAgent().registerListener(this);
+        mXoActivity.getXoClient().getUploadAgent().registerListener(this);
     }
 
     public void unregisterListeners() {
         mXoActivity.getXoClient().unregisterContactListener(this);
-        mXoActivity.getXoClient().unregisterTransferListener(this);
         mXoActivity.getXoClient().unregisterMessageListener(this);
+        mXoActivity.getXoClient().getDownloadAgent().unregisterListener(this);
+        mXoActivity.getXoClient().getUploadAgent().unregisterListener(this);
     }
 
     private void updateContact(final View view, final TalkClientContact contact) {

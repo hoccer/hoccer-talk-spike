@@ -28,6 +28,8 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     private static final Logger LOG = Logger.getLogger(ChatsActivity.class);
 
+    public static final String INTENT_EXTRA_EXIT = "exit";
+
     private String mPairingToken;
     private ContactsMenuItemActionProvider mContactsMenuItemActionProvider;
 
@@ -68,7 +70,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     @Override
     protected void onResume() {
         super.onResume();
-
         showProfileIfClientIsNotRegistered();
         registerListeners();
         mContactsMenuItemActionProvider.updateNotificationBadge();
@@ -111,6 +112,9 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
             handleContactIdIntent(intent);
         } else if (intent.hasExtra(IntentHelper.EXTRA_PUSH_MESSAGE)) {
             handlePushMessageIntent(intent);
+        } else if(intent.getBooleanExtra(INTENT_EXTRA_EXIT, false)) {
+            finish();
+            XoApplication.restartApplication();
         }
     }
 
@@ -157,6 +161,12 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private void handleContactIdIntent(Intent intent) {
         int contactId = intent.getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
         showContactConversation(contactId);
+    }
+
+    public void showContactConversation(int contactId) {
+        Intent intent = new Intent(this, ChatActivity.class);
+        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contactId);
+        startActivity(intent);
     }
 
     private void handlePushMessageIntent(Intent intent) {

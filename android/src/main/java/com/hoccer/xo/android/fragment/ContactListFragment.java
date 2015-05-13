@@ -22,7 +22,6 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     private ContactListAdapter mContactListAdapter;
 
     private final int mTabNameId;
-    private final Placeholder mPlaceholder;
 
     private MenuItem mMenuItemPairing;
     private MenuItem mMenuItemNewGroup;
@@ -30,20 +29,13 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     private View mTabView;
     private NotificationBadgeTextView mNotificationBadgeTextView;
 
-    protected ContactListFragment(int tabNameId, Placeholder placeholder) {
+    protected ContactListFragment(int tabNameId) {
         mTabNameId = tabNameId;
-        mPlaceholder = placeholder;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_contacts, container, false);
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        mPlaceholder.applyToView(view);
     }
 
     @Override

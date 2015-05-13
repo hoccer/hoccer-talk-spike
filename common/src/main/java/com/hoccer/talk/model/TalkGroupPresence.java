@@ -20,10 +20,13 @@ public class TalkGroupPresence {
 
     public static final String STATE_DELETED = "none";
     public static final String STATE_EXISTS = "exists";
-    public static final String STATE_KEPT = "kept";
 
     public static final String GROUP_TYPE_USER = "user";
     public static final String GROUP_TYPE_NEARBY = "nearby";
+    public static final String GROUP_TYPE_WORLDWIDE = "worldwide";
+
+    @DatabaseField
+    private boolean isKept;
 
     // needed for ormlight database
     private String _id;
@@ -70,6 +73,11 @@ public class TalkGroupPresence {
     }
 
     @JsonIgnore
+    public boolean isTypeWorldwide() {
+        return GROUP_TYPE_WORLDWIDE.equals(this.groupType);
+    }
+
+    @JsonIgnore
     public boolean isTypeUser() {
         return GROUP_TYPE_USER.equals(this.groupType);
     }
@@ -77,11 +85,6 @@ public class TalkGroupPresence {
     @JsonIgnore
     public boolean exists() {
         return STATE_EXISTS.equals(this.state);
-    }
-
-    @JsonIgnore
-    public boolean isKept() {
-        return STATE_KEPT.equals(this.state);
     }
 
     public String getGroupId() {
@@ -180,6 +183,16 @@ public class TalkGroupPresence {
     public Date setGroupKeyUpdateInProgress(Date groupKeyUpdateInProgress) {
         this.groupKeyUpdateInProgress = groupKeyUpdateInProgress;
         return groupKeyUpdateInProgress;
+    }
+
+    @JsonIgnore
+    public boolean isKept() {
+        return isKept;
+    }
+
+    @JsonIgnore
+    public void setKept(boolean kept) {
+        this.isKept = kept;
     }
 
     @JsonIgnore

@@ -191,7 +191,7 @@ public class TalkDelivery {
     public static final Set<String> FAILED_STATES_SET = new HashSet<String>(Arrays.asList(FAILED_STATES));
 
     public static final String[] FINAL_FAILED_STATES = {
-             STATE_FAILED_ACKNOWLEDGED,
+            STATE_FAILED_ACKNOWLEDGED,
             STATE_ABORTED_ACKNOWLEDGED,
             STATE_REJECTED_ACKNOWLEDGED,
             STATE_EXPIRED

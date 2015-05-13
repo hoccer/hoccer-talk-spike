@@ -3,11 +3,13 @@ package com.hoccer.talk.util;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
+import com.hoccer.talk.model.TalkEnvironment;
 import com.hoccer.talk.model.TalkGroupMembership;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.security.Security;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,7 +101,7 @@ public class TestHelper {
                     @Override
                     public Boolean call() throws Exception {
                         TalkGroupMembership membership = joiningClient.getDatabase().findGroupContactByGroupId(groupId, false).getGroupMembership();
-                        return  membership.isJoined() &&
+                        return membership.isJoined() &&
                                 membership.getEncryptedGroupKey() != null &&
                                 membership.getMemberKeyId() != null;
                     }
@@ -127,6 +129,28 @@ public class TestHelper {
             @Override
             public Boolean call() throws Exception {
                 return !client.getDatabase().findContactByClientId(clientId, false).getClientRelationship().isBlocked();
+            }
+        });
+    }
+
+    public static void setEnvironmentToWorldwide(final XoClient theClient) {
+        setEnvironmentToWorldwide(theClient, "*");
+    }
+
+    public static void setEnvironmentToWorldwide(final XoClient theClient, final String tag) {
+        assertNotNull(theClient);
+        assertNotNull(tag);
+        final TalkEnvironment environment = new TalkEnvironment();
+        environment.setTimestamp(new Date());
+        environment.setType(TalkEnvironment.TYPE_WORLDWIDE);
+        environment.setTag(tag);
+        theClient.sendEnvironmentUpdate(environment);
+
+        await("client1 has received a worldwide group").until(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                TalkClientContact group = theClient.getCurrentWorldwideGroup();
+                return group != null;
             }
         });
     }

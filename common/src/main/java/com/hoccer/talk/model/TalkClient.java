@@ -32,6 +32,10 @@ public class TalkClient {
     public static final String FIELD_REASON_DELETED       = "reasonDeleted";
     public static final String FIELD_LAST_PUSH_MESSAGE    = "lastPushMessage";
     public static final String FIELD_PUSH_ALERT_MESSAGE   = "pushAlertMessage";
+    public static final String FIELD_APNS_MODE            = "apnsMode";
+
+    public static final String APNS_MODE_DEFAULT          = "default";
+    public static final String APNS_MODE_BACKGROUND       = "background";
 
     /** Object ID for jongo */
     private String _id;
@@ -99,6 +103,10 @@ public class TalkClient {
     /** Next push message to be displayed to the user when connected */
     @DatabaseField(columnName = FIELD_PUSH_ALERT_MESSAGE, canBeNull = true)
     String pushAlertMessage;
+
+    /** Next push message to be displayed to the user when connected */
+    @DatabaseField(columnName = FIELD_APNS_MODE, canBeNull = true)
+    String apnsMode;
 
     public TalkClient() {
     }
@@ -254,5 +262,13 @@ public class TalkClient {
 
     public void setPushAlertMessage(String pushAlertMessage) {
         this.pushAlertMessage = pushAlertMessage;
+    }
+
+    public String getApnsMode() {
+        return apnsMode;
+    }
+
+    public void setApnsMode(String apnsMode) {
+        this.apnsMode = apnsMode;
     }
 }

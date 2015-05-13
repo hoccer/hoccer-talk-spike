@@ -17,6 +17,7 @@ build-log.xml
 **/proguard_logs
 **/git_properties
 **/.DS_Store
+**/libs/x86
 
 /filecache/development.conf
 

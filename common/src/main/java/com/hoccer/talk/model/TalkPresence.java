@@ -48,6 +48,12 @@ public class TalkPresence {
     @DatabaseField
     String connectionStatus;
 
+    @DatabaseField
+    private boolean isKept;
+
+    @DatabaseField
+    private boolean isNearbyAcquaintance;
+
     public TalkPresence() {
     }
 
@@ -136,6 +142,26 @@ public class TalkPresence {
     public void setConnectionStatus(String connectionStatus) {
         // TODO: validate connection status
         this.connectionStatus = connectionStatus;
+    }
+
+    @JsonIgnore
+    public boolean isKept() {
+        return isKept;
+    }
+
+    @JsonIgnore
+    public void setKept(boolean kept) {
+        this.isKept = kept;
+    }
+
+    @JsonIgnore
+    public boolean isNearbyAcquaintance() {
+        return isNearbyAcquaintance;
+    }
+
+    @JsonIgnore
+    public void setNearbyAcquaintance(boolean isNearbyAcquaintance) {
+        this.isNearbyAcquaintance = isNearbyAcquaintance;
     }
 
     @JsonIgnore

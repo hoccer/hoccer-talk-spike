@@ -193,6 +193,7 @@ public class DeliveryRequest {
             rpc = connection.getClientRpc();
         }
         LOG.info("DeliverRequest.perform for clientId: '" + mClientId + ", currentlyConnected=" + currentlyConnected);
+        boolean deliveryReady = false;
         if (currentlyConnected) {
 
             // get all outstanding deliveries for the client
@@ -212,7 +213,6 @@ public class DeliveryRequest {
                         mDatabase.findDeliveriesForClientInDeliveryAndAttachmentStates(mClientId, TalkDelivery.IN_ATTACHMENT_DELIVERY_STATES, TalkDelivery.IN_ATTACHMENT_STATES);
                 LOG.info("clientId: '" + mClientId + "' has " + inAttachmentDeliveries.size() + " incoming deliveries with relevant attachment states");
                 if (!inAttachmentDeliveries.isEmpty()) {
-                    // we will need to push if we don't succeed
                     // deliver one by one
                     currentlyConnected = performIncoming(inAttachmentDeliveries,rpc,connection);
                 }
@@ -250,6 +250,9 @@ public class DeliveryRequest {
         if (needToNotify && !currentlyConnected) {
             LOG.info("pushing " + mClientId);
             performPush();
+        }
+        if (currentlyConnected && !needToNotify) {
+            rpc.deliveriesReady();
         }
     }
 
