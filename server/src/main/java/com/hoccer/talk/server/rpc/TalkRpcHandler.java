@@ -712,8 +712,8 @@ public class TalkRpcHandler implements ITalkRpcServer {
         TalkKey key = null;
 
         TalkRelationship relationship = mDatabase.findRelationshipBetween(mConnection.getClientId(), clientId);
-        TalkRelationship otherRelationship = mDatabase.findRelationshipBetween(clientId, mConnection.getClientId());
-        if ((relationship != null && relationship.isRelated()) || (otherRelationship != null && otherRelationship.isRelated())) {
+        //TalkRelationship otherRelationship = mDatabase.findRelationshipBetween(clientId, mConnection.getClientId());
+        if ((relationship != null && relationship.isRelated()) /*|| (otherRelationship != null && otherRelationship.isRelated())*/) {
             key = mDatabase.findKey(clientId, keyId);
         } else {
             List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsForClient(mConnection.getClientId());
@@ -949,14 +949,23 @@ public class TalkRpcHandler implements ITalkRpcServer {
         return true;
     }
 
-    // TODO: blocking can cause unidirectional relationsShips to be created that cause problems in some cases
-    // TODO: e.g. we will get presence updates causing a blocked contact to be created, but when requesting isContactOf they will be
-    // TODO: immediately deleted; we might either not send out presence information for blocked contacts, but this might cause other
-    // TODO: problems, e.g. a stuck online indicator or not being able to unblock a contact after a client database loss
-    // TODO: Possible alternative solutions:
-    // TODO:    a) always maintain bidirectional relationships
-    // TODO:    b) make sure unidirectional relationships are properly handled everywhere (e.g. getPresences(), isContactOf, delivery, invitations, etc...)
-    // TODO: a) seems to be much easier
+    // This discussion is left here for better understanding the history of some changes that wer made:
+    //
+    //  Blocking can cause unidirectional relationsShips to be created that caused problems in some cases
+    //  e.g. we got presence updates causing a blocked contact to be created, but when requesting isContactOf they will be
+    //  immediately deleted; we might either not send out presence information for blocked contacts, but this might cause other
+    //  problems, e.g. a stuck online indicator or not being able to unblock a contact after a client database loss
+    //  Possible alternative solutions:
+    //     a) always maintain bidirectional relationships
+    //     b) make sure unidirectional relationships are properly handled everywhere (e.g. getPresences(), isContactOf, delivery, invitations, etc...)
+    //  a) seems to be much easier
+    //
+    // However, b) actually turned out to be the way to go. The problem with the presence updates in getPresences() was
+    // that there were presences sent out when there was a unidirectional relationship blocking *us*, which was wrong.
+    // The problem was caused because initially someone thought that the same code as in performPresenceUpdate()
+    // should be used, but the case is different there because performPresenceUpdate actually sees the clients from
+    // the other side of a relationship.
+
     @Override
     public void blockClient(String clientId) {
         requireIdentification(true);
@@ -985,6 +994,8 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
     }
 
+    // This function must also work with unidirectional relationships, and it easily does
+    // because it deals with one relationship only.
     @Override
     public void unblockClient(String clientId) {
         requireIdentification(true);
@@ -1013,6 +1024,10 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
     }
 
+    //
+    // This function must also work with unidirectional relationships, and it is a bit harder
+    // because it deals with both sides of the relationship and we have at least.
+    //
     @Override
     public void inviteFriend(String clientId) {
         requireIdentification(true);
@@ -1027,9 +1042,11 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
             if (rel != null) {
                 logCall("inviteFriend(id '" + clientId + "'), found relationsShip in state '"+rel.getState()+"'");
+                /*
                 if (reverse_rel == null) {
                     throw new RuntimeException("Server error: Relationship exists, but no reverse relationship found");
                 }
+                */
                 if (rel.isFriend()) {
                     throw new RuntimeException("Contact is already a friend");
                 }
@@ -1042,9 +1059,11 @@ public class TalkRpcHandler implements ITalkRpcServer {
             }
             if (reverse_rel != null) {
                 logCall("inviteFriend(id '" + clientId + "'), found reverse relationsShip in state '"+reverse_rel.getState()+"'");
+                /*
                 if (rel == null) {
                     throw new RuntimeException("Server error: Reverse Relationship exists, but relationship to client not found");
                 }
+                */
                 if (reverse_rel.isBlocked()) {
                     throw new RuntimeException("Contact has blocked client"); // TODO: leaks information about blocking to client, how shall we deal with it?
                 }
@@ -1155,6 +1174,11 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
     }
 
+    /* The old version of this function had a security hole;
+    A blocked client could have
+
+     */
+
     @Override
     public void depairClient(String clientId) {
         requireIdentification(true);
@@ -1170,7 +1194,20 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 return;
             }
             setRelationship(myId, clientId, TalkRelationship.STATE_NONE, TalkRelationship.STATE_NONE, true);
-            setRelationship(clientId, myId, TalkRelationship.STATE_NONE, TalkRelationship.STATE_NONE, true);
+
+            /* The old version of this function had a security hole:
+               A blocked client could have called blockClient() itself and then depairClient() to
+                get rid of the block. We check for this now.
+                We also avoid creating a new reverse relationship if there is none.
+             */
+            TalkRelationship reverse_rel = mDatabase.findRelationshipBetween(clientId, myId);
+            if (reverse_rel != null) {
+                if (reverse_rel.isBlocked()) {
+                    setRelationship(clientId, myId, TalkRelationship.STATE_BLOCKED, TalkRelationship.STATE_NONE, true);
+                } else {
+                    setRelationship(clientId, myId, TalkRelationship.STATE_NONE, TalkRelationship.STATE_NONE, true);
+                }
+            }
         }
     }
 
@@ -1475,7 +1512,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
             return false;
         }
 
-        // reject messages to nonexisting clients
+        // reject messages to non-existing clients
         TalkClient receiver = mDatabase.findClientById(receiverId);
         if (receiver == null) {
             LOG.info("delivery rejected: recipient with id '" + receiverId + "' does not exist");
@@ -1815,8 +1852,8 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
 
         for (String role : roles) {
-            if (!TalkGroupMembership.isValidRole(role))  {
-                throw new RuntimeException("Invalid role:"+role);
+            if (!TalkGroupMembership.isValidRoleForGroupType(role, groupType))  {
+                throw new RuntimeException("Invalid role:"+role+" for group type"+groupType);
             }
         }
 
@@ -2085,11 +2122,15 @@ public class TalkRpcHandler implements ITalkRpcServer {
         requireGroupAdmin(groupId);
         logCall("updateGroupRole(groupId: '" + groupId + "' / clientId: '" + clientId + "', role: '" + role + "')");
         TalkGroupMembership targetMembership = mDatabase.findGroupMembershipForClient(groupId, clientId);
+        TalkGroupPresence targetPresence = mDatabase.findGroupPresenceById(groupId);
         if (targetMembership == null) {
             throw new RuntimeException("Client is not a member of group");
         }
-        if (!TalkGroupMembership.isValidRole(role)) {
-            throw new RuntimeException("Invalid role");
+        if (targetPresence == null) {
+            throw new RuntimeException("Group does not exist");
+        }
+        if (!TalkGroupMembership.isValidRoleForGroupType(role, targetPresence.getGroupType())) {
+            throw new RuntimeException("Invalid role:"+role+" for group type"+targetPresence.getGroupType());
         }
         targetMembership.setRole(role);
         changedGroupMembership(targetMembership, new Date());
@@ -2905,7 +2946,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
             relationshipHashMap.put(relationship.getOtherClientId(), relationship);
         }
 
-        // we do this to check if the relationsships are symmetrical
+        // we do this to check if the relationships are symmetrical
         final List<TalkRelationship> otherRelationships =
                 mDatabase.findRelationshipsForOtherClientInStates(clientId, TalkRelationship.STATES_RELATED);
 

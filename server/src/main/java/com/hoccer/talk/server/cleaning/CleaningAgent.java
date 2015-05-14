@@ -423,9 +423,8 @@ public class CleaningAgent {
         LOG.info("doCleanRelationships");
         Date oldDate = new Date(new Date().getTime() - NO_RELATIONSHIP_LIFE_TIME);
         LOG.info("doCleanRelationships: cleaning expired relationships deleted before "+ oldDate);
-        int deleted = mDatabase.deleteGroupMembershipsWithStatesChangedBefore(new String[]{TalkRelationship.STATE_NONE}, oldDate);
+        int deleted = mDatabase.deleteRelationshipsWithStatesAndNotNotificationsDisabledChangedBefore(new String[]{TalkRelationship.STATE_NONE}, oldDate);
         LOG.info("doCleanRelationships: deleted "+deleted+" relationships");
-        // TODO: Maybe keep none relationsShips with notificationPreference
         // TODO: Cleaning might cause unidirectional relationships - we should handle that properly
     }
 

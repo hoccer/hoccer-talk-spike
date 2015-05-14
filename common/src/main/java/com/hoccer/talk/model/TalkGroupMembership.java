@@ -14,6 +14,7 @@ public class TalkGroupMembership {
     public static final String STATE_JOINED = "joined";
     public static final String STATE_GROUP_REMOVED = "groupRemoved";
 
+    public static final String ROLE_NONE = "none";
     public static final String ROLE_ADMIN = "admin";
     public static final String ROLE_MEMBER = "member";
     public static final String ROLE_NEARBY_MEMBER = "nearbyMember";
@@ -22,8 +23,16 @@ public class TalkGroupMembership {
     public static final String NOTIFICATIONS_DISABLED = "disabled";
     public static final String NOTIFICATIONS_ENABLED = "enabled";
 
-    public static boolean isValidRole(String role) {
-        return ROLE_ADMIN.equals(role) || ROLE_MEMBER.equals(role);
+    public static boolean isValidRoleForGroupType(String role, String type) {
+        if (TalkGroupPresence.GROUP_TYPE_USER.equals(type)) {
+            return ROLE_ADMIN.equals(role) || ROLE_MEMBER.equals(role);
+        } else if (TalkGroupPresence.GROUP_TYPE_NEARBY.equals(type)) {
+            return ROLE_NEARBY_MEMBER.equals(role);
+        } else if (TalkGroupPresence.GROUP_TYPE_WORLDWIDE.equals(type)) {
+            return ROLE_WORLDWIDE_MEMBER.equals(role);
+        } else {
+            return false;
+        }
     }
     public static boolean isValidNotificationPreference(String preference) {
         return NOTIFICATIONS_DISABLED.equals(preference) || NOTIFICATIONS_ENABLED.equals(preference);

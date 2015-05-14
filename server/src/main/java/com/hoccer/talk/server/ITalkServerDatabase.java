@@ -119,6 +119,7 @@ public interface ITalkServerDatabase {
     public List<TalkRelationship> findRelationshipsWithStatesChangedBefore(String[] states, Date lastChanged);
 
     public int deleteRelationshipsWithStatesChangedBefore(String[] states, Date lastChanged);
+    public int deleteRelationshipsWithStatesAndNotNotificationsDisabledChangedBefore(String[] states, Date lastChanged);
 
     @Nullable
     public TalkRelationship findRelationshipBetween(String client, String otherClient);
