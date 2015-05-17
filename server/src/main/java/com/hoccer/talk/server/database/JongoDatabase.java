@@ -371,6 +371,11 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public long countDeliveriesForClientInGroupInState(String receiverId, String groupId, String state) {
+        return mDeliveries .count("{receiverId:#, groupId:#, state:#}", receiverId, groupId, state);
+    }
+
+    @Override
     @NotNull
     public List<TalkDelivery> findDeliveriesForClientInDeliveryAndAttachmentStates(String receiverId, String[] deliveryStates, String[] attachmentStates) {
         Iterator<TalkDelivery> it = mDeliveries

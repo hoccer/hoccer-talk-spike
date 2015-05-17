@@ -2509,6 +2509,10 @@ public class TalkRpcHandler implements ITalkRpcServer {
         return result;
     }
 
+    private long deliveryCountForEnvironment(TalkEnvironment environment) {
+       return mDatabase.countDeliveriesForClientInGroupInState(environment.getClientId(), environment.getGroupId(), TalkDelivery.STATE_DELIVERING);
+    }
+
     @Override
     public String updateEnvironment(TalkEnvironment environment) {
         logCall("updateEnvironment(clientId: '" + mConnection.getClientId() + "')");
@@ -2528,6 +2532,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
         environment.setTimeReceived(new Date());
         environment.setClientId(mConnection.getClientId());
+        environment.setTimeReleased(null);
 
         List<TalkEnvironment> matching_found = mDatabase.findEnvironmentsMatching(environment);
         List<TalkEnvironment> matching = new ArrayList<TalkEnvironment>();
@@ -2545,11 +2550,12 @@ public class TalkRpcHandler implements ITalkRpcServer {
                     if (te.hasExpired()) {
                         LOG.info("updateEnvironment: worldwide: expired environment for client "+te.getClientId());
                         // but before we can destroy, we need to check if there are undelivered messages
-                        List<TalkDelivery> deliveries = mDatabase.findDeliveriesForClientInGroupInState(te.getClientId(),te.getGroupId(),TalkDelivery.STATE_DELIVERING);
-                        if (deliveries.size() == 0) {
+                        long undeliveredCount = deliveryCountForEnvironment(te);
+                        if (undeliveredCount == 0) {
                             destroyEnvironment(te);
                         } else {
-                            LOG.info("updateEnvironment: worldwide: can't remove expired worldwide environment for client="+ te.getClientId() + " from groupId=" + te.getGroupId()+", there are "+ deliveries.size()+" deliveries to be delivered");
+                            LOG.info("updateEnvironment: worldwide: can't remove expired worldwide environment for client="+ te.getClientId() + " from groupId=" + te.getGroupId()+", there are "+ undeliveredCount+" deliveries to be delivered");
+                            //matching.add(te);
                         }
                     } else {
                         matching.add(te);
@@ -2686,7 +2692,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                         mDatabase.saveEnvironment(myEnvironment);
                         // update worldwide notification preference if necessary
                        if (environment.isWorldwide() && environment.getNotificationPreference() != null) {
-                           if (environment.getNotificationPreference().equals(myMembership.getNotificationPreference())) {
+                           if (!environment.getNotificationPreference().equals(myMembership.getNotificationPreference())) {
                                myMembership.setNotificationPreference(environment.getNotificationPreference());
                                mDatabase.saveGroupMembership(myMembership);
                                mServer.getUpdateAgent().requestGroupMembershipUpdate(myMembership);
@@ -2837,14 +2843,15 @@ public class TalkRpcHandler implements ITalkRpcServer {
     @Override
     public void releaseEnvironment(String type) {
         requirePastIdentification();
-        logCall("releaseEnvironment(clientId: '" + mConnection.getClientId() + "')");
+        String clientId = mConnection.getClientId();
+        logCall("releaseEnvironment(clientId: '" + clientId + "')");
 
         if (type == null) {
             LOG.warn("releaseEnvironment: no environment type, defaulting to nearby. Please fix client");
             type = TalkEnvironment.TYPE_NEARBY;
         }
 
-        List<TalkEnvironment> myEnvironments = mDatabase.findEnvironmentsForClient(mConnection.getClientId());
+        List<TalkEnvironment> myEnvironments = mDatabase.findEnvironmentsForClient(clientId);
 
         TalkEnvironment mostRecentEnvironment = null;
         for (TalkEnvironment myEnvironment : myEnvironments) {
@@ -2858,12 +2865,29 @@ public class TalkRpcHandler implements ITalkRpcServer {
         for (TalkEnvironment myEnvironment : myEnvironments) {
             if (type.equals(myEnvironment.getType())) {
                 if (!myEnvironment.willLiveAfterRelease() || myEnvironment.getTimeReceived().getTime() != (mostRecentEnvironment.getTimeReceived().getTime())) {
-                    LOG.info("releaseEnvironment: destroying expired or not latest environment with ttl " + myEnvironment.getTimeToLive());
+                    LOG.info("releaseEnvironment: destroying duplicate old environment with type " + myEnvironment.getType() + " for client " + clientId);
                     destroyEnvironment(myEnvironment);
+                } else if (!myEnvironment.willLiveAfterRelease()) {
+                    LOG.info("releaseEnvironment: destroying environment with type " + myEnvironment.getType() + ", ttl " + myEnvironment.getTimeToLive()+" for client " + clientId);
+                    destroyEnvironment(myEnvironment);
+                } else if (myEnvironment.hasExpired()) {
+                    long deliveryCount = deliveryCountForEnvironment(myEnvironment);
+                    if (deliveryCount == 0) {
+                        LOG.info("releaseEnvironment: destroying expired environment with type " + myEnvironment.getType() + ", ttl " + myEnvironment.getTimeToLive() + " for client " + clientId);
+                        destroyEnvironment(myEnvironment);
+                    } else {
+                        LOG.info("releaseEnvironment: keeping expired environment with type " + myEnvironment.getType() + ", ttl " + myEnvironment.getTimeToLive() + " for client " + clientId+" because it has "+deliveryCount+" undelivered deliveries");
+                    }
                 } else {
-                    LOG.info("releaseEnvironment: releasing environment with ttl " + myEnvironment.getTimeToLive());
-                    myEnvironment.setTimeReleased(new Date());
-                    mDatabase.saveEnvironment(myEnvironment);
+                    if (myEnvironment.getTimeReleased() == null) {
+                        LOG.info("releaseEnvironment: releasing environment with type " + myEnvironment.getType() + ", ttl " + myEnvironment.getTimeToLive()+" for client " + clientId);
+                        myEnvironment.setTimeReleased(new Date());
+                        mDatabase.saveEnvironment(myEnvironment);
+                    } else {
+                        LOG.info("releaseEnvironment: environment with ttl " + myEnvironment.getTimeToLive() +
+                                " already released on "+myEnvironment.getTimeReleased()+", ttl remaining "+
+                                (myEnvironment.getTimeReleased().getTime()+myEnvironment.getTimeToLive()- new Date().getTime()));
+                    }
                 }
             }
         }
