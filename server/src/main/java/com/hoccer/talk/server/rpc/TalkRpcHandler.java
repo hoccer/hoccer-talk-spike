@@ -2549,7 +2549,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                         if (deliveries.size() == 0) {
                             destroyEnvironment(te);
                         } else {
-                            LOG.info("updateEnvironment: worldwide: can remove expired worldwide environment for client="+ te.getClientId() + " from groupId=" + te.getGroupId()+", there are "+ deliveries.size()+" deliveries to be delivered");
+                            LOG.info("updateEnvironment: worldwide: can't remove expired worldwide environment for client="+ te.getClientId() + " from groupId=" + te.getGroupId()+", there are "+ deliveries.size()+" deliveries to be delivered");
                         }
                     } else {
                         matching.add(te);
@@ -2629,7 +2629,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                             // we are in worldwide and already member of a worldwide group
                             // for worldwide, we want to make sure the group is neither too small nor too large
 
-                            LOG.info("updateEnvironment: worldwide: matching="+matching.size()+"groups="+environmentsPerGroup.size()+",minGroups="+minNumberOfGroups+",maxGroups="+maxNumberOfGroups+",abandoned="+abandonedGroups+",clientId="+mConnection.getClientId()+",groupId="+myMembership.getGroupId());
+                            LOG.info("updateEnvironment: worldwide: matching="+matching.size()+",groups="+environmentsPerGroup.size()+",minGroups="+minNumberOfGroups+",maxGroups="+maxNumberOfGroups+",abandoned="+abandonedGroups+",clientId="+mConnection.getClientId()+",groupId="+myMembership.getGroupId());
 
                             if (minNumberOfGroups > environmentsPerGroup.size()) {
                                 // we have not enough groups, lets create a new group and join it

@@ -1,5 +1,6 @@
 package com.hoccer.talk.server.delivery;
 
+import com.hoccer.talk.model.TalkClient;
 import com.hoccer.talk.server.TalkServer;
 import com.hoccer.talk.server.agents.NotificationDeferrer;
 
@@ -26,7 +27,7 @@ public class DeliveryAgent extends NotificationDeferrer {
         return mServer;
     }
 
-    public void requestDelivery(String clientId, boolean forceAll) {
+    public void requestDelivery(final String clientId, boolean forceAll) {
         if (clientId == null) {
             throw new IllegalArgumentException("no clientId");
         }
@@ -36,6 +37,15 @@ public class DeliveryAgent extends NotificationDeferrer {
             @Override
             public void run() {
                 try {
+                    TalkClient client = mServer.getDatabase().findClientById(deliveryRequest.mClientId);
+                    if (client == null) {
+                        throw new RuntimeException("requestDelivery: client +"+deliveryRequest.mClientId+" not found");
+                    }
+                    if (!client.isReady()) {
+                        LOG.debug("requestDelivery: client not ready:'" + deliveryRequest.mClientId);
+                        return;
+                    }
+
                     TalkServer.NonReentrantLock lock = mServer.idLockNonReentrant("deliveryRequest-"+deliveryRequest.mClientId);
 
                     boolean acquired = lock.tryLock();
