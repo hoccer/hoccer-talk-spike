@@ -103,7 +103,7 @@ public class GroupMemberContactsAdapter extends ContactsAdapter {
 
     private boolean isContactAdminInGroup(TalkClientContact contact) {
         try {
-            if(mGroupId != null) {
+            if (mGroupId != null) {
                 TalkClientContact admin = mDatabase.findAdminInGroup(mGroupId);
                 return admin != null && contact.getClientId().equals(admin.getClientId());
             }
@@ -115,7 +115,7 @@ public class GroupMemberContactsAdapter extends ContactsAdapter {
 
     private boolean isContactInvitedToGroup(TalkClientContact contact) {
         try {
-            if(mGroupId != null) {
+            if (mGroupId != null) {
                 TalkGroupMembership membership = mDatabase.findMembershipInGroupByClientId(mGroupId, contact.getClientId());
                 return membership != null && membership.isInvited();
             }
