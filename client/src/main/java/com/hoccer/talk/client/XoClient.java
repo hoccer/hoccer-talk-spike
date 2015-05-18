@@ -3011,9 +3011,12 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             }
             // if this concerns the membership of someone else
             if (clientContact.isClient()) {
-                /* Mark as nearby contact and save to database. */
+                /* Mark as nearby or worldwide contact and save to database. */
                 boolean isJoinedInNearbyGroup = groupContact.getGroupPresence() != null && groupContact.getGroupPresence().isTypeNearby() && newMembership.isJoined();
                 clientContact.setNearby(isJoinedInNearbyGroup);
+
+                boolean isJoinedInWorldwideGroup = groupContact.isWorldwideGroup() && newMembership.isJoined();
+                clientContact.setWorldwide(isJoinedInWorldwideGroup);
 
                 mDatabase.saveContact(clientContact);
             }
