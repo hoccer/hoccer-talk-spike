@@ -366,8 +366,9 @@
     <string name="error_compatible_app_unavailable">Keine App zum öffnen des gewählten Objekts gefunden.</string>
 
     <!-- Nearby all invite texts -->
-    <string name="nearby_invite_all">%1$d Mitglieder als Freunde einladen</string>
-    <string name="nearby_disinvite_all">%1$d Mitglieder als Freunde ausladen</string>
+    <string name="group_invite_all">%1$d Mitglieder als Freunde einladen</string>
+    <string name="group_disinvite_all">%1$d Mitglieder als Freunde ausladen</string>
+
     <string name="nearby_notification_title">In der Nähe</string>
     <string name="nearby_notification_text">In der Nähe Modus aktiv</string>
 

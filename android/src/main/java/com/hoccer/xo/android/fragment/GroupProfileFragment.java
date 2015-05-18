@@ -513,10 +513,10 @@ public class GroupProfileFragment extends ProfileFragment
             return;
         }
         updateContactsToInviteAsFriend();
-        String buttonText = "";
+        String buttonText;
         if (mContactsToDisinviteAsFriend.isEmpty()) {
             int numberOfClients = mContactsToInviteAsFriend.size();
-            buttonText = String.format(getString(R.string.nearby_invite_all), numberOfClients);
+            buttonText = String.format(getString(R.string.group_invite_all), numberOfClients);
             if (numberOfClients > 0) {
                 mInviteAllButton.setEnabled(true);
             } else {
@@ -525,7 +525,7 @@ public class GroupProfileFragment extends ProfileFragment
         } else {
             mInviteAllButton.setEnabled(true);
             int numberOfInvitedClients = mContactsToDisinviteAsFriend.size();
-            buttonText = String.format(getString(R.string.nearby_disinvite_all), numberOfInvitedClients);
+            buttonText = String.format(getString(R.string.group_disinvite_all), numberOfInvitedClients);
         }
         mInviteAllButton.setText(buttonText);
     }

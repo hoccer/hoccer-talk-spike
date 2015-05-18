@@ -379,9 +379,10 @@
 
     <string name="error_compatible_app_unavailable">No app found to open the selected item.</string>
 
-    <!-- Nearby all invite texts -->
-    <string name="nearby_invite_all">invite %1$d group members as friend</string>
-    <string name="nearby_disinvite_all">disinvite %1$d group members as friend</string>
+    <!-- Group invite all texts -->
+    <string name="group_invite_all">Invite %1$d group members as friend</string>
+    <string name="group_disinvite_all">Disinvite %1$d group members as friend</string>
+
     <string name="nearby_notification_title">Nearby</string>
     <string name="nearby_notification_text">Nearby mode active</string>
 
