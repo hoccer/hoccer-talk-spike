@@ -363,6 +363,7 @@
     <string name="message_rejected_text">zurückgewiesen</string>
 
     <string name="nearby_saved">Nahebei gespeichert</string>
+    <string name="worldwide_saved">Weltweit gespeichert</string>
     <string name="error_compatible_app_unavailable">Keine App zum öffnen des gewählten Objekts gefunden.</string>
 
     <!-- Nearby all invite texts -->

@@ -15,6 +15,7 @@ public abstract class ChatItem {
     public static final int TYPE_CLIENT_HISTORY = 1;
     public static final int TYPE_CLIENT_NEARBY_HISTORY = 2;
     public static final int TYPE_GROUP_NEARBY_HISTORY = 3;
+    public static final int TYPE_GROUP_WORLDWIDE_HISTORY = 4;
 
     protected long mUnseenMessageCount;
 
@@ -84,6 +85,13 @@ public abstract class ChatItem {
         return chatItem;
     }
 
+    public static ChatItem createWorldwideGroupHistory() {
+        ChatItem chatItem = new WorldwideGroupHistoryChatItem();
+        chatItem.setType(ChatItem.TYPE_GROUP_WORLDWIDE_HISTORY);
+        chatItem.setLayout(R.layout.item_chat_client);
+        return chatItem;
+    }
+
     private static ChatItem createHistoryChatItem(TalkClientContact contact, Context context) {
         ChatItem chatItem = new ContactChatItem(contact, context);
         chatItem.setType(ChatItem.TYPE_CLIENT_HISTORY);
@@ -104,5 +112,4 @@ public abstract class ChatItem {
         chatItem.setLayout(R.layout.item_chat_client);
         return chatItem;
     }
-
 }

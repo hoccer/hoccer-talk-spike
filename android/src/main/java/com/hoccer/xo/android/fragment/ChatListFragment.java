@@ -12,8 +12,10 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
+import com.hoccer.talk.model.TalkEnvironment;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ChatActivity;
+import com.hoccer.xo.android.activity.ChatsActivity;
 import com.hoccer.xo.android.adapter.ChatListAdapter;
 import com.hoccer.xo.android.adapter.SearchAdapter;
 import com.hoccer.xo.android.base.XoActivity;
@@ -190,7 +192,7 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
             @Override
             public boolean shouldShow(TalkClientContact contact) {
                 if (contact.isGroup()) {
-                    return ((contact.isKeptGroup()) || (contact.isGroupJoined() && contact.isGroupExisting())) && !contact.isNearbyGroup();
+                    return (contact.isKeptGroup() || (contact.isGroupJoined() && contact.isGroupExisting())) && !(contact.isNearbyGroup() || contact.isWorldwideGroup()) ;
                 } else if (contact.isClient()) {
                     return contact.isKept() || contact.isFriendOrBlocked();
                 }
@@ -227,6 +229,8 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
             showChat(contact);
         } else if (item.getType() == ChatItem.TYPE_GROUP_NEARBY_HISTORY) {
             showNearbyGroupHistory();
+        } else if (item.getType() == ChatItem.TYPE_GROUP_WORLDWIDE_HISTORY) {
+            showWorldwideGroupHistory();
         }
     }
 
@@ -245,7 +249,13 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
 
     private void showNearbyGroupHistory() {
         Intent intent = new Intent(getActivity(), ChatActivity.class);
-        intent.putExtra(ChatActivity.EXTRA_NEARBY_GROUP_HISTORY, true);
+        intent.putExtra(ChatActivity.EXTRA_ENVIRONMENT_GROUP_HISTORY, TalkEnvironment.TYPE_NEARBY);
+        startActivity(intent);
+    }
+
+    private void showWorldwideGroupHistory() {
+        Intent intent = new Intent(getActivity(), ChatActivity.class);
+        intent.putExtra(ChatActivity.EXTRA_ENVIRONMENT_GROUP_HISTORY, TalkEnvironment.TYPE_WORLDWIDE);
         startActivity(intent);
     }
 

@@ -58,6 +58,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
         try {
             final List<TalkClientContact> filteredContacts = filter(mDatabase.findAllContacts());
             final long nearbyMessageCount = mDatabase.getNearbyGroupMessageCount();
+            final long worldwideMessageCount = mDatabase.getWorldwideGroupMessageCount();
 
             runOnUiThread(new Runnable() {
                 @Override
@@ -71,6 +72,10 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
 
                     if (nearbyMessageCount > 0) {
                         mChatItems.add(ChatItem.createNearbyGroupHistory());
+                    }
+
+                    if (worldwideMessageCount > 0) {
+                        mChatItems.add(ChatItem.createWorldwideGroupHistory());
                     }
 
                     notifyDataSetChanged();
