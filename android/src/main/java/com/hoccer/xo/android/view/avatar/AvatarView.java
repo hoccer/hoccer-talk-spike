@@ -101,8 +101,7 @@ public abstract class AvatarView extends LinearLayout {
                     setAvatarImage(R.drawable.avatar_location);
                 } else if (mContact.getGroupPresence() != null && mContact.getGroupPresence().isTypeWorldwide()) {
                     setAvatarImage(R.drawable.avatar_world);
-                }
-                else {
+                } else {
                     setAvatarImage(R.drawable.avatar_group);
                 }
             } else {
@@ -161,7 +160,7 @@ public abstract class AvatarView extends LinearLayout {
         int layoutId;
         if (!contact.isFriendOrBlocked() && contact.isNearbyAcquaintance()) {
             layoutId = R.layout.view_avatar_nearby_history;
-        } else if (!(contact.isFriendOrBlocked() || contact.isNearby()) || contact.isKeptGroup()) {
+        } else if (!(contact.isFriendOrBlocked() || contact.isNearby() || contact.isWorldwide()) || contact.isKeptGroup()) {
             layoutId = R.layout.view_avatar_history;
         } else {
             layoutId = R.layout.view_avatar_presence;
