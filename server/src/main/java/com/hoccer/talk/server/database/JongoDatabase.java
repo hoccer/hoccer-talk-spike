@@ -142,10 +142,12 @@ public class JongoDatabase implements ITalkServerDatabase {
         mDeliveries.ensureIndex("{messageId:1, senderId:1, receiverId:1}");
         mDeliveries.ensureIndex("{messageId:1}");
         mDeliveries.ensureIndex("{senderId:1}");
+        mDeliveries.ensureIndex("{groupId:1}");
         mDeliveries.ensureIndex("{senderId:1, state:1}");
         mDeliveries.ensureIndex("{senderId:1, state:1, attachmentState:1}");
         mDeliveries.ensureIndex("{receiverId:1}");
         mDeliveries.ensureIndex("{receiverId:1, state:1}");
+        mDeliveries.ensureIndex("{receiverId:1, groupId:1, state:1}");
         mDeliveries.ensureIndex("{receiverId:1, state:1, attachmentState:1}");
         mDeliveries.ensureIndex("{state:1}");
         mDeliveries.ensureIndex("{state:1, attachmentState:1}");
@@ -359,6 +361,22 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     @NotNull
+    public List<TalkDelivery> findDeliveriesForClientInGroupInState(String receiverId, String groupId, String state) {
+        Iterator<TalkDelivery> it = mDeliveries
+                .find("{receiverId:#, groupId:#, state:#}", receiverId, groupId, state)
+                .as(TalkDelivery.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
+    }
+
+    @Override
+    public long countDeliveriesForClientInGroupInState(String receiverId, String groupId, String state) {
+        return mDeliveries .count("{receiverId:#, groupId:#, state:#}", receiverId, groupId, state);
+    }
+
+    @Override
+    @NotNull
     public List<TalkDelivery> findDeliveriesForClientInDeliveryAndAttachmentStates(String receiverId, String[] deliveryStates, String[] attachmentStates) {
         Iterator<TalkDelivery> it = mDeliveries
                 .find("{receiverId:#, state: { $in: # }, attachmentState: {$in: # } }", receiverId, Arrays.asList(deliveryStates), Arrays.asList(attachmentStates))
@@ -503,15 +521,49 @@ public class JongoDatabase implements ITalkServerDatabase {
         // since the client has received presences the last time
         Set<String> mustInclude = new HashSet<String>();
         // collect clients known through relationships
+
+        /*
+        // With the following (former) variant in this comment we will also get presences
+        // for clients that have (only) blocked us which is not what we want. Note that this is
+        // however the same code used in performPresenceUpdate() to determine to which
+        // clients a presence update should be sent, but this is a different case.
+
         List<TalkRelationship> relationships = findRelationshipsByOtherClient(clientId);
         for (TalkRelationship relationship : relationships) {
-            if (relationship.isDirectlyRelated()) {
+            if (relationship.isRelated()) {
+                LOG.info("including "+relationship.getClientId()+" because related");
                 clients.add(relationship.getClientId());
                 if (relationship.getLastChanged().after(lastKnown)) {
+                    LOG.info("must include "+relationship.getClientId()+" because related");
                     mustInclude.add(relationship.getClientId());
                 }
             }
         }
+        The following code however will also include presence updates for clients *we* (clientId) do block,
+        which is fine because there are corner cases like online indication and group key management
+        that we also have to perform for clients we block. Semantically it is also ok because
+        we might want to unblock them, so we actually have a relationship.
+
+        Note that this code needs to behave the same way like performPresenceUpdate() regarding
+        the decision if a particular presence is sent to a particular client.
+
+        It also has to play well with the isContactOf() call which will also return true for a
+        contact we have blocked, but false for a contact that *only* has blocked us without
+        us have a relationShip to this blocking client.
+
+        */
+        List<TalkRelationship> relationships = findRelationships(clientId);
+        for (TalkRelationship relationship : relationships) {
+            if (relationship.isRelated()) {
+                LOG.info("including "+relationship.getOtherClientId()+" because related");
+                clients.add(relationship.getOtherClientId());
+                if (relationship.getLastChanged().after(lastKnown)) {
+                    LOG.info("must include "+relationship.getOtherClientId()+" because related");
+                    mustInclude.add(relationship.getOtherClientId());
+                }
+            }
+        }
+
         // collect clients known through groups
         List<TalkGroupMembership> ownMemberships = findGroupMembershipsForClient(clientId);
         for (TalkGroupMembership ownMembership : ownMemberships) {
@@ -521,7 +573,9 @@ public class JongoDatabase implements ITalkServerDatabase {
                 for (TalkGroupMembership otherMembership : otherMemberships) {
                     if (otherMembership.isInvited() || otherMembership.isJoined()) {
                         clients.add(otherMembership.getClientId());
+                        LOG.info("include "+otherMembership.getClientId()+" because common membership");
                         if (otherMembership.getLastChanged().after(lastKnown) || ownMembership.getLastChanged().after(lastKnown)) {
+                            LOG.info("must include "+otherMembership.getClientId()+" because memberships changed");
                             mustInclude.add(otherMembership.getClientId());
                         }
                     }
@@ -533,9 +587,7 @@ public class JongoDatabase implements ITalkServerDatabase {
         // collect presences
         for (String client : clients) {
             TalkPresence pres = findPresenceForClient(client);
-            if (pres != null &&
-                    (pres.getTimestamp().after(lastKnown) ||
-                            mustInclude.contains(client))) {
+            if (pres != null && (pres.getTimestamp().after(lastKnown) || mustInclude.contains(client))) {
                 res.add(pres);
             }
         }
@@ -665,6 +717,12 @@ public class JongoDatabase implements ITalkServerDatabase {
     @Override
     public int deleteRelationshipsWithStatesChangedBefore(String[] states, Date lastChanged) {
         WriteResult result = mRelationships.remove("{state: { $in: # }, lastChanged: { $lt:# } }", Arrays.asList(states), lastChanged);
+        return result.getN();
+    }
+
+    @Override
+    public int deleteRelationshipsWithStatesAndNotNotificationsDisabledChangedBefore(String[] states, Date lastChanged) {
+        WriteResult result = mRelationships.remove("{state: { $in: # }, lastChanged: { $lt:# } , notificationPreference: { $ne:#} }", Arrays.asList(states), lastChanged, TalkRelationship.NOTIFICATIONS_DISABLED);
         return result.getN();
     }
 

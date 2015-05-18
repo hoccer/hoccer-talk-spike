@@ -416,15 +416,16 @@ public class CleaningAgent {
                 new String[]{TalkGroupMembership.STATE_GROUP_REMOVED, TalkGroupMembership.STATE_NONE}, oldGroupMemberDate);
 
         LOG.info("doCleanGroups: deleted "+deleted+" group members");
-
+        // TODO: clean dangling nearby and worldwide groups and memberships without environments (there shouldn't be any,but we should check)
     }
 
     private void doCleanRelationships() {
         LOG.info("doCleanRelationships");
         Date oldDate = new Date(new Date().getTime() - NO_RELATIONSHIP_LIFE_TIME);
         LOG.info("doCleanRelationships: cleaning expired relationships deleted before "+ oldDate);
-        int deleted = mDatabase.deleteGroupMembershipsWithStatesChangedBefore(new String[]{TalkRelationship.STATE_NONE}, oldDate);
+        int deleted = mDatabase.deleteRelationshipsWithStatesAndNotNotificationsDisabledChangedBefore(new String[]{TalkRelationship.STATE_NONE}, oldDate);
         LOG.info("doCleanRelationships: deleted "+deleted+" relationships");
+        // TODO: Cleaning might cause unidirectional relationships - we should handle that properly
     }
 
 }

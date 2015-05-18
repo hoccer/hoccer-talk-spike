@@ -40,7 +40,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
     private final Digest SRP_DIGEST = new SHA256Digest();
     private static final SecureRandom SRP_RANDOM = new SecureRandom();
     private static final SRP6Parameters SRP_PARAMETERS = SRP6Parameters.CONSTANTS_1024;
-
+   /*
     // TODO: make configurable via TalkServerConfiguration
     private static final int TOKEN_LIFETIME_MIN = 60; // (seconds) at least 1 minute
     private static final int TOKEN_LIFETIME_MAX = 7 * 24 * 3600; // (seconds) at most 1 week
@@ -49,8 +49,16 @@ public class TalkRpcHandler implements ITalkRpcServer {
     private static final int PAIRING_TOKEN_MAX_USAGE_RANGE_MAX = 50;
 
     // TODO: make configurable via TalkServerConfiguration
-    private static final int MIN_WORLD_WIDE_GROUP_SIZE = 5;
-    private static final int MAX_WORLD_WIDE_GROUP_SIZE = 10;
+    private static final int MIN_WORLD_WIDE_GROUP_SIZE = 10;
+    private static final int MAX_WORLD_WIDE_GROUP_SIZE = 20;
+    */
+    private final int TOKEN_LIFETIME_MIN;
+    private final int TOKEN_LIFETIME_MAX;
+    private final int TOKEN_MAX_USAGE;
+    private final int PAIRING_TOKEN_MAX_USAGE_RANGE_MIN;
+    private final int PAIRING_TOKEN_MAX_USAGE_RANGE_MAX;
+    private final int MIN_WORLD_WIDE_GROUP_SIZE;
+    private final int MAX_WORLD_WIDE_GROUP_SIZE;
 
     /**
      * Reference to server
@@ -87,6 +95,14 @@ public class TalkRpcHandler implements ITalkRpcServer {
         mConnection = pConnection;
         mDatabase = mServer.getDatabase();
         mStatistics = mServer.getStatistics();
+
+        TOKEN_LIFETIME_MIN = mServer.getConfiguration().getTokenLifeTimeMin();
+        TOKEN_LIFETIME_MAX = mServer.getConfiguration().getTokenLifeTimeMax();
+        TOKEN_MAX_USAGE = mServer.getConfiguration().getTokenMaxUsage();
+        PAIRING_TOKEN_MAX_USAGE_RANGE_MIN = mServer.getConfiguration().getTokenMaxUsageRangeMin();
+        PAIRING_TOKEN_MAX_USAGE_RANGE_MAX = mServer.getConfiguration().getTokenMaxUsageRangeMax();
+        MIN_WORLD_WIDE_GROUP_SIZE = mServer.getConfiguration().getMinWorldwideGroupSize();
+        MAX_WORLD_WIDE_GROUP_SIZE = mServer.getConfiguration().getMaxWorldwideGroupSize();
     }
 
     private void requireIsNotOutdated() {
@@ -696,7 +712,8 @@ public class TalkRpcHandler implements ITalkRpcServer {
         TalkKey key = null;
 
         TalkRelationship relationship = mDatabase.findRelationshipBetween(mConnection.getClientId(), clientId);
-        if (relationship != null && relationship.isRelated()) {
+        //TalkRelationship otherRelationship = mDatabase.findRelationshipBetween(clientId, mConnection.getClientId());
+        if ((relationship != null && relationship.isRelated()) /*|| (otherRelationship != null && otherRelationship.isRelated())*/) {
             key = mDatabase.findKey(clientId, keyId);
         } else {
             List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsForClient(mConnection.getClientId());
@@ -932,6 +949,23 @@ public class TalkRpcHandler implements ITalkRpcServer {
         return true;
     }
 
+    // This discussion is left here for better understanding the history of some changes that wer made:
+    //
+    //  Blocking can cause unidirectional relationsShips to be created that caused problems in some cases
+    //  e.g. we got presence updates causing a blocked contact to be created, but when requesting isContactOf they will be
+    //  immediately deleted; we might either not send out presence information for blocked contacts, but this might cause other
+    //  problems, e.g. a stuck online indicator or not being able to unblock a contact after a client database loss
+    //  Possible alternative solutions:
+    //     a) always maintain bidirectional relationships
+    //     b) make sure unidirectional relationships are properly handled everywhere (e.g. getPresences(), isContactOf, delivery, invitations, etc...)
+    //  a) seems to be much easier
+    //
+    // However, b) actually turned out to be the way to go. The problem with the presence updates in getPresences() was
+    // that there were presences sent out when there was a unidirectional relationship blocking *us*, which was wrong.
+    // The problem was caused because initially someone thought that the same code as in performPresenceUpdate()
+    // should be used, but the case is different there because performPresenceUpdate actually sees the clients from
+    // the other side of a relationship.
+
     @Override
     public void blockClient(String clientId) {
         requireIdentification(true);
@@ -960,6 +994,8 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
     }
 
+    // This function must also work with unidirectional relationships, and it easily does
+    // because it deals with one relationship only.
     @Override
     public void unblockClient(String clientId) {
         requireIdentification(true);
@@ -988,6 +1024,10 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
     }
 
+    //
+    // This function must also work with unidirectional relationships, and it is a bit harder
+    // because it deals with both sides of the relationship and we have at least.
+    //
     @Override
     public void inviteFriend(String clientId) {
         requireIdentification(true);
@@ -1002,9 +1042,11 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
             if (rel != null) {
                 logCall("inviteFriend(id '" + clientId + "'), found relationsShip in state '"+rel.getState()+"'");
+                /*
                 if (reverse_rel == null) {
                     throw new RuntimeException("Server error: Relationship exists, but no reverse relationship found");
                 }
+                */
                 if (rel.isFriend()) {
                     throw new RuntimeException("Contact is already a friend");
                 }
@@ -1017,9 +1059,11 @@ public class TalkRpcHandler implements ITalkRpcServer {
             }
             if (reverse_rel != null) {
                 logCall("inviteFriend(id '" + clientId + "'), found reverse relationsShip in state '"+reverse_rel.getState()+"'");
+                /*
                 if (rel == null) {
                     throw new RuntimeException("Server error: Reverse Relationship exists, but relationship to client not found");
                 }
+                */
                 if (reverse_rel.isBlocked()) {
                     throw new RuntimeException("Contact has blocked client"); // TODO: leaks information about blocking to client, how shall we deal with it?
                 }
@@ -1130,6 +1174,11 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
     }
 
+    /* The old version of this function had a security hole;
+    A blocked client could have
+
+     */
+
     @Override
     public void depairClient(String clientId) {
         requireIdentification(true);
@@ -1145,7 +1194,20 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 return;
             }
             setRelationship(myId, clientId, TalkRelationship.STATE_NONE, TalkRelationship.STATE_NONE, true);
-            setRelationship(clientId, myId, TalkRelationship.STATE_NONE, TalkRelationship.STATE_NONE, true);
+
+            /* The old version of this function had a security hole:
+               A blocked client could have called blockClient() itself and then depairClient() to
+                get rid of the block. We check for this now.
+                We also avoid creating a new reverse relationship if there is none.
+             */
+            TalkRelationship reverse_rel = mDatabase.findRelationshipBetween(clientId, myId);
+            if (reverse_rel != null) {
+                if (reverse_rel.isBlocked()) {
+                    setRelationship(clientId, myId, TalkRelationship.STATE_BLOCKED, TalkRelationship.STATE_NONE, true);
+                } else {
+                    setRelationship(clientId, myId, TalkRelationship.STATE_NONE, TalkRelationship.STATE_NONE, true);
+                }
+            }
         }
     }
 
@@ -1450,7 +1512,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
             return false;
         }
 
-        // reject messages to nonexisting clients
+        // reject messages to non-existing clients
         TalkClient receiver = mDatabase.findClientById(receiverId);
         if (receiver == null) {
             LOG.info("delivery rejected: recipient with id '" + receiverId + "' does not exist");
@@ -1790,8 +1852,8 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
 
         for (String role : roles) {
-            if (!TalkGroupMembership.isValidRole(role))  {
-                throw new RuntimeException("Invalid role:"+role);
+            if (!TalkGroupMembership.isValidRoleForGroupType(role, groupType))  {
+                throw new RuntimeException("Invalid role:"+role+" for group type"+groupType);
             }
         }
 
@@ -2060,11 +2122,15 @@ public class TalkRpcHandler implements ITalkRpcServer {
         requireGroupAdmin(groupId);
         logCall("updateGroupRole(groupId: '" + groupId + "' / clientId: '" + clientId + "', role: '" + role + "')");
         TalkGroupMembership targetMembership = mDatabase.findGroupMembershipForClient(groupId, clientId);
+        TalkGroupPresence targetPresence = mDatabase.findGroupPresenceById(groupId);
         if (targetMembership == null) {
             throw new RuntimeException("Client is not a member of group");
         }
-        if (!TalkGroupMembership.isValidRole(role)) {
-            throw new RuntimeException("Invalid role");
+        if (targetPresence == null) {
+            throw new RuntimeException("Group does not exist");
+        }
+        if (!TalkGroupMembership.isValidRoleForGroupType(role, targetPresence.getGroupType())) {
+            throw new RuntimeException("Invalid role:"+role+" for group type"+targetPresence.getGroupType());
         }
         targetMembership.setRole(role);
         changedGroupMembership(targetMembership, new Date());
@@ -2336,19 +2402,6 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
     }
 
-
-    // should be called by the sender of an transfer file after upload has been finished
-    //void finishedFileUpload(String fileId);
-
-    /*
-    @Override
-    public void deleteFile(String fileId) {
-        requireIdentification();
-        logCall("deleteFile(fileId: '" + fileId + "')");
-        mServer.getFilecacheClient().deleteFile(fileId);
-        // TODO: notify receivers
-    }
-    */
     private void createGroupWithEnvironment(TalkEnvironment environment) {
         LOG.info("createGroupWithEnvironment: creating new group for client with id '" + mConnection.getClientId() + "'");
         TalkGroupPresence groupPresence = new TalkGroupPresence();
@@ -2456,6 +2509,10 @@ public class TalkRpcHandler implements ITalkRpcServer {
         return result;
     }
 
+    private long deliveryCountForEnvironment(TalkEnvironment environment) {
+       return mDatabase.countDeliveriesForClientInGroupInState(environment.getClientId(), environment.getGroupId(), TalkDelivery.STATE_DELIVERING);
+    }
+
     @Override
     public String updateEnvironment(TalkEnvironment environment) {
         logCall("updateEnvironment(clientId: '" + mConnection.getClientId() + "')");
@@ -2475,18 +2532,31 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
         environment.setTimeReceived(new Date());
         environment.setClientId(mConnection.getClientId());
+        environment.setTimeReleased(null);
 
         List<TalkEnvironment> matching_found = mDatabase.findEnvironmentsMatching(environment);
         List<TalkEnvironment> matching = new ArrayList<TalkEnvironment>();
 
+        int minNumberOfGroups = 0;
+        int maxNumberOfGroups = 0;
+        int abandonedGroups = 0;
+
         if (!environment.isNearby()) {
             // make an worldwide expiry run first
+            // TODO: should perform other client expiry elsewhere periodically for performance reasons
             for (TalkEnvironment te : matching_found) {
                 if (!te.getClientId().equals(mConnection.getClientId())) {
                     // only expire other client's environments
                     if (te.hasExpired()) {
-                        LOG.info("updateEnvironment: destroying expired environment for client "+te.getClientId());
-                        destroyEnvironment(te);
+                        LOG.info("updateEnvironment: worldwide: expired environment for client "+te.getClientId());
+                        // but before we can destroy, we need to check if there are undelivered messages
+                        long undeliveredCount = deliveryCountForEnvironment(te);
+                        if (undeliveredCount == 0) {
+                            destroyEnvironment(te);
+                        } else {
+                            LOG.info("updateEnvironment: worldwide: can't remove expired worldwide environment for client="+ te.getClientId() + " from groupId=" + te.getGroupId()+", there are "+ undeliveredCount+" deliveries to be delivered");
+                            //matching.add(te);
+                        }
                     } else {
                         matching.add(te);
                     }
@@ -2494,12 +2564,52 @@ public class TalkRpcHandler implements ITalkRpcServer {
                     matching.add(te);
                 }
             }
+            minNumberOfGroups = matching.size() / MAX_WORLD_WIDE_GROUP_SIZE + 1;
+            maxNumberOfGroups = matching.size() / MIN_WORLD_WIDE_GROUP_SIZE + 1;
+
+            // The Group distribution algorithm works as follows:
+            // 1. The first member of a matching set will make a group to be created
+            // 2. New arriving members will be added to the n-th smallest group
+            //    depending on the condition explained in 3c.
+            //    This might make one group grow over the limit if all groups are "full"
+            // 3. When a group members updates his environment (and only then), there are three possible
+            //    outcomes:
+            //    a: If the average group size is between MIN_WORLD_WIDE_GROUP_SIZE and MAX_WORLD_WIDE_GROUP_SIZE,
+            //       nothing special happens, the client will stay in the current group.
+            //    b: If all groups are "full" and at least one group is over the limit (MAX_WORLD_WIDE_GROUP_SIZE),
+            //       the "minNumberOfGroups" will be larger than the current number of groups,
+            //       and a new group will be created, and the updating client will be moved to this new group.
+            //    c: If there are so many groups that the average group size is below MIN_WORLD_WIDE_GROUP_SIZE,
+            //       the smallest groups will be virtually "declared abandoned" by computing the number of
+            //       superfluous groups.
+            //       The updating client will be moved to the smallest non-abandoned group; this will happen to other
+            //       environment-updaters too, until the group is empty. Note that a member will stay in a
+            //       group and the group will remain in place unless the member updates it's environment.
+            //       This means that there may be a number of abandoned groups with just one non-updating member
+            //       until the environment expires. However, if the number of environments increases, these
+            //       groups will be repopulated before new groups will be created.
+            //   Yeah!
         } else {
             matching = matching_found;
         }
 
-        TalkEnvironment myEnvironment = mDatabase.findEnvironmentByClientId(environment.getType(), mConnection.getClientId());
+        // determine how many environments in the matching list belong to how many different groups
         ArrayList<Pair<String, Integer>> environmentsPerGroup = findGroupSortedBySize(matching);
+
+        // determine how many groups are not needed
+        abandonedGroups = environmentsPerGroup.size() - minNumberOfGroups;
+        if (abandonedGroups < 0) {
+            abandonedGroups = 0;
+        }
+        TalkEnvironment myEnvironment = mDatabase.findEnvironmentByClientId(environment.getType(), mConnection.getClientId());
+
+        // debug output code
+        int i = 0;
+        if (environment.isWorldwide()) {
+            for (Pair<String, Integer> epg : environmentsPerGroup) {
+                LOG.info("updateEnvironment: "+ epg.getRight() +" members in group " + epg.getLeft()+",("+i+"/"+environmentsPerGroup.size()+"),clientId="+mConnection.getClientId()+",my current groupId="+environment.getGroupId());
+            }
+        }
 
         for (TalkEnvironment te : matching) {
             if (te.getClientId().equals(mConnection.getClientId())) {
@@ -2522,26 +2632,46 @@ public class TalkRpcHandler implements ITalkRpcServer {
                                 }
                             }
                         } else {
+                            // we are in worldwide and already member of a worldwide group
                             // for worldwide, we want to make sure the group is neither too small nor too large
-                            int minNumberOfGroups = matching.size() / MAX_WORLD_WIDE_GROUP_SIZE + 1;
-                            int maxNumberOfGroups = matching.size() / MIN_WORLD_WIDE_GROUP_SIZE + 1;
-                            int targetGroupSize = matching.size() / environmentsPerGroup.size();
+
+                            LOG.info("updateEnvironment: worldwide: matching="+matching.size()+",groups="+environmentsPerGroup.size()+",minGroups="+minNumberOfGroups+",maxGroups="+maxNumberOfGroups+",abandoned="+abandonedGroups+",clientId="+mConnection.getClientId()+",groupId="+myMembership.getGroupId());
 
                             if (minNumberOfGroups > environmentsPerGroup.size()) {
                                 // we have not enough groups, lets create a new group and join it
+                                LOG.info("updateEnvironment: worldwide: not enough groups, creating a new group and joining it,clientId="+mConnection.getClientId()+",groupId="+myMembership.getGroupId());
                                 destroyEnvironment(myEnvironment);
                                 createGroupWithEnvironment(environment);
                                 return environment.getGroupId();
                             }
                             if (environmentsPerGroup.size() > maxNumberOfGroups) {
-                                // we have too many groups, lets consolidate
-                                if (environmentsPerGroup.get(environmentsPerGroup.size()-1).getLeft().equals(te.getGroupId())) {
-                                    // we are in the smallest group, lets move to the second smallest
-                                    destroyEnvironment(myEnvironment);
-                                    String secondSmallestGroupId = environmentsPerGroup.get(environmentsPerGroup.size()-2).getLeft();
-                                    TalkGroupPresence secondSmallestGroup = mDatabase.findGroupPresenceById(secondSmallestGroupId);
-                                    joinGroupWithEnvironment(secondSmallestGroup, environment);
-                                    return secondSmallestGroup.getGroupId();
+                                // we have too many groups, lets see if we have to consolidate
+                                // maxNumberOfGroups is always at least 1, so we get here only when there are at least 2 groups
+                                LOG.info("updateEnvironment: worldwide: too many groups,clientId="+mConnection.getClientId()+",groupId="+myMembership.getGroupId());
+
+                                for (int n = 0; n < abandonedGroups;++n) {
+                                    // lets check if we are in an "abandoned group"
+                                    if (environmentsPerGroup.get(environmentsPerGroup.size() - 1 - n).getLeft().equals(te.getGroupId())) {
+                                        // we are in an an abandoned group, lets move the smallest non-abandoned group
+                                        LOG.info("updateEnvironment: worldwide: too many groups and we are in an abandoned group ("+n+"-smallest),joining "+abandonedGroups+"-smallest group,clientId=" + mConnection.getClientId() + ",groupId=" + myMembership.getGroupId());
+
+                                        // but before we can move, we need to check if there are undelivered messages
+                                        List<TalkDelivery> deliveries = mDatabase.findDeliveriesForClientInGroupInState(mConnection.getClientId(),myGroupPresence.getGroupId(),TalkDelivery.STATE_DELIVERING);
+                                        if (deliveries.size() == 0) {
+
+                                            destroyEnvironment(myEnvironment);
+                                            String nThSmallestGroupId = environmentsPerGroup.get(environmentsPerGroup.size() - 1 - abandonedGroups).getLeft();
+                                            TalkGroupPresence nThSmallestGroup = mDatabase.findGroupPresenceById(nThSmallestGroupId);
+                                            if (nThSmallestGroup == null) {
+                                                LOG.error("updateEnvironment: worldwide: secondSmallestGroup presence not found, id=" + nThSmallestGroup.getGroupId() + ",clientId=" + mConnection.getClientId() + ",groupId=" + myMembership.getGroupId());
+                                            } else {
+                                                joinGroupWithEnvironment(nThSmallestGroup, environment);
+                                                return nThSmallestGroup.getGroupId();
+                                            }
+                                        } else {
+                                            LOG.info("updateEnvironment: worldwide: can not move client="+ mConnection.getClientId() + " from groupId=" + myMembership.getGroupId()+", there are "+ deliveries.size()+" deliveries to be delivered");
+                                        }
+                                    }
                                 }
                             }
                             // we are fine and in the right group
@@ -2562,7 +2692,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                         mDatabase.saveEnvironment(myEnvironment);
                         // update worldwide notification preference if necessary
                        if (environment.isWorldwide() && environment.getNotificationPreference() != null) {
-                           if (environment.getNotificationPreference().equals(myMembership.getNotificationPreference())) {
+                           if (!environment.getNotificationPreference().equals(myMembership.getNotificationPreference())) {
                                myMembership.setNotificationPreference(environment.getNotificationPreference());
                                mDatabase.saveGroupMembership(myMembership);
                                mServer.getUpdateAgent().requestGroupMembershipUpdate(myMembership);
@@ -2572,22 +2702,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                     } else {
                         // there is a group and a membership, but they seem to be tombstones, so lets ignore them, just get rid of the bad environment
                         mDatabase.deleteEnvironment(te);
-                        if (environment.isNearby()) {
-                            String largestGroupId = environmentsPerGroup.get(0).getLeft();
-                            TalkGroupPresence largestGroup = mDatabase.findGroupPresenceById(largestGroupId);
-                            if (largestGroup.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
-                                joinGroupWithEnvironment(largestGroup, environment);
-                                return largestGroup.getGroupId();
-
-                            }
-                        } else if (environment.isWorldwide()) {
-                            String smallestGroupId = environmentsPerGroup.get(environmentsPerGroup.size()-1).getLeft();
-                            TalkGroupPresence smallestGroup = mDatabase.findGroupPresenceById(smallestGroupId);
-                            if (smallestGroup.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
-                                joinGroupWithEnvironment(smallestGroup, environment);
-                                return smallestGroup.getGroupId();
-                            }
-                        }
+                        break; // continue processing after the loop and join or create a new group
                     }
                 }
             }
@@ -2597,24 +2712,32 @@ public class TalkRpcHandler implements ITalkRpcServer {
             // we have an environment for another location that does not match, lets get rid of it
             destroyEnvironment(myEnvironment);
         }
-        if (!matching.isEmpty()) {
-            if (environment.isNearby()) {
-                // join the largest group
-                String largestGroupId = environmentsPerGroup.get(0).getLeft();
-                TalkGroupPresence largestGroup = mDatabase.findGroupPresenceById(largestGroupId);
-                if (largestGroup.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
-                    joinGroupWithEnvironment(largestGroup, environment);
-                    return largestGroup.getGroupId();
-                }
-            } else if (environment.isWorldwide()) {
-                // join the smallest group
-                String smallestGroupId = environmentsPerGroup.get(environmentsPerGroup.size()-1).getLeft();
-                TalkGroupPresence smallestGroup = mDatabase.findGroupPresenceById(smallestGroupId);
-                if (smallestGroup.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
-                    joinGroupWithEnvironment(smallestGroup, environment);
-                    return smallestGroup.getGroupId();
-                }
-            }
+       if (!matching.isEmpty()) {
+           if (environment.isNearby()) {
+               // join the largest group
+               String largestGroupId = environmentsPerGroup.get(0).getLeft();
+               TalkGroupPresence largestGroup = mDatabase.findGroupPresenceById(largestGroupId);
+               if (largestGroup.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
+                   joinGroupWithEnvironment(largestGroup, environment);
+                   return largestGroup.getGroupId();
+               } else {
+                   LOG.warn("the (largest) nearby group we were supposed to join is gone or does not exist, largestGroup="+largestGroup);
+               }
+           } else if (environment.isWorldwide()) {
+               // join the n-th-smallest group in order to properly distribute the clients
+               String nThSmallestGroupId = environmentsPerGroup.get(environmentsPerGroup.size()-1-abandonedGroups).getLeft();
+               String kind = ""+abandonedGroups+"-smallestGroupId";
+               LOG.info("updateEnvironment: worldwide: joining "+kind+", id="+nThSmallestGroupId+",clientId="+mConnection.getClientId());
+               TalkGroupPresence destinationGroup = mDatabase.findGroupPresenceById(nThSmallestGroupId);
+               if (destinationGroup.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
+                   joinGroupWithEnvironment(destinationGroup, environment);
+                   return destinationGroup.getGroupId();
+               } else {
+                   LOG.warn("the worldwide group ("+kind+") we were supposed to join is gone, will create a new one, destinationGroupId="+nThSmallestGroupId);
+               }
+           } else {
+               throw new RuntimeException("unknown environment type:"+environment.getType());
+           }
         }
         // we are alone or first at the location, lets create a new group
         createGroupWithEnvironment(environment);
@@ -2648,29 +2771,39 @@ public class TalkRpcHandler implements ITalkRpcServer {
             // we already have a list of all remaining members, so it will be faster
             // and should cause less trouble than doing it on joining
             int removedCount = 0;
-            for (int i = 0; i < membershipsLeft.size(); ++i) {
-                // cleanup other offline members
-                TalkGroupMembership otherMembership = membershipsLeft.get(i);
-                boolean isConnected = mServer.isClientConnected(otherMembership.getClientId());
-                if (!isConnected) {
-                    boolean keep = false;
-                    if (!groupPresence.isTypeNearby()) {
-                        // check for not expired environment
-                        TalkEnvironment otherEnvironment = mDatabase.findEnvironmentByClientIdForGroup(otherMembership.getClientId(), otherMembership.getGroupId());
-                        if (otherEnvironment != null) {
-                            if (!otherEnvironment.hasExpired()) {
-                                keep = true;
-                            } else {
-                                logCall("destroyEnvironment: deleting otherClient's expired environment: " + removedCount);
-                                mDatabase.deleteEnvironment(otherEnvironment);
-                            }
-                        }
-                    }
-                    if (!keep) {
+            if (environment.isNearby()) {
+                // cleanup other offline members for nearby only
+                for (int i = 0; i < membershipsLeft.size(); ++i) {
+
+                    TalkGroupMembership otherMembership = membershipsLeft.get(i);
+                    boolean isConnected = mServer.isClientConnected(otherMembership.getClientId());
+                    if (!isConnected) {
                         // remove offline member from group
                         removeGroupMembership(otherMembership, now);
                         ++removedCount;
                     }
+            /*
+                    if (!isConnected) {
+                        boolean keep = false;
+                        if (!groupPresence.isTypeNearby()) {
+                            // check for not expired environment
+                            TalkEnvironment otherEnvironment = mDatabase.findEnvironmentByClientIdForGroup(otherMembership.getClientId(), otherMembership.getGroupId());
+                            if (otherEnvironment != null) {
+                                if (!otherEnvironment.hasExpired()) {
+                                    keep = true;
+                                } else {
+                                    logCall("destroyEnvironment: deleting otherClient's expired environment: " + removedCount);
+                                    mDatabase.deleteEnvironment(otherEnvironment);
+                                }
+                            }
+                        }
+                        if (!keep) {
+                            // remove offline member from group
+                            removeGroupMembership(otherMembership, now);
+                            ++removedCount;
+                        }
+                    }
+                    */
                 }
             }
             logCall("destroyEnvironment: offline members removed: " + removedCount);
@@ -2710,14 +2843,15 @@ public class TalkRpcHandler implements ITalkRpcServer {
     @Override
     public void releaseEnvironment(String type) {
         requirePastIdentification();
-        logCall("releaseEnvironment(clientId: '" + mConnection.getClientId() + "')");
+        String clientId = mConnection.getClientId();
+        logCall("releaseEnvironment(clientId: '" + clientId + "')");
 
         if (type == null) {
             LOG.warn("releaseEnvironment: no environment type, defaulting to nearby. Please fix client");
             type = TalkEnvironment.TYPE_NEARBY;
         }
 
-        List<TalkEnvironment> myEnvironments = mDatabase.findEnvironmentsForClient(mConnection.getClientId());
+        List<TalkEnvironment> myEnvironments = mDatabase.findEnvironmentsForClient(clientId);
 
         TalkEnvironment mostRecentEnvironment = null;
         for (TalkEnvironment myEnvironment : myEnvironments) {
@@ -2731,12 +2865,29 @@ public class TalkRpcHandler implements ITalkRpcServer {
         for (TalkEnvironment myEnvironment : myEnvironments) {
             if (type.equals(myEnvironment.getType())) {
                 if (!myEnvironment.willLiveAfterRelease() || myEnvironment.getTimeReceived().getTime() != (mostRecentEnvironment.getTimeReceived().getTime())) {
-                    LOG.info("releaseEnvironment: destroying expired or not latest environment with ttl " + myEnvironment.getTimeToLive());
+                    LOG.info("releaseEnvironment: destroying duplicate old environment with type " + myEnvironment.getType() + " for client " + clientId);
                     destroyEnvironment(myEnvironment);
+                } else if (!myEnvironment.willLiveAfterRelease()) {
+                    LOG.info("releaseEnvironment: destroying environment with type " + myEnvironment.getType() + ", ttl " + myEnvironment.getTimeToLive()+" for client " + clientId);
+                    destroyEnvironment(myEnvironment);
+                } else if (myEnvironment.hasExpired()) {
+                    long deliveryCount = deliveryCountForEnvironment(myEnvironment);
+                    if (deliveryCount == 0) {
+                        LOG.info("releaseEnvironment: destroying expired environment with type " + myEnvironment.getType() + ", ttl " + myEnvironment.getTimeToLive() + " for client " + clientId);
+                        destroyEnvironment(myEnvironment);
+                    } else {
+                        LOG.info("releaseEnvironment: keeping expired environment with type " + myEnvironment.getType() + ", ttl " + myEnvironment.getTimeToLive() + " for client " + clientId+" because it has "+deliveryCount+" undelivered deliveries");
+                    }
                 } else {
-                    LOG.info("releaseEnvironment: releasing environment with ttl " + myEnvironment.getTimeToLive());
-                    myEnvironment.setTimeReleased(new Date());
-                    mDatabase.saveEnvironment(myEnvironment);
+                    if (myEnvironment.getTimeReleased() == null) {
+                        LOG.info("releaseEnvironment: releasing environment with type " + myEnvironment.getType() + ", ttl " + myEnvironment.getTimeToLive()+" for client " + clientId);
+                        myEnvironment.setTimeReleased(new Date());
+                        mDatabase.saveEnvironment(myEnvironment);
+                    } else {
+                        LOG.info("releaseEnvironment: environment with ttl " + myEnvironment.getTimeToLive() +
+                                " already released on "+myEnvironment.getTimeReleased()+", ttl remaining "+
+                                (myEnvironment.getTimeReleased().getTime()+myEnvironment.getTimeToLive()- new Date().getTime()));
+                    }
                 }
             }
         }
@@ -2811,10 +2962,33 @@ public class TalkRpcHandler implements ITalkRpcServer {
         final List<TalkRelationship> relationships =
                 mDatabase.findRelationshipsForClientInStates(clientId, TalkRelationship.STATES_RELATED);
 
+        final HashMap<String,TalkRelationship> relationshipHashMap = new HashMap<String, TalkRelationship>();
+
         Set<String> myContactIds = new HashSet<String>();
         for (TalkRelationship relationship : relationships) {
             myContactIds.add(relationship.getOtherClientId());
+            relationshipHashMap.put(relationship.getOtherClientId(), relationship);
         }
+
+        // we do this to check if the relationships are symmetrical
+        final List<TalkRelationship> otherRelationships =
+                mDatabase.findRelationshipsForOtherClientInStates(clientId, TalkRelationship.STATES_RELATED);
+
+        Set<String> myOtherContactIds = new HashSet<String>();
+        for (TalkRelationship relationship : otherRelationships) {
+            if (!myContactIds.contains(relationship.getClientId())) {
+                // we have only a reverse relationship pointing to us, but none pointing to the other client
+                LOG.error("isContactOf: missing relationship from us (" + clientId + ") to contact " + relationship.getClientId() + " who has a relationship pointing to us with state '" + relationship.getState() + "'");
+            }
+            myOtherContactIds.add(relationship.getClientId());
+        }
+        for (String otherClientId : myContactIds) {
+            if (!myOtherContactIds.contains(otherClientId)) {
+                // we have a relationship pointing to otherClientId, but he has no contact point to us
+                LOG.error("isContactOf: missing relationship from contact " + otherClientId + " to us (" + clientId + ") while we have a relationship pointing to him with state '"+relationshipHashMap.get(otherClientId).getState()+"'");
+            }
+        }
+        // TODO: automatically fix missing relationship when above error cases are encountered
 
         final List<TalkGroupMembership> clientMemberships = mDatabase.findGroupMembershipsForClientWithStates(clientId, TalkGroupMembership.ACTIVE_STATES);
 

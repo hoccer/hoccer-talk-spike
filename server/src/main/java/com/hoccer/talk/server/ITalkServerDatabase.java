@@ -58,6 +58,10 @@ public interface ITalkServerDatabase {
 
     public List<TalkDelivery> findDeliveriesForClientInState(String receiverId, String state);
 
+    public List<TalkDelivery> findDeliveriesForClientInGroupInState(String receiverId, String groupId, String state);
+
+    public long countDeliveriesForClientInGroupInState(String receiverId, String groupId, String state);
+
     public List<TalkDelivery> findDeliveriesForClientInDeliveryAndAttachmentStates(String receiverId, String[] deliveryStates, String[] attachmentStates);
 
     public List<TalkDelivery> findDeliveriesFromClient(String senderId);
@@ -117,6 +121,7 @@ public interface ITalkServerDatabase {
     public List<TalkRelationship> findRelationshipsWithStatesChangedBefore(String[] states, Date lastChanged);
 
     public int deleteRelationshipsWithStatesChangedBefore(String[] states, Date lastChanged);
+    public int deleteRelationshipsWithStatesAndNotNotificationsDisabledChangedBefore(String[] states, Date lastChanged);
 
     @Nullable
     public TalkRelationship findRelationshipBetween(String client, String otherClient);

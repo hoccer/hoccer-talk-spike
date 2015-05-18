@@ -160,9 +160,9 @@ public class UpdateAgent extends NotificationDeferrer {
         // collect clientIds known through relationships (have a relationship to me)
         List<TalkRelationship> relationships = mDatabase.findRelationshipsByOtherClient(selfClientId);
         for (TalkRelationship relationship : relationships) {
-            // if the other clients relation is friendly to or has been invited by present client
-            // Clients that have blocked present client therefore will not be included here
-            if (relationship.isDirectlyRelated()) {
+            if (relationship.isRelated()) {
+                // if the other clients relation is anything but 'none'
+                // Clients that have blocked present client therefore will also be included here
                 LOG.trace(tag + "including friend " + relationship.getClientId());
                 clientIds.add(relationship.getClientId());
             }
@@ -185,12 +185,16 @@ public class UpdateAgent extends NotificationDeferrer {
             }
         }
 /*
-        // I think it is better to distribute the presence even to blocking clients
+        // It is better to distribute the presence even to blocking clients
         // because there are some corner cases like the connection flag and
-        // possibly others that need to be handled; maybe we can better live
+        // possibly others that need to be handled; we can better live
         // with updating the presence to blocking clients and request from
         // the user to delete a contact when he does not want to know anything
         // about it.
+
+        // The main hazard is that a client might change it's avatar frequently
+        // causing a blocker to unnecessarily download the avatar.
+        // TODO: implement some countermeasures against this (this might as well be done on the client side by not retrieving avatars of blocked clients)
 
         // do not send presence to clients the present client has blocked
         List<TalkRelationship> my_relationships = mDatabase.findRelationships(selfClientId);
@@ -202,7 +206,6 @@ public class UpdateAgent extends NotificationDeferrer {
                 }
             }
         }
-        //TODO: deal with blocked group members in conjunction with group key distribution
 */
         // remove self
         LOG.trace(tag + "excluding self " + selfClientId);
@@ -768,39 +771,49 @@ public class UpdateAgent extends NotificationDeferrer {
 
     public void removeMembership(TalkGroupMembership membership, Date changedDate, String removalState) {
         LOG.info("removeMembership group "+membership.getGroupId()+" removing membership for client "+membership.getClientId());
-        // set membership state to NONE
-        membership.setState(TalkGroupMembership.STATE_NONE);
-        // degrade anyone who leaves to member
-        membership.setRole(TalkGroupMembership.ROLE_MEMBER);
-        // trash keys
-        membership.trashPrivate();
-        membership.setLastChanged(changedDate);
-        mDatabase.saveGroupMembership(membership);
-        requestGroupMembershipUpdate(membership.getGroupId(), membership.getClientId());
+        if (!(removalState.equals(membership.getState()) &&
+                TalkGroupMembership.ROLE_NONE.equals(membership.getRole())))
+        {
+            // set membership state to removalState
+            membership.setState(removalState);
+            // degrade anyone who leaves to member
+            membership.setRole(TalkGroupMembership.ROLE_NONE);
+            // trash keys
+            membership.trashPrivate();
+            membership.setLastChanged(changedDate);
+            mDatabase.saveGroupMembership(membership);
+            requestGroupMembershipUpdate(membership.getGroupId(), membership.getClientId());
+        }
     }
 
-    public void removeRelationship(TalkRelationship relationship, Date changedDate) {
-        relationship.setState(TalkRelationship.STATE_NONE);
-        relationship.setUnblockState(TalkRelationship.STATE_NONE);
-        relationship.setLastChanged(changedDate);
-        mDatabase.saveRelationship(relationship);
-        requestRelationshipUpdate(relationship);
+    public void nullifyRelationship(TalkRelationship relationship, Date changedDate) {
+        if (!(TalkRelationship.STATE_NONE.equals(relationship.getState()) &&
+                TalkRelationship.STATE_NONE.equals(relationship.getUnblockState()) &&
+                relationship.getNotificationPreference() != null))
+        {
+            relationship.setState(TalkRelationship.STATE_NONE);
+            relationship.setUnblockState(TalkRelationship.STATE_NONE);
+            relationship.setNotificationPreference(null);
+            relationship.setLastChanged(changedDate);
+            mDatabase.saveRelationship(relationship);
+            requestRelationshipUpdate(relationship);
+        }
     }
 
-    public void removeRelationships(List<TalkRelationship> relationships, List<TalkRelationship> otherRelationships) {
-        LOG.info("removeRelationships: count:"+relationships.size()+", otherCount:"+otherRelationships.size());
+    public void nullifyRelationships(List<TalkRelationship> relationships, List<TalkRelationship> otherRelationships) {
+        LOG.info("nullifyRelationships: count:"+relationships.size()+", otherCount:"+otherRelationships.size());
 
         int count = 0;
         int otherCount = 0;
         for (TalkRelationship relationship : relationships) {
             synchronized (mServer.dualIdLock(TalkRelationship.LOCK_PREFIX, relationship.getClientId(), relationship.getOtherClientId())) {
                 Date deletionMarkDate = new Date();
-                removeRelationship(relationship, deletionMarkDate);
+                nullifyRelationship(relationship, deletionMarkDate);
                 ++count;
                 for (TalkRelationship otherRelationship : otherRelationships) {
                     if (otherRelationship.getOtherClientId().equals(relationship.getClientId()) &&
                         otherRelationship.getClientId().equals(relationship.getOtherClientId())) {
-                        removeRelationship(otherRelationship, deletionMarkDate);
+                        nullifyRelationship(otherRelationship, deletionMarkDate);
                         ++otherCount;
                         break;
                     }
@@ -808,9 +821,9 @@ public class UpdateAgent extends NotificationDeferrer {
             }
         }
         if (count != otherCount) {
-            LOG.warn("removeRelationships: counts differ, done count:"+count+", done otherCount:"+otherCount);
+            LOG.warn("nullifyRelationships: counts differ, done count:"+count+", done otherCount:"+otherCount);
         } else {
-            LOG.info("removeRelationships: done count:"+count+", done otherCount:"+otherCount);
+            LOG.info("nullifyRelationships: done count:"+count+", done otherCount:"+otherCount);
         }
     }
 
@@ -839,10 +852,12 @@ public class UpdateAgent extends NotificationDeferrer {
                     TalkGroupPresence groupPresence = mDatabase.findGroupPresenceById(membership.getGroupId());
                     if (groupPresence != null) {
                         // mark the group as deleted
-                        groupPresence.setState(TalkGroupPresence.STATE_DELETED);
-                        groupPresence.setLastChanged(new Date());
-                        mDatabase.saveGroupPresence(groupPresence);
-                        requestGroupUpdate(groupPresence.getGroupId());
+                        if (!TalkGroupPresence.STATE_DELETED.equals(groupPresence.getState())) {
+                            groupPresence.setState(TalkGroupPresence.STATE_DELETED);
+                            groupPresence.setLastChanged(new Date());
+                            mDatabase.saveGroupPresence(groupPresence);
+                            requestGroupUpdate(groupPresence.getGroupId());
+                        }
 
                         // walk the group and make everyone have a "none" relationship to it
                         List<TalkGroupMembership> otherMemberships = mDatabase.findGroupMembershipsById(groupPresence.getGroupId());
@@ -864,13 +879,15 @@ public class UpdateAgent extends NotificationDeferrer {
 
         // remove all relationsships
         final List<TalkRelationship> relationships =
-                mDatabase.findRelationshipsForClientInStates(clientId, TalkRelationship.STATES_RELATED);
+                mDatabase.findRelationships(clientId);
+                // mDatabase.findRelationshipsForClientInStates(clientId, TalkRelationship.STATES_RELATED);
 
         final List<TalkRelationship> otherRelationships =
-                mDatabase.findRelationshipsForOtherClientInStates(clientId, TalkRelationship.STATES_RELATED);
+            mDatabase.findRelationshipsByOtherClient(clientId);
+            // mDatabase.findRelationshipsForOtherClientInStates(clientId, TalkRelationship.STATES_RELATED);
 
         if (otherRelationships.size() > 0 || relationships.size() > 0) {
-            removeRelationships(relationships, otherRelationships);
+            nullifyRelationships(relationships, otherRelationships);
             acquaintances += relationships.size() + otherRelationships.size();
         }
 
