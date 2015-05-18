@@ -124,7 +124,7 @@ public class GroupProfileFragment extends ProfileFragment
         }
         mGroupMemberAdapter.requestReload();
 
-        if (mContact.getGroupPresence() != null && mContact.getGroupPresence().isTypeNearby()) {
+        if (mContact.isNearbyGroup() || mContact.isWorldwideGroup()) {
             mGroupMembersList.setOnItemClickListener(this);
         } else {
             mGroupMembersList.setOnItemClickListener(null);
@@ -187,7 +187,7 @@ public class GroupProfileFragment extends ProfileFragment
         editGroupItem.setVisible(false);
         leaveGroupItem.setVisible(false);
 
-        if (mContact.getGroupPresence() != null && !mContact.getGroupPresence().isTypeNearby()) {
+        if (!(mContact.isNearbyGroup() || mContact.isWorldwideGroup())) {
             if (mContact.isEditable()) {
                 editGroupItem.setVisible(true);
                 listAttachmentsItem.setVisible(true);
@@ -341,8 +341,10 @@ public class GroupProfileFragment extends ProfileFragment
             name = mNameEditText.getText().toString();
         }
 
-        if (mContact.getGroupPresence() != null && mContact.getGroupPresence().isTypeNearby()) {
+        if (mContact.isNearbyGroup()) {
             mNameText.setText(R.string.all_nearby);
+        } else if (mContact.isWorldwideGroup()) {
+            mNameText.setText(R.string.all_worldwide);
         } else {
             mNameText.setText(name);
         }
