@@ -197,8 +197,7 @@ public class ChatFragment extends XoListFragment
             musicItem.setVisible(true);
 
             MenuItem createPermanentGroupItem = menu.findItem(R.id.menu_group_profile_create_permanent_group);
-            boolean shouldShow = (mContact.isGroup() && mContact.getGroupPresence() != null && mContact.getGroupPresence().isTypeNearby());
-            createPermanentGroupItem.setVisible(shouldShow);
+            createPermanentGroupItem.setVisible(mContact.isNearbyGroup() || mContact.isWorldwideGroup());
         }
     }
 
