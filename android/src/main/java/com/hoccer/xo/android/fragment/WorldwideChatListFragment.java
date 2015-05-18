@@ -1,18 +1,16 @@
-package com.hoccer.xo.android.activity;
+package com.hoccer.xo.android.fragment;
 
 import android.content.Context;
 import android.content.res.Resources;
 import android.view.View;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.model.TalkEnvironment;
+import com.hoccer.xo.android.WorldwideController;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.adapter.EnvironmentChatListAdapter;
-import com.hoccer.xo.android.fragment.EnvironmentChatListFragment;
 import com.hoccer.xo.android.view.Placeholder;
 
-import java.util.Date;
-
-import static com.hoccer.talk.model.TalkEnvironment.*;
+import static com.hoccer.talk.model.TalkEnvironment.TYPE_WORLDWIDE;
 
 public class WorldwideChatListFragment extends EnvironmentChatListFragment {
 
@@ -64,31 +62,23 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
 
     @Override
     public void onPageResume() {
-        TalkEnvironment environment = createWorldwideEnvironment();
-        if (environment.isValid()) {
-            XoApplication.get().getXoClient().sendEnvironmentUpdate(environment);
-        }
-    }
-
-    private TalkEnvironment createWorldwideEnvironment() {
-        TalkEnvironment environment = new TalkEnvironment();
-        environment.setType(TYPE_WORLDWIDE);
-        environment.setTimestamp(new Date());
-//        environment.setTag("*"); TODO: which tag?
-        return environment;
+        WorldwideController.get().enableWorldwide();
     }
 
     @Override
-    public void onPageSelected() {}
+    public void onPageSelected() {
+    }
 
     @Override
     public void onPageUnselected() {
-        XoApplication.get().getXoClient().sendDestroyEnvironment(TalkEnvironment.TYPE_WORLDWIDE);
+        WorldwideController.get().disableWorldWide();
     }
 
     @Override
-    public void onPagePause() {}
+    public void onPagePause() {
+    }
 
     @Override
-    public void onPageScrollStateChanged(int state) {}
+    public void onPageScrollStateChanged(int state) {
+    }
 }
