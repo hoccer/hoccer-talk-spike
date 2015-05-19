@@ -149,30 +149,24 @@ public class ChatActivity extends ComposableActivity {
         Bundle bundle = new Bundle();
         bundle.putInt(HistoryFragment.ARG_CLIENT_CONTACT_ID, contactId);
 
-        HistoryFragment fragment = new HistoryFragment();
-        fragment.setArguments(bundle);
-
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, fragment);
-        fragmentTransaction.commit();
+        replaceWithHistoryFragment(bundle);
     }
 
     private void showNearbyGroupHistoryFragment() {
         Bundle bundle = new Bundle();
         bundle.putString(HistoryFragment.ARG_GROUP_HISTORY, TalkEnvironment.TYPE_NEARBY);
 
-        HistoryFragment fragment = new HistoryFragment();
-        fragment.setArguments(bundle);
-
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, fragment);
-        fragmentTransaction.commit();
+        replaceWithHistoryFragment(bundle);
     }
 
     private void showWorldwideGroupHistoryFragment() {
         Bundle bundle = new Bundle();
         bundle.putString(HistoryFragment.ARG_GROUP_HISTORY, TalkEnvironment.TYPE_WORLDWIDE);
 
+        replaceWithHistoryFragment(bundle);
+    }
+
+    private void replaceWithHistoryFragment(Bundle bundle) {
         HistoryFragment fragment = new HistoryFragment();
         fragment.setArguments(bundle);
 
