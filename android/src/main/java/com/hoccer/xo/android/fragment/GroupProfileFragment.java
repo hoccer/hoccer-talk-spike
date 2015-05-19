@@ -365,13 +365,25 @@ public class GroupProfileFragment extends ProfileFragment
             avatarUri = UriUtils.getAbsoluteFileUri(avatarTransfer.getFilePath());
         }
 
+        int placeholderId = getGroupPlaceholder();
+
         Picasso.with(getActivity())
                 .load(avatarUri)
                 .centerCrop()
                 .fit()
-                .placeholder(R.drawable.avatar_group_large)
-                .error(R.drawable.avatar_group_large)
+                .placeholder(placeholderId)
+                .error(placeholderId)
                 .into(mAvatarImage);
+    }
+
+    private int getGroupPlaceholder() {
+        int placeholderId = R.drawable.group_large;
+        if (mContact.isNearbyGroup()) {
+            placeholderId = R.drawable.location_large;
+        } else if (mContact.isWorldwideGroup()) {
+            placeholderId = R.drawable.world_large;
+        }
+        return placeholderId;
     }
 
     private void refreshContact() {

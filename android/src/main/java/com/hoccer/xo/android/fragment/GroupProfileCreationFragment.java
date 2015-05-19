@@ -234,8 +234,8 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
                 .load(avatarUri)
                 .centerCrop()
                 .fit()
-                .placeholder(R.drawable.avatar_group_large)
-                .error(R.drawable.avatar_group_large)
+                .placeholder(R.drawable.group_large)
+                .error(R.drawable.group_large)
                 .into(mAvatarImageView);
     }
 
