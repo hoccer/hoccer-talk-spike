@@ -19,6 +19,7 @@ import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.activity.component.ViewPagerActivityComponent;
 import com.hoccer.xo.android.fragment.ChatListFragment;
 import com.hoccer.xo.android.fragment.NearbyChatListFragment;
+import com.hoccer.xo.android.fragment.WorldwideChatListFragment;
 import com.hoccer.xo.android.passwordprotection.PasswordProtection;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.ContactsMenuItemActionProvider;
