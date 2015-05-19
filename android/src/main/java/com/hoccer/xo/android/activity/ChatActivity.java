@@ -1,9 +1,7 @@
 package com.hoccer.xo.android.activity;
 
-import android.app.ActionBar;
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -29,8 +27,6 @@ public class ChatActivity extends ComposableActivity {
     public static final String EXTRA_ENVIRONMENT_GROUP_HISTORY = "com.hoccer.xo.android.intent.extra.ENVIRONMENT_GROUP_HISTORY";
     public static final String EXTRA_CLIENT_HISTORY = "com.hoccer.xo.android.intent.extra.NEARBY_CLIENT_HISTORY";
 
-    ActionBar mActionBar;
-
     @Override
     protected ActivityComponent[] createComponents() {
         return new ActivityComponent[]{new MediaPlayerActivityComponent(this)};
@@ -50,33 +46,29 @@ public class ChatActivity extends ComposableActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // get action bar (for setting title)
-        mActionBar = getActionBar();
+        if (getIntent() == null) {
+            return;
+        }
 
-        // enable up navigation
-        enableUpNavigation();
-
-        // handle converse intent
-        Intent intent = getIntent();
-        if (intent != null && intent.hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
-            int contactId = intent.getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
-            if (contactId == -1) {
-                LOG.error("invalid contact id");
+        int contactId = getIntent().getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
+        if (contactId != -1) {
+            if (getIntent().hasExtra(EXTRA_CLIENT_HISTORY)) {
+                showHistoryFragment(contactId);
             } else {
-                if (intent.hasExtra(EXTRA_CLIENT_HISTORY)) {
-                    showHistoryFragment(contactId);
-                } else {
-                    showChatFragment(contactId);
+                showChatFragment(contactId);
+            }
+        } else {
+            String type = getIntent().getStringExtra(EXTRA_ENVIRONMENT_GROUP_HISTORY);
+            if (type != null) {
+                if (TalkEnvironment.TYPE_NEARBY.equals(type)) {
+                    showNearbyGroupHistoryFragment();
+                } else if (TalkEnvironment.TYPE_WORLDWIDE.equals(type)) {
+                    showWorldwideGroupHistoryFragment();
                 }
             }
-        } else if (intent != null && intent.hasExtra(EXTRA_ENVIRONMENT_GROUP_HISTORY)) {
-            String type = intent.getStringExtra(EXTRA_ENVIRONMENT_GROUP_HISTORY);
-            if (TalkEnvironment.TYPE_NEARBY.equals(type)) {
-                showNearbyGroupHistoryFragment();
-            } else if (TalkEnvironment.TYPE_WORLDWIDE.equals(type)) {
-                showWorldwideGroupHistoryFragment();
-            }
         }
+
+        enableUpNavigation();
     }
 
     @Override
