@@ -454,7 +454,7 @@ public class SingleProfileFragment extends ProfileFragment
                 blockedCount = getXoDatabase().findClientContactsByState(TalkRelationship.STATE_BLOCKED).size();
 
                 List<TalkClientContact> joinedGroups = getXoDatabase().findGroupContactsByMembershipState(TalkGroupMembership.STATE_JOINED);
-                CollectionUtils.filterInverse(joinedGroups, TalkClientContactPredicates.IS_NEARBY_GROUP_PREDICATE);
+                CollectionUtils.filterInverse(joinedGroups, TalkClientContactPredicates.IS_ENVIRONMENT_GROUP_PREDICATE);
                 groupsCount = joinedGroups.size();
             } catch (SQLException e) {
                 e.printStackTrace();
