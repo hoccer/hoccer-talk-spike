@@ -16,6 +16,7 @@ import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
+import com.hoccer.talk.model.TalkEnvironment;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
@@ -244,18 +245,23 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
-        TalkClientContact environmentGroup = getActiveEnvironmentGroup();
-        if (environmentGroup != null) {
+        TalkClientContact environmentGroup = getCurrentEnvironmentGroup();
+
+        if (environmentGroup != null && groupMatchesEnvironmentType(environmentGroup)) {
             mCurrentEnvironmentGroup = environmentGroup;
+        } else {
+            mCurrentEnvironmentGroup = null;
         }
-        if (mCurrentEnvironmentGroup != null && contact.getGroupId().equals(mCurrentEnvironmentGroup.getGroupId())) {
-            LOG.debug("onGroupMembershipChanged()");
-            scheduleUpdate(contact);
-        }
+        scheduleUpdate(mCurrentEnvironmentGroup);
+    }
+
+    private boolean groupMatchesEnvironmentType(TalkClientContact environmentGroup) {
+        return TalkEnvironment.TYPE_NEARBY.equals(mEnvironmentType) && environmentGroup.isNearbyGroup() ||
+                TalkEnvironment.TYPE_WORLDWIDE.equals(mEnvironmentType) && environmentGroup.isWorldwideGroup();
     }
 
     @Nullable
-    private TalkClientContact getActiveEnvironmentGroup() {
+    private TalkClientContact getCurrentEnvironmentGroup() {
         return XoApplication.get().getXoClient().getCurrentEnvironmentGroup();
     }
 
