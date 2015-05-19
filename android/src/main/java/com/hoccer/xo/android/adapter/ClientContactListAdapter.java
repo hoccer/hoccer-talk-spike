@@ -89,7 +89,7 @@ public class ClientContactListAdapter extends ContactListAdapter {
     private int getViewTypeForContact(TalkClientContact contact) {
         int type;
 
-        if (contact.getClientRelationship().isFriend() || contact.getClientRelationship().isBlocked() || contact.isNearby()) {
+        if (contact.getClientRelationship().isFriend() || contact.getClientRelationship().isBlocked() || contact.isNearby() || contact.isWorldwide()) {
             type = TYPE_PRESENCE;
         } else if (contact.isKept() && contact.isNearbyAcquaintance()) {
             type = TYPE_NEARBY_HISTORY;
