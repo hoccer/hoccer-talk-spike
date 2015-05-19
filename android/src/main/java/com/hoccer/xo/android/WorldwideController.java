@@ -13,6 +13,8 @@ public class WorldwideController {
 
     private static WorldwideController sInstance;
 
+    private IXoStateListener mStateListener;
+
     public static WorldwideController get() {
         if (sInstance == null) {
             sInstance = new WorldwideController();
@@ -21,17 +23,18 @@ public class WorldwideController {
     }
 
     private WorldwideController() {
-        XoApplication.get().getXoClient().registerStateListener(new IXoStateListener() {
+        mStateListener = new IXoStateListener() {
             @Override
             public void onClientStateChange(XoClient client) {
                 if (client.isReady()) {
-                    enableWorldwide();
+                    sendEnvironmentUpdate(createWorldwideEnvironment());
                 }
             }
-        });
+        };
     }
 
     public void enableWorldwide() {
+        XoApplication.get().getXoClient().registerStateListener(mStateListener);
         sendEnvironmentUpdate(createWorldwideEnvironment());
     }
 
@@ -54,6 +57,7 @@ public class WorldwideController {
     }
 
     public void disableWorldWide() {
+        XoApplication.get().getXoClient().unregisterStateListener(mStateListener);
         XoApplication.get().getXoClient().sendDestroyEnvironment(TalkEnvironment.TYPE_WORLDWIDE);
     }
 }
