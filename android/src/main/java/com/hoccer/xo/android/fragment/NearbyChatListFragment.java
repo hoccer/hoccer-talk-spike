@@ -12,6 +12,8 @@ import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.EnvironmentChatListAdapter;
 import com.hoccer.xo.android.view.Placeholder;
 
+import static com.hoccer.talk.model.TalkEnvironment.TYPE_NEARBY;
+
 
 public class NearbyChatListFragment extends EnvironmentChatListFragment {
 
@@ -37,7 +39,7 @@ public class NearbyChatListFragment extends EnvironmentChatListFragment {
 
     private void createAdapter() {
         if (mListAdapter == null) {
-            mListAdapter = new EnvironmentChatListAdapter(TalkEnvironment.TYPE_NEARBY, mActivity);
+            mListAdapter = new EnvironmentChatListAdapter(TYPE_NEARBY, mActivity);
             mListAdapter.registerListeners();
             setListAdapter(mListAdapter);
         }
