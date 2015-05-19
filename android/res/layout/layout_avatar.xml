@@ -5,5 +5,5 @@
         android:scaleType="centerCrop"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/avatar_contact_round"
+        android:src="@drawable/avatar_contact_circle"
         custom:aspectRatio="1.0" tools:showIn="@layout/view_avatar_presence"/>
