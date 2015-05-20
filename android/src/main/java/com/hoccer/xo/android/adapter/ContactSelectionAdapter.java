@@ -79,8 +79,12 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
             viewHolder.checkedNameTextView.setText(R.string.all_nearby);
         } else {
             viewHolder.checkedNameTextView.setText(contact.getNickname());
-            if (!contact.isClientRelated() && contact.isNearby()) {
-                viewHolder.checkedNameTextView.setText(contact.getNickname() + " (" + parent.getContext().getString(R.string.nearby) + ")");
+            if (!contact.isFriendOrBlocked()) {
+                if (contact.isNearby()) {
+                    viewHolder.checkedNameTextView.setText(contact.getNickname() + " (" + parent.getContext().getString(R.string.nearby) + ")");
+                } else if (contact.isWorldwide()) {
+                    viewHolder.checkedNameTextView.setText(contact.getNickname() + " (" + parent.getContext().getString(R.string.worldwide) + ")");
+                }
             }
         }
 
@@ -147,7 +151,7 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
                 shouldShow = true;
             }
         } else if (contact.isClient()) {
-            if (contact.isClientFriend() || contact.isNearby() || (contact.isClientRelated() && contact.getClientRelationship().isBlocked())) {
+            if (contact.isClientFriend() || contact.isInEnvironment() || (contact.isClientRelated() && contact.getClientRelationship().isBlocked())) {
                 shouldShow = true;
             }
         }

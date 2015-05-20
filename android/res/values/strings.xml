@@ -455,6 +455,7 @@
     <string name="progress_cancelling">Cancelling..</string>
 
     <string name="nearby">nearby</string>
+    <string name="worldwide">worldwide</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>
