@@ -1393,6 +1393,8 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     TalkGroupPresence groupPresence = groupContact.getGroupPresence();
                     if (groupPresence != null && groupPresence.isTypeNearby()) {
                         destroyNearbyGroup(groupContact);
+                    } else if (groupPresence != null && groupPresence.isTypeWorldwide()) {
+                        destroyWorldwideGroup(groupContact);
                     } else {
                         if (groupPresence != null) {
                             if (groupContact.getGroupMembership().isInvolved() && hasMembersOrMessages(groupContact)) {
@@ -1915,6 +1917,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
     public void sendEnvironmentUpdate(final TalkEnvironment environment) {
         LOG.debug("sendEnvironmentUpdate()");
+
         if (isReady() && environment != null) {
             if (mEnvironmentUpdateCallPending.compareAndSet(false, true)) {
                 mExecutor.execute(new Runnable() {
@@ -2869,6 +2872,8 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         // quietly destroy nearby group
         if (groupPresence.isTypeNearby() && !groupPresence.exists()) {
             destroyNearbyGroup(groupContact);
+        } else if (groupPresence.isTypeWorldwide() && !groupPresence.exists()) {
+            destroyWorldwideGroup(groupContact);
         }
 
         LOG.info("updateGroupPresence(" + groupPresence.getGroupId() + ") - saved");
@@ -2909,6 +2914,40 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             }
         } catch (SQLException e) {
             LOG.error("Error while destroying nearby group " + groupContact.getGroupId());
+        }
+    }
+
+    private void destroyWorldwideGroup(TalkClientContact groupContact) {
+        LOG.debug("destroying worldwide group with id " + groupContact.getGroupId());
+
+        try {
+            // reset group state
+            TalkGroupPresence groupPresence = groupContact.getGroupPresence();
+            if (groupPresence == null) {
+                LOG.error("Can not destroy worldwide group since groupPresence is null");
+                return;
+            }
+            groupPresence.setKept(true);
+
+            // save group
+            mDatabase.saveContact(groupContact);
+            mDatabase.saveGroupPresence(groupPresence);
+
+            // set member states to none
+            List<TalkGroupMembership> memberships = mDatabase.findMembershipsInGroup(groupContact.getGroupId());
+            for (TalkGroupMembership membership : memberships) {
+                membership.setState(TalkGroupMembership.STATE_NONE);
+                mDatabase.saveGroupMembership(membership);
+            }
+
+            // set worldwide state to false
+            List<TalkClientContact> contacts = mDatabase.findContactsInGroup(groupContact.getGroupId());
+            for (TalkClientContact contact : contacts) {
+                contact.setWorldwide(false);
+                mDatabase.saveContact(contact);
+            }
+        } catch (SQLException e) {
+            LOG.error("Error while destroying worldwide group " + groupContact.getGroupId());
         }
     }
 
@@ -3006,6 +3045,8 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     TalkGroupPresence groupPresence = groupContact.getGroupPresence();
                     if (groupPresence != null && groupPresence.isTypeNearby()) {
                         destroyNearbyGroup(groupContact);
+                    } else if (groupPresence != null && groupPresence.isTypeWorldwide()) {
+                        destroyWorldwideGroup(groupContact);
                     }
                 }
             }
