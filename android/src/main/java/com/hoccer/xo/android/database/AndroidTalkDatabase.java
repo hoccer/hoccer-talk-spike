@@ -104,6 +104,8 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
             }
 
             if (oldVersion < 27) {
+                db.execSQL("ALTER TABLE 'groupMembership' ADD COLUMN 'notificationPreference' VARCHAR" );
+                db.execSQL("ALTER TABLE 'relationship' ADD COLUMN 'notificationPreference' VARCHAR" );
                 db.execSQL("ALTER TABLE 'clientContact' ADD COLUMN 'worldwide' SMALLINT");
             }
 
