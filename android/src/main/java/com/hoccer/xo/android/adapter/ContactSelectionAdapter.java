@@ -75,8 +75,10 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
         viewHolder.contact = contact;
         viewHolder.avatarView.setContact(contact);
 
-        if (contact.isGroup() && contact.getGroupPresence() != null && contact.getGroupPresence().isTypeNearby()) {
+        if (contact.isNearbyGroup()) {
             viewHolder.checkedNameTextView.setText(R.string.all_nearby);
+        } else if (contact.isWorldwideGroup()) {
+            viewHolder.checkedNameTextView.setText(R.string.all_worldwide);
         } else {
             viewHolder.checkedNameTextView.setText(contact.getNickname());
             if (!contact.isFriendOrBlocked()) {
