@@ -2032,7 +2032,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             }
 
             if (groupContact == null) {
-                keepNearbyAcquaintance(clientContact);
+                keepAcquaintance(clientContact);
             }
 
             String messageId = delivery.getMessageId();
@@ -2301,7 +2301,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             messageFailed = false;
 
             if (groupContact == null) {
-                keepNearbyAcquaintance(senderContact);
+                keepAcquaintance(senderContact);
             }
 
         } catch (GeneralSecurityException e) {
@@ -2356,14 +2356,17 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         sendDownloadAttachmentDeliveryConfirmation(delivery);
     }
 
-    private void keepNearbyAcquaintance(TalkClientContact clientContact) throws SQLException, NoClientIdInPresenceException {
-        if (clientContact.isClient() && clientContact.isNearby() && (
-                clientContact.getClientRelationship() == null
+    private void keepAcquaintance(TalkClientContact clientContact) throws SQLException, NoClientIdInPresenceException {
+        if (clientContact.isClient()  && clientContact.isInEnvironment() && (clientContact.getClientRelationship() == null
                         || clientContact.getClientRelationship().isNone()
                         || clientContact.getClientRelationship().isInvited()
                         || clientContact.getClientRelationship().invitedMe())) {
+            if (clientContact.isNearby()) {
+                clientContact.getClientPresence().setAcquaintanceType(TalkEnvironment.TYPE_NEARBY);
+            } else if (clientContact.isWorldwide()) {
+                clientContact.getClientPresence().setAcquaintanceType(TalkEnvironment.TYPE_WORLDWIDE);
+            }
             clientContact.getClientPresence().setKept(true);
-            clientContact.getClientPresence().setNearbyAcquaintance(true);
             mDatabase.savePresence(clientContact.getClientPresence());
             mDatabase.saveContact(clientContact);
         }
@@ -2800,7 +2803,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 clientContact.getClientPresence().setKept(false);
             } else if (friendshipCancelled(newRelationship, oldRelationShip)) {
                 clientContact.getClientPresence().setKept(true);
-                clientContact.getClientPresence().setNearbyAcquaintance(false);
+                clientContact.getClientPresence().setAcquaintanceType(TalkPresence.TYPE_ACQUAINTANCE_NONE);
             }
             clientContact.updateRelationship(newRelationship);
             mDatabase.saveRelationship(clientContact.getClientRelationship());

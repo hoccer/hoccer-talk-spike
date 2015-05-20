@@ -28,9 +28,9 @@ public class TalkClientContact implements Serializable {
     public @interface SelfMethodOnly {}
 
     public static final String TYPE_SELF = "self";
+
     public static final String TYPE_CLIENT = "client";
     public static final String TYPE_GROUP = "group";
-
     @DatabaseField(generatedId = true)
     private int clientContactId;
 
@@ -164,6 +164,10 @@ public class TalkClientContact implements Serializable {
 
     public boolean isNearbyAcquaintance() {
         return isClient() && this.clientPresence.isNearbyAcquaintance();
+    }
+
+    public boolean isWorldwideAcquaintance() {
+        return isClient() && this.clientPresence.isWorldwideAcquaintance();
     }
 
     public boolean isKept() {

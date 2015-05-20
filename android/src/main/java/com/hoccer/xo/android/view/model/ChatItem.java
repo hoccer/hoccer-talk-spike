@@ -14,8 +14,9 @@ public abstract class ChatItem {
     public static final int TYPE_RELATED = 0;
     public static final int TYPE_CLIENT_HISTORY = 1;
     public static final int TYPE_CLIENT_NEARBY_HISTORY = 2;
-    public static final int TYPE_GROUP_NEARBY_HISTORY = 3;
-    public static final int TYPE_GROUP_WORLDWIDE_HISTORY = 4;
+    public static final int TYPE_CLIENT_WORLDWIDE_HISTORY = 3;
+    public static final int TYPE_GROUP_NEARBY_HISTORY = 4;
+    public static final int TYPE_GROUP_WORLDWIDE_HISTORY = 5;
 
     protected long mUnseenMessageCount;
 
@@ -70,6 +71,8 @@ public abstract class ChatItem {
         ChatItem chatItem;
         if (!contact.isFriendOrBlocked() && contact.isNearbyAcquaintance()) {
             chatItem = createNearbyHistoryChatItem(contact, context);
+        } else if (!contact.isFriendOrBlocked() && contact.isWorldwideAcquaintance()) {
+            chatItem = createWorldwideHistoryChatItem(contact, context);
         } else if (contact.isClient() && !contact.isFriendOrBlocked() || contact.isKeptGroup()) {
             chatItem = createHistoryChatItem(contact, context);
         } else {
@@ -103,6 +106,13 @@ public abstract class ChatItem {
         ChatItem chatItem = new ContactChatItem(contact, context);
         chatItem.setType(ChatItem.TYPE_CLIENT_NEARBY_HISTORY);
         chatItem.setLayout(R.layout.item_nearby_history_chat_client);
+        return chatItem;
+    }
+
+    private static ChatItem createWorldwideHistoryChatItem(TalkClientContact contact, Context context) {
+        ChatItem chatItem = new ContactChatItem(contact, context);
+        chatItem.setType(ChatItem.TYPE_CLIENT_WORLDWIDE_HISTORY);
+        chatItem.setLayout(R.layout.item_worldwide_history_chat_client);
         return chatItem;
     }
 
