@@ -68,6 +68,7 @@ public class GroupManagementContactsAdapter extends ContactsAdapter {
         checkedTextView.setText(contact.getNickname());
 
         ViewGroup avatarContainer = (ViewGroup) view.findViewById(R.id.fl_avatar);
+        avatarContainer.removeAllViews();
         avatarContainer.addView(AvatarView.inflate(contact, mActivity));
 
         try {
