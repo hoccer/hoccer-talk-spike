@@ -429,20 +429,26 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public List<TalkClientMessage> findMessagesByContactId(int contactId, long count, long offset) throws SQLException {
-        QueryBuilder<TalkClientMessage, Integer> builder = mClientMessages.queryBuilder();
+
+        QueryBuilder<TalkClientMessage, Integer> clientMessages = mClientMessages.queryBuilder();
         if (count >= 0) {
-            builder.limit(count);
+            clientMessages.limit(count);
         }
-        builder.orderBy("timestamp", true);
-        if (offset >= 0) {
-            builder.offset(offset);
-        }
-        Where<TalkClientMessage, Integer> where = builder.where()
+        Where<TalkClientMessage, Integer> where = clientMessages.where()
                 .eq("conversationContact_id", contactId)
                 .eq("deleted", false)
                 .and(2);
-        builder.setWhere(where);
-        return mClientMessages.query(builder.prepare());
+        clientMessages.setWhere(where);
+
+        QueryBuilder<TalkMessage, String> messages = mMessages.queryBuilder();
+        messages.orderBy("timeSent", true);
+
+        QueryBuilder<TalkClientMessage, ?> join = clientMessages.join(messages);
+        if (offset >= 0) {
+            join.offset(offset);
+        }
+
+        return join.query();
     }
 
     public Vector<Integer> findMessageIdsByContactId(int contactId) throws SQLException {
