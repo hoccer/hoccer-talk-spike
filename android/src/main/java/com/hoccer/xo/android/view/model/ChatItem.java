@@ -36,8 +36,6 @@ public abstract class ChatItem {
 
     protected abstract View updateView(View view);
 
-    public abstract Object getContent();
-
     public abstract long getMessageTimeStamp();
 
     public abstract long getContactCreationTimeStamp();

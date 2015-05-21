@@ -15,13 +15,15 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.model.TalkEnvironment;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ChatActivity;
-import com.hoccer.xo.android.activity.ChatsActivity;
 import com.hoccer.xo.android.adapter.ChatListAdapter;
 import com.hoccer.xo.android.adapter.SearchAdapter;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.Placeholder;
 import com.hoccer.xo.android.view.model.ChatItem;
+import com.hoccer.xo.android.view.model.ContactChatItem;
+import com.hoccer.xo.android.view.model.NearbyGroupHistoryChatItem;
+import com.hoccer.xo.android.view.model.WorldwideGroupHistoryChatItem;
 import org.apache.log4j.Logger;
 
 import java.lang.ref.WeakReference;
@@ -103,15 +105,8 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, view, menuInfo);
         if (menuInfo != null) {
-            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-            Object object = ((ChatItem) mAdapter.getItem(info.position)).getContent();
-            if (object instanceof TalkClientContact) {
-                MenuInflater inflater = getActivity().getMenuInflater();
-                inflater.inflate(R.menu.context_menu_contacts, menu);
-            } else if (object instanceof String) {
-                MenuInflater inflater = getActivity().getMenuInflater();
-                inflater.inflate(R.menu.context_menu_contacts, menu);
-            }
+            MenuInflater inflater = getActivity().getMenuInflater();
+            inflater.inflate(R.menu.context_menu_contacts, menu);
         }
     }
 
@@ -154,11 +149,13 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
     }
 
     private void deleteChatHistoryAt(int position) {
-        Object item = ((ChatItem) mAdapter.getItem(position)).getContent();
-        if (item instanceof TalkClientContact) {
-            clearConversationForContact((TalkClientContact) item);
-        } else if (item instanceof String) {
-            clearNearbyHistory();
+        ChatItem item = ((ChatItem) mAdapter.getItem(position));
+        if (item instanceof ContactChatItem) {
+            clearConversationForContact(((ContactChatItem) item).getContact());
+        } else if (item instanceof NearbyGroupHistoryChatItem) {
+            clearNearbyGroupHistory();
+        } else if (item instanceof WorldwideGroupHistoryChatItem) {
+            clearWorldwideGroupHistory();
         }
     }
 
@@ -171,20 +168,30 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
         }
     }
 
-    private void clearNearbyHistory() {
+    private void clearWorldwideGroupHistory() {
         try {
-            if (mDatabase == null) {
-                return;
-            }
-            List<TalkClientMessage> messages = mDatabase.getAllNearbyGroupMessages();
-            for (TalkClientMessage message : messages) {
-                message.markAsDeleted();
-                mDatabase.saveClientMessage(message);
-            }
-            mAdapter.requestReload();
+            List<TalkClientMessage> messages = mDatabase.getAllWorldwideGroupMessages();
+            deleteMessages(messages);
         } catch (SQLException e) {
-            LOG.error("SQLException while clearing nearby history", e);
+            LOG.error("SQLException while clearing worldwide group history", e);
         }
+    }
+
+    private void clearNearbyGroupHistory() {
+        try {
+            List<TalkClientMessage> messages = mDatabase.getAllNearbyGroupMessages();
+            deleteMessages(messages);
+        } catch (SQLException e) {
+            LOG.error("SQLException while clearing nearby group history", e);
+        }
+    }
+
+    private void deleteMessages(List<TalkClientMessage> messages) throws SQLException {
+        for (TalkClientMessage message : messages) {
+            message.markAsDeleted();
+            mDatabase.saveClientMessage(message);
+        }
+        mAdapter.requestReload();
     }
 
     private void initAdapter() {
@@ -192,7 +199,7 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
             @Override
             public boolean shouldShow(TalkClientContact contact) {
                 if (contact.isGroup()) {
-                    return (contact.isKeptGroup() || (contact.isGroupJoined() && contact.isGroupExisting())) && !(contact.isNearbyGroup() || contact.isWorldwideGroup()) ;
+                    return (contact.isKeptGroup() || (contact.isGroupJoined() && contact.isGroupExisting())) && !contact.isEnvironmentGroup();
                 } else if (contact.isClient()) {
                     return contact.isKept() || contact.isFriendOrBlocked();
                 }
@@ -222,10 +229,10 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
 
         ChatItem item = ((ChatItem) listView.getItemAtPosition(position));
         if (item.getType() == ChatItem.TYPE_CLIENT_NEARBY_HISTORY || item.getType() == ChatItem.TYPE_CLIENT_HISTORY) {
-            TalkClientContact contact = (TalkClientContact) item.getContent();
+            TalkClientContact contact = ((ContactChatItem) item).getContact();
             showHistory(contact);
         } else if (item.getType() == ChatItem.TYPE_RELATED) {
-            TalkClientContact contact = (TalkClientContact) item.getContent();
+            TalkClientContact contact = ((ContactChatItem) item).getContact();
             showChat(contact);
         } else if (item.getType() == ChatItem.TYPE_GROUP_NEARBY_HISTORY) {
             showNearbyGroupHistory();

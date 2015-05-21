@@ -72,11 +72,6 @@ public class WorldwideGroupHistoryChatItem extends ChatItem implements SearchAda
     }
 
     @Override
-    public Object getContent() {
-        return "worldwideArchived";
-    }
-
-    @Override
     public long getMessageTimeStamp() {
         return -1000;
     }

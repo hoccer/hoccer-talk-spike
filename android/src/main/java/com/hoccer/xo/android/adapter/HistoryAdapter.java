@@ -10,7 +10,6 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.model.TalkEnvironment;
-import com.hoccer.talk.model.TalkGroupPresence;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.chat.MessageItem;
 import org.apache.log4j.Logger;
@@ -39,6 +38,7 @@ public class HistoryAdapter extends ChatAdapter {
         try {
             if (TalkEnvironment.TYPE_NEARBY.equals(mEnvironmentType)) {
                 messages = mDatabase.getAllNearbyGroupMessages();
+
             } else if (TalkEnvironment.TYPE_WORLDWIDE.equals(mEnvironmentType)) {
                 messages = mDatabase.getAllWorldwideGroupMessages();
             }
@@ -83,16 +83,7 @@ public class HistoryAdapter extends ChatAdapter {
 
     @Override
     protected boolean isMessageRelevant(TalkClientMessage message) {
-        TalkClientContact conversationContact = message.getConversationContact();
-        if (conversationContact != null && conversationContact.getContactType() != null) {
-            if (conversationContact.isGroup()) {
-                TalkGroupPresence groupPresence = conversationContact.getGroupPresence();
-                if (groupPresence != null && groupPresence.isTypeNearby()) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        TalkClientContact contact = message.getConversationContact();
+        return contact != null && contact.isEnvironmentGroup();
     }
 }

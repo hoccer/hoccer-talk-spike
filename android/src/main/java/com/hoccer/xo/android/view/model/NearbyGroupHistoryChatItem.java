@@ -72,11 +72,6 @@ public class NearbyGroupHistoryChatItem extends ChatItem implements SearchAdapte
     }
 
     @Override
-    public Object getContent() {
-        return "nearbyArchived";
-    }
-
-    @Override
     public long getMessageTimeStamp() {
         return -1000;
     }
