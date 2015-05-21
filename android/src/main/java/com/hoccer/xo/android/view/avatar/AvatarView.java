@@ -158,8 +158,10 @@ public abstract class AvatarView extends LinearLayout {
 
     public static AvatarView inflate(TalkClientContact contact, Context context) {
         int layoutId;
-        if (!contact.isFriendOrBlocked() && contact.isNearbyAcquaintance()) {
+        if (!(contact.isFriendOrBlocked() || contact.isInEnvironment()) && contact.isNearbyAcquaintance()) {
             layoutId = R.layout.view_avatar_nearby_history;
+        } else if (!(contact.isFriendOrBlocked() || contact.isInEnvironment()) && contact.isWorldwideAcquaintance()) {
+            layoutId = R.layout.view_avatar_worldwide_history;
         } else if (!(contact.isFriendOrBlocked() || contact.isNearby() || contact.isWorldwide()) || contact.isKeptGroup()) {
             layoutId = R.layout.view_avatar_history;
         } else {
