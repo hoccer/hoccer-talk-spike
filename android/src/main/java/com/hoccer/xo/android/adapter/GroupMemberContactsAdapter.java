@@ -70,7 +70,8 @@ public class GroupMemberContactsAdapter extends ContactsAdapter {
         nameView.setText(contact.getNickname());
 
         ViewGroup avatarContainer = (ViewGroup) view.findViewById(R.id.fl_avatar);
-        avatarContainer.addView(AvatarView.inflate(contact, mActivity));
+        avatarContainer.removeAllViews();
+        avatarContainer.addView(AvatarView.inflate(contact, mActivity), 0);
         avatarContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -102,7 +103,7 @@ public class GroupMemberContactsAdapter extends ContactsAdapter {
 
     private boolean isContactAdminInGroup(TalkClientContact contact) {
         try {
-            if(mGroupId != null) {
+            if (mGroupId != null) {
                 TalkClientContact admin = mDatabase.findAdminInGroup(mGroupId);
                 return admin != null && contact.getClientId().equals(admin.getClientId());
             }
@@ -114,7 +115,7 @@ public class GroupMemberContactsAdapter extends ContactsAdapter {
 
     private boolean isContactInvitedToGroup(TalkClientContact contact) {
         try {
-            if(mGroupId != null) {
+            if (mGroupId != null) {
                 TalkGroupMembership membership = mDatabase.findMembershipInGroupByClientId(mGroupId, contact.getClientId());
                 return membership != null && membership.isInvited();
             }

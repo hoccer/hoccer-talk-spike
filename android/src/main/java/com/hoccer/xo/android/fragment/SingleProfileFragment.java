@@ -11,7 +11,6 @@ import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.talk.model.TalkRelationship;
-import com.hoccer.xo.android.NearbyController;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.ChatsActivity;
@@ -23,7 +22,6 @@ import com.squareup.picasso.Picasso;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -145,7 +143,7 @@ public class SingleProfileFragment extends ProfileFragment
             menu.findItem(R.id.menu_profile_delete).setVisible(false);
         } else {
             TalkRelationship relationship = mContact.getClientRelationship();
-            if ((relationship == null || relationship.isInvited() || relationship.invitedMe() || relationship.isNone()) && mContact.isNearby()) {
+            if ((relationship == null || relationship.isInvited() || relationship.invitedMe() || relationship.isNone()) && mContact.isInEnvironment()) {
                 menu.findItem(R.id.menu_profile_edit).setVisible(false);
                 menu.findItem(R.id.menu_profile_delete).setVisible(false);
                 menu.findItem(R.id.menu_profile_block).setVisible(false);
@@ -423,8 +421,8 @@ public class SingleProfileFragment extends ProfileFragment
                 .load(avatarUri)
                 .centerCrop()
                 .fit()
-                .placeholder(R.drawable.avatar_default_contact_large)
-                .error(R.drawable.avatar_default_contact_large)
+                .placeholder(R.drawable.avatar_contact_large)
+                .error(R.drawable.avatar_contact_large)
                 .into(mAvatarImage);
     }
 
@@ -456,7 +454,7 @@ public class SingleProfileFragment extends ProfileFragment
                 blockedCount = getXoDatabase().findClientContactsByState(TalkRelationship.STATE_BLOCKED).size();
 
                 List<TalkClientContact> joinedGroups = getXoDatabase().findGroupContactsByMembershipState(TalkGroupMembership.STATE_JOINED);
-                CollectionUtils.filterInverse(joinedGroups, TalkClientContactPredicates.IS_NEARBY_GROUP_PREDICATE);
+                CollectionUtils.filterInverse(joinedGroups, TalkClientContactPredicates.IS_ENVIRONMENT_GROUP_PREDICATE);
                 groupsCount = joinedGroups.size();
             } catch (SQLException e) {
                 e.printStackTrace();

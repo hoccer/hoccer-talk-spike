@@ -1,9 +1,7 @@
 package com.hoccer.xo.android.activity;
 
-import android.app.ActionBar;
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -11,6 +9,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.model.TalkEnvironment;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.content.Clipboard;
@@ -25,14 +24,12 @@ public class ChatActivity extends ComposableActivity {
 
     private static final Logger LOG = Logger.getLogger(ChatActivity.class);
 
-    public static final String EXTRA_NEARBY_GROUP_HISTORY = "com.hoccer.xo.android.intent.extra.NEARBY_GROUP_HISTORY";
-    public static final String EXTRA_CLIENT_HISTORY = "com.hoccer.xo.android.intent.extra.NEARBY_CLIENT_HISTORY";;
-
-    ActionBar mActionBar;
+    public static final String EXTRA_ENVIRONMENT_GROUP_HISTORY = "com.hoccer.xo.android.intent.extra.ENVIRONMENT_GROUP_HISTORY";
+    public static final String EXTRA_CLIENT_HISTORY = "com.hoccer.xo.android.intent.extra.NEARBY_CLIENT_HISTORY";
 
     @Override
     protected ActivityComponent[] createComponents() {
-        return new ActivityComponent[] { new MediaPlayerActivityComponent(this) };
+        return new ActivityComponent[]{new MediaPlayerActivityComponent(this)};
     }
 
     @Override
@@ -49,30 +46,29 @@ public class ChatActivity extends ComposableActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // get action bar (for setting title)
-        mActionBar = getActionBar();
+        if (getIntent() == null) {
+            return;
+        }
 
-        // enable up navigation
-        enableUpNavigation();
-
-        // handle converse intent
-        Intent intent = getIntent();
-        if (intent != null && intent.hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
-            int contactId = intent.getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
-            if (contactId == -1) {
-                LOG.error("invalid contact id");
+        int contactId = getIntent().getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
+        if (contactId != -1) {
+            if (getIntent().hasExtra(EXTRA_CLIENT_HISTORY)) {
+                showHistoryFragment(contactId);
             } else {
-                if (intent.hasExtra(EXTRA_CLIENT_HISTORY)) {
-                    showHistoryFragment(contactId);
-                } else {
-                    showChatFragment(contactId);
+                showChatFragment(contactId);
+            }
+        } else {
+            String type = getIntent().getStringExtra(EXTRA_ENVIRONMENT_GROUP_HISTORY);
+            if (type != null) {
+                if (TalkEnvironment.TYPE_NEARBY.equals(type)) {
+                    showNearbyGroupHistoryFragment();
+                } else if (TalkEnvironment.TYPE_WORLDWIDE.equals(type)) {
+                    showWorldwideGroupHistoryFragment();
                 }
             }
-        } else if (intent != null && intent.hasExtra(EXTRA_NEARBY_GROUP_HISTORY)) {
-            showNearbyGroupHistoryFragment();
-        } else {
-            LOG.error("Neither contact ID nor nearby-archive specified");
         }
+
+        enableUpNavigation();
     }
 
     @Override
@@ -145,17 +141,29 @@ public class ChatActivity extends ComposableActivity {
         Bundle bundle = new Bundle();
         bundle.putInt(HistoryFragment.ARG_CLIENT_CONTACT_ID, contactId);
 
+        replaceWithHistoryFragment(bundle);
+    }
+
+    private void showNearbyGroupHistoryFragment() {
+        Bundle bundle = new Bundle();
+        bundle.putString(HistoryFragment.ARG_GROUP_HISTORY, TalkEnvironment.TYPE_NEARBY);
+
+        replaceWithHistoryFragment(bundle);
+    }
+
+    private void showWorldwideGroupHistoryFragment() {
+        Bundle bundle = new Bundle();
+        bundle.putString(HistoryFragment.ARG_GROUP_HISTORY, TalkEnvironment.TYPE_WORLDWIDE);
+
+        replaceWithHistoryFragment(bundle);
+    }
+
+    private void replaceWithHistoryFragment(Bundle bundle) {
         HistoryFragment fragment = new HistoryFragment();
         fragment.setArguments(bundle);
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fl_messaging_fragment_container, fragment);
-        fragmentTransaction.commit();
-    }
-
-    private void showNearbyGroupHistoryFragment() {
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, new HistoryFragment());
         fragmentTransaction.commit();
     }
 }

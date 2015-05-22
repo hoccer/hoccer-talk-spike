@@ -314,17 +314,21 @@
     <string name="placeholder_conversations_text"><![CDATA[<a href="http://faq.hoccer.com/de/tutorial-xo/#freunde-einladen">Lade deine Freunde</a>]]> zum Chatten ein!</string>
     <string name="placeholder_groups_text"><![CDATA[<a href="http://faq.hoccer.com/de/tutorial-xo/#gruppen">Lege Gruppen an</a>]]> um mit vielen Freunden gleichzeitig zu chatten.</string>
     <string name="placeholder_nearby_text">Warten auf Kontakte <![CDATA[<a href="http://faq.hoccer.com/de/tutorial-xo/#in-der-naehe">in der Nähe</a>]]>…</string>
+    <string name="placeholder_worldwide_text">Warten auf Kontakte <![CDATA[<a href="http://faq.hoccer.com/de/tutorial-xo/#weltweit">weltweit</a>]]></string>
     <string name="actionbar_default_title">${app.name.short}</string>
     <string name="content_audio_caption">Medien</string>
     <string name="content_audio_by_contact_caption">Medien von %1$s</string>
     <string name="profile_nickname_text">Anzeigename</string>
-    <string name="nearby_text">Alle nahebei</string>
+    <string name="all_nearby">Alle nahebei</string>
+    <string name="all_worldwide">Alle weltweit</string>
+    
     <string name="pref_privacy_title">Privatspähre</string>
     <string name="error_send_message_blocked">Du hast diesen Kontakt blockiert. Die Nachricht wird nicht gesendet.</string>
     <string name="multi_invitation_button">weiter</string>
 
     <string name="chats_tab_name">CHATS</string>
     <string name="nearby_tab_name">IN DER NÄHE</string>
+    <string name="worldwide_tab_name">WELTWEIT</string>
 
     <string name="contacts_tab_friends">FREUNDE</string>
     <string name="contacts_tab_groups">GRUPPEN</string>
@@ -360,11 +364,13 @@
     <string name="message_rejected_text">zurückgewiesen</string>
 
     <string name="nearby_saved">Nahebei gespeichert</string>
+    <string name="worldwide_saved">Weltweit gespeichert</string>
     <string name="error_compatible_app_unavailable">Keine App zum öffnen des gewählten Objekts gefunden.</string>
 
     <!-- Nearby all invite texts -->
-    <string name="nearby_invite_all">%1$d Mitglieder als Freunde einladen</string>
-    <string name="nearby_disinvite_all">%1$d Mitglieder als Freunde ausladen</string>
+    <string name="group_invite_all">%1$d Mitglieder als Freunde einladen</string>
+    <string name="group_disinvite_all">%1$d Mitglieder als Freunde ausladen</string>
+
     <string name="nearby_notification_title">In der Nähe</string>
     <string name="nearby_notification_text">In der Nähe Modus aktiv</string>
 
@@ -436,6 +442,7 @@
     <string name="progress_cancelling">Beende..</string>
 
     <string name="nearby">in der Nähe</string>
+    <string name="worldwide">weltweit</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Kontakt</item>

@@ -15,7 +15,6 @@ import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.view.avatar.AvatarView;
 import com.hoccer.xo.android.view.avatar.PresenceAvatarView;
-import com.hoccer.xo.android.view.avatar.SimpleAvatarView;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 
@@ -76,12 +75,18 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
         viewHolder.contact = contact;
         viewHolder.avatarView.setContact(contact);
 
-        if (contact.isGroup() && contact.getGroupPresence() != null && contact.getGroupPresence().isTypeNearby()) {
-            viewHolder.checkedNameTextView.setText(R.string.nearby_text);
+        if (contact.isNearbyGroup()) {
+            viewHolder.checkedNameTextView.setText(R.string.all_nearby);
+        } else if (contact.isWorldwideGroup()) {
+            viewHolder.checkedNameTextView.setText(R.string.all_worldwide);
         } else {
             viewHolder.checkedNameTextView.setText(contact.getNickname());
-            if (!contact.isClientRelated() && contact.isNearby()) {
-                viewHolder.checkedNameTextView.setText(contact.getNickname() + " (" + parent.getContext().getString(R.string.nearby) + ")");
+            if (!contact.isFriendOrBlocked()) {
+                if (contact.isNearby()) {
+                    viewHolder.checkedNameTextView.setText(contact.getNickname() + " (" + parent.getContext().getString(R.string.nearby) + ")");
+                } else if (contact.isWorldwide()) {
+                    viewHolder.checkedNameTextView.setText(contact.getNickname() + " (" + parent.getContext().getString(R.string.worldwide) + ")");
+                }
             }
         }
 
@@ -148,7 +153,7 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
                 shouldShow = true;
             }
         } else if (contact.isClient()) {
-            if (contact.isClientFriend() || contact.isNearby() || (contact.isClientRelated() && contact.getClientRelationship().isBlocked())) {
+            if (contact.isClientFriend() || contact.isInEnvironment() || (contact.isClientRelated() && contact.getClientRelationship().isBlocked())) {
                 shouldShow = true;
             }
         }

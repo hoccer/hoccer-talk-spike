@@ -5,12 +5,12 @@ import com.hoccer.talk.model.TalkGroupPresence;
 import org.apache.commons.collections4.Predicate;
 
 public class TalkClientContactPredicates {
-    public static final Predicate<TalkClientContact> IS_NEARBY_GROUP_PREDICATE = new Predicate<TalkClientContact>() {
+    public static final Predicate<TalkClientContact> IS_ENVIRONMENT_GROUP_PREDICATE = new Predicate<TalkClientContact>() {
         @Override
         public boolean evaluate(TalkClientContact group) {
             TalkGroupPresence groupPresence = group.getGroupPresence();
 
-            return groupPresence != null && groupPresence.isTypeNearby();
+            return groupPresence != null && (groupPresence.isTypeNearby() || groupPresence.isTypeWorldwide());
         }
     };
 

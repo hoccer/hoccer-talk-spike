@@ -143,8 +143,8 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
                 .load(avatarUri)
                 .centerCrop()
                 .fit()
-                .placeholder(R.drawable.avatar_default_contact_large)
-                .error(R.drawable.avatar_default_contact_large)
+                .placeholder(R.drawable.avatar_contact_large)
+                .error(R.drawable.avatar_contact_large)
                 .into(mAvatarImage);
     }
 

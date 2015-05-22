@@ -1,8 +1,6 @@
 package com.hoccer.xo.android.view.model;
 
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientMessage;
@@ -67,15 +65,10 @@ public class NearbyGroupHistoryChatItem extends ChatItem implements SearchAdapte
         lastMessageTextView.setText(mLastMessageText);
         setUnseenMessages(unseenView);
 
-        simpleAvatarView.setAvatarImage(R.drawable.avatar_default_location);
+        simpleAvatarView.setAvatarImage(R.drawable.avatar_location);
         simpleAvatarView.setClickable(false);
 
         return view;
-    }
-
-    @Override
-    public Object getContent() {
-        return "nearbyArchived";
     }
 
     @Override

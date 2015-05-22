@@ -327,6 +327,7 @@
 
     <string name="chats_tab_name">CHATS</string>
     <string name="nearby_tab_name">NEARBY</string>
+    <string name="worldwide_tab_name">WORLDWIDE</string>
 
     <string name="contacts_tab_friends">FRIENDS</string>
     <string name="contacts_tab_groups">GROUPS</string>
@@ -337,13 +338,16 @@
     <string name="placeholder_conversations_text"><![CDATA[<a href="http://faq.hoccer.com/tutorial-xo/#invite">Invite friends</a>]]> to chat with!</string>
     <string name="placeholder_groups_text"><![CDATA[<a href="http://faq.hoccer.com/tutorial-xo/#groups">Create groups</a>]]> to chat with many friends at once.</string>
     <string name="placeholder_nearby_text">Waiting for others <![CDATA[<a href="http://faq.hoccer.com/tutorial-xo/#nearby">nearby</a>]]>…</string>
+    <string name="placeholder_worldwide_text">Waiting for others <![CDATA[<a href="http://faq.hoccer.com/tutorial-xo/#worldwide">worldwide</a>]]>…</string>
     <string name="actionbar_default_title">${app.name.short}</string>
     <string name="content_audio_caption">Media</string>
     <string name="content_audio_by_contact_caption">Media from %1$s</string>
     <string name="profile_nickname_text">Nickname</string>
-    <string name="nearby_text">All nearby</string>
+    <string name="all_nearby">All nearby</string>
+    <string name="all_worldwide">All worldwide</string>
     <string name="pref_privacy_title">Privacy</string>
     <string name="nearby_saved">Nearby saved</string>
+    <string name="worldwide_saved">Worldwide saved</string>
     <string name="error_send_message_blocked">The contact is blocked. Message will not be sent.</string>
     <string name="invite_several_entries">Has several entries</string>
 
@@ -376,9 +380,10 @@
 
     <string name="error_compatible_app_unavailable">No app found to open the selected item.</string>
 
-    <!-- Nearby all invite texts -->
-    <string name="nearby_invite_all">invite %1$d group members as friend</string>
-    <string name="nearby_disinvite_all">disinvite %1$d group members as friend</string>
+    <!-- Group invite all texts -->
+    <string name="group_invite_all">Invite %1$d group members as friend</string>
+    <string name="group_disinvite_all">Disinvite %1$d group members as friend</string>
+
     <string name="nearby_notification_title">Nearby</string>
     <string name="nearby_notification_text">Nearby mode active</string>
 
@@ -450,6 +455,7 @@
     <string name="progress_cancelling">Cancelling..</string>
 
     <string name="nearby">nearby</string>
+    <string name="worldwide">worldwide</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>

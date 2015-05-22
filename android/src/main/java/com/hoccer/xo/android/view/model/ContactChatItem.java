@@ -127,8 +127,7 @@ public class ContactChatItem extends ChatItem implements SearchAdapter.Searchabl
         }
     }
 
-    @Override
-    public TalkClientContact getContent() {
+    public TalkClientContact getContact() {
         return mContact;
     }
 

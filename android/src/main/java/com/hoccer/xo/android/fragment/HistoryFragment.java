@@ -7,9 +7,7 @@ import android.database.DataSetObserver;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -27,6 +25,7 @@ public class HistoryFragment extends ListFragment {
 
     static final Logger LOG = Logger.getLogger(HistoryFragment.class);
     public static final String ARG_CLIENT_CONTACT_ID = "com.hoccer.xo.android.fragment.ARG_CLIENT_CONTACT_ID";
+    public static final String ARG_GROUP_HISTORY = "com.hoccer.xo.android.fragment.ARG_GROUP_HISTORY";
 
     private HistoryAdapter mAdapter;
 
@@ -85,7 +84,7 @@ public class HistoryFragment extends ListFragment {
                                         });
                                     }
                                 }
-                            }, null);
+                            });
                 }
             }
         });
@@ -99,8 +98,8 @@ public class HistoryFragment extends ListFragment {
                 LOG.error("Client contact with id '" + contactId + "' does not exist", e);
                 return;
             }
-        } else if (getArguments() == null) {
-            mAdapter = new HistoryAdapter(getListView(), (XoActivity) getActivity(), null);
+        } else if (getArguments() != null && getArguments().getString(ARG_GROUP_HISTORY) != null) {
+            mAdapter = new HistoryAdapter(getListView(), (XoActivity) getActivity(), getArguments().getString(ARG_GROUP_HISTORY));
         }
 
         mAdapter.onCreate();

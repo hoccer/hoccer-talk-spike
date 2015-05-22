@@ -28,8 +28,9 @@ public class ClientContactListAdapter extends ContactListAdapter {
     private static final Logger LOG = Logger.getLogger(ClientContactListAdapter.class);
     private static final int TYPE_PRESENCE = 0;
     private static final int TYPE_NEARBY_HISTORY = 1;
-    private static final int TYPE_HISTORY = 2;
-    private static final int TYPE_SIMPLE = 3;
+    private static final int TYPE_WORLDWIDE_HISTORY = 2;
+    private static final int TYPE_HISTORY = 3;
+    private static final int TYPE_SIMPLE = 4;
 
     public ClientContactListAdapter(Activity activity) {
         super(activity);
@@ -89,10 +90,12 @@ public class ClientContactListAdapter extends ContactListAdapter {
     private int getViewTypeForContact(TalkClientContact contact) {
         int type;
 
-        if (contact.getClientRelationship().isFriend() || contact.getClientRelationship().isBlocked() || contact.isNearby()) {
+        if (contact.getClientRelationship().isFriend() || contact.getClientRelationship().isBlocked() || contact.isNearby() || contact.isWorldwide()) {
             type = TYPE_PRESENCE;
         } else if (contact.isKept() && contact.isNearbyAcquaintance()) {
             type = TYPE_NEARBY_HISTORY;
+        } else if (contact.isKept() && contact.isWorldwideAcquaintance()) {
+            type = TYPE_WORLDWIDE_HISTORY;
         } else if (contact.isKept()) {
             type = TYPE_HISTORY;
         } else {
@@ -108,6 +111,8 @@ public class ClientContactListAdapter extends ContactListAdapter {
             convertView = inflater.inflate(R.layout.item_contact_client_presence, null);
         } else if (type == TYPE_NEARBY_HISTORY) {
             convertView = inflater.inflate(R.layout.item_contact_client_history_nearby, null);
+        } else if (type == TYPE_WORLDWIDE_HISTORY) {
+            convertView = inflater.inflate(R.layout.item_contact_client_history_worldwide, null);
         } else if (type == TYPE_HISTORY) {
             convertView = inflater.inflate(R.layout.item_contact_client_history, null);
         } else {

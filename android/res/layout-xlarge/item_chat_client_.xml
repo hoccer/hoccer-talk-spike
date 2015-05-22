@@ -13,7 +13,7 @@
             android:layout_width="65dp"
             android:layout_height="65dp"
             custom:cornerRadius="65"
-            custom:defaultAvatarImageUrl="@drawable/avatar_default_contact"
+            custom:defaultAvatarImageUrl="@drawable/avatar_contact"
             style="@style/AppBaseTheme.Contact.Avatar"/>
 
     <TextView

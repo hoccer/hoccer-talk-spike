@@ -81,11 +81,8 @@ public class ChatFragment extends XoListFragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        LOG.debug("onCreateView()");
         super.onCreateView(inflater, container, savedInstanceState);
-
-        View view = inflater.inflate(R.layout.fragment_messaging, container, false);
-        return view;
+        return inflater.inflate(R.layout.fragment_messaging, container, false);
     }
 
     @Override
@@ -182,8 +179,10 @@ public class ChatFragment extends XoListFragment
 
         // select client/group profile entry for appropriate icon
         if (mContact != null) {
-            if (mContact.isGroup() && mContact.getGroupPresence() != null && mContact.getGroupPresence().isTypeNearby()) {
-                getActivity().getActionBar().setTitle(getActivity().getResources().getString(R.string.nearby_text));
+            if (mContact.isNearbyGroup()) {
+                getActivity().getActionBar().setTitle(getActivity().getResources().getString(R.string.all_nearby));
+            } else if (mContact.isWorldwideGroup()) {
+                getActivity().getActionBar().setTitle(getActivity().getResources().getString(R.string.all_worldwide));
             } else {
                 getActivity().getActionBar().setTitle(mContact.getNickname());
             }
@@ -198,8 +197,7 @@ public class ChatFragment extends XoListFragment
             musicItem.setVisible(true);
 
             MenuItem createPermanentGroupItem = menu.findItem(R.id.menu_group_profile_create_permanent_group);
-            boolean shouldShow = (mContact.isGroup() && mContact.getGroupPresence() != null && mContact.getGroupPresence().isTypeNearby());
-            createPermanentGroupItem.setVisible(shouldShow);
+            createPermanentGroupItem.setVisible(mContact.isNearbyGroup() || mContact.isWorldwideGroup());
         }
     }
 

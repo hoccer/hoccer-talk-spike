@@ -24,6 +24,10 @@ public class TalkPresence {
     public final static String FIELD_KEY_ID = "keyId";
     public final static String FIELD_CONNECTION_STATUS = "connectionStatus";
 
+    public final static String TYPE_ACQUAINTANCE_NEARBY = "nearby";
+    public final static String TYPE_ACQUAINTANCE_WORLDWIDE = "worldwide";
+    public static final String TYPE_ACQUAINTANCE_NONE = "none";
+
     // required for OrmLite!
     private String _id;
 
@@ -52,7 +56,7 @@ public class TalkPresence {
     private boolean isKept;
 
     @DatabaseField
-    private boolean isNearbyAcquaintance;
+    private String acquaintanceType;
 
     public TalkPresence() {
     }
@@ -155,13 +159,23 @@ public class TalkPresence {
     }
 
     @JsonIgnore
-    public boolean isNearbyAcquaintance() {
-        return isNearbyAcquaintance;
+    public String getAcquaintanceType() {
+        return acquaintanceType;
     }
 
     @JsonIgnore
-    public void setNearbyAcquaintance(boolean isNearbyAcquaintance) {
-        this.isNearbyAcquaintance = isNearbyAcquaintance;
+    public void setAcquaintanceType(String acquaintanceType) {
+        this.acquaintanceType = acquaintanceType;
+    }
+
+    @JsonIgnore
+    public boolean isNearbyAcquaintance() {
+        return TYPE_ACQUAINTANCE_NEARBY.equals(this.acquaintanceType);
+    }
+
+    @JsonIgnore
+    public boolean isWorldwideAcquaintance() {
+        return TYPE_ACQUAINTANCE_WORLDWIDE.equals(this.acquaintanceType);
     }
 
     @JsonIgnore
