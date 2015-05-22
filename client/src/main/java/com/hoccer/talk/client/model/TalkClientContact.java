@@ -1,6 +1,5 @@
 package com.hoccer.talk.client.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.model.*;
 import com.j256.ormlite.field.DatabaseField;
@@ -29,9 +28,9 @@ public class TalkClientContact implements Serializable {
     public @interface SelfMethodOnly {}
 
     public static final String TYPE_SELF = "self";
+
     public static final String TYPE_CLIENT = "client";
     public static final String TYPE_GROUP = "group";
-
     @DatabaseField(generatedId = true)
     private int clientContactId;
 
@@ -86,6 +85,9 @@ public class TalkClientContact implements Serializable {
 
     @DatabaseField
     private boolean isNearby;
+
+    @DatabaseField
+    private boolean worldwide;
 
     @DatabaseField
     private String nickname;
@@ -164,6 +166,10 @@ public class TalkClientContact implements Serializable {
         return isClient() && this.clientPresence.isNearbyAcquaintance();
     }
 
+    public boolean isWorldwideAcquaintance() {
+        return isClient() && this.clientPresence.isWorldwideAcquaintance();
+    }
+
     public boolean isKept() {
         return isClient() && this.clientPresence != null && this.clientPresence.isKept();
     }
@@ -194,6 +200,18 @@ public class TalkClientContact implements Serializable {
 
     public boolean isNearbyGroup() {
         return isGroup() && this.groupPresence != null && this.groupPresence.isTypeNearby();
+    }
+
+    public boolean isWorldwideGroup() {
+        return isGroup() && this.groupPresence != null && this.groupPresence.isTypeWorldwide();
+    }
+
+    public boolean isEnvironmentGroup() {
+        return isWorldwideGroup() || isNearbyGroup();
+    }
+
+    public boolean isInEnvironment() {
+        return isNearby() || isWorldwide();
     }
 
     public String getName() {
@@ -387,6 +405,14 @@ public class TalkClientContact implements Serializable {
 
     public void setNearby(boolean isNearby) {
         this.isNearby = isNearby;
+    }
+
+    public boolean isWorldwide() {
+        return worldwide;
+    }
+
+    public void setWorldwide(boolean worldwide) {
+        this.worldwide = worldwide;
     }
 
     @SelfMethodOnly

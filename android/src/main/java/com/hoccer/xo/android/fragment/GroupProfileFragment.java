@@ -124,7 +124,7 @@ public class GroupProfileFragment extends ProfileFragment
         }
         mGroupMemberAdapter.requestReload();
 
-        if (mContact.getGroupPresence() != null && mContact.getGroupPresence().isTypeNearby()) {
+        if (mContact.isNearbyGroup() || mContact.isWorldwideGroup()) {
             mGroupMembersList.setOnItemClickListener(this);
         } else {
             mGroupMembersList.setOnItemClickListener(null);
@@ -187,7 +187,7 @@ public class GroupProfileFragment extends ProfileFragment
         editGroupItem.setVisible(false);
         leaveGroupItem.setVisible(false);
 
-        if (mContact.getGroupPresence() != null && !mContact.getGroupPresence().isTypeNearby()) {
+        if (!(mContact.isNearbyGroup() || mContact.isWorldwideGroup())) {
             if (mContact.isEditable()) {
                 editGroupItem.setVisible(true);
                 listAttachmentsItem.setVisible(true);
@@ -341,8 +341,10 @@ public class GroupProfileFragment extends ProfileFragment
             name = mNameEditText.getText().toString();
         }
 
-        if (mContact.getGroupPresence() != null && mContact.getGroupPresence().isTypeNearby()) {
-            mNameText.setText(R.string.nearby_text);
+        if (mContact.isNearbyGroup()) {
+            mNameText.setText(R.string.all_nearby);
+        } else if (mContact.isWorldwideGroup()) {
+            mNameText.setText(R.string.all_worldwide);
         } else {
             mNameText.setText(name);
         }
@@ -363,13 +365,25 @@ public class GroupProfileFragment extends ProfileFragment
             avatarUri = UriUtils.getAbsoluteFileUri(avatarTransfer.getFilePath());
         }
 
+        int placeholderId = getGroupPlaceholder();
+
         Picasso.with(getActivity())
                 .load(avatarUri)
                 .centerCrop()
                 .fit()
-                .placeholder(R.drawable.avatar_default_group_large)
-                .error(R.drawable.avatar_default_group_large)
+                .placeholder(placeholderId)
+                .error(placeholderId)
                 .into(mAvatarImage);
+    }
+
+    private int getGroupPlaceholder() {
+        int placeholderId = R.drawable.group_large;
+        if (mContact.isNearbyGroup()) {
+            placeholderId = R.drawable.location_large;
+        } else if (mContact.isWorldwideGroup()) {
+            placeholderId = R.drawable.world_large;
+        }
+        return placeholderId;
     }
 
     private void refreshContact() {
@@ -401,8 +415,10 @@ public class GroupProfileFragment extends ProfileFragment
             public void run() {
                 if (mContact.getGroupPresence() == null) {
                     getActivity().getActionBar().setTitle("");
-                } else if (mContact.getGroupPresence().isTypeNearby()) {
-                    getActivity().getActionBar().setTitle(getActivity().getResources().getString(R.string.nearby_text));
+                } else if (mContact.isNearbyGroup()) {
+                    getActivity().getActionBar().setTitle(getString(R.string.all_nearby));
+                } else if (mContact.isWorldwideGroup()) {
+                    getActivity().getActionBar().setTitle(getString(R.string.all_worldwide));
                 } else {
                     getActivity().getActionBar().setTitle(mContact.getNickname());
                 }
@@ -511,10 +527,10 @@ public class GroupProfileFragment extends ProfileFragment
             return;
         }
         updateContactsToInviteAsFriend();
-        String buttonText = "";
+        String buttonText;
         if (mContactsToDisinviteAsFriend.isEmpty()) {
             int numberOfClients = mContactsToInviteAsFriend.size();
-            buttonText = String.format(getString(R.string.nearby_invite_all), numberOfClients);
+            buttonText = String.format(getString(R.string.group_invite_all), numberOfClients);
             if (numberOfClients > 0) {
                 mInviteAllButton.setEnabled(true);
             } else {
@@ -523,7 +539,7 @@ public class GroupProfileFragment extends ProfileFragment
         } else {
             mInviteAllButton.setEnabled(true);
             int numberOfInvitedClients = mContactsToDisinviteAsFriend.size();
-            buttonText = String.format(getString(R.string.nearby_disinvite_all), numberOfInvitedClients);
+            buttonText = String.format(getString(R.string.group_disinvite_all), numberOfInvitedClients);
         }
         mInviteAllButton.setText(buttonText);
     }

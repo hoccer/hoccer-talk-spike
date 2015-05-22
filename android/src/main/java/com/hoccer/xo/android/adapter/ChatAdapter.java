@@ -60,6 +60,11 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, Transf
         initialize();
     }
 
+    public ChatAdapter(ListView listView, XoActivity activity) {
+        super(activity);
+        mListView = listView;
+    }
+
     protected void initialize() {
         int totalMessageCount = 0;
         try {

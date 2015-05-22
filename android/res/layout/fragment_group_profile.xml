@@ -96,7 +96,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:visibility="visible"
-            android:text="@string/nearby_invite_all"
+            android:text="@string/group_invite_all"
             style="@style/AppBaseTheme.Group.CreateButton"/>
 
 </LinearLayout>

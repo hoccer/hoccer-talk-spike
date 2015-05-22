@@ -9,7 +9,7 @@ import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.model.TalkGroupPresence;
+import com.hoccer.talk.model.TalkEnvironment;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.chat.MessageItem;
 import org.apache.log4j.Logger;
@@ -21,26 +21,31 @@ import java.util.List;
 public class HistoryAdapter extends ChatAdapter {
 
     private static final Logger LOG = Logger.getLogger(HistoryAdapter.class);
+    private String mEnvironmentType;
 
     public HistoryAdapter(ListView listView, XoActivity activity, TalkClientContact contact) {
         super(listView, activity, contact);
     }
 
-    @Override
-    protected void initialize() {
-        if (mContact == null) {
-            try {
-                initializeNearbyGroupHistory();
-            } catch (SQLException e) {
-                LOG.error("SQLException while batch retrieving messages for nearby", e);
-            }
-        } else {
-            super.initialize();
-        }
+    public HistoryAdapter(ListView listView, XoActivity activity, String environmentType) {
+        super(listView, activity);
+        mEnvironmentType = environmentType;
+        initializeEnvironmentGroupHistory();
     }
 
-    private void initializeNearbyGroupHistory() throws SQLException {
-        List<TalkClientMessage> messages = mDatabase.getAllNearbyGroupMessages();
+    private void initializeEnvironmentGroupHistory() {
+        List<TalkClientMessage> messages = new ArrayList<TalkClientMessage>();
+        try {
+            if (TalkEnvironment.TYPE_NEARBY.equals(mEnvironmentType)) {
+                messages = mDatabase.getAllNearbyGroupMessages();
+
+            } else if (TalkEnvironment.TYPE_WORLDWIDE.equals(mEnvironmentType)) {
+                messages = mDatabase.getAllWorldwideGroupMessages();
+            }
+        } catch (SQLException e) {
+            LOG.error("SQLException while batch retrieving messages for environment", e);
+        }
+
         mMessageItems = new ArrayList<MessageItem>(messages.size());
         for (TalkClientMessage message : messages) {
             MessageItem messageItem = getItemForMessage(message);
@@ -78,16 +83,7 @@ public class HistoryAdapter extends ChatAdapter {
 
     @Override
     protected boolean isMessageRelevant(TalkClientMessage message) {
-        TalkClientContact conversationContact = message.getConversationContact();
-        if (conversationContact != null && conversationContact.getContactType() != null) {
-            if (conversationContact.isGroup()) {
-                TalkGroupPresence groupPresence = conversationContact.getGroupPresence();
-                if (groupPresence != null && groupPresence.isTypeNearby()) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        TalkClientContact contact = message.getConversationContact();
+        return contact != null && contact.isEnvironmentGroup();
     }
 }

@@ -14,7 +14,7 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             custom:cornerRadius="50"
-            custom:defaultAvatarImageUrl="@drawable/avatar_default_contact"
+            custom:defaultAvatarImageUrl="@drawable/avatar_contact"
             style="@style/AppBaseTheme.Contact.Avatar"/>
 
     <TextView

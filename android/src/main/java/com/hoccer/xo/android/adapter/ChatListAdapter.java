@@ -58,6 +58,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
         try {
             final List<TalkClientContact> filteredContacts = filter(mDatabase.findAllContacts());
             final long nearbyMessageCount = mDatabase.getNearbyGroupMessageCount();
+            final long worldwideMessageCount = mDatabase.getWorldwideGroupMessageCount();
 
             runOnUiThread(new Runnable() {
                 @Override
@@ -71,6 +72,10 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
 
                     if (nearbyMessageCount > 0) {
                         mChatItems.add(ChatItem.createNearbyGroupHistory());
+                    }
+
+                    if (worldwideMessageCount > 0) {
+                        mChatItems.add(ChatItem.createWorldwideGroupHistory());
                     }
 
                     notifyDataSetChanged();
@@ -128,10 +133,12 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
         return res;
     }
 
-    private ChatItem findChatItemForContent(Object content) {
+    private ChatItem findChatItemForContact(TalkClientContact contact) {
         for (ChatItem item : mChatItems) {
-            if (content.equals(item.getContent())) {
-                return item;
+            if (item instanceof ContactChatItem) {
+                if (contact.equals(((ContactChatItem) item).getContact())) {
+                    return item;
+                }
             }
         }
         return null;
@@ -176,7 +183,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                ChatItem item = findChatItemForContent(contact);
+                ChatItem item = findChatItemForContact(contact);
                 if (item == null) {
                     return;
                 }
@@ -199,7 +206,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                ChatItem item = findChatItemForContent(contact);
+                ChatItem item = findChatItemForContact(contact);
                 if (item != null) {
                     item.update();
                     notifyDataSetChanged();
@@ -235,7 +242,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
             if (contact == null) {
                 return;
             }
-            ContactChatItem item = (ContactChatItem) findChatItemForContent(contact);
+            ContactChatItem item = (ContactChatItem) findChatItemForContact(contact);
             if (item != null) { // the contact is not in our list so we won't update anything
                 item.update();
 

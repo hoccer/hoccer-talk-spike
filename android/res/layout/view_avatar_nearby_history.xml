@@ -9,5 +9,5 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         custom:cornerRadius="65"
-        custom:defaultAvatarImageUrl="@drawable/avatar_default_contact"
+        custom:defaultAvatarImageUrl="@drawable/avatar_contact"
         tools:showIn="@layout/item_chat_client"/>

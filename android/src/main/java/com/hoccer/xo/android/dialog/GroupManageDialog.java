@@ -48,7 +48,7 @@ public class GroupManageDialog extends DialogFragment {
             mAdapter.setFilter(new ContactsAdapter.Filter() {
                 @Override
                 public boolean shouldShow(TalkClientContact contact) {
-                    return mCurrentContactsInGroup.contains(contact) || (contact.isClient() && contact.isClientRelated());
+                    return mCurrentContactsInGroup.contains(contact) || contact.isKept() || contact.isInEnvironment() || contact.isClientRelated();
                 }
             });
         }

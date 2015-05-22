@@ -428,6 +428,42 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return orderedMessages;
     }
 
+    public long getWorldwideGroupMessageCount() throws SQLException {
+        return getAllWorldwideGroupMessages().size();
+    }
+
+    public List<TalkClientMessage> getAllWorldwideGroupMessages() throws SQLException  {
+        List<TalkClientMessage> messages = mClientMessages.queryBuilder()
+                .orderBy("timestamp", true).where()
+                .eq("deleted", false)
+                .query();
+
+        ArrayList<TalkClientMessage> worldwideMessages = new ArrayList<TalkClientMessage>();
+        for (TalkClientMessage message : messages) {
+            TalkClientContact conversationContact = message.getConversationContact();
+            if (conversationContact != null && conversationContact.getContactType() != null) {
+                if (conversationContact.isWorldwideGroup()) {
+                    worldwideMessages.add(message);
+                }
+            }
+        }
+        ArrayList<TalkClientContact> allWorldwideGroupsOrdered = new ArrayList<TalkClientContact>();
+        for (TalkClientMessage m : worldwideMessages) {
+            if (!allWorldwideGroupsOrdered.contains(m.getConversationContact())) {
+                allWorldwideGroupsOrdered.add(m.getConversationContact());
+            }
+        }
+        ArrayList<TalkClientMessage> orderedMessages = new ArrayList<TalkClientMessage>();
+        for (TalkClientContact c : allWorldwideGroupsOrdered) {
+            TalkClientMessage separator = new TalkClientMessage();
+            separator.setConversationContact(c);
+            separator.setMessageId(TalkClientMessage.TYPE_SEPARATOR);
+            orderedMessages.add(separator);
+            orderedMessages.addAll(findMessagesByContactId(c.getClientContactId(), worldwideMessages.size(), 0));
+        }
+        return orderedMessages;
+    }
+
     public List<TalkClientMessage> findMessagesByContactId(int contactId, long count, long offset) throws SQLException {
 
         QueryBuilder<TalkClientMessage, Integer> clientMessages = mClientMessages.queryBuilder();

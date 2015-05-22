@@ -53,7 +53,7 @@ public class GroupContactListAdapter extends ContactListAdapter {
         }
 
         Collections.sort(joined, CLIENT_CONTACT_COMPARATOR);
-        CollectionUtils.filterInverse(joined, TalkClientContactPredicates.IS_NEARBY_GROUP_PREDICATE);
+        CollectionUtils.filterInverse(joined, TalkClientContactPredicates.IS_ENVIRONMENT_GROUP_PREDICATE);
 
         return ListUtils.union(invitedMe, joined);
     }

@@ -40,7 +40,7 @@ public abstract class AvatarView extends LinearLayout {
         TypedArray a = getContext().getTheme()
                 .obtainStyledAttributes(attributes, R.styleable.SimpleAvatarView, 0, 0);
         try {
-            mDefaultAvatarImageUri = Uri.parse("drawable://" + a.getResourceId(R.styleable.SimpleAvatarView_defaultAvatarImageUrl, R.drawable.avatar_default_contact));
+            mDefaultAvatarImageUri = Uri.parse("drawable://" + a.getResourceId(R.styleable.SimpleAvatarView_defaultAvatarImageUrl, R.drawable.avatar_contact));
             mCornerRadius = a.getFloat(R.styleable.SimpleAvatarView_cornerRadius, 0.0f);
         } finally {
             a.recycle();
@@ -98,12 +98,14 @@ public abstract class AvatarView extends LinearLayout {
         if (avatarUri == null) {
             if (mContact.isGroup()) {
                 if (mContact.getGroupPresence() != null && mContact.getGroupPresence().isTypeNearby()) {
-                    setAvatarImage(R.drawable.avatar_default_location);
+                    setAvatarImage(R.drawable.avatar_location);
+                } else if (mContact.getGroupPresence() != null && mContact.getGroupPresence().isTypeWorldwide()) {
+                    setAvatarImage(R.drawable.avatar_world);
                 } else {
-                    setAvatarImage(R.drawable.avatar_default_group);
+                    setAvatarImage(R.drawable.avatar_group);
                 }
             } else {
-                setAvatarImage(R.drawable.avatar_default_contact);
+                setAvatarImage(R.drawable.avatar_contact);
             }
         } else {
             setAvatarImage(avatarUri);
@@ -132,7 +134,7 @@ public abstract class AvatarView extends LinearLayout {
             public void run() {
                 if (isInEditMode()) {
                     ImageView avatar = (ImageView) findViewById(R.id.avatar_image);
-                    avatar.setImageResource(R.drawable.avatar_default_contact);
+                    avatar.setImageResource(R.drawable.avatar_contact);
                 } else {
                     mAvatarImage.setVisibility(View.VISIBLE);
                     if (avatarImageUri != null) {
@@ -156,9 +158,11 @@ public abstract class AvatarView extends LinearLayout {
 
     public static AvatarView inflate(TalkClientContact contact, Context context) {
         int layoutId;
-        if (!contact.isFriendOrBlocked() && contact.isNearbyAcquaintance()) {
+        if (!(contact.isFriendOrBlocked() || contact.isInEnvironment()) && contact.isNearbyAcquaintance()) {
             layoutId = R.layout.view_avatar_nearby_history;
-        } else if (!(contact.isFriendOrBlocked() || contact.isNearby()) || contact.isKeptGroup()) {
+        } else if (!(contact.isFriendOrBlocked() || contact.isInEnvironment()) && contact.isWorldwideAcquaintance()) {
+            layoutId = R.layout.view_avatar_worldwide_history;
+        } else if (!(contact.isFriendOrBlocked() || contact.isNearby() || contact.isWorldwide()) || contact.isKeptGroup()) {
             layoutId = R.layout.view_avatar_history;
         } else {
             layoutId = R.layout.view_avatar_presence;

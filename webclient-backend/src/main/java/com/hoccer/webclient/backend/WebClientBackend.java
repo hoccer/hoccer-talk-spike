@@ -51,7 +51,7 @@ public class WebClientBackend implements IXoStateListener {
 
         // create and register client event handler
         mTransferListener = new TransferListener(mClient, mConfiguration);
-        mClient.registerTransferListener(mTransferListener);
+        mClient.getDownloadAgent().registerListener(mTransferListener);
         mClient.registerStateListener(this);
 
         mClient.connect();

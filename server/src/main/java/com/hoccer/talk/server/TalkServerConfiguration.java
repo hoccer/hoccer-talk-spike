@@ -276,6 +276,30 @@ public class TalkServerConfiguration {
                 PropertyTypes.INTEGER,
                 300), // in seconds (every 5 minutes)
 
+        // RPC HANDLER
+        TOKEN_LIFETIME_MIN(PROPERTY_PREFIX + ".token.lifeTimeMin",
+                PropertyTypes.INTEGER,
+                60), // (seconds) at least 1 minute
+        TOKEN_LIFETIME_MAX(PROPERTY_PREFIX + ".token.lifeTimeMax",
+                PropertyTypes.INTEGER,
+                7 * 24 * 3600), // (seconds) at most 1 week
+        TOKEN_MAX_USAGE(PROPERTY_PREFIX + ".token.maxUsage",
+                PropertyTypes.INTEGER,
+                1),
+        PAIRING_TOKEN_MAX_USAGE_RANGE_MIN(PROPERTY_PREFIX + ".token.maxUsageRangeMin",
+                PropertyTypes.INTEGER,
+                1),
+        PAIRING_TOKEN_MAX_USAGE_RANGE_MAX(PROPERTY_PREFIX + ".token.maxUsageRangeMax",
+                PropertyTypes.INTEGER,
+                50),
+
+        MIN_WORLD_WIDE_GROUP_SIZE(PROPERTY_PREFIX + ".token.minWorldwideGroupSize",
+                PropertyTypes.INTEGER,
+                8),
+        MAX_WORLD_WIDE_GROUP_SIZE(PROPERTY_PREFIX + ".token.maxWorldwideGroupSize",
+                PropertyTypes.INTEGER,
+                10),
+
         // FILECACHE
         FILECACHE_CONTROL_URL(PROPERTY_PREFIX + ".filecache.controlUrl",
                 PropertyTypes.STRING,
@@ -420,6 +444,17 @@ public class TalkServerConfiguration {
         builder.append(                     "\n - Ping:");
         builder.append(MessageFormat.format("\n   * Ping interval (in s):                 {0}", this.getPingInterval()));
         builder.append(MessageFormat.format("\n   * perform ping at intervals:            {0}", this.getPerformPingAtInterval()));
+
+        builder.append(                     "\n - RPC-Handler-Token:");
+        builder.append(MessageFormat.format("\n   * Min. Token Lifetime (in s):           {0}", this.getTokenLifeTimeMin()));
+        builder.append(MessageFormat.format("\n   * Max. Token Lifetime (in s):           {0}", this.getTokenLifeTimeMax()));
+        builder.append(MessageFormat.format("\n   * Max. Token Usage Count:               {0}", this.getTokenMaxUsage()));
+        builder.append(MessageFormat.format("\n   * Min. Pairing Token Usage Count:       {0}", this.getTokenMaxUsageRangeMin()));
+        builder.append(MessageFormat.format("\n   * Max. Pairing Token Usage Count:       {0}", this.getTokenMaxUsageRangeMax()));
+        builder.append(                     "\n - RPC-Handler-Worldwide:");
+        builder.append(MessageFormat.format("\n   * Min. Worldwide Group Size:            {0}", this.getMinWorldwideGroupSize()));
+        builder.append(MessageFormat.format("\n   * Max. Worldwide Group Size:            {0}", this.getMaxWorldwideGroupSize()));
+
         builder.append(                     "\n - Debugging:");
         builder.append(MessageFormat.format("\n   * LogAllCalls:                          {0}", this.getLogAllCalls()));
 
@@ -684,4 +719,27 @@ public class TalkServerConfiguration {
     public int getPingInterval() {
         return (Integer) ConfigurableProperties.PING_INTERVAL.value;
     }
+
+    public int getTokenLifeTimeMin() {
+        return (Integer) ConfigurableProperties.TOKEN_LIFETIME_MIN.value;
+    }
+    public int getTokenLifeTimeMax() {
+        return (Integer) ConfigurableProperties.TOKEN_LIFETIME_MAX.value;
+    }
+    public int getTokenMaxUsage() {
+        return (Integer) ConfigurableProperties.TOKEN_MAX_USAGE.value;
+    }
+    public int getTokenMaxUsageRangeMin() {
+        return (Integer) ConfigurableProperties.PAIRING_TOKEN_MAX_USAGE_RANGE_MIN.value;
+    }
+    public int getTokenMaxUsageRangeMax() {
+        return (Integer) ConfigurableProperties.PAIRING_TOKEN_MAX_USAGE_RANGE_MAX.value;
+    }
+    public int getMinWorldwideGroupSize() {
+        return (Integer) ConfigurableProperties.MIN_WORLD_WIDE_GROUP_SIZE.value;
+    }
+    public int getMaxWorldwideGroupSize() {
+        return (Integer) ConfigurableProperties.MAX_WORLD_WIDE_GROUP_SIZE.value;
+    }
+
 }

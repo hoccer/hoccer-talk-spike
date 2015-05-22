@@ -11,6 +11,7 @@ import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.talk.model.TalkGroupPresence;
+import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.util.UriUtils;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
@@ -29,7 +30,7 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
 
     private static final Logger LOG = Logger.getLogger(AndroidTalkDatabase.class);
 
-    private static final int DATABASE_VERSION = 26;
+    private static final int DATABASE_VERSION = 27;
 
     public static final String DATABASE_NAME_DEFAULT = "hoccer-talk.db";
 
@@ -103,11 +104,29 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
                 db.execSQL("ALTER TABLE 'groupPresence' ADD COLUMN 'isKept' SMALLINT");
             }
 
+            if (oldVersion < 27) {
+                db.execSQL("ALTER TABLE 'groupMembership' ADD COLUMN 'notificationPreference' VARCHAR" );
+                db.execSQL("ALTER TABLE 'relationship' ADD COLUMN 'notificationPreference' VARCHAR" );
+                db.execSQL("ALTER TABLE 'clientContact' ADD COLUMN 'worldwide' SMALLINT");
+                updateAcquaintanceTypeColumn(db);
+            }
+
         } catch (android.database.SQLException e) {
             LOG.error("Android SQL error upgrading database", e);
         } catch (SQLException e) {
             LOG.error("OrmLite SQL error upgrading database", e);
         }
+    }
+
+    private void updateAcquaintanceTypeColumn(SQLiteDatabase db) throws SQLException {
+        db.execSQL("ALTER TABLE 'presence' ADD COLUMN 'acquaintanceType' VARCHAR");
+
+        Cursor cursor = db.rawQuery("SELECT * FROM presence WHERE isNearbyAcquaintance = '1'", null);
+        while (cursor.moveToNext()) {
+            db.execSQL("UPDATE presence SET acquaintanceType = '" + TalkPresence.TYPE_ACQUAINTANCE_NEARBY + "'");
+        }
+
+        db.execSQL("ALTER TABLE 'presence' DROP COLUMN 'isNearbyAcquaintance' SMALLINT");
     }
 
     private static void makeTransferDataFileRelative(SQLiteDatabase db) {
