@@ -234,12 +234,13 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      */
     public void disconnect() {
         synchronized (this) {
-            if (mTalkClient != null && mTalkClient.isReady()) {
+            if (mTalkClient != null && (mTalkClient.isReady() || mTalkClient.isConnected())) {
                 // set client to not ready
                 ITalkServerDatabase database = mServer.getDatabase();
                 TalkClient client = database.findClientById(mTalkClient.getClientId());
                 if (client != null) {
                     client.setTimeReady(null);
+                    client.setTimeLastDisconnect(new Date());
                     database.saveClient(client);
                 }
             }

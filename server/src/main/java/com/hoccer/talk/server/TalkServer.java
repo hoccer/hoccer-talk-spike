@@ -418,7 +418,7 @@ public class TalkServer {
             oldConnection.disconnect();
         }
         connection.getServerHandler().destroyEnvironment(TalkEnvironment.TYPE_NEARBY);  // after logon, destroy possibly left over environments
-        connection.getServerHandler().destroyEnvironment(TalkEnvironment.TYPE_WORLDWIDE);  // after logon, destroy possibly left over environments
+        connection.getServerHandler().releaseEnvironment(TalkEnvironment.TYPE_WORLDWIDE);  // after logon, release possibly left over environments
         mConnectionsByClientId.put(clientId, connection);
     }
 
@@ -463,7 +463,7 @@ public class TalkServer {
             // update presence for connection status change
             mUpdateAgent.requestPresenceUpdate(clientId, CONNECTION_STATUS_UPDATE_FIELDS);
             connection.getServerHandler().destroyEnvironment(TalkEnvironment.TYPE_NEARBY);
-            connection.getServerHandler().destroyEnvironment(TalkEnvironment.TYPE_WORLDWIDE);
+            connection.getServerHandler().releaseEnvironment(TalkEnvironment.TYPE_WORLDWIDE);
             mDeliveryAgent.requestDelivery(clientId, false);
         }
         // disconnect if we still are

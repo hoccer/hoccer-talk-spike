@@ -26,6 +26,7 @@ public class TalkClient {
     public static final String FIELD_APNS_UNREAD_MESSAGES = "apnsUnreadMessages";
     public static final String FIELD_TIME_REGISTERED      = "timeRegistered";
     public static final String FIELD_TIME_LAST_LOGIN      = "timeLastLogin";
+    public static final String FIELD_TIME_LAST_DISCONNECT = "timeLastDisconnect";
     public static final String FIELD_TIME_LAST_PUSH       = "timeLastPush";
     public static final String FIELD_TIME_READY           = "timeReady";
     public static final String FIELD_TIME_DELETED         = "timeDeleted";
@@ -79,6 +80,10 @@ public class TalkClient {
     /** Time of last login */
     @DatabaseField(columnName = FIELD_TIME_LAST_LOGIN, canBeNull = true)
     Date timeLastLogin;
+
+    /** Time of last disconnect */
+    @DatabaseField(columnName = FIELD_TIME_LAST_DISCONNECT, canBeNull = true)
+    Date timeLastDisconnect;
 
     /** Time of last push notification */
     @DatabaseField(columnName = FIELD_TIME_LAST_PUSH, canBeNull = true)
@@ -134,6 +139,11 @@ public class TalkClient {
     @JsonIgnore
     public boolean isReady() {
         return timeReady != null && timeLastLogin != null && timeReady.getTime() > timeLastLogin.getTime();
+    }
+
+    @JsonIgnore
+    public boolean isConnected() {
+        return timeLastLogin != null && (timeLastDisconnect == null || timeLastLogin.getTime() > timeLastDisconnect.getTime());
     }
 
     public String getClientId() {
@@ -214,6 +224,14 @@ public class TalkClient {
 
     public void setTimeLastLogin(Date timeLastLogin) {
         this.timeLastLogin = timeLastLogin;
+    }
+
+    public Date getTimeLastDisconnect() {
+        return timeLastDisconnect;
+    }
+
+    public void setTimeLastDisconnect(Date timeLastDisconnect) {
+        this.timeLastDisconnect = timeLastDisconnect;
     }
 
     public Date getTimeLastPush() {

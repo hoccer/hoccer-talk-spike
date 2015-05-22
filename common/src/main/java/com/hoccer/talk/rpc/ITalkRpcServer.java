@@ -584,6 +584,22 @@ public interface ITalkRpcServer {
      */
     void leaveGroup(String groupId);
 
+    /** set the notification preferences for my group membership
+     * @param groupId denotes the group to set the connected client's notification preferences for
+     * @param preference currently a string containing 'enabled' or 'disabled'
+     * @talk.preconditions client must be logged in, connected client must be 'invited' or 'joined' member
+     */
+    void setGroupNotifications(String groupId, String preference);
+
+
+    /** set the notification preferences for a contact
+     * @param otherClientId denotes the contact to set the connected client's notification preferences for
+     * @param preference currently a string containing 'enabled' or 'disabled'
+     * @talk.preconditions client must be logged in, connected client must have a relationship with otherClientId
+     */
+    void setClientNotifications(String otherClientId, String preference);
+
+
     /** Change group name
      * @param groupId denotes the group to rename
      * @param name the new group name
@@ -649,7 +665,6 @@ public interface ITalkRpcServer {
      * @talk.errors.server
      */
     void removeGroupMember(String groupId, String clientId);
-
 
     /** get URLs for file storage, currently only used for avatars.
      Files created this way on a server are only removed when all references to it are removed, which right now does not happen.
@@ -735,7 +750,7 @@ public interface ITalkRpcServer {
      */
     String updateEnvironment(TalkEnvironment environment);
 
-    /** end participation in location based grouping
+    /** end participation in location based or worldwide grouping
      * @param type denotes the type of the environment; only one environment of each type can exist on the server
      * @talk.preconditions client must be logged in
      * @talk.preconditions.server
@@ -746,6 +761,13 @@ public interface ITalkRpcServer {
      * @talk.errors.server
      */
     void destroyEnvironment(String type);
+
+    /** begin time to live expiry, used for worldwide grouping
+     *
+     * @param type denotes the type of the environment; only one environment of each type can exist on the server
+     * @talk.preconditions client must be logged in
+     */
+    void releaseEnvironment(String type);
 
     // returns true for each group where you are an active or invited group member
     Boolean[] isMemberInGroups(String[] groupIds);

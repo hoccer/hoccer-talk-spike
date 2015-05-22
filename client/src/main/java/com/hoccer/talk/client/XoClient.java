@@ -1990,7 +1990,11 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 @Override
                 public void run() {
                     try {
-                        mServerRpc.destroyEnvironment(type);
+                        if (TalkEnvironment.TYPE_NEARBY.equals(type)) {
+                            mServerRpc.destroyEnvironment(type);
+                        } else {
+                            mServerRpc.releaseEnvironment(type);
+                        }
                     } catch (Throwable t) {
                         LOG.error("sendDestroyEnvironment: other error", t);
                     }

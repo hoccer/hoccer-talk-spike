@@ -127,7 +127,7 @@ public class CleaningAgent {
                     mDatabase.markClientDeleted(client);
                     mServer.getUpdateAgent().performAccountDeletion(clientId);
                 } else {
-                    LOG.info("keeping used client id '" + clientId + "', just cleaning keys and tokens");
+                    LOG.debug("keeping used client id '" + clientId + "', just cleaning keys and tokens");
                     doCleanKeysForClient(clientId);
                     doCleanTokensForClient(clientId);
                 }
@@ -156,7 +156,7 @@ public class CleaningAgent {
                 }
                 mServer.getFilecacheClient().deleteAccount(originalClientId);
             } else {
-                LOG.info("keeping deleted expired client id '" + clientId + "', has been marked for deletion on "+client.getTimeDeleted());
+                LOG.debug("keeping deleted expired client id '" + clientId + "', has been marked for deletion on "+client.getTimeDeleted());
             }
         }
     }
@@ -236,7 +236,9 @@ public class CleaningAgent {
         LOG.info("Cleaning '" + allClients.size() + "' clients...");
         long current = 0;
         for (TalkClient client : allClients) {
-            LOG.info("Clean client " + current++ + "/"+allClients.size() + " clients...");
+            if (current++ % 10000 == 0) {
+                LOG.info("Clean client " + current + "/" + allClients.size() + " clients...");
+            }
             cleanClientData(client.getClientId());
         }
         long endTime = System.currentTimeMillis();
@@ -400,61 +402,30 @@ public class CleaningAgent {
     }
 
     private void doCleanGroups() {
-        LOG.debug("doCleanGroups");
         Date oldGroupDate = new Date(new Date().getTime() - DELETED_GROUP_PRESENCE_LIFE_TIME);
+        LOG.info("doCleanGroups: cleaning expired groups deleted before "+ oldGroupDate);
 
         int deleted = mDatabase.deleteGroupPresencesWithStateChangedBefore(TalkGroupPresence.STATE_DELETED, oldGroupDate);
-        LOG.debug("doCleanGroups: deleted "+deleted+" group presences");
-
-        /*
-        List<TalkGroupPresence> groupPresences = mDatabase.findGroupPresencesWithStateChangedBefore(TalkGroupPresence.STATE_DELETED, oldGroupDate);
-        LOG.debug("doCleanGroups: deleting "+groupPresences.size()+" group presences");
-        int counter = 0;
-        for (TalkGroupPresence groupPresence : groupPresences) {
-            mDatabase.deleteGroupPresence(groupPresence);
-            if (counter++ % 100 == 0) {
-                LOG.debug("doCleanGroups: deleted "+ counter + "/"+groupPresences.size()+" group presences");
-            }
-        }
-        */
+        LOG.info("doCleanGroups: deleted "+deleted+" group presences");
 
         Date oldGroupMemberDate = new Date(new Date().getTime() - DELETED_GROUP_MEMBER_LIFE_TIME);
+
+        LOG.info("doCleanGroups: cleaning expired group memberships deleted before "+ oldGroupMemberDate);
 
         deleted = mDatabase.deleteGroupMembershipsWithStatesChangedBefore(
                 new String[]{TalkGroupMembership.STATE_GROUP_REMOVED, TalkGroupMembership.STATE_NONE}, oldGroupMemberDate);
 
-        LOG.debug("doCleanGroups: deleted "+deleted+" group members");
-
-        /*
-        List<TalkGroupMembership> groupMembers =
-                mDatabase.findGroupMembershipsWithStatesChangedBefore(
-                        new String[]{TalkGroupMembership.STATE_GROUP_REMOVED, TalkGroupMembership.STATE_NONE}, oldGroupMemberDate);
-        LOG.debug("doCleanGroups: deleting "+groupMembers.size()+" group members");
-        counter = 0;
-        for (TalkGroupMembership membership : groupMembers) {
-            mDatabase.deleteGroupMembership(membership);
-            if (counter++ % 100 == 0) {
-                LOG.debug("doCleanGroups: deleted " + counter + "/" + groupMembers.size() + " group members");
-            }
-        }
-        */
-
+        LOG.info("doCleanGroups: deleted "+deleted+" group members");
+        // TODO: clean dangling nearby and worldwide groups and memberships without environments (there shouldn't be any,but we should check)
     }
 
     private void doCleanRelationships() {
-        LOG.debug("doCleanRelationships");
+        LOG.info("doCleanRelationships");
         Date oldDate = new Date(new Date().getTime() - NO_RELATIONSHIP_LIFE_TIME);
-        int deleted = mDatabase.deleteGroupMembershipsWithStatesChangedBefore(new String[]{TalkRelationship.STATE_NONE}, oldDate);
-        LOG.debug("doCleanRelationships: deleted "+deleted+" relationships");
- /*
-        List<TalkRelationship> relationships = mDatabase.findRelationshipsWithStatesChangedBefore(
-                new String[]{TalkRelationship.STATE_NONE}, oldDate);
-
-        LOG.debug("doCleanRelationships: deleting " + relationships.size() + " relationships");
-        for (TalkRelationship relationship : relationships) {
-            mDatabase.deleteRelationship(relationship);
-        }
- */
+        LOG.info("doCleanRelationships: cleaning expired relationships deleted before "+ oldDate);
+        int deleted = mDatabase.deleteRelationshipsWithStatesAndNotNotificationsDisabledChangedBefore(new String[]{TalkRelationship.STATE_NONE}, oldDate);
+        LOG.info("doCleanRelationships: deleted "+deleted+" relationships");
+        // TODO: Cleaning might cause unidirectional relationships - we should handle that properly
     }
 
 }
