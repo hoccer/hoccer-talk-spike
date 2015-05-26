@@ -65,7 +65,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, Transf
         mListView = listView;
     }
 
-    protected void initialize() {
+    private void initialize() {
         int totalMessageCount = 0;
         try {
             final List<TalkClientMessage> messages = mDatabase.findMessagesByContactId(mContact.getClientContactId(), -1, -1);
