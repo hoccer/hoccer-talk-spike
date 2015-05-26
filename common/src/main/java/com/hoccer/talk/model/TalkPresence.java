@@ -26,7 +26,7 @@ public class TalkPresence {
 
     public final static String TYPE_ACQUAINTANCE_NEARBY = "nearby";
     public final static String TYPE_ACQUAINTANCE_WORLDWIDE = "worldwide";
-    public static final String TYPE_ACQUAINTANCE_NONE = "none";
+    public final static String TYPE_ACQUAINTANCE_NONE = "none";
 
     // required for OrmLite!
     private String _id;
