@@ -113,7 +113,7 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
             }
 
             if (oldVersion < 28) {
-                updateDeliveryDirection(db);
+                uniteDeliveryFieldsAndSaveDeliveryDirection(db);
             }
         } catch (android.database.SQLException e) {
             LOG.error("Android SQL error upgrading database", e);
@@ -122,7 +122,7 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
         }
     }
 
-    private void updateDeliveryDirection(SQLiteDatabase db) throws SQLException {
+    private void uniteDeliveryFieldsAndSaveDeliveryDirection(SQLiteDatabase db) throws SQLException {
         db.execSQL("ALTER TABLE 'clientMessage' ADD COLUMN 'direction' VARCHAR");
         db.execSQL("ALTER TABLE 'clientMessage' ADD COLUMN 'delivery_id' INTEGER");
 
