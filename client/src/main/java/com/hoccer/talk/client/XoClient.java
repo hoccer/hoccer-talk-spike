@@ -967,7 +967,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             for (IXoMessageListener listener : mMessageListeners) {
                 listener.onMessageCreated(message);
             }
-            if (TalkDelivery.STATE_NEW.equals(message.getOutgoingDelivery().getState())) {
+            if (TalkDelivery.STATE_NEW.equals(message.getDelivery().getState())) {
                 requestDelivery(message);
             }
         } catch (SQLException e) {
@@ -1323,8 +1323,9 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     doSync();
                     switchState(State.READY, "ready after sync");
                 } catch (Exception e) {
-                    LOG.error("Exception while syncing", e);
-                    switchState(State.CONNECTING, "reconnect after sync failed");
+                    throw new RuntimeException(e);
+//                    LOG.error("Exception while syncing", e);
+//                    switchState(State.CONNECTING, "reconnect after sync failed");
                 }
             }
         }, 0, TimeUnit.SECONDS);
@@ -1772,7 +1773,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
     private void performDelivery(TalkClientMessage clientMessage) {
         final TalkMessage message = clientMessage.getMessage();
-        final TalkDelivery delivery = clientMessage.getOutgoingDelivery();
+        final TalkDelivery delivery = clientMessage.getDelivery();
         LOG.debug("preparing delivery of message " + clientMessage.getClientMessageId());
         try {
             encryptMessage(clientMessage, delivery, message);
@@ -1782,7 +1783,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         }
 
         TalkDelivery[] deliveries = new TalkDelivery[1];
-        deliveries[0] = clientMessage.getOutgoingDelivery();
+        deliveries[0] = clientMessage.getDelivery();
 
         LOG.debug(" delivering message " + clientMessage.getClientMessageId());
 
@@ -2066,7 +2067,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         clientMessage.updateOutgoing(delivery);
 
         try {
-            mDatabase.saveDelivery(clientMessage.getOutgoingDelivery());
+            mDatabase.saveDelivery(clientMessage.getDelivery());
             mDatabase.saveClientMessage(clientMessage);
         } catch (SQLException e) {
             LOG.error("SQL error", e);
@@ -2218,7 +2219,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         try {
             clientMessage.updateIncoming(delivery);
             TalkClientDownload download = clientMessage.getAttachmentDownload();
-            mDatabase.updateDelivery(clientMessage.getIncomingDelivery());
+            mDatabase.updateDelivery(clientMessage.getDelivery());
 
             if (download != null) {
                 if (download.isAttachment() && TalkDelivery.ATTACHMENT_STATE_UPLOADING.equals(delivery.getAttachmentState())) {
@@ -2287,7 +2288,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 mDatabase.saveClientDownload(clientMessage.getAttachmentDownload());
             }
             mDatabase.saveMessage(clientMessage.getMessage());
-            mDatabase.saveDelivery(clientMessage.getIncomingDelivery());
+            mDatabase.saveDelivery(clientMessage.getDelivery());
             mDatabase.saveClientMessage(clientMessage);
 
             for (IXoMessageListener listener : mMessageListeners) {
@@ -3215,9 +3216,9 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     public void markMessageAsAborted(TalkClientMessage message) {
-        message.getOutgoingDelivery().setState(TalkDelivery.STATE_ABORTED); // TODO: ABORTED OR ABORTED_ACKNOWLEDGED?
+        message.getDelivery().setState(TalkDelivery.STATE_ABORTED); // TODO: ABORTED OR ABORTED_ACKNOWLEDGED?
         try {
-            mDatabase.saveDelivery(message.getOutgoingDelivery());
+            mDatabase.saveDelivery(message.getDelivery());
         } catch (SQLException e) {
             LOG.error("error while saving a message which will never be sent since the receiver is blocked or the group is empty", e);
         }

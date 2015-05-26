@@ -15,6 +15,9 @@ public class TalkClientMessage {
 
     public static final String TYPE_SEPARATOR = "separator";
 
+    public static final String TYPE_INCOMING = "incoming";
+    public static final String TYPE_OUTGOING = "outgoing";
+
     private static final Logger LOG = Logger.getLogger(TalkClientMessage.class);
 
     @DatabaseField(generatedId = true)
@@ -36,10 +39,7 @@ public class TalkClientMessage {
     private TalkMessage message;
 
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
-    private TalkDelivery incomingDelivery;
-
-    @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
-    private TalkDelivery outgoingDelivery;
+    private TalkDelivery delivery;
 
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
     private TalkClientUpload attachmentUpload;
@@ -65,9 +65,11 @@ public class TalkClientMessage {
     @DatabaseField(width = 1024)
     private String signature;
 
-
     @DatabaseField
     private boolean inProgress;
+
+    @DatabaseField
+    private String direction;
 
     public TalkClientMessage() {
         this.timestamp = new Date();
@@ -78,11 +80,11 @@ public class TalkClientMessage {
     }
 
     public boolean isIncoming() {
-        return incomingDelivery != null;
+        return TYPE_INCOMING.equals(direction);
     }
 
     public boolean isOutgoing() {
-        return outgoingDelivery != null;
+        return TYPE_OUTGOING.equals(direction);
     }
 
     @Nullable
@@ -126,20 +128,12 @@ public class TalkClientMessage {
         this.message = message;
     }
 
-    public TalkDelivery getIncomingDelivery() {
-        return incomingDelivery;
+    public TalkDelivery getDelivery() {
+        return delivery;
     }
 
-    public void setIncomingDelivery(TalkDelivery incomingDelivery) {
-        this.incomingDelivery = incomingDelivery;
-    }
-
-    public TalkDelivery getOutgoingDelivery() {
-        return outgoingDelivery;
-    }
-
-    public void setOutgoingDelivery(TalkDelivery outgoingDelivery) {
-        this.outgoingDelivery = outgoingDelivery;
+    public void setOutgoingDelivery(TalkDelivery delivery) {
+        this.delivery = delivery;
     }
 
     public TalkClientUpload getAttachmentUpload() {
@@ -215,48 +209,51 @@ public class TalkClientMessage {
     }
 
     public void updateIncoming(TalkDelivery delivery, TalkMessage message) {
-        if (outgoingDelivery != null) {
+        if (TYPE_OUTGOING.equals(direction)) {
             LOG.warn("incoming update for outgoing message");
             return;
         }
         this.message = message;
-        if (incomingDelivery == null) {
-            incomingDelivery = delivery;
+        if (this.delivery == null) {
+            this.delivery = delivery;
         } else {
             Set<String> fields = delivery.nonNullFields();
-            incomingDelivery.updateWith(delivery, fields);
+            this.delivery.updateWith(delivery, fields);
             if (message.getTimeSent() != null) {
                 this.timestamp = message.getTimeSent();
             }
         }
+        direction = TYPE_INCOMING;
     }
 
     public void updateIncoming(TalkDelivery delivery) {
-        if (outgoingDelivery != null) {
+        if (TYPE_OUTGOING.equals(direction)) {
             LOG.error("incoming incremental update for outgoing message");
             return;
         }
 
-        if (incomingDelivery == null) {
+        if (delivery == null) {
             LOG.error("incremental update for not yet received incoming delivery");
             return;
         }
 
         Set<String> fields = delivery.nonNullFields();
-        incomingDelivery.updateWith(delivery, fields);
+        this.delivery.updateWith(delivery, fields);
+        direction = TYPE_INCOMING;
     }
 
     public void updateOutgoing(TalkDelivery delivery) {
-        if (incomingDelivery != null) {
+        if (TYPE_INCOMING.equals(direction)) {
             LOG.warn("outgoing update for incoming message");
             return;
         }
-        if (outgoingDelivery == null) {
-            outgoingDelivery = delivery;
+        if (delivery == null) {
+            this.delivery = delivery;
         } else {
             Set<String> fields = delivery.nonNullFields();
-            outgoingDelivery.updateWith(delivery, fields);
+            this.delivery.updateWith(delivery, fields);
         }
+        direction = TYPE_OUTGOING;
     }
  /*
     private void updateDelivery(TalkDelivery currentDelivery, TalkDelivery newDelivery) {

@@ -211,7 +211,7 @@ public class MessageItem implements AttachmentTransferListener {
             return;
         }
 
-        TalkDelivery incomingDelivery = mMessage.getIncomingDelivery();
+        TalkDelivery incomingDelivery = mMessage.getDelivery();
         deliveryInfo.setVisibility(View.VISIBLE);
 
         if (incomingDelivery.isFailure()) {
@@ -277,7 +277,7 @@ public class MessageItem implements AttachmentTransferListener {
             return;
         }
 
-        TalkDelivery outgoingDelivery = mMessage.getOutgoingDelivery();
+        TalkDelivery outgoingDelivery = mMessage.getDelivery();
         deliveryInfo.setVisibility(View.VISIBLE);
 
         String statusText = stateStringForDelivery(outgoingDelivery, view);
@@ -293,7 +293,7 @@ public class MessageItem implements AttachmentTransferListener {
     }
 
     public Drawable getOutgoingBackgroundDrawable() {
-        String currentState = mMessage.getOutgoingDelivery().getState();
+        String currentState = mMessage.getDelivery().getState();
         Drawable background;
         if (currentState != null) {
             if (TalkDelivery.isFailureState(currentState)) {
@@ -309,7 +309,7 @@ public class MessageItem implements AttachmentTransferListener {
     }
 
     public Drawable getIncomingBackgroundDrawable() {
-        String currentState = mMessage.getIncomingDelivery().getState();
+        String currentState = mMessage.getDelivery().getState();
         Drawable background;
         if (currentState != null) {
             if (TalkDelivery.isFailureState(currentState)) {
@@ -464,13 +464,13 @@ public class MessageItem implements AttachmentTransferListener {
     private Drawable bubbleForMessageAttachment(TalkClientMessage clientMessage) {
         Drawable bubbleForMessage;
         if (clientMessage.isIncoming()) {
-            if (clientMessage.getIncomingDelivery().isFailure()) {
+            if (clientMessage.getDelivery().isFailure()) {
                 bubbleForMessage = mContext.getResources().getDrawable(R.drawable.chat_bubble_error_incoming);
             } else {
                 bubbleForMessage = ColoredDrawable.create(R.drawable.chat_bubble_incoming, R.color.message_incoming_background);
             }
         } else {
-            if (clientMessage.getOutgoingDelivery().isFailure()) {
+            if (clientMessage.getDelivery().isFailure()) {
                 bubbleForMessage = mContext.getResources().getDrawable(R.drawable.chat_bubble_error_outgoing);
             } else {
                 bubbleForMessage = ColoredDrawable.create(R.drawable.chat_bubble_outgoing, R.color.message_outgoing_background);

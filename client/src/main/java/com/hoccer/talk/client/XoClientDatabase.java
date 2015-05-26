@@ -432,7 +432,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return getAllWorldwideGroupMessages().size();
     }
 
-    public List<TalkClientMessage> getAllWorldwideGroupMessages() throws SQLException  {
+    public List<TalkClientMessage> getAllWorldwideGroupMessages() throws SQLException {
         List<TalkClientMessage> messages = mClientMessages.queryBuilder()
                 .orderBy("timestamp", true).where()
                 .eq("deleted", false)
@@ -476,10 +476,9 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .and(2);
         clientMessages.setWhere(where);
 
-        QueryBuilder<TalkMessage, String> messages = mMessages.queryBuilder();
-        messages.orderBy("timeSent", true);
+        QueryBuilder<TalkDelivery, ?> deliveries = mDeliveries.queryBuilder().orderBy("timeAccepted", true);
 
-        QueryBuilder<TalkClientMessage, ?> join = clientMessages.join(messages);
+        QueryBuilder<TalkClientMessage, ?> join = clientMessages.join(deliveries);
         if (offset >= 0) {
             join.offset(offset);
         }
@@ -852,7 +851,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     public TalkDelivery deliveryForUpload(TalkClientUpload upload) throws SQLException {
         TalkClientMessage message = getClientMessageForUpload(upload);
         if (message != null) {
-            return message.getOutgoingDelivery();
+            return message.getDelivery();
         }
         return null;
     }
@@ -860,7 +859,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     public TalkDelivery deliveryForDownload(TalkClientDownload download) throws SQLException {
         TalkClientMessage message = getClientMessageForDownload(download);
         if (message != null) {
-            return message.getIncomingDelivery();
+            return message.getDelivery();
         }
         return null;
     }
