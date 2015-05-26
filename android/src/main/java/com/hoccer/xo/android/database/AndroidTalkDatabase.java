@@ -146,8 +146,6 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
         while (cursor.moveToNext()) {
             db.execSQL("UPDATE presence SET acquaintanceType = '" + TalkPresence.TYPE_ACQUAINTANCE_NEARBY + "'");
         }
-
-        db.execSQL("ALTER TABLE 'presence' DROP COLUMN 'isNearbyAcquaintance' SMALLINT");
     }
 
     private static void makeTransferDataFileRelative(SQLiteDatabase db) {
