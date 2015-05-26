@@ -228,7 +228,7 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
         super.onListItemClick(listView, view, position, id);
 
         ChatItem item = ((ChatItem) listView.getItemAtPosition(position));
-        if (item.getType() == ChatItem.TYPE_CLIENT_NEARBY_HISTORY || item.getType() == ChatItem.TYPE_CLIENT_HISTORY) {
+        if (shouldShowClientHistory(item)) {
             TalkClientContact contact = ((ContactChatItem) item).getContact();
             showHistory(contact);
         } else if (item.getType() == ChatItem.TYPE_RELATED) {
@@ -239,6 +239,10 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
         } else if (item.getType() == ChatItem.TYPE_GROUP_WORLDWIDE_HISTORY) {
             showWorldwideGroupHistory();
         }
+    }
+
+    private boolean shouldShowClientHistory(ChatItem item) {
+        return item.getType() == ChatItem.TYPE_CLIENT_NEARBY_HISTORY || item.getType() == ChatItem.TYPE_CLIENT_WORLDWIDE_HISTORY ||item.getType() == ChatItem.TYPE_CLIENT_HISTORY;
     }
 
     public void showChat(TalkClientContact contact) {
