@@ -9,6 +9,7 @@ import android.provider.MediaStore;
 import com.hoccer.talk.client.IXoClientDatabaseBackend;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.talk.model.TalkGroupPresence;
 import com.hoccer.talk.model.TalkPresence;
@@ -30,7 +31,7 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
 
     private static final Logger LOG = Logger.getLogger(AndroidTalkDatabase.class);
 
-    private static final int DATABASE_VERSION = 27;
+    private static final int DATABASE_VERSION = 28;
 
     public static final String DATABASE_NAME_DEFAULT = "hoccer-talk.db";
 
@@ -105,16 +106,36 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
             }
 
             if (oldVersion < 27) {
-                db.execSQL("ALTER TABLE 'groupMembership' ADD COLUMN 'notificationPreference' VARCHAR" );
-                db.execSQL("ALTER TABLE 'relationship' ADD COLUMN 'notificationPreference' VARCHAR" );
+                db.execSQL("ALTER TABLE 'groupMembership' ADD COLUMN 'notificationPreference' VARCHAR");
+                db.execSQL("ALTER TABLE 'relationship' ADD COLUMN 'notificationPreference' VARCHAR");
                 db.execSQL("ALTER TABLE 'clientContact' ADD COLUMN 'worldwide' SMALLINT");
                 updateAcquaintanceTypeColumn(db);
             }
 
+            if (oldVersion < 28) {
+                uniteDeliveryFieldsAndSaveDeliveryDirection(db);
+            }
         } catch (android.database.SQLException e) {
             LOG.error("Android SQL error upgrading database", e);
         } catch (SQLException e) {
             LOG.error("OrmLite SQL error upgrading database", e);
+        }
+    }
+
+    private void uniteDeliveryFieldsAndSaveDeliveryDirection(SQLiteDatabase db) throws SQLException {
+        db.execSQL("ALTER TABLE 'clientMessage' ADD COLUMN 'direction' VARCHAR");
+        db.execSQL("ALTER TABLE 'clientMessage' ADD COLUMN 'delivery_id' INTEGER");
+
+        Cursor cursor = db.rawQuery("SELECT * FROM clientMessage", null);
+        while (cursor.moveToNext()) {
+            int deliveryId = cursor.getInt(cursor.getColumnIndex("incomingDelivery_id"));
+            if (deliveryId == 0) {
+                deliveryId = cursor.getInt(cursor.getColumnIndex("outgoingDelivery_id"));
+            }
+
+            db.execSQL("UPDATE clientMessage SET delivery_id = '" + deliveryId + "' WHERE incomingDelivery_id = '" + deliveryId + "' OR outgoingDelivery_id = '" + deliveryId + "'");
+            db.execSQL("UPDATE clientMessage SET direction = '" + TalkClientMessage.TYPE_INCOMING + "' WHERE incomingDelivery_id = '" + deliveryId + "'");
+            db.execSQL("UPDATE clientMessage SET direction = '" + TalkClientMessage.TYPE_OUTGOING + "' WHERE outgoingDelivery_id = '" + deliveryId + "'");
         }
     }
 

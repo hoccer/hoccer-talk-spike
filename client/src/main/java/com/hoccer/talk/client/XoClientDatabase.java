@@ -432,7 +432,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return getAllWorldwideGroupMessages().size();
     }
 
-    public List<TalkClientMessage> getAllWorldwideGroupMessages() throws SQLException  {
+    public List<TalkClientMessage> getAllWorldwideGroupMessages() throws SQLException {
         List<TalkClientMessage> messages = mClientMessages.queryBuilder()
                 .orderBy("timestamp", true).where()
                 .eq("deleted", false)
@@ -465,20 +465,25 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public List<TalkClientMessage> findMessagesByContactId(int contactId, long count, long offset) throws SQLException {
-        QueryBuilder<TalkClientMessage, Integer> builder = mClientMessages.queryBuilder();
+
+        QueryBuilder<TalkClientMessage, Integer> clientMessages = mClientMessages.queryBuilder();
         if (count >= 0) {
-            builder.limit(count);
+            clientMessages.limit(count);
         }
-        builder.orderBy("timestamp", true);
-        if (offset >= 0) {
-            builder.offset(offset);
-        }
-        Where<TalkClientMessage, Integer> where = builder.where()
+        Where<TalkClientMessage, Integer> where = clientMessages.where()
                 .eq("conversationContact_id", contactId)
                 .eq("deleted", false)
                 .and(2);
-        builder.setWhere(where);
-        return mClientMessages.query(builder.prepare());
+        clientMessages.setWhere(where);
+
+        QueryBuilder<TalkDelivery, ?> deliveries = mDeliveries.queryBuilder().orderBy("timeAccepted", true);
+
+        QueryBuilder<TalkClientMessage, ?> join = clientMessages.join(deliveries);
+        if (offset >= 0) {
+            join.offset(offset);
+        }
+
+        return join.query();
     }
 
     public Vector<Integer> findMessageIdsByContactId(int contactId) throws SQLException {
@@ -846,7 +851,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     public TalkDelivery deliveryForUpload(TalkClientUpload upload) throws SQLException {
         TalkClientMessage message = getClientMessageForUpload(upload);
         if (message != null) {
-            return message.getOutgoingDelivery();
+            return message.getDelivery();
         }
         return null;
     }
@@ -854,7 +859,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     public TalkDelivery deliveryForDownload(TalkClientDownload download) throws SQLException {
         TalkClientMessage message = getClientMessageForDownload(download);
         if (message != null) {
-            return message.getIncomingDelivery();
+            return message.getDelivery();
         }
         return null;
     }
