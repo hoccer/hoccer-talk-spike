@@ -22,6 +22,7 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
 
     public XoAndroidClientConfiguration(Context context) {
         mPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
         mProperties = new Properties();
         mAppName = context.getString(R.string.app_name);
 
@@ -108,5 +109,10 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
 
     public String getCredentialImportPackage() {
         return mProperties.getProperty("hoccer.android.credential.import.package", null);
+    }
+
+    @Override
+    public long getTimeToLiveInWorldwide() {
+        return mPreferences.getLong("preference_key_worldwide_timetolive", 0);
     }
 }

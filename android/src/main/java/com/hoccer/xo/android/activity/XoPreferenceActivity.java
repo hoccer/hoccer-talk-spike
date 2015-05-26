@@ -14,12 +14,13 @@ import android.view.*;
 import android.widget.ListAdapter;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
+import com.hoccer.xo.android.WorldwideController;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.backup.*;
+import com.hoccer.xo.android.passwordprotection.PasswordProtection;
 import com.hoccer.xo.android.passwordprotection.activity.PasswordChangeActivity;
 import com.hoccer.xo.android.passwordprotection.activity.PasswordPromptActivity;
-import com.hoccer.xo.android.passwordprotection.PasswordProtection;
 import com.hoccer.xo.android.passwordprotection.activity.PasswordSetActivity;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import org.apache.commons.io.FileUtils;
@@ -231,6 +232,8 @@ public class XoPreferenceActivity extends PreferenceActivity
         if ("preference_keysize".equals(key)) {
             createDialog();
             regenerateKeys();
+        } else if ("preference_key_worldwide_timetolive".equals(key)) {
+            WorldwideController.get().updateTimeToLive(sharedPreferences.getLong("preference_key_worldwide_timetolive", 0));
         }
     }
 
