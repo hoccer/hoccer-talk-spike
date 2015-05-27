@@ -134,6 +134,7 @@ public class TalkClientMessage {
 
     public void setOutgoingDelivery(TalkDelivery delivery) {
         this.delivery = delivery;
+        this.direction = TYPE_OUTGOING;
     }
 
     public TalkClientUpload getAttachmentUpload() {

@@ -320,8 +320,9 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
             for (TalkDelivery newDelivery : newDeliveries) {
                 TalkClientMessage message = mClientMessages.queryBuilder().where()
                         .eq("deleted", false)
-                        .eq("outgoingDelivery" + "_id", newDelivery)
-                        .and(2)
+                        .eq("delivery_id", newDelivery)
+                        .eq("direction", TalkClientMessage.TYPE_OUTGOING)
+                        .and(3)
                         .queryForFirst();
 
                 if (message != null) {
