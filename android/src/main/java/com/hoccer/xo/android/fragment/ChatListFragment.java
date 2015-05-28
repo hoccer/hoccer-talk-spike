@@ -242,7 +242,7 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
     }
 
     private boolean shouldShowClientHistory(ChatItem item) {
-        return item.getType() == ChatItem.TYPE_CLIENT_NEARBY_HISTORY || item.getType() == ChatItem.TYPE_CLIENT_WORLDWIDE_HISTORY ||item.getType() == ChatItem.TYPE_CLIENT_HISTORY;
+        return item.getType() == ChatItem.TYPE_CLIENT_NEARBY_HISTORY || item.getType() == ChatItem.TYPE_CLIENT_WORLDWIDE_HISTORY || item.getType() == ChatItem.TYPE_CLIENT_HISTORY;
     }
 
     public void showChat(TalkClientContact contact) {
