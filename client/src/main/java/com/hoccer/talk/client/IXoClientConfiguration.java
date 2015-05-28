@@ -27,4 +27,5 @@ public interface IXoClientConfiguration {
     public boolean isSendDeliveryConfirmationEnabled();
 
     public long getTimeToLiveInWorldwide();
+    public String getNotificationPreferenceForWorldwide();
 }

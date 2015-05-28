@@ -458,6 +458,7 @@
     <string name="worldwide">worldwide</string>
     <string name="worldwide_mode">worldwide mode</string>
     <string name="leave_after">Leave after..</string>
+    <string name="notifications">Notifications</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>

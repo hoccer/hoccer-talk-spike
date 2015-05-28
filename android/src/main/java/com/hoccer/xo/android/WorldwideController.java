@@ -1,9 +1,11 @@
 package com.hoccer.xo.android;
 
 
+import com.hoccer.talk.client.IXoClientConfiguration;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.model.TalkEnvironment;
+import com.hoccer.talk.model.TalkGroupMembership;
 import org.apache.log4j.Logger;
 
 import java.util.Date;
@@ -15,6 +17,7 @@ public class WorldwideController {
     private static final Logger LOG = Logger.getLogger(WorldwideController.class);
 
     private static WorldwideController sInstance;
+    private final IXoClientConfiguration mConfiguration;
 
     private IXoStateListener mStateListener;
     private TalkEnvironment mEnvironment;
@@ -36,6 +39,8 @@ public class WorldwideController {
                 }
             }
         };
+
+        mConfiguration = XoApplication.get().getXoClient().getConfiguration();
     }
 
     public void enableWorldwide() {
@@ -47,9 +52,9 @@ public class WorldwideController {
     private TalkEnvironment createWorldwideEnvironment() {
         TalkEnvironment environment = new TalkEnvironment();
         environment.setType(TYPE_WORLDWIDE);
-        environment.setTimeToLive(XoApplication.get().getXoClient().getConfiguration().getTimeToLiveInWorldwide());
         environment.setTimestamp(new Date());
-//        environment.setNotificationPreference(TalkRelationship.NOTIFICATIONS_ENABLED); //TODO #826
+        environment.setTimeToLive(mConfiguration.getTimeToLiveInWorldwide());
+        environment.setNotificationPreference(mConfiguration.getNotificationPreferenceForWorldwide());
 //        environment.setTag("*"); TODO: send tag?
         return environment;
     }
@@ -72,6 +77,13 @@ public class WorldwideController {
     public void updateTimeToLive(long timeToLive) {
         if (mEnvironment != null) {
             mEnvironment.setTimeToLive(timeToLive);
+            sendEnvironmentUpdate();
+        }
+    }
+
+    public void updateNotificationPreference(String notificationPreference) {
+        if (mEnvironment != null) {
+            mEnvironment.setNotificationPreference(notificationPreference);
             sendEnvironmentUpdate();
         }
     }

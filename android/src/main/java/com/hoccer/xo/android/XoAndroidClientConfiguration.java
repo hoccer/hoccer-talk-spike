@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoDefaultClientConfiguration;
+import com.hoccer.talk.model.TalkGroupMembership;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -114,5 +115,11 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
     @Override
     public long getTimeToLiveInWorldwide() {
         return Long.parseLong(mSharedPreferences.getString("preference_key_worldwide_timetolive", "0"));
+    }
+
+    @Override
+    public String getNotificationPreferenceForWorldwide() {
+        Boolean notificationsEnabled = mSharedPreferences.getBoolean("preference_key_worldwide_enable_notifications", false);
+        return notificationsEnabled ? TalkGroupMembership.NOTIFICATIONS_ENABLED : TalkGroupMembership.NOTIFICATIONS_DISABLED;
     }
 }

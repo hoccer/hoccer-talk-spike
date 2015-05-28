@@ -14,6 +14,7 @@ import android.view.*;
 import android.widget.ListAdapter;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.WorldwideController;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
@@ -232,14 +233,25 @@ public class XoPreferenceActivity extends PreferenceActivity
         if ("preference_keysize".equals(key)) {
             createDialog();
             regenerateKeys();
-        } else if ("preference_key_worldwide_timetolive".equals(key)) {
+        } else if (getString(R.string.preference_key_worldwide_timetolive).equals(key)) {
             updateTimeToLive(sharedPreferences);
+        } else if (getString(R.string.preference_key_worldwide_enable_notifications).equals(key)) {
+            updateWorldwideNotificationPreference(sharedPreferences);
         }
     }
 
     private void updateTimeToLive(SharedPreferences sharedPreferences) {
         long timeToLive = Long.parseLong(sharedPreferences.getString("preference_key_worldwide_timetolive", "0"));
         WorldwideController.get().updateTimeToLive(timeToLive);
+    }
+
+    private void updateWorldwideNotificationPreference(SharedPreferences sharedPreferences) {
+        Boolean notificationsEnabled = sharedPreferences.getBoolean(getString(R.string.preference_key_worldwide_enable_notifications), false);
+        if (notificationsEnabled) {
+            WorldwideController.get().updateNotificationPreference(TalkGroupMembership.NOTIFICATIONS_ENABLED);
+        } else {
+            WorldwideController.get().updateNotificationPreference(TalkGroupMembership.NOTIFICATIONS_DISABLED);
+        }
     }
 
     private void regenerateKeys() {

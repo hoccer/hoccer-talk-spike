@@ -5,4 +5,5 @@
     <string name="preference_key_activate_passcode">preference_key_activate_passcode</string>
     <string name="preference_key_change_passcode">preference_key_change_passcode</string>
     <string name="preference_key_worldwide_timetolive">preference_key_worldwide_timetolive</string>
+    <string name="preference_key_worldwide_enable_notifications">preference_key_worldwide_enable_notifications</string>
 </resources>

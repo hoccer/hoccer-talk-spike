@@ -54,6 +54,10 @@
                 android:entries="@array/worldwide_timetolive"
                 android:entryValues="@array/worldwide_timetolive_values"
                 android:defaultValue="0"/>
+        <SwitchPreference
+                android:key="@string/preference_key_worldwide_enable_notifications"
+                android:title="@string/notifications"
+                android:defaultValue="false"/>
     </PreferenceCategory>
 
     <PreferenceCategory
