@@ -9,6 +9,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.Date;
 
 
@@ -292,4 +293,25 @@ public class TalkEnvironment {
         }
     }
 
+    @Override
+    public String toString() {
+        return "TalkEnvironment{" +
+                "_id='" + _id + '\'' +
+                ", clientId='" + clientId + '\'' +
+                ", groupId='" + groupId + '\'' +
+                ", type='" + type + '\'' +
+                ", name='" + name + '\'' +
+                ", timestamp=" + timestamp +
+                ", timeReceived=" + timeReceived +
+                ", locationType='" + locationType + '\'' +
+                ", geoLocation=" + Arrays.toString(geoLocation) +
+                ", accuracy=" + accuracy +
+                ", bssids=" + Arrays.toString(bssids) +
+                ", identifiers=" + Arrays.toString(identifiers) +
+                ", tag='" + tag + '\'' +
+                ", notificationPreference='" + notificationPreference + '\'' +
+                ", timeToLive=" + timeToLive +
+                ", timeReleased=" + timeReleased +
+                '}';
+    }
 }

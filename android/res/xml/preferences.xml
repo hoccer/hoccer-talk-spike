@@ -46,6 +46,16 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+            android:title="@string/worldwide_mode">
+        <ListPreference
+                android:key="@string/preference_key_worldwide_timetolive"
+                android:title="@string/leave_after"
+                android:entries="@array/worldwide_timetolive"
+                android:entryValues="@array/worldwide_timetolive_values"
+                android:defaultValue="0"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
             android:title="@string/pref_category_image_encoding">
 
         <ListPreference
