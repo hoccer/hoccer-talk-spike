@@ -129,23 +129,18 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
         Cursor cursor = db.rawQuery("SELECT * FROM clientMessage", null);
         while (cursor.moveToNext()) {
             int deliveryId = cursor.getInt(cursor.getColumnIndex("incomingDelivery_id"));
-            if (deliveryId == 0) {
+            if (deliveryId > 0) {
+                db.execSQL("UPDATE clientMessage SET delivery_id = '" + deliveryId + "', direction = '" + TalkClientMessage.TYPE_INCOMING + "' WHERE incomingDelivery_id = '" + deliveryId + "'");
+            } else {
                 deliveryId = cursor.getInt(cursor.getColumnIndex("outgoingDelivery_id"));
+                db.execSQL("UPDATE clientMessage SET delivery_id = '" + deliveryId + "', direction = '" + TalkClientMessage.TYPE_OUTGOING + "' WHERE outgoingDelivery_id = '" + deliveryId + "'");
             }
-
-            db.execSQL("UPDATE clientMessage SET delivery_id = '" + deliveryId + "' WHERE incomingDelivery_id = '" + deliveryId + "' OR outgoingDelivery_id = '" + deliveryId + "'");
-            db.execSQL("UPDATE clientMessage SET direction = '" + TalkClientMessage.TYPE_INCOMING + "' WHERE incomingDelivery_id = '" + deliveryId + "'");
-            db.execSQL("UPDATE clientMessage SET direction = '" + TalkClientMessage.TYPE_OUTGOING + "' WHERE outgoingDelivery_id = '" + deliveryId + "'");
         }
     }
 
     private void updateAcquaintanceTypeColumn(SQLiteDatabase db) throws SQLException {
         db.execSQL("ALTER TABLE 'presence' ADD COLUMN 'acquaintanceType' VARCHAR");
-
-        Cursor cursor = db.rawQuery("SELECT * FROM presence WHERE isNearbyAcquaintance = '1'", null);
-        while (cursor.moveToNext()) {
-            db.execSQL("UPDATE presence SET acquaintanceType = '" + TalkPresence.TYPE_ACQUAINTANCE_NEARBY + "'");
-        }
+        db.execSQL("UPDATE presence SET acquaintanceType = '" + TalkPresence.TYPE_ACQUAINTANCE_NEARBY + "' WHERE isNearbyAcquaintance = '1'");
     }
 
     private static void makeTransferDataFileRelative(SQLiteDatabase db) {
