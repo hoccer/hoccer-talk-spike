@@ -233,8 +233,13 @@ public class XoPreferenceActivity extends PreferenceActivity
             createDialog();
             regenerateKeys();
         } else if ("preference_key_worldwide_timetolive".equals(key)) {
-            WorldwideController.get().updateTimeToLive(sharedPreferences.getLong("preference_key_worldwide_timetolive", 0));
+            updateTimeToLive(sharedPreferences);
         }
+    }
+
+    private void updateTimeToLive(SharedPreferences sharedPreferences) {
+        long timeToLive = Long.parseLong(sharedPreferences.getString("preference_key_worldwide_timetolive", "0"));
+        WorldwideController.get().updateTimeToLive(timeToLive);
     }
 
     private void regenerateKeys() {

@@ -4,12 +4,15 @@ package com.hoccer.xo.android;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.model.TalkEnvironment;
+import org.apache.log4j.Logger;
 
 import java.util.Date;
 
 import static com.hoccer.talk.model.TalkEnvironment.TYPE_WORLDWIDE;
 
 public class WorldwideController {
+
+    private static final Logger LOG = Logger.getLogger(WorldwideController.class);
 
     private static WorldwideController sInstance;
 
@@ -54,6 +57,7 @@ public class WorldwideController {
     private void sendEnvironmentUpdate() {
         if (XoApplication.get().getXoClient().getState() == XoClient.State.READY) {
             if (mEnvironment.isValid()) {
+                LOG.info("Sending environment update: " + mEnvironment.toString());
                 XoApplication.get().getXoClient().sendEnvironmentUpdate(mEnvironment);
             }
         }
