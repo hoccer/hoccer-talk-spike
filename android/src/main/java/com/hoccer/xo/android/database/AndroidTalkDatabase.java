@@ -129,13 +129,12 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
         Cursor cursor = db.rawQuery("SELECT * FROM clientMessage", null);
         while (cursor.moveToNext()) {
             int deliveryId = cursor.getInt(cursor.getColumnIndex("incomingDelivery_id"));
-            if (deliveryId == 0) {
+            if (deliveryId > 0) {
+                db.execSQL("UPDATE clientMessage SET delivery_id = '" + deliveryId + "', direction = '" + TalkClientMessage.TYPE_INCOMING + "' WHERE incomingDelivery_id = '" + deliveryId + "'");
+            } else {
                 deliveryId = cursor.getInt(cursor.getColumnIndex("outgoingDelivery_id"));
+                db.execSQL("UPDATE clientMessage SET delivery_id = '" + deliveryId + "', direction = '" + TalkClientMessage.TYPE_OUTGOING + "' WHERE outgoingDelivery_id = '" + deliveryId + "'");
             }
-
-            db.execSQL("UPDATE clientMessage SET delivery_id = '" + deliveryId + "' WHERE incomingDelivery_id = '" + deliveryId + "' OR outgoingDelivery_id = '" + deliveryId + "'");
-            db.execSQL("UPDATE clientMessage SET direction = '" + TalkClientMessage.TYPE_INCOMING + "' WHERE incomingDelivery_id = '" + deliveryId + "'");
-            db.execSQL("UPDATE clientMessage SET direction = '" + TalkClientMessage.TYPE_OUTGOING + "' WHERE outgoingDelivery_id = '" + deliveryId + "'");
         }
     }
 
