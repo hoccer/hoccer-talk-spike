@@ -141,11 +141,7 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
 
     private void updateAcquaintanceTypeColumn(SQLiteDatabase db) throws SQLException {
         db.execSQL("ALTER TABLE 'presence' ADD COLUMN 'acquaintanceType' VARCHAR");
-
-        Cursor cursor = db.rawQuery("SELECT * FROM presence WHERE isNearbyAcquaintance = '1'", null);
-        while (cursor.moveToNext()) {
-            db.execSQL("UPDATE presence SET acquaintanceType = '" + TalkPresence.TYPE_ACQUAINTANCE_NEARBY + "'");
-        }
+        db.execSQL("UPDATE presence SET acquaintanceType = '" + TalkPresence.TYPE_ACQUAINTANCE_NEARBY + "' WHERE isNearbyAcquaintance = '1'");
     }
 
     private static void makeTransferDataFileRelative(SQLiteDatabase db) {
