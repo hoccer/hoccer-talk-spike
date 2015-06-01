@@ -1400,13 +1400,24 @@ public class TalkRpcHandler implements ITalkRpcServer {
                         memberDelivery.setState(TalkDelivery.STATE_FAILED);
                         memberDelivery.setReason("group key for receiver is not current");
                     } else {
+                        if (groupPresence.isTypeWorldwide()) {
+                            // check for expired environment
+                            TalkEnvironment environment = mDatabase.findEnvironmentByClientIdForGroup(memberDelivery.getReceiverId(), memberDelivery.getGroupId());
+                            if (environment == null || environment.hasExpired()) {
+                                memberDelivery.setState(TalkDelivery.STATE_FAILED);
+                                memberDelivery.setReason("worldwide membership with expired on non-existing environment");
+                                LOG.info("not delivering (failing) message to worldwide group member with expired or non-existing environment" + message.getMessageId() + " for client " + membership.getClientId() + " group " + groupId);
+                            }
+                        }
 
-                        boolean success = checkOneDelivery(message, memberDelivery);
-                        if (success) {
-                            memberDelivery.setState(TalkDelivery.STATE_DELIVERING);
-                            LOG.info("delivering message " + message.getMessageId() + " for client " + membership.getClientId() + " group " + groupId + " sharedKeyId=" + message.getSharedKeyId() + ", member sharedKeyId=" + membership.getSharedKeyId());
-                        } else {
-                            LOG.info("failed message " + message.getMessageId() + " for client " + membership.getClientId() + " group " + groupId + " sharedKeyId=" + message.getSharedKeyId() + ", member sharedKeyId=" + membership.getSharedKeyId());
+                        if (!TalkDelivery.STATE_FAILED.equals(memberDelivery.getState())) {
+                            boolean success = checkOneDelivery(message, memberDelivery);
+                            if (success) {
+                                memberDelivery.setState(TalkDelivery.STATE_DELIVERING);
+                                LOG.info("delivering message " + message.getMessageId() + " for client " + membership.getClientId() + " group " + groupId + " sharedKeyId=" + message.getSharedKeyId() + ", member sharedKeyId=" + membership.getSharedKeyId());
+                            } else {
+                                LOG.info("failed message " + message.getMessageId() + " for client " + membership.getClientId() + " group " + groupId + " sharedKeyId=" + message.getSharedKeyId() + ", member sharedKeyId=" + membership.getSharedKeyId());
+                            }
                         }
                     }
                     // set delivery timestamps
@@ -2513,6 +2524,25 @@ public class TalkRpcHandler implements ITalkRpcServer {
        return mDatabase.countDeliveriesForClientInGroupInState(environment.getClientId(), environment.getGroupId(), TalkDelivery.STATE_DELIVERING);
     }
 
+    private boolean tryEnsureGroupMembershipForEnvironment(TalkEnvironment environment) {
+        if (environment.getGroupId() == null) {
+            LOG.error("ensureGroupMembershipForEnvironment: no group id");
+            return false;
+        }
+        TalkGroupPresence groupPresence = mDatabase.findGroupPresenceById(environment.getGroupId());
+        if (groupPresence == null) {
+            LOG.error("ensureGroupMembershipForEnvironment: no group with id "+environment.getGroupId());
+            // TODO: create a group with a particular group id or trash the deliveries
+            return false;
+        }
+        TalkGroupMembership membership = mDatabase.findGroupMembershipForClient(environment.getGroupId(), environment.getClientId());
+        if (membership == null || !groupPresence.exists() || !membership.isMember()) {
+            LOG.info("ensureGroupMembershipForEnvironment: client " + environment.getClientId() + " will join group with id " + environment.getGroupId());
+            joinGroupWithEnvironment(groupPresence, environment);
+        }
+        return true;
+    }
+
     @Override
     public String updateEnvironment(TalkEnvironment environment) {
         logCall("updateEnvironment(clientId: '" + mConnection.getClientId() + "')");
@@ -2555,7 +2585,8 @@ public class TalkRpcHandler implements ITalkRpcServer {
                             destroyEnvironment(te);
                         } else {
                             LOG.info("updateEnvironment: worldwide: can't remove expired worldwide environment for client="+ te.getClientId() + " from groupId=" + te.getGroupId()+", there are "+ undeliveredCount+" deliveries to be delivered");
-                            //matching.add(te);
+                            tryEnsureGroupMembershipForEnvironment(te);
+                            matching.add(te);
                         }
                     } else {
                         matching.add(te);
@@ -2603,13 +2634,40 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
         TalkEnvironment myEnvironment = mDatabase.findEnvironmentByClientId(environment.getType(), mConnection.getClientId());
 
+        // TODO: remove for production
         // debug output code
-        int i = 0;
         if (environment.isWorldwide()) {
+            int i = 0;
             for (Pair<String, Integer> epg : environmentsPerGroup) {
-                LOG.info("updateEnvironment: "+ epg.getRight() +" members in group " + epg.getLeft()+",("+i+"/"+environmentsPerGroup.size()+"),clientId="+mConnection.getClientId()+",my current groupId="+environment.getGroupId());
+                LOG.info("updateEnvironment: " + epg.getRight() + " members in group " + epg.getLeft() + ",(" + i + "/" + environmentsPerGroup.size() + "),clientId=" + mConnection.getClientId() + ",my current groupId=" + environment.getGroupId());
+                ++i;
+            }
+            int ii = 0;
+
+            for (Pair<String, Integer> epg : environmentsPerGroup) {
+                LOG.info("updateEnvironment(member listing): "+ epg.getRight() +" members in group " + epg.getLeft()+",("+ii+"/"+environmentsPerGroup.size()+"),clientId="+mConnection.getClientId()+",my current groupId="+environment.getGroupId());
+
+                List<TalkGroupMembership> members = mDatabase.findGroupMembershipsById(epg.getLeft());
+                int g = 0;
+                for (TalkGroupMembership member : members) {
+                    if (member.isMember()) {
+                        TalkPresence presence = mDatabase.findPresenceForClient(member.getClientId());
+                        TalkEnvironment hisEnvironment = mDatabase.findEnvironmentByClientId(environment.getType(), member.getClientId());
+                        if (presence != null && hisEnvironment != null) {
+                            LOG.info("updateEnvironment: member " + g + "/" + epg.getRight() + " members in group " + epg.getLeft() +
+                                    ", nick '" + presence.getClientName() + "', membership '" + member.getState() + "'.status '" + presence.getConnectionStatus() +
+                                    ", hasExpired=" + environment.hasExpired() + ", released:" + environment.getTimeReleased() + ", ttl=" + environment.getTimeToLive()+", undelivered="+deliveryCountForEnvironment(environment));
+                        } else {
+                            LOG.error("updateEnvironment: missing presence or environment for member " + g + "/" + epg.getRight() +
+                                    " members in group " + epg.getLeft() + ", clientId=" + member.getClientId() + ", presence:" + presence + ", environment:" + environment);
+                        }
+                        ++g;
+                    }
+                }
+                ++ii;
             }
         }
+        // end debug output code
 
         for (TalkEnvironment te : matching) {
             if (te.getClientId().equals(mConnection.getClientId())) {
@@ -2877,6 +2935,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                         destroyEnvironment(myEnvironment);
                     } else {
                         LOG.info("releaseEnvironment: keeping expired environment with type " + myEnvironment.getType() + ", ttl " + myEnvironment.getTimeToLive() + " for client " + clientId+" because it has "+deliveryCount+" undelivered deliveries");
+                        tryEnsureGroupMembershipForEnvironment(myEnvironment);
                     }
                 } else {
                     if (myEnvironment.getTimeReleased() == null) {
