@@ -205,6 +205,7 @@ public class CleaningAgent {
                     doCleanAllClients();
                     doCleanGroups();
                     doCleanRelationships();
+                    mServer.cleanAllLocks();
                     firstRunDone = true;
                 } catch (Throwable t) {
                     LOG.error("caught and swallowed exception escaping runnable", t);

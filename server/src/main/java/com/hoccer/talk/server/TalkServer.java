@@ -275,15 +275,50 @@ public class TalkServer {
         }
     }
 
-    // TODO: call this when we are through with an id (e.g. message)
-    public void removeIdLock(String id) {
-        mIdLocks.remove(id);
+    private void cleanIdLocks() {
+        System.out.println("#INFO: cleanIdLocks removing locks");
+
+        synchronized (mIdLocks) {
+            long count = mIdLocks.size();
+            Iterator it = mIdLocks.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry)it.next();
+                synchronized (pair.getValue()) {
+                    it.remove();
+                }
+            }
+            System.out.println("#INFO: cleanIdLocks removed "+count+" locks");
+        }
     }
 
+    private void cleanNonReentrantLocks() {
+        System.out.println("#INFO: cleanNonReentrantLocks removing locks");
 
-        /**
-         * @return the JSON mapper used by this server
-         */
+        synchronized (mNonReentrantIdLocks) {
+            long count = mNonReentrantIdLocks.size();
+            long removed = 0;
+            Iterator it = mNonReentrantIdLocks.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry)it.next();
+                NonReentrantLock lock =  (NonReentrantLock)pair.getValue();
+                if (lock.tryLock()) {
+                    it.remove();
+                    lock.unlock();
+                    ++removed;
+                }
+            }
+            System.out.println("#INFO: cleanNonReentrantLocks removed "+removed+" of "+count+" locks");
+        }
+    }
+
+    public void cleanAllLocks () {
+        cleanIdLocks();
+        cleanNonReentrantLocks();
+    }
+
+    /**
+     * @return the JSON mapper used by this server
+     */
     public ObjectMapper getJsonMapper() {
         return mJsonMapper;
     }
