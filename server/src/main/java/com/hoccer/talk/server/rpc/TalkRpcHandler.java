@@ -1855,10 +1855,17 @@ public class TalkRpcHandler implements ITalkRpcServer {
             throw new RuntimeException("number of members != number of roles");
         }
 
+        HashSet<String> deleted = new HashSet<String>();
         for (String memberId : members) {
             TalkClient client = mDatabase.findClientById(memberId);
             if (client == null) {
-                throw new RuntimeException("No such client:"+memberId);
+                client = mDatabase.findDeletedClientById(memberId);
+                if (client == null) {
+                    throw new RuntimeException("No such client:" + memberId);
+                } else {
+                    logCall("createGroupWithMembers(groupName: '"+groupName +"', groupTag='" + groupTag + "'), member +"+memberId+" already deleted");
+                    deleted.add(memberId);
+                }
             }
         }
 
@@ -1879,16 +1886,20 @@ public class TalkRpcHandler implements ITalkRpcServer {
         changedGroupMembership(adminMembership, now);
 
         for (int i = 0; i < members.length;++i) {
-            TalkGroupMembership membership = new TalkGroupMembership();
-            membership.setGroupId(groupPresence.getGroupId());
-            membership.setClientId(members[i]);
-            membership.setRole(roles[i]);
-            membership.setState(TalkGroupMembership.STATE_INVITED);
-            changedGroupMembership(membership, now);
+            if (!deleted.contains(members[i])) {
+                TalkGroupMembership membership = new TalkGroupMembership();
+                membership.setGroupId(groupPresence.getGroupId());
+                membership.setClientId(members[i]);
+                membership.setRole(roles[i]);
+                membership.setState(TalkGroupMembership.STATE_INVITED);
+                changedGroupMembership(membership, now);
+            }
         }
         for (int i = 0; i < members.length;++i) {
-            // send the presence of all other group members to the new group member
-            mServer.getUpdateAgent().requestPresenceUpdateForClientOfMembersOfGroup(members[i], groupPresence.getGroupId());
+            if (!deleted.contains(members[i])) {
+                // send the presence of all other group members to the new group member
+                mServer.getUpdateAgent().requestPresenceUpdateForClientOfMembersOfGroup(members[i], groupPresence.getGroupId());
+            }
         }
         return groupPresence;
     }
