@@ -235,22 +235,18 @@ public class TalkServerConfiguration {
         // CLEANING AGENT
         CLEANUP_ALL_CLIENTS_DELAY(PROPERTY_PREFIX + ".cleanup.allClientsDelay",
                 PropertyTypes.INTEGER,
-        //        7200), // in seconds (2 hours)
-                  10), // in seconds (2 hours)
+                  30), // in seconds
         CLEANUP_ALL_CLIENTS_INTERVAL(PROPERTY_PREFIX + ".cleanup.allClientsInterval",
                 PropertyTypes.INTEGER,
-        //        60 * 60 * 24), // in seconds (once a day)
-                  60 * 60),
-        /*
-        CLEANUP_ALL_DEVLIVERIES_DELAY(PROPERTY_PREFIX + ".cleanup.allDeliveriesDelay",
+                  60 * 60), // once per hour
+
+        CLEANUP_ENVIRONMENTS_DELAY(PROPERTY_PREFIX + ".cleanup.environmentsDelay",
                 PropertyTypes.INTEGER,
-                //3600), // in second (1 hour)
-                30), // in seconds (2 hours)
-        CLEANUP_ALL_DELIVERIES_INTERVAL(PROPERTY_PREFIX + ".cleanup.allDeliveriesInterval",
+                1), // in seconds
+        CLEANUP_ENVIRONMENTS_INTERVAL(PROPERTY_PREFIX + ".cleanup.environmentsInterval",
                 PropertyTypes.INTEGER,
-                //60 * 60 * 6), // in seconds (every 6 hours)
-                60),
-                */
+                60), // in seconds
+
         CLEANUP_THREAD_POOL_SIZE(PROPERTY_PREFIX + ".cleanup.threadPoolSize",
                 PropertyTypes.INTEGER,
                 4), // ScheduledThreadPoolExecutor, number is also maximum Number of threads used
@@ -423,8 +419,10 @@ public class TalkServerConfiguration {
         builder.append(MessageFormat.format("\n     * api key (length):                   ''{0}''", getGcmApiKey().length()));
         builder.append(MessageFormat.format("\n     * wake ttl (in s)                     ''{0}''", Long.toString(GCM_WAKE_TTL)));
         builder.append(                     "\n - Cleaning Agent Configuration:");
-        builder.append(MessageFormat.format("\n   * clients cleanup delay (in s):         {0}", Long.toString(this.getApnsInvalidateDelay())));
+        builder.append(MessageFormat.format("\n   * clients cleanup delay (in s):         {0}", Long.toString(this.getCleanupAllClientsDelay())));
         builder.append(MessageFormat.format("\n   * clients cleanup interval (in s):      {0}", Long.toString(this.getCleanupAllClientsInterval())));
+        builder.append(MessageFormat.format("\n   * environments cleanup delay (in s):    {0}", Long.toString(this.getCleanupEnvironmentsDelay())));
+        builder.append(MessageFormat.format("\n   * clients cleanup interval (in s):      {0}", Long.toString(this.getCleanupEnvironmentsInterval())));
         /*
         builder.append(MessageFormat.format("\n   * deliveries cleanup delay (in s):      {0}", Long.toString(this.getCleanupAllDeliveriesDelay())));
         builder.append(MessageFormat.format("\n   * deliveries cleanup interval (in s):   {0}", Long.toString(this.getCleanupAllDeliveriesInterval())));
@@ -618,22 +616,21 @@ public class TalkServerConfiguration {
         return (Integer) ConfigurableProperties.APNS_INVALIDATE_INTERVAL.value;
     }
 
+    public int getCleanupAllClientsInterval() {
+        return (Integer) ConfigurableProperties.CLEANUP_ALL_CLIENTS_INTERVAL.value;
+    }
     public int getCleanupAllClientsDelay() {
         return (Integer) ConfigurableProperties.CLEANUP_ALL_CLIENTS_DELAY.value;
     }
 
-    public int getCleanupAllClientsInterval() {
-        return (Integer) ConfigurableProperties.CLEANUP_ALL_CLIENTS_INTERVAL.value;
-    }
-/*
-    public int getCleanupAllDeliveriesDelay() {
-        return (Integer) ConfigurableProperties.CLEANUP_ALL_DEVLIVERIES_DELAY.value;
+    public int getCleanupEnvironmentsInterval() {
+        return (Integer) ConfigurableProperties.CLEANUP_ENVIRONMENTS_INTERVAL.value;
     }
 
-    public int getCleanupAllDeliveriesInterval() {
-        return (Integer) ConfigurableProperties.CLEANUP_ALL_DELIVERIES_INTERVAL.value;
+    public int getCleanupEnvironmentsDelay() {
+        return (Integer) ConfigurableProperties.CLEANUP_ENVIRONMENTS_DELAY.value;
     }
-*/
+
     public URI getFilecacheControlUrl() {
         URI url = null;
         try {

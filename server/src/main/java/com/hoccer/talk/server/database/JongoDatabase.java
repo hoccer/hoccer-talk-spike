@@ -568,10 +568,10 @@ public class JongoDatabase implements ITalkServerDatabase {
         List<TalkGroupMembership> ownMemberships = findGroupMembershipsForClient(clientId);
         for (TalkGroupMembership ownMembership : ownMemberships) {
             String groupId = ownMembership.getGroupId();
-            if (ownMembership.isInvited() || ownMembership.isJoined()) {
+            if (ownMembership.isInvited() || ownMembership.isJoined() || ownMembership.isSuspended()) {
                 List<TalkGroupMembership> otherMemberships = findGroupMembershipsById(groupId);
                 for (TalkGroupMembership otherMembership : otherMemberships) {
-                    if (otherMembership.isInvited() || otherMembership.isJoined()) {
+                    if (otherMembership.isInvited() || otherMembership.isJoined() || otherMembership.isSuspended()) {
                         clients.add(otherMembership.getClientId());
                         LOG.info("include "+otherMembership.getClientId()+" because common membership");
                         if (otherMembership.getLastChanged().after(lastKnown) || ownMembership.getLastChanged().after(lastKnown)) {
@@ -759,7 +759,7 @@ public class JongoDatabase implements ITalkServerDatabase {
         List<TalkGroupPresence> res = new ArrayList<TalkGroupPresence>();
         List<TalkGroupMembership> memberships = findGroupMembershipsForClient(clientId);
         for (TalkGroupMembership membership : memberships) {
-            if (membership.isMember() || membership.isInvited()) {
+            if (membership.isMember() || membership.isInvited() || membership.isSuspended()) {
                 TalkGroupPresence groupPresence = findGroupPresenceById(membership.getGroupId());
                 if (groupPresence == null) {
                     // TODO: Define and throw a dedicated exception instead of using a generic one (from sonarqube)
@@ -776,7 +776,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     private List<TalkGroupPresence> findGroupsByClientIdChangedAfterV2(String clientId, Date lastKnown) {
         // indirect query
         List<TalkGroupPresence> res = new ArrayList<TalkGroupPresence>();
-        List<TalkGroupMembership> memberships = findGroupMembershipsByIdWithStates(clientId, new String[]{TalkGroupMembership.STATE_JOINED, TalkGroupMembership.STATE_INVITED});
+        List<TalkGroupMembership> memberships = findGroupMembershipsByIdWithStates(clientId, new String[]{TalkGroupMembership.STATE_JOINED, TalkGroupMembership.STATE_INVITED, TalkGroupMembership.STATE_SUSPENDED});
         for (TalkGroupMembership membership : memberships) {
                 TalkGroupPresence groupPresence = findGroupPresenceById(membership.getGroupId());
                 if (groupPresence == null) {
@@ -844,7 +844,17 @@ public class JongoDatabase implements ITalkServerDatabase {
     @Override
     public List<TalkGroupMembership> findGroupMembershipsByIdWithStatesAndRoles(String groupId, String[] states, String[] roles) {
         Iterator<TalkGroupMembership> it = mGroupMemberships
-                .find("{groupId:#, state: { $in: # }, role: {$in: #}", groupId, Arrays.asList(states), Arrays.asList(roles))
+                .find("{groupId:#, state: { $in: # }, role: {$in: #} }", groupId, Arrays.asList(states), Arrays.asList(roles))
+                .as(TalkGroupMembership.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
+    }
+
+    @Override
+    public List<TalkGroupMembership> findGroupMembershipsWithStatesAndRoles(String[] states, String[] roles) {
+        Iterator<TalkGroupMembership> it = mGroupMemberships
+                .find("{state: { $in: # }, role: {$in: #} }", Arrays.asList(states), Arrays.asList(roles))
                 .as(TalkGroupMembership.class)
                 .iterator();
 
@@ -928,6 +938,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     public void saveGroupMembership(TalkGroupMembership membership) {
         mGroupMemberships.save(membership);
     }
+
     @Override
     public void deleteGroupMembership(TalkGroupMembership membership) {
         mGroupMemberships.remove("{groupId:#,clientId:#}", membership.getGroupId(), membership.getClientId());
@@ -968,6 +979,26 @@ public class JongoDatabase implements ITalkServerDatabase {
     public List<TalkEnvironment> findEnvironmentsForClient(String clientId) {
         Iterator<TalkEnvironment> it = mEnvironments
                 .find("{clientId:#}", clientId)
+                .as(TalkEnvironment.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
+    }
+
+    @Override
+    public List<TalkEnvironment> findEnvironmentsByType(String type) {
+        Iterator<TalkEnvironment> it = mEnvironments
+                .find("{type:#}", type)
+                .as(TalkEnvironment.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
+    }
+
+    @Override
+    public List<TalkEnvironment> findEnvironmentsForClient(String clientId, String type) {
+        Iterator<TalkEnvironment> it = mEnvironments
+                .find("{clientId:#, type:#}", clientId, type)
                 .as(TalkEnvironment.class)
                 .iterator();
 

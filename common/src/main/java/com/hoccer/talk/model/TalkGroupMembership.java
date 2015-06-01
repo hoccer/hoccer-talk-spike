@@ -13,6 +13,7 @@ public class TalkGroupMembership {
     public static final String STATE_INVITED = "invited";
     public static final String STATE_JOINED = "joined";
     public static final String STATE_GROUP_REMOVED = "groupRemoved";
+    public static final String STATE_SUSPENDED = "suspended";
 
     public static final String ROLE_NONE = "none";
     public static final String ROLE_ADMIN = "admin";
@@ -22,6 +23,8 @@ public class TalkGroupMembership {
 
     public static final String NOTIFICATIONS_DISABLED = "disabled";
     public static final String NOTIFICATIONS_ENABLED = "enabled";
+
+    public static final String LOCK_PREFIX = "mbr-";
 
     public static boolean isValidRoleForGroupType(String role, String type) {
         if (TalkGroupPresence.GROUP_TYPE_USER.equals(type)) {
@@ -92,41 +95,55 @@ public class TalkGroupMembership {
 
     @JsonIgnore
     public boolean isAdmin() {
-        return this.state.equals(STATE_JOINED) && this.role.equals(ROLE_ADMIN);
+        return isJoined() && ROLE_ADMIN.equals(this.role);
     }
 
     @JsonIgnore
     public boolean isNearby() {
-        return this.state.equals(STATE_JOINED) && this.role.equals(ROLE_NEARBY_MEMBER);
+        return isJoined() && ROLE_NEARBY_MEMBER.equals(this.role);
     }
     @JsonIgnore
     public boolean isWorldwide() {
-        return this.state.equals(STATE_JOINED) && this.role.equals(ROLE_WORLDWIDE_MEMBER);
+        return (isJoined() || isSuspended()) && ROLE_WORLDWIDE_MEMBER.equals(this.role);
     }
 
     @JsonIgnore
     public boolean isMember() {
-        return this.state.equals(STATE_JOINED) && (this.role.equals(ROLE_MEMBER) || this.role.equals(ROLE_NEARBY_MEMBER) || this.role.equals(ROLE_WORLDWIDE_MEMBER)|| this.role.equals(ROLE_ADMIN));
+        return isJoined() &&
+                (ROLE_MEMBER.equals(this.role) ||
+                ROLE_NEARBY_MEMBER.equals(this.role) ||
+                ROLE_WORLDWIDE_MEMBER.equals(this.role) ||
+                ROLE_ADMIN.equals(this.role));
     }
 
     @JsonIgnore
     public boolean isJoined() {
-        return this.state.equals(STATE_JOINED);
+        return STATE_JOINED.equals(this.state);
     }
 
     @JsonIgnore
     public boolean isInvited() {
-        return this.state.equals(STATE_INVITED);
+        return STATE_INVITED.equals(this.state);
+    }
+
+    @JsonIgnore
+    public boolean isSuspended() {
+        return STATE_SUSPENDED.equals(this.state);
     }
 
     @JsonIgnore
     public boolean isGroupRemoved() {
-        return this.state.equals(STATE_GROUP_REMOVED);
+        return STATE_GROUP_REMOVED.equals(this.state);
     }
+    @JsonIgnore
+    public boolean isNone() {
+        return STATE_NONE.equals(this.state);
+    }
+
 
     @JsonIgnore
     public boolean isInvolved() {
-        return !this.state.equals(STATE_NONE);
+        return !isNone() && !isGroupRemoved();
     }
 
     public String getClientId() {

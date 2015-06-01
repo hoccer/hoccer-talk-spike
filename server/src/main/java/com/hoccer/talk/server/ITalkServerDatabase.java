@@ -156,6 +156,8 @@ public interface ITalkServerDatabase {
 
     public List<TalkGroupMembership> findGroupMembershipsByIdWithStatesAndRoles(String groupId, String[] states, String[] roles);
 
+    public List<TalkGroupMembership> findGroupMembershipsWithStatesAndRoles(String[] states, String[] roles);
+
     public List<TalkGroupMembership> findGroupMembershipsByIdChangedAfter(String groupId, Date lastKnown);
 
     public List<TalkGroupMembership> findGroupMembershipsForClient(String clientId);
@@ -179,6 +181,10 @@ public interface ITalkServerDatabase {
     public List<TalkEnvironment> findEnvironmentsForGroup(String groupId);
 
     public List<TalkEnvironment> findEnvironmentsForClient(String clientId);
+
+    public List<TalkEnvironment> findEnvironmentsByType(String type);
+
+    public List<TalkEnvironment> findEnvironmentsForClient(String clientId, String type);
 
     public List<TalkEnvironment> findEnvironmentsMatching(TalkEnvironment environment);
 
