@@ -3,10 +3,11 @@ package com.hoccer.xo.android.activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.model.TalkEnvironment;
@@ -26,6 +27,10 @@ public class ChatActivity extends ComposableActivity {
 
     public static final String EXTRA_ENVIRONMENT_GROUP_HISTORY = "com.hoccer.xo.android.intent.extra.ENVIRONMENT_GROUP_HISTORY";
     public static final String EXTRA_CLIENT_HISTORY = "com.hoccer.xo.android.intent.extra.NEARBY_CLIENT_HISTORY";
+
+    private ChatFragment mChatFragment;
+
+    private boolean mIsKeyboardOpen = false;
 
     @Override
     protected ActivityComponent[] createComponents() {
@@ -69,6 +74,35 @@ public class ChatActivity extends ComposableActivity {
         }
 
         enableUpNavigation();
+        initKeyboardCallback();
+    }
+
+    private void initKeyboardCallback() {
+        final LinearLayout view = (LinearLayout) findViewById(R.id.content);
+        view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                if ((view.getRootView().getHeight() - view.getHeight()) >
+                        view.getRootView().getHeight()/3) {
+                    // keyboard is open
+                    onKeyboardOpen(true);
+                } else {
+                    // keyboard is closed
+                    onKeyboardOpen(false);
+                }
+            }
+        });
+    }
+
+    private void onKeyboardOpen(boolean isOpen) {
+        if((mIsKeyboardOpen == isOpen) || (mChatFragment == null)) {
+            return;
+        } else {
+            mIsKeyboardOpen = isOpen;
+        }
+        if(mIsKeyboardOpen) {
+            mChatFragment.onKeyboardOpen();
+        }
     }
 
     @Override
@@ -129,11 +163,11 @@ public class ChatActivity extends ComposableActivity {
         Bundle bundle = new Bundle();
         bundle.putInt(ChatFragment.ARG_CLIENT_CONTACT_ID, contactId);
 
-        Fragment fragment = new ChatFragment();
-        fragment.setArguments(bundle);
+        mChatFragment = new ChatFragment();
+        mChatFragment.setArguments(bundle);
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, fragment);
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, mChatFragment);
         fragmentTransaction.commit();
     }
 
