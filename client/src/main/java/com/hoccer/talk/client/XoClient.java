@@ -3082,8 +3082,9 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         }
     }
 
-    private void updateGroupKeptState(TalkGroupMembership oldMemebership, TalkGroupMembership newMembership, TalkClientContact groupContact, TalkClientContact clientContact) throws SQLException {
-        if (selfHasDeclined(oldMemebership, newMembership) || selfHasJoinedGroup(newMembership, clientContact)) {
+    private void updateGroupKeptState(TalkGroupMembership oldMembership, TalkGroupMembership newMembership, TalkClientContact groupContact, TalkClientContact clientContact) throws SQLException {
+        // TODO: This can throw null pointer exceptions since groupContact.getGroupPresence() can be null.
+        if (selfHasDeclined(oldMembership, newMembership) || selfHasJoinedGroup(newMembership, clientContact)) {
             groupContact.getGroupPresence().setKept(false);
         } else {
             if (((newMembership.isGroupRemoved() || selfHasLeftGroup(newMembership, clientContact)) && hasMembersOrMessages(groupContact))) {
