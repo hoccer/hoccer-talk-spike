@@ -3145,14 +3145,14 @@ public class TalkRpcHandler implements ITalkRpcServer {
         for (TalkRelationship relationship : otherRelationships) {
             if (!myContactIds.contains(relationship.getClientId())) {
                 // we have only a reverse relationship pointing to us, but none pointing to the other client
-                LOG.error("isContactOf: missing relationship from us (" + clientId + ") to contact " + relationship.getClientId() + " who has a relationship pointing to us with state '" + relationship.getState() + "'");
+                LOG.info("isContactOf: missing relationship from us (" + clientId + ") to contact " + relationship.getClientId() + " who has a relationship pointing to us with state '" + relationship.getState() + "'");
             }
             myOtherContactIds.add(relationship.getClientId());
         }
         for (String otherClientId : myContactIds) {
             if (!myOtherContactIds.contains(otherClientId)) {
                 // we have a relationship pointing to otherClientId, but he has no contact point to us
-                LOG.error("isContactOf: missing relationship from contact " + otherClientId + " to us (" + clientId + ") while we have a relationship pointing to him with state '"+relationshipHashMap.get(otherClientId).getState()+"'");
+                LOG.info("isContactOf: missing relationship from contact " + otherClientId + " to us (" + clientId + ") while we have a relationship pointing to him with state '"+relationshipHashMap.get(otherClientId).getState()+"'");
             }
         }
         // TODO: automatically fix missing relationship when above error cases are encountered
