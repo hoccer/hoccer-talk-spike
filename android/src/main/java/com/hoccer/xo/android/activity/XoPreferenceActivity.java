@@ -48,11 +48,11 @@ public class XoPreferenceActivity extends PreferenceActivity
 
     private Dialog mWaitingDialog;
     private BackupController mBackupController;
+    private SharedPreferences mDefaultSharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        preferences.registerOnSharedPreferenceChangeListener(this);
+        mDefaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         LOG.debug("onCreate()");
         super.onCreate(savedInstanceState);
 
@@ -71,7 +71,7 @@ public class XoPreferenceActivity extends PreferenceActivity
         activatePasswordPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
-                boolean oldValue = preferences.getBoolean(getString(R.string.preference_key_activate_passcode), false);
+                boolean oldValue = mDefaultSharedPreferences.getBoolean(getString(R.string.preference_key_activate_passcode), false);
                 if (oldValue != newValue) {
                     boolean activatePassword = (Boolean) newValue;
                     if (activatePassword && !isPasswordSet()) {
@@ -156,6 +156,8 @@ public class XoPreferenceActivity extends PreferenceActivity
     protected void onResume() {
         super.onResume();
 
+        mDefaultSharedPreferences.registerOnSharedPreferenceChangeListener(this);
+
         if (isPasswordSet()) {
             findPreference(getString(R.string.preference_key_change_passcode)).setEnabled(true);
         }
@@ -167,6 +169,9 @@ public class XoPreferenceActivity extends PreferenceActivity
     @Override
     protected void onPause() {
         super.onPause();
+
+        mDefaultSharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
+
         mBackupController.unregisterAndUnbind();
     }
 
