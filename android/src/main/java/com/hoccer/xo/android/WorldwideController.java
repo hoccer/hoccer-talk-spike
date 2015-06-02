@@ -4,11 +4,13 @@ package com.hoccer.xo.android;
 import com.hoccer.talk.client.IXoClientConfiguration;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
+import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkEnvironment;
-import com.hoccer.talk.model.TalkGroupMembership;
 import org.apache.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static com.hoccer.talk.model.TalkEnvironment.TYPE_WORLDWIDE;
 
@@ -22,6 +24,8 @@ public class WorldwideController {
     private IXoStateListener mStateListener;
     private TalkEnvironment mEnvironment;
 
+    private List<WorldWideActivationListener> mWorldWideActivationListeners = new ArrayList<WorldWideActivationListener>();
+
     public static WorldwideController get() {
         if (sInstance == null) {
             sInstance = new WorldwideController();
@@ -34,19 +38,28 @@ public class WorldwideController {
             @Override
             public void onClientStateChange(XoClient client) {
                 if (client.isReady()) {
-                    mEnvironment = createWorldwideEnvironment();
-                    sendEnvironmentUpdate();
+                    TalkClientContact worldwideGroup = client.getCurrentWorldwideGroup();
+                    if (worldwideGroup != null) {
+                        notifyWorldwideActivated();
+                    }
                 }
             }
         };
 
+        XoApplication.get().getXoClient().registerStateListener(mStateListener);
+
         mConfiguration = XoApplication.get().getXoClient().getConfiguration();
     }
 
-    public void enableWorldwide() {
-        XoApplication.get().getXoClient().registerStateListener(mStateListener);
+    public void activateWorldwide() {
         mEnvironment = createWorldwideEnvironment();
         sendEnvironmentUpdate();
+    }
+
+    private void notifyWorldwideActivated() {
+        for (WorldWideActivationListener listener : mWorldWideActivationListeners) {
+            listener.onWorldwideActivated();
+        }
     }
 
     private TalkEnvironment createWorldwideEnvironment() {
@@ -55,7 +68,6 @@ public class WorldwideController {
         environment.setTimestamp(new Date());
         environment.setTimeToLive(mConfiguration.getTimeToLiveInWorldwide());
         environment.setNotificationPreference(mConfiguration.getNotificationPreferenceForWorldwide());
-//        environment.setTag("*"); TODO: send tag?
         return environment;
     }
 
@@ -68,10 +80,16 @@ public class WorldwideController {
         }
     }
 
-    public void disableWorldWide() {
-        XoApplication.get().getXoClient().unregisterStateListener(mStateListener);
+    public void deactivateWorldWide() {
         XoApplication.get().getXoClient().sendDestroyEnvironment(TalkEnvironment.TYPE_WORLDWIDE);
         mEnvironment = null;
+        notifyWorldwideDeactivated();
+    }
+
+    private void notifyWorldwideDeactivated() {
+        for (WorldWideActivationListener listener : mWorldWideActivationListeners) {
+            listener.onWorldwideDeactivated();
+        }
     }
 
     public void updateTimeToLive(long timeToLive) {
@@ -86,5 +104,13 @@ public class WorldwideController {
             mEnvironment.setNotificationPreference(notificationPreference);
             sendEnvironmentUpdate();
         }
+    }
+
+    public void registerWorldwideActivationListener(WorldWideActivationListener listener) {
+        mWorldWideActivationListeners.add(listener);
+    }
+
+    public void unregisterWorldwideActivationListener(WorldWideActivationListener listener) {
+        mWorldWideActivationListeners.remove(listener);
     }
 }
