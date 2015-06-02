@@ -1387,6 +1387,11 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
                 if (groupMembershipFlags[i]) {
                     TalkGroupMembership[] memberships = mServerRpc.getGroupMembers(groupContact.getGroupId(), never);
+
+                    if (groupContact.isWorldwideGroup()) {
+                        mEnvironmentGroupId = groupContact.getGroupId();
+                    }
+
                     for (TalkGroupMembership membership : memberships) {
                         updateGroupMembership(membership);
                     }
