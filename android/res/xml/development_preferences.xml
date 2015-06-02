@@ -56,7 +56,7 @@
                 android:defaultValue="0"/>
         <SwitchPreference
                 android:key="@string/preference_key_worldwide_enable_notifications"
-                android:title="@string/notifications"
+                android:title="@string/group_notifications"
                 android:defaultValue="false"/>
     </PreferenceCategory>
 
