@@ -14,4 +14,14 @@ public class TestClientConfiguration extends XoDefaultClientConfiguration {
         return "ws://127.0.0.1:" + mServer.getServerConnector().getPort();
     }
 
+    @Override
+    public long getTimeToLiveInWorldwide() {
+        return 0;
+    }
+
+    @Override
+    public String getNotificationPreferenceForWorldwide() {
+        return null;
+    }
+
 }
