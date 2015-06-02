@@ -27,6 +27,7 @@ import com.hoccer.talk.server.rpc.TalkRpcConnection;
 import com.hoccer.talk.server.update.UpdateAgent;
 import com.hoccer.talk.util.CountedSet;
 import de.undercouch.bson4jackson.BsonFactory;
+import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -40,6 +41,8 @@ import java.util.concurrent.locks.Lock;
  * references to common database mapping helpers and so on.
  */
 public class TalkServer {
+
+    protected final Logger LOG = Logger.getLogger(getClass());
 
     /**
      * server-global JSON mapper
@@ -276,7 +279,7 @@ public class TalkServer {
     }
 
     private void cleanIdLocks() {
-        System.out.println("#INFO: cleanIdLocks removing locks");
+        LOG.debug("cleanIdLocks removing locks");
 
         synchronized (mIdLocks) {
             long count = mIdLocks.size();
@@ -287,12 +290,12 @@ public class TalkServer {
                     it.remove();
                 }
             }
-            System.out.println("#INFO: cleanIdLocks removed "+count+" locks");
+            LOG.debug("cleanIdLocks removed "+count+" locks");
         }
     }
 
     private void cleanNonReentrantLocks() {
-        System.out.println("#INFO: cleanNonReentrantLocks removing locks");
+        LOG.debug("cleanNonReentrantLocks removing locks");
 
         synchronized (mNonReentrantIdLocks) {
             long count = mNonReentrantIdLocks.size();
@@ -307,7 +310,7 @@ public class TalkServer {
                     ++removed;
                 }
             }
-            System.out.println("#INFO: cleanNonReentrantLocks removed "+removed+" of "+count+" locks");
+            LOG.debug("cleanNonReentrantLocks removed "+removed+" of "+count+" locks");
         }
     }
 

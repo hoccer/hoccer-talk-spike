@@ -255,8 +255,8 @@ public class JsonRpcClient {
      */
     public void sendRequest(JsonRpcConnection connection, ObjectNode request) throws Exception {
         // log request
-        if (LOG.isInfoEnabled()) {
-            LOG.info("RPC-Request -> [" + connection.getConnectionId() + "] " + request.toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("RPC-Request -> [" + connection.getConnectionId() + "] " + request.toString());
         }
         // send it
         connection.sendRequest(request);
@@ -267,8 +267,8 @@ public class JsonRpcClient {
      */
     public void sendNotification(JsonRpcConnection connection, ObjectNode notification) throws Exception {
         // log notification
-        if (LOG.isInfoEnabled()) {
-            LOG.info("RPC-Notification -> [" + connection.getConnectionId() + "] " + notification.toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("RPC-Notification -> [" + connection.getConnectionId() + "] " + notification.toString());
         }
         // send it
         connection.sendNotification(notification);
@@ -418,8 +418,8 @@ public class JsonRpcClient {
 		if(idNode != null && idNode.isTextual()) {
 			String id = idNode.asText();
             // log response
-            if (LOG.isInfoEnabled()) {
-                LOG.info("RPC-Response <- [" + connection.getConnectionId() + "] " + response.toString());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("RPC-Response <- [" + connection.getConnectionId() + "] " + response.toString());
             }
             // retrieve the request from the client table
             JsonRpcClientRequest req = null;

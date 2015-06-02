@@ -45,13 +45,13 @@ public class DeliveryRequest {
         for (TalkDelivery delivery : inDeliveries) {
             // we lost the connection somehow
             if (!currentlyConnected) {
-                LOG.info("performIncoming: clientId: '" + mClientId + "no longer connected");
+                LOG.debug("performIncoming: clientId: '" + mClientId + "no longer connected");
                 break;
             }
 
             delivery.ensureDates();
             if (!mForceAll && (delivery.getTimeUpdatedIn().getTime() > delivery.getTimeChanged().getTime())) {
-                LOG.info("performIncoming: clientId: '" + mClientId + ",delivery has not changed since last up'd in="+ delivery.getTimeUpdatedIn().getTime()+",changed="+delivery.getTimeChanged().getTime());
+                LOG.debug("performIncoming: clientId: '" + mClientId + ",delivery has not changed since last up'd in="+ delivery.getTimeUpdatedIn().getTime()+",changed="+delivery.getTimeChanged().getTime());
                 continue;
             }
 
@@ -71,12 +71,12 @@ public class DeliveryRequest {
 
                     // remove for production build
                     if (!latestDelivery.equals(delivery)) {
-                        LOG.info("latestDelivery (in) has changed");
-                        LOG.info("delivery:"+delivery.toString());
-                        LOG.info("latestDelivery:"+latestDelivery.toString());
+                        LOG.trace("latestDelivery (in) has changed");
+                        LOG.trace("delivery:"+delivery.toString());
+                        LOG.trace("latestDelivery:"+latestDelivery.toString());
                     }
                     if (!mForceAll && (latestDelivery.getTimeUpdatedIn().getTime() > latestDelivery.getTimeChanged().getTime())) {
-                        LOG.info("performIncoming(2): clientId: '" + mClientId + ", delivery has not changed since last up'd in="+ delivery.getTimeUpdatedIn().getTime()+",changed="+delivery.getTimeChanged().getTime());
+                        LOG.debug("performIncoming(2): clientId: '" + mClientId + ", delivery has not changed since last up'd in="+ delivery.getTimeUpdatedIn().getTime()+",changed="+delivery.getTimeChanged().getTime());
                         continue;
                     }
 
@@ -99,7 +99,7 @@ public class DeliveryRequest {
                     latestDelivery.setTimeUpdatedIn(new Date());
                     mDatabase.saveDelivery(latestDelivery);
                 } catch (Exception e) {
-                    LOG.info("Exception calling incomingDelivery() for clientId: '" + mClientId + "'", e);
+                    LOG.warn("Exception calling incomingDelivery() for clientId: '" + mClientId + "'", e);
                     //currentlyConnected = false; XXX do this when we can differentiate
                 }
             }
@@ -117,7 +117,7 @@ public class DeliveryRequest {
         for (TalkDelivery delivery : outDeliveries) {
             // we lost the connection somehow
             if (!currentlyConnected) {
-                LOG.info("performOutgoing: clientId: '" + mClientId + "no longer connected");
+                LOG.debug("performOutgoing: clientId: '" + mClientId + "no longer connected");
                 break;
             }
             synchronized (mServer.idLock(delivery.getMessageId())) {
@@ -125,10 +125,10 @@ public class DeliveryRequest {
                 delivery.ensureDates();
 
                 if (delivery.isInStaleFor(30000)) {
-                    LOG.info("performOutgoing: clientId: '" + mClientId + ", delivery (state:"+delivery.getState()+","+delivery.getAttachmentState()+") is stale, up'd out="+ delivery.getTimeUpdatedOut().getTime()+",changed="+delivery.getTimeChanged().getTime());
+                    LOG.debug("performOutgoing: clientId: '" + mClientId + ", delivery (state:"+delivery.getState()+","+delivery.getAttachmentState()+") is stale, up'd out="+ delivery.getTimeUpdatedOut().getTime()+",changed="+delivery.getTimeChanged().getTime());
                 } else {
                     if (!mForceAll && delivery.isOutUpToDate()) {
-                        LOG.info("performOutgoing: clientId: '" + mClientId + ", delivery (state:"+delivery.getState()+","+delivery.getAttachmentState()+") has not changed since last up'd out="+ delivery.getTimeUpdatedOut().getTime()+",changed="+delivery.getTimeChanged().getTime());
+                        LOG.debug("performOutgoing: clientId: '" + mClientId + ", delivery (state:"+delivery.getState()+","+delivery.getAttachmentState()+") has not changed since last up'd out="+ delivery.getTimeUpdatedOut().getTime()+",changed="+delivery.getTimeChanged().getTime());
                         continue;
                     }
                 }
@@ -140,16 +140,16 @@ public class DeliveryRequest {
 
                 // remove for production build
                 if (!latestDelivery.equals(delivery)) {
-                    LOG.info("latestDelivery (out) has changed");
-                    LOG.info("delivery:"+delivery.toString());
-                    LOG.info("latestDelivery:"+latestDelivery.toString());
+                    LOG.trace("latestDelivery (out) has changed");
+                    LOG.trace("delivery:"+delivery.toString());
+                    LOG.trace("latestDelivery:"+latestDelivery.toString());
                 }
 
                 if (delivery.isInStaleFor(30000)) {
-                    LOG.info("performOutgoing: clientId: '" + mClientId + ", delivery (state:"+delivery.getState()+","+delivery.getAttachmentState()+") is stale, up'd out="+ delivery.getTimeUpdatedOut().getTime()+",changed="+delivery.getTimeChanged().getTime());
+                    LOG.debug("performOutgoing: clientId: '" + mClientId + ", delivery (state:"+delivery.getState()+","+delivery.getAttachmentState()+") is stale, up'd out="+ delivery.getTimeUpdatedOut().getTime()+",changed="+delivery.getTimeChanged().getTime());
                 } else {
                     if (!mForceAll && delivery.isOutUpToDate()) {
-                        LOG.info("####### performOutgoing(2): clientId: '" + mClientId + ", delivery has not changed since last up'd out="+ delivery.getTimeUpdatedOut().getTime()+",changed="+delivery.getTimeChanged().getTime());
+                        LOG.debug("####### performOutgoing(2): clientId: '" + mClientId + ", delivery has not changed since last up'd out="+ delivery.getTimeUpdatedOut().getTime()+",changed="+delivery.getTimeChanged().getTime());
                         continue;
                     }
                 }
@@ -170,7 +170,7 @@ public class DeliveryRequest {
                         throw new RuntimeException("delivery is missing group and receiver, deleted");
                     }
                 } catch (Exception e) {
-                    LOG.info("Exception calling outgoingDelivery() for clientId: '" + mClientId + "'", e);
+                    LOG.warn("Exception calling outgoingDelivery() for clientId: '" + mClientId + "'", e);
                 }
             }
             // check for disconnects
@@ -183,7 +183,7 @@ public class DeliveryRequest {
 
 
     void perform() {
-        LOG.info("DeliverRequest.perform for clientId: '" + mClientId);
+        LOG.debug("DeliverRequest.perform for clientId: '" + mClientId);
         boolean currentlyConnected = false;
 
         // determine if the client is currently connected
@@ -195,13 +195,13 @@ public class DeliveryRequest {
         }
         List<TalkDelivery> inDeliveries = new ArrayList<TalkDelivery>();
 
-        LOG.info("DeliverRequest.perform for clientId: '" + mClientId + ", currentlyConnected=" + currentlyConnected);
+        LOG.debug("DeliverRequest.perform for clientId: '" + mClientId + ", currentlyConnected=" + currentlyConnected);
         boolean deliveryReady = false;
         if (currentlyConnected) {
 
             // get all outstanding deliveries for the client
             inDeliveries = mDatabase.findDeliveriesForClientInState(mClientId, TalkDelivery.STATE_DELIVERING);
-            LOG.info("clientId: '" + mClientId + "' has " + inDeliveries.size() + " incoming deliveries");
+            LOG.debug("clientId: '" + mClientId + "' has " + inDeliveries.size() + " incoming deliveries");
             if (!inDeliveries.isEmpty()) {
                 // we will need to push if we don't succeed
                 //needToNotify = true;
@@ -213,7 +213,7 @@ public class DeliveryRequest {
                 // get all deliveries for the client with not yet completed attachment transfers
                 List<TalkDelivery> inAttachmentDeliveries =
                         mDatabase.findDeliveriesForClientInDeliveryAndAttachmentStates(mClientId, TalkDelivery.IN_ATTACHMENT_DELIVERY_STATES, TalkDelivery.IN_ATTACHMENT_STATES);
-                LOG.info("clientId: '" + mClientId + "' has " + inAttachmentDeliveries.size() + " incoming deliveries with relevant attachment states");
+                LOG.debug("clientId: '" + mClientId + "' has " + inAttachmentDeliveries.size() + " incoming deliveries with relevant attachment states");
                 if (!inAttachmentDeliveries.isEmpty()) {
                     // deliver one by one
                     currentlyConnected = performIncoming(inAttachmentDeliveries,rpc,connection);
@@ -223,7 +223,7 @@ public class DeliveryRequest {
             if (currentlyConnected) {
                 List<TalkDelivery> outDeliveries =
                         mDatabase.findDeliveriesFromClientInStates(mClientId, TalkDelivery.OUT_STATES);
-                LOG.info("clientId: '" + mClientId + "' has " + outDeliveries.size() + " outgoing deliveries");
+                LOG.debug("clientId: '" + mClientId + "' has " + outDeliveries.size() + " outgoing deliveries");
                 if (!outDeliveries.isEmpty())      {
                     // deliver one by one
                     currentlyConnected = performOutgoing(outDeliveries, rpc, connection);
@@ -233,7 +233,7 @@ public class DeliveryRequest {
             if (currentlyConnected) {
                 List<TalkDelivery> outDeliveries =
                         mDatabase.findDeliveriesFromClientInDeliveryAndAttachmentStates(mClientId, TalkDelivery.OUT_ATTACHMENT_DELIVERY_STATES, TalkDelivery.OUT_ATTACHMENT_STATES);
-                LOG.info("clientId: '" + mClientId + "' has " + outDeliveries.size() + " outgoing deliveries with relevant attachment states");
+                LOG.debug("clientId: '" + mClientId + "' has " + outDeliveries.size() + " outgoing deliveries with relevant attachment states");
                 if (!outDeliveries.isEmpty())      {
                     // deliver one by one
                     currentlyConnected = performOutgoing(outDeliveries,rpc, connection);
@@ -242,41 +242,41 @@ public class DeliveryRequest {
             mForceAll = false;
         } else {
             inDeliveries = mDatabase.findDeliveriesForClientInState(mClientId, TalkDelivery.STATE_DELIVERING);
-            LOG.info("unconnected clientId: '" + mClientId + "' has " + inDeliveries.size() + " incoming deliveries");
+            LOG.debug("unconnected clientId: '" + mClientId + "' has " + inDeliveries.size() + " incoming deliveries");
           }
 
         // initiate push delivery if needed
         if (!inDeliveries.isEmpty() && !currentlyConnected) {
-            LOG.info("check if push-notify " + mClientId);
+            LOG.debug("check if push-notify " + mClientId);
 
             boolean needToNotify = false;
 
             for (TalkDelivery delivery : inDeliveries) {
                 TalkRelationship relationship = mDatabase.findRelationshipBetween(delivery.getReceiverId(), delivery.getSenderId());
                 if (relationship != null && TalkRelationship.NOTIFICATIONS_DISABLED.equals(relationship.getNotificationPreference())) {
-                    LOG.info("notifications disabled for sender "+delivery.getSenderId()+ " by " + mClientId);
+                    LOG.debug("notifications disabled for sender "+delivery.getSenderId()+ " by " + mClientId);
                 } else if (delivery.getGroupId() != null) {
                      TalkGroupMembership membership = mDatabase.findGroupMembershipForClient(delivery.getGroupId(), mClientId);
                     if (membership == null) {
-                        LOG.info("notifications: no membership for group " + delivery.getGroupId() + " by " + mClientId);
+                        LOG.debug("notifications: no membership for group " + delivery.getGroupId() + " by " + mClientId);
                     } else {
-                        LOG.info("notifications: preferences are '"+membership.getNotificationPreference()+"' for group " + delivery.getGroupId() + " by " + mClientId);
+                        LOG.debug("notifications: preferences are '"+membership.getNotificationPreference()+"' for group " + delivery.getGroupId() + " by " + mClientId);
                     }
                      if (membership == null || TalkGroupMembership.NOTIFICATIONS_DISABLED.equals(membership.getNotificationPreference())) {
-                         LOG.info("notifications disabled for group "+delivery.getGroupId()+ " by " + mClientId);
+                         LOG.debug("notifications disabled for group "+delivery.getGroupId()+ " by " + mClientId);
                      } else {
-                         LOG.info("notifications not disabled for group "+delivery.getGroupId()+ " by " + mClientId);
+                         LOG.debug("notifications not disabled for group "+delivery.getGroupId()+ " by " + mClientId);
                          needToNotify = true;
                          break;
                      }
                  } else {
-                    LOG.info("notifications not disabled for sender "+delivery.getSenderId()+ " by " + mClientId);
+                    LOG.debug("notifications not disabled for sender "+delivery.getSenderId()+ " by " + mClientId);
                     needToNotify = true;
                     break;
                 }
             }
             if (needToNotify) {
-                LOG.info("pushing " + mClientId);
+                LOG.debug("pushing " + mClientId);
                 performPush();
             }
         }
@@ -292,7 +292,7 @@ public class DeliveryRequest {
         if (client.isPushCapable()) {
             mServer.getPushAgent().submitRequest(client);
         } else {
-            LOG.info("push unconfigured for " + mClientId);
+            LOG.warn("push unconfigured for " + mClientId);
         }
     }
 

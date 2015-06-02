@@ -214,7 +214,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      */
     @Override
     public void onOpen(JsonRpcConnection connection) {
-        LOG.info("[connectionId: '" + getConnectionId() + "'] connection opened by " + getRemoteAddress());
+        LOG.debug("[connectionId: '" + getConnectionId() + "'] connection opened by " + getRemoteAddress());
         mServer.connectionOpened(this);
     }
 
@@ -225,7 +225,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      */
     @Override
     public void onClose(JsonRpcConnection connection) {
-        LOG.info("[connectionId: '" + getConnectionId() + "'] connection closed");
+        LOG.debug("[connectionId: '" + getConnectionId() + "'] connection closed");
         mServer.connectionClosed(this);
     }
 
@@ -254,7 +254,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      * Called by handler when the client has logged in
      */
     public void identifyClient(String clientId) {
-        LOG.info("[connectionId: '" + getConnectionId() + "'] logged in as " + clientId);
+        LOG.debug("[connectionId: '" + getConnectionId() + "'] logged in as " + clientId);
         final ITalkServerDatabase database = mServer.getDatabase();
 
         // mark connection as logged in
@@ -294,7 +294,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
         //    or bugs that cause this function to be called at the wrong time.
         synchronized (this) {
             if (isLoggedIn() && mTalkClient != null) {
-                LOG.info("[connectionId: '" + getConnectionId() + "'] signalled Ready: " + mTalkClient.getClientId());
+                LOG.debug("[connectionId: '" + getConnectionId() + "'] signalled Ready: " + mTalkClient.getClientId());
 
                 // mark connection as logged in
                 ITalkServerDatabase database = mServer.getDatabase();
@@ -321,7 +321,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      * Begins the registration process under the given client id
      */
     public void beginRegistration(String clientId) {
-        LOG.info("[connectionId: '" + getConnectionId() + "'] begins registration as " + clientId);
+        LOG.debug("[connectionId: '" + getConnectionId() + "'] begins registration as " + clientId);
         mUnregisteredClientId = clientId;
     }
 
@@ -329,7 +329,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      * Activate support mode for this connection
      */
     public void activateSupportMode() {
-        LOG.info("[connectionId: '" + getConnectionId() + "'] activated support mode");
+        LOG.debug("[connectionId: '" + getConnectionId() + "'] activated support mode");
         mSupportMode = true;
     }
 
@@ -337,7 +337,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      * Deactivate support mode for this connection
      */
     public void deactivateSupportMode() {
-        LOG.info("[connectionId: '" + getConnectionId() + "'] deactivated support mode");
+        LOG.debug("[connectionId: '" + getConnectionId() + "'] deactivated support mode");
         mSupportMode = false;
     }
 

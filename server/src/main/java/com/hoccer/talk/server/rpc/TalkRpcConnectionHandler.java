@@ -106,7 +106,7 @@ public class TalkRpcConnectionHandler extends WebSocketHandler {
             return createTalkConnection(request, binary, true);
         }
 
-        LOG.info("new connection with unknown protocol '" + protocol + "'");
+        LOG.error("new connection with unknown protocol '" + protocol + "'");
         return null;
     }
 
