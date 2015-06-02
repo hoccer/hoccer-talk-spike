@@ -106,9 +106,9 @@ public class JsonRpcServer {
 
         if (LOG.isInfoEnabled()) {
             if (node.hasNonNull("id")) {
-                LOG.info("RPC-Request <- [" + connection.getConnectionId() + "] " + node.toString());
+                LOG.debug("RPC-Request <- [" + connection.getConnectionId() + "] " + node.toString());
             } else {
-                LOG.info("RPC-Notification <- [" + connection.getConnectionId() + "] " + node.toString());
+                LOG.debug("RPC-Notification <- [" + connection.getConnectionId() + "] " + node.toString());
             }
         }
 
@@ -170,7 +170,7 @@ public class JsonRpcServer {
                 realThrown = ((InvocationTargetException) realThrown).getTargetException();
             }
             if (LOG.isInfoEnabled()) {
-                LOG.info("Error in JSON-RPC call", realThrown);
+                LOG.warn("Error in JSON-RPC call", realThrown);
             }
         }
 
@@ -188,8 +188,8 @@ public class JsonRpcServer {
                         error.getCode(), error.getMessage(), error.getData());
             }
 
-            if (LOG.isInfoEnabled()) {
-                LOG.info("RPC-Response -> [" + connection.getConnectionId() + "] " + response.toString());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("RPC-Response -> [" + connection.getConnectionId() + "] " + response.toString());
             }
 
             connection.sendResponse(response);

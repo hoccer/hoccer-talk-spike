@@ -153,7 +153,7 @@ public class CleaningAgent {
                 }
                 if (timeAgo(lastLogin, UNUSED_CLIENT_LIFE_TIME)) {
                     // delete client that has not been active for UNUSED_CLIENT_LIFE_TIME months
-                    LOG.info("deleting unused client id '" + clientId + "'");
+                    LOG.debug("deleting unused client id '" + clientId + "'");
                     client.setSrpVerifier("");
                     client.setReasonDeleted("unused-lifetime-expired");
                     mDatabase.markClientDeleted(client);
@@ -172,14 +172,14 @@ public class CleaningAgent {
 
             if (client != null && timeAgo(client.getTimeDeleted(), DELETED_CLIENT_LIFE_TIME)) {
                 // finally remove deleted client
-                LOG.info("removing deleted expired client id '" + clientId + "'");
+                LOG.debug("removing deleted expired client id '" + clientId + "'");
                 mDatabase.deleteClient(client);
 
                 TalkPresence presence = mDatabase.findPresenceForClient(originalClientId);
                 if (presence != null) {
                     mDatabase.deletePresence(presence);
                 } else {
-                    LOG.info("no presence for expired client id '" + clientId + "'");
+                    LOG.debug("no presence for expired client id '" + clientId + "'");
                 }
 
                 TalkClientHostInfo clientHostInfo = mDatabase.findClientHostInfoForClient(originalClientId);

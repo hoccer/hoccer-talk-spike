@@ -78,14 +78,14 @@ public class StaticSystemMessage {
         // for debugging
         final ObjectMapper mapper = new ObjectMapper();
         try {
-            LOG.info("hostInfo: " + mapper.writeValueAsString(this.mClientHostInfo));
+            LOG.debug("hostInfo: " + mapper.writeValueAsString(this.mClientHostInfo));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
     }
 
     public String generateMessage() {
-        LOG.info("generateMessage -clientId: '" + this.mClientId + "' -hostInfo: '" + this.mClientHostInfo + "' -message: '" + this.mMessage);
+        LOG.debug("generateMessage -clientId: '" + this.mClientId + "' -hostInfo: '" + this.mClientHostInfo + "' -message: '" + this.mMessage);
         dumpHostInfo();
 
         return Message.getMessageForLanguage(this.mMessage, getLanguage());

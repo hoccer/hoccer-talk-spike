@@ -101,7 +101,9 @@ public class GcmPushProvider extends PushProvider {
             }
         }
 
-        LOG.error("GCM multicast returned " + failures + " failures");
+        if (failures != 0) {
+            LOG.warn("GCM multicast returned " + failures + " failures");
+        }
         LOG.info("GCM multicast returned " + canonicalIds + " canonical ids");
     }
 

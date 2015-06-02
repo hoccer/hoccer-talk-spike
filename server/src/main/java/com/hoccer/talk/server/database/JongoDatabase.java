@@ -555,10 +555,10 @@ public class JongoDatabase implements ITalkServerDatabase {
         List<TalkRelationship> relationships = findRelationships(clientId);
         for (TalkRelationship relationship : relationships) {
             if (relationship.isRelated()) {
-                LOG.info("including "+relationship.getOtherClientId()+" because related");
+                LOG.trace("including "+relationship.getOtherClientId()+" because related");
                 clients.add(relationship.getOtherClientId());
                 if (relationship.getLastChanged().after(lastKnown)) {
-                    LOG.info("must include "+relationship.getOtherClientId()+" because related");
+                    LOG.trace("must include "+relationship.getOtherClientId()+" because related");
                     mustInclude.add(relationship.getOtherClientId());
                 }
             }
@@ -573,9 +573,9 @@ public class JongoDatabase implements ITalkServerDatabase {
                 for (TalkGroupMembership otherMembership : otherMemberships) {
                     if (otherMembership.isInvited() || otherMembership.isJoined() || otherMembership.isSuspended()) {
                         clients.add(otherMembership.getClientId());
-                        LOG.info("include "+otherMembership.getClientId()+" because common membership");
+                        LOG.trace("include "+otherMembership.getClientId()+" because common membership");
                         if (otherMembership.getLastChanged().after(lastKnown) || ownMembership.getLastChanged().after(lastKnown)) {
-                            LOG.info("must include "+otherMembership.getClientId()+" because memberships changed");
+                            LOG.trace("must include "+otherMembership.getClientId()+" because memberships changed");
                             mustInclude.add(otherMembership.getClientId());
                         }
                     }

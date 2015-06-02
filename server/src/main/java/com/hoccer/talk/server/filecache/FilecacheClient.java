@@ -60,7 +60,7 @@ public class FilecacheClient {
     public ITalkRpcServer.FileHandles createFileForStorage(String accountId, String contentType, int contentLength) {
         ensureConnected();
         ICacheControl.FileHandles cacheHandles = mRpc.createFileForStorage(accountId, contentType, contentLength);
-        LOG.info("created storage file with handles (fileId: '" + cacheHandles.fileId + "', "
+        LOG.debug("created storage file with handles (fileId: '" + cacheHandles.fileId + "', "
                  + " uploadId: '" + cacheHandles.uploadId + "', "
                  + " downloadId: '" + cacheHandles.downloadId + "')");
         ITalkRpcServer.FileHandles serverHandles = new ITalkRpcServer.FileHandles();
@@ -73,7 +73,7 @@ public class FilecacheClient {
     public ITalkRpcServer.FileHandles createFileForTransfer(String accountId, String contentType, int contentLength) {
         ensureConnected();
         ICacheControl.FileHandles cacheHandles = mRpc.createFileForTransfer(accountId, contentType, contentLength);
-        LOG.info("created transfer file with handles (fileId: '" + cacheHandles.fileId + "', "
+        LOG.debug("created transfer file with handles (fileId: '" + cacheHandles.fileId + "', "
                  + " uploadId: '" + cacheHandles.uploadId + "', "
                  + " downloadId: '" + cacheHandles.downloadId + "')");
         ITalkRpcServer.FileHandles serverHandles = new ITalkRpcServer.FileHandles();
@@ -85,7 +85,7 @@ public class FilecacheClient {
 
     public void deleteFile(String fileId) {
         ensureConnected();
-        LOG.info("deleting file with id: '" + fileId + "'");
+        LOG.debug("deleting file with id: '" + fileId + "'");
         mRpc.deleteFile(fileId);
     }
 

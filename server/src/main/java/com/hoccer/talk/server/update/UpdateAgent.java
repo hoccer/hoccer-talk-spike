@@ -40,7 +40,7 @@ public class UpdateAgent extends NotificationDeferrer {
         if (presence.getConnectionStatus() == null || isConnected != presence.isConnected()) {
             String connStatus = isConnected ? TalkPresence.STATUS_ONLINE
                     : TalkPresence.STATUS_OFFLINE;
-            LOG.info("Persisting connection status '" + connStatus + "' for client's presence. ClientId: '" + presence.getClientId() + "'");
+            LOG.debug("Persisting connection status '" + connStatus + "' for client's presence. ClientId: '" + presence.getClientId() + "'");
             presence.setConnectionStatus(connStatus);
             mDatabase.savePresence(presence);
         }
@@ -599,7 +599,7 @@ public class UpdateAgent extends NotificationDeferrer {
             if (presence != null && presence.getKeyId() != null) {
                 withPublicKeyIdsList.add(presence.getKeyId());
                 forClientIdsList.add(membership.getClientId());
-                LOG.info("requestGroupKeys, added client='" + membership.getClientId() + "', keyId='" + presence.getKeyId() + "'");
+                LOG.debug("requestGroupKeys, added client='" + membership.getClientId() + "', keyId='" + presence.getKeyId() + "'");
             } else {
                 LOG.error("requestGroupKeys, failed to add client='" + membership.getClientId() + "'");
             }
@@ -613,17 +613,17 @@ public class UpdateAgent extends NotificationDeferrer {
                 withSharedKeyIdSalt = "RENEW";
             }
             ITalkRpcClient rpc = connection.getClientRpc();
-            LOG.info("requestGroupKeys, acquiring lock for calling getEncryptedGroupKeys(" + forGroupId + ") on client for " + forClientIds.length + " client(s)");
+            LOG.debug("requestGroupKeys, acquiring lock for calling getEncryptedGroupKeys(" + forGroupId + ") on client for " + forClientIds.length + " client(s)");
             String[] newKeyBoxes = null;
             // serialize encrypted key request for one client
             synchronized (connection.keyRequestLock) {
-                LOG.info("requestGroupKeys, calling getEncryptedGroupKeys(" + forGroupId + ") on client for " + forClientIds.length + " client(s)");
+                LOG.debug("requestGroupKeys, calling getEncryptedGroupKeys(" + forGroupId + ") on client for " + forClientIds.length + " client(s)");
                 // temporarily add penalty so this client won't be selected again unless there is no other who can do the work
                 connection.penalizePriorization(1000);
                 try {
                     newKeyBoxes = rpc.getEncryptedGroupKeys(forGroupId, forSharedKeyId, withSharedKeyIdSalt, forClientIds, withPublicKeyIds);
                     connection.penalizePriorization(-1000);
-                    LOG.info("requestGroupKeys, call of getEncryptedGroupKeys(" + forGroupId + ") returned " + newKeyBoxes.length + " items)");
+                    LOG.debug("requestGroupKeys, call of getEncryptedGroupKeys(" + forGroupId + ") returned " + newKeyBoxes.length + " items)");
                 } catch (Exception e) {
                     LOG.error("An error occured for calling getEncryptedGroupKeys -> most proably because the connection is actually not valid anymore.");
                     e.printStackTrace();
@@ -649,14 +649,14 @@ public class UpdateAgent extends NotificationDeferrer {
                     groupPresence.setSharedKeyId(forSharedKeyId);
                     groupPresence.setSharedKeyIdSalt(withSharedKeyIdSalt);
                     groupPresence.setLastChanged(now);
-                    LOG.info("requestGroupKeys, for group '" + forGroupId + "' did set sharedKeyId " + groupPresence.getSharedKeyId() + ", salt="+groupPresence.getSharedKeyIdSalt());
+                    LOG.debug("requestGroupKeys, for group '" + forGroupId + "' did set sharedKeyId " + groupPresence.getSharedKeyId() + ", salt="+groupPresence.getSharedKeyIdSalt());
                     mDatabase.saveGroupPresence(groupPresence);
 
                     for (int i = 0; i < forClientIds.length; ++i) {
                         TalkGroupMembership membership = mDatabase.findGroupMembershipForClient(forGroupId, forClientIds[i]);
                         membership.setSharedKeyId(forSharedKeyId);
                         membership.setSharedKeyIdSalt(withSharedKeyIdSalt);
-                        LOG.info("requestGroupKeys, for member '" + membership.getClientId() + "' did set sharedKeyId " + membership.getSharedKeyId() + ", salt="+membership.getSharedKeyIdSalt());
+                        LOG.debug("requestGroupKeys, for member '" + membership.getClientId() + "' did set sharedKeyId " + membership.getSharedKeyId() + ", salt="+membership.getSharedKeyIdSalt());
                         membership.setMemberKeyId(withPublicKeyIds[i]);
                         membership.setEncryptedGroupKey(newKeyBoxes[i]);
                         membership.setKeySupplier(fromClientId);
@@ -734,7 +734,7 @@ public class UpdateAgent extends NotificationDeferrer {
                         return;
                     }
 
-                    LOG.info("requestUserAlert");
+                    LOG.debug("requestUserAlert");
                     conn.getClientRpc().alertUser(message);
                 } catch (Throwable t) {
                     LOG.error("caught and swallowed exception escaping runnable", t);
@@ -758,7 +758,7 @@ public class UpdateAgent extends NotificationDeferrer {
                     TalkClientHostInfo clientHostInfo = mDatabase.findClientHostInfoForClient(clientId);
                     String messageString = new StaticSystemMessage(clientId, clientHostInfo, message).generateMessage();
 
-                    LOG.info("requestSettingUpdate");
+                    LOG.debug("requestSettingUpdate");
                     conn.getClientRpc().settingsChanged(setting, value, messageString);
                 } catch (Throwable t) {
                     LOG.error("caught and swallowed exception escaping runnable", t);
@@ -770,7 +770,7 @@ public class UpdateAgent extends NotificationDeferrer {
     }
 
     public void removeMembership(TalkGroupMembership membership, Date changedDate, String removalState) {
-        LOG.info("removeMembership group "+membership.getGroupId()+" removing membership for client "+membership.getClientId());
+        LOG.debug("removeMembership group "+membership.getGroupId()+" removing membership for client "+membership.getClientId());
         if (!(removalState.equals(membership.getState()) &&
                 TalkGroupMembership.ROLE_NONE.equals(membership.getRole())))
         {
@@ -801,7 +801,7 @@ public class UpdateAgent extends NotificationDeferrer {
     }
 
     public void nullifyRelationships(List<TalkRelationship> relationships, List<TalkRelationship> otherRelationships) {
-        LOG.info("nullifyRelationships: count:"+relationships.size()+", otherCount:"+otherRelationships.size());
+        LOG.debug("nullifyRelationships: count:"+relationships.size()+", otherCount:"+otherRelationships.size());
 
         int count = 0;
         int otherCount = 0;
@@ -823,17 +823,17 @@ public class UpdateAgent extends NotificationDeferrer {
         if (count != otherCount) {
             LOG.warn("nullifyRelationships: counts differ, done count:"+count+", done otherCount:"+otherCount);
         } else {
-            LOG.info("nullifyRelationships: done count:"+count+", done otherCount:"+otherCount);
+            LOG.debug("nullifyRelationships: done count:"+count+", done otherCount:"+otherCount);
         }
     }
 
     public void performAccountDeletion(final String clientId) {
-        LOG.info("performAccountDeletion running for client " + clientId);
+        LOG.debug("performAccountDeletion running for client " + clientId);
 
         // make sure client is disconnected
         final TalkRpcConnection conn = mServer.getClientConnection(clientId);
         if (conn != null) {
-            LOG.info("performAccountDeletion closing connection for client " + clientId);
+            LOG.debug("performAccountDeletion closing connection for client " + clientId);
             conn.disconnect();
         }
 
@@ -841,14 +841,14 @@ public class UpdateAgent extends NotificationDeferrer {
 
         // remove membership from all groups and close groups where I am admin
         List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsForClient(clientId);
-        LOG.info("performAccountDeletion found " + memberships.size() + " group memberships for client " + clientId);
+        LOG.debug("performAccountDeletion found " + memberships.size() + " group memberships for client " + clientId);
         for (int i = 0; i < memberships.size(); i++) {
             TalkGroupMembership membership = memberships.get(i);
 
             if (membership != null) {
                 if (membership.isAdmin()) {
                     // delete group
-                    LOG.info("performAccountDeletion closing group " + membership.getGroupId() + " for client " + clientId);
+                    LOG.debug("performAccountDeletion closing group " + membership.getGroupId() + " for client " + clientId);
                     TalkGroupPresence groupPresence = mDatabase.findGroupPresenceById(membership.getGroupId());
                     if (groupPresence != null) {
                         // mark the group as deleted
@@ -948,7 +948,7 @@ public class UpdateAgent extends NotificationDeferrer {
         }
 
         if (acquaintances == 0) {
-            LOG.info("performAccountDeletion: no acquaintances, deleting " + clientId + " immediately");
+            LOG.debug("performAccountDeletion: no acquaintances, deleting " + clientId + " immediately");
             // delete all other stuff immediately as well because nobody knows us
             if (presence != null) {
                 mDatabase.deletePresence(presence);
@@ -965,7 +965,7 @@ public class UpdateAgent extends NotificationDeferrer {
             }
             mServer.getFilecacheClient().deleteAccount(clientId);
         } else {
-            LOG.info("performAccountDeletion: " + acquaintances + ", just marked " + clientId + " for deletion");
+            LOG.debug("performAccountDeletion: " + acquaintances + ", just marked " + clientId + " for deletion");
         }
 
         //@DatabaseTable(tableName = "groupPresence")
