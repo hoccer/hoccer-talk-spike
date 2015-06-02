@@ -24,4 +24,14 @@ public class TalkToolClientConfiguration extends XoDefaultClientConfiguration{
         return mClient.getSupportTag();
     }
 
+    @Override
+    public long getTimeToLiveInWorldwide() {
+        return 0;
+    }
+
+    @Override
+    public String getNotificationPreferenceForWorldwide() {
+        return null;
+    }
+
 }
