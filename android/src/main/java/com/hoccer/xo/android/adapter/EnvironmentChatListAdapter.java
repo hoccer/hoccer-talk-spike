@@ -162,7 +162,7 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
         return String.format(text, attachmentType);
     }
 
-    private void scheduleUpdate(final TalkClientContact group) {
+    public void scheduleUpdate(final TalkClientContact group) {
         long now = System.currentTimeMillis();
         long delta = now - mNotifyTimestamp;
         if (mNotifyFuture != null) {
