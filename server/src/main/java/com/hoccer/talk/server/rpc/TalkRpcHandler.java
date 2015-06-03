@@ -718,9 +718,9 @@ public class TalkRpcHandler implements ITalkRpcServer {
         } else {
             List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsForClient(mConnection.getClientId());
             for (TalkGroupMembership membership : memberships) {
-                if (membership.isJoined() || membership.isInvited()) {
+                if (membership.isJoined() || membership.isInvited() || membership.isSuspended()) {
                     TalkGroupMembership otherMembership = mDatabase.findGroupMembershipForClient(membership.getGroupId(), clientId);
-                    if (otherMembership != null && (otherMembership.isJoined() || otherMembership.isInvited())) {
+                    if (otherMembership != null && (otherMembership.isJoined() || otherMembership.isInvited() || otherMembership.isSuspended())) {
                         key = mDatabase.findKey(clientId, keyId);
                         break;
                     }
@@ -1991,7 +1991,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         // walk the group and make everyone have a "none" relationship to it
         List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsById(groupId);
         for (TalkGroupMembership membership : memberships) {
-            if (membership.isInvited() || membership.isJoined()) {
+            if (membership.isInvited() || membership.isJoined() || membership.isSuspended()) {
                 membership.setState(TalkGroupMembership.STATE_GROUP_REMOVED);
 
                 // TODO: check if degrade role of admins is advisable

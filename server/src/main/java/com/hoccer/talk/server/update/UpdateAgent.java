@@ -66,7 +66,7 @@ public class UpdateAgent extends NotificationDeferrer {
                                 if (!clientId.equals(otherMembership.getClientId())) {
                                     if (otherMembership.isJoined() || otherMembership.isInvited() || otherMembership.isSuspended()) {
                                         String otherClientId = otherMembership.getClientId();
-                                        LOG.debug("RPUFG: delivering presence of " + otherClientId + " to "+clientId);
+                                        LOG.trace("RPUFG: delivering presence of " + otherClientId + " to "+clientId);
                                         TalkPresence presence = mDatabase.findPresenceForClient(otherClientId);
                                         if (presence.getConnectionStatus() == null) {
                                             updateConnectionStatus(presence);
@@ -74,10 +74,10 @@ public class UpdateAgent extends NotificationDeferrer {
                                         // Calling Client via RPC
                                         rpc.presenceUpdated(presence);
                                     } else {
-                                        LOG.debug("RPUFG: target " + otherMembership.getClientId() + " is not invited or joined");
+                                        LOG.trace("RPUFG: target " + otherMembership.getClientId() + " is not invited or joined");
                                     }
                                 } else {
-                                    LOG.debug("RPUFG: not sending presence update for group " + membership.getGroupId()+" to self "+clientId);
+                                    LOG.trace("RPUFG: not sending presence update for group " + membership.getGroupId()+" to self "+clientId);
                                 }
                             }
                         } else {
@@ -175,7 +175,7 @@ public class UpdateAgent extends NotificationDeferrer {
                 LOG.trace(tag + "scanning group " + groupId);
                 List<TalkGroupMembership> otherMemberships = mDatabase.findGroupMembershipsById(groupId);
                 for (TalkGroupMembership otherMembership : otherMemberships) {
-                    if (otherMembership.isJoined() || otherMembership.isInvited()) { // MARK
+                    if (otherMembership.isJoined() || otherMembership.isInvited() || otherMembership.isSuspended()) {
                         LOG.trace(tag + "including group member " + otherMembership.getClientId());
                         clientIds.add(otherMembership.getClientId());
                     } else {
@@ -297,7 +297,7 @@ public class UpdateAgent extends NotificationDeferrer {
                     if (updatedGroupPresence != null) {
                         List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsById(groupId);
                         for (TalkGroupMembership membership : memberships) {
-                            if (membership.isJoined() || membership.isInvited() || membership.isGroupRemoved()) {
+                            if (membership.isJoined() || membership.isInvited() || membership.isSuspended() || membership.isGroupRemoved()) {
                                 if (membership.getClientId() == null) {
                                     LOG.error("requestGroupUpdate for group " + groupId + ", no clientID for a membership record");
                                     continue;
@@ -363,10 +363,10 @@ public class UpdateAgent extends NotificationDeferrer {
                     LOG.debug("requestGroupMembershipUpdate found " + memberships.size() + " members");
                     boolean someOneWasNotified = false;
                     for (TalkGroupMembership membership : memberships) {
-                        if (membership.isJoined() || membership.isInvited() || membership.isGroupRemoved() || membership.getClientId().equals(clientId)) {
+                        if (membership.isJoined() || membership.isInvited() || membership.isSuspended() || membership.isGroupRemoved() || membership.getClientId().equals(clientId)) {
                             TalkRpcConnection connection = mServer.getClientConnection(membership.getClientId());
                             if (connection == null || !connection.isConnected()) {
-                                LOG.debug("requestGroupMembershipUpdate - refrain from updating not connected member client " + membership.getClientId());
+                                LOG.trace("requestGroupMembershipUpdate - refrain from updating not connected member client " + membership.getClientId());
                                 continue;
                             }
 
@@ -384,7 +384,7 @@ public class UpdateAgent extends NotificationDeferrer {
                                 e.printStackTrace();
                             }
                         } else {
-                            LOG.debug("requestGroupMembershipUpdate - not updating client " + membership.getClientId() + ", state=" + membership.getState() + ", self=" + membership.getClientId().equals(clientId));
+                            LOG.trace("requestGroupMembershipUpdate - not updating client " + membership.getClientId() + ", state=" + membership.getState() + ", self=" + membership.getClientId().equals(clientId));
                         }
                     }
                     if (someOneWasNotified) {
@@ -421,7 +421,7 @@ public class UpdateAgent extends NotificationDeferrer {
                     ITalkRpcClient rpc = connection.getClientRpc();
                     for (TalkGroupMembership membership : memberships) {
                         // do not send out updates for own membership or dead members
-                        if (!membership.getClientId().equals(newMemberClientId) && (membership.isJoined() || membership.isInvited())) {
+                        if (!membership.getClientId().equals(newMemberClientId) && (membership.isJoined() || membership.isInvited() || membership.isSuspended())) {
                             try {
                                 membership.setEncryptedGroupKey(null);
                                 rpc.groupMemberUpdated(membership);
@@ -862,7 +862,7 @@ public class UpdateAgent extends NotificationDeferrer {
                         // walk the group and make everyone have a "none" relationship to it
                         List<TalkGroupMembership> otherMemberships = mDatabase.findGroupMembershipsById(groupPresence.getGroupId());
                         for (TalkGroupMembership otherMembership : otherMemberships) {
-                            if (otherMembership.isInvited() || otherMembership.isJoined()) {
+                            if (otherMembership.isInvited() || otherMembership.isJoined() || otherMembership.isSuspended()) {
                                 removeMembership(otherMembership, groupPresence.getLastChanged(), TalkGroupMembership.STATE_GROUP_REMOVED);
                                 ++acquaintances;
                             }
