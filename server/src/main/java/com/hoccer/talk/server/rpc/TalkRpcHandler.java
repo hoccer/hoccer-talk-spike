@@ -1223,8 +1223,9 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 TalkRelationship relationship = mDatabase.findRelationshipBetween(myId, otherClientId);
 
                 if (relationship == null) {
-                    throw new RuntimeException("No relationship exists with client with id '" + otherClientId + "'");
+                    relationship = setRelationship(myId, otherClientId, TalkRelationship.STATE_NONE, TalkRelationship.STATE_NONE, false);
                 }
+
                 relationship.setLastChanged(new Date());
                 relationship.setNotificationPreference(preference);
                 mDatabase.saveRelationship(relationship);
@@ -1235,7 +1236,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
     }
 
-    private void setRelationship(String thisClientId, String otherClientId, String state, String unblockState, boolean notify) {
+    private TalkRelationship setRelationship(String thisClientId, String otherClientId, String state, String unblockState, boolean notify) {
         if (!TalkRelationship.isValidState(state)) {
             throw new RuntimeException("Invalid state '" + state + "'");
         }
@@ -1261,6 +1262,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         if (notify) {
             mServer.getUpdateAgent().requestRelationshipUpdate(relationship);
         }
+        return relationship;
     }
 
     @Override
