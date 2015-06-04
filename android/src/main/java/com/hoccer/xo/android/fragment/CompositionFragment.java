@@ -1,8 +1,10 @@
 package com.hoccer.xo.android.fragment;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -10,6 +12,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.Formatter;
+import android.util.Base64;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,12 +39,22 @@ import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionGestureListener;
 import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.util.UriUtils;
+import com.sun.org.apache.bcel.internal.generic.Select;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -54,6 +67,10 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     public static final String ARG_CLIENT_CONTACT_ID = "com.hoccer.xo.android.fragment.ARG_CLIENT_CONTACT_ID";
     public static final int REQUEST_SELECT_ATTACHMENT = 42;
     private static final int STRESS_TEST_MESSAGE_COUNT = 15;
+
+    private static final String BUNDLE_COMPOSITION_TEXT = "composition_text";
+
+    private static final String BUNDLE_ATTACHMENTS = "composition_attachment";
 
     private enum AttachmentSelectionType {
         NONE,
@@ -74,14 +91,13 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
 
     private ContentSelection mAttachmentSelection;
     private EnumMap<AttachmentSelectionType, View> mAttachmentTypeViews;
-    private List<SelectedContent> mSelectedContent = new ArrayList<SelectedContent>();
+    private ArrayList<SelectedContent> mSelectedContent = new ArrayList<SelectedContent>();
     private TalkClientContact mContact;
     private String mLastMessage;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         if (getArguments() != null) {
             try {
                 int clientContactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
@@ -94,6 +110,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         if (mContact == null) {
             throw new IllegalArgumentException("MessagingFragment requires valid contact.");
         }
+        applyBundle(savedInstanceState);
     }
 
     @Override
@@ -164,12 +181,104 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         mTextField.addTextChangedListener(mTextFieldWatcher);
         updateAttachmentButton();
         updateSendButton();
+        applyCompositionIfAvailable();
+    }
+
+    private void applyCompositionIfAvailable() {
+        SharedPreferences preferences = getXoActivity().getSharedPreferences("chat_composition", Context.MODE_PRIVATE);
+        String text = preferences.getString(BUNDLE_COMPOSITION_TEXT, "");
+        mTextField.setText(text);
+
+        try {
+            String string = preferences.getString(BUNDLE_ATTACHMENTS, null);
+            LOG.debug("attachment json string: " + string);
+            if(string != null) {
+                JSONArray attachmentJsonArray = new JSONArray(string);
+                if (attachmentJsonArray != null) {
+                    int length = attachmentJsonArray.length();
+                    for (int i = 0; i < length; i++) {
+                        try {
+                            SelectedContent selectedContent = stringToSelectedContent(attachmentJsonArray.getString(i));
+                            mSelectedContent.add(selectedContent);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } catch (ClassNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    updateAttachmentButton();
+                    updateSendButton();
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private static SelectedContent stringToSelectedContent(String selectedContentString) throws IOException, ClassNotFoundException {
+        byte [] data = Base64.decode(selectedContentString, Base64.DEFAULT);
+        ObjectInputStream ois = new ObjectInputStream(
+                new ByteArrayInputStream(data));
+        SelectedContent selectedContent = (SelectedContent) ois.readObject();
+        ois.close();
+        return selectedContent;
+    }
+
+    private static String selectedContentToString(SelectedContent selectedContent) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(selectedContent);
+        oos.close();
+        return Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
     }
 
     @Override
     public void onPause() {
         super.onPause();
         mTextField.removeTextChangedListener(mTextFieldWatcher);
+        saveComposition();
+    }
+
+    private void saveComposition() {
+        SharedPreferences preferences = getXoActivity().getSharedPreferences("chat_composition", Context.MODE_PRIVATE);
+        SharedPreferences.Editor edit = preferences.edit();
+        edit.putString(BUNDLE_COMPOSITION_TEXT, mTextField.getText().toString());
+        try {
+            JSONArray selectedAttachmentJson = new JSONArray();
+            for (SelectedContent content : mSelectedContent) {
+                selectedAttachmentJson.put(selectedContentToString(content));
+            }
+            edit.putString(BUNDLE_ATTACHMENTS, selectedAttachmentJson.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        edit.commit();
+        LOG.debug("saved composition");
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putString(BUNDLE_COMPOSITION_TEXT, mTextField.getText().toString());
+        if(mAttachmentSelection != null) {
+            outState.putSerializable(BUNDLE_ATTACHMENTS, (ArrayList) mSelectedContent);
+        }
+        super.onSaveInstanceState(outState);
+    }
+
+    private void applyBundle(Bundle bundle) {
+        if(bundle == null) {
+            return;
+        }
+        String text = bundle.getString(BUNDLE_COMPOSITION_TEXT, "");
+        mTextField.setText(text);
+
+        ArrayList<SelectedContent> selectedContents = (ArrayList<SelectedContent>) bundle.getSerializable(BUNDLE_ATTACHMENTS);
+        if(selectedContents != null) {
+            mSelectedContent = selectedContents;
+            updateAttachmentButton();
+            updateSendButton();
+        }
     }
 
     @Override
@@ -226,7 +335,8 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     private boolean isBlocked() {
         if (!mContact.isGroup() && !mContact.isNearby()) {
             TalkRelationship clientRelationship = mContact.getClientRelationship();
-            if (clientRelationship != null && clientRelationship.getState() != null && clientRelationship.getState().equals(TalkRelationship.STATE_BLOCKED)) {
+            if (clientRelationship != null && clientRelationship.getState() != null && clientRelationship.getState().equals(
+                    TalkRelationship.STATE_BLOCKED)) {
                 return true;
             }
         }
@@ -288,7 +398,8 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     private static boolean isGroupEmpty(TalkClientContact contact) {
         final List<TalkClientContact> otherContactsInGroup;
         try {
-            otherContactsInGroup = XoApplication.get().getXoClient().getDatabase().findContactsInGroupByState(contact.getGroupId(), TalkGroupMembership.STATE_JOINED);
+            otherContactsInGroup = XoApplication.get().getXoClient().getDatabase().findContactsInGroupByState(contact.getGroupId(),
+                    TalkGroupMembership.STATE_JOINED);
             CollectionUtils.filterInverse(otherContactsInGroup, TalkClientContactPredicates.IS_SELF_PREDICATE);
             return otherContactsInGroup.isEmpty();
         } catch (SQLException e) {
@@ -456,7 +567,8 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
             throw new IOException("Could not resize image '" + imageFile.getAbsolutePath() + "' to bitmap");
         }
 
-        boolean success = ImageUtils.compressBitmapToFile(bitmap, compressedImageFile, getXoClient().getImageUploadEncodingQuality(), Bitmap.CompressFormat.JPEG);
+        boolean success = ImageUtils.compressBitmapToFile(bitmap, compressedImageFile, getXoClient().getImageUploadEncodingQuality(),
+                Bitmap.CompressFormat.JPEG);
         if (!success) {
             throw new IOException("Could not compress bitmap to '" + compressedImageFile.getAbsolutePath() + "'");
         }

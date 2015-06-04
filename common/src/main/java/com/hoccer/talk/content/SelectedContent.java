@@ -2,10 +2,12 @@ package com.hoccer.talk.content;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.io.Serializable;
+
 /**
  * Base for user selected attachments.
  */
-public abstract class SelectedContent {
+public abstract class SelectedContent implements Serializable {
 
     @Nullable
     protected String mFilePath;
