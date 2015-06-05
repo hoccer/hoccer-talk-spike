@@ -289,4 +289,8 @@ public class ChatFragment extends XoListFragment
         intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mContact.getClientContactId());
         startActivity(intent);
     }
+
+    public void onKeyboardOpen() {
+        mMessageListView.setSelection(mMessageListView.getCount() - 1);
+    }
 }

@@ -718,9 +718,9 @@ public class TalkRpcHandler implements ITalkRpcServer {
         } else {
             List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsForClient(mConnection.getClientId());
             for (TalkGroupMembership membership : memberships) {
-                if (membership.isJoined() || membership.isInvited()) {
+                if (membership.isJoined() || membership.isInvited() || membership.isSuspended()) {
                     TalkGroupMembership otherMembership = mDatabase.findGroupMembershipForClient(membership.getGroupId(), clientId);
-                    if (otherMembership != null && (otherMembership.isJoined() || otherMembership.isInvited())) {
+                    if (otherMembership != null && (otherMembership.isJoined() || otherMembership.isInvited() || otherMembership.isSuspended())) {
                         key = mDatabase.findKey(clientId, keyId);
                         break;
                     }
@@ -1223,8 +1223,9 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 TalkRelationship relationship = mDatabase.findRelationshipBetween(myId, otherClientId);
 
                 if (relationship == null) {
-                    throw new RuntimeException("No relationship exists with client with id '" + otherClientId + "'");
+                    relationship = setRelationship(myId, otherClientId, TalkRelationship.STATE_NONE, TalkRelationship.STATE_NONE, false);
                 }
+
                 relationship.setLastChanged(new Date());
                 relationship.setNotificationPreference(preference);
                 mDatabase.saveRelationship(relationship);
@@ -1235,7 +1236,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
     }
 
-    private void setRelationship(String thisClientId, String otherClientId, String state, String unblockState, boolean notify) {
+    private TalkRelationship setRelationship(String thisClientId, String otherClientId, String state, String unblockState, boolean notify) {
         if (!TalkRelationship.isValidState(state)) {
             throw new RuntimeException("Invalid state '" + state + "'");
         }
@@ -1261,6 +1262,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         if (notify) {
             mServer.getUpdateAgent().requestRelationshipUpdate(relationship);
         }
+        return relationship;
     }
 
     @Override
@@ -1989,7 +1991,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         // walk the group and make everyone have a "none" relationship to it
         List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsById(groupId);
         for (TalkGroupMembership membership : memberships) {
-            if (membership.isInvited() || membership.isJoined()) {
+            if (membership.isInvited() || membership.isJoined() || membership.isSuspended()) {
                 membership.setState(TalkGroupMembership.STATE_GROUP_REMOVED);
 
                 // TODO: check if degrade role of admins is advisable
