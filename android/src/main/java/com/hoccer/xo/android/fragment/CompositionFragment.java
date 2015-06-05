@@ -39,14 +39,12 @@ import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionGestureListener;
 import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.util.UriUtils;
-import com.sun.org.apache.bcel.internal.generic.Select;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -54,7 +52,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -68,9 +65,9 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     public static final int REQUEST_SELECT_ATTACHMENT = 42;
     private static final int STRESS_TEST_MESSAGE_COUNT = 15;
 
-    private static final String BUNDLE_COMPOSITION_TEXT = "composition_text";
+    private static final String KEY_COMPOSITION_TEXT = "composition_text:";
 
-    private static final String BUNDLE_ATTACHMENTS = "composition_attachment";
+    private static final String KEY_ATTACHMENTS = "composition_attachment:";
 
     private static final String SHARED_PREFERENCES = "chats";
 
@@ -187,11 +184,11 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
 
     private void applyCompositionIfAvailable() {
         SharedPreferences preferences = getXoActivity().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
-        String text = preferences.getString(BUNDLE_COMPOSITION_TEXT, "");
+        String text = preferences.getString(KEY_COMPOSITION_TEXT + mContact.getClientId(), "");
         mTextField.setText(text);
 
         try {
-            String string = preferences.getString(BUNDLE_ATTACHMENTS, null);
+            String string = preferences.getString(KEY_ATTACHMENTS + mContact.getClientId(), null);
             if(string != null) {
                 JSONArray attachmentJsonArray = new JSONArray(string);
                 if (attachmentJsonArray != null) {
@@ -243,13 +240,13 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     private void saveComposition() {
         SharedPreferences preferences = getXoActivity().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
         SharedPreferences.Editor edit = preferences.edit();
-        edit.putString(BUNDLE_COMPOSITION_TEXT, mTextField.getText().toString());
+        edit.putString(KEY_COMPOSITION_TEXT + mContact.getClientId(), mTextField.getText().toString());
         try {
             JSONArray selectedAttachmentJson = new JSONArray();
             for (SelectedContent content : mSelectedContent) {
                 selectedAttachmentJson.put(selectedContentToString(content));
             }
-            edit.putString(BUNDLE_ATTACHMENTS, selectedAttachmentJson.toString());
+            edit.putString(KEY_ATTACHMENTS + mContact.getClientId(), selectedAttachmentJson.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
