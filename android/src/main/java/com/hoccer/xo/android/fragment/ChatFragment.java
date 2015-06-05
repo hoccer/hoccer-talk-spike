@@ -42,7 +42,7 @@ public class ChatFragment extends XoListFragment
 
     private static final Logger LOG = Logger.getLogger(ChatFragment.class);
 
-    private static final String KEY_SCROLL_POSITION = "scroll_position";
+    private static final String KEY_SCROLL_POSITION = "scroll_position:";
 
     private ListView mMessageListView;
 
@@ -162,13 +162,13 @@ public class ChatFragment extends XoListFragment
     private void saveScrollPosition() {
         SharedPreferences preferences = getActivity().getSharedPreferences(ChatActivity.SHARED_PREFERENCES, Context.MODE_PRIVATE);
         SharedPreferences.Editor edit = preferences.edit();
-        edit.putInt(KEY_SCROLL_POSITION, mMessageListView.getFirstVisiblePosition());
+        edit.putInt(KEY_SCROLL_POSITION + mContact.getClientId(), mMessageListView.getFirstVisiblePosition());
         edit.commit();
     }
 
     private void applySavedScrollPosition() {
         SharedPreferences preferences = getActivity().getSharedPreferences(ChatActivity.SHARED_PREFERENCES, Context.MODE_PRIVATE);
-        int scrollPosition = preferences.getInt(KEY_SCROLL_POSITION, -1);
+        int scrollPosition = preferences.getInt(KEY_SCROLL_POSITION + mContact.getClientId(), -1);
         if(scrollPosition >= 0) {
             mMessageListView.setSelection(scrollPosition);
         }
