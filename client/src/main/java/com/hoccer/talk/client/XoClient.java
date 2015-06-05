@@ -1323,9 +1323,8 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     doSync();
                     switchState(State.READY, "ready after sync");
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
-//                    LOG.error("Exception while syncing", e);
-//                    switchState(State.CONNECTING, "reconnect after sync failed");
+                    LOG.error("Exception while syncing", e);
+                    switchState(State.CONNECTING, "reconnect after sync failed");
                 }
             }
         }, 0, TimeUnit.SECONDS);
