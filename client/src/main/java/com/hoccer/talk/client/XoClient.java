@@ -1056,6 +1056,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             }
 
             if (mState == State.CONNECTING) {
+                scheduleDisconnect();
                 scheduleConnect();
             } else {
                 cancelConnect();
@@ -1417,6 +1418,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                         }
                     }
 
+                    // TODO this can cause java.util.ConcurrentModificationException
                     for (IXoContactListener listener : mContactListeners) {
                         listener.onGroupMembershipChanged(groupContact);
                         listener.onGroupPresenceChanged(groupContact);
