@@ -72,6 +72,8 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
 
     private static final String BUNDLE_ATTACHMENTS = "composition_attachment";
 
+    private static final String SHARED_PREFERENCES = "chats";
+
     private enum AttachmentSelectionType {
         NONE,
         IMAGE,
@@ -110,7 +112,6 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         if (mContact == null) {
             throw new IllegalArgumentException("MessagingFragment requires valid contact.");
         }
-        applyBundle(savedInstanceState);
     }
 
     @Override
@@ -185,13 +186,12 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     }
 
     private void applyCompositionIfAvailable() {
-        SharedPreferences preferences = getXoActivity().getSharedPreferences("chat_composition", Context.MODE_PRIVATE);
+        SharedPreferences preferences = getXoActivity().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
         String text = preferences.getString(BUNDLE_COMPOSITION_TEXT, "");
         mTextField.setText(text);
 
         try {
             String string = preferences.getString(BUNDLE_ATTACHMENTS, null);
-            LOG.debug("attachment json string: " + string);
             if(string != null) {
                 JSONArray attachmentJsonArray = new JSONArray(string);
                 if (attachmentJsonArray != null) {
@@ -241,7 +241,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     }
 
     private void saveComposition() {
-        SharedPreferences preferences = getXoActivity().getSharedPreferences("chat_composition", Context.MODE_PRIVATE);
+        SharedPreferences preferences = getXoActivity().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
         SharedPreferences.Editor edit = preferences.edit();
         edit.putString(BUNDLE_COMPOSITION_TEXT, mTextField.getText().toString());
         try {
@@ -254,31 +254,6 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
             e.printStackTrace();
         }
         edit.commit();
-        LOG.debug("saved composition");
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        outState.putString(BUNDLE_COMPOSITION_TEXT, mTextField.getText().toString());
-        if(mAttachmentSelection != null) {
-            outState.putSerializable(BUNDLE_ATTACHMENTS, (ArrayList) mSelectedContent);
-        }
-        super.onSaveInstanceState(outState);
-    }
-
-    private void applyBundle(Bundle bundle) {
-        if(bundle == null) {
-            return;
-        }
-        String text = bundle.getString(BUNDLE_COMPOSITION_TEXT, "");
-        mTextField.setText(text);
-
-        ArrayList<SelectedContent> selectedContents = (ArrayList<SelectedContent>) bundle.getSerializable(BUNDLE_ATTACHMENTS);
-        if(selectedContents != null) {
-            mSelectedContent = selectedContents;
-            updateAttachmentButton();
-            updateSendButton();
-        }
     }
 
     @Override
