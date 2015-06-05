@@ -17,7 +17,11 @@ public class PresenceAvatarView extends AvatarView implements IXoContactListener
     private boolean mIsAttachedToWindow;
 
     public PresenceAvatarView(Context context, AttributeSet attrs) {
-        super(context, attrs, R.layout.layout_avatar_presence);
+        this(context, attrs, R.layout.layout_avatar_presence);
+    }
+
+    public PresenceAvatarView(Context context, AttributeSet attrs, int layoutId) {
+        super(context, attrs, layoutId);
         mPresenceIndicatorActive = this.findViewById(R.id.presence_indicator_view_active);
         mPresenceIndicatorInactive = this.findViewById(R.id.presence_indicator_view_inactive);
     }

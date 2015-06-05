@@ -158,15 +158,23 @@ public abstract class AvatarView extends LinearLayout {
 
     public static AvatarView inflate(TalkClientContact contact, Context context) {
         int layoutId;
-        if (!(contact.isFriendOrBlocked() || contact.isInEnvironment()) && contact.isNearbyAcquaintance()) {
-            layoutId = R.layout.view_avatar_nearby_history;
-        } else if (!(contact.isFriendOrBlocked() || contact.isInEnvironment()) && contact.isWorldwideAcquaintance()) {
-            layoutId = R.layout.view_avatar_worldwide_history;
-        } else if (!(contact.isFriendOrBlocked() || contact.isNearby() || contact.isWorldwide()) || contact.isKeptGroup()) {
-            layoutId = R.layout.view_avatar_history;
-        } else {
+
+        if (!contact.isFriendOrBlocked() && contact.isWorldwide()) {
+            layoutId = R.layout.view_avatar_client_presence_worldwide;
+        } else if (!contact.isFriendOrBlocked() && contact.isNearby()) {
+            layoutId = R.layout.view_avatar_client_presence_nearby;
+        } else if (!contact.isFriendOrBlocked() && contact.isNearbyAcquaintance()) {
+            layoutId = R.layout.view_avatar_client_acquaintance_nearby;
+        } else if (!contact.isFriendOrBlocked() && contact.isWorldwideAcquaintance()) {
+            layoutId = R.layout.view_avatar_client_acquaintance_worldwide;
+        } else if (!contact.isFriendOrBlocked() && contact.isKept() || contact.isKeptGroup()) {
+            layoutId = R.layout.view_avatar_client_kept;
+        } else if (contact.isWorldwideGroup()) {
+            layoutId = R.layout.view_avatar_group_worldwide;
+        }  else {
             layoutId = R.layout.view_avatar_presence;
         }
+
         AvatarView avatarView = (AvatarView) LayoutInflater.from(context).inflate(layoutId, null);
         avatarView.setContact(contact);
         return avatarView;

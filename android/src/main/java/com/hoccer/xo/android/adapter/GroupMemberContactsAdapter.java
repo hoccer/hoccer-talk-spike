@@ -69,7 +69,7 @@ public class GroupMemberContactsAdapter extends ContactsAdapter {
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
         nameView.setText(contact.getNickname());
 
-        ViewGroup avatarContainer = (ViewGroup) view.findViewById(R.id.fl_avatar);
+        ViewGroup avatarContainer = (ViewGroup) view.findViewById(R.id.vs_avatar);
         avatarContainer.removeAllViews();
         avatarContainer.addView(AvatarView.inflate(contact, mActivity), 0);
         avatarContainer.setOnClickListener(new View.OnClickListener() {

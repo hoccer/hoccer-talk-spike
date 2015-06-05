@@ -1,6 +1,8 @@
 package com.hoccer.xo.android.view.model;
 
+import android.content.Context;
 import android.view.View;
+import android.view.ViewStub;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientMessage;
@@ -26,7 +28,8 @@ public class WorldwideGroupHistoryChatItem extends ChatItem implements SearchAda
     private Date mLastMessageTimeStamp;
     private String mLastMessageText = "";
 
-    public WorldwideGroupHistoryChatItem() {
+    protected WorldwideGroupHistoryChatItem(Context context) {
+        super(context);
         update();
     }
 
@@ -54,7 +57,13 @@ public class WorldwideGroupHistoryChatItem extends ChatItem implements SearchAda
 
     @Override
     protected View updateView(View view) {
-        AvatarView simpleAvatarView = (AvatarView) view.findViewById(R.id.contact_icon);
+        AvatarView avatarView = ((AvatarView) view.findViewById(R.id.contact_icon));
+        if (avatarView == null) {
+            ViewStub avatarCointainer = (ViewStub) view.findViewById(R.id.vs_avatar);
+            avatarCointainer.setLayoutResource(getAvatarView());
+            avatarView = (AvatarView) avatarCointainer.inflate();
+        }
+
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
         TextView lastMessageTextView = (TextView) view.findViewById(R.id.contact_last_message);
         TextView lastMessageTimeView = (TextView) view.findViewById(R.id.contact_time);
@@ -65,8 +74,8 @@ public class WorldwideGroupHistoryChatItem extends ChatItem implements SearchAda
         lastMessageTextView.setText(mLastMessageText);
         setUnseenMessages(unseenView);
 
-        simpleAvatarView.setAvatarImage(R.drawable.avatar_world);
-        simpleAvatarView.setClickable(false);
+        avatarView.setAvatarImage(R.drawable.avatar_world);
+        avatarView.setClickable(false);
 
         return view;
     }
