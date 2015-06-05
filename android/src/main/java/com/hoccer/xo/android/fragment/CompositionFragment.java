@@ -198,9 +198,9 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
                             SelectedContent selectedContent = stringToSelectedContent(attachmentJsonArray.getString(i));
                             mSelectedContent.add(selectedContent);
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            LOG.error(e.getMessage());
                         } catch (ClassNotFoundException e) {
-                            e.printStackTrace();
+                            LOG.error(e.getMessage());
                         }
                     }
                     updateAttachmentButton();
@@ -208,7 +208,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
                 }
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage());
         }
 
     }
@@ -248,7 +248,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
             }
             edit.putString(KEY_ATTACHMENTS + mContact.getClientId(), selectedAttachmentJson.toString());
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage());
         }
         edit.commit();
     }
