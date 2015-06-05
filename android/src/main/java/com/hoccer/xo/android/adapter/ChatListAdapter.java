@@ -71,11 +71,11 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
                     }
 
                     if (nearbyMessageCount > 0) {
-                        mChatItems.add(ChatItem.createNearbyGroupHistory());
+                        mChatItems.add(ChatItem.createNearbyGroupHistory(mActivity));
                     }
 
                     if (worldwideMessageCount > 0) {
-                        mChatItems.add(ChatItem.createWorldwideGroupHistory());
+                        mChatItems.add(ChatItem.createWorldwideGroupHistory(mActivity));
                     }
 
                     notifyDataSetChanged();

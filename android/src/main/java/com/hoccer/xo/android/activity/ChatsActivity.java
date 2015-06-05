@@ -27,7 +27,7 @@ import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.ContactsMenuItemActionProvider;
 import org.apache.log4j.Logger;
 
-public class ChatsActivity extends ComposableActivity implements IXoStateListener, IXoPairingListener, BackgroundManager.Listener, WorldWideActivationListener {
+public class ChatsActivity extends ComposableActivity implements IXoStateListener, IXoPairingListener, BackgroundManager.Listener {
 
     private static final Logger LOG = Logger.getLogger(ChatsActivity.class);
 
@@ -35,26 +35,19 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     private String mPairingToken;
     private ContactsMenuItemActionProvider mContactsMenuItemActionProvider;
-    private ViewPagerActivityComponent mViewPagerActivityComponent;
-    private Fragment mChatListFragment;
-    private Fragment mNearbyChatListFragment;
-    private Fragment mWorldwideChatListFragment;
 
 
     @Override
     protected ActivityComponent[] createComponents() {
         MediaPlayerActivityComponent mediaPlayerActivityComponent = new MediaPlayerActivityComponent(this);
 
-        mChatListFragment = new ChatListFragment();
-        mNearbyChatListFragment = new NearbyChatListFragment();
-        mWorldwideChatListFragment = new WorldwideChatListFragment();
-        mViewPagerActivityComponent = new ViewPagerActivityComponent(this,
+        ViewPagerActivityComponent viewPagerActivityComponent = new ViewPagerActivityComponent(this,
                 R.id.pager,
-                mChatListFragment,
-                mNearbyChatListFragment,
-                mWorldwideChatListFragment);
+                new ChatListFragment(),
+                new NearbyChatListFragment(),
+                new WorldwideChatListFragment());
 
-        return new ActivityComponent[]{mediaPlayerActivityComponent, mViewPagerActivityComponent};
+        return new ActivityComponent[]{mediaPlayerActivityComponent, viewPagerActivityComponent};
     }
 
     @Override
@@ -78,8 +71,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         BackgroundManager.get().registerListener(this);
 
         PasswordProtection.get();
-
-        WorldwideController.get().registerWorldwideActivationListener(this);
     }
 
     @Override
@@ -102,7 +93,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         MediaPlayer.get().removeNotification();
         NearbyController.get().removeNotification();
         BackgroundManager.get().unregisterListener(this);
-        WorldwideController.get().unregisterWorldwideActivationListener(this);
     }
 
     @Override
@@ -255,31 +245,5 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     public void onBecameBackground(Activity activity) {
         LOG.debug("onBecameBackground()");
         getXoClient().setPresenceStatus(TalkPresence.STATUS_BACKGROUND);
-    }
-
-    @Override
-    public void onWorldwideActivated() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                selectPageByCurrentEnvironment();
-            }
-        });
-    }
-
-    private void selectPageByCurrentEnvironment() {
-        TalkClientContact environmentGroup = getXoClient().getCurrentEnvironmentGroup();
-        if (environmentGroup == null) {
-            mViewPagerActivityComponent.selectFragment(mChatListFragment);
-        } else if (environmentGroup.isNearbyGroup()) {
-            mViewPagerActivityComponent.selectFragment(mNearbyChatListFragment);
-        } else if (environmentGroup.isWorldwideGroup()) {
-            mViewPagerActivityComponent.selectFragment(mWorldwideChatListFragment);
-        }
-    }
-
-    @Override
-    public void onWorldwideDeactivated() {
-
     }
 }

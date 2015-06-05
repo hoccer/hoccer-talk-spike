@@ -18,14 +18,12 @@
             android:layout_marginRight="8dp"
             android:layout_marginEnd="8dp">
 
-        <include layout="@layout/view_avatar_presence"
-                 android:layout_width="48dp"
-                 android:layout_height="48dp"/>
+        <ViewStub android:id="@+id/vs_avatar" android:layout_width="48dp" android:layout_height="48dp"/>
 
         <TextView
                 android:id="@+id/contact_unseen_messages"
-                android:layout_alignRight="@+id/contact_icon"
-                android:layout_alignTop="@id/contact_icon"
+                android:layout_alignRight="@+id/vs_avatar"
+                android:layout_alignTop="@id/vs_avatar"
                 android:layout_marginRight="-8dp"
                 android:visibility="visible"
                 android:background="@drawable/shape_unread_messages_badge"

@@ -199,9 +199,9 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
             @Override
             public boolean shouldShow(TalkClientContact contact) {
                 if (contact.isGroup()) {
-                    return (contact.isKeptGroup() || (contact.isGroupJoined() && contact.isGroupExisting())) && !contact.isEnvironmentGroup();
+                    return contact.isKeptGroup() || contact.isGroupJoined() && contact.isGroupExisting();
                 } else if (contact.isClient()) {
-                    return contact.isKept() || contact.isFriendOrBlocked();
+                    return !contact.isSelf() && (contact.isWorldwide() || contact.isKept() || contact.isFriendOrBlocked());
                 }
                 return false;
             }
@@ -231,18 +231,27 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
         if (shouldShowClientHistory(item)) {
             TalkClientContact contact = ((ContactChatItem) item).getContact();
             showHistory(contact);
-        } else if (item.getType() == ChatItem.TYPE_RELATED) {
+        } else if (shouldShowChat(item)) {
             TalkClientContact contact = ((ContactChatItem) item).getContact();
             showChat(contact);
-        } else if (item.getType() == ChatItem.TYPE_GROUP_NEARBY_HISTORY) {
+        } else if (item.getType() == ChatItem.TYPE_GROUP_HISTORY_NEARBY) {
             showNearbyGroupHistory();
-        } else if (item.getType() == ChatItem.TYPE_GROUP_WORLDWIDE_HISTORY) {
+        } else if (item.getType() == ChatItem.TYPE_GROUP_HISTORY_WORLDWIDE) {
             showWorldwideGroupHistory();
         }
     }
 
+    private boolean shouldShowChat(ChatItem item) {
+        return item.getType() == ChatItem.TYPE_RELATED
+                || item.getType() == ChatItem.TYPE_CLIENT_PRESENCE_NEARBY
+                || item.getType() == ChatItem.TYPE_CLIENT_PRESENCE_WORLDWIDE
+                || item.getType() == ChatItem.TYPE_GROUP_WORLDWIDE;
+    }
+
     private boolean shouldShowClientHistory(ChatItem item) {
-        return item.getType() == ChatItem.TYPE_CLIENT_NEARBY_HISTORY || item.getType() == ChatItem.TYPE_CLIENT_WORLDWIDE_HISTORY || item.getType() == ChatItem.TYPE_CLIENT_HISTORY;
+        return item.getType() == ChatItem.TYPE_CLIENT_ACQUAINTANCE_NEARBY
+                || item.getType() == ChatItem.TYPE_CLIENT_ACQUAINTANCE_WORLDWIDE
+                || item.getType() == ChatItem.TYPE_CLIENT_KEPT;
     }
 
     public void showChat(TalkClientContact contact) {

@@ -11,13 +11,17 @@ import com.hoccer.xo.android.XoApplication;
 
 public class PresenceAvatarView extends AvatarView implements IXoContactListener {
 
-    private View mPresenceIndicatorActive;
-    private View mPresenceIndicatorInactive;
+    protected View mPresenceIndicatorActive;
+    protected View mPresenceIndicatorInactive;
 
     private boolean mIsAttachedToWindow;
 
     public PresenceAvatarView(Context context, AttributeSet attrs) {
-        super(context, attrs, R.layout.layout_avatar_presence);
+        this(context, attrs, R.layout.layout_avatar_presence);
+    }
+
+    public PresenceAvatarView(Context context, AttributeSet attrs, int layoutId) {
+        super(context, attrs, layoutId);
         mPresenceIndicatorActive = this.findViewById(R.id.presence_indicator_view_active);
         mPresenceIndicatorInactive = this.findViewById(R.id.presence_indicator_view_inactive);
     }
@@ -71,7 +75,7 @@ public class PresenceAvatarView extends AvatarView implements IXoContactListener
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {}
 
-    private void updatePresence() {
+    protected void updatePresence() {
         post(new Runnable() {
             @Override
             public void run() {
@@ -88,22 +92,22 @@ public class PresenceAvatarView extends AvatarView implements IXoContactListener
                         }
                     }
                 }
-                hidePresenceIndicator();
+                showPresenceIndicatorOffline();
             }
         });
     }
 
-    private void showPresenceIndicatorActive() {
+    protected void showPresenceIndicatorActive() {
         mPresenceIndicatorActive.setVisibility(View.VISIBLE);
         mPresenceIndicatorInactive.setVisibility(View.INVISIBLE);
     }
 
-    private void showPresenceIndicatorInactive() {
+    protected void showPresenceIndicatorInactive() {
         mPresenceIndicatorActive.setVisibility(View.INVISIBLE);
         mPresenceIndicatorInactive.setVisibility(View.VISIBLE);
     }
 
-    private void hidePresenceIndicator() {
+    protected void showPresenceIndicatorOffline() {
         mPresenceIndicatorActive.setVisibility(View.INVISIBLE);
         mPresenceIndicatorInactive.setVisibility(View.INVISIBLE);
     }
