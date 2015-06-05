@@ -184,11 +184,14 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
 
     private void applyCompositionIfAvailable() {
         SharedPreferences preferences = getXoActivity().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
-        String text = preferences.getString(KEY_COMPOSITION_TEXT + mContact.getClientId(), "");
+
+        String contactId = mContact.isClient() ? mContact.getClientId() : mContact.getGroupId();
+
+        String text = preferences.getString(KEY_COMPOSITION_TEXT + contactId, "");
         mTextField.setText(text);
 
         try {
-            String string = preferences.getString(KEY_ATTACHMENTS + mContact.getClientId(), null);
+            String string = preferences.getString(KEY_ATTACHMENTS + contactId, null);
             if(string != null) {
                 JSONArray attachmentJsonArray = new JSONArray(string);
                 if (attachmentJsonArray != null) {
@@ -240,13 +243,15 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     private void saveComposition() {
         SharedPreferences preferences = getXoActivity().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
         SharedPreferences.Editor edit = preferences.edit();
-        edit.putString(KEY_COMPOSITION_TEXT + mContact.getClientId(), mTextField.getText().toString());
+
+        String contactId = mContact.isClient() ? mContact.getClientId() : mContact.getGroupId();
+        edit.putString(KEY_COMPOSITION_TEXT + contactId, mTextField.getText().toString());
         try {
             JSONArray selectedAttachmentJson = new JSONArray();
             for (SelectedContent content : mSelectedContent) {
                 selectedAttachmentJson.put(selectedContentToString(content));
             }
-            edit.putString(KEY_ATTACHMENTS + mContact.getClientId(), selectedAttachmentJson.toString());
+            edit.putString(KEY_ATTACHMENTS + contactId, selectedAttachmentJson.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
