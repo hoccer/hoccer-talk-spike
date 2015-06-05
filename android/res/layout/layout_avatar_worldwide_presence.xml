@@ -39,4 +39,19 @@
         </ImageView>
     </RelativeLayout>
 
+    <RelativeLayout android:id="@+id/presence_indicator_view_offline"
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:gravity="center"
+                    android:visibility="visible"
+                    android:layout_alignLeft="@+id/avatar_image"
+                    android:layout_alignStart="@+id/avatar_image"
+                    android:layout_alignBottom="@+id/avatar_image"
+                    android:background="@drawable/shape_presence_indicator_offline">
+        <ImageView android:layout_width="8dp"
+                   android:layout_height="8dp"
+                   android:src="@drawable/ic_notification_worldwide">
+        </ImageView>
+    </RelativeLayout>
+
 </RelativeLayout>

@@ -23,7 +23,6 @@
         </ImageView>
     </RelativeLayout>
 
-
     <RelativeLayout android:id="@+id/presence_indicator_view_inactive"
           android:layout_width="12dp"
           android:layout_height="12dp"
