@@ -1,6 +1,8 @@
 package com.hoccer.xo.android.fragment;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -12,6 +14,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.activity.ChatActivity;
 import com.hoccer.xo.android.activity.GroupProfileActivity;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
 import com.hoccer.xo.android.activity.SingleProfileActivity;
@@ -38,6 +41,8 @@ public class ChatFragment extends XoListFragment
     public static final String ARG_CLIENT_CONTACT_ID = "com.hoccer.xo.android.fragment.ARG_CLIENT_CONTACT_ID";
 
     private static final Logger LOG = Logger.getLogger(ChatFragment.class);
+
+    private static final String KEY_SCROLL_POSITION = "scroll_position";
 
     private ListView mMessageListView;
 
@@ -135,6 +140,7 @@ public class ChatFragment extends XoListFragment
         intent.setAction(IntentHelper.ACTION_CONTACT_ID_IN_CONVERSATION);
         intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mContact.getClientContactId());
         getActivity().sendBroadcast(intent);
+        applySavedScrollPosition();
     }
 
     @Override
@@ -150,6 +156,22 @@ public class ChatFragment extends XoListFragment
         intent.setAction(IntentHelper.ACTION_CONTACT_ID_IN_CONVERSATION);
         intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
         getActivity().sendBroadcast(intent);
+        saveScrollPosition();
+    }
+
+    private void saveScrollPosition() {
+        SharedPreferences preferences = getActivity().getSharedPreferences(ChatActivity.SHARED_PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor edit = preferences.edit();
+        edit.putInt(KEY_SCROLL_POSITION, mMessageListView.getFirstVisiblePosition());
+        edit.commit();
+    }
+
+    private void applySavedScrollPosition() {
+        SharedPreferences preferences = getActivity().getSharedPreferences(ChatActivity.SHARED_PREFERENCES, Context.MODE_PRIVATE);
+        int scrollPosition = preferences.getInt(KEY_SCROLL_POSITION, -1);
+        if(scrollPosition >= 0) {
+            mMessageListView.setSelection(scrollPosition);
+        }
     }
 
     @Override
