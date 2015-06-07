@@ -515,11 +515,14 @@ public class JongoDatabase implements ITalkServerDatabase {
     public List<TalkPresence> findPresencesChangedAfter(String clientId, Date lastKnown) {
         // result array
         List<TalkPresence> res = new ArrayList<TalkPresence>();
+
         // set to collect clients into
         Set<String> clients = new HashSet<String>();
+
         // set to collect clients which may have been added to the presence set
         // since the client has received presences the last time
         Set<String> mustInclude = new HashSet<String>();
+
         // collect clients known through relationships
 
         /*
@@ -582,6 +585,25 @@ public class JongoDatabase implements ITalkServerDatabase {
                 }
             }
         }
+
+        // treat former senders with unfinished deliveries as contact
+        final List<TalkDelivery> deliveries = findDeliveriesForClientInState(clientId, TalkDelivery.STATE_DELIVERING);
+        for (TalkDelivery delivery : deliveries) {
+            clients.add(delivery.getSenderId());
+            if (delivery.getTimeChanged().after(lastKnown)) {
+                mustInclude.add(delivery.getSenderId());
+            }
+        }
+        final List<TalkDelivery> attachmentDeliveries =
+                findDeliveriesForClientInDeliveryAndAttachmentStates(clientId,
+                        TalkDelivery.IN_ATTACHMENT_DELIVERY_STATES, TalkDelivery.IN_ATTACHMENT_STATES);
+        for (TalkDelivery delivery : deliveries) {
+            clients.add(delivery.getSenderId());
+            if (delivery.getTimeChanged().after(lastKnown)) {
+                mustInclude.add(delivery.getSenderId());
+            }
+        }
+
         // remove self
         clients.remove(clientId);
         // collect presences
