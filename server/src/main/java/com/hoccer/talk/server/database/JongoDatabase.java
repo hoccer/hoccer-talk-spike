@@ -597,7 +597,7 @@ public class JongoDatabase implements ITalkServerDatabase {
         final List<TalkDelivery> attachmentDeliveries =
                 findDeliveriesForClientInDeliveryAndAttachmentStates(clientId,
                         TalkDelivery.IN_ATTACHMENT_DELIVERY_STATES, TalkDelivery.IN_ATTACHMENT_STATES);
-        for (TalkDelivery delivery : deliveries) {
+        for (TalkDelivery delivery : attachmentDeliveries) {
             clients.add(delivery.getSenderId());
             if (delivery.getTimeChanged().after(lastKnown)) {
                 mustInclude.add(delivery.getSenderId());
