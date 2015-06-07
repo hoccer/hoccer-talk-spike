@@ -42,7 +42,9 @@
 
     <color name="last_message">@color/text_secondary</color>
 
-    <color name="environment_indicator_background">#777777</color>
+    <color name="presence_indicator_offline">#777777</color>
+
+    <color name="indicator_history">#AAAAAA</color>
 
     <color name="connection_state_background">#2f2f2f</color>
     <color name="connection_state_text">#8f8f8f</color>

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
@@ -33,9 +34,6 @@ import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
-import static com.hoccer.talk.model.TalkEnvironment.TYPE_NEARBY;
-import static com.hoccer.talk.model.TalkEnvironment.TYPE_WORLDWIDE;
 
 public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContactListener, IXoMessageListener, TransferListener {
 
@@ -100,21 +98,26 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
     }
 
     private void updateContact(final View view, final TalkClientContact contact) {
+        AvatarView avatarView = ((AvatarView) view.findViewById(R.id.contact_icon));
+        if (avatarView == null) {
+            ViewStub avatarCointainer = (ViewStub) view.findViewById(R.id.vs_avatar);
+            avatarCointainer.setLayoutResource(R.layout.view_avatar_presence);
+            avatarView = (AvatarView) avatarCointainer.inflate();
+        }
+
         TextView nameView = ViewHolderForAdapters.get(view, R.id.contact_name);
-        AvatarView avatarView = ViewHolderForAdapters.get(view, R.id.contact_icon);
         TextView lastMessageTimeView = (TextView) view.findViewById(R.id.contact_time);
         TextView lastMessageText = (TextView) view.findViewById(R.id.contact_last_message);
         TextView unseenView = (TextView) view.findViewById(R.id.contact_unseen_messages);
 
-        if (contact.isGroup()) {
-            if (TYPE_WORLDWIDE.equals(mEnvironmentType)) {
-                nameView.setText(mXoActivity.getResources().getString(R.string.all_worldwide) + " (" + (mContacts.size() - 1) + ")");
-            } else if (TYPE_NEARBY.equals(mEnvironmentType)) {
-                nameView.setText(mXoActivity.getResources().getString(R.string.all_nearby) + " (" + (mContacts.size() - 1) + ")");
-            }
+        if (contact.isWorldwideGroup()) {
+            nameView.setText(mXoActivity.getResources().getString(R.string.all_worldwide) + " (" + (mContacts.size() - 1) + ")");
+        } else if (contact.isNearbyGroup()) {
+            nameView.setText(R.string.all_nearby);
         } else {
             nameView.setText(contact.getNickname());
         }
+
         avatarView.setContact(contact);
 
         lastMessageText.setText("");

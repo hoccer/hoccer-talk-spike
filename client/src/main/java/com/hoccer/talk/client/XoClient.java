@@ -1056,6 +1056,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             }
 
             if (mState == State.CONNECTING) {
+                scheduleDisconnect();
                 scheduleConnect();
             } else {
                 cancelConnect();
@@ -1323,9 +1324,8 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     doSync();
                     switchState(State.READY, "ready after sync");
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
-//                    LOG.error("Exception while syncing", e);
-//                    switchState(State.CONNECTING, "reconnect after sync failed");
+                    LOG.error("Exception while syncing", e);
+                    switchState(State.CONNECTING, "reconnect after sync failed");
                 }
             }
         }, 0, TimeUnit.SECONDS);
@@ -1418,6 +1418,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                         }
                     }
 
+                    // TODO this can cause java.util.ConcurrentModificationException
                     for (IXoContactListener listener : mContactListeners) {
                         listener.onGroupMembershipChanged(groupContact);
                         listener.onGroupPresenceChanged(groupContact);
@@ -2902,7 +2903,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 LOG.error("Can not destroy nearby group since groupPresence is null");
                 return;
             }
-            groupPresence.setKept(true);
 
             // save group
             mDatabase.saveContact(groupContact);
@@ -2936,7 +2936,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 LOG.error("Can not destroy worldwide group since groupPresence is null");
                 return;
             }
-            groupPresence.setKept(true);
 
             // save group
             mDatabase.saveContact(groupContact);
@@ -3083,6 +3082,10 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     private void updateGroupKeptState(TalkGroupMembership oldMembership, TalkGroupMembership newMembership, TalkClientContact groupContact, TalkClientContact clientContact) throws SQLException {
+        if (groupContact.isEnvironmentGroup()){
+            return;
+        }
+
         // TODO: This can throw null pointer exceptions since groupContact.getGroupPresence() can be null.
         if (selfHasDeclined(oldMembership, newMembership) || selfHasJoinedGroup(newMembership, clientContact)) {
             groupContact.getGroupPresence().setKept(false);
