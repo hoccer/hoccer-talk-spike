@@ -8,7 +8,6 @@ import java.util.List;
 
 public class TalkToolClientCommand extends TalkToolCommand {
 
-    TalkToolContext mContext;
     @Parameter(description = "Run on all clients", names = "-a")
     boolean pAllClients;
     @Parameter(description = "Run on specified clients", names = "-c")

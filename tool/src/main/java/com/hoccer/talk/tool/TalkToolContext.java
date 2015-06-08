@@ -10,8 +10,6 @@ import java.io.InputStream;
 import java.security.KeyStore;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class TalkToolContext extends CLIContext {
@@ -20,7 +18,7 @@ public class TalkToolContext extends CLIContext {
 
     TalkTool mApplication;
     ObjectMapper mMapper;
-    ScheduledExecutorService mExecutor;
+    //ScheduledExecutorService mExecutor;
     AtomicInteger mClientIdCounter;
     List<TalkToolClient> mClients;
     Hashtable<Integer, TalkToolClient> mClientsById;
@@ -58,7 +56,7 @@ public class TalkToolContext extends CLIContext {
         Console.debug("- setting up TalkToolContext...");
         mApplication = app;
         mMapper = new ObjectMapper();
-        mExecutor = Executors.newScheduledThreadPool(8);
+        //mExecutor = Executors.newScheduledThreadPool(1);
         mClientIdCounter = new AtomicInteger(0);
         mClients = new Vector<TalkToolClient>();
         mClientsById = new Hashtable<Integer, TalkToolClient>();
