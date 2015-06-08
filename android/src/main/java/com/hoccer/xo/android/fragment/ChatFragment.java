@@ -34,7 +34,7 @@ import java.util.List;
 /**
  * Fragment for conversations
  */
-public class ChatFragment extends XoListFragment
+public class ChatFragment extends XoChatListFragment
         implements SearchView.OnQueryTextListener,
         XoAdapter.AdapterReloadListener, IXoContactListener {
 
@@ -140,7 +140,6 @@ public class ChatFragment extends XoListFragment
         intent.setAction(IntentHelper.ACTION_CONTACT_ID_IN_CONVERSATION);
         intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mContact.getClientContactId());
         getActivity().sendBroadcast(intent);
-        applySavedScrollPosition();
     }
 
     @Override
@@ -156,24 +155,11 @@ public class ChatFragment extends XoListFragment
         intent.setAction(IntentHelper.ACTION_CONTACT_ID_IN_CONVERSATION);
         intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
         getActivity().sendBroadcast(intent);
-        saveScrollPosition();
     }
 
-    private void saveScrollPosition() {
-        String contactId = mContact.isClient() ? mContact.getClientId() : mContact.getGroupId();
-        SharedPreferences preferences = getActivity().getSharedPreferences(ChatActivity.SHARED_PREFERENCES, Context.MODE_PRIVATE);
-        SharedPreferences.Editor edit = preferences.edit();
-        edit.putInt(KEY_SCROLL_POSITION + contactId, mMessageListView.getFirstVisiblePosition());
-        edit.commit();
-    }
-
-    private void applySavedScrollPosition() {
-        String contactId = mContact.isClient() ? mContact.getClientId() : mContact.getGroupId();
-        SharedPreferences preferences = getActivity().getSharedPreferences(ChatActivity.SHARED_PREFERENCES, Context.MODE_PRIVATE);
-        int scrollPosition = preferences.getInt(KEY_SCROLL_POSITION + contactId, -1);
-        if(scrollPosition >= 0) {
-            mMessageListView.setSelection(scrollPosition);
-        }
+    @Override
+    protected String getScrollPositionId() {
+        return mContact.isClient() ? mContact.getClientId() : mContact.getGroupId();
     }
 
     @Override
