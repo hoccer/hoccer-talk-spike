@@ -128,5 +128,15 @@ public class HistoryFragment extends XoChatListFragment {
         mAdapter.onDestroy();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        applySavedScrollPosition();
+    }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        saveScrollPosition();
+    }
 }

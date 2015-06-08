@@ -140,6 +140,7 @@ public class ChatFragment extends XoChatListFragment
         intent.setAction(IntentHelper.ACTION_CONTACT_ID_IN_CONVERSATION);
         intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mContact.getClientContactId());
         getActivity().sendBroadcast(intent);
+        applySavedScrollPosition();
     }
 
     @Override
@@ -155,6 +156,7 @@ public class ChatFragment extends XoChatListFragment
         intent.setAction(IntentHelper.ACTION_CONTACT_ID_IN_CONVERSATION);
         intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
         getActivity().sendBroadcast(intent);
+        saveScrollPosition();
     }
 
     @Override
