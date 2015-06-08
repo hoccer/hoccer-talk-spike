@@ -160,15 +160,17 @@ public class ChatFragment extends XoListFragment
     }
 
     private void saveScrollPosition() {
+        String contactId = mContact.isClient() ? mContact.getClientId() : mContact.getGroupId();
         SharedPreferences preferences = getActivity().getSharedPreferences(ChatActivity.SHARED_PREFERENCES, Context.MODE_PRIVATE);
         SharedPreferences.Editor edit = preferences.edit();
-        edit.putInt(KEY_SCROLL_POSITION + mContact.getClientId(), mMessageListView.getFirstVisiblePosition());
+        edit.putInt(KEY_SCROLL_POSITION + contactId, mMessageListView.getFirstVisiblePosition());
         edit.commit();
     }
 
     private void applySavedScrollPosition() {
+        String contactId = mContact.isClient() ? mContact.getClientId() : mContact.getGroupId();
         SharedPreferences preferences = getActivity().getSharedPreferences(ChatActivity.SHARED_PREFERENCES, Context.MODE_PRIVATE);
-        int scrollPosition = preferences.getInt(KEY_SCROLL_POSITION + mContact.getClientId(), -1);
+        int scrollPosition = preferences.getInt(KEY_SCROLL_POSITION + contactId, -1);
         if(scrollPosition >= 0) {
             mMessageListView.setSelection(scrollPosition);
         }
