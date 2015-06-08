@@ -1056,7 +1056,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             }
 
             if (mState == State.CONNECTING) {
-                scheduleDisconnect();
                 scheduleConnect();
             } else {
                 cancelConnect();
@@ -1193,6 +1192,8 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     private void doConnect() throws Exception {
+        mConnection.disconnect();
+
         LOG.debug("doConnect() on connection #" + mConnection.getConnectionId());
         URI uri = new URI(mClientConfiguration.getServerUri());
         String protocol = mClientConfiguration.getUseBsonProtocol() ? mClientConfiguration.getBsonProtocolString() : mClientConfiguration.getJsonProtocolString();
