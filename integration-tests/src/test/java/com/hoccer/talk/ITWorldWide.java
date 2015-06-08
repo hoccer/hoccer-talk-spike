@@ -1,8 +1,8 @@
 package com.hoccer.talk;
 
 import com.hoccer.talk.client.XoClient;
-import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkEnvironment;
+import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.util.IntegrationTest;
 import com.hoccer.talk.util.TestHelper;
 import com.hoccer.talk.util.TestTalkServer;
@@ -13,18 +13,20 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.util.HashMap;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 @RunWith(JUnit4.class)
 public class ITWorldWide extends IntegrationTest {
-    
+
     private TestTalkServer talkServer;
     private HashMap<String, XoClient> clients;
 
     @Before
     public void setUp() throws Exception {
         talkServer = createTalkServer();
-        clients = TestHelper.initializeTalkClients(talkServer, 20);
+        clients = TestHelper.initializeTalkClients(talkServer, 13);
     }
 
     @After
@@ -36,17 +38,28 @@ public class ITWorldWide extends IntegrationTest {
     @Test
     public void activateWorldwideOneClient() throws Exception {
         final XoClient client1 = clients.get("client1");
+        final ITalkServerDatabase serverDb = talkServer.getTalkServer().getDatabase();
+
         TestHelper.setEnvironmentToWorldwide(client1);
 
-        TalkEnvironment client1Env = talkServer.getTalkServer().getDatabase().findEnvironmentByClientId(
+        assertNotNull(serverDb.findEnvironmentByClientId(
                 TalkEnvironment.TYPE_WORLDWIDE,
                 client1.getSelfContact().getClientId()
-        );
-        assertNotNull(client1Env);
+        ));
 
-        assertEquals(1,talkServer.getTalkServer().getDatabase().findEnvironmentsForGroup(
-                client1.getCurrentWorldwideGroup().getGroupId()
-        ).size());
+        assertEquals(
+                1,
+                serverDb.findEnvironmentsForGroup(
+                        client1.getCurrentWorldwideGroup().getGroupId()
+                ).size()
+        );
+
+        assertEquals(
+                1,
+                serverDb.findGroupMembershipsById(
+                        client1.getCurrentWorldwideGroup().getGroupId()
+                ).size()
+        );
     }
 
     @Test
@@ -56,9 +69,21 @@ public class ITWorldWide extends IntegrationTest {
 
         // The first client should be together in one group with the other nine.
         final XoClient client1 = clients.get("client1");
-        assertEquals(13,talkServer.getTalkServer().getDatabase().findEnvironmentsForGroup(
-                client1.getCurrentWorldwideGroup().getGroupId()
-        ).size());
+        final ITalkServerDatabase serverDb = talkServer.getTalkServer().getDatabase();
+
+        assertEquals(
+                13,
+                serverDb.findEnvironmentsForGroup(
+                        client1.getCurrentWorldwideGroup().getGroupId()
+                ).size()
+        );
+
+        assertEquals(
+                13,
+                serverDb.findGroupMembershipsById(
+                        client1.getCurrentWorldwideGroup().getGroupId()
+                ).size()
+        );
 
         // 13th client should be in a new group
         /*activateWorldwideFor(new String[]{"client14"});

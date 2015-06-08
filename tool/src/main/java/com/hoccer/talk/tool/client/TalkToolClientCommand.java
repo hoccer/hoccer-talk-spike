@@ -8,11 +8,12 @@ import java.util.List;
 
 public class TalkToolClientCommand extends TalkToolCommand {
 
-    TalkToolContext mContext;
     @Parameter(description = "Run on all clients", names = "-a")
     boolean pAllClients;
     @Parameter(description = "Run on specified clients", names = "-c")
     List<String> pSpecificClients;
+
+    private final static int INTERVAL = 2; // Time between client runs in seconds
 
     private List<TalkToolClient> selectClients(TalkToolContext context) {
         if (pAllClients) {
@@ -30,6 +31,9 @@ public class TalkToolClientCommand extends TalkToolCommand {
         for (TalkToolClient client : clients) {
             System.out.println("client #" + client.getId());
             runOnClient(context, client);
+
+            // TODO: This sucks! Necessary because of concurrency issues in bouncycastle?
+            Thread.sleep(INTERVAL * 1000);
         }
     }
 
