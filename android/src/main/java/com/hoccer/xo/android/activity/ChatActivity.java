@@ -28,6 +28,8 @@ public class ChatActivity extends ComposableActivity {
     public static final String EXTRA_ENVIRONMENT_GROUP_HISTORY = "com.hoccer.xo.android.intent.extra.ENVIRONMENT_GROUP_HISTORY";
     public static final String EXTRA_CLIENT_HISTORY = "com.hoccer.xo.android.intent.extra.NEARBY_CLIENT_HISTORY";
 
+    public static final String SHARED_PREFERENCES = "chats";
+
     private ChatFragment mChatFragment;
 
     private boolean mIsKeyboardOpen = false;
