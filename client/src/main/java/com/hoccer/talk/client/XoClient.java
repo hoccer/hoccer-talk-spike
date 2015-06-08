@@ -2022,7 +2022,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                             mNearbyGroupId = null;
                         } else {
                             mServerRpc.releaseEnvironment(type);
-                            mWorldwideGroupId = null;
                         }
                     } catch (Throwable t) {
                         LOG.error("sendDestroyEnvironment: other error", t);
