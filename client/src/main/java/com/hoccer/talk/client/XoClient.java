@@ -118,8 +118,9 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     // Count connections attempts for back-off
     int mConnectBackoffPotency;
 
-    // temporary group for geolocation grouping
-    String mEnvironmentGroupId;
+    String mWorldwideGroupId;
+    String mNearbyGroupId;
+
     AtomicBoolean mEnvironmentUpdateCallPending = new AtomicBoolean(false);
 
     ObjectMapper mJsonMapper;
@@ -1390,7 +1391,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     TalkGroupMembership[] memberships = mServerRpc.getGroupMembers(groupContact.getGroupId(), never);
 
                     if (groupContact.isWorldwideGroup()) {
-                        mEnvironmentGroupId = groupContact.getGroupId();
+                        mWorldwideGroupId = groupContact.getGroupId();
                     }
 
                     for (TalkGroupMembership membership : memberships) {
@@ -1933,8 +1934,20 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     public void run() {
                         try {
                             environment.setClientId(mSelfContact.getClientId());
-                            environment.setGroupId(mEnvironmentGroupId);
-                            mEnvironmentGroupId = mServerRpc.updateEnvironment(environment);
+
+                            if (environment.isWorldwide()) {
+                                environment.setGroupId(mWorldwideGroupId);
+                            } else {
+                                environment.setGroupId(mNearbyGroupId);
+                            }
+
+                            String environmentGroupId = mServerRpc.updateEnvironment(environment);
+
+                            if (environment.isWorldwide()) {
+                                mWorldwideGroupId = environmentGroupId;
+                            } else {
+                                mNearbyGroupId = environmentGroupId;
+                            }
                         } catch (Throwable t) {
                             LOG.error("sendEnvironmentUpdate: other error", t);
                         }
@@ -1949,20 +1962,16 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         }
     }
 
-    public TalkClientContact getCurrentEnvironmentGroup() {
-        TalkClientContact currentEnvironmentGroup = null;
+    public TalkClientContact getCurrentNearbyGroup() {
+        TalkClientContact currentNearbyGroup = null;
         try {
-            if (mEnvironmentGroupId != null) {
-                currentEnvironmentGroup = mDatabase.findGroupContactByGroupId(mEnvironmentGroupId, false);
+            if (mNearbyGroupId != null) {
+                currentNearbyGroup = mDatabase.findGroupContactByGroupId(mNearbyGroupId, false);
             }
         } catch (SQLException e) {
             LOG.error("SQL Error while retrieving current environment group ", e);
         }
-        return currentEnvironmentGroup;
-    }
 
-    public TalkClientContact getCurrentNearbyGroup() {
-        final TalkClientContact currentNearbyGroup = getCurrentEnvironmentGroup();
         if (currentNearbyGroup == null) {
             return null;
         }
@@ -1978,7 +1987,15 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     public TalkClientContact getCurrentWorldwideGroup() {
-        final TalkClientContact currentWorldwideGroup = getCurrentEnvironmentGroup();
+        TalkClientContact currentWorldwideGroup = null;
+        try {
+            if (mWorldwideGroupId != null) {
+                currentWorldwideGroup = mDatabase.findGroupContactByGroupId(mWorldwideGroupId, false);
+            }
+        } catch (SQLException e) {
+            LOG.error("SQL Error while retrieving current environment group ", e);
+        }
+
         if (currentWorldwideGroup == null) {
             return null;
         }
@@ -1996,15 +2013,16 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
     public void sendDestroyEnvironment(final String type) {
         if (isReady()) {
-            mEnvironmentGroupId = null;
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         if (TalkEnvironment.TYPE_NEARBY.equals(type)) {
                             mServerRpc.destroyEnvironment(type);
+                            mNearbyGroupId = null;
                         } else {
                             mServerRpc.releaseEnvironment(type);
+                            mWorldwideGroupId = null;
                         }
                     } catch (Throwable t) {
                         LOG.error("sendDestroyEnvironment: other error", t);
@@ -2365,10 +2383,10 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     private void keepAcquaintance(TalkClientContact clientContact) throws SQLException, NoClientIdInPresenceException {
-        if (clientContact.isClient()  && clientContact.isInEnvironment() && (clientContact.getClientRelationship() == null
-                        || clientContact.getClientRelationship().isNone()
-                        || clientContact.getClientRelationship().isInvited()
-                        || clientContact.getClientRelationship().invitedMe())) {
+        if (clientContact.isClient() && clientContact.isInEnvironment() && (clientContact.getClientRelationship() == null
+                || clientContact.getClientRelationship().isNone()
+                || clientContact.getClientRelationship().isInvited()
+                || clientContact.getClientRelationship().invitedMe())) {
             if (clientContact.isNearby()) {
                 clientContact.getClientPresence().setAcquaintanceType(TalkEnvironment.TYPE_NEARBY);
             } else if (clientContact.isWorldwide()) {
@@ -3083,7 +3101,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     private void updateGroupKeptState(TalkGroupMembership oldMembership, TalkGroupMembership newMembership, TalkClientContact groupContact, TalkClientContact clientContact) throws SQLException {
-        if (groupContact.isEnvironmentGroup()){
+        if (groupContact.isEnvironmentGroup()) {
             return;
         }
 

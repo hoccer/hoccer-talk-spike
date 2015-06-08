@@ -265,7 +265,11 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
 
     @Nullable
     private TalkClientContact getCurrentEnvironmentGroup() {
-        return XoApplication.get().getXoClient().getCurrentEnvironmentGroup();
+        if (TalkEnvironment.TYPE_WORLDWIDE.equals(mEnvironmentType)) {
+            return XoApplication.get().getXoClient().getCurrentWorldwideGroup();
+        } else {
+            return XoApplication.get().getXoClient().getCurrentNearbyGroup();
+        }
     }
 
     @Override
