@@ -13,7 +13,7 @@ public class TalkToolClientCommand extends TalkToolCommand {
     @Parameter(description = "Run on specified clients", names = "-c")
     List<String> pSpecificClients;
 
-    private final static int INTERVAL = 2; // Time between client runs in seconds
+    private final static int INTERVAL = 1; // Time between client runs in seconds
 
     private List<TalkToolClient> selectClients(TalkToolContext context) {
         if (pAllClients) {
