@@ -2879,7 +2879,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                                             String nThSmallestGroupId = environmentsPerGroup.get(environmentsPerGroup.size() - 1 - abandonedGroups).getLeft();
                                             TalkGroupPresence nThSmallestGroup = mDatabase.findGroupPresenceById(nThSmallestGroupId);
                                             if (nThSmallestGroup == null) {
-                                                LOG.error("updateEnvironment: worldwide: secondSmallestGroup presence not found, id=" + nThSmallestGroup.getGroupId() + ",clientId=" + mConnection.getClientId() + ",groupId=" + myMembership.getGroupId());
+                                                LOG.error("updateEnvironment: worldwide: secondSmallestGroup presence not found, id=" + nThSmallestGroupId + ",clientId=" + mConnection.getClientId() + ",groupId=" + myMembership.getGroupId());
                                             } else {
                                                 joinGroupWithEnvironment(nThSmallestGroup, environment);
                                                 return nThSmallestGroup.getGroupId();
