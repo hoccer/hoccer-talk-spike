@@ -4,13 +4,10 @@ package com.hoccer.xo.android;
 import com.hoccer.talk.client.IXoClientConfiguration;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
-import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkEnvironment;
 import org.apache.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import static com.hoccer.talk.model.TalkEnvironment.TYPE_WORLDWIDE;
 
@@ -24,7 +21,7 @@ public class WorldwideController {
     private IXoStateListener mStateListener;
     private TalkEnvironment mEnvironment;
 
-    private boolean mShouldActivateWorldwide;
+    private boolean mShouldActivateWorldwideOnReconnect;
 
     public static WorldwideController get() {
         if (sInstance == null) {
@@ -38,7 +35,7 @@ public class WorldwideController {
             @Override
             public void onClientStateChange(XoClient client) {
                 if (client.isReady()) {
-                    if (mShouldActivateWorldwide) {
+                    if (mShouldActivateWorldwideOnReconnect) {
                         activateWorldwide();
                     }
                 }
@@ -51,7 +48,7 @@ public class WorldwideController {
     }
 
     public void activateWorldwide() {
-        mShouldActivateWorldwide = true;
+        mShouldActivateWorldwideOnReconnect = true;
         mEnvironment = createWorldwideEnvironment();
         sendEnvironmentUpdate();
     }
@@ -75,7 +72,7 @@ public class WorldwideController {
     }
 
     public void deactivateWorldWide() {
-        mShouldActivateWorldwide = false;
+        mShouldActivateWorldwideOnReconnect = false;
         XoApplication.get().getXoClient().sendDestroyEnvironment(TalkEnvironment.TYPE_WORLDWIDE);
         mEnvironment = null;
     }
