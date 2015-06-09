@@ -728,7 +728,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
             }
             if (key == null) {
                 // treat former senders with unfinished deliveries as contact
-                final List<TalkDelivery> deliveries = mDatabase.findDeliveriesForClientInState(clientId, TalkDelivery.STATE_DELIVERING);
+                final List<TalkDelivery> deliveries = mDatabase.findDeliveriesForClientInState(mConnection.getClientId(), TalkDelivery.STATE_DELIVERING);
                 for (TalkDelivery delivery : deliveries) {
                     if (clientId.equals(delivery.getSenderId())) {
                         key = mDatabase.findKey(clientId, keyId);
@@ -738,7 +738,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
             }
             if (key == null) {
                 final List<TalkDelivery> attachmentDeliveries =
-                        mDatabase.findDeliveriesForClientInDeliveryAndAttachmentStates(clientId,
+                        mDatabase.findDeliveriesForClientInDeliveryAndAttachmentStates(mConnection.getClientId(),
                                 TalkDelivery.IN_ATTACHMENT_DELIVERY_STATES, TalkDelivery.IN_ATTACHMENT_STATES);
                 for (TalkDelivery delivery : attachmentDeliveries) {
                     if (clientId.equals(delivery.getSenderId())) {
