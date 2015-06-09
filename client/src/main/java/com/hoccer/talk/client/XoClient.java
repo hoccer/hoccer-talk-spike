@@ -2380,19 +2380,39 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     private void keepAcquaintance(TalkClientContact clientContact) throws SQLException, NoClientIdInPresenceException {
-        if (clientContact.isClient() && clientContact.isInEnvironment() && (clientContact.getClientRelationship() == null
+        boolean wasWorldWide = wasInWorldwideGroup(clientContact);
+        if (clientContact.isClient() && (clientContact.isInEnvironment() || wasWorldWide) && (clientContact.getClientRelationship() == null
                 || clientContact.getClientRelationship().isNone()
                 || clientContact.getClientRelationship().isInvited()
                 || clientContact.getClientRelationship().invitedMe())) {
             if (clientContact.isNearby()) {
                 clientContact.getClientPresence().setAcquaintanceType(TalkEnvironment.TYPE_NEARBY);
-            } else if (clientContact.isWorldwide()) {
+            } else if (clientContact.isWorldwide() || wasWorldWide) {
                 clientContact.getClientPresence().setAcquaintanceType(TalkEnvironment.TYPE_WORLDWIDE);
             }
             clientContact.getClientPresence().setKept(true);
             mDatabase.savePresence(clientContact.getClientPresence());
             mDatabase.saveContact(clientContact);
         }
+    }
+
+    private boolean wasInWorldwideGroup(TalkClientContact clientContact) {
+        try {
+            List<TalkClientContact> groups = mDatabase.findAllGroupContacts();
+            for (TalkClientContact group : groups) {
+                if (group.getGroupPresence() != null && group.getGroupPresence().isTypeWorldwide()) {
+                    List<TalkClientContact> contactsInGroup = mDatabase.findContactsInGroup(group.getGroupId());
+                    for (TalkClientContact contactInGroup : contactsInGroup) {
+                        if (clientContact.getClientId().equals(contactInGroup.getClientId())) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            LOG.error("SQL error", e);
+        }
+        return false;
     }
 
     private void decryptMessage(TalkClientMessage clientMessage, TalkDelivery delivery, TalkMessage message) throws GeneralSecurityException, IOException, SQLException {
@@ -2828,6 +2848,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 clientContact.getClientPresence().setKept(true);
                 clientContact.getClientPresence().setAcquaintanceType(TalkPresence.TYPE_ACQUAINTANCE_NONE);
             }
+
             clientContact.updateRelationship(newRelationship);
             mDatabase.saveRelationship(clientContact.getClientRelationship());
             mDatabase.savePresence(clientContact.getClientPresence());
