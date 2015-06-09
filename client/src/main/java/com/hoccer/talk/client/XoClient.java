@@ -1937,8 +1937,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
                             if (environment.isWorldwide()) {
                                 environment.setGroupId(mWorldwideGroupId);
-                            } else {
-                                environment.setGroupId(mNearbyGroupId);
                             }
 
                             String environmentGroupId = mServerRpc.updateEnvironment(environment);
