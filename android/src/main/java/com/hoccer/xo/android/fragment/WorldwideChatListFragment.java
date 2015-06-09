@@ -4,9 +4,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.view.View;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.WorldwideController;
-import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.adapter.EnvironmentChatListAdapter;
 import com.hoccer.xo.android.view.Placeholder;
 
