@@ -100,7 +100,9 @@ public class TalkToolClient {
         final TalkEnvironment environment = new TalkEnvironment();
         environment.setTimestamp(new Date());
         environment.setType(TalkEnvironment.TYPE_WORLDWIDE);
-        environment.setTag(tag);
+        if (!tag.isEmpty()) {
+            environment.setTag(tag);
+        }
         mClient.sendEnvironmentUpdate(environment);
     }
 

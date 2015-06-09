@@ -13,7 +13,7 @@ public class TalkToolClientCommand extends TalkToolCommand {
     @Parameter(description = "Run on specified clients", names = "-c")
     List<String> pSpecificClients;
 
-    private final static int INTERVAL = 1; // Time between client runs in seconds
+    private final static double INTERVAL = 0.35; // Time between client runs in seconds
 
     private List<TalkToolClient> selectClients(TalkToolContext context) {
         if (pAllClients) {
@@ -33,7 +33,7 @@ public class TalkToolClientCommand extends TalkToolCommand {
             runOnClient(context, client);
 
             // TODO: This sucks! Necessary because of concurrency issues in bouncycastle?
-            Thread.sleep(INTERVAL * 1000);
+            Thread.sleep((int)Math.abs(INTERVAL * 1000.0));
         }
     }
 
