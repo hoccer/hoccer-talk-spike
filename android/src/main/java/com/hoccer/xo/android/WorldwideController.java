@@ -24,7 +24,6 @@ public class WorldwideController {
     private IXoStateListener mStateListener;
     private TalkEnvironment mEnvironment;
 
-    private List<WorldWideActivationListener> mWorldWideActivationListeners = new ArrayList<WorldWideActivationListener>();
     private boolean mShouldActivateWorldwide;
 
     public static WorldwideController get() {
@@ -57,12 +56,6 @@ public class WorldwideController {
         sendEnvironmentUpdate();
     }
 
-    private void notifyWorldwideActivated() {
-        for (WorldWideActivationListener listener : mWorldWideActivationListeners) {
-            listener.onWorldwideActivated();
-        }
-    }
-
     private TalkEnvironment createWorldwideEnvironment() {
         TalkEnvironment environment = new TalkEnvironment();
         environment.setType(TYPE_WORLDWIDE);
@@ -85,13 +78,6 @@ public class WorldwideController {
         mShouldActivateWorldwide = false;
         XoApplication.get().getXoClient().sendDestroyEnvironment(TalkEnvironment.TYPE_WORLDWIDE);
         mEnvironment = null;
-        notifyWorldwideDeactivated();
-    }
-
-    private void notifyWorldwideDeactivated() {
-        for (WorldWideActivationListener listener : mWorldWideActivationListeners) {
-            listener.onWorldwideDeactivated();
-        }
     }
 
     public void updateTimeToLive(long timeToLive) {
@@ -106,13 +92,5 @@ public class WorldwideController {
             mEnvironment.setNotificationPreference(notificationPreference);
             sendEnvironmentUpdate();
         }
-    }
-
-    public void registerWorldwideActivationListener(WorldWideActivationListener listener) {
-        mWorldWideActivationListeners.add(listener);
-    }
-
-    public void unregisterWorldwideActivationListener(WorldWideActivationListener listener) {
-        mWorldWideActivationListeners.remove(listener);
     }
 }
