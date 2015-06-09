@@ -2942,10 +2942,11 @@ public class TalkRpcHandler implements ITalkRpcServer {
            } else if (environment.isWorldwide()) {
                // join the n-th-smallest group in order to properly distribute the clients
                String nThSmallestGroupId = environmentsPerGroup.get(environmentsPerGroup.size()-1-abandonedGroups).getLeft();
+               //int nThSmallestGroupSize = environmentsPerGroup.get(environmentsPerGroup.size()-1-abandonedGroups).getRight();
                String kind = ""+abandonedGroups+"-smallestGroupId";
                LOG.debug("updateEnvironment: worldwide: joining " + kind + ", id=" + nThSmallestGroupId + ",clientId=" + mConnection.getClientId());
                TalkGroupPresence destinationGroup = mDatabase.findGroupPresenceById(nThSmallestGroupId);
-               if (destinationGroup.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
+               if (destinationGroup.getState().equals(TalkGroupPresence.STATE_EXISTS)/* && nThSmallestGroupSize < MAX_WORLD_WIDE_GROUP_SIZE*/) {
                    joinGroupWithEnvironment(destinationGroup, environment);
                    return destinationGroup.getGroupId();
                } else {
