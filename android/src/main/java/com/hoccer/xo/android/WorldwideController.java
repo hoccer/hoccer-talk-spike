@@ -25,6 +25,7 @@ public class WorldwideController {
     private TalkEnvironment mEnvironment;
 
     private List<WorldWideActivationListener> mWorldWideActivationListeners = new ArrayList<WorldWideActivationListener>();
+    private boolean mShouldActivateWorldwide;
 
     public static WorldwideController get() {
         if (sInstance == null) {
@@ -38,9 +39,8 @@ public class WorldwideController {
             @Override
             public void onClientStateChange(XoClient client) {
                 if (client.isReady()) {
-                    TalkClientContact worldwideGroup = client.getCurrentWorldwideGroup();
-                    if (worldwideGroup != null) {
-                        notifyWorldwideActivated();
+                    if (mShouldActivateWorldwide) {
+                        activateWorldwide();
                     }
                 }
             }
@@ -52,6 +52,7 @@ public class WorldwideController {
     }
 
     public void activateWorldwide() {
+        mShouldActivateWorldwide = true;
         mEnvironment = createWorldwideEnvironment();
         sendEnvironmentUpdate();
     }
@@ -81,6 +82,7 @@ public class WorldwideController {
     }
 
     public void deactivateWorldWide() {
+        mShouldActivateWorldwide = false;
         XoApplication.get().getXoClient().sendDestroyEnvironment(TalkEnvironment.TYPE_WORLDWIDE);
         mEnvironment = null;
         notifyWorldwideDeactivated();
