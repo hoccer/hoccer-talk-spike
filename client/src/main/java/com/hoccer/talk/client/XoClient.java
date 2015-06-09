@@ -2972,6 +2972,8 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 contact.setWorldwide(false);
                 mDatabase.saveContact(contact);
             }
+
+            mWorldwideGroupId = null;
         } catch (SQLException e) {
             LOG.error("Error while destroying worldwide group " + groupContact.getGroupId());
         }
