@@ -197,6 +197,13 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
 
     private void updateFromDatabase(final TalkClientContact group) {
         if (group == null || mDatabase == null) {
+            mXoActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mContacts.clear();
+                    notifyDataSetChanged();
+                }
+            });
             return;
         }
 
