@@ -4,7 +4,9 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.view.View;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.WorldwideController;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.adapter.EnvironmentChatListAdapter;
 import com.hoccer.xo.android.view.Placeholder;
 
@@ -63,13 +65,10 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
 
     @Override
     public void onPageSelected() {
+        WorldwideController.get().activateWorldwide();
+
         TalkClientContact group = XoApplication.get().getXoClient().getCurrentWorldwideGroup();
-        if (group == null) {
-            WorldwideController.get().activateWorldwide();
-        } else {
-            createAdapter();
-            mListAdapter.scheduleUpdate(group);
-        }
+        mListAdapter.scheduleUpdate(group);
     }
 
     @Override
