@@ -1937,8 +1937,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
                             if (environment.isWorldwide()) {
                                 environment.setGroupId(mWorldwideGroupId);
-                            } else {
-                                environment.setGroupId(mNearbyGroupId);
                             }
 
                             String environmentGroupId = mServerRpc.updateEnvironment(environment);
@@ -2022,7 +2020,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                             mNearbyGroupId = null;
                         } else {
                             mServerRpc.releaseEnvironment(type);
-                            mWorldwideGroupId = null;
                         }
                     } catch (Throwable t) {
                         LOG.error("sendDestroyEnvironment: other error", t);
@@ -2972,6 +2969,10 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             for (TalkClientContact contact : contacts) {
                 contact.setWorldwide(false);
                 mDatabase.saveContact(contact);
+            }
+
+            if (groupContact.getGroupId().equals(mWorldwideGroupId)) {
+                mWorldwideGroupId = null;
             }
         } catch (SQLException e) {
             LOG.error("Error while destroying worldwide group " + groupContact.getGroupId());

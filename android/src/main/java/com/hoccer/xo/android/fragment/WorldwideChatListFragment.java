@@ -65,13 +65,10 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
 
     @Override
     public void onPageSelected() {
+        WorldwideController.get().activateWorldwide();
+
         TalkClientContact group = XoApplication.get().getXoClient().getCurrentWorldwideGroup();
-        if (group == null) {
-            WorldwideController.get().activateWorldwide();
-        } else {
-            createAdapter();
-            mListAdapter.scheduleUpdate(group);
-        }
+        mListAdapter.scheduleUpdate(group);
     }
 
     @Override
