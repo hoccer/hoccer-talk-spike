@@ -201,7 +201,7 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
                 if (contact.isGroup()) {
                     return contact.isKeptGroup() || contact.isGroupJoined() && contact.isGroupExisting();
                 } else if (contact.isClient()) {
-                    return !contact.isSelf() && (contact.isWorldwide() || contact.isKept() || contact.isFriendOrBlocked());
+                    return !contact.isSelf() && ((contact.isWorldwide() && !contact.getGroupMembership().isSuspended()) || contact.isKept() || contact.isFriendOrBlocked());
                 }
                 return false;
             }
