@@ -1,5 +1,13 @@
 package com.hoccer.xo.android.fragment;
 
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.view.*;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.*;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
@@ -18,30 +26,8 @@ import com.hoccer.xo.android.activity.MediaBrowserActivity;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.UriUtils;
 import com.squareup.picasso.Picasso;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
-
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
-import android.view.ActionMode;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -143,7 +129,7 @@ public class SingleProfileFragment extends ProfileFragment
             menu.findItem(R.id.menu_profile_delete).setVisible(false);
         } else {
             TalkRelationship relationship = mContact.getClientRelationship();
-            if ((relationship == null || relationship.isInvited() || relationship.invitedMe() || relationship.isNone()) && mContact.isInEnvironment()) {
+            if ((relationship == null || !relationship.isFriend()) && mContact.isInEnvironment()) {
                 menu.findItem(R.id.menu_profile_edit).setVisible(false);
                 menu.findItem(R.id.menu_profile_delete).setVisible(false);
                 menu.findItem(R.id.menu_profile_block).setVisible(false);
@@ -153,17 +139,16 @@ public class SingleProfileFragment extends ProfileFragment
                 menu.findItem(R.id.menu_profile_delete).setVisible(true);
                 menu.findItem(R.id.menu_profile_block).setVisible(false);
                 menu.findItem(R.id.menu_profile_unblock).setVisible(false);
-            } else {
-                if (relationship.isBlocked()) {
-                    menu.findItem(R.id.menu_profile_block).setVisible(false);
-                    menu.findItem(R.id.menu_profile_unblock).setVisible(true);
-                    menu.findItem(R.id.menu_audio_attachment_list).setVisible(true);
-                } else {
-                    menu.findItem(R.id.menu_profile_block).setVisible(true);
-                    menu.findItem(R.id.menu_profile_unblock).setVisible(false);
-                    menu.findItem(R.id.menu_audio_attachment_list).setVisible(true);
-                }
             }
+
+            if (relationship != null && relationship.isBlocked()) {
+                menu.findItem(R.id.menu_profile_block).setVisible(false);
+                menu.findItem(R.id.menu_profile_unblock).setVisible(true);
+            } else {
+                menu.findItem(R.id.menu_profile_block).setVisible(true);
+                menu.findItem(R.id.menu_profile_unblock).setVisible(false);
+            }
+            menu.findItem(R.id.menu_audio_attachment_list).setVisible(true);
         }
     }
 
