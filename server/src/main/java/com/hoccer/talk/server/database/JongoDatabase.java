@@ -372,7 +372,7 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     public long countDeliveriesForClientInGroupInState(String receiverId, String groupId, String state) {
-        return mDeliveries .count("{receiverId:#, groupId:#, state:#}", receiverId, groupId, state);
+        return mDeliveries.count("{receiverId:#, groupId:#, state:#}", receiverId, groupId, state);
     }
 
     @Override
@@ -395,6 +395,14 @@ public class JongoDatabase implements ITalkServerDatabase {
                 .iterator();
 
         return IteratorUtils.toList(it);
+    }
+    @Override
+    public long countDeliveriesFromClientInState(String senderId, String state) {
+        return mDeliveries.count("{senderId:#,state:#}", senderId, state);
+    }
+    @Override
+    public long countDeliveriesBetweenClientsInState(String senderId, String receiverId, String state) {
+        return mDeliveries.count("{senderId:#, receiverId:#, state:#}", senderId, receiverId, state);
     }
 
     @Override
@@ -420,6 +428,18 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public long countDeliveriesFromClientInDeliveryAndAttachmentStates(String senderId, String[] deliveryStates, String[] attachmentStates) {
+        return mDeliveries.count("{senderId:#, state: { $in: # }, attachmentState: {$in: #} }", senderId, Arrays.asList(deliveryStates), Arrays.asList(attachmentStates));
+    }
+
+    @Override
+    public long countDeliveriesBetweenClientsInDeliveryAndAttachmentStates(String senderId, String receiverId, String[] deliveryStates, String[] attachmentStates) {
+        return mDeliveries.count("{senderId:#, receiverId:#, state: { $in: # }, attachmentState: {$in: #} }",
+                senderId, receiverId, Arrays.asList(deliveryStates), Arrays.asList(attachmentStates));
+    }
+
+
+        @Override
     @NotNull
     public List<TalkDelivery> findDeliveriesForMessage(String messageId) {
         Iterator<TalkDelivery> it = mDeliveries

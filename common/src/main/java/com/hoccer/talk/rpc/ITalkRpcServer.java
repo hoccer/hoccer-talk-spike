@@ -778,6 +778,10 @@ public interface ITalkRpcServer {
     // returns true for each client that is an active or invited group member
     // throws exception if you are not an active or invited group member
     Boolean[] areMembersOfGroup(String groupId, String[] clientIds);
+
+    // return total number of undelivered and unfinished deliveries from a particular client
+    // used by the client to decide when a contact can be finally deleted
+    long unfinishedDeliveriesFrom(String senderId);
 }
 
 /**

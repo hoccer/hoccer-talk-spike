@@ -3190,4 +3190,18 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
         return result.toArray(new Boolean[result.size()]);
     }
+
+    @Override
+    public long unfinishedDeliveriesFrom(String senderId) {
+        requireIdentification(true);
+        logCall("unfinishedDeliveriesFrom(senderId: '" + senderId + "'");
+        final String myClientId = mConnection.getClientId();
+
+        long undelivered = mDatabase.countDeliveriesBetweenClientsInState(senderId, myClientId, TalkDelivery.STATE_DELIVERING);
+        long unfinished = mDatabase.countDeliveriesBetweenClientsInDeliveryAndAttachmentStates(senderId, myClientId, TalkDelivery.IN_ATTACHMENT_DELIVERY_STATES, TalkDelivery.IN_ATTACHMENT_STATES);
+        long total = undelivered + unfinished;
+        LOG.debug("unfinishedDeliveriesFrom:"+senderId+" -> "+myClientId+", undelivered="+undelivered+", unfinished="+unfinished+", returning total="+total);
+        return total;
+    }
+
 }
