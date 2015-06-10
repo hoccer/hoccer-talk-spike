@@ -2380,7 +2380,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     private void keepAcquaintance(TalkClientContact clientContact) throws SQLException, NoClientIdInPresenceException {
-        boolean wasWorldWide = wasInWorldwideGroup(clientContact);
+        boolean wasWorldWide = mDatabase.isClientContactInGroupOfType(TalkGroupPresence.GROUP_TYPE_WORLDWIDE, clientContact.getClientId());
         if (clientContact.isClient() && (clientContact.isInEnvironment() || wasWorldWide) && (clientContact.getClientRelationship() == null
                 || clientContact.getClientRelationship().isNone()
                 || clientContact.getClientRelationship().isInvited()
@@ -2394,25 +2394,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             mDatabase.savePresence(clientContact.getClientPresence());
             mDatabase.saveContact(clientContact);
         }
-    }
-
-    private boolean wasInWorldwideGroup(TalkClientContact clientContact) {
-        try {
-            List<TalkClientContact> groups = mDatabase.findAllGroupContacts();
-            for (TalkClientContact group : groups) {
-                if (group.getGroupPresence() != null && group.getGroupPresence().isTypeWorldwide()) {
-                    List<TalkClientContact> contactsInGroup = mDatabase.findContactsInGroup(group.getGroupId());
-                    for (TalkClientContact contactInGroup : contactsInGroup) {
-                        if (clientContact.getClientId().equals(contactInGroup.getClientId())) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            LOG.error("SQL error", e);
-        }
-        return false;
     }
 
     private void decryptMessage(TalkClientMessage clientMessage, TalkDelivery delivery, TalkMessage message) throws GeneralSecurityException, IOException, SQLException {
