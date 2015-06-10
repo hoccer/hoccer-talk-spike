@@ -67,10 +67,14 @@ public interface ITalkServerDatabase {
     public List<TalkDelivery> findDeliveriesFromClient(String senderId);
 
     public List<TalkDelivery> findDeliveriesFromClientInState(String senderId, String state);
+    public long countDeliveriesFromClientInState(String senderId, String state);
+    public long countDeliveriesBetweenClientsInState(String senderId, String receiverId, String state);
 
     public List<TalkDelivery> findDeliveriesFromClientInStates(String senderId, String[] states);
 
     public List<TalkDelivery> findDeliveriesFromClientInDeliveryAndAttachmentStates(String senderId, String[] deliveryStates, String[] attachmentStates);
+    public long countDeliveriesFromClientInDeliveryAndAttachmentStates(String senderId, String[] deliveryStates, String[] attachmentStates);
+    public long countDeliveriesBetweenClientsInDeliveryAndAttachmentStates(String senderId, String receiverId, String[] deliveryStates, String[] attachmentStates);
 
     public List<TalkDelivery> findDeliveriesForMessage(String messageId);
 

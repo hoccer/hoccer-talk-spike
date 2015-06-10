@@ -1193,8 +1193,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     private void doConnect() throws Exception {
-        mConnection.disconnect();
-
         LOG.debug("doConnect() on connection #" + mConnection.getConnectionId());
         URI uri = new URI(mClientConfiguration.getServerUri());
         String protocol = mClientConfiguration.getUseBsonProtocol() ? mClientConfiguration.getBsonProtocolString() : mClientConfiguration.getJsonProtocolString();
@@ -1213,7 +1211,11 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     switchState(State.LOGIN, "login after registration");
                 } catch (Exception e) {
                     LOG.error("Exception while registering", e);
-                    switchState(State.CONNECTING, "reconnect after registration failed");
+                    if (mConnection.isConnected()){
+                        scheduleRegistration();
+                    } else {
+                        switchState(State.CONNECTING, "reconnect after registration failed");
+                    }
                 }
             }
         }, 0, TimeUnit.SECONDS);
@@ -1275,7 +1277,11 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     switchState(State.SYNCING, "sync after login");
                 } catch (Exception e) {
                     LOG.error("Exception while logging in", e);
-                    switchState(State.CONNECTING, "reconnect after login failed");
+                    if (mConnection.isConnected()){
+                        scheduleLogin();
+                    } else {
+                        switchState(State.CONNECTING, "reconnect after login failed");
+                    }
                 }
             }
         }, 0, TimeUnit.SECONDS);
@@ -1327,7 +1333,11 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     switchState(State.READY, "ready after sync");
                 } catch (Exception e) {
                     LOG.error("Exception while syncing", e);
-                    switchState(State.CONNECTING, "reconnect after sync failed");
+                    if (mConnection.isConnected()){
+                        scheduleSync();
+                    } else {
+                        switchState(State.CONNECTING, "reconnect after sync failed");
+                    }
                 }
             }
         }, 0, TimeUnit.SECONDS);
