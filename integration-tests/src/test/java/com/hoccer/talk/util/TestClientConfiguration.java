@@ -1,6 +1,7 @@
 package com.hoccer.talk.util;
 
 import com.hoccer.talk.client.XoDefaultClientConfiguration;
+import com.hoccer.talk.model.TalkGroupMembership;
 
 public class TestClientConfiguration extends XoDefaultClientConfiguration {
     private TestTalkServer mServer;
@@ -21,7 +22,7 @@ public class TestClientConfiguration extends XoDefaultClientConfiguration {
 
     @Override
     public String getNotificationPreferenceForWorldwide() {
-        return null;
+        return TalkGroupMembership.NOTIFICATIONS_DISABLED;
     }
 
 }
