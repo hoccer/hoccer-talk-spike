@@ -444,6 +444,7 @@
     <string name="nearby">in der Nähe</string>
     <string name="worldwide">weltweit</string>
     <string name="worldwide_mode">weltweit modus</string>
+    <string name="leave_after">Verlassen nach..</string>
     <string name="group_notifications">Gruppen Benachrichtigungen</string>
 
     <plurals name="contact_count">
