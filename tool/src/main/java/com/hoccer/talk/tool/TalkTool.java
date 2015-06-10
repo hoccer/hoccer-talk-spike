@@ -13,10 +13,10 @@ public class TalkTool extends CommandLineApplication<TalkToolContext> {
 
     static String[] mRawArgs;
 
-    private final String DEFAULT_FILES_DIR = "/files";
-    private final String UPLOAD_DIR = "/upload";
-    private final String DOWNLOAD_DIR = "/download";
-    private final String TALK_TOOL_SERVER_URI = "wss://talkserver.talk.hoccer.de:8443/";
+    private static final String DEFAULT_FILES_DIR = "/files";
+    private static final String UPLOAD_DIR = "/upload";
+    private static final String DOWNLOAD_DIR = "/download";
+    private static final String TALK_TOOL_SERVER_URI = "wss://talkserver.talk.hoccer.de:8443/";
 
     TalkToolContext mContext;
 
