@@ -7,8 +7,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
-import com.hoccer.xo.android.fragment.SingleProfileCreationFragment;
-import com.hoccer.xo.android.fragment.SingleProfileFragment;
+import com.hoccer.xo.android.fragment.profile.SingleProfileCreationFragment;
+import com.hoccer.xo.android.fragment.profile.SingleProfileFragment;
 import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 

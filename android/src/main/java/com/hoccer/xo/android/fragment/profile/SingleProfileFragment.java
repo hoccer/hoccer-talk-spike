@@ -1,4 +1,4 @@
-package com.hoccer.xo.android.fragment;
+package com.hoccer.xo.android.fragment.profile;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -116,10 +116,17 @@ public class SingleProfileFragment extends ProfileFragment
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater);
-
         menuInflater.inflate(R.menu.fragment_single_profile, menu);
+        updateMenuItems(menu);
+    }
 
+    private void updateMenuItems(Menu menu) {
         boolean isSelf = mContact.isSelf();
+
+        // self -> edit
+        // friend -> delete, block/unblock
+        // kept -> delete, block/unblock
+        // environment -> block/unblock
 
         menu.findItem(R.id.menu_my_profile).setVisible(!isSelf);
         if (mContact.isSelf()) {
