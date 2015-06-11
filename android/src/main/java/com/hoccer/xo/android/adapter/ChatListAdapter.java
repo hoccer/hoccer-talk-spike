@@ -253,7 +253,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
                     }
                 });
             } else {
-                // message received from worldwide contact which is not in worldwide mode anymore, so update contacts to list the acquaintance
+                // message received from worldwide contact which is not in worldwide anymore, so update contacts to list the acquaintance
                 loadChatItems();
             }
         } catch (SQLException e) {
