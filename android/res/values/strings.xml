@@ -461,8 +461,8 @@
     <string name="group_notifications">Group notifications</string>
     <string name="mute_contact">mute</string>
     <string name="unmute_contact">unmute</string>
-    <string name="toast_mute_chat">mute</string>
-    <string name="toast_unmute_chat">unmute</string>
+    <string name="toast_mute_chat">muted</string>
+    <string name="toast_unmute_chat">unmuted</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>
