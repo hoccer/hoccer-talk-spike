@@ -182,10 +182,27 @@ public class ChatFragment extends XoChatListFragment
         }
     }
 
+    private boolean isNotificationsDisabledForContact() {
+        if(mContact.isGroup()) {
+            if(mContact.getGroupMembership() != null && mContact.getGroupMembership().isNotificationsDisabled()) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if(mContact.getClientRelationship() != null && mContact.getClientRelationship().isNotificationsDisabled()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         MenuItem mMuteItem = menu.findItem(R.id.menu_mute_contact);
-        if(mContact.getClientRelationship().isNotificationsDisabled()) {
+        int drawableIconId;
+        if(isNotificationsDisabledForContact()) {
             mMuteItem.setIcon(R.drawable.ic_action_notifications_on);
         } else {
             mMuteItem.setIcon(R.drawable.ic_action_notifications_off);
@@ -312,7 +329,11 @@ public class ChatFragment extends XoChatListFragment
     public void onGroupPresenceChanged(TalkClientContact contact) {}
 
     @Override
-    public void onGroupMembershipChanged(TalkClientContact contact) {}
+    public void onGroupMembershipChanged(TalkClientContact contact) {
+        if(contact.equals(mContact)) {
+            getActivity().invalidateOptionsMenu();
+        }
+    }
 
     public void showAudioAttachmentList() {
         Intent intent = new Intent(getActivity(), MediaBrowserActivity.class);
@@ -326,7 +347,7 @@ public class ChatFragment extends XoChatListFragment
 
     private void onMuteItemClick() {
         String notificationPreference;
-        if(mContact.getClientRelationship().isNotificationsDisabled()) {
+        if(isNotificationsDisabledForContact()) {
             notificationPreference = TalkRelationship.NOTIFICATIONS_ENABLED;
         } else {
             notificationPreference = TalkRelationship.NOTIFICATIONS_DISABLED;
