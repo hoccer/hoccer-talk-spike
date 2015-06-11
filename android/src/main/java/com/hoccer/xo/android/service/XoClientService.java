@@ -444,6 +444,9 @@ public class XoClientService extends Service {
                 relevantContactsMap.put(entry.getKey(), entry.getValue());
             }
         }
+        if(relevantContactsMap.isEmpty()) {
+            return;
+        }
 
         // build the notification
         Notification.Builder builder = new Notification.Builder(this);
