@@ -439,7 +439,7 @@ public class XoClientService extends Service {
         int unseenMessagesCount = 0;
         Map<Integer, ContactUnseenMessageHolder> relevantContactsMap = new HashMap<Integer, ContactUnseenMessageHolder>();
         for (Map.Entry<Integer, ContactUnseenMessageHolder> entry : contactsMap.entrySet()) {
-            if(!entry.getValue().getContact().getClientRelationship().isNotificationsDisabled()) {
+            if(!entry.getValue().getContact().isNotificationsDisabled()) {
                 unseenMessagesCount += entry.getValue().getUnseenMessages().size();
                 relevantContactsMap.put(entry.getKey(), entry.getValue());
             }

@@ -504,6 +504,14 @@ public class TalkClientContact implements Serializable {
         }
     }
 
+    public boolean isNotificationsDisabled() {
+        if(isGroup()) {
+            return getGroupMembership() != null && getGroupMembership().isNotificationsDisabled();
+        } else {
+            return getClientRelationship() != null && getClientRelationship().isNotificationsDisabled();
+        }
+    }
+
     @Override
     public boolean equals(Object obj) {
         return obj != null && obj instanceof TalkClientContact && clientContactId == ((TalkClientContact) obj).clientContactId;

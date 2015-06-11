@@ -8,6 +8,8 @@ import android.view.*;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -52,8 +54,6 @@ public class ChatFragment extends XoChatListFragment
     private ChatAdapter mAdapter;
 
     private CompositionFragment mCompositionFragment;
-
-    private MenuItem mMuteItem;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -182,30 +182,13 @@ public class ChatFragment extends XoChatListFragment
         }
     }
 
-    private boolean isNotificationsDisabledForContact() {
-        if(mContact.isGroup()) {
-            if(mContact.getGroupMembership() != null && mContact.getGroupMembership().isNotificationsDisabled()) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            if(mContact.getClientRelationship() != null && mContact.getClientRelationship().isNotificationsDisabled()) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }
-
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         MenuItem mMuteItem = menu.findItem(R.id.menu_mute_contact);
-        int drawableIconId;
-        if(isNotificationsDisabledForContact()) {
-            mMuteItem.setIcon(R.drawable.ic_action_notifications_on);
+        if(mContact.isNotificationsDisabled()) {
+            mMuteItem.setIcon(R.drawable.ic_action_notifications_disabled);
         } else {
-            mMuteItem.setIcon(R.drawable.ic_action_notifications_off);
+            mMuteItem.setIcon(R.drawable.ic_action_notifications_enabled);
         }
         super.onPrepareOptionsMenu(menu);
     }
@@ -223,8 +206,8 @@ public class ChatFragment extends XoChatListFragment
                 getActivity().getActionBar().setTitle(getActivity().getResources().getString(R.string.all_worldwide));
             } else {
                 getActivity().getActionBar().setTitle(mContact.getNickname());
-                mMuteItem = menu.findItem(R.id.menu_mute_contact);
-                mMuteItem.setVisible(true);
+                MenuItem muteItem = menu.findItem(R.id.menu_mute_contact);
+                muteItem.setVisible(true);
             }
 
             MenuItem clientItem = menu.findItem(R.id.menu_profile_single);
@@ -347,16 +330,20 @@ public class ChatFragment extends XoChatListFragment
 
     private void onMuteItemClick() {
         String notificationPreference;
-        if(isNotificationsDisabledForContact()) {
+        int toastText;
+        if(mContact.isNotificationsDisabled()) {
             notificationPreference = TalkRelationship.NOTIFICATIONS_ENABLED;
+            toastText = R.string.toast_unmute_chat;
         } else {
             notificationPreference = TalkRelationship.NOTIFICATIONS_DISABLED;
+            toastText = R.string.toast_mute_chat;
         }
         if(mContact.isGroup()) {
             getXoActivity().getXoClient().getServerRpc().setGroupNotifications(mContact.getGroupId(), notificationPreference);
         } else {
             getXoActivity().getXoClient().getServerRpc().setClientNotifications(mContact.getClientId(), notificationPreference);
         }
+        Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
     }
 
 }
