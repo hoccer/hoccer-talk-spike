@@ -279,4 +279,9 @@ public class TalkGroupMembership {
         this.setKeySupplier(null);
         this.setNotificationPreference(null);
     }
+
+    @JsonIgnore
+    public boolean isNotificationsDisabled() {
+        return NOTIFICATIONS_DISABLED.equals(notificationPreference);
+    }
 }

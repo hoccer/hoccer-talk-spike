@@ -97,6 +97,12 @@ public class TalkRelationship {
         return STATE_INVITED.equals(state);
     }
 
+
+    @JsonIgnore
+    public boolean isNotificationsDisabled() {
+        return NOTIFICATIONS_DISABLED.equals(notificationPreference);
+    }
+
     @JsonIgnore
     public boolean invitedMe() {
         return STATE_INVITED_ME.equals(state);
