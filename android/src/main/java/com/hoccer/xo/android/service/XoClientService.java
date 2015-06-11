@@ -437,8 +437,12 @@ public class XoClientService extends Service {
     private void createUnseenMessageNotification(Map<Integer, ContactUnseenMessageHolder> contactsMap, boolean doAlarm) {
         // sum up all unseen messages
         int unseenMessagesCount = 0;
-        for (ContactUnseenMessageHolder holder : contactsMap.values()) {
-            unseenMessagesCount += holder.getUnseenMessages().size();
+        Map<Integer, ContactUnseenMessageHolder> relevantContactsMap = new HashMap<Integer, ContactUnseenMessageHolder>();
+        for (Map.Entry<Integer, ContactUnseenMessageHolder> entry : contactsMap.entrySet()) {
+            if(!entry.getValue().getContact().getClientRelationship().isNotificationsDisabled()) {
+                unseenMessagesCount += entry.getValue().getUnseenMessages().size();
+                relevantContactsMap.put(entry.getKey(), entry.getValue());
+            }
         }
 
         // build the notification
@@ -464,9 +468,9 @@ public class XoClientService extends Service {
         }
 
         // fill in content
-        if (contactsMap.size() == 1) {
+        if (relevantContactsMap.size() == 1) {
             // create intent to start the messaging activity for the right contact
-            ContactUnseenMessageHolder holder = contactsMap.values().iterator().next();
+            ContactUnseenMessageHolder holder = relevantContactsMap.values().iterator().next();
             TalkClientContact contact = holder.getContact();
 
             Intent intent = new Intent(this, ChatsActivity.class);
@@ -496,7 +500,7 @@ public class XoClientService extends Service {
 
             // concatenate contact names
             StringBuilder sb = new StringBuilder();
-            for (ContactUnseenMessageHolder holder : contactsMap.values()) {
+            for (ContactUnseenMessageHolder holder : relevantContactsMap.values()) {
                 sb.append(getContactName(holder.getContact())).append(CONTACT_DELIMETER);
             }
 
@@ -518,7 +522,7 @@ public class XoClientService extends Service {
 
         // log all unseen messages found
         StringBuilder logMessage = new StringBuilder("Notifying about unseen messages: ");
-        for (ContactUnseenMessageHolder holder : contactsMap.values()) {
+        for (ContactUnseenMessageHolder holder : relevantContactsMap.values()) {
             logMessage.append(getContactName(holder.getContact())).append("(").append(holder.getUnseenMessages().size()).append(") ");
         }
         LOG.debug(logMessage);
