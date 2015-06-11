@@ -445,8 +445,10 @@
     <string name="worldwide">weltweit</string>
     <string name="worldwide_mode">weltweit modus</string>
     <string name="group_notifications">Gruppen Benachrichtigungen</string>
-    <string name="mute_contact">Kontakt stumm schalten</string>
-    <string name="unmute_contact">Kontakt laut schalten</string>
+    <string name="mute_contact">stumm schalten</string>
+    <string name="unmute_contact">laut schalten</string>
+    <string name="toast_mute_chat">stumm schalten</string>
+    <string name="toast_unmute_chat">laut schalten</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Kontakt</item>

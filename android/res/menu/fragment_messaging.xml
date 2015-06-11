@@ -11,7 +11,7 @@
     <item
             android:id="@+id/menu_mute_contact"
             android:title="@string/mute_contact"
-            android:icon="@drawable/ic_action_notifications_off"
+            android:icon="@drawable/ic_action_notifications_disabled"
             android:showAsAction="always"
             android:visible="false"
             android:orderInCategory="210"/>
