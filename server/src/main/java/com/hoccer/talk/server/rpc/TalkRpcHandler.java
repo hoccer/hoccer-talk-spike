@@ -728,7 +728,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
             }
             if (key == null) {
                 // treat former senders with unfinished deliveries as contact
-                final List<TalkDelivery> deliveries = mDatabase.findDeliveriesForClientInState(clientId, TalkDelivery.STATE_DELIVERING);
+                final List<TalkDelivery> deliveries = mDatabase.findDeliveriesForClientInState(mConnection.getClientId(), TalkDelivery.STATE_DELIVERING);
                 for (TalkDelivery delivery : deliveries) {
                     if (clientId.equals(delivery.getSenderId())) {
                         key = mDatabase.findKey(clientId, keyId);
@@ -738,7 +738,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
             }
             if (key == null) {
                 final List<TalkDelivery> attachmentDeliveries =
-                        mDatabase.findDeliveriesForClientInDeliveryAndAttachmentStates(clientId,
+                        mDatabase.findDeliveriesForClientInDeliveryAndAttachmentStates(mConnection.getClientId(),
                                 TalkDelivery.IN_ATTACHMENT_DELIVERY_STATES, TalkDelivery.IN_ATTACHMENT_STATES);
                 for (TalkDelivery delivery : attachmentDeliveries) {
                     if (clientId.equals(delivery.getSenderId())) {
@@ -2712,43 +2712,19 @@ public class TalkRpcHandler implements ITalkRpcServer {
         environment.setClientId(mConnection.getClientId());
         environment.setTimeReleased(null);
 
-        List<TalkEnvironment> matching_found = mDatabase.findEnvironmentsMatching(environment);
-        List<TalkEnvironment> matching = new ArrayList<TalkEnvironment>();
+        List<TalkEnvironment> matching = mDatabase.findEnvironmentsMatching(environment);
 
         int minNumberOfGroups = 0;
         int maxNumberOfGroups = 0;
         int abandonedGroups = 0;
 
         if (!environment.isNearby()) {
-            matching = matching_found;
 
-            /*
-            // make an worldwide expiry run first
-            // TODO: should perform other client expiry elsewhere periodically for performance reasons
-            for (TalkEnvironment te : matching_found) {
-                if (!te.getClientId().equals(mConnection.getClientId())) {
-                    // only expire other client's environments
-                    if (te.hasExpired()) {
-                        LOG.info("updateEnvironment: worldwide: expired environment for client "+te.getClientId());
-                        // but before we can destroy, we need to check if there are undelivered messages
-                        long undeliveredCount = deliveryCountForEnvironment(te);
-                        if (undeliveredCount == 0) {
-                            destroyEnvironment(te);
-                        } else {
-                            LOG.info("updateEnvironment: worldwide: can't remove expired worldwide environment for client="+ te.getClientId() + " from groupId=" + te.getGroupId()+", there are "+ undeliveredCount+" deliveries to be delivered");
-                            //tryEnsureGroupMembershipForEnvironment(te);
-                            suspendGroupMember(mServer, te.getGroupId(),te.getClientId());
-                            matching.add(te);
-                        }
-                    } else {
-                        matching.add(te);
-                    }
-                } else {
-                    matching.add(te);
-                }
-            }
-            */
             minNumberOfGroups = matching.size() / MAX_WORLD_WIDE_GROUP_SIZE + 1;
+
+            // TODO: it seems to me that in case MIN_WORLD_WIDE_GROUP_SIZE is 8 and we have a matching.size of 8 we would get 2 as answer, but in fact want it to be 1
+            // maybe something like (int)(((double)matching.size() + 0.5) / MIN_WORLD_WIDE_GROUP_SIZE)
+            // ... enter `plot Quotient[(x-0.5),8] + 1` at wolfram alpha to see what i mean
             maxNumberOfGroups = matching.size() / MIN_WORLD_WIDE_GROUP_SIZE + 1;
 
             // The Group distribution algorithm works as follows:
@@ -2773,8 +2749,6 @@ public class TalkRpcHandler implements ITalkRpcServer {
             //       until the environment expires. However, if the number of environments increases, these
             //       groups will be repopulated before new groups will be created.
             //   Yeah!
-        } else {
-            matching = matching_found;
         }
 
         // determine how many environments in the matching list belong to how many different groups
@@ -2787,40 +2761,42 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
         TalkEnvironment myEnvironment = mDatabase.findEnvironmentByClientId(environment.getType(), mConnection.getClientId());
 
-        // TODO: remove for production
-        // debug output code
-        if (environment.isWorldwide()) {
-            int i = 0;
-            for (Pair<String, Integer> epg : environmentsPerGroup) {
-                LOG.debug("updateEnvironment: " + epg.getRight() + " members in group " + epg.getLeft() + ",(" + i + "/" + environmentsPerGroup.size() + "),clientId=" + mConnection.getClientId() + ",my current groupId=" + environment.getGroupId());
-                ++i;
-            }
-            int ii = 0;
-
-            for (Pair<String, Integer> epg : environmentsPerGroup) {
-                LOG.debug("updateEnvironment(member listing): " + epg.getRight() + " members in group " + epg.getLeft() + ",(" + ii + "/" + environmentsPerGroup.size() + "),clientId=" + mConnection.getClientId() + ",my current groupId=" + environment.getGroupId());
-
-                List<TalkGroupMembership> members = mDatabase.findGroupMembershipsById(epg.getLeft());
-                int g = 0;
-                for (TalkGroupMembership member : members) {
-                    if (member.isMember() || member.isSuspended()) {
-                        TalkPresence presence = mDatabase.findPresenceForClient(member.getClientId());
-                        TalkEnvironment hisEnvironment = mDatabase.findEnvironmentByClientId(environment.getType(), member.getClientId());
-                        if (presence != null && hisEnvironment != null) {
-                            LOG.debug("updateEnvironment: member " + g + "/" + epg.getRight() + " members in group " + epg.getLeft() +
-                                    ", nick '" + presence.getClientName() + "', membership '" + member.getState() + "'.status '" + presence.getConnectionStatus() +
-                                    ", hasExpired=" + environment.hasExpired() + ", released:" + environment.getTimeReleased() + ", ttl=" + environment.getTimeToLive() + ", undelivered=" + deliveryCountForEnvironment(environment));
-                        } else {
-                            LOG.error("updateEnvironment: missing presence or environment for member " + g + "/" + epg.getRight() +
-                                    " members in group " + epg.getLeft() + ", clientId=" + member.getClientId() + ", presence:" + presence + ", environment:" + environment);
-                        }
-                        ++g;
-                    }
+        // TODO: set to trace for production
+        if (LOG.isDebugEnabled()) {
+            // begin debug output code
+            if (environment.isWorldwide()) {
+                int i = 0;
+                for (Pair<String, Integer> epg : environmentsPerGroup) {
+                    LOG.debug("updateEnvironment: " + epg.getRight() + " members in group " + epg.getLeft() + ",(" + i + "/" + environmentsPerGroup.size() + "),clientId=" + mConnection.getClientId() + ",my current groupId=" + environment.getGroupId());
+                    ++i;
                 }
-                ++ii;
+                int ii = 0;
+
+                for (Pair<String, Integer> epg : environmentsPerGroup) {
+                    LOG.debug("updateEnvironment(member listing): " + epg.getRight() + " members in group " + epg.getLeft() + ",(" + ii + "/" + environmentsPerGroup.size() + "),clientId=" + mConnection.getClientId() + ",my current groupId=" + environment.getGroupId());
+
+                    List<TalkGroupMembership> members = mDatabase.findGroupMembershipsById(epg.getLeft());
+                    int g = 0;
+                    for (TalkGroupMembership member : members) {
+                        if (member.isMember() || member.isSuspended()) {
+                            TalkPresence presence = mDatabase.findPresenceForClient(member.getClientId());
+                            TalkEnvironment hisEnvironment = mDatabase.findEnvironmentByClientId(environment.getType(), member.getClientId());
+                            if (presence != null && hisEnvironment != null) {
+                                LOG.debug("updateEnvironment: member " + g + "/" + epg.getRight() + " members in group " + epg.getLeft() +
+                                        ", nick '" + presence.getClientName() + "', membership '" + member.getState() + "'.status '" + presence.getConnectionStatus() +
+                                        ", hasExpired=" + environment.hasExpired() + ", released:" + environment.getTimeReleased() + ", ttl=" + environment.getTimeToLive() + ", undelivered=" + deliveryCountForEnvironment(environment));
+                            } else {
+                                LOG.error("updateEnvironment: missing presence or environment for member " + g + "/" + epg.getRight() +
+                                        " members in group " + epg.getLeft() + ", clientId=" + member.getClientId() + ", presence:" + presence + ", environment:" + environment);
+                            }
+                            ++g;
+                        }
+                    }
+                    ++ii;
+                }
             }
+            // end debug output code
         }
-        // end debug output code
 
         long undeliveredCount = deliveryCountForEnvironment(environment);
 
@@ -2874,7 +2850,6 @@ public class TalkRpcHandler implements ITalkRpcServer {
                                         // but before we can move, we need to check if there are undelivered messages
 
                                         if (undeliveredCount == 0) {
-
                                             destroyEnvironment(mServer, myEnvironment);
                                             String nThSmallestGroupId = environmentsPerGroup.get(environmentsPerGroup.size() - 1 - abandonedGroups).getLeft();
                                             TalkGroupPresence nThSmallestGroup = mDatabase.findGroupPresenceById(nThSmallestGroupId);
@@ -2940,17 +2915,21 @@ public class TalkRpcHandler implements ITalkRpcServer {
                    LOG.warn("the (largest) nearby group we were supposed to join is gone or does not exist, largestGroup="+largestGroup);
                }
            } else if (environment.isWorldwide()) {
-               // join the n-th-smallest group in order to properly distribute the clients
-               String nThSmallestGroupId = environmentsPerGroup.get(environmentsPerGroup.size()-1-abandonedGroups).getLeft();
-               //int nThSmallestGroupSize = environmentsPerGroup.get(environmentsPerGroup.size()-1-abandonedGroups).getRight();
-               String kind = ""+abandonedGroups+"-smallestGroupId";
-               LOG.debug("updateEnvironment: worldwide: joining " + kind + ", id=" + nThSmallestGroupId + ",clientId=" + mConnection.getClientId());
-               TalkGroupPresence destinationGroup = mDatabase.findGroupPresenceById(nThSmallestGroupId);
-               if (destinationGroup.getState().equals(TalkGroupPresence.STATE_EXISTS)/* && nThSmallestGroupSize < MAX_WORLD_WIDE_GROUP_SIZE*/) {
-                   joinGroupWithEnvironment(destinationGroup, environment);
-                   return destinationGroup.getGroupId();
-               } else {
-                   LOG.warn("the worldwide group ("+kind+") we were supposed to join is gone, will create a new one, destinationGroupId="+nThSmallestGroupId);
+               if (minNumberOfGroups > environmentsPerGroup.size()) {
+                   // we have not enough groups, lets create a new group and join it
+                   LOG.debug("updateEnvironment: worldwide: not enough groups on first update, will create a new group and join it,clientId=" + mConnection.getClientId());
+                } else {
+                   // join the n-th-smallest group in order to properly distribute the clients
+                   String nThSmallestGroupId = environmentsPerGroup.get(environmentsPerGroup.size() - 1 - abandonedGroups).getLeft();
+                   String kind = "" + abandonedGroups + "-smallestGroupId";
+                   LOG.debug("updateEnvironment: worldwide: joining " + kind + ", id=" + nThSmallestGroupId + ",clientId=" + mConnection.getClientId());
+                   TalkGroupPresence destinationGroup = mDatabase.findGroupPresenceById(nThSmallestGroupId);
+                   if (destinationGroup.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
+                       joinGroupWithEnvironment(destinationGroup, environment);
+                       return destinationGroup.getGroupId();
+                   } else {
+                       LOG.warn("the worldwide group (" + kind + ") we were supposed to join is gone, will create a new one, destinationGroupId=" + nThSmallestGroupId);
+                   }
                }
            } else {
                throw new RuntimeException("unknown environment type:"+environment.getType());
@@ -3215,4 +3194,18 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
         return result.toArray(new Boolean[result.size()]);
     }
+
+    @Override
+    public long unfinishedDeliveriesFrom(String senderId) {
+        requireIdentification(true);
+        logCall("unfinishedDeliveriesFrom(senderId: '" + senderId + "'");
+        final String myClientId = mConnection.getClientId();
+
+        long undelivered = mDatabase.countDeliveriesBetweenClientsInState(senderId, myClientId, TalkDelivery.STATE_DELIVERING);
+        long unfinished = mDatabase.countDeliveriesBetweenClientsInDeliveryAndAttachmentStates(senderId, myClientId, TalkDelivery.IN_ATTACHMENT_DELIVERY_STATES, TalkDelivery.IN_ATTACHMENT_STATES);
+        long total = undelivered + unfinished;
+        LOG.debug("unfinishedDeliveriesFrom:"+senderId+" -> "+myClientId+", undelivered="+undelivered+", unfinished="+unfinished+", returning total="+total);
+        return total;
+    }
+
 }

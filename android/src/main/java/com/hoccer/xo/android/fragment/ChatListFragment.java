@@ -9,10 +9,12 @@ import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.model.TalkEnvironment;
+import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ChatActivity;
 import com.hoccer.xo.android.adapter.ChatListAdapter;
@@ -201,7 +203,7 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
                 if (contact.isGroup()) {
                     return contact.isKeptGroup() || contact.isGroupJoined() && contact.isGroupExisting();
                 } else if (contact.isClient()) {
-                    return !contact.isSelf() && (contact.isWorldwide() || contact.isKept() || contact.isFriendOrBlocked());
+                    return !contact.isSelf() && ((contact.isWorldwide() && !isSuspendedGroupMember(contact)) || contact.isKept() || contact.isFriendOrBlocked());
                 }
                 return false;
             }
@@ -210,6 +212,22 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
         mAdapter = new ChatListAdapter((XoActivity) getActivity(), filter);
 
         setListAdapter(mAdapter);
+    }
+
+    private boolean isSuspendedGroupMember(TalkClientContact contact) {
+        TalkClientContact worldwideGroup = XoApplication.get().getXoClient().getCurrentWorldwideGroup();
+        if (worldwideGroup != null) {
+            try {
+                TalkGroupMembership groupMembership = mDatabase.findMembershipInGroupByClientId(worldwideGroup.getGroupId(), contact.getClientId());
+                if (groupMembership == null || groupMembership.isSuspended()) {
+                    return true;
+                }
+            } catch (SQLException e) {
+                LOG.error("SQL error", e);
+            }
+        }
+
+        return false;
     }
 
     public void onGroupCreationSucceeded(int contactId) {

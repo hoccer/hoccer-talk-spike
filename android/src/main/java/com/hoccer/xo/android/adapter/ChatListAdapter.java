@@ -243,7 +243,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
                 return;
             }
             ContactChatItem item = (ContactChatItem) findChatItemForContact(contact);
-            if (item != null) { // the contact is not in our list so we won't update anything
+            if (item != null) {
                 item.update();
 
                 runOnUiThread(new Runnable() {
@@ -252,6 +252,9 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
                         notifyDataSetChanged();
                     }
                 });
+            } else {
+                // message received from worldwide contact which is not in worldwide anymore, so update contacts to list the acquaintance
+                loadChatItems();
             }
         } catch (SQLException e) {
             LOG.error("Error while retrieving contacts for message " + message.getMessageId(), e);
