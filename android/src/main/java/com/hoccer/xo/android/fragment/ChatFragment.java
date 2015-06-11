@@ -1,8 +1,6 @@
 package com.hoccer.xo.android.fragment;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -13,14 +11,13 @@ import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.activity.ChatActivity;
 import com.hoccer.xo.android.activity.GroupProfileActivity;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
 import com.hoccer.xo.android.activity.SingleProfileActivity;
 import com.hoccer.xo.android.adapter.ChatAdapter;
 import com.hoccer.xo.android.base.XoAdapter;
-import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionInterpreter;
 import com.hoccer.xo.android.util.IntentHelper;
@@ -55,6 +52,8 @@ public class ChatFragment extends XoChatListFragment
     private ChatAdapter mAdapter;
 
     private CompositionFragment mCompositionFragment;
+
+    private MenuItem mMuteItem;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -184,11 +183,21 @@ public class ChatFragment extends XoChatListFragment
     }
 
     @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        MenuItem mMuteItem = menu.findItem(R.id.menu_mute_contact);
+        if(mContact.getClientRelationship().isNotificationsDisabled()) {
+            mMuteItem.setIcon(R.drawable.ic_action_notifications_on);
+        } else {
+            mMuteItem.setIcon(R.drawable.ic_action_notifications_off);
+        }
+        super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
 
         inflater.inflate(R.menu.fragment_messaging, menu);
-
         // select client/group profile entry for appropriate icon
         if (mContact != null) {
             if (mContact.isNearbyGroup()) {
@@ -197,6 +206,8 @@ public class ChatFragment extends XoChatListFragment
                 getActivity().getActionBar().setTitle(getActivity().getResources().getString(R.string.all_worldwide));
             } else {
                 getActivity().getActionBar().setTitle(mContact.getNickname());
+                mMuteItem = menu.findItem(R.id.menu_mute_contact);
+                mMuteItem.setVisible(true);
             }
 
             MenuItem clientItem = menu.findItem(R.id.menu_profile_single);
@@ -244,6 +255,9 @@ public class ChatFragment extends XoChatListFragment
                             .putExtra(GroupProfileActivity.EXTRA_GROUP_ID, mContact.getGroupId()));
                 }
                 break;
+            case R.id.menu_mute_contact:
+                onMuteItemClick();
+                break;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -288,7 +302,11 @@ public class ChatFragment extends XoChatListFragment
     public void onClientPresenceChanged(TalkClientContact contact) {}
 
     @Override
-    public void onClientRelationshipChanged(TalkClientContact contact) {}
+    public void onClientRelationshipChanged(TalkClientContact contact) {
+        if(contact.equals(mContact)) {
+            getActivity().invalidateOptionsMenu();
+        }
+    }
 
     @Override
     public void onGroupPresenceChanged(TalkClientContact contact) {}
@@ -305,4 +323,19 @@ public class ChatFragment extends XoChatListFragment
     public void onKeyboardOpen() {
         mMessageListView.setSelection(mMessageListView.getCount() - 1);
     }
+
+    private void onMuteItemClick() {
+        String notificationPreference;
+        if(mContact.getClientRelationship().isNotificationsDisabled()) {
+            notificationPreference = TalkRelationship.NOTIFICATIONS_ENABLED;
+        } else {
+            notificationPreference = TalkRelationship.NOTIFICATIONS_DISABLED;
+        }
+        if(mContact.isGroup()) {
+            getXoActivity().getXoClient().getServerRpc().setGroupNotifications(mContact.getGroupId(), notificationPreference);
+        } else {
+            getXoActivity().getXoClient().getServerRpc().setClientNotifications(mContact.getClientId(), notificationPreference);
+        }
+    }
+
 }
