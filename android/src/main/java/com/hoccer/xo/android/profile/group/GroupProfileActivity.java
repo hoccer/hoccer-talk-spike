@@ -1,4 +1,4 @@
-package com.hoccer.xo.android.profile;
+package com.hoccer.xo.android.profile.group;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,12 +17,12 @@ public class GroupProfileActivity extends ComposableActivity {
 
     private static final Logger LOG = Logger.getLogger(GroupProfileActivity.class);
 
-    public static final String ACTION_CREATE = "com.hoccer.xo.android.profile.GroupProfileActivity.CREATE";
+    public static final String ACTION_CREATE = "com.hoccer.xo.android.profile.group.GroupProfileActivity.CREATE";
 
-    public static final String ACTION_CLONE = "com.hoccer.xo.android.profile.GroupProfileActivity.CLONE";
+    public static final String ACTION_CLONE = "com.hoccer.xo.android.profile.group.GroupProfileActivity.CLONE";
     public static final String EXTRA_GROUP_ID = "clientCloneGroup";
 
-    public static final String ACTION_SHOW = "com.hoccer.xo.android.profile.GroupProfileActivity.SHOW";
+    public static final String ACTION_SHOW = "com.hoccer.xo.android.profile.group.GroupProfileActivity.SHOW";
     public static final String EXTRA_CLIENT_CONTACT_ID = "clientContactId";
 
     @Override

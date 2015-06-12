@@ -12,9 +12,9 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.profile.GroupProfileActivity;
+import com.hoccer.xo.android.profile.client.ClientProfileActivity;
+import com.hoccer.xo.android.profile.group.GroupProfileActivity;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
-import com.hoccer.xo.android.profile.SingleProfileActivity;
 import com.hoccer.xo.android.adapter.ChatAdapter;
 import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.gesture.Gestures;
@@ -216,9 +216,9 @@ public class ChatFragment extends XoChatListFragment
         switch (item.getItemId()) {
             case R.id.menu_profile_single:
                 if (mContact != null) {
-                    startActivity(new Intent(getActivity(), SingleProfileActivity.class)
-                            .setAction(SingleProfileActivity.ACTION_SHOW)
-                            .putExtra(SingleProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId()));
+                    startActivity(new Intent(getActivity(), ClientProfileActivity.class)
+                            .setAction(ClientProfileActivity.ACTION_SHOW)
+                            .putExtra(ClientProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId()));
                 }
                 break;
             case R.id.menu_profile_group:

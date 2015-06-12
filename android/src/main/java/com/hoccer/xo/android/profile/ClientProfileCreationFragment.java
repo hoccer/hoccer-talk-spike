@@ -25,11 +25,11 @@ import org.apache.log4j.Logger;
 import java.sql.SQLException;
 
 
-public class SingleProfileCreationFragment extends XoFragment implements IXoContactListener, View.OnClickListener, ActionMode.Callback {
+public class ClientProfileCreationFragment extends XoFragment implements IXoContactListener, View.OnClickListener, ActionMode.Callback {
 
     private static final String HOCCER_CLASSIC_PREFERENCES = "com.artcom.hoccer_preferences";
 
-    private static final Logger LOG = Logger.getLogger(SingleProfileCreationFragment.class);
+    private static final Logger LOG = Logger.getLogger(ClientProfileCreationFragment.class);
 
     private ActionMode mActionMode;
 

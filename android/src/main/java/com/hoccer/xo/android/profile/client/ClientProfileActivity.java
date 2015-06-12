@@ -1,22 +1,27 @@
-package com.hoccer.xo.android.profile;
+package com.hoccer.xo.android.profile.client;
 
 import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ComposableActivity;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.artcom.hoccer.R;
+import com.hoccer.xo.android.profile.ClientProfileCreationFragment;
 import org.apache.log4j.Logger;
+
+import java.sql.SQLException;
 
 /**
  * Activity wrapping a single profile fragment
  */
-public class SingleProfileActivity extends ComposableActivity {
+public class ClientProfileActivity extends ComposableActivity {
 
-    private static final Logger LOG = Logger.getLogger(SingleProfileActivity.class);
+    private static final Logger LOG = Logger.getLogger(ClientProfileActivity.class);
 
     public static final String ACTION_CREATE_SELF = "com.hoccer.xo.android.profile.SingleProfileActivity.CREATE_SELF";
 
@@ -63,7 +68,7 @@ public class SingleProfileActivity extends ComposableActivity {
                 throw new RuntimeException("Missing EXTRA_CLIENT_CONTACT_ID");
             }
 
-            showSingleProfileFragment(contactId);
+            showClientProfileFragment(contactId);
         } else {
             throw new RuntimeException("Unknown or missing action");
         }
@@ -71,20 +76,30 @@ public class SingleProfileActivity extends ComposableActivity {
         getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
-    private void showSingleProfileFragment(int contactId) {
-        Bundle bundle = new Bundle();
-        bundle.putInt(SingleProfileFragment.ARG_CLIENT_CONTACT_ID, contactId);
+    private void showClientProfileFragment(int contactId) {
+        try {
+            TalkClientContact contact = XoApplication.get().getXoClient().getDatabase().findContactById(contactId);
+            Fragment fragment;
+            if (contact.isSelf()) {
+                fragment = new SelfClientProfileFragment();
+            } else {
+                fragment = new ContactClientProfileFragment();
+            }
 
-        Fragment fragment = new SingleProfileFragment();
-        fragment.setArguments(bundle);
+            Bundle bundle = new Bundle();
+            bundle.putInt(ContactClientProfileFragment.ARG_CLIENT_CONTACT_ID, contactId);
+            fragment.setArguments(bundle);
 
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_single_profile_fragment_container, fragment);
-        ft.commit();
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.fl_single_profile_fragment_container, fragment);
+            ft.commit();
+        } catch (SQLException e) {
+            LOG.error("SQL error", e);
+        }
     }
 
     private void showCreateSingleProfileFragment() {
-        Fragment fragment = new SingleProfileCreationFragment();
+        Fragment fragment = new ClientProfileCreationFragment();
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.fl_single_profile_fragment_container, fragment, SINGLE_PROFILE_CREATION_FRAGMENT);

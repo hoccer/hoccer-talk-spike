@@ -1,0 +1,426 @@
+package com.hoccer.xo.android.profile.client;
+
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.*;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.*;
+import com.artcom.hoccer.R;
+import com.hoccer.talk.client.XoClientDatabase;
+import com.hoccer.talk.client.exceptions.NoClientIdInPresenceException;
+import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.model.TalkPresence;
+import com.hoccer.talk.model.TalkRelationship;
+import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.XoDialogs;
+import com.hoccer.xo.android.activity.MediaBrowserActivity;
+import com.hoccer.xo.android.util.IntentHelper;
+import org.apache.log4j.Logger;
+
+import java.sql.SQLException;
+
+public class ContactClientProfileFragment extends ClientProfileFragment {
+
+    private static final Logger LOG = Logger.getLogger(ContactClientProfileFragment.class);
+
+    private LinearLayout mInviteButtonContainer;
+    private TextView mNicknameTextView;
+    private EditText mNicknameEditText;
+    private ImageButton mNicknameEditButton;
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_single_profile, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        mInviteButtonContainer = (LinearLayout) view.findViewById(R.id.inc_profile_request);
+        mNicknameTextView = (TextView) view.findViewById(R.id.tv_profile_nickname);
+        mNicknameEditText = (EditText) view.findViewById(R.id.et_profile_nickname);
+        mNicknameEditButton = (ImageButton) view.findViewById(R.id.ib_profile_nickname_edit);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        refreshContact();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        super.onCreateOptionsMenu(menu, menuInflater);
+        updateMenuItems(menu);
+    }
+
+    private void updateMenuItems(Menu menu) {
+        menu.findItem(R.id.menu_my_profile).setVisible(true);
+        TalkRelationship relationship = mContact.getClientRelationship();
+        if ((relationship == null || !relationship.isFriend()) && mContact.isInEnvironment()) {
+            menu.findItem(R.id.menu_profile_edit).setVisible(false);
+            menu.findItem(R.id.menu_profile_delete).setVisible(false);
+            menu.findItem(R.id.menu_profile_block).setVisible(false);
+            menu.findItem(R.id.menu_profile_unblock).setVisible(false);
+        } else if (!mContact.isFriendOrBlocked()) {
+            menu.findItem(R.id.menu_profile_edit).setVisible(false);
+            menu.findItem(R.id.menu_profile_delete).setVisible(true);
+            menu.findItem(R.id.menu_profile_block).setVisible(false);
+            menu.findItem(R.id.menu_profile_unblock).setVisible(false);
+        }
+
+        if (relationship != null && relationship.isBlocked()) {
+            menu.findItem(R.id.menu_profile_block).setVisible(false);
+            menu.findItem(R.id.menu_profile_unblock).setVisible(true);
+        } else {
+            menu.findItem(R.id.menu_profile_block).setVisible(true);
+            menu.findItem(R.id.menu_profile_unblock).setVisible(false);
+        }
+        menu.findItem(R.id.menu_audio_attachment_list).setVisible(true);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        boolean isSelectionHandled;
+        switch (item.getItemId()) {
+            case R.id.menu_profile_block:
+                blockContact();
+                isSelectionHandled = true;
+                break;
+            case R.id.menu_profile_unblock:
+                unblockContact();
+                isSelectionHandled = true;
+                break;
+            case R.id.menu_profile_delete:
+                if (mContact.isFriendOrBlocked()) {
+                    showDeleteContactDialog();
+                } else {
+                    showDiscardContactDialog();
+                }
+                isSelectionHandled = true;
+                break;
+            case R.id.menu_audio_attachment_list:
+                Intent intent = new Intent(getActivity(), MediaBrowserActivity.class);
+                intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mContact.getClientContactId());
+                startActivity(intent);
+                isSelectionHandled = true;
+                break;
+            default:
+                isSelectionHandled = super.onOptionsItemSelected(item);
+        }
+        return isSelectionHandled;
+    }
+
+    private void showDeleteContactDialog() {
+        XoDialogs.showYesNoDialog("ContactDeleteDialog",
+                R.string.dialog_delete_contact_title,
+                R.string.dialog_delete_contact_message,
+                getActivity(),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        deleteContact();
+                        getActivity().finish();
+                    }
+                },
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+
+                    }
+                }
+        );
+    }
+
+    private void showDiscardContactDialog() {
+        XoDialogs.showYesNoDialog("RemoveContactFromListDialog",
+                R.string.dialog_discard_contact_title,
+                R.string.dialog_discard_contact_message,
+                getActivity(),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        declineAndDiscardContact();
+                        getActivity().finish();
+                    }
+                },
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+
+                    }
+                }
+        );
+    }
+
+    private void deleteContact() {
+        getXoClient().deleteContact(mContact);
+    }
+
+    private void declineAndDiscardContact() {
+        if (mContact.getClientRelationship() != null && mContact.getClientRelationship().invitedMe()) {
+            getXoClient().declineFriend(mContact);
+        } else if (mContact.getClientRelationship() != null && mContact.getClientRelationship().isInvited()) {
+            getXoClient().disinviteFriend(mContact);
+        }
+        discardContact();
+    }
+
+    private void discardContact() {
+        mContact.getClientPresence().setKept(false);
+        try {
+            getXoClient().getDatabase().savePresence(mContact.getClientPresence());
+        } catch (SQLException e) {
+            LOG.error("sql error", e);
+        } catch (NoClientIdInPresenceException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    protected int getClientContactId() {
+        return mContact.getClientContactId();
+    }
+
+    @Override
+    protected void updateMessageText() {
+        try {
+            int count = (int) XoApplication.get().getXoClient().getDatabase().getMessageCountByContactId(mContact.getClientContactId());
+            super.updateMessageText(count);
+        } catch (SQLException e) {
+            LOG.error("Error fetching message count from database.");
+        }
+    }
+
+    @Override
+    public void updateActionBar() {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                getActivity().getActionBar().setTitle(mContact.getNickname());
+            }
+        });
+    }
+
+    @Override
+    protected void updateView() {
+        super.updateView();
+        updateAvatarView();
+        updateName();
+        updateMessageText();
+        updateFingerprint();
+        updateInviteButton(mContact);
+        updateDeclineButton(mContact);
+        hideNicknameEdit();
+        updateNicknameContainer();
+    }
+
+    private void updateAvatarView() {
+        super.updateAvatarView(mContact.getAvatarDownload());
+    }
+
+    private void updateName() {
+        TalkPresence presence = mContact.getClientPresence();
+        if (presence != null) {
+            mNameText.setText(presence.getClientName());
+        }
+    }
+
+    private void updateInviteButton(final TalkClientContact contact) {
+        Button inviteButton = (Button) getView().findViewById(R.id.btn_profile_invite);
+        if (contact == null || contact.isSelf()) {
+            mInviteButtonContainer.setVisibility(View.GONE);
+            return;
+        } else {
+            mInviteButtonContainer.setVisibility(View.VISIBLE);
+        }
+
+        try {
+            getXoDatabase().refreshClientContact(contact);
+        } catch (SQLException e) {
+            LOG.error("Error while refreshing client contact: " + contact.getClientId(), e);
+        }
+
+        if (contact.getClientRelationship() == null || contact.getClientRelationship().isNone()) {
+            inviteButton.setText(R.string.friend_request_add_as_friend);
+            inviteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    getXoActivity().getXoClient().inviteFriend(contact);
+                }
+            });
+        } else if (contact.getClientRelationship().isInvited()) {
+            inviteButton.setText(R.string.friend_request_cancel_invitation);
+            inviteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    getXoActivity().getXoClient().disinviteFriend(contact);
+                }
+            });
+        } else if (contact.getClientRelationship().invitedMe()) {
+            inviteButton.setText(R.string.friend_request_accept_invitation);
+            inviteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    getXoActivity().getXoClient().acceptFriend(contact);
+                }
+            });
+        } else {
+            mInviteButtonContainer.setVisibility(View.GONE);
+        }
+    }
+
+    private void updateDeclineButton(final TalkClientContact contact) {
+
+        Button declineButton = (Button) getView().findViewById(R.id.btn_profile_decline);
+        if (contact == null || contact.isSelf()) {
+            declineButton.setVisibility(View.GONE);
+            return;
+        } else {
+            declineButton.setVisibility(View.VISIBLE);
+        }
+
+        try {
+            getXoDatabase().refreshClientContact(contact);
+        } catch (SQLException e) {
+            LOG.error("Error while refreshing client contact: " + contact.getClientId(), e);
+        }
+
+        if (contact.getClientRelationship() != null &&
+                contact.getClientRelationship().getState() != null &&
+                contact.getClientRelationship().getState().equals(TalkRelationship.STATE_INVITED_ME)) {
+            declineButton.setText(R.string.friend_request_decline_invitation);
+            declineButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    getXoActivity().getXoClient().declineFriend(contact);
+                }
+            });
+        } else {
+            declineButton.setVisibility(View.GONE);
+        }
+    }
+
+    private void hideNicknameEdit() {
+        mNicknameEditText.setVisibility(View.GONE);
+        mNicknameTextView.setVisibility(View.VISIBLE);
+        mNicknameEditButton.setImageResource(android.R.drawable.ic_menu_edit);
+        mNicknameEditButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showNicknameEdit();
+                toggleSoftKeyboard();
+            }
+        });
+    }
+
+    private void showNicknameEdit() {
+        mNicknameTextView.setVisibility(View.INVISIBLE);
+        mNicknameEditText.setVisibility(View.VISIBLE);
+        mNicknameEditText.requestFocus();
+        mNicknameEditText.setSelection(mNicknameEditText.getText().length());
+        mNicknameEditButton.setImageResource(R.drawable.ic_light_navigation_accept);
+        mNicknameEditButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String nickname = mNicknameEditText.getText().toString();
+                mContact.setNickname(nickname);
+                try {
+                    getXoDatabase().saveContact(mContact);
+                } catch (SQLException e) {
+                    LOG.error("error while saving nickname to contact " + mContact.getClientId(), e);
+                }
+                updateNickname(mContact);
+                hideNicknameEdit();
+                toggleSoftKeyboard();
+
+                updateActionBar();
+            }
+        });
+    }
+
+    private void toggleSoftKeyboard() {
+        InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputManager.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+    }
+
+    private void updateNicknameContainer() {
+        View nickNameContainer = getView().findViewById(R.id.inc_profile_nickname);
+        if (mContact.isSelf()) {
+            nickNameContainer.setVisibility(View.GONE);
+        } else {
+            updateNickname(mContact);
+            nickNameContainer.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void updateNickname(TalkClientContact contact) {
+        mNicknameEditText.setText(contact.getNickname());
+        mNicknameTextView.setText(contact.getNickname());
+    }
+
+    private void blockContact() {
+        LOG.debug("blockContact()");
+        XoDialogs.showYesNoDialog("BlockContactDialog",
+                R.string.dialog_block_user_title,
+                R.string.dialog_block_user_message,
+                getActivity(),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        getXoClient().blockContact(mContact);
+                    }
+                },
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                    }
+                }
+        );
+    }
+
+    private void unblockContact() {
+        LOG.debug("unblockContact()");
+        getXoClient().unblockContact(mContact);
+        getActivity().finish();
+    }
+
+    private boolean isCurrentContact(TalkClientContact contact) {
+        return mContact == contact || mContact.getClientContactId() == contact.getClientContactId();
+    }
+
+    @Override
+    protected boolean shouldShowChatContainer(int count) {
+        return (mContact.isClient() && mContact.getClientRelationship() != null && mContact.isFriendOrBlocked()) || mContact.isKept() && count > 0 || mContact.isNearby();
+    }
+
+    @Override
+    public void onClientPresenceChanged(final TalkClientContact contact) {
+        if (isCurrentContact(contact)) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    refreshContact();
+                    getActivity().invalidateOptionsMenu();
+                    updateActionBar();
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onClientRelationshipChanged(final TalkClientContact contact) {
+        if (isCurrentContact(contact)) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    refreshContact();
+                    getActivity().invalidateOptionsMenu();
+                    updateActionBar();
+                }
+            });
+        }
+    }
+}

@@ -6,7 +6,7 @@ import android.view.View;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.profile.SingleProfileActivity;
+import com.hoccer.xo.android.profile.client.ClientProfileActivity;
 import com.hoccer.xo.android.adapter.ClientContactListAdapter;
 import com.hoccer.xo.android.adapter.ContactListAdapter;
 import com.hoccer.xo.android.base.XoActivity;
@@ -42,9 +42,9 @@ public class ClientContactListFragment extends ContactListFragment {
 
     @Override
     protected Intent getProfileActivityIntent(TalkClientContact contact) {
-        return new Intent(getActivity(), SingleProfileActivity.class)
-                .setAction(SingleProfileActivity.ACTION_SHOW)
-                .putExtra(SingleProfileActivity.EXTRA_CLIENT_CONTACT_ID, contact.getClientContactId());
+        return new Intent(getActivity(), ClientProfileActivity.class)
+                .setAction(ClientProfileActivity.ACTION_SHOW)
+                .putExtra(ClientProfileActivity.EXTRA_CLIENT_CONTACT_ID, contact.getClientContactId());
     }
 
     @Override

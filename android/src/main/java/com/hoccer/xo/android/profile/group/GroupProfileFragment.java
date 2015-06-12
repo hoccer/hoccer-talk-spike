@@ -1,4 +1,4 @@
-package com.hoccer.xo.android.profile;
+package com.hoccer.xo.android.profile.group;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -23,6 +23,7 @@ import com.hoccer.xo.android.activity.MediaBrowserActivity;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupMemberContactsAdapter;
 import com.hoccer.xo.android.dialog.GroupManageDialog;
+import com.hoccer.xo.android.profile.ProfileFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.UriUtils;
 import com.squareup.picasso.Picasso;

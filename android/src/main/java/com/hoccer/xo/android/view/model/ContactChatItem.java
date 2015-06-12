@@ -14,8 +14,8 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.profile.GroupProfileActivity;
-import com.hoccer.xo.android.profile.SingleProfileActivity;
+import com.hoccer.xo.android.profile.client.ClientProfileActivity;
+import com.hoccer.xo.android.profile.group.GroupProfileActivity;
 import com.hoccer.xo.android.adapter.SearchAdapter;
 import com.hoccer.xo.android.view.avatar.AvatarView;
 import org.apache.commons.collections4.CollectionUtils;
@@ -116,9 +116,9 @@ public class ContactChatItem extends ChatItem implements SearchAdapter.Searchabl
                             .setAction(GroupProfileActivity.ACTION_SHOW)
                             .putExtra(GroupProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId());
                 } else {
-                    intent = new Intent(mContext, SingleProfileActivity.class)
-                            .setAction(SingleProfileActivity.ACTION_SHOW)
-                            .putExtra(SingleProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId());
+                    intent = new Intent(mContext, ClientProfileActivity.class)
+                            .setAction(ClientProfileActivity.ACTION_SHOW)
+                            .putExtra(ClientProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId());
                 }
                 mContext.startActivity(intent);
             }

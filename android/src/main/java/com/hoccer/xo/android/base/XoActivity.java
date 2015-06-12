@@ -40,8 +40,8 @@ import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.content.ContentSelection;
 import com.hoccer.xo.android.content.selector.ImageSelector;
 import com.hoccer.xo.android.fragment.DeviceContactsInvitationFragment;
-import com.hoccer.xo.android.profile.GroupProfileActivity;
-import com.hoccer.xo.android.profile.SingleProfileActivity;
+import com.hoccer.xo.android.profile.client.ClientProfileActivity;
+import com.hoccer.xo.android.profile.group.GroupProfileActivity;
 import com.hoccer.xo.android.view.chat.MessageItem;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import net.hockeyapp.android.CrashManager;
@@ -499,9 +499,9 @@ public abstract class XoActivity extends FragmentActivity {
                     .setAction(GroupProfileActivity.ACTION_SHOW)
                     .putExtra(GroupProfileActivity.EXTRA_CLIENT_CONTACT_ID, contact.getClientContactId());
         } else {
-            intent = new Intent(this, SingleProfileActivity.class)
-                    .setAction(SingleProfileActivity.ACTION_SHOW)
-                    .putExtra(SingleProfileActivity.EXTRA_CLIENT_CONTACT_ID, contact.getClientContactId());
+            intent = new Intent(this, ClientProfileActivity.class)
+                    .setAction(ClientProfileActivity.ACTION_SHOW)
+                    .putExtra(ClientProfileActivity.EXTRA_CLIENT_CONTACT_ID, contact.getClientContactId());
         }
         startActivity(intent);
     }

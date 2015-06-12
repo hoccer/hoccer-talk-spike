@@ -13,8 +13,8 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.profile.GroupProfileActivity;
-import com.hoccer.xo.android.profile.SingleProfileActivity;
+import com.hoccer.xo.android.profile.client.ClientProfileActivity;
+import com.hoccer.xo.android.profile.group.GroupProfileActivity;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.AspectImageView;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -73,9 +73,9 @@ public abstract class AvatarView extends LinearLayout {
                             .setAction(GroupProfileActivity.ACTION_SHOW)
                             .putExtra(GroupProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId());
                 } else {
-                    intent = new Intent(getContext(), SingleProfileActivity.class)
-                            .setAction(SingleProfileActivity.ACTION_SHOW)
-                            .putExtra(SingleProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId());
+                    intent = new Intent(getContext(), ClientProfileActivity.class)
+                            .setAction(ClientProfileActivity.ACTION_SHOW)
+                            .putExtra(ClientProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId());
                 }
                 getContext().startActivity(intent);
             }

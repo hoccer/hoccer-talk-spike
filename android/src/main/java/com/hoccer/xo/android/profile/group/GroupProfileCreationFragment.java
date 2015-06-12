@@ -1,4 +1,4 @@
-package com.hoccer.xo.android.profile;
+package com.hoccer.xo.android.profile.group;
 
 import android.content.DialogInterface;
 import android.net.Uri;
