@@ -1,14 +1,13 @@
-package com.hoccer.xo.android.activity;
+package com.hoccer.xo.android.profile;
 
 import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import com.hoccer.xo.android.activity.ComposableActivity;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
-import com.hoccer.xo.android.fragment.profile.SingleProfileCreationFragment;
-import com.hoccer.xo.android.fragment.profile.SingleProfileFragment;
 import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
@@ -19,9 +18,9 @@ public class SingleProfileActivity extends ComposableActivity {
 
     private static final Logger LOG = Logger.getLogger(SingleProfileActivity.class);
 
-    public static final String ACTION_CREATE_SELF = "com.hoccer.xo.android.activity.SingleProfileActivity.CREATE_SELF";
+    public static final String ACTION_CREATE_SELF = "com.hoccer.xo.android.profile.SingleProfileActivity.CREATE_SELF";
 
-    public static final String ACTION_SHOW = "com.hoccer.xo.android.activity.SingleProfileActivity.SHOW";
+    public static final String ACTION_SHOW = "com.hoccer.xo.android.profile.SingleProfileActivity.SHOW";
     public static final String EXTRA_CLIENT_CONTACT_ID = "clientContactId";
 
     public static final String SINGLE_PROFILE_CREATION_FRAGMENT = "SINGLE_PROFILE_CREATION_FRAGMENT";

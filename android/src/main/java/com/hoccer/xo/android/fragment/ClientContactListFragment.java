@@ -6,7 +6,7 @@ import android.view.View;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.activity.SingleProfileActivity;
+import com.hoccer.xo.android.profile.SingleProfileActivity;
 import com.hoccer.xo.android.adapter.ClientContactListAdapter;
 import com.hoccer.xo.android.adapter.ContactListAdapter;
 import com.hoccer.xo.android.base.XoActivity;

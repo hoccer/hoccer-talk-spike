@@ -1,4 +1,4 @@
-package com.hoccer.xo.android.fragment.profile;
+package com.hoccer.xo.android.profile;
 
 import android.app.Activity;
 import android.content.Intent;

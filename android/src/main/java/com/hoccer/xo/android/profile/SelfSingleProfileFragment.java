@@ -1,4 +1,4 @@
-package com.hoccer.xo.android.fragment.profile;
+package com.hoccer.xo.android.profile;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -36,10 +36,10 @@ import java.util.List;
 /**
  * Fragment for display and editing of single-contact profiles.
  */
-public class SingleProfileFragment extends ProfileFragment
+public class SelfSingleProfileFragment extends ProfileFragment
         implements View.OnClickListener, ActionMode.Callback {
 
-    private static final Logger LOG = Logger.getLogger(SingleProfileFragment.class);
+    private static final Logger LOG = Logger.getLogger(SelfSingleProfileFragment.class);
 
     private TextView mNameText;
     private EditText mNameEditText;

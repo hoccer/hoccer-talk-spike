@@ -1,8 +1,6 @@
 package com.hoccer.xo.android.fragment;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -14,13 +12,11 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.activity.ChatActivity;
-import com.hoccer.xo.android.activity.GroupProfileActivity;
+import com.hoccer.xo.android.profile.GroupProfileActivity;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
-import com.hoccer.xo.android.activity.SingleProfileActivity;
+import com.hoccer.xo.android.profile.SingleProfileActivity;
 import com.hoccer.xo.android.adapter.ChatAdapter;
 import com.hoccer.xo.android.base.XoAdapter;
-import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionInterpreter;
 import com.hoccer.xo.android.util.IntentHelper;

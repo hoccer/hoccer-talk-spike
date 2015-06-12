@@ -1,13 +1,12 @@
-package com.hoccer.xo.android.activity;
+package com.hoccer.xo.android.profile;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import com.artcom.hoccer.R;
+import com.hoccer.xo.android.activity.ComposableActivity;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
-import com.hoccer.xo.android.fragment.profile.GroupProfileCreationFragment;
-import com.hoccer.xo.android.fragment.profile.GroupProfileFragment;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,12 +17,12 @@ public class GroupProfileActivity extends ComposableActivity {
 
     private static final Logger LOG = Logger.getLogger(GroupProfileActivity.class);
 
-    public static final String ACTION_CREATE = "com.hoccer.xo.android.activity.GroupProfileActivity.CREATE";
+    public static final String ACTION_CREATE = "com.hoccer.xo.android.profile.GroupProfileActivity.CREATE";
 
-    public static final String ACTION_CLONE = "com.hoccer.xo.android.activity.GroupProfileActivity.CLONE";
+    public static final String ACTION_CLONE = "com.hoccer.xo.android.profile.GroupProfileActivity.CLONE";
     public static final String EXTRA_GROUP_ID = "clientCloneGroup";
 
-    public static final String ACTION_SHOW = "com.hoccer.xo.android.activity.GroupProfileActivity.SHOW";
+    public static final String ACTION_SHOW = "com.hoccer.xo.android.profile.GroupProfileActivity.SHOW";
     public static final String EXTRA_CLIENT_CONTACT_ID = "clientContactId";
 
     @Override

@@ -40,6 +40,8 @@ import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.content.ContentSelection;
 import com.hoccer.xo.android.content.selector.ImageSelector;
 import com.hoccer.xo.android.fragment.DeviceContactsInvitationFragment;
+import com.hoccer.xo.android.profile.GroupProfileActivity;
+import com.hoccer.xo.android.profile.SingleProfileActivity;
 import com.hoccer.xo.android.view.chat.MessageItem;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import net.hockeyapp.android.CrashManager;
