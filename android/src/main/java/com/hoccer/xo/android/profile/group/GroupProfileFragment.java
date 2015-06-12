@@ -9,6 +9,7 @@ import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientUpload;
@@ -39,7 +40,7 @@ import java.util.List;
  * Fragment for display and editing of group profiles.
  */
 public class GroupProfileFragment extends ProfileFragment
-        implements View.OnClickListener, ActionMode.Callback, AdapterView.OnItemClickListener {
+        implements IXoContactListener, View.OnClickListener, ActionMode.Callback, AdapterView.OnItemClickListener {
 
     private static final Logger LOG = Logger.getLogger(GroupProfileFragment.class);
 
@@ -53,12 +54,14 @@ public class GroupProfileFragment extends ProfileFragment
 
     private Mode mMode;
 
-    private TextView mNameText;
     private EditText mNameEditText;
-    private ImageView mAvatarImage;
     private Button mInviteAllButton;
     private LinearLayout mGroupMembersContainer;
     private ListView mGroupMembersList;
+
+    private RelativeLayout mChatContainer;
+    private RelativeLayout mChatMessagesContainer;
+    private TextView mChatMessagesText;
 
     @Nullable
     private ContactsAdapter mGroupMemberAdapter;
@@ -98,11 +101,19 @@ public class GroupProfileFragment extends ProfileFragment
         view.setFocusableInTouchMode(true);
         view.setOnKeyListener(new BackPressListener());
 
-        mAvatarImage = (ImageView) view.findViewById(R.id.profile_group_profile_image);
+        mChatContainer = (RelativeLayout) view.findViewById(R.id.inc_profile_chat_stats);
+        mChatMessagesContainer = (RelativeLayout) view.findViewById(R.id.rl_profile_messages);
+        mChatMessagesText = (TextView) view.findViewById(R.id.tv_messages_text);
+        mChatMessagesContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showMessagingActivity();
+            }
+        });
+
         mGroupMembersContainer = (LinearLayout) view.findViewById(R.id.profile_group_members_container);
         mGroupMembersList = (ListView) mGroupMembersContainer.findViewById(R.id.profile_group_members_list);
 
-        mNameText = (TextView) view.findViewById(R.id.profile_group_name);
         mNameEditText = (EditText) view.findViewById(R.id.profile_group_name_edit);
         mNameEditText.setFocusableInTouchMode(true);
         mNameEditText.setOnKeyListener(new BackPressListener());
@@ -111,9 +122,21 @@ public class GroupProfileFragment extends ProfileFragment
         mInviteAllButton.setOnClickListener(this);
     }
 
+    private void showMessagingActivity() {
+        Intent intent = new Intent(getActivity(), ChatActivity.class);
+        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, getClientContactId());
+        if (mContact.isKept() || mContact.isKeptGroup()) {
+            intent.putExtra(ChatActivity.EXTRA_CLIENT_HISTORY, true);
+        }
+        startActivity(intent);
+    }
+
     @Override
     public void onResume() {
         super.onResume();
+
+        getXoClient().registerContactListener(this);
+
         mMode = Mode.PROFILE;
 
         if (mGroupMemberAdapter == null) {
@@ -141,6 +164,12 @@ public class GroupProfileFragment extends ProfileFragment
                 }
             }
         }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        getXoClient().unregisterContactListener(this);
     }
 
     @Override
@@ -294,19 +323,36 @@ public class GroupProfileFragment extends ProfileFragment
         updateMessageText();
     }
 
-    @Override
     protected void updateMessageText() {
-        super.updateMessageText(getMessageCount());
-    }
-
-    private int getMessageCount() {
-        int count = 0;
         try {
-            count = (int) XoApplication.get().getXoClient().getDatabase().getMessageCountByContactId(mContact.getClientContactId());
+            int count = (int) XoApplication.get().getXoClient().getDatabase().getMessageCountByContactId(mContact.getClientContactId());
+            updateMessageText(count);
         } catch (SQLException e) {
             LOG.error("SQL Error fetching message count from database.", e);
         }
-        return count;
+    }
+
+    private void updateMessageText(int count) {
+        if (shouldShowChatContainer(count)) {
+            mChatContainer.setVisibility(View.VISIBLE);
+            mChatMessagesText.setText(getResources().getQuantityString(R.plurals.message_count, count, count));
+        } else {
+            mChatContainer.setVisibility(View.GONE);
+        }
+    }
+
+    protected boolean shouldShowChatContainer(int count) {
+        if (mContact.isKeptGroup() && count > 0) {
+            return true;
+        } else {
+            int membershipCount = 0;
+            try {
+                membershipCount = XoApplication.get().getXoClient().getDatabase().findMembershipsInGroup(mContact.getGroupId()).size();
+            } catch (SQLException e) {
+                LOG.error("SQL error", e);
+            }
+            return mContact.isGroupJoined() && membershipCount > 1;
+        }
     }
 
     private void updateContentVisibility() {
@@ -441,18 +487,8 @@ public class GroupProfileFragment extends ProfileFragment
     }
 
     @Override
-    protected boolean shouldShowChatContainer(int count) {
-        if (mContact.isKeptGroup() && getMessageCount() > 0) {
-            return true;
-        } else {
-            int membershipCount = 0;
-            try {
-                membershipCount = XoApplication.get().getXoClient().getDatabase().findMembershipsInGroup(mContact.getGroupId()).size();
-            } catch (SQLException e) {
-                LOG.error("SQL error", e);
-            }
-            return mContact.isGroupJoined() && membershipCount > 1;
-        }
+    public void onClientPresenceChanged(TalkClientContact contact) {
+
     }
 
     @Override

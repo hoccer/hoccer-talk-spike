@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:background="@color/background_default"
+        android:layout_height="match_parent">
+
+    <RelativeLayout
+            android:id="@+id/profile_avatar_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <ImageView
+                android:id="@+id/profile_avatar_image"
+                android:scaleType="centerCrop"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_gravity="center_horizontal"/>
+
+        <include
+                android:id="@+id/inc_profile_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/profile_avatar_image"
+                layout="@layout/profile_name_container"
+                style="@style/ProfileContainerStyle"/>
+
+        <include
+                android:id="@+id/inc_profile_chat_stats"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/inc_profile_name"
+                layout="@layout/profile_chat_stats_container"
+                style="@style/ProfileContainerStyle"/>
+
+        <include
+                android:id="@+id/inc_profile_nickname"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/inc_profile_chat_stats"
+                layout="@layout/profile_nickname_container"
+                style="@style/ProfileContainerStyle"/>
+
+        <include
+                android:id="@+id/inc_profile_friend_request"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/inc_profile_nickname"
+                layout="@layout/profile_request_container"
+                style="@style/ProfileContainerStyle"/>
+
+        <include
+                android:id="@+id/inc_profile_key"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/inc_profile_friend_request"
+                layout="@layout/profile_key_container"
+                style="@style/ProfileContainerStyle"/>
+    </RelativeLayout>
+</ScrollView>
+

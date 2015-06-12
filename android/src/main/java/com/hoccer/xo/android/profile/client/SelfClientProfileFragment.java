@@ -36,36 +36,23 @@ public class SelfClientProfileFragment extends ClientProfileFragment
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_single_profile, container, false);
+        return inflater.inflate(R.layout.fragment_self_client_profile, container, false);
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mNameEditText = (EditText) view.findViewById(R.id.et_profile_name);
-        mContactStatsContainer = (RelativeLayout) view.findViewById(R.id.inc_profile_contacts);
+        mContactStatsContainer = (RelativeLayout) view.findViewById(R.id.inc_profile_contact_stats);
         mContactStatsText = (TextView) view.findViewById(R.id.tv_profile_contacts_text);
         mAccountDeletionButton = (Button) view.findViewById(R.id.btn_profile_delete_account);
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        refreshContact();
-    }
-
-    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater);
-        updateMenuItems(menu);
-    }
-
-    private void updateMenuItems(Menu menu) {
+        menuInflater.inflate(R.menu.fragment_self_client_profile, menu);
         menu.findItem(R.id.menu_my_profile).setVisible(false);
-        menu.findItem(R.id.menu_profile_edit).setVisible(true);
-        menu.findItem(R.id.menu_profile_block).setVisible(false);
-        menu.findItem(R.id.menu_profile_unblock).setVisible(false);
-        menu.findItem(R.id.menu_profile_delete).setVisible(false);
     }
 
     @Override
@@ -159,16 +146,6 @@ public class SelfClientProfileFragment extends ClientProfileFragment
         return mContact.getClientContactId();
     }
 
-    @Override
-    protected void updateMessageText() {
-        try {
-            int count = (int) XoApplication.get().getXoClient().getDatabase().getMessageCountByContactId(mContact.getClientContactId());
-            super.updateMessageText(count);
-        } catch (SQLException e) {
-            LOG.error("Error fetching message count from database.");
-        }
-    }
-
     private void updateAvatar(final SelectedContent avatar) {
         if (avatar != null) {
             XoApplication.get().getExecutor().execute(new Runnable() {
@@ -207,7 +184,6 @@ public class SelfClientProfileFragment extends ClientProfileFragment
         updateName();
         updateContactsContainer();
         updateFingerprint();
-        updateChatContainer(); //todo remove
     }
 
     private void updateAvatarView() {
@@ -241,42 +217,6 @@ public class SelfClientProfileFragment extends ClientProfileFragment
                 clientContactsCount + " " + getResources().getQuantityString(R.plurals.profile_contacts_text_friends, clientContactsCount) + "   "
                         +
                         groupsCount + " " + getResources().getQuantityString(R.plurals.profile_contacts_text_groups, groupsCount));
-    }
-
-    private void updateChatContainer() {
-        mChatContainer.setVisibility(View.GONE);
-    }
-
-    private boolean isCurrentContact(TalkClientContact contact) {
-        return mContact == contact || mContact.getClientContactId() == contact.getClientContactId();
-    }
-
-    @Override
-    public void onClientPresenceChanged(final TalkClientContact contact) {
-        if (isCurrentContact(contact)) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    refreshContact();
-                    getActivity().invalidateOptionsMenu();
-                    updateActionBar();
-                }
-            });
-        }
-    }
-
-    @Override
-    public void onClientRelationshipChanged(final TalkClientContact contact) {
-        if (isCurrentContact(contact)) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    refreshContact();
-                    getActivity().invalidateOptionsMenu();
-                    updateActionBar();
-                }
-            });
-        }
     }
 
     @Override

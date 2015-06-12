@@ -1,25 +1,19 @@
 package com.hoccer.xo.android.profile;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.RelativeLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.client.IXoContactListener;
-import com.hoccer.talk.client.IXoMessageListener;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.activity.ChatActivity;
 import com.hoccer.xo.android.base.XoFragment;
-import com.hoccer.xo.android.util.IntentHelper;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 
-public abstract class ProfileFragment extends XoFragment implements IXoContactListener, IXoMessageListener {
+public abstract class ProfileFragment extends XoFragment {
 
     public static final String ARG_CLIENT_CONTACT_ID = "ARG_CLIENT_CONTACT_ID";
 
@@ -27,18 +21,8 @@ public abstract class ProfileFragment extends XoFragment implements IXoContactLi
 
     protected TalkClientContact mContact;
 
-    protected RelativeLayout mChatContainer;
-    private RelativeLayout mChatMessagesContainer;
-    private TextView mChatMessagesText;
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        mChatContainer = (RelativeLayout) view.findViewById(R.id.inc_profile_chat_stats);
-        mChatMessagesContainer = (RelativeLayout) view.findViewById(R.id.rl_profile_messages);
-        mChatMessagesText = (TextView) view.findViewById(R.id.tv_messages_text);
-    }
+    protected TextView mNameText;
+    protected ImageView mAvatarImage;
 
     @Override
     public void onAttach(Activity activity) {
@@ -47,30 +31,10 @@ public abstract class ProfileFragment extends XoFragment implements IXoContactLi
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-
-        setHasOptionsMenu(true);
-
-        mChatMessagesContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showMessagingActivity();
-            }
-        });
-
-        getXoClient().registerContactListener(this);
-        getXoClient().registerMessageListener(this);
-
-        updateMessageText();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        getXoClient().unregisterContactListener(this);
-        getXoClient().unregisterMessageListener(this);
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        mAvatarImage = (ImageView) view.findViewById(R.id.profile_avatar_image);
+        mNameText = (TextView) view.findViewById(R.id.tv_profile_name);
     }
 
     private void setContact() {
@@ -89,69 +53,13 @@ public abstract class ProfileFragment extends XoFragment implements IXoContactLi
         }
     }
 
-    protected void showMessagingActivity() {
-        Intent intent = new Intent(getActivity(), ChatActivity.class);
-        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, getClientContactId());
-        if (mContact.isKept() || mContact.isKeptGroup()) {
-            intent.putExtra(ChatActivity.EXTRA_CLIENT_HISTORY, true);
-        }
-        startActivity(intent);
+    @Override
+    public void onResume() {
+        super.onResume();
+        setHasOptionsMenu(true);
     }
-
-    private void updateMessageTextOnUiThread() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                updateMessageText();
-            }
-        });
-    }
-
-    protected void updateMessageText(int count) {
-        if (shouldShowChatContainer(count)) {
-            mChatContainer.setVisibility(View.VISIBLE);
-            mChatMessagesText.setText(getResources().getQuantityString(R.plurals.message_count, count, count));
-        } else {
-            mChatContainer.setVisibility(View.GONE);
-        }
-    }
-
-    protected abstract boolean shouldShowChatContainer(int count);
 
     protected abstract int getClientContactId();
 
-    protected abstract void updateMessageText();
-
     protected abstract void updateView();
-
-    @Override
-    public void onMessageCreated(TalkClientMessage message) {
-        updateMessageTextOnUiThread();
-    }
-
-    @Override
-    public void onMessageUpdated(TalkClientMessage message) {
-        updateMessageTextOnUiThread();
-    }
-
-    @Override
-    public void onMessageDeleted(TalkClientMessage message) {
-        updateMessageTextOnUiThread();
-    }
-
-    @Override
-    public void onClientPresenceChanged(TalkClientContact contact) {
-    }
-
-    @Override
-    public void onClientRelationshipChanged(TalkClientContact contact) {
-    }
-
-    @Override
-    public void onGroupPresenceChanged(TalkClientContact contact) {
-    }
-
-    @Override
-    public void onGroupMembershipChanged(TalkClientContact contact) {
-    }
 }

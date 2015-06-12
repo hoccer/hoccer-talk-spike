@@ -8,20 +8,23 @@ import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.client.XoClientDatabase;
+import com.hoccer.talk.client.IXoContactListener;
+import com.hoccer.talk.client.IXoMessageListener;
 import com.hoccer.talk.client.exceptions.NoClientIdInPresenceException;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
+import com.hoccer.xo.android.activity.ChatActivity;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
 import com.hoccer.xo.android.util.IntentHelper;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 
-public class ContactClientProfileFragment extends ClientProfileFragment {
+public class ContactClientProfileFragment extends ClientProfileFragment implements IXoMessageListener, IXoContactListener {
 
     private static final Logger LOG = Logger.getLogger(ContactClientProfileFragment.class);
 
@@ -30,29 +33,74 @@ public class ContactClientProfileFragment extends ClientProfileFragment {
     private EditText mNicknameEditText;
     private ImageButton mNicknameEditButton;
 
+    private RelativeLayout mChatContainer;
+    private RelativeLayout mChatMessagesContainer;
+    private TextView mChatMessagesText;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_single_profile, container, false);
+        return inflater.inflate(R.layout.fragment_contact_client_profile, container, false);
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mInviteButtonContainer = (LinearLayout) view.findViewById(R.id.inc_profile_request);
+        mChatContainer = (RelativeLayout) view.findViewById(R.id.inc_profile_chat_stats);
+        mChatMessagesContainer = (RelativeLayout) view.findViewById(R.id.rl_profile_messages);
+        mChatMessagesText = (TextView) view.findViewById(R.id.tv_messages_text);
         mNicknameTextView = (TextView) view.findViewById(R.id.tv_profile_nickname);
         mNicknameEditText = (EditText) view.findViewById(R.id.et_profile_nickname);
         mNicknameEditButton = (ImageButton) view.findViewById(R.id.ib_profile_nickname_edit);
+        mInviteButtonContainer = (LinearLayout) view.findViewById(R.id.inc_profile_friend_request);
+
+        mChatMessagesContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showMessagingActivity();
+            }
+        });
+    }
+
+    private void showMessagingActivity() {
+        Intent intent = new Intent(getActivity(), ChatActivity.class);
+        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, getClientContactId());
+        if (mContact.isKept() || mContact.isKeptGroup()) {
+            intent.putExtra(ChatActivity.EXTRA_CLIENT_HISTORY, true);
+        }
+        startActivity(intent);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        refreshContact();
+
+        getXoClient().registerContactListener(this);
+        getXoClient().registerMessageListener(this);
+
+        updateMessageText();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        getXoClient().unregisterContactListener(this);
+        getXoClient().unregisterMessageListener(this);
+    }
+
+    private void updateMessageTextOnUiThread() {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                updateMessageText();
+            }
+        });
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater);
+        menuInflater.inflate(R.menu.fragment_contact_client_profile, menu);
         updateMenuItems(menu);
     }
 
@@ -184,14 +232,26 @@ public class ContactClientProfileFragment extends ClientProfileFragment {
         return mContact.getClientContactId();
     }
 
-    @Override
     protected void updateMessageText() {
         try {
             int count = (int) XoApplication.get().getXoClient().getDatabase().getMessageCountByContactId(mContact.getClientContactId());
-            super.updateMessageText(count);
+            updateMessageText(count);
         } catch (SQLException e) {
-            LOG.error("Error fetching message count from database.");
+            LOG.error("SQL Error fetching message count from database.", e);
         }
+    }
+
+    private void updateMessageText(int count) {
+        if (shouldShowChatContainer(count)) {
+            mChatContainer.setVisibility(View.VISIBLE);
+            mChatMessagesText.setText(getResources().getQuantityString(R.plurals.message_count, count, count));
+        } else {
+            mChatContainer.setVisibility(View.GONE);
+        }
+    }
+
+    protected boolean shouldShowChatContainer(int count) {
+        return (mContact.isClient() && mContact.getClientRelationship() != null && mContact.isFriendOrBlocked()) || mContact.isKept() && count > 0 || mContact.isNearby();
     }
 
     @Override
@@ -215,6 +275,22 @@ public class ContactClientProfileFragment extends ClientProfileFragment {
         updateDeclineButton(mContact);
         hideNicknameEdit();
         updateNicknameContainer();
+    }
+
+
+    @Override
+    public void onMessageCreated(TalkClientMessage message) {
+        updateMessageTextOnUiThread();
+    }
+
+    @Override
+    public void onMessageUpdated(TalkClientMessage message) {
+        updateMessageTextOnUiThread();
+    }
+
+    @Override
+    public void onMessageDeleted(TalkClientMessage message) {
+        updateMessageTextOnUiThread();
     }
 
     private void updateAvatarView() {
@@ -387,15 +463,6 @@ public class ContactClientProfileFragment extends ClientProfileFragment {
         getActivity().finish();
     }
 
-    private boolean isCurrentContact(TalkClientContact contact) {
-        return mContact == contact || mContact.getClientContactId() == contact.getClientContactId();
-    }
-
-    @Override
-    protected boolean shouldShowChatContainer(int count) {
-        return (mContact.isClient() && mContact.getClientRelationship() != null && mContact.isFriendOrBlocked()) || mContact.isKept() && count > 0 || mContact.isNearby();
-    }
-
     @Override
     public void onClientPresenceChanged(final TalkClientContact contact) {
         if (isCurrentContact(contact)) {
@@ -422,5 +489,19 @@ public class ContactClientProfileFragment extends ClientProfileFragment {
                 }
             });
         }
+    }
+
+    private boolean isCurrentContact(TalkClientContact contact) {
+        return mContact == contact || mContact.getClientContactId() == contact.getClientContactId();
+    }
+
+    @Override
+    public void onGroupPresenceChanged(TalkClientContact contact) {
+
+    }
+
+    @Override
+    public void onGroupMembershipChanged(TalkClientContact contact) {
+
     }
 }

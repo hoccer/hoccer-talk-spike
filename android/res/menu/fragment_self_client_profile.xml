@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+            android:id="@+id/menu_profile_edit"
+            android:icon="@drawable/ic_action_edit"
+            android:orderInCategory="101"
+            android:showAsAction="always"
+            android:title="@string/menu_group_edit_profile"/>
+</menu>
