@@ -2728,6 +2728,9 @@ public class TalkRpcHandler implements ITalkRpcServer {
             if (!environment.isNearby()) {
 
                 minNumberOfGroups = matching.size() / MAX_WORLD_WIDE_GROUP_SIZE + 1;
+                // TODO: it seems to me that in case MIN_WORLD_WIDE_GROUP_SIZE is 8 and we have a matching.size of 8 we would get 2 as answer, but in fact want it to be 1
+                // maybe something like (int)(((double)matching.size() + 0.5) / MIN_WORLD_WIDE_GROUP_SIZE)
+                // ... enter `plot Quotient[(x-0.5),8] + 1` at wolfram alpha to see what i mean
                 maxNumberOfGroups = matching.size() / MIN_WORLD_WIDE_GROUP_SIZE + 1;
 
                 // The Group distribution algorithm works as follows:

@@ -26,7 +26,7 @@ public class ITWorldWide extends IntegrationTest {
     @Before
     public void setUp() throws Exception {
         talkServer = createTalkServer();
-        clients = TestHelper.initializeTalkClients(talkServer, 13);
+        clients = TestHelper.initializeTalkClients(talkServer, 11);
     }
 
     @After
@@ -65,43 +65,46 @@ public class ITWorldWide extends IntegrationTest {
     @Test
     public void activateWorldwideUntilTwoGroups() throws Exception {
         activateWorldwideFor(new String[]{"client1", "client2", "client3", "client4", "client5", "client6",
-                "client7", "client8", "client9", "client10", "client11", "client12", "client13"});
+                "client7", "client8", "client9", "client10"});
 
         // The first client should be together in one group with the other nine.
         final XoClient client1 = clients.get("client1");
         final ITalkServerDatabase serverDb = talkServer.getTalkServer().getDatabase();
 
         assertEquals(
-                13,
+                10,
                 serverDb.findEnvironmentsForGroup(
                         client1.getCurrentWorldwideGroup().getGroupId()
                 ).size()
         );
 
         assertEquals(
-                13,
+                10,
                 serverDb.findGroupMembershipsById(
                         client1.getCurrentWorldwideGroup().getGroupId()
                 ).size()
         );
 
-        // 13th client should be in a new group
-        /*activateWorldwideFor(new String[]{"client14"});
-        final XoClient client14 = clients.get("client14");
-        assertEquals(1,talkServer.getTalkServer().getDatabase().findEnvironmentsForGroup(
-                client14.getCurrentWorldwideGroup().getGroupId()
-        ).size());*/
+        // 11th client should be in a new group
+        activateWorldwideFor(new String[]{"client11"});
+        final XoClient client11 = clients.get("client11");
+        assertEquals(
+                1,
+                serverDb.findEnvironmentsForGroup(
+                        client11.getCurrentWorldwideGroup().getGroupId()
+                ).size()
+        );
     }
 
-    private void activateWorldwideFor(String[] clientIds) {
+    private void activateWorldwideFor(final String[] clientIds) {
         XoClient client;
-        for (String clientId : clientIds) {
+        for (final String clientId : clientIds) {
             client = clients.get(clientId);
             TestHelper.setEnvironmentToWorldwide(client);
         }
-        for (String clientId : clientIds) {
+        for (final String clientId : clientIds) {
             client = clients.get(clientId);
-            TalkEnvironment clientEnv = talkServer.getTalkServer().getDatabase().findEnvironmentByClientId(
+            final TalkEnvironment clientEnv = talkServer.getTalkServer().getDatabase().findEnvironmentByClientId(
                     TalkEnvironment.TYPE_WORLDWIDE,
                     client.getSelfContact().getClientId()
             );

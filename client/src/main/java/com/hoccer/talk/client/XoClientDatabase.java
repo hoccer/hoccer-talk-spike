@@ -208,6 +208,26 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return mClientContacts.queryForEq("contactType", TalkClientContact.TYPE_GROUP);
     }
 
+    public boolean isClientContactInGroupOfType(String groupType, String clientId) throws SQLException {
+        List<TalkGroupPresence> groupPresences = mGroupPresences.queryBuilder().where()
+                .eq("groupType", groupType)
+                .query();
+
+        List<TalkGroupMembership> memberships = mGroupMemberships.queryBuilder().where()
+                .eq("clientId", clientId)
+                .query();
+
+        for (TalkGroupMembership groupMembership : memberships) {
+            for (TalkGroupPresence groupPresence : groupPresences) {
+                if (groupMembership.getGroupId().equals(groupPresence.getGroupId())) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     public List<TalkClientContact> findGroupContactsByMembershipState(String state) throws SQLException {
         QueryBuilder<TalkGroupMembership, Long> memberships = mGroupMemberships.queryBuilder();
         memberships.where()

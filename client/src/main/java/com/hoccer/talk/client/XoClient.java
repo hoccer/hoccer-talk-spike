@@ -1193,8 +1193,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     private void doConnect() throws Exception {
-        mConnection.disconnect();
-
         LOG.debug("doConnect() on connection #" + mConnection.getConnectionId());
         URI uri = new URI(mClientConfiguration.getServerUri());
         String protocol = mClientConfiguration.getUseBsonProtocol() ? mClientConfiguration.getBsonProtocolString() : mClientConfiguration.getJsonProtocolString();
@@ -1213,7 +1211,11 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     switchState(State.LOGIN, "login after registration");
                 } catch (Exception e) {
                     LOG.error("Exception while registering", e);
-                    switchState(State.CONNECTING, "reconnect after registration failed");
+                    if (mConnection.isConnected()){
+                        scheduleRegistration();
+                    } else {
+                        switchState(State.CONNECTING, "reconnect after registration failed");
+                    }
                 }
             }
         }, 0, TimeUnit.SECONDS);
@@ -1275,7 +1277,11 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     switchState(State.SYNCING, "sync after login");
                 } catch (Exception e) {
                     LOG.error("Exception while logging in", e);
-                    switchState(State.CONNECTING, "reconnect after login failed");
+                    if (mConnection.isConnected()){
+                        scheduleLogin();
+                    } else {
+                        switchState(State.CONNECTING, "reconnect after login failed");
+                    }
                 }
             }
         }, 0, TimeUnit.SECONDS);
@@ -1327,7 +1333,11 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     switchState(State.READY, "ready after sync");
                 } catch (Exception e) {
                     LOG.error("Exception while syncing", e);
-                    switchState(State.CONNECTING, "reconnect after sync failed");
+                    if (mConnection.isConnected()){
+                        scheduleSync();
+                    } else {
+                        switchState(State.CONNECTING, "reconnect after sync failed");
+                    }
                 }
             }
         }, 0, TimeUnit.SECONDS);
@@ -2380,13 +2390,14 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     private void keepAcquaintance(TalkClientContact clientContact) throws SQLException, NoClientIdInPresenceException {
-        if (clientContact.isClient() && clientContact.isInEnvironment() && (clientContact.getClientRelationship() == null
+        boolean wasWorldWide = mDatabase.isClientContactInGroupOfType(TalkGroupPresence.GROUP_TYPE_WORLDWIDE, clientContact.getClientId());
+        if (clientContact.isClient() && (clientContact.isInEnvironment() || wasWorldWide) && (clientContact.getClientRelationship() == null
                 || clientContact.getClientRelationship().isNone()
                 || clientContact.getClientRelationship().isInvited()
                 || clientContact.getClientRelationship().invitedMe())) {
             if (clientContact.isNearby()) {
                 clientContact.getClientPresence().setAcquaintanceType(TalkEnvironment.TYPE_NEARBY);
-            } else if (clientContact.isWorldwide()) {
+            } else if (clientContact.isWorldwide() || wasWorldWide) {
                 clientContact.getClientPresence().setAcquaintanceType(TalkEnvironment.TYPE_WORLDWIDE);
             }
             clientContact.getClientPresence().setKept(true);
@@ -2828,6 +2839,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 clientContact.getClientPresence().setKept(true);
                 clientContact.getClientPresence().setAcquaintanceType(TalkPresence.TYPE_ACQUAINTANCE_NONE);
             }
+
             clientContact.updateRelationship(newRelationship);
             mDatabase.saveRelationship(clientContact.getClientRelationship());
             mDatabase.savePresence(clientContact.getClientPresence());
