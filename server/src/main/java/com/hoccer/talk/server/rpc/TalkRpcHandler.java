@@ -2694,6 +2694,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
     @Override
     public String updateEnvironment(TalkEnvironment environment) {
         logCall("updateEnvironment(clientId: '" + mConnection.getClientId() + "')");
+
         requireIdentification(true);
 
         if (!environment.isValid()) {
@@ -2704,240 +2705,245 @@ public class TalkRpcHandler implements ITalkRpcServer {
             LOG.warn("updateEnvironment: no environment type, defaulting to nearby. Please fix client");
             environment.setType(TalkEnvironment.TYPE_NEARBY);
         }
-        if (environment.isWorldwide() && environment.getTag() == null) {
-            environment.setTag("*");
+        if (environment.isWorldwide() && environment.getTag() == null || environment.getTag().length() < 2) {
+            Date now = new Date();
+            long day = now.getTime() / 1000 / 60 / 60 / 24;
+            environment.setTag("*-"+ day);
         }
 
         environment.setTimeReceived(new Date());
         environment.setClientId(mConnection.getClientId());
         environment.setTimeReleased(null);
 
-        List<TalkEnvironment> matching = mDatabase.findEnvironmentsMatching(environment);
+        String lockId = "env-"+environment.getType();
 
-        int minNumberOfGroups = 0;
-        int maxNumberOfGroups = 0;
-        int abandonedGroups = 0;
+        synchronized (mServer.idLock(lockId)) {
 
-        if (!environment.isNearby()) {
+            List<TalkEnvironment> matching = mDatabase.findEnvironmentsMatching(environment);
 
-            minNumberOfGroups = matching.size() / MAX_WORLD_WIDE_GROUP_SIZE + 1;
+            int minNumberOfGroups = 0;
+            int maxNumberOfGroups = 0;
+            int abandonedGroups = 0;
 
-            // TODO: it seems to me that in case MIN_WORLD_WIDE_GROUP_SIZE is 8 and we have a matching.size of 8 we would get 2 as answer, but in fact want it to be 1
-            // maybe something like (int)(((double)matching.size() + 0.5) / MIN_WORLD_WIDE_GROUP_SIZE)
-            // ... enter `plot Quotient[(x-0.5),8] + 1` at wolfram alpha to see what i mean
-            maxNumberOfGroups = matching.size() / MIN_WORLD_WIDE_GROUP_SIZE + 1;
+            if (!environment.isNearby()) {
 
-            // The Group distribution algorithm works as follows:
-            // 1. The first member of a matching set will make a group to be created
-            // 2. New arriving members will be added to the n-th smallest group
-            //    depending on the condition explained in 3c.
-            //    This might make one group grow over the limit if all groups are "full"
-            // 3. When a group members updates his environment (and only then), there are three possible
-            //    outcomes:
-            //    a: If the average group size is between MIN_WORLD_WIDE_GROUP_SIZE and MAX_WORLD_WIDE_GROUP_SIZE,
-            //       nothing special happens, the client will stay in the current group.
-            //    b: If all groups are "full" and at least one group is over the limit (MAX_WORLD_WIDE_GROUP_SIZE),
-            //       the "minNumberOfGroups" will be larger than the current number of groups,
-            //       and a new group will be created, and the updating client will be moved to this new group.
-            //    c: If there are so many groups that the average group size is below MIN_WORLD_WIDE_GROUP_SIZE,
-            //       the smallest groups will be virtually "declared abandoned" by computing the number of
-            //       superfluous groups.
-            //       The updating client will be moved to the smallest non-abandoned group; this will happen to other
-            //       environment-updaters too, until the group is empty. Note that a member will stay in a
-            //       group and the group will remain in place unless the member updates it's environment.
-            //       This means that there may be a number of abandoned groups with just one non-updating member
-            //       until the environment expires. However, if the number of environments increases, these
-            //       groups will be repopulated before new groups will be created.
-            //   Yeah!
-        }
+                minNumberOfGroups = matching.size() / MAX_WORLD_WIDE_GROUP_SIZE + 1;
+                // TODO: it seems to me that in case MIN_WORLD_WIDE_GROUP_SIZE is 8 and we have a matching.size of 8 we would get 2 as answer, but in fact want it to be 1
+                // maybe something like (int)(((double)matching.size() + 0.5) / MIN_WORLD_WIDE_GROUP_SIZE)
+                // ... enter `plot Quotient[(x-0.5),8] + 1` at wolfram alpha to see what i mean
+                maxNumberOfGroups = matching.size() / MIN_WORLD_WIDE_GROUP_SIZE + 1;
 
-        // determine how many environments in the matching list belong to how many different groups
-        ArrayList<Pair<String, Integer>> environmentsPerGroup = findGroupSortedBySize(matching);
-
-        // determine how many groups are not needed
-        abandonedGroups = environmentsPerGroup.size() - minNumberOfGroups;
-        if (abandonedGroups < 0) {
-            abandonedGroups = 0;
-        }
-        TalkEnvironment myEnvironment = mDatabase.findEnvironmentByClientId(environment.getType(), mConnection.getClientId());
-
-        // TODO: set to trace for production
-        if (LOG.isDebugEnabled()) {
-            // begin debug output code
-            if (environment.isWorldwide()) {
-                int i = 0;
-                for (Pair<String, Integer> epg : environmentsPerGroup) {
-                    LOG.debug("updateEnvironment: " + epg.getRight() + " members in group " + epg.getLeft() + ",(" + i + "/" + environmentsPerGroup.size() + "),clientId=" + mConnection.getClientId() + ",my current groupId=" + environment.getGroupId());
-                    ++i;
-                }
-                int ii = 0;
-
-                for (Pair<String, Integer> epg : environmentsPerGroup) {
-                    LOG.debug("updateEnvironment(member listing): " + epg.getRight() + " members in group " + epg.getLeft() + ",(" + ii + "/" + environmentsPerGroup.size() + "),clientId=" + mConnection.getClientId() + ",my current groupId=" + environment.getGroupId());
-
-                    List<TalkGroupMembership> members = mDatabase.findGroupMembershipsById(epg.getLeft());
-                    int g = 0;
-                    for (TalkGroupMembership member : members) {
-                        if (member.isMember() || member.isSuspended()) {
-                            TalkPresence presence = mDatabase.findPresenceForClient(member.getClientId());
-                            TalkEnvironment hisEnvironment = mDatabase.findEnvironmentByClientId(environment.getType(), member.getClientId());
-                            if (presence != null && hisEnvironment != null) {
-                                LOG.debug("updateEnvironment: member " + g + "/" + epg.getRight() + " members in group " + epg.getLeft() +
-                                        ", nick '" + presence.getClientName() + "', membership '" + member.getState() + "'.status '" + presence.getConnectionStatus() +
-                                        ", hasExpired=" + environment.hasExpired() + ", released:" + environment.getTimeReleased() + ", ttl=" + environment.getTimeToLive() + ", undelivered=" + deliveryCountForEnvironment(environment));
-                            } else {
-                                LOG.error("updateEnvironment: missing presence or environment for member " + g + "/" + epg.getRight() +
-                                        " members in group " + epg.getLeft() + ", clientId=" + member.getClientId() + ", presence:" + presence + ", environment:" + environment);
-                            }
-                            ++g;
-                        }
-                    }
-                    ++ii;
-                }
+                // The Group distribution algorithm works as follows:
+                // 1. The first member of a matching set will make a group to be created
+                // 2. New arriving members will be added to the n-th smallest group
+                //    depending on the condition explained in 3c.
+                //    This might make one group grow over the limit if all groups are "full"
+                // 3. When a group members updates his environment (and only then), there are three possible
+                //    outcomes:
+                //    a: If the average group size is between MIN_WORLD_WIDE_GROUP_SIZE and MAX_WORLD_WIDE_GROUP_SIZE,
+                //       nothing special happens, the client will stay in the current group.
+                //    b: If all groups are "full" and at least one group is over the limit (MAX_WORLD_WIDE_GROUP_SIZE),
+                //       the "minNumberOfGroups" will be larger than the current number of groups,
+                //       and a new group will be created, and the updating client will be moved to this new group.
+                //    c: If there are so many groups that the average group size is below MIN_WORLD_WIDE_GROUP_SIZE,
+                //       the smallest groups will be virtually "declared abandoned" by computing the number of
+                //       superfluous groups.
+                //       The updating client will be moved to the smallest non-abandoned group; this will happen to other
+                //       environment-updaters too, until the group is empty. Note that a member will stay in a
+                //       group and the group will remain in place unless the member updates it's environment.
+                //       This means that there may be a number of abandoned groups with just one non-updating member
+                //       until the environment expires. However, if the number of environments increases, these
+                //       groups will be repopulated before new groups will be created.
+                //   Yeah!
             }
-            // end debug output code
-        }
 
-        long undeliveredCount = deliveryCountForEnvironment(environment);
+            // determine how many environments in the matching list belong to how many different groups
+            ArrayList<Pair<String, Integer>> environmentsPerGroup = findGroupSortedBySize(matching);
 
-        for (TalkEnvironment te : matching) {
-            if (te.getClientId().equals(mConnection.getClientId())) {
-                // there is already a matching environment for us
-                TalkGroupMembership myMembership = mDatabase.findGroupMembershipForClient(te.getGroupId(), te.getClientId());
-                TalkGroupPresence myGroupPresence = mDatabase.findGroupPresenceById(te.getGroupId());
-                if (myMembership != null && myGroupPresence != null) {
-                    if ((myMembership.isNearby() || myMembership.isWorldwide()) &&
-                            (myMembership.isJoined() || myMembership.isSuspended()) &&
-                            myGroupPresence.getState().equals(TalkGroupPresence.STATE_EXISTS))
-                    {
-                        // everything seems fine, but are we in the right group?
-                        if (myMembership.isNearby()) {
-                            // for nearby, we want to be in the largest group
-                            if (environmentsPerGroup.size() > 1) {
-                                if (!environmentsPerGroup.get(0).getLeft().equals(te.getGroupId())) {
-                                    // we are not in the largest group, lets move over
-                                    destroyEnvironment(mServer, myEnvironment);
-                                    // join the largest group
-                                    TalkGroupPresence largestGroup = mDatabase.findGroupPresenceById(environmentsPerGroup.get(0).getLeft());
-                                    joinGroupWithEnvironment(largestGroup, environment);
-                                    return largestGroup.getGroupId();
+            // determine how many groups are not needed
+            abandonedGroups = environmentsPerGroup.size() - minNumberOfGroups;
+            if (abandonedGroups < 0) {
+                abandonedGroups = 0;
+            }
+            TalkEnvironment myEnvironment = mDatabase.findEnvironmentByClientId(environment.getType(), mConnection.getClientId());
+
+            // TODO: set to trace for production
+            if (LOG.isDebugEnabled()) {
+                // begin debug output code
+                if (environment.isWorldwide()) {
+                    int i = 0;
+                    for (Pair<String, Integer> epg : environmentsPerGroup) {
+                        LOG.debug("updateEnvironment: " + epg.getRight() + " members in group " + epg.getLeft() + ",(" + i + "/" + environmentsPerGroup.size() + "),clientId=" + mConnection.getClientId() + ",my current groupId=" + environment.getGroupId());
+                        ++i;
+                    }
+                    int ii = 0;
+
+                    for (Pair<String, Integer> epg : environmentsPerGroup) {
+                        LOG.debug("updateEnvironment(member listing): " + epg.getRight() + " members in group " + epg.getLeft() + ",(" + ii + "/" + environmentsPerGroup.size() + "),clientId=" + mConnection.getClientId() + ",my current groupId=" + environment.getGroupId());
+
+                        List<TalkGroupMembership> members = mDatabase.findGroupMembershipsById(epg.getLeft());
+                        int g = 0;
+                        for (TalkGroupMembership member : members) {
+                            if (member.isMember() || member.isSuspended()) {
+                                TalkPresence presence = mDatabase.findPresenceForClient(member.getClientId());
+                                TalkEnvironment hisEnvironment = mDatabase.findEnvironmentByClientId(environment.getType(), member.getClientId());
+                                if (presence != null && hisEnvironment != null) {
+                                    LOG.debug("updateEnvironment: member " + g + "/" + epg.getRight() + " members in group " + epg.getLeft() +
+                                            ", nick '" + presence.getClientName() + "', membership '" + member.getState() + "'.status '" + presence.getConnectionStatus() +
+                                            ", hasExpired=" + environment.hasExpired() + ", released:" + environment.getTimeReleased() + ", ttl=" + environment.getTimeToLive() + ", undelivered=" + deliveryCountForEnvironment(environment));
+                                } else {
+                                    LOG.error("updateEnvironment: missing presence or environment for member " + g + "/" + epg.getRight() +
+                                            " members in group " + epg.getLeft() + ", clientId=" + member.getClientId() + ", presence:" + presence + ", environment:" + environment);
                                 }
+                                ++g;
                             }
-                        } else {
-                            // we are in worldwide and already member of a worldwide group
-                            // for worldwide, we want to make sure the group is neither too small nor too large
+                        }
+                        ++ii;
+                    }
+                }
+                // end debug output code
+            }
 
-                            LOG.debug("updateEnvironment: worldwide: matching=" + matching.size() + ",groups=" + environmentsPerGroup.size() + ",minGroups=" + minNumberOfGroups + ",maxGroups=" + maxNumberOfGroups + ",abandoned=" + abandonedGroups + ",clientId=" + mConnection.getClientId() + ",groupId=" + myMembership.getGroupId());
+            long undeliveredCount = deliveryCountForEnvironment(environment);
 
-                            if (minNumberOfGroups > environmentsPerGroup.size() && undeliveredCount == 0) {
-                                // we have not enough groups, lets create a new group and join it
-                                LOG.debug("updateEnvironment: worldwide: not enough groups, creating a new group and joining it,clientId=" + mConnection.getClientId() + ",groupId=" + myMembership.getGroupId());
-                                destroyEnvironment(mServer, myEnvironment);
-                                createGroupWithEnvironment(environment);
-                                return environment.getGroupId();
-                            }
-                            if (environmentsPerGroup.size() > maxNumberOfGroups) {
-                                // we have too many groups, lets see if we have to consolidate
-                                // maxNumberOfGroups is always at least 1, so we get here only when there are at least 2 groups
-                                LOG.debug("updateEnvironment: worldwide: too many groups,clientId=" + mConnection.getClientId() + ",groupId=" + myMembership.getGroupId());
+            for (TalkEnvironment te : matching) {
+                if (te.getClientId().equals(mConnection.getClientId())) {
+                    // there is already a matching environment for us
+                    TalkGroupMembership myMembership = mDatabase.findGroupMembershipForClient(te.getGroupId(), te.getClientId());
+                    TalkGroupPresence myGroupPresence = mDatabase.findGroupPresenceById(te.getGroupId());
+                    if (myMembership != null && myGroupPresence != null) {
+                        if ((myMembership.isNearby() || myMembership.isWorldwide()) &&
+                                (myMembership.isJoined() || myMembership.isSuspended()) &&
+                                myGroupPresence.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
+                            // everything seems fine, but are we in the right group?
+                            if (myMembership.isNearby()) {
+                                // for nearby, we want to be in the largest group
+                                if (environmentsPerGroup.size() > 1) {
+                                    if (!environmentsPerGroup.get(0).getLeft().equals(te.getGroupId())) {
+                                        // we are not in the largest group, lets move over
+                                        destroyEnvironment(mServer, myEnvironment);
+                                        // join the largest group
+                                        TalkGroupPresence largestGroup = mDatabase.findGroupPresenceById(environmentsPerGroup.get(0).getLeft());
+                                        joinGroupWithEnvironment(largestGroup, environment);
+                                        return largestGroup.getGroupId();
+                                    }
+                                }
+                            } else {
+                                // we are in worldwide and already member of a worldwide group
+                                // for worldwide, we want to make sure the group is neither too small nor too large
 
-                                for (int n = 0; n < abandonedGroups;++n) {
-                                    // lets check if we are in an "abandoned group"
-                                    if (environmentsPerGroup.get(environmentsPerGroup.size() - 1 - n).getLeft().equals(te.getGroupId())) {
-                                        // we are in an an abandoned group, lets move the smallest non-abandoned group
-                                        LOG.debug("updateEnvironment: worldwide: too many groups and we are in an abandoned group (" + n + "-smallest),joining " + abandonedGroups + "-smallest group,clientId=" + mConnection.getClientId() + ",groupId=" + myMembership.getGroupId());
+                                LOG.debug("updateEnvironment: worldwide: matching=" + matching.size() + ",groups=" + environmentsPerGroup.size() + ",minGroups=" + minNumberOfGroups + ",maxGroups=" + maxNumberOfGroups + ",abandoned=" + abandonedGroups + ",clientId=" + mConnection.getClientId() + ",groupId=" + myMembership.getGroupId());
 
-                                        // but before we can move, we need to check if there are undelivered messages
+                                if (minNumberOfGroups > environmentsPerGroup.size() && undeliveredCount == 0) {
+                                    // we have not enough groups, lets create a new group and join it
+                                    LOG.debug("updateEnvironment: worldwide: not enough groups, creating a new group and joining it,clientId=" + mConnection.getClientId() + ",groupId=" + myMembership.getGroupId());
+                                    destroyEnvironment(mServer, myEnvironment);
+                                    createGroupWithEnvironment(environment);
+                                    return environment.getGroupId();
+                                }
+                                if (environmentsPerGroup.size() > maxNumberOfGroups) {
+                                    // we have too many groups, lets see if we have to consolidate
+                                    // maxNumberOfGroups is always at least 1, so we get here only when there are at least 2 groups
+                                    LOG.debug("updateEnvironment: worldwide: too many groups,clientId=" + mConnection.getClientId() + ",groupId=" + myMembership.getGroupId());
 
-                                        if (undeliveredCount == 0) {
-                                            destroyEnvironment(mServer, myEnvironment);
-                                            String nThSmallestGroupId = environmentsPerGroup.get(environmentsPerGroup.size() - 1 - abandonedGroups).getLeft();
-                                            TalkGroupPresence nThSmallestGroup = mDatabase.findGroupPresenceById(nThSmallestGroupId);
-                                            if (nThSmallestGroup == null) {
-                                                LOG.error("updateEnvironment: worldwide: secondSmallestGroup presence not found, id=" + nThSmallestGroupId + ",clientId=" + mConnection.getClientId() + ",groupId=" + myMembership.getGroupId());
+                                    for (int n = 0; n < abandonedGroups; ++n) {
+                                        // lets check if we are in an "abandoned group"
+                                        if (environmentsPerGroup.get(environmentsPerGroup.size() - 1 - n).getLeft().equals(te.getGroupId())) {
+                                            // we are in an an abandoned group, lets move the smallest non-abandoned group
+                                            LOG.debug("updateEnvironment: worldwide: too many groups and we are in an abandoned group (" + n + "-smallest),joining " + abandonedGroups + "-smallest group,clientId=" + mConnection.getClientId() + ",groupId=" + myMembership.getGroupId());
+
+                                            // but before we can move, we need to check if there are undelivered messages
+
+                                            if (undeliveredCount == 0) {
+                                                destroyEnvironment(mServer, myEnvironment);
+                                                String nThSmallestGroupId = environmentsPerGroup.get(environmentsPerGroup.size() - 1 - abandonedGroups).getLeft();
+                                                TalkGroupPresence nThSmallestGroup = mDatabase.findGroupPresenceById(nThSmallestGroupId);
+                                                if (nThSmallestGroup == null) {
+                                                    LOG.error("updateEnvironment: worldwide: secondSmallestGroup presence not found, id=" + nThSmallestGroupId + ",clientId=" + mConnection.getClientId() + ",groupId=" + myMembership.getGroupId());
+                                                } else {
+                                                    joinGroupWithEnvironment(nThSmallestGroup, environment);
+                                                    return nThSmallestGroup.getGroupId();
+                                                }
                                             } else {
-                                                joinGroupWithEnvironment(nThSmallestGroup, environment);
-                                                return nThSmallestGroup.getGroupId();
+                                                LOG.debug("updateEnvironment: worldwide: can not move client=" + mConnection.getClientId() + " from groupId=" + myMembership.getGroupId() + ", there are " + undeliveredCount + " deliveries to be delivered");
                                             }
-                                        } else {
-                                            LOG.debug("updateEnvironment: worldwide: can not move client=" + mConnection.getClientId() + " from groupId=" + myMembership.getGroupId() + ", there are " + undeliveredCount + " deliveries to be delivered");
                                         }
                                     }
                                 }
+                                // we are fine and in the right group
                             }
-                            // we are fine and in the right group
+                            // group membership has not changed, we are still fine
+                            // just update environment
+                            if (environment.getGroupId() == null) {
+                                // first environment update without a group known to the client, but group exists on server, probably unclean connection shutdown
+                                environment.setGroupId(myEnvironment.getGroupId());
+                            } else if (!environment.getGroupId().equals(myEnvironment.getGroupId())) {
+                                // matching environment found, but group id differs from old environment, which must not happen - client wants to gain membership to a group it is not entitled to
+                                // lets destroy all environments
+                                destroyEnvironment(mServer, te);
+                                destroyEnvironment(mServer, myEnvironment);
+                                throw new RuntimeException("illegal group id in environment");
+                            }
+                            myEnvironment.updateWith(environment);
+                            mDatabase.saveEnvironment(myEnvironment);
+                            // update worldwide notification preference if necessary
+                            if (environment.isWorldwide() && environment.getNotificationPreference() != null) {
+                                if (!environment.getNotificationPreference().equals(myMembership.getNotificationPreference())) {
+                                    myMembership.setNotificationPreference(environment.getNotificationPreference());
+                                    mDatabase.saveGroupMembership(myMembership);
+                                    mServer.getUpdateAgent().requestGroupMembershipUpdate(myMembership);
+                                }
+                            }
+                            return myGroupPresence.getGroupId();
+                        } else {
+                            // there is a group and a membership, but they seem to be tombstones, so lets ignore them, just get rid of the bad environment
+                            mDatabase.deleteEnvironment(te);
+                            break; // continue processing after the loop and join or create a new group
                         }
-                        // group membership has not changed, we are still fine
-                        // just update environment
-                        if (environment.getGroupId() == null) {
-                            // first environment update without a group known to the client, but group exists on server, probably unclean connection shutdown
-                            environment.setGroupId(myEnvironment.getGroupId());
-                        } else if (!environment.getGroupId().equals(myEnvironment.getGroupId())) {
-                            // matching environment found, but group id differs from old environment, which must not happen - client wants to gain membership to a group it is not entitled to
-                            // lets destroy all environments
-                            destroyEnvironment(mServer, te);
-                            destroyEnvironment(mServer, myEnvironment);
-                            throw new RuntimeException("illegal group id in environment");
-                        }
-                        myEnvironment.updateWith(environment);
-                        mDatabase.saveEnvironment(myEnvironment);
-                        // update worldwide notification preference if necessary
-                       if (environment.isWorldwide() && environment.getNotificationPreference() != null) {
-                           if (!environment.getNotificationPreference().equals(myMembership.getNotificationPreference())) {
-                               myMembership.setNotificationPreference(environment.getNotificationPreference());
-                               mDatabase.saveGroupMembership(myMembership);
-                               mServer.getUpdateAgent().requestGroupMembershipUpdate(myMembership);
-                           }
-                       }
-                       return myGroupPresence.getGroupId();
-                    } else {
-                        // there is a group and a membership, but they seem to be tombstones, so lets ignore them, just get rid of the bad environment
-                        mDatabase.deleteEnvironment(te);
-                        break; // continue processing after the loop and join or create a new group
                     }
                 }
             }
-        }
-        // when we got here, there is no environment for us in the matching list
-        if (myEnvironment != null) {
-            // we have an environment for another location that does not match, lets get rid of it
-            destroyEnvironment(mServer, myEnvironment);
-        }
-       if (!matching.isEmpty()) {
-           if (environment.isNearby()) {
-               // join the largest group
-               String largestGroupId = environmentsPerGroup.get(0).getLeft();
-               TalkGroupPresence largestGroup = mDatabase.findGroupPresenceById(largestGroupId);
-               if (largestGroup.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
-                   joinGroupWithEnvironment(largestGroup, environment);
-                   return largestGroup.getGroupId();
-               } else {
-                   LOG.warn("the (largest) nearby group we were supposed to join is gone or does not exist, largestGroup="+largestGroup);
-               }
-           } else if (environment.isWorldwide()) {
-               if (minNumberOfGroups > environmentsPerGroup.size()) {
-                   // we have not enough groups, lets create a new group and join it
-                   LOG.debug("updateEnvironment: worldwide: not enough groups on first update, will create a new group and join it,clientId=" + mConnection.getClientId());
+            // when we got here, there is no environment for us in the matching list
+            if (myEnvironment != null) {
+                // we have an environment for another location that does not match, lets get rid of it
+                destroyEnvironment(mServer, myEnvironment);
+            }
+            if (!matching.isEmpty()) {
+                if (environment.isNearby()) {
+                    // join the largest group
+                    String largestGroupId = environmentsPerGroup.get(0).getLeft();
+                    TalkGroupPresence largestGroup = mDatabase.findGroupPresenceById(largestGroupId);
+                    if (largestGroup.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
+                        joinGroupWithEnvironment(largestGroup, environment);
+                        return largestGroup.getGroupId();
+                    } else {
+                        LOG.warn("the (largest) nearby group we were supposed to join is gone or does not exist, largestGroup=" + largestGroup);
+                    }
+                } else if (environment.isWorldwide()) {
+                    if (minNumberOfGroups > environmentsPerGroup.size()) {
+                        // we have not enough groups, lets create a new group and join it
+                        LOG.debug("updateEnvironment: worldwide: not enough groups on first update, will create a new group and join it,clientId=" + mConnection.getClientId());
+                    } else {
+                        // join the n-th-smallest group in order to properly distribute the clients
+                        String nThSmallestGroupId = environmentsPerGroup.get(environmentsPerGroup.size() - 1 - abandonedGroups).getLeft();
+                        String kind = "" + abandonedGroups + "-smallestGroupId";
+                        LOG.debug("updateEnvironment: worldwide: joining " + kind + ", id=" + nThSmallestGroupId + ",clientId=" + mConnection.getClientId());
+                        TalkGroupPresence destinationGroup = mDatabase.findGroupPresenceById(nThSmallestGroupId);
+                        if (destinationGroup.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
+                            joinGroupWithEnvironment(destinationGroup, environment);
+                            return destinationGroup.getGroupId();
+                        } else {
+                            LOG.warn("the worldwide group (" + kind + ") we were supposed to join is gone, will create a new one, destinationGroupId=" + nThSmallestGroupId);
+                        }
+                    }
                 } else {
-                   // join the n-th-smallest group in order to properly distribute the clients
-                   String nThSmallestGroupId = environmentsPerGroup.get(environmentsPerGroup.size() - 1 - abandonedGroups).getLeft();
-                   String kind = "" + abandonedGroups + "-smallestGroupId";
-                   LOG.debug("updateEnvironment: worldwide: joining " + kind + ", id=" + nThSmallestGroupId + ",clientId=" + mConnection.getClientId());
-                   TalkGroupPresence destinationGroup = mDatabase.findGroupPresenceById(nThSmallestGroupId);
-                   if (destinationGroup.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
-                       joinGroupWithEnvironment(destinationGroup, environment);
-                       return destinationGroup.getGroupId();
-                   } else {
-                       LOG.warn("the worldwide group (" + kind + ") we were supposed to join is gone, will create a new one, destinationGroupId=" + nThSmallestGroupId);
-                   }
-               }
-           } else {
-               throw new RuntimeException("unknown environment type:"+environment.getType());
-           }
+                    throw new RuntimeException("unknown environment type:" + environment.getType());
+                }
+            }
+            // we are alone or first at the location, lets create a new group
+            createGroupWithEnvironment(environment);
+            return environment.getGroupId();
         }
-        // we are alone or first at the location, lets create a new group
-        createGroupWithEnvironment(environment);
-        return environment.getGroupId();
     }
 
     private static void removeGroupMembership(TalkServer server, TalkGroupMembership membership, Date now) {
