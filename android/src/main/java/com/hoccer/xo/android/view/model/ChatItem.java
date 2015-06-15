@@ -8,6 +8,7 @@ import android.view.ViewStub;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.xo.android.view.avatar.AvatarView;
 
 
 public abstract class ChatItem {
@@ -25,8 +26,8 @@ public abstract class ChatItem {
     protected long mUnseenMessageCount;
 
     private int mType;
-    private int mLayout;
-    private int mAvatarView;
+    private int mAvatarViewId;
+    protected AvatarView mAvatarView;
 
     protected final Context mContext;
 
@@ -36,12 +37,25 @@ public abstract class ChatItem {
 
     public abstract void update();
 
-    public View getView(View view, ViewGroup parent) {
-        if (view == null || view.getTag() == null || (Integer) view.getTag() != getType()) {
-            view = LayoutInflater.from(parent.getContext()).inflate(getLayout(), null);
+    public View getView(View convertView, ViewGroup parent) {
+        if (convertView == null) {
+            convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat_client, null);
         }
 
-        return updateView(view);
+        mAvatarView = ((AvatarView) convertView.findViewById(R.id.avatar));
+        if (mAvatarView == null) {
+            ViewStub avatarCointainer = (ViewStub) convertView.findViewById(R.id.vs_avatar);
+            avatarCointainer.setLayoutResource(getAvatarViewId());
+            mAvatarView = (AvatarView) avatarCointainer.inflate();
+        } else if ((Integer) convertView.getTag() != getType()) {
+            ViewGroup viewGroup = (ViewGroup) convertView.findViewById(R.id.avatar_container);
+            viewGroup.removeView(mAvatarView);
+            viewGroup.addView(LayoutInflater.from(convertView.getContext()).inflate(getAvatarViewId(), null), 0);
+        }
+
+        convertView.setTag(getType());
+
+        return updateView(convertView);
     }
 
     protected abstract View updateView(View view);
@@ -67,47 +81,38 @@ public abstract class ChatItem {
         return mType;
     }
 
-    public void setLayout(int layout) {
-        mLayout = layout;
+    public void setAvatarViewId(int avatarViewId) {
+        mAvatarViewId = avatarViewId;
     }
 
-    public int getLayout() {
-        return mLayout;
-    }
-
-    public void setAvatarView(int avatarView) {
-        mAvatarView = avatarView;
-    }
-
-    public int getAvatarView() {
-        return mAvatarView;
+    public int getAvatarViewId() {
+        return mAvatarViewId;
     }
 
     public static ChatItem create(TalkClientContact contact, Context context) {
         ChatItem chatItem = new ContactChatItem(contact, context);
-        chatItem.setLayout(R.layout.item_chat_client);
 
         if (!contact.isFriendOrBlocked() && contact.isWorldwide()) {
             chatItem.setType(ChatItem.TYPE_CLIENT_PRESENCE_WORLDWIDE);
-            chatItem.setAvatarView(R.layout.view_avatar_client_presence_worldwide);
+            chatItem.setAvatarViewId(R.layout.view_avatar_client_presence_worldwide);
         } else if (!contact.isFriendOrBlocked() && contact.isNearby()) {
             chatItem.setType(ChatItem.TYPE_CLIENT_PRESENCE_NEARBY);
-            chatItem.setAvatarView(R.layout.view_avatar_client_presence_nearby);
+            chatItem.setAvatarViewId(R.layout.view_avatar_client_presence_nearby);
         } else if (!contact.isFriendOrBlocked() && contact.isNearbyAcquaintance()) {
             chatItem.setType(ChatItem.TYPE_CLIENT_ACQUAINTANCE_NEARBY);
-            chatItem.setAvatarView(R.layout.view_avatar_client_acquaintance_nearby);
+            chatItem.setAvatarViewId(R.layout.view_avatar_client_acquaintance_nearby);
         } else if (!contact.isFriendOrBlocked() && contact.isWorldwideAcquaintance()) {
             chatItem.setType(ChatItem.TYPE_CLIENT_ACQUAINTANCE_WORLDWIDE);
-            chatItem.setAvatarView(R.layout.view_avatar_client_acquaintance_worldwide);
+            chatItem.setAvatarViewId(R.layout.view_avatar_client_acquaintance_worldwide);
         } else if (!contact.isFriendOrBlocked() && contact.isKept() || contact.isKeptGroup()) {
             chatItem.setType(ChatItem.TYPE_CLIENT_KEPT);
-            chatItem.setAvatarView(R.layout.view_avatar_client_kept);
+            chatItem.setAvatarViewId(R.layout.view_avatar_client_kept);
         } else if (contact.isWorldwideGroup()) {
             chatItem.setType(ChatItem.TYPE_GROUP_WORLDWIDE);
-            chatItem.setAvatarView(R.layout.view_avatar_group_worldwide);
+            chatItem.setAvatarViewId(R.layout.view_avatar_group_worldwide);
         } else {
             chatItem.setType(ChatItem.TYPE_RELATED);
-            chatItem.setAvatarView(R.layout.view_avatar_presence);
+            chatItem.setAvatarViewId(R.layout.view_avatar_presence);
         }
 
         return chatItem;
@@ -116,16 +121,14 @@ public abstract class ChatItem {
     public static ChatItem createNearbyGroupHistory(Context context) {
         ChatItem chatItem = new NearbyGroupHistoryChatItem(context);
         chatItem.setType(ChatItem.TYPE_GROUP_HISTORY_NEARBY);
-        chatItem.setLayout(R.layout.item_chat_client);
-        chatItem.setAvatarView(R.layout.view_avatar_simple);
+        chatItem.setAvatarViewId(R.layout.view_avatar_simple);
         return chatItem;
     }
 
     public static ChatItem createWorldwideGroupHistory(Context context) {
         ChatItem chatItem = new WorldwideGroupHistoryChatItem(context);
         chatItem.setType(ChatItem.TYPE_GROUP_HISTORY_WORLDWIDE);
-        chatItem.setLayout(R.layout.item_chat_client);
-        chatItem.setAvatarView(R.layout.view_avatar_simple);
+        chatItem.setAvatarViewId(R.layout.view_avatar_simple);
         return chatItem;
     }
 }

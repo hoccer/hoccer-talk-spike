@@ -64,7 +64,7 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
             convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_contact_select, parent, false);
 
             viewHolder = new ViewHolder();
-            viewHolder.avatarView = (PresenceAvatarView) (convertView.findViewById(R.id.contact_icon));
+            viewHolder.avatarView = (PresenceAvatarView) (convertView.findViewById(R.id.avatar));
             viewHolder.checkedNameTextView = (CheckedTextView) (convertView.findViewById(R.id.contact_name_checked));
             convertView.setTag(viewHolder);
         } else {

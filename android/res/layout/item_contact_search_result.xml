@@ -9,7 +9,7 @@
         android:paddingBottom="5dp">
 
     <com.hoccer.xo.android.view.avatar.PresenceAvatarView
-            android:id="@+id/contact_icon"
+            android:id="@+id/avatar"
             android:clickable="true"
             android:layout_width="50dp"
             android:layout_height="50dp"
@@ -23,7 +23,7 @@
             android:textAppearance="@android:style/TextAppearance.Medium"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/contact_icon"
+            android:layout_toRightOf="@id/avatar"
             android:layout_centerVertical="true"
             android:ellipsize="end"
             android:maxLines="1"

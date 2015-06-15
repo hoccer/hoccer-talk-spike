@@ -13,7 +13,7 @@
         android:orientation="horizontal">
 
     <com.hoccer.xo.android.view.avatar.NearbyHistoryAvatarView
-            android:id="@+id/contact_icon"
+            android:id="@+id/avatar"
             android:clickable="false"
             android:layout_width="48dp"
             android:layout_height="48dp"
