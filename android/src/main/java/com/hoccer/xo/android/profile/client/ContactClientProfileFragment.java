@@ -108,12 +108,10 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
         menu.findItem(R.id.menu_my_profile).setVisible(true);
         TalkRelationship relationship = mContact.getClientRelationship();
         if ((relationship == null || !relationship.isFriend()) && mContact.isInEnvironment()) {
-            menu.findItem(R.id.menu_profile_edit).setVisible(false);
             menu.findItem(R.id.menu_profile_delete).setVisible(false);
             menu.findItem(R.id.menu_profile_block).setVisible(false);
             menu.findItem(R.id.menu_profile_unblock).setVisible(false);
         } else if (!mContact.isFriendOrBlocked()) {
-            menu.findItem(R.id.menu_profile_edit).setVisible(false);
             menu.findItem(R.id.menu_profile_delete).setVisible(true);
             menu.findItem(R.id.menu_profile_block).setVisible(false);
             menu.findItem(R.id.menu_profile_unblock).setVisible(false);
