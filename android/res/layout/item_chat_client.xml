@@ -14,12 +14,12 @@
 
     <RelativeLayout
             android:id="@+id/avatar_container"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginRight="8dp"
             android:layout_marginEnd="8dp">
 
-        <ViewStub android:id="@+id/vs_avatar" android:layout_width="match_parent" android:layout_height="match_parent"/>
+        <ViewStub android:id="@+id/vs_avatar" android:layout_width="@dimen/chat_view_avatar_size" android:layout_height="@dimen/chat_view_avatar_size"/>
 
         <TextView
                 android:id="@+id/contact_unseen_messages"

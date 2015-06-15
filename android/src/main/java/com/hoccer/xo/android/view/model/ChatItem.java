@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -50,6 +51,9 @@ public abstract class ChatItem {
         } else if ((Integer) convertView.getTag() != getType()) {
             ViewGroup viewGroup = (ViewGroup) convertView.findViewById(R.id.avatar_container);
             viewGroup.removeView(mAvatarView);
+
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(R.dimen.chat_view_avatar_size, R.dimen.chat_view_avatar_size);
+            viewGroup.setLayoutParams(layoutParams);
             viewGroup.addView(LayoutInflater.from(convertView.getContext()).inflate(getAvatarViewId(), null), 0);
         }
 
