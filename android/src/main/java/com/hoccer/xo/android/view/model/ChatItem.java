@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -45,16 +46,15 @@ public abstract class ChatItem {
 
         mAvatarView = ((AvatarView) convertView.findViewById(R.id.avatar));
         if (mAvatarView == null) {
-            ViewStub avatarCointainer = (ViewStub) convertView.findViewById(R.id.vs_avatar);
-            avatarCointainer.setLayoutResource(getAvatarViewId());
-            mAvatarView = (AvatarView) avatarCointainer.inflate();
+            ViewStub avatarStub = (ViewStub) convertView.findViewById(R.id.vs_avatar);
+            avatarStub.setLayoutResource(getAvatarViewId());
+            mAvatarView = (AvatarView) avatarStub.inflate();
         } else if ((Integer) convertView.getTag() != getType()) {
             ViewGroup viewGroup = (ViewGroup) convertView.findViewById(R.id.avatar_container);
             viewGroup.removeView(mAvatarView);
 
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(R.dimen.chat_view_avatar_size, R.dimen.chat_view_avatar_size);
-            viewGroup.setLayoutParams(layoutParams);
-            viewGroup.addView(LayoutInflater.from(convertView.getContext()).inflate(getAvatarViewId(), null), 0);
+            mAvatarView = (AvatarView) LayoutInflater.from(convertView.getContext()).inflate(getAvatarViewId(), viewGroup, false);
+            viewGroup.addView(mAvatarView);
         }
 
         convertView.setTag(getType());
