@@ -8,7 +8,7 @@
         android:paddingBottom="5dp">
 
     <com.hoccer.xo.android.view.avatar.PresenceAvatarView
-            android:id="@+id/contact_icon"
+            android:id="@+id/avatar"
             android:clickable="true"
             android:layout_width="65dp"
             android:layout_height="65dp"
@@ -18,8 +18,8 @@
 
     <TextView
             android:id="@+id/contact_unseen_messages"
-            android:layout_alignRight="@+id/contact_icon"
-            android:layout_alignTop="@id/contact_icon"
+            android:layout_alignRight="@+id/avatar"
+            android:layout_alignTop="@id/avatar"
             android:layout_marginRight="-3dp"
             android:visibility="gone"
             android:background="@drawable/shape_unread_messages_badge"
@@ -31,7 +31,7 @@
             android:textAppearance="@android:style/TextAppearance.Large"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/contact_icon"
+            android:layout_toRightOf="@id/avatar"
             android:ellipsize="end"
             android:maxLines="1"
             android:singleLine="true"
@@ -44,7 +44,7 @@
             android:text=""
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/contact_icon"
+            android:layout_toRightOf="@id/avatar"
             android:layout_toLeftOf="@+id/contact_type"
             android:layout_below="@id/contact_name"
             android:layout_alignLeft="@id/contact_name"

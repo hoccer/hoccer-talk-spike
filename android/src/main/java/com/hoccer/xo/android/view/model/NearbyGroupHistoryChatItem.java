@@ -57,13 +57,6 @@ public class NearbyGroupHistoryChatItem extends ChatItem implements SearchAdapte
 
     @Override
     protected View updateView(View view) {
-        AvatarView avatarView = ((AvatarView) view.findViewById(R.id.contact_icon));
-        if (avatarView == null) {
-            ViewStub avatarCointainer = (ViewStub) view.findViewById(R.id.vs_avatar);
-            avatarCointainer.setLayoutResource(getAvatarView());
-            avatarView = (AvatarView) avatarCointainer.inflate();
-        }
-
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
         TextView lastMessageTextView = (TextView) view.findViewById(R.id.contact_last_message);
         TextView lastMessageTimeView = (TextView) view.findViewById(R.id.contact_time);
@@ -74,8 +67,8 @@ public class NearbyGroupHistoryChatItem extends ChatItem implements SearchAdapte
         lastMessageTextView.setText(mLastMessageText);
         setUnseenMessages(unseenView);
 
-        avatarView.setAvatarImage(R.drawable.avatar_location);
-        avatarView.setClickable(false);
+        mAvatarView.setAvatarImage(R.drawable.avatar_location);
+        mAvatarView.setClickable(false);
 
         return view;
     }

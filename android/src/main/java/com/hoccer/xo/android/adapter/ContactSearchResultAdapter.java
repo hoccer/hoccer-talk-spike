@@ -93,7 +93,7 @@ public class ContactSearchResultAdapter extends ContactsAdapter {
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
         nameView.setText(getHighlightedSearchResult(contact.getName()));
 
-        PresenceAvatarView avatarView = (PresenceAvatarView) view.findViewById(R.id.contact_icon);
+        PresenceAvatarView avatarView = (PresenceAvatarView) view.findViewById(R.id.avatar);
         avatarView.setContact(contact);
     }
 
