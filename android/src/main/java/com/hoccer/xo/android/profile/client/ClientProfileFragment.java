@@ -68,6 +68,8 @@ public abstract class ClientProfileFragment extends ProfileFragment {
     protected void updateAvatarView(XoTransfer avatarTransfer) {
         if (avatarTransfer != null && avatarTransfer.isContentAvailable() && avatarTransfer.getFilePath() != null) {
             updateAvatarView(getAbsoluteFileUri(avatarTransfer.getFilePath()));
+        } else {
+            updateAvatarView(R.drawable.avatar_contact_large);
         }
     }
 
@@ -78,6 +80,14 @@ public abstract class ClientProfileFragment extends ProfileFragment {
                 .fit()
                 .placeholder(R.drawable.avatar_contact_large)
                 .error(R.drawable.avatar_contact_large)
+                .into(mAvatarImage);
+    }
+
+    protected void updateAvatarView(int resourceId) {
+        Picasso.with(getActivity())
+                .load(resourceId)
+                .centerCrop()
+                .fit()
                 .into(mAvatarImage);
     }
 

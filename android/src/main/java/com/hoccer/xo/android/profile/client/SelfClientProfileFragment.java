@@ -98,38 +98,6 @@ public class SelfClientProfileFragment extends ClientProfileFragment implements 
         startActivity(intent);
     }
 
-    @Override
-    public void onAvatarSelected(final SelectedContent avatar) {
-        uploadSelectedAvatar(avatar);
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                updateAvatarView(getAbsoluteFileUri(avatar.getFilePath()));
-            }
-        });
-    }
-
-    private void uploadSelectedAvatar(final SelectedContent avatar) {
-        if (avatar != null) {
-            XoApplication.get().getExecutor().execute(new Runnable() {
-                @Override
-                public void run() {
-                    LOG.debug("creating avatar upload");
-                    TalkClientUpload upload = new TalkClientUpload();
-                    upload.initializeAsAvatar(avatar);
-                    try {
-                        getXoDatabase().saveClientUpload(upload);
-                        getXoClient().setClientAvatar(upload);
-                    } catch (SQLException e) {
-                        LOG.error("sql error", e);
-                    }
-                }
-            });
-        } else {
-            getXoClient().setClientAvatar(null);
-        }
-    }
-
     private void updateName() {
         String name = mContact.getSelf().getRegistrationName();
         mNameText.setText(name);
@@ -212,12 +180,45 @@ public class SelfClientProfileFragment extends ClientProfileFragment implements 
                             }
                             break;
                             case 1: {
-                                uploadSelectedAvatar(null);
+                                removeAvatar();
                             }
                         }
                     }
                 }
         );
+    }
+
+    @Override
+    public void onAvatarSelected(final SelectedContent avatar) {
+        uploadSelectedAvatar(avatar);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                updateAvatarView(getAbsoluteFileUri(avatar.getFilePath()));
+            }
+        });
+    }
+
+    private void uploadSelectedAvatar(final SelectedContent avatar) {
+        XoApplication.get().getExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                LOG.debug("creating avatar upload");
+                TalkClientUpload upload = new TalkClientUpload();
+                upload.initializeAsAvatar(avatar);
+                try {
+                    getXoDatabase().saveClientUpload(upload);
+                    getXoClient().setClientAvatar(upload);
+                } catch (SQLException e) {
+                    LOG.error("sql error", e);
+                }
+            }
+        });
+    }
+
+    private void removeAvatar() {
+        getXoClient().setClientAvatar(null);
+        updateAvatarView(R.drawable.avatar_contact_large);
     }
 
     private void showAccountDelectionDialog() {
