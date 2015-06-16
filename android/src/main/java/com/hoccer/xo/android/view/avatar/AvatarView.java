@@ -7,8 +7,10 @@ import android.net.Uri;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -109,6 +111,35 @@ public abstract class AvatarView extends LinearLayout {
             }
         } else {
             setAvatarImage(avatarUri);
+        }
+
+        if (mContact.isClient() && mContact.getClientRelationship() != null && mContact.getClientRelationship().isBlocked()) {
+            if (findViewWithTag("blockedLayout") != null) {
+                return;
+            }
+
+            View backgroundLayerView = new View(getContext());
+            backgroundLayerView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            backgroundLayerView.setBackgroundResource(R.drawable.shape_round_black_transparency);
+
+            ImageView imageView = new ImageView(getContext());
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+            imageView.setLayoutParams(params);
+            imageView.setImageResource(R.drawable.ic_action_block);
+
+            RelativeLayout blockedLayout = new RelativeLayout(getContext());
+            blockedLayout.setTag("blockedLayout");
+            blockedLayout.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            blockedLayout.addView(backgroundLayerView);
+            blockedLayout.addView(imageView);
+
+            ViewGroup parent = (ViewGroup) mAvatarImage.getParent();
+            int avatarImageIndex = parent.indexOfChild(mAvatarImage);
+            parent.addView(blockedLayout, avatarImageIndex + 1);
+        } else if (mContact.isClient() && mContact.getClientRelationship() != null) {
+            View blockedLayout = findViewWithTag("blockedLayout");
+            ((ViewGroup) mAvatarImage.getParent()).removeView(blockedLayout);
         }
     }
 
