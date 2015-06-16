@@ -27,8 +27,8 @@
 
         <TextView
                 android:id="@+id/contact_unseen_messages"
-                android:layout_alignRight="@+id/avatar"
-                android:layout_alignTop="@id/vs_avatar"
+                android:layout_alignRight="@+id/avatar_container"
+                android:layout_alignTop="@id/avatar_container"
                 android:layout_marginRight="-8dp"
                 android:visibility="visible"
                 android:background="@drawable/shape_unread_messages_badge"
