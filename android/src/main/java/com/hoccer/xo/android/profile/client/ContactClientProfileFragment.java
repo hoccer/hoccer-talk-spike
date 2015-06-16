@@ -10,6 +10,7 @@ import android.widget.*;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.IXoMessageListener;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.exceptions.NoClientIdInPresenceException;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
@@ -63,7 +64,7 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
 
     private void showMessagingActivity() {
         Intent intent = new Intent(getActivity(), ChatActivity.class);
-        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, getClientContactId());
+        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mContact.getClientContactId());
         if (mContact.isKept() || mContact.isKeptGroup()) {
             intent.putExtra(ChatActivity.EXTRA_CLIENT_HISTORY, true);
         }
@@ -225,11 +226,6 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
         }
     }
 
-    @Override
-    protected int getClientContactId() {
-        return mContact.getClientContactId();
-    }
-
     protected void updateMessageText() {
         try {
             int count = (int) XoApplication.get().getXoClient().getDatabase().getMessageCountByContactId(mContact.getClientContactId());
@@ -254,18 +250,12 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
 
     @Override
     public void updateActionBar() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                getActivity().getActionBar().setTitle(mContact.getNickname());
-            }
-        });
+        getActivity().getActionBar().setTitle(mContact.getNickname());
     }
 
     @Override
-    protected void updateView() {
-        super.updateView();
-        updateAvatarView();
+    protected void updateViews() {
+        super.updateViews();
         updateName();
         updateMessageText();
         updateFingerprint();
@@ -275,6 +265,10 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
         updateNicknameContainer();
     }
 
+    @Override
+    protected XoTransfer getAvatarTransfer() {
+        return mContact.getAvatarDownload();
+    }
 
     @Override
     public void onMessageCreated(TalkClientMessage message) {
@@ -467,9 +461,11 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    refreshContact();
-                    getActivity().invalidateOptionsMenu();
-                    updateActionBar();
+                    refreshContactFromDatabase();
+                    updateContent();
+//                    updateViews();
+//                    getActivity().invalidateOptionsMenu();
+//                    updateActionBar();
                 }
             });
         }
@@ -481,9 +477,10 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    refreshContact();
-                    getActivity().invalidateOptionsMenu();
-                    updateActionBar();
+                    refreshContactFromDatabase();
+                    updateContent();
+//                    getActivity().invalidateOptionsMenu();
+//                    updateActionBar();
                 }
             });
         }

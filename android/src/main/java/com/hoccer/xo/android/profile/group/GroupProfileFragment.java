@@ -124,7 +124,7 @@ public class GroupProfileFragment extends ProfileFragment
 
     private void showMessagingActivity() {
         Intent intent = new Intent(getActivity(), ChatActivity.class);
-        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, getClientContactId());
+        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mContact.getClientContactId());
         if (mContact.isKept() || mContact.isKeptGroup()) {
             intent.putExtra(ChatActivity.EXTRA_CLIENT_HISTORY, true);
         }
@@ -170,11 +170,6 @@ public class GroupProfileFragment extends ProfileFragment
     public void onPause() {
         super.onPause();
         getXoClient().unregisterContactListener(this);
-    }
-
-    @Override
-    protected int getClientContactId() {
-        return mContact.getClientContactId();
     }
 
     class BackPressListener implements View.OnKeyListener {
@@ -302,8 +297,8 @@ public class GroupProfileFragment extends ProfileFragment
         getXoClient().setGroupName(mContact, newGroupName);
     }
 
-    @Override
-    protected void updateView() {
+//    @Override
+    protected void updateViews() {
         updateAvatarView();
         updateChatContainer();
         updateGroupName();
@@ -451,7 +446,7 @@ public class GroupProfileFragment extends ProfileFragment
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                updateView();
+                updateViews();
             }
         });
     }
@@ -688,7 +683,7 @@ public class GroupProfileFragment extends ProfileFragment
 
         mMode = Mode.EDIT_GROUP;
         configureActionMenuItems(menu);
-        updateView();
+        updateViews();
 
         return true;
     }
@@ -742,7 +737,7 @@ public class GroupProfileFragment extends ProfileFragment
         mBackPressed = false;
         mAvatarImage.setOnClickListener(null);
         mMode = Mode.PROFILE;
-        updateView();
+        updateViews();
 
         configureOptionsMenuItems(mOptionsMenu);
     }

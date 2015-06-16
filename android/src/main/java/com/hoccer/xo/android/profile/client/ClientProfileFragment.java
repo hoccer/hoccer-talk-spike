@@ -2,14 +2,11 @@ package com.hoccer.xo.android.profile.client;
 
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.*;
-import android.widget.ImageView;
+import android.view.View;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
-import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.profile.ProfileFragment;
 import com.hoccer.xo.android.util.UriUtils;
@@ -17,6 +14,8 @@ import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
+
+import static com.hoccer.xo.android.util.UriUtils.getAbsoluteFileUri;
 
 public abstract class ClientProfileFragment extends ProfileFragment {
 
@@ -30,35 +29,14 @@ public abstract class ClientProfileFragment extends ProfileFragment {
         mKeyText = (TextView) view.findViewById(R.id.tv_profile_key);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        refreshContact();
+    protected void updateContent() {
+        updateViews();
+        updateActionBar();
     }
 
-    @Override
-    protected int getClientContactId() {
-        return mContact.getClientContactId();
-    }
-
-    @Override
-    protected void updateView() {
+    protected void updateViews() {
         updateFingerprint();
-    }
-
-    protected void updateAvatarView(XoTransfer avatarTransfer) {
-        Uri avatarUri = null;
-        if (avatarTransfer != null && avatarTransfer.isContentAvailable() && avatarTransfer.getFilePath() != null) {
-            avatarUri = UriUtils.getAbsoluteFileUri(avatarTransfer.getFilePath());
-        }
-
-        Picasso.with(getActivity())
-                .load(avatarUri)
-                .centerCrop()
-                .fit()
-                .placeholder(R.drawable.avatar_contact_large)
-                .error(R.drawable.avatar_contact_large)
-                .into(mAvatarImage);
+        updateAvatarView(getAvatarTransfer());
     }
 
     protected void updateFingerprint() {
@@ -85,9 +63,27 @@ public abstract class ClientProfileFragment extends ProfileFragment {
         }
     }
 
-    protected void refreshContact() {
-        LOG.debug("refreshContact()");
+    protected abstract XoTransfer getAvatarTransfer();
 
+    protected void updateAvatarView(XoTransfer avatarTransfer) {
+        if (avatarTransfer != null && avatarTransfer.isContentAvailable() && avatarTransfer.getFilePath() != null) {
+            updateAvatarView(getAbsoluteFileUri(avatarTransfer.getFilePath()));
+        }
+    }
+
+    protected void updateAvatarView(Uri avatarUri) {
+        Picasso.with(getActivity())
+                .load(avatarUri)
+                .centerCrop()
+                .fit()
+                .placeholder(R.drawable.avatar_contact_large)
+                .error(R.drawable.avatar_contact_large)
+                .into(mAvatarImage);
+    }
+
+    protected abstract void updateActionBar();
+
+    protected void refreshContactFromDatabase() {
         try {
             XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
             database.refreshClientContact(mContact);
@@ -101,14 +97,6 @@ public abstract class ClientProfileFragment extends ProfileFragment {
             LOG.error("SQL error", e);
         }
 
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                updateView();
-                updateActionBar();
-            }
-        });
+//        updateContent();
     }
-
-    protected abstract void updateActionBar();
 }

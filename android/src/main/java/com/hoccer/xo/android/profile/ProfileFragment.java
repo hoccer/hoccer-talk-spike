@@ -27,7 +27,20 @@ public abstract class ProfileFragment extends XoFragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        setContact();
+        mContact = getContactById();
+    }
+
+    private TalkClientContact getContactById() {
+        if (getArguments() != null && getArguments().containsKey(ARG_CLIENT_CONTACT_ID)) {
+            try {
+                int contactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
+                return XoApplication.get().getXoClient().getDatabase().findContactById(contactId);
+            } catch (SQLException e) {
+                LOG.error("SQL error while retrieving contact ", e);
+            }
+        }
+
+        return null;
     }
 
     @Override
@@ -35,31 +48,7 @@ public abstract class ProfileFragment extends XoFragment {
         super.onViewCreated(view, savedInstanceState);
         mAvatarImage = (ImageView) view.findViewById(R.id.profile_avatar_image);
         mNameText = (TextView) view.findViewById(R.id.tv_profile_name);
-    }
 
-    private void setContact() {
-        if (getArguments() != null && getArguments().containsKey(ARG_CLIENT_CONTACT_ID)) {
-            int clientContactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
-
-            try {
-                mContact = XoApplication.get().getXoClient().getDatabase().findContactById(clientContactId);
-            } catch (SQLException e) {
-                LOG.error("SQL error while retrieving contact ", e);
-            }
-        }
-
-        if (mContact == null) {
-            throw new IllegalArgumentException("Contact missing or does not exist.");
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
         setHasOptionsMenu(true);
     }
-
-    protected abstract int getClientContactId();
-
-    protected abstract void updateView();
 }
