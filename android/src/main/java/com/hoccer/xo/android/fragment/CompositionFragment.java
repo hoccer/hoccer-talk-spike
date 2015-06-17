@@ -309,17 +309,6 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         return !(mSelectedContent.isEmpty() && mTextField.getText().toString().trim().isEmpty());
     }
 
-    private boolean isBlocked() {
-        if (!mContact.isGroup() && !mContact.isNearby()) {
-            TalkRelationship clientRelationship = mContact.getClientRelationship();
-            if (clientRelationship != null && clientRelationship.getState() != null && clientRelationship.getState().equals(
-                    TalkRelationship.STATE_BLOCKED)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private void updateAttachmentButton() {
         if (mSelectedContent.isEmpty()) {
             updateAttachmentButtonImage(AttachmentSelectionType.NONE);
@@ -391,7 +380,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
             return;
         }
 
-        if (isBlocked()) {
+        if (mContact.isClientBlocked()) {
             Toast.makeText(getXoActivity(), R.string.error_send_message_blocked, Toast.LENGTH_LONG).show();
             clearComposedMessage();
             return;
