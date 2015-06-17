@@ -113,6 +113,10 @@ public abstract class AvatarView extends LinearLayout {
             setAvatarImage(avatarUri);
         }
 
+        updateAvatarBlocked();
+    }
+
+    private void updateAvatarBlocked() {
         if (mContact.isClient() && mContact.getClientRelationship() != null && mContact.getClientRelationship().isBlocked()) {
             if (findViewWithTag("blockedLayout") != null) {
                 return;
@@ -137,6 +141,7 @@ public abstract class AvatarView extends LinearLayout {
             ViewGroup parent = (ViewGroup) mAvatarImage.getParent();
             int avatarImageIndex = parent.indexOfChild(mAvatarImage);
             parent.addView(blockedLayout, avatarImageIndex + 1);
+
         } else if (mContact.isClient() && mContact.getClientRelationship() != null) {
             View blockedLayout = findViewWithTag("blockedLayout");
             ((ViewGroup) mAvatarImage.getParent()).removeView(blockedLayout);
