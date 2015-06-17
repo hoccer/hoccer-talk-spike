@@ -5,11 +5,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.view.avatar.AvatarView;
 
 
@@ -96,19 +95,19 @@ public abstract class ChatItem {
     public static ChatItem create(TalkClientContact contact, Context context) {
         ChatItem chatItem = new ContactChatItem(contact, context);
 
-        if (!contact.isFriendOrBlocked() && contact.isWorldwide()) {
+        if (contact.isWorldwide() && !contact.isClientFriend()) {
             chatItem.setType(ChatItem.TYPE_CLIENT_PRESENCE_WORLDWIDE);
             chatItem.setAvatarViewId(R.layout.view_avatar_client_presence_worldwide);
-        } else if (!contact.isFriendOrBlocked() && contact.isNearby()) {
+        } else if (contact.isNearby() && !contact.isClientFriend()) {
             chatItem.setType(ChatItem.TYPE_CLIENT_PRESENCE_NEARBY);
             chatItem.setAvatarViewId(R.layout.view_avatar_client_presence_nearby);
-        } else if (!contact.isFriendOrBlocked() && contact.isNearbyAcquaintance()) {
+        } else if (contact.isKept() && contact.isNearbyAcquaintance()) {
             chatItem.setType(ChatItem.TYPE_CLIENT_ACQUAINTANCE_NEARBY);
             chatItem.setAvatarViewId(R.layout.view_avatar_client_acquaintance_nearby);
-        } else if (!contact.isFriendOrBlocked() && contact.isWorldwideAcquaintance()) {
+        } else if (contact.isKept() && contact.isWorldwideAcquaintance()) {
             chatItem.setType(ChatItem.TYPE_CLIENT_ACQUAINTANCE_WORLDWIDE);
             chatItem.setAvatarViewId(R.layout.view_avatar_client_acquaintance_worldwide);
-        } else if (!contact.isFriendOrBlocked() && contact.isKept() || contact.isKeptGroup()) {
+        } else if (contact.isKept() || contact.isKeptGroup()) {
             chatItem.setType(ChatItem.TYPE_CLIENT_KEPT);
             chatItem.setAvatarViewId(R.layout.view_avatar_client_kept);
         } else if (contact.isWorldwideGroup()) {
