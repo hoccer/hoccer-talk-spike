@@ -294,18 +294,7 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
 
     private void updateInviteButton(final TalkClientContact contact) {
         Button inviteButton = (Button) getView().findViewById(R.id.btn_profile_invite);
-        if (contact == null || contact.isSelf()) {
-            mInviteButtonContainer.setVisibility(View.GONE);
-            return;
-        } else {
-            mInviteButtonContainer.setVisibility(View.VISIBLE);
-        }
-
-        try {
-            getXoDatabase().refreshClientContact(contact);
-        } catch (SQLException e) {
-            LOG.error("Error while refreshing client contact: " + contact.getClientId(), e);
-        }
+        mInviteButtonContainer.setVisibility(View.VISIBLE);
 
         if (contact.getClientRelationship() == null || contact.getClientRelationship().isNone()) {
             inviteButton.setText(R.string.friend_request_add_as_friend);
@@ -337,20 +326,8 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
     }
 
     private void updateDeclineButton(final TalkClientContact contact) {
-
         Button declineButton = (Button) getView().findViewById(R.id.btn_profile_decline);
-        if (contact == null || contact.isSelf()) {
-            declineButton.setVisibility(View.GONE);
-            return;
-        } else {
-            declineButton.setVisibility(View.VISIBLE);
-        }
-
-        try {
-            getXoDatabase().refreshClientContact(contact);
-        } catch (SQLException e) {
-            LOG.error("Error while refreshing client contact: " + contact.getClientId(), e);
-        }
+        declineButton.setVisibility(View.VISIBLE);
 
         if (contact.getClientRelationship() != null &&
                 contact.getClientRelationship().getState() != null &&
