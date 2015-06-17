@@ -1211,7 +1211,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     switchState(State.LOGIN, "login after registration");
                 } catch (Exception e) {
                     LOG.error("Exception while registering", e);
-                    if (mConnection.isConnected()){
+                    if (mConnection.isConnected()) {
                         scheduleRegistration();
                     } else {
                         switchState(State.CONNECTING, "reconnect after registration failed");
@@ -1277,7 +1277,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     switchState(State.SYNCING, "sync after login");
                 } catch (Exception e) {
                     LOG.error("Exception while logging in", e);
-                    if (mConnection.isConnected()){
+                    if (mConnection.isConnected()) {
                         scheduleLogin();
                     } else {
                         switchState(State.CONNECTING, "reconnect after login failed");
@@ -1333,7 +1333,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     switchState(State.READY, "ready after sync");
                 } catch (Exception e) {
                     LOG.error("Exception while syncing", e);
-                    if (mConnection.isConnected()){
+                    if (mConnection.isConnected()) {
                         scheduleSync();
                     } else {
                         switchState(State.CONNECTING, "reconnect after sync failed");
