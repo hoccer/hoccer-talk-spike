@@ -33,9 +33,7 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
     private TextView mNicknameTextView;
     private EditText mNicknameEditText;
     private ImageButton mNicknameEditButton;
-
     private RelativeLayout mChatContainer;
-    private RelativeLayout mChatMessagesContainer;
     private TextView mChatMessagesText;
 
     @Override
@@ -47,19 +45,38 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mChatContainer = (RelativeLayout) view.findViewById(R.id.inc_profile_chat_stats);
-        mChatMessagesContainer = (RelativeLayout) view.findViewById(R.id.rl_profile_messages);
         mChatMessagesText = (TextView) view.findViewById(R.id.tv_messages_text);
         mNicknameTextView = (TextView) view.findViewById(R.id.tv_profile_nickname);
         mNicknameEditText = (EditText) view.findViewById(R.id.et_profile_nickname);
         mNicknameEditButton = (ImageButton) view.findViewById(R.id.ib_profile_nickname_edit);
         mInviteButtonContainer = (LinearLayout) view.findViewById(R.id.inc_profile_friend_request);
 
-        mChatMessagesContainer.setOnClickListener(new View.OnClickListener() {
+        RelativeLayout chatMessagesContainer = (RelativeLayout) view.findViewById(R.id.rl_profile_messages);
+        chatMessagesContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showMessagingActivity();
             }
         });
+
+        updateContent();
+    }
+
+    @Override
+    public void updateActionBar() {
+        getActivity().getActionBar().setTitle(mContact.getNickname());
+    }
+
+    @Override
+    protected void updateViews() {
+        super.updateViews();
+        updateName();
+        updateMessageText();
+        updateFingerprint();
+        updateInviteButton(mContact);
+        updateDeclineButton(mContact);
+        hideNicknameEdit();
+        updateNicknameContainer();
     }
 
     private void showMessagingActivity() {
@@ -141,10 +158,10 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
                 isSelectionHandled = true;
                 break;
             case R.id.menu_profile_delete:
-                if (mContact.isFriendOrBlocked()) {
-                    showDeleteContactDialog();
-                } else {
+                if (mContact.isKept()) {
                     showDiscardContactDialog();
+                } else {
+                    showDeleteContactDialog();
                 }
                 isSelectionHandled = true;
                 break;
@@ -249,23 +266,6 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
     }
 
     @Override
-    public void updateActionBar() {
-        getActivity().getActionBar().setTitle(mContact.getNickname());
-    }
-
-    @Override
-    protected void updateViews() {
-        super.updateViews();
-        updateName();
-        updateMessageText();
-        updateFingerprint();
-        updateInviteButton(mContact);
-        updateDeclineButton(mContact);
-        hideNicknameEdit();
-        updateNicknameContainer();
-    }
-
-    @Override
     protected XoTransfer getAvatarTransfer() {
         return mContact.getAvatarDownload();
     }
@@ -283,10 +283,6 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
     @Override
     public void onMessageDeleted(TalkClientMessage message) {
         updateMessageTextOnUiThread();
-    }
-
-    private void updateAvatarView() {
-        super.updateAvatarView(mContact.getAvatarDownload());
     }
 
     private void updateName() {
@@ -440,11 +436,6 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
                     public void onClick(DialogInterface dialog, int id) {
                         getXoClient().blockContact(mContact);
                     }
-                },
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                    }
                 }
         );
     }
@@ -463,9 +454,7 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
                 public void run() {
                     refreshContactFromDatabase();
                     updateContent();
-//                    updateViews();
-//                    getActivity().invalidateOptionsMenu();
-//                    updateActionBar();
+                    getActivity().invalidateOptionsMenu();
                 }
             });
         }
@@ -479,8 +468,7 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
                 public void run() {
                     refreshContactFromDatabase();
                     updateContent();
-//                    getActivity().invalidateOptionsMenu();
-//                    updateActionBar();
+                    getActivity().invalidateOptionsMenu();
                 }
             });
         }

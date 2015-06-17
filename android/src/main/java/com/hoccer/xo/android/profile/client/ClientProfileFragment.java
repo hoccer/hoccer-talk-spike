@@ -9,7 +9,6 @@ import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.profile.ProfileFragment;
-import com.hoccer.xo.android.util.UriUtils;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
