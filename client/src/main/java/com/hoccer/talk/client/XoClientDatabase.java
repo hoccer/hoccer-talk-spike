@@ -190,6 +190,17 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return contacts.join(relationships).query();
     }
 
+    public List<TalkClientContact> findClientContactsByState(String state, String unblockState) throws SQLException {
+        QueryBuilder<TalkRelationship, Long> relationships = mRelationships.queryBuilder();
+        relationships.where()
+                .eq("state", state)
+                .and()
+                .eq("unblockState", unblockState);
+
+        QueryBuilder<TalkClientContact, Integer> contacts = mClientContacts.queryBuilder();
+        return contacts.join(relationships).query();
+    }
+
     //////////////////////////////////
     //////// Group Management ////////
     //////////////////////////////////
