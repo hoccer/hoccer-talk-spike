@@ -61,7 +61,6 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
         mFilter = filter;
         mXoClient = XoApplication.get().getXoClient();
         mDatabase = mXoClient.getDatabase();
-        loadChatItems();
     }
 
     public void loadChatItems() {
