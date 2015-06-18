@@ -56,6 +56,11 @@ public class NearbyGroupHistoryChatItem extends ChatItem implements SearchAdapte
     }
 
     @Override
+    protected int getAvatarLayout() {
+        return R.layout.view_avatar_simple;
+    }
+
+    @Override
     protected View updateView(View view) {
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
         TextView lastMessageTextView = (TextView) view.findViewById(R.id.contact_last_message);

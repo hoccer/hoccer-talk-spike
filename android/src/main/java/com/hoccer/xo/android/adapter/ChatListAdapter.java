@@ -16,6 +16,8 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.model.ChatItem;
 import com.hoccer.xo.android.view.model.ContactChatItem;
+import com.hoccer.xo.android.view.model.NearbyGroupHistoryChatItem;
+import com.hoccer.xo.android.view.model.WorldwideGroupHistoryChatItem;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -74,16 +76,15 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
                     mChatItems.clear();
 
                     for (final TalkClientContact contact : filteredContacts) {
-                        ChatItem chatItem = ChatItem.create(contact, mActivity);
-                        mChatItems.add(chatItem);
+                        mChatItems.add(new ContactChatItem(contact, mActivity));
                     }
 
                     if (nearbyMessageCount > 0) {
-                        mChatItems.add(ChatItem.createNearbyGroupHistory(mActivity));
+                        mChatItems.add(new NearbyGroupHistoryChatItem(mActivity));
                     }
 
                     if (worldwideMessageCount > 0) {
-                        mChatItems.add(ChatItem.createWorldwideGroupHistory(mActivity));
+                        mChatItems.add(new WorldwideGroupHistoryChatItem(mActivity));
                     }
 
                     notifyDataSetChanged();

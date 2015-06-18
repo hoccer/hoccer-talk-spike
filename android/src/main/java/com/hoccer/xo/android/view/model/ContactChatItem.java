@@ -13,9 +13,10 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.adapter.SearchAdapter;
 import com.hoccer.xo.android.profile.client.ClientProfileActivity;
 import com.hoccer.xo.android.profile.group.GroupProfileActivity;
-import com.hoccer.xo.android.adapter.SearchAdapter;
+import com.hoccer.xo.android.view.avatar.AvatarView;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -71,11 +72,16 @@ public class ContactChatItem extends ChatItem implements SearchAdapter.Searchabl
     }
 
     @Override
-    protected View updateView(View view) {
-        TextView nameView = (TextView) view.findViewById(R.id.contact_name);
-        TextView lastMessageTextView = (TextView) view.findViewById(R.id.contact_last_message);
-        TextView lastMessageTimeView = (TextView) view.findViewById(R.id.contact_time);
-        TextView unseenView = (TextView) view.findViewById(R.id.contact_unseen_messages);
+    protected int getAvatarLayout() {
+        return AvatarView.getLayoutResource(mContact);
+    }
+
+    @Override
+    protected View updateView(View convertView) {
+        TextView nameView = (TextView) convertView.findViewById(R.id.contact_name);
+        TextView lastMessageTextView = (TextView) convertView.findViewById(R.id.contact_last_message);
+        TextView lastMessageTimeView = (TextView) convertView.findViewById(R.id.contact_time);
+        TextView unseenView = (TextView) convertView.findViewById(R.id.contact_unseen_messages);
 
         if (mContact.isWorldwideGroup()) {
             List<TalkClientContact> contacts = new ArrayList<TalkClientContact>();
@@ -96,7 +102,6 @@ public class ContactChatItem extends ChatItem implements SearchAdapter.Searchabl
         setUnseenMessages(unseenView);
 
         mAvatarView.setContact(mContact);
-
         mAvatarView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -114,7 +119,7 @@ public class ContactChatItem extends ChatItem implements SearchAdapter.Searchabl
             }
         });
 
-        return view;
+        return convertView;
     }
 
     private void updateLastMessageText(TalkClientMessage message) {
