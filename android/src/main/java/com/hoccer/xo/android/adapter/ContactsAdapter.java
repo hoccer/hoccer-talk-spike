@@ -86,9 +86,10 @@ public abstract class ContactsAdapter extends BaseAdapter implements IXoContactL
     }
 
     public void loadContacts() {
+        List<TalkClientContact> newContacts = new ArrayList<TalkClientContact>();
         synchronized (this) {
             try {
-                List<TalkClientContact> newContacts = mDatabase.findAllContactsExceptSelfOrderedByRecentMessage();
+                newContacts = mDatabase.findAllContactsExceptSelfOrderedByRecentMessage();
                 LOG.debug("found " + newContacts.size() + " contacts");
 
                 if (mFilter != null) {
@@ -103,14 +104,16 @@ public abstract class ContactsAdapter extends BaseAdapter implements IXoContactL
                     }
                 }
 
-                mContacts = newContacts;
             } catch (SQLException e) {
                 LOG.error("SQL error", e);
             }
         }
+
+        final List<TalkClientContact> finalNewContacts = newContacts;
         mActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                mContacts = finalNewContacts;
                 notifyDataSetInvalidated();
             }
         });
