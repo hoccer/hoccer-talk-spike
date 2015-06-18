@@ -1,14 +1,11 @@
 package com.hoccer.xo.android.fragment;
 
 import android.app.TaskStackBuilder;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.DataSetObserver;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
 import android.view.View;
 import android.widget.AdapterView;
 import com.artcom.hoccer.R;
@@ -16,10 +13,8 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.activity.ChatActivity;
-import com.hoccer.xo.android.adapter.HistoryAdapter;
+import com.hoccer.xo.android.adapter.HistoryMessagesAdapter;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.view.chat.MessageItem;
 import org.apache.log4j.Logger;
 
@@ -32,7 +27,7 @@ public class HistoryFragment extends XoChatListFragment {
     public static final String ARG_GROUP_HISTORY = "com.hoccer.xo.android.fragment.ARG_GROUP_HISTORY";
 
     private String mHistoryId = null;
-    private HistoryAdapter mAdapter;
+    private HistoryMessagesAdapter mAdapter;
 
 
 
@@ -102,14 +97,14 @@ public class HistoryFragment extends XoChatListFragment {
             try {
                 TalkClientContact contact = XoApplication.get().getXoClient().getDatabase().findContactById(contactId);
                 mHistoryId = contact.isClient() ? contact.getClientId() : contact.getGroupId();
-                mAdapter = new HistoryAdapter(getListView(), (XoActivity) getActivity(), contact);
+                mAdapter = new HistoryMessagesAdapter(getListView(), (XoActivity) getActivity(), contact);
             } catch (SQLException e) {
                 LOG.error("Client contact with id '" + contactId + "' does not exist", e);
                 return;
             }
         } else if (getArguments() != null && getArguments().getString(ARG_GROUP_HISTORY) != null) {
             mHistoryId = getArguments().getString(ARG_GROUP_HISTORY);
-            mAdapter = new HistoryAdapter(getListView(), (XoActivity) getActivity(), mHistoryId);
+            mAdapter = new HistoryMessagesAdapter(getListView(), (XoActivity) getActivity(), mHistoryId);
         }
 
         mAdapter.onCreate();

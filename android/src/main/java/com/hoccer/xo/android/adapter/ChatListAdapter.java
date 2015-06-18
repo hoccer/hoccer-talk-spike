@@ -14,7 +14,6 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.xo.android.XoAndroidClient;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.view.model.ChatItem;
 import com.hoccer.xo.android.view.model.ContactChatItem;
 import org.apache.log4j.Logger;

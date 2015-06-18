@@ -11,8 +11,8 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.base.MessagesAdapter;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.view.chat.MessageItem;
 import com.hoccer.xo.android.view.chat.attachments.*;
 import org.apache.log4j.Logger;
@@ -31,9 +31,9 @@ import java.util.List;
  * <p/>
  * To configure list items it uses instances of ChatMessageItem and its subtypes.
  */
-public class ChatAdapter extends XoAdapter implements IXoMessageListener, TransferListener {
+public class ChatMessagesAdapter extends MessagesAdapter implements IXoMessageListener, TransferListener {
 
-    private static final Logger LOG = Logger.getLogger(ChatAdapter.class);
+    private static final Logger LOG = Logger.getLogger(ChatMessagesAdapter.class);
 
     /**
      * Number of TalkClientMessage objects in a batch
@@ -53,14 +53,14 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, Transf
 
     private final ListView mListView;
 
-    public ChatAdapter(ListView listView, XoActivity activity, TalkClientContact contact) {
+    public ChatMessagesAdapter(ListView listView, XoActivity activity, TalkClientContact contact) {
         super(activity);
         mListView = listView;
         mContact = contact;
         initialize();
     }
 
-    public ChatAdapter(ListView listView, XoActivity activity) {
+    public ChatMessagesAdapter(ListView listView, XoActivity activity) {
         super(activity);
         mListView = listView;
     }
