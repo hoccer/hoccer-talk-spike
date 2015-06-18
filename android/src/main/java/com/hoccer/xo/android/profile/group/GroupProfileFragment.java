@@ -142,11 +142,10 @@ public class GroupProfileFragment extends ProfileFragment
         if (mGroupMemberAdapter == null) {
             mGroupMemberAdapter = new GroupMemberContactsAdapter(getXoActivity(), mContact.getGroupId());
             mGroupMemberAdapter.setFilter(mInvitedOrJoinedClientFilter);
-            mGroupMemberAdapter.onCreate();
-            mGroupMemberAdapter.onResume();
+            mGroupMemberAdapter.registerListeners();
             mGroupMembersList.setAdapter(mGroupMemberAdapter);
         }
-        mGroupMemberAdapter.requestReload();
+        mGroupMemberAdapter.loadContacts();
 
         if (mContact.isNearbyGroup() || mContact.isWorldwideGroup()) {
             mGroupMembersList.setOnItemClickListener(this);
@@ -187,8 +186,7 @@ public class GroupProfileFragment extends ProfileFragment
     public void onDestroy() {
         super.onDestroy();
         if (mGroupMemberAdapter != null) {
-            mGroupMemberAdapter.onPause();
-            mGroupMemberAdapter.onDestroy();
+            mGroupMemberAdapter.unRegisterListeners();
             mGroupMemberAdapter = null;
         }
     }

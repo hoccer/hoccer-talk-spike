@@ -2,16 +2,18 @@ package com.hoccer.xo.android.adapter;
 
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.TextView;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.IXoMessageListener;
 import com.hoccer.talk.client.TransferListener;
+import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.base.XoAdapter;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.log4j.Logger;
 
@@ -26,8 +28,7 @@ import java.util.List;
  * <p/>
  * It also has a filter feature that allows restricting the displayed set of contacts.
  */
-public abstract class ContactsAdapter extends XoAdapter
-        implements IXoContactListener, IXoMessageListener, TransferListener {
+public abstract class ContactsAdapter extends BaseAdapter implements IXoContactListener, IXoMessageListener, TransferListener {
 
     private static final Logger LOG = Logger.getLogger(ContactsAdapter.class);
 
@@ -42,16 +43,20 @@ public abstract class ContactsAdapter extends XoAdapter
 
     protected final static int VIEW_TYPE_COUNT = 4;
 
-    private boolean showNearbyHistory;
+    private boolean mShowNearbyHistory;
     private long mNearbyMessagesCount;
 
+    protected final XoClientDatabase mDatabase;
+    protected final XoActivity mActivity;
+
     protected ContactsAdapter(XoActivity activity) {
-        super(activity);
+        mActivity = activity;
+        mDatabase = XoApplication.get().getXoClient().getDatabase();
     }
 
     protected ContactsAdapter(XoActivity activity, boolean showNearbyHistory) {
-        super(activity);
-        this.showNearbyHistory = showNearbyHistory;
+        this(activity);
+        mShowNearbyHistory = showNearbyHistory;
     }
 
     Filter mFilter;
@@ -66,30 +71,21 @@ public abstract class ContactsAdapter extends XoAdapter
         this.mFilter = filter;
     }
 
-    @Override
-    public void onCreate() {
-        LOG.debug("onCreate()");
-        super.onCreate();
-        getXoClient().registerContactListener(this);
-        getXoClient().registerMessageListener(this);
-        getXoClient().getDownloadAgent().registerListener(this);
-        getXoClient().getUploadAgent().registerListener(this);
+    public void registerListeners() {
+        XoApplication.get().getXoClient().registerContactListener(this);
+        XoApplication.get().getXoClient().registerMessageListener(this);
+        XoApplication.get().getXoClient().getDownloadAgent().registerListener(this);
+        XoApplication.get().getXoClient().getUploadAgent().registerListener(this);
     }
 
-    @Override
-    public void onDestroy() {
-        LOG.debug("onDestroy()");
-        super.onDestroy();
-        getXoClient().unregisterContactListener(this);
-        getXoClient().unregisterMessageListener(this);
-        getXoClient().getDownloadAgent().unregisterListener(this);
-        getXoClient().getUploadAgent().unregisterListener(this);
+    public void unRegisterListeners() {
+        XoApplication.get().getXoClient().unregisterContactListener(this);
+        XoApplication.get().getXoClient().unregisterMessageListener(this);
+        XoApplication.get().getXoClient().getDownloadAgent().unregisterListener(this);
+        XoApplication.get().getXoClient().getUploadAgent().unregisterListener(this);
     }
 
-    @Override
-    public void onReloadRequest() {
-        LOG.debug("onReloadRequest()");
-        super.onReloadRequest();
+    public void loadContacts() {
         synchronized (this) {
             try {
                 List<TalkClientContact> newContacts = mDatabase.findAllContactsExceptSelfOrderedByRecentMessage();
@@ -112,10 +108,9 @@ public abstract class ContactsAdapter extends XoAdapter
                 LOG.error("SQL error", e);
             }
         }
-        runOnUiThread(new Runnable() {
+        mActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                reloadFinished();
                 notifyDataSetInvalidated();
             }
         });
@@ -133,27 +128,27 @@ public abstract class ContactsAdapter extends XoAdapter
 
     @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
-        requestReload();
+        loadContacts();
     }
 
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
-        requestReload();
+        loadContacts();
     }
 
     @Override
     public void onGroupPresenceChanged(TalkClientContact contact) {
-        requestReload();
+        loadContacts();
     }
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
-        requestReload();
+        loadContacts();
     }
 
     @Override
     public void onMessageCreated(TalkClientMessage message) {
-        requestReload();
+        loadContacts();
     }
 
     @Override
@@ -187,7 +182,7 @@ public abstract class ContactsAdapter extends XoAdapter
     @Override
     public void onDownloadStateChanged(TalkClientDownload download) {
         if (download.isAvatar() && download.getState() == TalkClientDownload.State.COMPLETE) {
-            requestReload();
+            loadContacts();
         }
     }
 
@@ -209,7 +204,7 @@ public abstract class ContactsAdapter extends XoAdapter
     @Override
     public void onUploadStateChanged(TalkClientUpload upload) {
         if (upload.isAvatar()) {
-            requestReload();
+            loadContacts();
         }
     }
 
@@ -229,7 +224,7 @@ public abstract class ContactsAdapter extends XoAdapter
         count += mContacts.size();
 
         // add saved nearby messages
-        if (showNearbyHistory) {
+        if (mShowNearbyHistory) {
 
             // TODO: only if nearby history was found in db
             try {
@@ -287,30 +282,30 @@ public abstract class ContactsAdapter extends XoAdapter
         switch (type) {
             case VIEW_TYPE_CLIENT:
                 if (view == null) {
-                    view = mInflater.inflate(getClientLayout(), null);
+                    view = mActivity.getLayoutInflater().inflate(getClientLayout(), null);
                 }
                 updateContact(view, (TalkClientContact) getItem(position));
                 break;
             case VIEW_TYPE_GROUP:
                 if (view == null) {
-                    view = mInflater.inflate(getGroupLayout(), null);
+                    view = mActivity.getLayoutInflater().inflate(getGroupLayout(), null);
                 }
                 updateContact(view, (TalkClientContact) getItem(position));
                 break;
             case VIEW_TYPE_SEPARATOR:
                 if (view == null) {
-                    view = mInflater.inflate(getSeparatorLayout(), null);
+                    view = mActivity.getLayoutInflater().inflate(getSeparatorLayout(), null);
                 }
                 updateSeparator(view, position);
                 break;
             case VIEW_TYPE_NEARBY_HISTORY:
                 if (view == null) {
-                    view = mInflater.inflate(getNearbyHistoryLayout(), null);
+                    view = mActivity.getLayoutInflater().inflate(getNearbyHistoryLayout(), null);
                 }
                 updateNearbyHistoryLayout(view);
                 break;
             default:
-                view = mInflater.inflate(getSeparatorLayout(), null);
+                view = mActivity.getLayoutInflater().inflate(getSeparatorLayout(), null);
                 break;
         }
 
