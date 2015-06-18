@@ -450,6 +450,7 @@
     <string name="unmute_contact">laut schalten</string>
     <string name="toast_mute_chat">stumm geschaltet</string>
     <string name="toast_unmute_chat">laut geschaltet</string>
+    <string name="blocked">Blockiert</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Kontakt</item>

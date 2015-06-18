@@ -10,18 +10,37 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-        <ImageView
-                android:id="@+id/profile_avatar_image"
-                android:scaleType="centerCrop"
+        <RelativeLayout
+                android:id="@+id/rl_profile_avatar_image"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:layout_gravity="center_horizontal"/>
+                android:layout_height="wrap_content">
+
+            <ImageView
+                    android:id="@+id/profile_avatar_image"
+                    android:scaleType="centerCrop"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:layout_gravity="center_horizontal"/>
+
+            <LinearLayout android:id="@+id/ll_blocked"
+                          android:layout_width="match_parent"
+                          android:layout_height="200dp"
+                          android:visibility="visible"
+                          android:background="@color/black_transparency_60_percent">
+                <TextView android:layout_marginRight="8dp" android:layout_alignParentRight="true"
+                          android:layout_alignParentBottom="true" android:layout_width="wrap_content"
+                          android:layout_height="wrap_content" android:gravity="center_vertical"
+                          android:textColor="@android:color/white"
+                          android:text="@string/blocked" android:drawableRight="@drawable/ic_action_block"/>
+            </LinearLayout>
+
+        </RelativeLayout>
 
         <include
                 android:id="@+id/inc_profile_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/profile_avatar_image"
+                android:layout_below="@id/rl_profile_avatar_image"
                 layout="@layout/profile_name_container"
                 style="@style/ProfileContainerStyle"/>
 

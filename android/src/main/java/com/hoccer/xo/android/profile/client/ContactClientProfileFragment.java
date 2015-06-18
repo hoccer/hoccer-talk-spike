@@ -29,6 +29,7 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
 
     private static final Logger LOG = Logger.getLogger(ContactClientProfileFragment.class);
 
+    private LinearLayout mBlockedContainer;
     private LinearLayout mInviteButtonContainer;
     private TextView mNicknameTextView;
     private EditText mNicknameEditText;
@@ -44,6 +45,7 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mBlockedContainer = (LinearLayout) view.findViewById(R.id.ll_blocked);
         mChatContainer = (RelativeLayout) view.findViewById(R.id.inc_profile_chat_stats);
         mChatMessagesText = (TextView) view.findViewById(R.id.tv_messages_text);
         mNicknameTextView = (TextView) view.findViewById(R.id.tv_profile_nickname);
@@ -62,23 +64,6 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
         updateContent();
     }
 
-    @Override
-    public void updateActionBar() {
-        getActivity().getActionBar().setTitle(mContact.getNickname());
-    }
-
-    @Override
-    protected void updateViews() {
-        super.updateViews();
-        updateName();
-        updateMessageText();
-        updateFingerprint();
-        updateInviteButton(mContact);
-        updateDeclineButton(mContact);
-        hideNicknameEdit();
-        updateNicknameContainer();
-    }
-
     private void showMessagingActivity() {
         Intent intent = new Intent(getActivity(), ChatActivity.class);
         intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mContact.getClientContactId());
@@ -86,6 +71,17 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
             intent.putExtra(ChatActivity.EXTRA_CLIENT_HISTORY, true);
         }
         startActivity(intent);
+    }
+
+    @Override
+    public void updateActionBar() {
+        getActivity().getActionBar().setTitle(mContact.getNickname());
+    }
+
+    @Override
+    protected void updateAvatarView(XoTransfer avatarTransfer) {
+        super.updateAvatarView(avatarTransfer);
+
     }
 
     @Override
@@ -283,6 +279,26 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
     @Override
     public void onMessageDeleted(TalkClientMessage message) {
         updateMessageTextOnUiThread();
+    }
+
+    @Override
+    protected void updateViews() {
+        super.updateViews();
+        updateBlockedContainer();
+        updateName();
+        updateMessageText();
+        updateInviteButton(mContact);
+        updateDeclineButton(mContact);
+        hideNicknameEdit();
+        updateNicknameContainer();
+    }
+
+    private void updateBlockedContainer() {
+        if (mContact.isClientBlocked()) {
+            mBlockedContainer.setVisibility(View.VISIBLE);
+        } else {
+            mBlockedContainer.setVisibility(View.GONE);
+        }
     }
 
     private void updateName() {
