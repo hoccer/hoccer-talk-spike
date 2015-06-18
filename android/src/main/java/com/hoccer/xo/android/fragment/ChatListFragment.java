@@ -235,30 +235,37 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
         super.onListItemClick(listView, view, position, id);
 
         ChatItem item = ((ChatItem) listView.getItemAtPosition(position));
-        if (shouldShowClientHistory(item)) {
-            TalkClientContact contact = ((ContactChatItem) item).getContact();
-            showHistory(contact);
-        } else if (shouldShowChat(item)) {
+        if (shouldShowChat(item)) {
             TalkClientContact contact = ((ContactChatItem) item).getContact();
             showChat(contact);
-        } else if (item.getType() == ChatItem.TYPE_GROUP_HISTORY_NEARBY) {
+        } else if (shouldShowClientHistory(item)) {
+            TalkClientContact contact = ((ContactChatItem) item).getContact();
+            showHistory(contact);
+        } else if (item instanceof NearbyGroupHistoryChatItem) {
             showNearbyGroupHistory();
-        } else if (item.getType() == ChatItem.TYPE_GROUP_HISTORY_WORLDWIDE) {
+        } else if (item instanceof WorldwideGroupHistoryChatItem) {
             showWorldwideGroupHistory();
         }
     }
 
     private boolean shouldShowChat(ChatItem item) {
-        return item.getType() == ChatItem.TYPE_RELATED
-                || item.getType() == ChatItem.TYPE_CLIENT_PRESENCE_NEARBY
-                || item.getType() == ChatItem.TYPE_CLIENT_PRESENCE_WORLDWIDE
-                || item.getType() == ChatItem.TYPE_GROUP_WORLDWIDE;
+        if (item instanceof ContactChatItem) {
+            TalkClientContact contact = ((ContactChatItem) item).getContact();
+            return contact.isInEnvironment()
+                    || contact.isEnvironmentGroup()
+                    || contact.isFriendOrBlocked()
+                    || contact.isGroupJoined();
+        }
+        return false;
     }
 
     private boolean shouldShowClientHistory(ChatItem item) {
-        return item.getType() == ChatItem.TYPE_CLIENT_ACQUAINTANCE_NEARBY
-                || item.getType() == ChatItem.TYPE_CLIENT_ACQUAINTANCE_WORLDWIDE
-                || item.getType() == ChatItem.TYPE_CLIENT_KEPT;
+        if (item instanceof ContactChatItem) {
+            ContactChatItem contactChatItem = (ContactChatItem) item;
+            TalkClientContact contact = contactChatItem.getContact();
+            return contact.isKept();
+        }
+        return false;
     }
 
     public void showChat(TalkClientContact contact) {
