@@ -7,8 +7,6 @@ import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.view.avatar.AvatarView;
 
 
@@ -31,26 +29,33 @@ public abstract class ChatItem {
             convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat_client, null);
         }
 
+        updateAvatarView(convertView);
+
+        return updateView(convertView);
+    }
+
+    private void updateAvatarView(View convertView) {
         AvatarView avatarView = (AvatarView) convertView.findViewById(R.id.avatar);
-        int layoutId;
         if (avatarView == null) {
             ViewStub avatarStub = (ViewStub) convertView.findViewById(R.id.vs_avatar);
-            layoutId = getAvatarLayout();
+
+            int layoutId = getAvatarLayout();
             avatarStub.setLayoutResource(layoutId);
-            mAvatarView = (AvatarView) avatarStub.inflate();
-            mAvatarView.setTag(layoutId);
-        } else if (mAvatarView == null || mAvatarView.getTag() != avatarView.getTag()) {
+
+            avatarView = (AvatarView) avatarStub.inflate();
+            avatarView.setTag(layoutId);
+        } else if ((Integer) avatarView.getTag() != getAvatarLayout()) {
             ViewGroup viewGroup = (ViewGroup) convertView.findViewById(R.id.avatar_container);
             viewGroup.removeView(avatarView);
 
-            layoutId = getAvatarLayout();
-            mAvatarView = (AvatarView) LayoutInflater.from(convertView.getContext()).inflate(layoutId, viewGroup, false);
-            viewGroup.addView(mAvatarView);
+            int layoutId = getAvatarLayout();
+            avatarView = (AvatarView) LayoutInflater.from(convertView.getContext()).inflate(layoutId, viewGroup, false);
+            viewGroup.addView(avatarView);
 
-            mAvatarView.setTag(layoutId);
+            avatarView.setTag(layoutId);
         }
 
-        return updateView(convertView);
+        mAvatarView = avatarView;
     }
 
     protected abstract int getAvatarLayout();
