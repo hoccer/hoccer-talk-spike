@@ -2705,7 +2705,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
             LOG.warn("updateEnvironment: no environment type, defaulting to nearby. Please fix client");
             environment.setType(TalkEnvironment.TYPE_NEARBY);
         }
-        if (environment.isWorldwide() && environment.getTag() == null || environment.getTag().length() < 2) {
+        if (environment.isWorldwide() && (environment.getTag() == null || environment.getTag().length() < 2)) {
             Date now = new Date();
             long day = now.getTime() / 1000 / 60 / 60 / 24;
             environment.setTag("*-"+ day);
@@ -2717,7 +2717,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
         String lockId = "env-"+environment.getType();
 
-        synchronized (mServer.idLock(lockId)) {
+        // synchronized (mServer.idLock(lockId)) {
 
             List<TalkEnvironment> matching = mDatabase.findEnvironmentsMatching(environment);
 
@@ -2943,7 +2943,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
             // we are alone or first at the location, lets create a new group
             createGroupWithEnvironment(environment);
             return environment.getGroupId();
-        }
+        // }
     }
 
     private static void removeGroupMembership(TalkServer server, TalkGroupMembership membership, Date now) {
