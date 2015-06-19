@@ -14,6 +14,8 @@ public class ClientCreate extends TalkToolCommand {
     int pNumClients = 1;
     @Parameter(description = "Select clients after creation", names = "-s")
     boolean pSelectClients = false;
+    @Parameter(description = "Client name - batchname if -n > 1, e.g. '<batchname>_#[i-n]' for n clients to be created. Default: not set!", names="--name")
+    String pName = null;
 
     @Override
     protected void run(TalkToolContext context) throws Exception {
@@ -24,6 +26,15 @@ public class ClientCreate extends TalkToolCommand {
             context.addClient(client);
             clients.add(client);
             client.getClient().setEncryptedDownloadDirectory(context.getApplication().getDownloadDir());
+            if (pName != null) {
+                final String name;
+                if (pNumClients == 1) {
+                    name = pName;
+                } else {
+                    name = pName + "_" + (i + 1);
+                }
+                client.getClient().getSelfContact().getSelf().setRegistrationName(name);
+            }
         }
         if (pSelectClients) {
             context.setSelectedClients(clients);

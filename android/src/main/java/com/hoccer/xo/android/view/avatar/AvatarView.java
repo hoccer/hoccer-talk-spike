@@ -129,27 +129,22 @@ public abstract class AvatarView extends LinearLayout {
      * @param avatarImageUri Url of the given image resource  to load.
      */
     public void setAvatarImage(final Uri avatarImageUri) {
-        post(new Runnable() {
-            @Override
-            public void run() {
-                if (isInEditMode()) {
-                    ImageView avatar = (ImageView) findViewById(R.id.avatar_image);
-                    avatar.setImageResource(R.drawable.avatar_contact);
-                } else {
-                    mAvatarImage.setVisibility(View.VISIBLE);
-                    if (avatarImageUri != null) {
-                        ImageLoader.getInstance()
-                                .displayImage(avatarImageUri.toString(), mAvatarImage, mDefaultOptions, null);
-                    } else if (mDefaultAvatarImageUri != null) {
-                        ImageLoader.getInstance()
-                                .displayImage(mDefaultAvatarImageUri.toString(), mAvatarImage, mDefaultOptions,
-                                        null);
-                    } else {
-                        mAvatarImage.setVisibility(View.INVISIBLE);
-                    }
-                }
+        if (isInEditMode()) {
+            ImageView avatar = (ImageView) findViewById(R.id.avatar_image);
+            avatar.setImageResource(R.drawable.avatar_contact);
+        } else {
+            mAvatarImage.setVisibility(View.VISIBLE);
+            if (avatarImageUri != null) {
+                ImageLoader.getInstance()
+                        .displayImage(avatarImageUri.toString(), mAvatarImage, mDefaultOptions, null);
+            } else if (mDefaultAvatarImageUri != null) {
+                ImageLoader.getInstance()
+                        .displayImage(mDefaultAvatarImageUri.toString(), mAvatarImage, mDefaultOptions,
+                                null);
+            } else {
+                mAvatarImage.setVisibility(View.INVISIBLE);
             }
-        });
+        }
     }
 
     public void setAvatarImage(int resourceId) {
@@ -171,7 +166,7 @@ public abstract class AvatarView extends LinearLayout {
             layoutId = R.layout.view_avatar_client_kept;
         } else if (contact.isWorldwideGroup()) {
             layoutId = R.layout.view_avatar_group_worldwide;
-        }  else {
+        } else {
             layoutId = R.layout.view_avatar_presence;
         }
 

@@ -98,7 +98,7 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
     }
 
     private void updateContact(final View view, final TalkClientContact contact) {
-        AvatarView avatarView = ((AvatarView) view.findViewById(R.id.contact_icon));
+        AvatarView avatarView = ((AvatarView) view.findViewById(R.id.avatar));
         if (avatarView == null) {
             ViewStub avatarCointainer = (ViewStub) view.findViewById(R.id.vs_avatar);
             avatarCointainer.setLayoutResource(R.layout.view_avatar_presence);
