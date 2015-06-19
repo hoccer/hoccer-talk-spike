@@ -28,7 +28,11 @@ public class ClientList extends TalkToolCommand {
             // id
             columns[0] = Integer.toString(client.getId());
             // name
-            columns[1] = client.getClient().getSelfContact().getName();
+            String name = client.getClient().getSelfContact().getName();
+            if (name == null) {
+                name = "";
+            }
+            columns[1] = name;
             // state
             columns[2] = client.getClient().getState().toString();
             // isNearby
