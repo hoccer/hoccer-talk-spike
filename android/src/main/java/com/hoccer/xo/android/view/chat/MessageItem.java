@@ -231,14 +231,32 @@ public class MessageItem implements AttachmentTransferListener {
     private String stateStringForGroupDelivery(View view) {
         try {
             StringBuilder statusTextBuilder = new StringBuilder();
-            int sent = 0, read = 0, error = 0, expecting = 0;
+            int unseen = 0, seen = 0, undeliverable = 0, sent = 0;
             List<TalkDelivery> deliveriesForMessage = mDatabase.getDeliveriesForMessage(mMessage);
             for (TalkDelivery delivery : deliveriesForMessage) {
-                if(delivery.isSeen()) read++;
-                if(delivery.isDelivered()) sent++;
-
+                if(delivery.isFailure()) undeliverable++;
+                if(delivery.isSeen()) seen++;
+                if(delivery.isUnseen()) unseen++;
+                if(delivery.isInState(TalkDelivery.STATE_DELIVERING)) sent++;
             }
 
+            StringBuilder builder = new StringBuilder();
+            if(seen > 0) {
+                builder.append(seen + " seen,");
+            }
+            if(unseen > 0) {
+                builder.append(" " + unseen + " unseen,");
+            }
+            if(sent > 0) {
+                builder.append(" " + sent + " sent,");
+            }
+            if(undeliverable > 0) {
+                builder.append(" " + undeliverable + " undeliverable,");
+            }
+            if(builder.length() > 0) {
+                builder.deleteCharAt(builder.length()-1);
+            }
+            return builder.toString();
         } catch (SQLException e) {
             LOG.error(e.getMessage());
         }
@@ -308,7 +326,7 @@ public class MessageItem implements AttachmentTransferListener {
             }
         } else {
             if (mMessage.getDelivery().isFailure()) {
-                return R.color.message_delivery_failed;
+                color = R.color.message_delivery_failed;
             }
         }
         return color;
