@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoApplication;
@@ -39,8 +40,8 @@ public class ChatVideoItem extends MessageItem {
     private ImageView mTargetView;
     private MediaScannedReceiver mMediaScannedReceiver;
 
-    public ChatVideoItem(Context context, TalkClientMessage message) {
-        super(context, message);
+    public ChatVideoItem(Context context, XoClientDatabase database, TalkClientMessage message) {
+        super(context, database, message);
     }
 
     @Override

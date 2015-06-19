@@ -8,6 +8,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.MediaPlayer;
@@ -24,8 +25,8 @@ public class AudioMessageItem extends MessageItem implements MediaPlayer.Listene
 
     private ImageButton mPlayPauseButton;
 
-    public AudioMessageItem(Context context, TalkClientMessage message) {
-        super(context, message);
+    public AudioMessageItem(Context context, XoClientDatabase database, TalkClientMessage message) {
+        super(context, database, message);
     }
 
     @Override

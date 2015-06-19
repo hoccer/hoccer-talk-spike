@@ -12,6 +12,8 @@ import com.artcom.hoccer.R;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.maps.model.LatLng;
+
+import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.base.XoActivity;
@@ -29,8 +31,8 @@ public class LocationMessageItem extends MessageItem {
 
     private final static Logger LOG = Logger.getLogger(LocationMessageItem.class);
 
-    public LocationMessageItem(Context context, TalkClientMessage message) {
-        super(context, message);
+    public LocationMessageItem(Context context, XoClientDatabase database, TalkClientMessage message) {
+        super(context, database, message);
     }
 
     @Override

@@ -9,6 +9,7 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoApplication;
@@ -30,8 +31,8 @@ public class ContactMessageItem extends MessageItem {
 
     private VCard mVCard;
 
-    public ContactMessageItem(Context context, TalkClientMessage message) {
-        super(context, message);
+    public ContactMessageItem(Context context, XoClientDatabase database, TalkClientMessage message) {
+        super(context, database, message);
     }
 
     @Override

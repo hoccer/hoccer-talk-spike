@@ -12,11 +12,13 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.ContentState;
 import com.hoccer.talk.model.TalkDelivery;
+import com.hoccer.talk.model.TalkMessage;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
@@ -27,9 +29,11 @@ import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferListener;
 import com.hoccer.xo.android.view.chat.attachments.ChatItemType;
 import org.apache.log4j.Logger;
 
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  * This class creates and configures layouts for incoming and outgoing messages.
@@ -37,6 +41,8 @@ import java.util.Date;
 public class MessageItem implements AttachmentTransferListener {
 
     private final static Logger LOG = Logger.getLogger(MessageItem.class);
+
+    private final XoClientDatabase mDatabase;
 
     protected Context mContext;
     protected AttachmentTransferHandler mAttachmentTransferHandler;
@@ -52,9 +58,10 @@ public class MessageItem implements AttachmentTransferListener {
     protected AttachmentTransferControlView mContentTransferControl;
     protected SimpleAvatarView mSimpleAvatarView;
 
-    public MessageItem(Context context, TalkClientMessage message) {
+    public MessageItem(Context context, XoClientDatabase database, TalkClientMessage message) {
         super();
         mContext = context;
+        mDatabase = database;
         mMessage = message;
         mContentRegistry = ContentRegistry.get(context);
     }
@@ -221,6 +228,23 @@ public class MessageItem implements AttachmentTransferListener {
         }
     }
 
+    private String stateStringForGroupDelivery(View view) {
+        try {
+            StringBuilder statusTextBuilder = new StringBuilder();
+            int sent = 0, read = 0, error = 0, expecting = 0;
+            List<TalkDelivery> deliveriesForMessage = mDatabase.getDeliveriesForMessage(mMessage);
+            for (TalkDelivery delivery : deliveriesForMessage) {
+                if(delivery.isSeen()) read++;
+                if(delivery.isDelivered()) sent++;
+
+            }
+
+        } catch (SQLException e) {
+            LOG.error(e.getMessage());
+        }
+        return null;
+    }
+
     private String stateStringForDelivery(TalkDelivery myDelivery, View view) {
         Resources res = view.getResources();
 
@@ -263,26 +287,45 @@ public class MessageItem implements AttachmentTransferListener {
         return myDelivery.getState();
     }
 
-    private static int statusColorId(TalkDelivery myDelivery) {
-        if (myDelivery.isFailure()) {
-            return R.color.message_delivery_failed;
+    private int statusColorId() {
+        int color = R.color.primary;
+        if(mMessage.getDelivery().isGroupDelivery()) {
+            List<TalkDelivery> deliveriesForMessage = null;
+            try {
+                deliveriesForMessage = mDatabase.getDeliveriesForMessage(mMessage);
+                boolean isDelivered = false;
+                for (TalkDelivery delivery : deliveriesForMessage) {
+                    if(delivery.isDelivered()) {
+                        isDelivered = true;
+                        break;
+                    }
+                }
+                if(!isDelivered) {
+                    color = R.color.message_delivery_failed;
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } else {
+            if (mMessage.getDelivery().isFailure()) {
+                return R.color.message_delivery_failed;
+            }
         }
-        return R.color.primary;
+        return color;
     }
 
     private void updateOutgoingMessageStatus(View view) {
         TextView deliveryInfo = (TextView) view.findViewById(R.id.tv_message_delivery_info);
-        if (mMessage.getConversationContact().isGroup()) {
-            deliveryInfo.setVisibility(View.GONE);
-            return;
+        TalkDelivery outgoingDelivery = mMessage.getDelivery();
+        String statusText;
+        if(mMessage.getConversationContact().isGroup()) {
+            statusText = stateStringForGroupDelivery(view);
+        } else {
+            statusText = stateStringForDelivery(outgoingDelivery, view);
         }
 
-        TalkDelivery outgoingDelivery = mMessage.getDelivery();
         deliveryInfo.setVisibility(View.VISIBLE);
-
-        String statusText = stateStringForDelivery(outgoingDelivery, view);
-        int statusColor = statusColorId(outgoingDelivery);
-
+        int statusColor = statusColorId(mMessage);
         setMessageStatusText(deliveryInfo, statusText, statusColor);
     }
 
