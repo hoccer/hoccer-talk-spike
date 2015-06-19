@@ -22,17 +22,17 @@
                     android:layout_height="200dp"
                     android:layout_gravity="center_horizontal"/>
 
-            <LinearLayout android:id="@+id/ll_blocked"
-                          android:layout_width="match_parent"
-                          android:layout_height="200dp"
-                          android:visibility="visible"
-                          android:background="@color/black_transparency_60_percent">
-                <TextView android:layout_marginRight="8dp" android:layout_alignParentRight="true"
+            <RelativeLayout android:id="@+id/rl_blocked"
+                            android:layout_width="match_parent"
+                            android:layout_height="200dp"
+                            android:visibility="visible"
+                            android:background="@color/black_transparency_60_percent">
+                <TextView android:padding="8dp" android:layout_alignParentRight="true"
                           android:layout_alignParentBottom="true" android:layout_width="wrap_content"
                           android:layout_height="wrap_content" android:gravity="center_vertical"
                           android:textColor="@android:color/white"
                           android:text="@string/blocked" android:drawableRight="@drawable/ic_action_block"/>
-            </LinearLayout>
+            </RelativeLayout>
 
         </RelativeLayout>
 

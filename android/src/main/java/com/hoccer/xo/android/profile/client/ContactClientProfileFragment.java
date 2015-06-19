@@ -29,7 +29,7 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
 
     private static final Logger LOG = Logger.getLogger(ContactClientProfileFragment.class);
 
-    private LinearLayout mBlockedContainer;
+    private RelativeLayout mBlockedContainer;
     private LinearLayout mInviteButtonContainer;
     private TextView mNicknameTextView;
     private EditText mNicknameEditText;
@@ -45,7 +45,7 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mBlockedContainer = (LinearLayout) view.findViewById(R.id.ll_blocked);
+        mBlockedContainer = (RelativeLayout) view.findViewById(R.id.rl_blocked);
         mChatContainer = (RelativeLayout) view.findViewById(R.id.inc_profile_chat_stats);
         mChatMessagesText = (TextView) view.findViewById(R.id.tv_messages_text);
         mNicknameTextView = (TextView) view.findViewById(R.id.tv_profile_nickname);
@@ -81,7 +81,6 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
     @Override
     protected void updateAvatarView(XoTransfer avatarTransfer) {
         super.updateAvatarView(avatarTransfer);
-
     }
 
     @Override
