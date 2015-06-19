@@ -2855,8 +2855,12 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         }
     }
 
-    private boolean friendshipCancelled(TalkRelationship newRelationship, TalkRelationship oldRelationShip) {
-        return newRelationship.isNone() && oldRelationShip != null && (oldRelationShip.isFriend() || (oldRelationShip.isBlocked() && TalkRelationship.STATE_FRIEND.equals(newRelationship.getUnblockState())));
+    private boolean friendshipCancelled(TalkRelationship newRelationship, TalkRelationship oldRelationShip) { 
+        return newRelationship.isNone() &&
+                oldRelationShip != null &&
+                (oldRelationShip.isFriend() ||
+                        (oldRelationShip.isBlocked() && (TalkRelationship.STATE_FRIEND.equals(newRelationship.getUnblockState())) ||
+                                oldRelationShip.getUnblockState().equals(TalkRelationship.STATE_FRIEND)));
     }
 
     private boolean becameFriend(TalkRelationship newRelationship, TalkRelationship oldRelationShip) {
