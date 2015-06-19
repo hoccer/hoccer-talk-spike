@@ -325,7 +325,7 @@ public class MessageItem implements AttachmentTransferListener {
         }
 
         deliveryInfo.setVisibility(View.VISIBLE);
-        int statusColor = statusColorId(mMessage);
+        int statusColor = statusColorId();
         setMessageStatusText(deliveryInfo, statusText, statusColor);
     }
 
