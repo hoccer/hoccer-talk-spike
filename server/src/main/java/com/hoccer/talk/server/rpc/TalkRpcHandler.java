@@ -2609,32 +2609,15 @@ public class TalkRpcHandler implements ITalkRpcServer {
             if (environment.hasExpired()) {
                 suspendGroupMember(server, membership.getGroupId(), membership.getClientId());
                 return true;
+            } else {
+                LOG.debug("checkAndSuspendGroupMembershipIfNecessary:  membership not yet expired for group:" + membership.getGroupId() + " client:" + membership.getClientId());
             }
+        } else {
+            LOG.debug("checkAndSuspendGroupMembershipIfNecessary:  membership already suspended for group:" + membership.getGroupId() + " client:" + membership.getClientId());
         }
         return membership.isSuspended();
     }
-    /*
-    private boolean tryEnsureGroupMembershipForEnvironment(TalkEnvironment environment) {
-        if (environment.getGroupId() == null) {
-            LOG.error("ensureGroupMembershipForEnvironment: no group id");
-            return false;
-        }
-        TalkGroupPresence groupPresence = mDatabase.findGroupPresenceById(environment.getGroupId());
-        if (groupPresence == null) {
-            LOG.error("ensureGroupMembershipForEnvironment: no group with id "+environment.getGroupId());
-            // TODO: create a group with a particular group id or trash the deliveries
-            return false;
-        }
-        TalkGroupMembership membership = mDatabase.findGroupMembershipForClient(environment.getGroupId(), environment.getClientId());
-        if (membership == null || !groupPresence.exists() || !(membership.isMember() || membership.isSuspended())) {
-            LOG.info("ensureGroupMembershipForEnvironment: client " + environment.getClientId() + " will join group with id " + environment.getGroupId());
-            joinGroupWithEnvironment(groupPresence, environment);
-        } else {
-               xxx
-        }
-        return true;
-    }
-    */
+
 
     public static void expireEnvironments(TalkServer server) {
 
@@ -2662,7 +2645,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 LOG.debug("expireEnvironments: not expired environment " + environment.getClientId() + " group " + environment.getGroupId() + ", released=" + environment.getTimeReleased() + ",conn=" + server.getClientConnection(environment.getClientId()));
                 if (environment.getTimeReleased() == null && server.getClientConnection(environment.getClientId()) == null) {
                     // client not connected, but environment not released
-                    releaseEnvironmentForClient(server, environment.getClientId(), TalkEnvironment.TYPE_WORLDWIDE);
+                    releaseEnvironmentForClient(server, environment.getClientId(), TalkEnvironment.TYPE_WORLDWIDE, null, null);
                 }
             }
         }
@@ -3021,7 +3004,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
     }
 
-    private static void releaseEnvironmentForClient(TalkServer server, String clientId, String type) {
+    private static void releaseEnvironmentForClient(TalkServer server, String clientId, String type, Long timeToLive, String notificationPreference) {
 
         ITalkServerDatabase database = server.getDatabase();
         List<TalkEnvironment> myEnvironments = database.findEnvironmentsForClient(clientId, type);
@@ -3033,36 +3016,61 @@ public class TalkRpcHandler implements ITalkRpcServer {
             }
         }
 
+        if (mostRecentEnvironment != null) {
+            if (timeToLive != null && notificationPreference != null) {
+                LOG.debug("releaseEnvironmentForClient: setting most recent environment ttl with type " + mostRecentEnvironment.getType() +
+                        ", ttl " + mostRecentEnvironment.getTimeToLive()+
+                        ", notificationPreference " + mostRecentEnvironment.getNotificationPreference() +
+                        " for client " + clientId);
+                mostRecentEnvironment.setTimeToLive(timeToLive.longValue());
+                if (mostRecentEnvironment.isWorldwide() && notificationPreference != null) {
+                    if (!notificationPreference.equals(mostRecentEnvironment.getNotificationPreference())) {
+                        mostRecentEnvironment.setNotificationPreference(notificationPreference);
+                        TalkGroupMembership myMembership = database.findGroupMembershipForClient(mostRecentEnvironment.getGroupId(), mostRecentEnvironment.getClientId());
+                        if (myMembership != null) {
+                            myMembership.setNotificationPreference(mostRecentEnvironment.getNotificationPreference());
+                            database.saveGroupMembership(myMembership);
+                            server.getUpdateAgent().requestGroupMembershipUpdate(myMembership);
+                            LOG.info("releaseEnvironmentForClient: changed notification preference for environment type " + type + " for client " + clientId+" group "+mostRecentEnvironment.getGroupId()+" to "+notificationPreference);
+                        } else {
+                            LOG.error("releaseEnvironmentForClient: could not find group membership for environment type " + type + " for client " + clientId+" group "+mostRecentEnvironment.getGroupId());
+                        }
+                    }
+                }
+                database.saveEnvironment(mostRecentEnvironment);
+            }
+        }
+
         for (TalkEnvironment myEnvironment : myEnvironments) {
             if (myEnvironment.getTimeReceived().getTime() != mostRecentEnvironment.getTimeReceived().getTime()) {
                 // not the most recent environment; duplicate environments should not happen, but...
                 if (mostRecentEnvironment.getGroupId().equals(myEnvironment.getGroupId())) {
                     // we have another environment with the same group id, so just trash the old one
-                    LOG.warn("releaseEnvironment: deleting duplicate old environment with type " + myEnvironment.getType() + " for client " + clientId);
+                    LOG.warn("releaseEnvironmentForClient: deleting duplicate old environment with type " + myEnvironment.getType() + " for client " + clientId);
                     database.deleteEnvironment(myEnvironment);
                 } else {
                     // we have another environment with the another group id, so destroy the old one
-                    LOG.warn("releaseEnvironment: destroying duplicate old environment with type " + myEnvironment.getType() + " for client " + clientId);
+                    LOG.warn("releaseEnvironmentForClient: destroying duplicate old environment with type " + myEnvironment.getType() + " for client " + clientId);
                     destroyEnvironment(server, myEnvironment);
                 }
             } else if (!myEnvironment.willLiveAfterRelease() || myEnvironment.hasExpired()) {
-                LOG.debug("releaseEnvironment: destroying environment with type " + myEnvironment.getType() + ", ttl " + myEnvironment.getTimeToLive() + " for client " + clientId);
+                LOG.debug("releaseEnvironmentForClient: destroying environment with type " + myEnvironment.getType() + ", ttl " + myEnvironment.getTimeToLive() + " for client " + clientId);
                 long deliveryCount = deliveryCountForEnvironment(database, myEnvironment);
                 if (deliveryCount == 0) {
-                    LOG.debug("releaseEnvironment: destroying expired environment with type " + myEnvironment.getType() + ", ttl " + myEnvironment.getTimeToLive() + " for client " + clientId);
+                    LOG.debug("releaseEnvironmentForClient: destroying expired environment with type " + myEnvironment.getType() + ", ttl " + myEnvironment.getTimeToLive() + " for client " + clientId);
                     destroyEnvironment(server, myEnvironment);
                 } else {
-                    LOG.debug("releaseEnvironment: keeping expired environment with type " + myEnvironment.getType() + ", ttl " + myEnvironment.getTimeToLive() + " for client " + clientId + " because it has " + deliveryCount + " undelivered deliveries");
+                    LOG.debug("releaseEnvironmentForClient: keeping expired environment with type " + myEnvironment.getType() + ", ttl " + myEnvironment.getTimeToLive() + " for client " + clientId + " because it has " + deliveryCount + " undelivered deliveries");
                     TalkGroupMembership membership = database.findGroupMembershipForClient(myEnvironment.getGroupId(),myEnvironment.getClientId());
                     checkAndSuspendGroupMembershipIfNecessary(server, myEnvironment, membership);
                 }
             } else {
                 if (myEnvironment.getTimeReleased() == null) {
-                    LOG.debug("releaseEnvironment: releasing environment with type " + myEnvironment.getType() + ", ttl " + myEnvironment.getTimeToLive() + " for client " + clientId);
+                    LOG.debug("releaseEnvironmentForClient: releasing environment with type " + myEnvironment.getType() + ", ttl " + myEnvironment.getTimeToLive() + " for client " + clientId);
                     myEnvironment.setTimeReleased(new Date());
                     database.saveEnvironment(myEnvironment);
                 } else {
-                    LOG.debug("releaseEnvironment: environment with ttl " + myEnvironment.getTimeToLive() +
+                    LOG.debug("releaseEnvironmentForClient: environment with ttl " + myEnvironment.getTimeToLive() +
                             " already released on " + myEnvironment.getTimeReleased() + ", ttl remaining " +
                             (myEnvironment.getTimeReleased().getTime() + myEnvironment.getTimeToLive() - new Date().getTime()));
                 }
@@ -3080,8 +3088,21 @@ public class TalkRpcHandler implements ITalkRpcServer {
             LOG.warn("releaseEnvironment: no environment type, defaulting to nearby. Please fix client");
             type = TalkEnvironment.TYPE_NEARBY;
         }
-        releaseEnvironmentForClient(mServer,clientId,type);
+        releaseEnvironmentForClient(mServer,clientId,type, null, null);
     }
+
+    @Override
+    public void releaseEnvironmentUpdatingParameters(String type, long timeToLive, String notificationPreference) {
+        requirePastIdentification();
+        String clientId = mConnection.getClientId();
+        logCall("releaseEnvironmentUpdatingParameters(clientId: '" + clientId + "'"+", ttl: "+timeToLive+", notificationPreference: "+notificationPreference+")");
+
+        if (type == null || !type.equals(TalkEnvironment.TYPE_WORLDWIDE)) {
+            throw new RuntimeException("releaseEnvironmentUpdatingParameters: illegal type "+type);
+        }
+        releaseEnvironmentForClient(mServer,clientId,type, new Long(timeToLive), notificationPreference);
+    }
+
 
     @Override
     public Boolean[] isMemberInGroups(String[] groupIds) {
