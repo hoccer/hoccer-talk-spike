@@ -2700,7 +2700,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
         String lockId = "env-"+environment.getType();
 
-        // synchronized (mServer.idLock(lockId)) {
+        synchronized (mServer.idLock(lockId)) {
 
             List<TalkEnvironment> matching = mDatabase.findEnvironmentsMatching(environment);
 
@@ -2709,6 +2709,38 @@ public class TalkRpcHandler implements ITalkRpcServer {
             int abandonedGroups = 0;
 
             if (!environment.isNearby()) {
+
+                ArrayList<Pair<String, Integer>> preFilteredEnvironmentsPerGroup = findGroupSortedBySize(matching);
+
+                HashMap<String, HashMap<String, TalkGroupMembership>> memberMap = new HashMap<String, HashMap<String, TalkGroupMembership>>();
+                final String[] states = {TalkGroupMembership.STATE_JOINED};
+
+                for (Pair<String, Integer> item : preFilteredEnvironmentsPerGroup) {
+                    List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsByIdWithStates(item.getLeft(), states);
+
+                    HashMap<String, TalkGroupMembership> membershipMap = new HashMap<String, TalkGroupMembership>();
+                    for (TalkGroupMembership membership : memberships) {
+                        if (membership.isMember() || membership.getClientId().equals(mConnection.getClientId())) {
+                            membershipMap.put(membership.getClientId(), membership);
+                        }
+                    }
+                    if (membershipMap.size() > 0) {
+                        memberMap.put(item.getLeft(), membershipMap);
+                    }
+                }
+
+                List<TalkEnvironment> matching_filtered = new ArrayList<TalkEnvironment>();
+                for (TalkEnvironment te : matching) {
+                    HashMap<String, TalkGroupMembership> membershipMap = memberMap.get(te.getGroupId());
+                    if (membershipMap != null) {
+                        TalkGroupMembership membership = membershipMap.get(te.getClientId());
+                        if (membership != null) {
+                            matching_filtered.add(te);
+                        }
+                    }
+                }
+                LOG.debug("updateEnvironment: found " + matching.size() + " worldwide environments, replacing with " + matching.size() + " filtered environments");
+                matching = matching_filtered;
 
                 minNumberOfGroups = matching.size() / MAX_WORLD_WIDE_GROUP_SIZE + 1;
                 // TODO: it seems to me that in case MIN_WORLD_WIDE_GROUP_SIZE is 8 and we have a matching.size of 8 we would get 2 as answer, but in fact want it to be 1
@@ -2926,7 +2958,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
             // we are alone or first at the location, lets create a new group
             createGroupWithEnvironment(environment);
             return environment.getGroupId();
-        // }
+        }
     }
 
     private static void removeGroupMembership(TalkServer server, TalkGroupMembership membership, Date now) {
@@ -3031,7 +3063,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                             myMembership.setNotificationPreference(mostRecentEnvironment.getNotificationPreference());
                             database.saveGroupMembership(myMembership);
                             server.getUpdateAgent().requestGroupMembershipUpdate(myMembership);
-                            LOG.info("releaseEnvironmentForClient: changed notification preference for environment type " + type + " for client " + clientId+" group "+mostRecentEnvironment.getGroupId()+" to "+notificationPreference);
+                            LOG.info("releaseEnvironmentForClient: changed notification preference for environment type " + type + " for client " + clientId + " group " + mostRecentEnvironment.getGroupId() + " to " + notificationPreference);
                         } else {
                             LOG.error("releaseEnvironmentForClient: could not find group membership for environment type " + type + " for client " + clientId+" group "+mostRecentEnvironment.getGroupId());
                         }
