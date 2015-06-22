@@ -2870,6 +2870,10 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         return (oldRelationShip == null || !(oldRelationShip.isFriend() || oldRelationShip.isBlocked())) && newRelationship.isFriend();
     }
 
+    private boolean isBlockedAcquaintance(TalkRelationship newRelationship) {
+        return newRelationship.isBlocked() && TalkRelationship.STATE_NONE.equals(newRelationship.getUnblockState());
+    }
+
     private void updateGroupPresence(TalkGroupPresence groupPresence) {
         LOG.info("updateGroupPresence(" + groupPresence.getGroupId() + ")");
 
