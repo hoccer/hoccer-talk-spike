@@ -253,7 +253,7 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
             TalkClientContact contact = ((ContactChatItem) item).getContact();
             return contact.isInEnvironment()
                     || contact.isEnvironmentGroup()
-                    || contact.isFriendOrBlocked()
+                    || contact.isClientFriend()
                     || contact.isGroupJoined();
         }
         return false;
