@@ -224,6 +224,9 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
         } else if (mContact.getClientRelationship() != null && mContact.getClientRelationship().isInvited()) {
             getXoClient().disinviteFriend(mContact);
         }
+        if (mContact.isClientBlocked() && mContact.isKept()) {
+            getXoClient().deleteContact(mContact);
+        }
         discardContact();
     }
 
