@@ -2788,7 +2788,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 if (environment.isWorldwide()) {
                     int i = 0;
                     for (Pair<String, Integer> epg : environmentsPerGroup) {
-                        LOG.debug("updateEnvironment: " + epg.getRight() + " members in group " + epg.getLeft() + ",(" + i + "/" + environmentsPerGroup.size() + "),clientId=" + mConnection.getClientId() + ",my current groupId=" + environment.getGroupId());
+                        LOG.debug("updateEnvironment: " + epg.getRight() + " members in group " + epg.getLeft() + ",(" + (i + 1) + "/" + environmentsPerGroup.size() + "),clientId=" + mConnection.getClientId() + ",my current groupId=" + environment.getGroupId());
                         ++i;
                     }
                     int ii = 0;
