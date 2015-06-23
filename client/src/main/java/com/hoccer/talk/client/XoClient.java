@@ -2840,7 +2840,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 clientContact.getClientPresence().setAcquaintanceType(TalkPresence.TYPE_ACQUAINTANCE_NONE);
             }
 
-            if (isBlockedAcquaintance(newRelationship)) {
+            if (isBlockedAcquaintance(newRelationship) && !clientContact.isKept()) {
                 keepAcquaintance(clientContact);
             }
 
@@ -2860,10 +2860,10 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     private boolean friendshipCancelled(TalkRelationship newRelationship, TalkRelationship oldRelationShip) {
-        return newRelationship.isNone() &&
+        return ((newRelationship.isNone() || newRelationship.isBlocked() && TalkRelationship.STATE_NONE.equals(newRelationship.getUnblockState())) &&
                 oldRelationShip != null &&
                 (oldRelationShip.isFriend() ||
-                        oldRelationShip.isBlocked() && TalkRelationship.STATE_FRIEND.equals(oldRelationShip.getUnblockState()));
+                        oldRelationShip.isBlocked() && TalkRelationship.STATE_FRIEND.equals(oldRelationShip.getUnblockState())));
     }
 
     private boolean becameFriend(TalkRelationship newRelationship, TalkRelationship oldRelationShip) {
