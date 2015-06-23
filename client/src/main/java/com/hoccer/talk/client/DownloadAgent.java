@@ -24,8 +24,6 @@ public class DownloadAgent extends TransferAgent {
     }
 
     public void startDownload(TalkClientDownload download) {
-        // - contact in worldwide
-        // - worldwide auto download enabled
         if (isManualDownload(download)) {
             holdDownload(download);
         } else {
