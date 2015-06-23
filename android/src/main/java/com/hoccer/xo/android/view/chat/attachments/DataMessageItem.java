@@ -3,7 +3,6 @@ package com.hoccer.xo.android.view.chat.attachments;
 import android.content.Context;
 import android.view.View;
 
-import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.view.chat.MessageItem;
@@ -11,8 +10,8 @@ import com.hoccer.xo.android.view.chat.MessageItem;
 
 public class DataMessageItem extends MessageItem {
 
-    public DataMessageItem(Context context, XoClientDatabase database, TalkClientMessage message) {
-        super(context, database, message);
+    public DataMessageItem(Context context, TalkClientMessage message) {
+        super(context, message);
     }
 
     @Override

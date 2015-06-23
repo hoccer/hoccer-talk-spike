@@ -10,7 +10,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoApplication;
@@ -34,8 +33,8 @@ public class ImageMessageItem extends MessageItem {
 
     private ImageView mTargetView;
 
-    public ImageMessageItem(Context context, XoClientDatabase database, TalkClientMessage message) {
-        super(context, database, message);
+    public ImageMessageItem(Context context, TalkClientMessage message) {
+        super(context, message);
     }
 
     public ChatItemType getType() {
