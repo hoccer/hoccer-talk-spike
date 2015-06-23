@@ -34,8 +34,8 @@ public class ImageMessageItem extends MessageItem {
 
     private ImageView mTargetView;
 
-    public ImageMessageItem(Context context, XoClientDatabase database, TalkClientMessage message) {
-        super(context, database, message);
+    public ImageMessageItem(Context context, TalkClientMessage message) {
+        super(context, message);
     }
 
     public ChatItemType getType() {

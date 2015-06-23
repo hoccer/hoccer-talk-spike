@@ -31,8 +31,8 @@ public class LocationMessageItem extends MessageItem {
 
     private final static Logger LOG = Logger.getLogger(LocationMessageItem.class);
 
-    public LocationMessageItem(Context context, XoClientDatabase database, TalkClientMessage message) {
-        super(context, database, message);
+    public LocationMessageItem(Context context, TalkClientMessage message) {
+        super(context, message);
     }
 
     @Override

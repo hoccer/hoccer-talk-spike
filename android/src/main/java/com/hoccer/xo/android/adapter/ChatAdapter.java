@@ -223,19 +223,19 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, Transf
         ChatItemType itemType = getListItemTypeForMessage(message);
 
         if (itemType == ChatItemType.ChatItemWithImage) {
-            return new ImageMessageItem(mActivity, mDatabase, message);
+            return new ImageMessageItem(mActivity, message);
         } else if (itemType == ChatItemType.ChatItemWithVideo) {
-            return new ChatVideoItem(mActivity, mDatabase, message);
+            return new ChatVideoItem(mActivity, message);
         } else if (itemType == ChatItemType.ChatItemWithAudio) {
-            return new AudioMessageItem(mActivity, mDatabase, message);
+            return new AudioMessageItem(mActivity, message);
         } else if (itemType == ChatItemType.ChatItemWithData) {
-            return new DataMessageItem(mActivity, mDatabase, message);
+            return new DataMessageItem(mActivity, message);
         } else if (itemType == ChatItemType.ChatItemWithContact) {
-            return new ContactMessageItem(mActivity, mDatabase, message);
+            return new ContactMessageItem(mActivity, message);
         } else if (itemType == ChatItemType.ChatItemWithLocation) {
-            return new LocationMessageItem(mActivity, mDatabase, message);
+            return new LocationMessageItem(mActivity, message);
         } else {
-            return new MessageItem(mActivity, mDatabase, message);
+            return new MessageItem(mActivity, message);
         }
     }
 
@@ -291,7 +291,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, Transf
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    MessageItem item = new MessageItem(mActivity, mDatabase, message);
+                    MessageItem item = new MessageItem(mActivity, message);
                     mMessageItems.remove(item);
                     notifyDataSetChanged();
                 }

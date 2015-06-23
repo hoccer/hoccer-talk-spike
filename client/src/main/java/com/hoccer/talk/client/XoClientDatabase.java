@@ -623,7 +623,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     public List<TalkDelivery> getDeliveriesForMessage(TalkClientMessage message) throws SQLException {
         QueryBuilder<TalkDelivery, Long> deliveries = mDeliveries.queryBuilder();
-        deliveries.where().eq(TalkDelivery.FIELD_MESSAGE_ID, message.getMessageId());
+        deliveries.where().eq(TalkDelivery.FIELD_MESSAGE_TAG, message.getMessageTag());
         return deliveries.query();
     }
 

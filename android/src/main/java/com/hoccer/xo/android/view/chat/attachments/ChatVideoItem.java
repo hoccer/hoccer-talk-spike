@@ -40,8 +40,8 @@ public class ChatVideoItem extends MessageItem {
     private ImageView mTargetView;
     private MediaScannedReceiver mMediaScannedReceiver;
 
-    public ChatVideoItem(Context context, XoClientDatabase database, TalkClientMessage message) {
-        super(context, database, message);
+    public ChatVideoItem(Context context, TalkClientMessage message) {
+        super(context, message);
     }
 
     @Override

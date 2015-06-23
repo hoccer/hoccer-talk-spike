@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.view.chat;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -19,6 +20,7 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.ContentState;
 import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.talk.model.TalkMessage;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
@@ -58,10 +60,10 @@ public class MessageItem implements AttachmentTransferListener {
     protected AttachmentTransferControlView mContentTransferControl;
     protected SimpleAvatarView mSimpleAvatarView;
 
-    public MessageItem(Context context, XoClientDatabase database, TalkClientMessage message) {
+    public MessageItem(Context context, TalkClientMessage message) {
         super();
         mContext = context;
-        mDatabase = database;
+        mDatabase = XoApplication.get().getXoClient().getDatabase();
         mMessage = message;
         mContentRegistry = ContentRegistry.get(context);
     }
@@ -228,23 +230,6 @@ public class MessageItem implements AttachmentTransferListener {
         }
     }
 
-    private String stateStringForGroupDelivery(View view) {
-        try {
-            StringBuilder statusTextBuilder = new StringBuilder();
-            int sent = 0, read = 0, error = 0, expecting = 0;
-            List<TalkDelivery> deliveriesForMessage = mDatabase.getDeliveriesForMessage(mMessage);
-            for (TalkDelivery delivery : deliveriesForMessage) {
-                if(delivery.isSeen()) read++;
-                if(delivery.isDelivered()) sent++;
-
-            }
-
-        } catch (SQLException e) {
-            LOG.error(e.getMessage());
-        }
-        return null;
-    }
-
     private String stateStringForDelivery(TalkDelivery myDelivery, View view) {
         Resources res = view.getResources();
 
@@ -316,16 +301,17 @@ public class MessageItem implements AttachmentTransferListener {
 
     private void updateOutgoingMessageStatus(View view) {
         TextView deliveryInfo = (TextView) view.findViewById(R.id.tv_message_delivery_info);
-        TalkDelivery outgoingDelivery = mMessage.getDelivery();
-        String statusText;
-        if(mMessage.getConversationContact().isGroup()) {
-            statusText = stateStringForGroupDelivery(view);
-        } else {
-            statusText = stateStringForDelivery(outgoingDelivery, view);
+        if (mMessage.getConversationContact().isGroup()) {
+            deliveryInfo.setVisibility(View.GONE);
+            return;
         }
 
+        TalkDelivery outgoingDelivery = mMessage.getDelivery();
         deliveryInfo.setVisibility(View.VISIBLE);
+
+        String statusText = stateStringForDelivery(outgoingDelivery, view);
         int statusColor = statusColorId();
+
         setMessageStatusText(deliveryInfo, statusText, statusColor);
     }
 

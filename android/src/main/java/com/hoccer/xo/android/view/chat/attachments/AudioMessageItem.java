@@ -25,8 +25,8 @@ public class AudioMessageItem extends MessageItem implements MediaPlayer.Listene
 
     private ImageButton mPlayPauseButton;
 
-    public AudioMessageItem(Context context, XoClientDatabase database, TalkClientMessage message) {
-        super(context, database, message);
+    public AudioMessageItem(Context context, TalkClientMessage message) {
+        super(context, message);
     }
 
     @Override

@@ -11,8 +11,8 @@ import com.hoccer.xo.android.view.chat.MessageItem;
 
 public class DataMessageItem extends MessageItem {
 
-    public DataMessageItem(Context context, XoClientDatabase database, TalkClientMessage message) {
-        super(context, database, message);
+    public DataMessageItem(Context context, TalkClientMessage message) {
+        super(context, message);
     }
 
     @Override
