@@ -179,15 +179,15 @@ public class MessageItem implements AttachmentTransferListener {
 
         } else {
             mSimpleAvatarView.setVisibility(View.GONE);
-            updateOutgoingMessageStatus(view);
+            boolean isDeliveryFailed = isDeliveryFailed();
+            updateOutgoingMessageStatus(view, isDeliveryFailed);
 
             messageContactInfo.setVisibility(View.GONE);
 
-
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                messageText.setBackground(getOutgoingBackgroundDrawable());
+                messageText.setBackground(getOutgoingBackgroundDrawable(isDeliveryFailed));
             } else {
-                messageText.setBackgroundDrawable(getOutgoingBackgroundDrawable());
+                messageText.setBackgroundDrawable(getOutgoingBackgroundDrawable(isDeliveryFailed));
             }
 
             messageText.setTextColor(mContext.getResources().getColorStateList(R.color.message_outgoing_text));
@@ -270,34 +270,7 @@ public class MessageItem implements AttachmentTransferListener {
         return myDelivery.getState();
     }
 
-    private int statusColorId() {
-        int color = R.color.primary;
-        if(mMessage.getDelivery().isGroupDelivery()) {
-            List<TalkDelivery> deliveriesForMessage = null;
-            try {
-                deliveriesForMessage = mDatabase.getDeliveriesForMessage(mMessage);
-                boolean isDelivered = false;
-                for (TalkDelivery delivery : deliveriesForMessage) {
-                    if(delivery.isDelivered()) {
-                        isDelivered = true;
-                        break;
-                    }
-                }
-                if(!isDelivered) {
-                    color = R.color.message_delivery_failed;
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        } else {
-            if (mMessage.getDelivery().isFailure()) {
-                color = R.color.message_delivery_failed;
-            }
-        }
-        return color;
-    }
-
-    private void updateOutgoingMessageStatus(View view) {
+    private void updateOutgoingMessageStatus(View view, boolean isDeliveryFailed) {
         TextView deliveryInfo = (TextView) view.findViewById(R.id.tv_message_delivery_info);
         if (mMessage.getConversationContact().isGroup()) {
             deliveryInfo.setVisibility(View.GONE);
@@ -307,8 +280,8 @@ public class MessageItem implements AttachmentTransferListener {
         TalkDelivery outgoingDelivery = mMessage.getDelivery();
         deliveryInfo.setVisibility(View.VISIBLE);
 
+        int statusColor = isDeliveryFailed ? R.color.message_delivery_failed : R.color.primary;
         String statusText = stateStringForDelivery(outgoingDelivery, view);
-        int statusColor = statusColorId();
 
         setMessageStatusText(deliveryInfo, statusText, statusColor);
     }
@@ -319,20 +292,12 @@ public class MessageItem implements AttachmentTransferListener {
         messageStatusLabel.setTextColor(messageStatusLabel.getResources().getColor(colorId));
     }
 
-    public Drawable getOutgoingBackgroundDrawable() {
-        String currentState = mMessage.getDelivery().getState();
-        Drawable background;
-        if (currentState != null) {
-            if (TalkDelivery.isFailureState(currentState)) {
-                background = mContext.getResources().getDrawable(R.drawable.chat_bubble_error_outgoing);
-            } else {
-                background = ColoredDrawable.create(R.drawable.chat_bubble_outgoing, R.color.message_outgoing_background);
-            }
+    public Drawable getOutgoingBackgroundDrawable(boolean isDeliveryFailed) {
+        if (isDeliveryFailed) {
+            return mContext.getResources().getDrawable(R.drawable.chat_bubble_error_outgoing);
         } else {
-            background = ColoredDrawable.create(R.drawable.chat_bubble_outgoing, R.color.message_outgoing_background);
+            return ColoredDrawable.create(R.drawable.chat_bubble_outgoing, R.color.message_outgoing_background);
         }
-
-        return background;
     }
 
     public Drawable getIncomingBackgroundDrawable() {
@@ -606,5 +571,29 @@ public class MessageItem implements AttachmentTransferListener {
                 break;
         }
         return stringResource;
+    }
+
+    public boolean isDeliveryFailed() {
+        if(mMessage.getDelivery().isGroupDelivery()) {
+            boolean isDeliveryFailed = true;
+            try {
+                List<TalkDelivery> deliveriesForMessage = mDatabase.getDeliveriesForMessage(mMessage);
+                for (TalkDelivery delivery : deliveriesForMessage) {
+                    if(delivery.isDelivered()) {
+                        isDeliveryFailed = false;
+                        break;
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return isDeliveryFailed;
+        } else {
+            if (mMessage.getDelivery().isFailure()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
     }
 }
