@@ -67,7 +67,7 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
     private void showMessagingActivity() {
         Intent intent = new Intent(getActivity(), ChatActivity.class);
         intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mContact.getClientContactId());
-        if (mContact.isKept() || mContact.isKeptGroup()) {
+        if ((mContact.isKept() && !mContact.isInEnvironment()) || mContact.isKeptGroup()) {
             intent.putExtra(ChatActivity.EXTRA_CLIENT_HISTORY, true);
         }
         startActivity(intent);
@@ -260,7 +260,7 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
     }
 
     protected boolean shouldShowChatContainer(int count) {
-        return (mContact.isClient() && mContact.getClientRelationship() != null && mContact.isFriendOrBlocked()) || mContact.isKept() && count > 0 || mContact.isNearby();
+        return (mContact.isClient() && mContact.getClientRelationship() != null && mContact.isClientFriend()) || mContact.isKept() && count > 0 || mContact.isInEnvironment();
     }
 
     @Override
