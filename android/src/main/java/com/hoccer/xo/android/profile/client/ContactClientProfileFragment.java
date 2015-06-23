@@ -119,25 +119,28 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
 
     private void updateMenuItems(Menu menu) {
         menu.findItem(R.id.menu_my_profile).setVisible(true);
-        TalkRelationship relationship = mContact.getClientRelationship();
-        if ((relationship == null || !relationship.isFriend()) && mContact.isInEnvironment()) {
-            menu.findItem(R.id.menu_profile_delete).setVisible(false);
-            menu.findItem(R.id.menu_profile_block).setVisible(false);
-            menu.findItem(R.id.menu_profile_unblock).setVisible(false);
-        } else if (!mContact.isFriendOrBlocked()) {
-            menu.findItem(R.id.menu_profile_delete).setVisible(true);
-            menu.findItem(R.id.menu_profile_block).setVisible(false);
-            menu.findItem(R.id.menu_profile_unblock).setVisible(false);
-        }
+        menu.findItem(R.id.menu_audio_attachment_list).setVisible(true);
 
-        if (relationship != null && relationship.isBlocked()) {
+        updateDeleteMenuItem(menu);
+        updateBlockMenuItem(menu);
+    }
+
+    private void updateBlockMenuItem(Menu menu) {
+        if (mContact.isClientBlocked()) {
             menu.findItem(R.id.menu_profile_block).setVisible(false);
             menu.findItem(R.id.menu_profile_unblock).setVisible(true);
         } else {
             menu.findItem(R.id.menu_profile_block).setVisible(true);
             menu.findItem(R.id.menu_profile_unblock).setVisible(false);
         }
-        menu.findItem(R.id.menu_audio_attachment_list).setVisible(true);
+    }
+
+    private void updateDeleteMenuItem(Menu menu) {
+        if (!mContact.isClientFriend() && mContact.isInEnvironment()) {
+            menu.findItem(R.id.menu_profile_delete).setVisible(false);
+        } else {
+            menu.findItem(R.id.menu_profile_delete).setVisible(true);
+        }
     }
 
     @Override
