@@ -18,16 +18,16 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HistoryAdapter extends ChatAdapter {
+public class HistoryMessagesAdapter extends ChatMessagesAdapter {
 
-    private static final Logger LOG = Logger.getLogger(HistoryAdapter.class);
+    private static final Logger LOG = Logger.getLogger(HistoryMessagesAdapter.class);
     private String mEnvironmentType;
 
-    public HistoryAdapter(ListView listView, XoActivity activity, TalkClientContact contact) {
+    public HistoryMessagesAdapter(ListView listView, XoActivity activity, TalkClientContact contact) {
         super(listView, activity, contact);
     }
 
-    public HistoryAdapter(ListView listView, XoActivity activity, String environmentType) {
+    public HistoryMessagesAdapter(ListView listView, XoActivity activity, String environmentType) {
         super(listView, activity);
         mEnvironmentType = environmentType;
         initializeEnvironmentGroupHistory();

@@ -1211,7 +1211,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     switchState(State.LOGIN, "login after registration");
                 } catch (Exception e) {
                     LOG.error("Exception while registering", e);
-                    if (mConnection.isConnected()){
+                    if (mConnection.isConnected()) {
                         scheduleRegistration();
                     } else {
                         switchState(State.CONNECTING, "reconnect after registration failed");
@@ -1277,7 +1277,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     switchState(State.SYNCING, "sync after login");
                 } catch (Exception e) {
                     LOG.error("Exception while logging in", e);
-                    if (mConnection.isConnected()){
+                    if (mConnection.isConnected()) {
                         scheduleLogin();
                     } else {
                         switchState(State.CONNECTING, "reconnect after login failed");
@@ -1333,7 +1333,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     switchState(State.READY, "ready after sync");
                 } catch (Exception e) {
                     LOG.error("Exception while syncing", e);
-                    if (mConnection.isConnected()){
+                    if (mConnection.isConnected()) {
                         scheduleSync();
                     } else {
                         switchState(State.CONNECTING, "reconnect after sync failed");
@@ -2840,6 +2840,10 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 clientContact.getClientPresence().setAcquaintanceType(TalkPresence.TYPE_ACQUAINTANCE_NONE);
             }
 
+            if (isBlockedAcquaintance(newRelationship) && !clientContact.isKept()) {
+                keepAcquaintance(clientContact);
+            }
+
             clientContact.updateRelationship(newRelationship);
             mDatabase.saveRelationship(clientContact.getClientRelationship());
             mDatabase.savePresence(clientContact.getClientPresence());
@@ -2856,11 +2860,18 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     private boolean friendshipCancelled(TalkRelationship newRelationship, TalkRelationship oldRelationShip) {
-        return newRelationship.isNone() && oldRelationShip != null && (oldRelationShip.isFriend() || oldRelationShip.isBlocked());
+        return ((newRelationship.isNone() || newRelationship.isBlocked() && TalkRelationship.STATE_NONE.equals(newRelationship.getUnblockState())) &&
+                oldRelationShip != null &&
+                (oldRelationShip.isFriend() ||
+                        oldRelationShip.isBlocked() && TalkRelationship.STATE_FRIEND.equals(oldRelationShip.getUnblockState())));
     }
 
     private boolean becameFriend(TalkRelationship newRelationship, TalkRelationship oldRelationShip) {
         return (oldRelationShip == null || !(oldRelationShip.isFriend() || oldRelationShip.isBlocked())) && newRelationship.isFriend();
+    }
+
+    private boolean isBlockedAcquaintance(TalkRelationship newRelationship) {
+        return newRelationship.isBlocked() && TalkRelationship.STATE_NONE.equals(newRelationship.getUnblockState());
     }
 
     private void updateGroupPresence(TalkGroupPresence groupPresence) {

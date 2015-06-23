@@ -768,6 +768,7 @@ public interface ITalkRpcServer {
      * @talk.preconditions client must be logged in
      */
     void releaseEnvironment(String type);
+    void releaseEnvironmentUpdatingParameters(String type, long timeToLive, String notificationPreference);
 
     // returns true for each group where you are an active or invited group member
     Boolean[] isMemberInGroups(String[] groupIds);

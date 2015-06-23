@@ -77,8 +77,7 @@ public class AttachmentListFragment extends SearchableListFragment {
 
         mAttachmentAdapter = new AttachmentListAdapter(mContact, ContentMediaType.AUDIO);
         mSearchContactsAdapter = new ContactSearchResultAdapter((XoActivity) getActivity());
-        mSearchContactsAdapter.onCreate();
-        
+
         setHasOptionsMenu(true);
     }
 
@@ -91,7 +90,7 @@ public class AttachmentListFragment extends SearchableListFragment {
     public void onStart() {
         super.onStart();
 
-        mSearchContactsAdapter.requestReload();
+        mSearchContactsAdapter.loadContacts();
         getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
         ListInteractionHandler listHandler = new ListInteractionHandler();
         getListView().setOnItemClickListener(listHandler);
@@ -104,11 +103,10 @@ public class AttachmentListFragment extends SearchableListFragment {
 
         if (mSearchContactsAdapter == null) {
             mSearchContactsAdapter = new ContactSearchResultAdapter((XoActivity) getActivity());
-            mSearchContactsAdapter.onCreate();
-            mSearchContactsAdapter.requestReload();
+            mSearchContactsAdapter.loadContacts();
         }
 
-        mSearchContactsAdapter.onResume();
+        mSearchContactsAdapter.registerListeners();
         setListAdapter(mAttachmentAdapter);
 
         if (mContact != null) {
@@ -128,6 +126,7 @@ public class AttachmentListFragment extends SearchableListFragment {
     @Override
     public void onPause() {
         super.onPause();
+        mSearchContactsAdapter.unRegisterListeners();
         setListAdapter(null);
     }
 

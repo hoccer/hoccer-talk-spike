@@ -11,9 +11,7 @@ import android.widget.TextView;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.activity.SingleProfileActivity;
 import com.hoccer.xo.android.adapter.ContactListAdapter;
-import com.hoccer.xo.android.view.Placeholder;
 import com.hoccer.xo.android.view.NotificationBadgeTextView;
 import com.artcom.hoccer.R;
 

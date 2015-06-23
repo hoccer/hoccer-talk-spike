@@ -2,17 +2,22 @@ package com.hoccer.xo.android.adapter;
 
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.IXoMessageListener;
 import com.hoccer.talk.client.TransferListener;
+import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.xo.android.XoAndroidClient;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.view.model.ChatItem;
 import com.hoccer.xo.android.view.model.ContactChatItem;
+import com.hoccer.xo.android.view.model.NearbyGroupHistoryChatItem;
+import com.hoccer.xo.android.view.model.WorldwideGroupHistoryChatItem;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,7 +28,7 @@ import java.util.Comparator;
 import java.util.List;
 
 
-public class ChatListAdapter extends XoAdapter implements IXoContactListener, IXoMessageListener, TransferListener {
+public class ChatListAdapter extends BaseAdapter implements IXoContactListener, IXoMessageListener, TransferListener {
 
     private static final Logger LOG = Logger.getLogger(ChatListAdapter.class);
 
@@ -44,14 +49,18 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
     };
 
     final protected List<ChatItem> mChatItems = new ArrayList<ChatItem>();
+    private final XoClientDatabase mDatabase;
+    private final XoAndroidClient mXoClient;
 
+    private XoActivity mActivity;
     @Nullable
     private Filter mFilter;
 
     public ChatListAdapter(XoActivity activity, @Nullable Filter filter) {
-        super(activity);
+        mActivity = activity;
         mFilter = filter;
-        loadChatItems();
+        mXoClient = XoApplication.get().getXoClient();
+        mDatabase = mXoClient.getDatabase();
     }
 
     public void loadChatItems() {
@@ -60,26 +69,24 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
             final long nearbyMessageCount = mDatabase.getNearbyGroupMessageCount();
             final long worldwideMessageCount = mDatabase.getWorldwideGroupMessageCount();
 
-            runOnUiThread(new Runnable() {
+            mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     mChatItems.clear();
 
                     for (final TalkClientContact contact : filteredContacts) {
-                        ChatItem chatItem = ChatItem.create(contact, mActivity);
-                        mChatItems.add(chatItem);
+                        mChatItems.add(new ContactChatItem(contact, mActivity));
                     }
 
                     if (nearbyMessageCount > 0) {
-                        mChatItems.add(ChatItem.createNearbyGroupHistory(mActivity));
+                        mChatItems.add(new NearbyGroupHistoryChatItem(mActivity));
                     }
 
                     if (worldwideMessageCount > 0) {
-                        mChatItems.add(ChatItem.createWorldwideGroupHistory(mActivity));
+                        mChatItems.add(new WorldwideGroupHistoryChatItem(mActivity));
                     }
 
                     notifyDataSetChanged();
-                    reloadFinished();
                 }
             });
         } catch (SQLException e) {
@@ -87,28 +94,18 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
         }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        getXoClient().registerContactListener(this);
-        getXoClient().registerMessageListener(this);
-        getXoClient().getDownloadAgent().registerListener(this);
-        getXoClient().getUploadAgent().registerListener(this);
+    public void registerListeners() {
+        mXoClient.registerContactListener(this);
+        mXoClient.registerMessageListener(this);
+        mXoClient.getDownloadAgent().registerListener(this);
+        mXoClient.getUploadAgent().registerListener(this);
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        getXoClient().unregisterContactListener(this);
-        getXoClient().unregisterMessageListener(this);
-        getXoClient().getDownloadAgent().unregisterListener(this);
-        getXoClient().getUploadAgent().unregisterListener(this);
-    }
-
-    @Override
-    public void onReloadRequest() {
-        loadChatItems();
-        super.onReloadRequest();
+    public void unregisterListeners() {
+        mXoClient.unregisterContactListener(this);
+        mXoClient.unregisterMessageListener(this);
+        mXoClient.getDownloadAgent().unregisterListener(this);
+        mXoClient.getUploadAgent().unregisterListener(this);
     }
 
     public Filter getFilter() {
@@ -180,7 +177,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
 
     @Override
     public void onClientPresenceChanged(final TalkClientContact contact) {
-        runOnUiThread(new Runnable() {
+        mActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 ChatItem item = findChatItemForContact(contact);
@@ -203,7 +200,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
         if (contact.getGroupPresence() == null || (contact.getGroupPresence().isTypeNearby() || contact.getGroupPresence().isKept())) {
             return;
         }
-        runOnUiThread(new Runnable() {
+        mActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 ChatItem item = findChatItemForContact(contact);
@@ -246,7 +243,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
             if (item != null) {
                 item.update();
 
-                runOnUiThread(new Runnable() {
+                mActivity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         notifyDataSetChanged();
@@ -280,7 +277,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
 
     @Override
     public void onDownloadFinished(final TalkClientDownload download) {
-        runOnUiThread(new Runnable() {
+        mActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if (download.isAvatar()) {
@@ -308,7 +305,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
 
     @Override
     public void onUploadFinished(final TalkClientUpload upload) {
-        runOnUiThread(new Runnable() {
+        mActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if (upload.isAvatar()) {

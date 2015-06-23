@@ -13,7 +13,7 @@ import java.util.List;
 public class ClientList extends TalkToolCommand {
 
     static final String[] COLUMN_NAMES = new String[]{
-        "id", "state", "isNearby", "isWorldwide", "clientId"
+        "id", "name", "state", "isNearby", "isWorldwide", "clientId"
     };
 
     @Override
@@ -27,17 +27,23 @@ public class ClientList extends TalkToolCommand {
             final String[] columns = new String[COLUMN_NAMES.length];
             // id
             columns[0] = Integer.toString(client.getId());
+            // name
+            String name = client.getClient().getSelfContact().getName();
+            if (name == null) {
+                name = "";
+            }
+            columns[1] = name;
             // state
-            columns[1] = client.getClient().getState().toString();
+            columns[2] = client.getClient().getState().toString();
             // isNearby
             TalkClientContact nearbyGroup = client.getClient().getCurrentNearbyGroup();
-            columns[2] = (nearbyGroup == null) ? "*inactive*" : nearbyGroup.getGroupId();
+            columns[3] = (nearbyGroup == null) ? "*inactive*" : nearbyGroup.getGroupId();
             // isWorldwide
             TalkClientContact worldwideGroup = client.getClient().getCurrentWorldwideGroup();
-            columns[3] = (worldwideGroup == null) ? "*inactive*" : worldwideGroup.getGroupId();
+            columns[4] = (worldwideGroup == null) ? "*inactive*" : worldwideGroup.getGroupId();
             // clientId
             final String c = client.getDatabase().findSelfContact(true).getClientId();
-            columns[4] = (c == null) ? "" : c;
+            columns[5] = (c == null) ? "" : c;
             rows[i] = columns;
         }
         PrintUtils.printTable(rows);

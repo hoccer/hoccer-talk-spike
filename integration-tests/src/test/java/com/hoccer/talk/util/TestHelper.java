@@ -133,6 +133,18 @@ public class TestHelper {
         });
     }
 
+    public static void leaveEnvironmentWorldwide(final XoClient theClient) {
+        assertNotNull(theClient);
+        theClient.sendDestroyEnvironment(TalkEnvironment.TYPE_WORLDWIDE);
+        await("client is not in worldwide group anymore").until(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                TalkClientContact group = theClient.getCurrentWorldwideGroup();
+                return group == null;
+            }
+        });
+    }
+
     public static void setEnvironmentToWorldwide(final XoClient theClient) {
         setEnvironmentToWorldwide(theClient, "*");
     }
@@ -146,7 +158,7 @@ public class TestHelper {
         environment.setTag(tag);
         theClient.sendEnvironmentUpdate(environment);
 
-        await("client1 has received a worldwide group").until(new Callable<Boolean>() {
+        await("client has received a worldwide group").until(new Callable<Boolean>() {
             @Override
             public Boolean call() throws Exception {
                 TalkClientContact group = theClient.getCurrentWorldwideGroup();

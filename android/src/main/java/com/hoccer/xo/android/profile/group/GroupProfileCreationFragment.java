@@ -1,4 +1,4 @@
-package com.hoccer.xo.android.fragment;
+package com.hoccer.xo.android.profile.group;
 
 import android.content.DialogInterface;
 import android.net.Uri;
@@ -19,7 +19,6 @@ import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.activity.GroupProfileActivity;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupMemberContactsAdapter;
 import com.hoccer.xo.android.base.XoFragment;
@@ -139,7 +138,6 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
                 return mContactsToInvite.contains(contact);
             }
         });
-        mGroupMemberAdapter.onCreate();
         groupMemberList.setAdapter(mGroupMemberAdapter);
 
         if (mContactsToInvite.isEmpty()) {
@@ -153,25 +151,20 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
     @Override
     public void onResume() {
         super.onResume();
-
-        mGroupMemberAdapter.onResume();
-        mGroupMemberAdapter.requestReload();
-        getXoClient().registerContactListener(this);
+        mGroupMemberAdapter.registerListeners();
+        mGroupMemberAdapter.loadContacts();
 
         mGroupNameEdit.requestFocus();
     }
 
     public void onPause() {
         super.onPause();
-
-        getXoClient().unregisterContactListener(this);
-        mGroupMemberAdapter.onPause();
+        mGroupMemberAdapter.unRegisterListeners();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mGroupMemberAdapter.onDestroy();
     }
 
     private void createGroup() {
