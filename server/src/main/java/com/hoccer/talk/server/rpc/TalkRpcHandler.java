@@ -2776,7 +2776,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
             ArrayList<Pair<String, Integer>> environmentsPerGroup = findGroupSortedBySize(matching);
 
             // determine how many groups are not needed
-            abandonedGroups = environmentsPerGroup.size() - minNumberOfGroups;
+            abandonedGroups = environmentsPerGroup.size() - maxNumberOfGroups;
             if (abandonedGroups < 0) {
                 abandonedGroups = 0;
             }
