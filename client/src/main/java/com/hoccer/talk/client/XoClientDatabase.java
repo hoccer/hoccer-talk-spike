@@ -1182,6 +1182,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         TalkClientMessage clientMessage = clientMessageQueryBuilder.join(dowloadQueryBuilder).queryForFirst();
         TalkClientContact senderContact = clientMessage.getSenderContact();
 
-        return senderContact.isWorldwide() && !senderContact.isClientFriend();
+        return senderContact.isWorldwide() && !senderContact.isNearby() && !senderContact.isClientFriend();
     }
 }
