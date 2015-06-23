@@ -28,4 +28,5 @@ public interface IXoClientConfiguration {
 
     public long getTimeToLiveInWorldwide();
     public String getNotificationPreferenceForWorldwide();
+    public boolean isWorldwideAutoDownloadEnabled();
 }

@@ -1172,4 +1172,16 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         collection.setDatabase(this);
         return collection;
     }
+
+    public boolean isWorldwideDownload(int clientDownloadId) throws SQLException {
+        QueryBuilder<TalkClientDownload, ?> dowloadQueryBuilder = mClientDownloads.queryBuilder();
+        dowloadQueryBuilder.where()
+                .eq("clientDownloadId", clientDownloadId);
+        QueryBuilder<TalkClientMessage, ?> clientMessageQueryBuilder = mClientMessages.queryBuilder();
+
+        TalkClientMessage clientMessage = clientMessageQueryBuilder.join(dowloadQueryBuilder).queryForFirst();
+        TalkClientContact senderContact = clientMessage.getSenderContact();
+
+        return senderContact.isWorldwide() && !senderContact.isClientFriend();
+    }
 }

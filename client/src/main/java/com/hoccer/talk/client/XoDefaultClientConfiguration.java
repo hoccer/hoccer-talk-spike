@@ -1,6 +1,7 @@
 package com.hoccer.talk.client;
 
 public abstract class XoDefaultClientConfiguration implements IXoClientConfiguration {
+
     @Override
     public String getUrlScheme() {
         return "hcr://";
@@ -84,5 +85,10 @@ public abstract class XoDefaultClientConfiguration implements IXoClientConfigura
     @Override
     public boolean isSendDeliveryConfirmationEnabled() {
         return true;
+    }
+
+    @Override
+    public boolean isWorldwideAutoDownloadEnabled() {
+        return false;
     }
 }
