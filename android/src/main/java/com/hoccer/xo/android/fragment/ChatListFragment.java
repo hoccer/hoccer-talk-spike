@@ -9,7 +9,6 @@ import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
@@ -49,6 +48,7 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mDatabase = XoApplication.get().getXoClient().getDatabase();
+        createAdapter();
     }
 
     @Override
@@ -66,9 +66,8 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
             }
         });
 
-        initAdapter();
-        ListView listView = (ListView) view.findViewById(android.R.id.list);
-        registerForContextMenu(listView);
+        setListAdapter(mAdapter);
+        registerForContextMenu(getListView());
     }
 
     @Override
@@ -79,27 +78,19 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        if (mAdapter != null) {
-            mAdapter.onPause();
-        }
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         if (mAdapter != null) {
-            mAdapter.onResume();
+            mAdapter.registerListeners();
             mAdapter.loadChatItems();
         }
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onPause() {
+        super.onPause();
         if (mAdapter != null) {
-            mAdapter.onDestroy();
+            mAdapter.unregisterListeners();
         }
     }
 
@@ -164,7 +155,7 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
     private void clearConversationForContact(TalkClientContact contact) {
         try {
             mDatabase.deleteAllMessagesFromContactId(contact.getClientContactId());
-            mAdapter.requestReload();
+            mAdapter.loadChatItems();
         } catch (SQLException e) {
             LOG.error("SQLException while clearing conversation with contact " + contact.getClientContactId(), e);
         }
@@ -193,10 +184,10 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
             message.markAsDeleted();
             mDatabase.saveClientMessage(message);
         }
-        mAdapter.requestReload();
+        mAdapter.loadChatItems();
     }
 
-    private void initAdapter() {
+    private void createAdapter() {
         ChatListAdapter.Filter filter = new ChatListAdapter.Filter() {
             @Override
             public boolean shouldShow(TalkClientContact contact) {
@@ -210,8 +201,6 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
         };
 
         mAdapter = new ChatListAdapter((XoActivity) getActivity(), filter);
-
-        setListAdapter(mAdapter);
     }
 
     private boolean isSuspendedGroupMember(TalkClientContact contact) {
@@ -246,30 +235,37 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
         super.onListItemClick(listView, view, position, id);
 
         ChatItem item = ((ChatItem) listView.getItemAtPosition(position));
-        if (shouldShowClientHistory(item)) {
-            TalkClientContact contact = ((ContactChatItem) item).getContact();
-            showHistory(contact);
-        } else if (shouldShowChat(item)) {
+        if (shouldShowChat(item)) {
             TalkClientContact contact = ((ContactChatItem) item).getContact();
             showChat(contact);
-        } else if (item.getType() == ChatItem.TYPE_GROUP_HISTORY_NEARBY) {
+        } else if (shouldShowClientHistory(item)) {
+            TalkClientContact contact = ((ContactChatItem) item).getContact();
+            showHistory(contact);
+        } else if (item instanceof NearbyGroupHistoryChatItem) {
             showNearbyGroupHistory();
-        } else if (item.getType() == ChatItem.TYPE_GROUP_HISTORY_WORLDWIDE) {
+        } else if (item instanceof WorldwideGroupHistoryChatItem) {
             showWorldwideGroupHistory();
         }
     }
 
     private boolean shouldShowChat(ChatItem item) {
-        return item.getType() == ChatItem.TYPE_RELATED
-                || item.getType() == ChatItem.TYPE_CLIENT_PRESENCE_NEARBY
-                || item.getType() == ChatItem.TYPE_CLIENT_PRESENCE_WORLDWIDE
-                || item.getType() == ChatItem.TYPE_GROUP_WORLDWIDE;
+        if (item instanceof ContactChatItem) {
+            TalkClientContact contact = ((ContactChatItem) item).getContact();
+            return contact.isInEnvironment()
+                    || contact.isEnvironmentGroup()
+                    || contact.isClientFriend()
+                    || contact.isGroupJoined();
+        }
+        return false;
     }
 
     private boolean shouldShowClientHistory(ChatItem item) {
-        return item.getType() == ChatItem.TYPE_CLIENT_ACQUAINTANCE_NEARBY
-                || item.getType() == ChatItem.TYPE_CLIENT_ACQUAINTANCE_WORLDWIDE
-                || item.getType() == ChatItem.TYPE_CLIENT_KEPT;
+        if (item instanceof ContactChatItem) {
+            ContactChatItem contactChatItem = (ContactChatItem) item;
+            TalkClientContact contact = contactChatItem.getContact();
+            return contact.isKept();
+        }
+        return false;
     }
 
     public void showChat(TalkClientContact contact) {

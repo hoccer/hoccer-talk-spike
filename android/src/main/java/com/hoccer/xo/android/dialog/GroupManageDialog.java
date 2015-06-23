@@ -43,8 +43,7 @@ public class GroupManageDialog extends DialogFragment {
         LOG.debug("onCreateDialog()");
         if (mAdapter == null) {
             mAdapter = new GroupManagementContactsAdapter((XoActivity) getActivity(), mGroup, mContactsToInvite, mContactsToKick);
-            mAdapter.onCreate();
-            mAdapter.onResume();
+            mAdapter.registerListeners();
             mAdapter.setFilter(new ContactsAdapter.Filter() {
                 @Override
                 public boolean shouldShow(TalkClientContact contact) {
@@ -52,7 +51,7 @@ public class GroupManageDialog extends DialogFragment {
                 }
             });
         }
-        mAdapter.requestReload();
+        mAdapter.loadContacts();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.dialog_manage_group_title);
@@ -123,8 +122,7 @@ public class GroupManageDialog extends DialogFragment {
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
         if (mAdapter != null) {
-            mAdapter.onPause();
-            mAdapter.onDestroy();
+            mAdapter.unRegisterListeners();
         }
     }
 }

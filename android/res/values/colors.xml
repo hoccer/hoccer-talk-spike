@@ -7,6 +7,7 @@
     <color name="text_secondary">#8e8e93</color>
 
     <color name="black_transparency_50_percent">#77000000</color>
+    <color name="black_transparency_60_percent">#66000000</color>
     <color name="white_transparency_50_percent">#77ffffff</color>
 
     <color name="background_default">#ffffff</color>

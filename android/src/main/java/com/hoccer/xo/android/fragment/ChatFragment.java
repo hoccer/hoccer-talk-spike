@@ -9,19 +9,18 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.activity.GroupProfileActivity;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
-import com.hoccer.xo.android.activity.SingleProfileActivity;
-import com.hoccer.xo.android.adapter.ChatAdapter;
-import com.hoccer.xo.android.base.XoAdapter;
+import com.hoccer.xo.android.adapter.ChatMessagesAdapter;
+import com.hoccer.xo.android.base.MessagesAdapter;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionInterpreter;
+import com.hoccer.xo.android.profile.client.ClientProfileActivity;
+import com.hoccer.xo.android.profile.group.GroupProfileActivity;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.MessageItem;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -35,7 +34,7 @@ import java.util.List;
  */
 public class ChatFragment extends XoChatListFragment
         implements SearchView.OnQueryTextListener,
-        XoAdapter.AdapterReloadListener, IXoContactListener {
+        MessagesAdapter.AdapterReloadListener, IXoContactListener {
 
     public static final String ARG_CLIENT_CONTACT_ID = "com.hoccer.xo.android.fragment.ARG_CLIENT_CONTACT_ID";
 
@@ -51,7 +50,7 @@ public class ChatFragment extends XoChatListFragment
 
     private TalkClientContact mContact;
 
-    private ChatAdapter mAdapter;
+    private ChatMessagesAdapter mAdapter;
 
     private CompositionFragment mCompositionFragment;
 
@@ -125,7 +124,7 @@ public class ChatFragment extends XoChatListFragment
         setHasOptionsMenu(true);
         mMessageListView = getListView();
 
-        mAdapter = new ChatAdapter(mMessageListView, getXoActivity(), mContact);
+        mAdapter = new ChatMessagesAdapter(mMessageListView, getXoActivity(), mContact);
         mAdapter.setAdapterReloadListener(this);
         mAdapter.onCreate();
 
@@ -231,9 +230,9 @@ public class ChatFragment extends XoChatListFragment
         switch (item.getItemId()) {
             case R.id.menu_profile_single:
                 if (mContact != null) {
-                    startActivity(new Intent(getActivity(), SingleProfileActivity.class)
-                            .setAction(SingleProfileActivity.ACTION_SHOW)
-                            .putExtra(SingleProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId()));
+                    startActivity(new Intent(getActivity(), ClientProfileActivity.class)
+                            .setAction(ClientProfileActivity.ACTION_SHOW)
+                            .putExtra(ClientProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId()));
                 }
                 break;
             case R.id.menu_profile_group:
@@ -265,13 +264,13 @@ public class ChatFragment extends XoChatListFragment
     }
 
     @Override
-    public void onAdapterReloadStarted(XoAdapter adapter) {
+    public void onAdapterReloadStarted(MessagesAdapter adapter) {
         LOG.debug("onAdapterReloadStarted()");
         mEmptyText.setText(R.string.messaging_loading);
     }
 
     @Override
-    public void onAdapterReloadFinished(XoAdapter adapter) {
+    public void onAdapterReloadFinished(MessagesAdapter adapter) {
         LOG.debug("onAdapterReloadFinished()");
         mEmptyText.setText(R.string.messaging_no_messages);
     }

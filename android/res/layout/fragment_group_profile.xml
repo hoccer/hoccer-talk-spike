@@ -9,7 +9,7 @@
 
 
     <ImageView
-            android:id="@+id/profile_group_profile_image"
+            android:id="@+id/profile_avatar_image"
             android:scaleType="centerCrop"
             android:layout_width="match_parent"
             android:layout_height="200dp"
@@ -29,7 +29,7 @@
             style="@style/AppBaseTheme.Group.HorizontalDivider"/>
 
     <TextView
-            android:id="@+id/profile_group_name"
+            android:id="@+id/tv_profile_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="@android:style/TextAppearance.Large"
