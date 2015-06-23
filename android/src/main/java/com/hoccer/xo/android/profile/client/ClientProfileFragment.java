@@ -105,7 +105,5 @@ public abstract class ClientProfileFragment extends ProfileFragment {
         } catch (SQLException e) {
             LOG.error("SQL error", e);
         }
-
-//        updateContent();
     }
 }
