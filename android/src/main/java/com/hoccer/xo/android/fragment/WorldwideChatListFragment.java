@@ -18,13 +18,13 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.WorldwideController;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.adapter.EnvironmentChatListAdapter;
+import com.hoccer.xo.android.dialog.WorldWideTutorialDialog;
 import com.hoccer.xo.android.view.Placeholder;
 
 import static com.hoccer.talk.model.TalkEnvironment.TYPE_WORLDWIDE;
 
 public class WorldwideChatListFragment extends EnvironmentChatListFragment {
 
-    private static final String PREFERENCE_KEY_WORLDWIDE_TUTORIAL_VIEWED = "ww_tutorial_viewed";
     private static final String DIALOG_TAG = "ww_tutorial";
 
     public WorldwideChatListFragment() {
@@ -39,45 +39,9 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
 
     private void displayWorldwideTutorialIfNeeded() {
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        boolean isTutorialViewed = preferences.getBoolean(PREFERENCE_KEY_WORLDWIDE_TUTORIAL_VIEWED, false);
+        boolean isTutorialViewed = preferences.getBoolean(WorldWideTutorialDialog.PREFERENCE_KEY_WORLDWIDE_TUTORIAL_VIEWED, false);
         if(!isTutorialViewed) {
-            final DialogFragment dialogFragment = new DialogFragment() {
-                @Override
-                public Dialog onCreateDialog(Bundle savedInstanceState) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    builder.setTitle("Worldwide"); // todo: extract
-                    View view = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_ww_tutorial, null);
-                    ListView optionsListView = (ListView) view.findViewById(R.id.lv_dialog_ww_tutorial);
-                    optionsListView.setAdapter(new ArrayAdapter<String>(getActivity(), R.layout.simple_list_item_centered,
-                            getResources().getStringArray(R.array.worldwide_tutorial_options)));
-                    optionsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                            SharedPreferences.Editor editor = preferences.edit();
-                            String timeToLive = "0";
-                            switch(position) {
-                                case 0:
-                                    timeToLive = "3600000"; // 1 hour
-                                    break;
-                                case 1:
-                                    timeToLive = "21600000"; // 6 hour
-                                    break;
-                                case 2:
-                                    timeToLive = "86400000"; // 24 hour
-                                    break;
-                            }
-                            editor.putString(getString(R.string.preference_key_worldwide_timetolive), timeToLive);
-                            editor.putBoolean(PREFERENCE_KEY_WORLDWIDE_TUTORIAL_VIEWED, true);
-                            editor.commit();
-                            WorldwideController.get().updateTimeToLive(Long.parseLong(timeToLive));
-                            dismiss();
-                        }
-                    });
-                    builder.setView(view);
-                    return builder.create();
-                }
-            };
-            dialogFragment.show(getActivity().getFragmentManager(), DIALOG_TAG);
+            new WorldWideTutorialDialog().show(getActivity().getFragmentManager(), DIALOG_TAG);
         }
     }
     @Override
