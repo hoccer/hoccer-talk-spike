@@ -6,4 +6,5 @@
     <string name="preference_key_change_passcode">preference_key_change_passcode</string>
     <string name="preference_key_worldwide_timetolive">preference_key_worldwide_timetolive</string>
     <string name="preference_key_worldwide_enable_notifications">preference_key_worldwide_enable_notifications</string>
+    <string name="preference_key_worldwide_enable_automatic_download">preference_key_worldwide_enable_automatic_download</string>
 </resources>

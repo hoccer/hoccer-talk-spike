@@ -88,7 +88,7 @@ public abstract class XoDefaultClientConfiguration implements IXoClientConfigura
     }
 
     @Override
-    public boolean isManualWorldwideDownloadEnabled() {
-        return true;
+    public boolean isAutomaticWorldwideDownloadEnabled() {
+        return false;
     }
 }
