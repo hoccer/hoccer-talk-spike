@@ -53,13 +53,13 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
                             SharedPreferences.Editor editor = preferences.edit();
                             switch(position) {
                                 case 0:
-                                    editor.putString(getString(R.string.preference_key_worldwide_timetolive), "0"); // immediatly
+                                    editor.putString(getString(R.string.preference_key_worldwide_timetolive), "3600000"); // 1 hour
                                     break;
                                 case 1:
-                                    editor.putString(getString(R.string.preference_key_worldwide_timetolive), "1800000"); // 30 minutes
+                                    editor.putString(getString(R.string.preference_key_worldwide_timetolive), "21600000"); // 6 hours
                                     break;
                                 case 2:
-                                    editor.putString(getString(R.string.preference_key_worldwide_timetolive), "21600000"); // 6 hours
+                                    editor.putString(getString(R.string.preference_key_worldwide_timetolive), "86400000"); // 24 hours
                                     break;
                             }
                             editor.putBoolean("tutorial_viewed", true);
