@@ -60,14 +60,13 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
                                     ttl = "3600000"; // 1 hour
                                     break;
                                 case 1:
-                                    ttl = "21600000"; // 1 hour
-                                    editor.putString(getString(R.string.preference_key_worldwide_timetolive), "21600000"); // 6 hours
+                                    ttl = "21600000"; // 6 hour
                                     break;
                                 case 2:
-                                    ttl = "86400000"; // 1 hour
+                                    ttl = "86400000"; // 24 hour
                                     break;
                             }
-                            editor.putString(getString(R.string.preference_key_worldwide_timetolive), ttl); // 24 hours
+                            editor.putString(getString(R.string.preference_key_worldwide_timetolive), ttl);
                             editor.putBoolean(PREFERENCE_KEY_WORLDWIDE_TUTORIAL_VIEWED, true);
                             editor.commit();
                             WorldwideController.get().updateTimeToLive(Long.parseLong(ttl));
