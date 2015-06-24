@@ -24,6 +24,9 @@ import static com.hoccer.talk.model.TalkEnvironment.TYPE_WORLDWIDE;
 
 public class WorldwideChatListFragment extends EnvironmentChatListFragment {
 
+    private static final String PREFERENCE_KEY_WORLDWIDE_TUTORIAL_VIEWED = "tutorial_viewed";
+    private static final String DIALOG_TAG = "ww_tutorial";
+
     public WorldwideChatListFragment() {
         mPlaceholder = new Placeholder(R.drawable.placeholder_world, R.string.placeholder_worldwide_text);
     }
@@ -36,7 +39,7 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
 
     private void displayWorldwideTutorialIfNeeded() {
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        boolean isTutorialViewed = preferences.getBoolean("tutorial_viewed", false);
+        boolean isTutorialViewed = preferences.getBoolean(PREFERENCE_KEY_WORLDWIDE_TUTORIAL_VIEWED, false);
         if(!isTutorialViewed) {
             final DialogFragment dialogFragment = new DialogFragment() {
                 @Override
@@ -62,7 +65,7 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
                                     editor.putString(getString(R.string.preference_key_worldwide_timetolive), "86400000"); // 24 hours
                                     break;
                             }
-                            editor.putBoolean("tutorial_viewed", true);
+                            editor.putBoolean(PREFERENCE_KEY_WORLDWIDE_TUTORIAL_VIEWED, true);
                             editor.commit();
                             dismiss();
                         }
@@ -71,7 +74,7 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
                     return builder.create();
                 }
             };
-            dialogFragment.show(getActivity().getFragmentManager(), "ww_tutorial");
+            dialogFragment.show(getActivity().getFragmentManager(), DIALOG_TAG);
         }
     }
     @Override
