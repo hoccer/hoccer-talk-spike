@@ -54,7 +54,7 @@ public class DownloadAgent extends TransferAgent {
     }
 
     private boolean isManualWorldwideDownloadEnabled() {
-        return !mClient.getConfiguration().isWorldwideAutoDownloadEnabled();
+        return mClient.getConfiguration().isManualWorldwideDownloadEnabled();
     }
 
     private boolean isWorldwideDownload(TalkClientDownload download) {
