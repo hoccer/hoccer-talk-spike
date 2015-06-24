@@ -632,6 +632,12 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .queryForFirst();
     }
 
+    public List<TalkDelivery> getDeliveriesForMessage(TalkClientMessage message) throws SQLException {
+        QueryBuilder<TalkDelivery, Long> deliveries = mDeliveries.queryBuilder();
+        deliveries.where().eq(TalkDelivery.FIELD_MESSAGE_TAG, message.getMessageTag());
+        return deliveries.query();
+    }
+
     ////////////////////////////////////////////
     //////// Upload/Download Management ////////
     ////////////////////////////////////////////
