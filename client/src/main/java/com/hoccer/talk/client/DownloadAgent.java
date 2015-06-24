@@ -43,9 +43,10 @@ public class DownloadAgent extends TransferAgent {
     }
 
     private boolean isManualDownload(TalkClientDownload download) {
-        return manualDownloadActivated()
-                || exceedsTransferLimit(download)
-                || isManualWorldwideDownload(download);
+        if (manualDownloadsActivated() || exceedsTransferLimit(download)) {
+            return true;
+        }
+        return isManualWorldwideDownload(download);
     }
 
     private boolean isManualWorldwideDownload(TalkClientDownload download) {
@@ -65,7 +66,7 @@ public class DownloadAgent extends TransferAgent {
         return false;
     }
 
-    private boolean manualDownloadActivated() {
+    private boolean manualDownloadsActivated() {
         return mClient.getDownloadLimit() == MANUAL;
     }
 
