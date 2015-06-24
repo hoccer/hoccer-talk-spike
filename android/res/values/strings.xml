@@ -463,8 +463,7 @@
     <string name="unmute_contact">unmute</string>
     <string name="toast_mute_chat">muted</string>
     <string name="toast_unmute_chat">unmuted</string>
-    <string name="ww_tutorial_message">In Worldwide-Mode you can chat with random users worldwide who have also activated worldwide-mode. Please take
-        a look at the available settings for worldwide mode. How long do you want to keep worldwide mode activated after leaving the worldwide view?
+    <string name="ww_tutorial_message">In Worldwide mode you can chat with random users worldwide who have also activated Worldwide mode. Please take a look at the available settings for Worldwide mode. How long do you want to keep Worldwide mode activated after leaving the Worldwide view?
     </string>
 
     <plurals name="contact_count">
