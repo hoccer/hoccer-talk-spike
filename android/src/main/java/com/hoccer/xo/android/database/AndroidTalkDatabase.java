@@ -13,6 +13,7 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.talk.model.TalkGroupPresence;
 import com.hoccer.talk.model.TalkPresence;
+import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.util.UriUtils;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
@@ -31,7 +32,7 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
 
     private static final Logger LOG = Logger.getLogger(AndroidTalkDatabase.class);
 
-    private static final int DATABASE_VERSION = 28;
+    private static final int DATABASE_VERSION = 29;
 
     public static final String DATABASE_NAME_DEFAULT = "hoccer-talk.db";
 
@@ -115,11 +116,19 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
             if (oldVersion < 28) {
                 uniteDeliveryFieldsAndSaveDeliveryDirection(db);
             }
+
+            if (oldVersion < 29) {
+                updateRelationshipUnblockState(db);
+            }
         } catch (android.database.SQLException e) {
             LOG.error("Android SQL error upgrading database", e);
         } catch (SQLException e) {
             LOG.error("OrmLite SQL error upgrading database", e);
         }
+    }
+
+    private void updateRelationshipUnblockState(SQLiteDatabase db) {
+        db.execSQL("UPDATE relationship SET unblockState = '" + TalkRelationship.STATE_FRIEND + "' WHERE state = '" + TalkRelationship.STATE_BLOCKED + "'");
     }
 
     private void uniteDeliveryFieldsAndSaveDeliveryDirection(SQLiteDatabase db) throws SQLException {

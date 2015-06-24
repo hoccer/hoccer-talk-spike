@@ -12,6 +12,7 @@ import com.artcom.hoccer.R;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.maps.model.LatLng;
+
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.base.XoActivity;

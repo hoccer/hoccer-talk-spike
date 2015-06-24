@@ -169,6 +169,7 @@ public class TalkRelationship {
         this.setClientId(r.getClientId());
         this.setOtherClientId(r.getOtherClientId());
         this.setState(r.getState());
+        this.setUnblockState(r.getUnblockState());
         this.setLastChanged(r.getLastChanged());
         this.setNotificationPreference(r.getNotificationPreference());
     }

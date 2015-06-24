@@ -28,7 +28,7 @@ public class WorldwideGroupHistoryChatItem extends ChatItem implements SearchAda
     private Date mLastMessageTimeStamp;
     private String mLastMessageText = "";
 
-    protected WorldwideGroupHistoryChatItem(Context context) {
+    public WorldwideGroupHistoryChatItem(Context context) {
         super(context);
         update();
     }
@@ -53,6 +53,11 @@ public class WorldwideGroupHistoryChatItem extends ChatItem implements SearchAda
                 mLastMessageText = message.getText();
             }
         }
+    }
+
+    @Override
+    protected int getAvatarLayout() {
+        return R.layout.view_avatar_simple;
     }
 
     @Override

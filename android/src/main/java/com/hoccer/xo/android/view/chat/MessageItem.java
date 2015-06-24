@@ -12,11 +12,13 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.ContentState;
 import com.hoccer.talk.model.TalkDelivery;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
@@ -27,9 +29,11 @@ import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferListener;
 import com.hoccer.xo.android.view.chat.attachments.ChatItemType;
 import org.apache.log4j.Logger;
 
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  * This class creates and configures layouts for incoming and outgoing messages.
@@ -37,6 +41,8 @@ import java.util.Date;
 public class MessageItem implements AttachmentTransferListener {
 
     private final static Logger LOG = Logger.getLogger(MessageItem.class);
+
+    private final XoClientDatabase mDatabase;
 
     protected Context mContext;
     protected AttachmentTransferHandler mAttachmentTransferHandler;
@@ -55,6 +61,7 @@ public class MessageItem implements AttachmentTransferListener {
     public MessageItem(Context context, TalkClientMessage message) {
         super();
         mContext = context;
+        mDatabase = XoApplication.get().getXoClient().getDatabase();
         mMessage = message;
         mContentRegistry = ContentRegistry.get(context);
     }
@@ -172,15 +179,15 @@ public class MessageItem implements AttachmentTransferListener {
 
         } else {
             mSimpleAvatarView.setVisibility(View.GONE);
-            updateOutgoingMessageStatus(view);
+            boolean isDeliveryFailed = isDeliveryFailed();
+            updateOutgoingMessageStatus(view, isDeliveryFailed);
 
             messageContactInfo.setVisibility(View.GONE);
 
-
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                messageText.setBackground(getOutgoingBackgroundDrawable());
+                messageText.setBackground(getOutgoingBackgroundDrawable(isDeliveryFailed));
             } else {
-                messageText.setBackgroundDrawable(getOutgoingBackgroundDrawable());
+                messageText.setBackgroundDrawable(getOutgoingBackgroundDrawable(isDeliveryFailed));
             }
 
             messageText.setTextColor(mContext.getResources().getColorStateList(R.color.message_outgoing_text));
@@ -263,14 +270,7 @@ public class MessageItem implements AttachmentTransferListener {
         return myDelivery.getState();
     }
 
-    private static int statusColorId(TalkDelivery myDelivery) {
-        if (myDelivery.isFailure()) {
-            return R.color.message_delivery_failed;
-        }
-        return R.color.primary;
-    }
-
-    private void updateOutgoingMessageStatus(View view) {
+    private void updateOutgoingMessageStatus(View view, boolean isDeliveryFailed) {
         TextView deliveryInfo = (TextView) view.findViewById(R.id.tv_message_delivery_info);
         if (mMessage.getConversationContact().isGroup()) {
             deliveryInfo.setVisibility(View.GONE);
@@ -280,8 +280,8 @@ public class MessageItem implements AttachmentTransferListener {
         TalkDelivery outgoingDelivery = mMessage.getDelivery();
         deliveryInfo.setVisibility(View.VISIBLE);
 
+        int statusColor = isDeliveryFailed ? R.color.message_delivery_failed : R.color.primary;
         String statusText = stateStringForDelivery(outgoingDelivery, view);
-        int statusColor = statusColorId(outgoingDelivery);
 
         setMessageStatusText(deliveryInfo, statusText, statusColor);
     }
@@ -292,20 +292,12 @@ public class MessageItem implements AttachmentTransferListener {
         messageStatusLabel.setTextColor(messageStatusLabel.getResources().getColor(colorId));
     }
 
-    public Drawable getOutgoingBackgroundDrawable() {
-        String currentState = mMessage.getDelivery().getState();
-        Drawable background;
-        if (currentState != null) {
-            if (TalkDelivery.isFailureState(currentState)) {
-                background = mContext.getResources().getDrawable(R.drawable.chat_bubble_error_outgoing);
-            } else {
-                background = ColoredDrawable.create(R.drawable.chat_bubble_outgoing, R.color.message_outgoing_background);
-            }
+    public Drawable getOutgoingBackgroundDrawable(boolean isDeliveryFailed) {
+        if (isDeliveryFailed) {
+            return mContext.getResources().getDrawable(R.drawable.chat_bubble_error_outgoing);
         } else {
-            background = ColoredDrawable.create(R.drawable.chat_bubble_outgoing, R.color.message_outgoing_background);
+            return ColoredDrawable.create(R.drawable.chat_bubble_outgoing, R.color.message_outgoing_background);
         }
-
-        return background;
     }
 
     public Drawable getIncomingBackgroundDrawable() {
@@ -579,5 +571,29 @@ public class MessageItem implements AttachmentTransferListener {
                 break;
         }
         return stringResource;
+    }
+
+    public boolean isDeliveryFailed() {
+        if(mMessage.getDelivery().isGroupDelivery()) {
+            boolean isDeliveryFailed = true;
+            try {
+                List<TalkDelivery> deliveriesForMessage = mDatabase.getDeliveriesForMessage(mMessage);
+                for (TalkDelivery delivery : deliveriesForMessage) {
+                    if(delivery.isDelivered()) {
+                        isDeliveryFailed = false;
+                        break;
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return isDeliveryFailed;
+        } else {
+            if (mMessage.getDelivery().isFailure()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
     }
 }

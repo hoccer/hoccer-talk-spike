@@ -190,6 +190,17 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return contacts.join(relationships).query();
     }
 
+    public List<TalkClientContact> findClientContactsByState(String state, String unblockState) throws SQLException {
+        QueryBuilder<TalkRelationship, Long> relationships = mRelationships.queryBuilder();
+        relationships.where()
+                .eq("state", state)
+                .and()
+                .eq("unblockState", unblockState);
+
+        QueryBuilder<TalkClientContact, Integer> contacts = mClientContacts.queryBuilder();
+        return contacts.join(relationships).query();
+    }
+
     //////////////////////////////////
     //////// Group Management ////////
     //////////////////////////////////
@@ -619,6 +630,12 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return clientMessages.join(clientDownloads).where()
                 .eq("deleted", false)
                 .queryForFirst();
+    }
+
+    public List<TalkDelivery> getDeliveriesForMessage(TalkClientMessage message) throws SQLException {
+        QueryBuilder<TalkDelivery, Long> deliveries = mDeliveries.queryBuilder();
+        deliveries.where().eq(TalkDelivery.FIELD_MESSAGE_TAG, message.getMessageTag());
+        return deliveries.query();
     }
 
     ////////////////////////////////////////////

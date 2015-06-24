@@ -155,7 +155,19 @@ public class TalkClientContact implements Serializable {
     }
 
     public boolean isClientFriend() {
+        return isFriend() || isFriendBlocked();
+    }
+
+    public boolean isClientBlocked() {
+        return isClient() && this.clientRelationship != null && this.clientRelationship.isBlocked();
+    }
+
+    private boolean isFriend() {
         return isClient() && this.clientRelationship != null && this.clientRelationship.isFriend();
+    }
+
+    private boolean isFriendBlocked() {
+        return isClient() && this.clientRelationship != null && this.clientRelationship.isBlocked() && TalkRelationship.STATE_FRIEND.equals(this.clientRelationship.getUnblockState());
     }
 
     public boolean isFriendOrBlocked() {

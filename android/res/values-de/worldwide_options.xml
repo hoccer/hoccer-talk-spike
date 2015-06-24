@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="worldwide_timetolive">
-        <item>0 Minuten (sofort)</item>
-        <item>1 Minute</item>
-        <item>5 Minuten</item>
+        <item>sofort (nicht empfholen)</item>
         <item>10 Minuten</item>
         <item>30 Minuten</item>
         <item>1 Stunde</item>

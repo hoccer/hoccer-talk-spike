@@ -41,14 +41,14 @@ public class ClientContactListAdapter extends ContactListAdapter {
         List<TalkClientContact> invitedMe;
         List<TalkClientContact> invited;
         List<TalkClientContact> friends;
-        List<TalkClientContact> blocked;
+        List<TalkClientContact> blockedFriends;
 
         try {
             XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
             invitedMe = database.findClientContactsByState(TalkRelationship.STATE_INVITED_ME);
             invited = database.findClientContactsByState(TalkRelationship.STATE_INVITED);
             friends = database.findClientContactsByState(TalkRelationship.STATE_FRIEND);
-            blocked = database.findClientContactsByState(TalkRelationship.STATE_BLOCKED);
+            blockedFriends = database.findClientContactsByState(TalkRelationship.STATE_BLOCKED, TalkRelationship.STATE_FRIEND);
         } catch (SQLException e) {
             LOG.error("Could not fetch client contacts", e);
             return Collections.emptyList();
@@ -56,9 +56,9 @@ public class ClientContactListAdapter extends ContactListAdapter {
 
         Collections.sort(invited, CLIENT_CONTACT_COMPARATOR);
         Collections.sort(friends, CLIENT_CONTACT_COMPARATOR);
-        Collections.sort(blocked, CLIENT_CONTACT_COMPARATOR);
+        Collections.sort(blockedFriends, CLIENT_CONTACT_COMPARATOR);
 
-        return ListUtils.union(invitedMe, ListUtils.union(invited, ListUtils.union(friends, blocked)));
+        return ListUtils.union(invitedMe, ListUtils.union(invited, ListUtils.union(friends, blockedFriends)));
     }
 
     @Override

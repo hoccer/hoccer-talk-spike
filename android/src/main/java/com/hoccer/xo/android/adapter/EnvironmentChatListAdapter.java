@@ -243,6 +243,7 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
 
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
+        refreshList();
     }
 
     @Override

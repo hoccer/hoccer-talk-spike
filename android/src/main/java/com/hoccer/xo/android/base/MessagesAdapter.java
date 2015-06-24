@@ -29,9 +29,9 @@ import java.util.concurrent.TimeUnit;
  * Reloads are rate-limited to a minimum interval to prevent
  * hogging the CPU with superfluous view updates.
  */
-public abstract class XoAdapter extends BaseAdapter {
+public abstract class MessagesAdapter extends BaseAdapter {
 
-    private static final Logger LOG = Logger.getLogger(XoAdapter.class);
+    private static final Logger LOG = Logger.getLogger(MessagesAdapter.class);
 
     private static final long RATE_LIMIT_MSECS = 1000;
 
@@ -53,7 +53,7 @@ public abstract class XoAdapter extends BaseAdapter {
     private boolean mNeedsReload;
     private long mNotifyTimestamp;
 
-    protected XoAdapter(XoActivity activity) {
+    protected MessagesAdapter(XoActivity activity) {
         mActivity = activity;
         mDatabase = mActivity.getXoDatabase();
         mInflater = mActivity.getLayoutInflater();
@@ -159,7 +159,7 @@ public abstract class XoAdapter extends BaseAdapter {
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        XoAdapter.super.notifyDataSetChanged();
+                                        MessagesAdapter.super.notifyDataSetChanged();
                                     }
                                 });
                             }
@@ -171,7 +171,7 @@ public abstract class XoAdapter extends BaseAdapter {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    XoAdapter.super.notifyDataSetChanged();
+                    MessagesAdapter.super.notifyDataSetChanged();
                 }
             });
         }
@@ -179,8 +179,8 @@ public abstract class XoAdapter extends BaseAdapter {
 
     public interface AdapterReloadListener {
 
-        public void onAdapterReloadStarted(XoAdapter adapter);
+        public void onAdapterReloadStarted(MessagesAdapter adapter);
 
-        public void onAdapterReloadFinished(XoAdapter adapter);
+        public void onAdapterReloadFinished(MessagesAdapter adapter);
     }
 }

@@ -1,6 +1,8 @@
 package com.hoccer.webclient.backend;
 
 import com.hoccer.talk.client.XoDefaultClientConfiguration;
+import com.hoccer.talk.model.TalkEnvironment;
+import com.hoccer.talk.model.TalkGroupMembership;
 import org.apache.log4j.Logger;
 
 import java.io.FileInputStream;
@@ -37,6 +39,16 @@ public class Configuration extends XoDefaultClientConfiguration {
     @Override
     public String getServerUri() {
         return mServerUri;
+    }
+
+    @Override
+    public long getTimeToLiveInWorldwide() {
+        return 0;
+    }
+
+    @Override
+    public String getNotificationPreferenceForWorldwide() {
+        return TalkGroupMembership.NOTIFICATIONS_ENABLED;
     }
 
     public String getTrustedCertFile() {
