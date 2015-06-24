@@ -1,18 +1,31 @@
 package com.hoccer.xo.android.fragment;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.WorldwideController;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.adapter.EnvironmentChatListAdapter;
+import com.hoccer.xo.android.dialog.WorldWideTutorialDialog;
 import com.hoccer.xo.android.view.Placeholder;
 
 import static com.hoccer.talk.model.TalkEnvironment.TYPE_WORLDWIDE;
 
 public class WorldwideChatListFragment extends EnvironmentChatListFragment {
+
+    private static final String DIALOG_TAG = "ww_tutorial";
 
     public WorldwideChatListFragment() {
         mPlaceholder = new Placeholder(R.drawable.placeholder_world, R.string.placeholder_worldwide_text);
@@ -24,6 +37,13 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
         createAdapter();
     }
 
+    private void displayWorldwideTutorialIfNeeded() {
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        boolean isTutorialViewed = preferences.getBoolean(WorldWideTutorialDialog.PREFERENCE_KEY_WORLDWIDE_TUTORIAL_VIEWED, false);
+        if(!isTutorialViewed) {
+            new WorldWideTutorialDialog().show(getActivity().getFragmentManager(), DIALOG_TAG);
+        }
+    }
     @Override
     public void onDestroy() {
         if (mListAdapter != null) {
@@ -69,6 +89,7 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
 
         TalkClientContact group = XoApplication.get().getXoClient().getCurrentWorldwideGroup();
         mListAdapter.scheduleUpdate(group);
+        displayWorldwideTutorialIfNeeded();
     }
 
     @Override
