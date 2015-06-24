@@ -464,6 +464,7 @@
     <string name="toast_mute_chat">muted</string>
     <string name="toast_unmute_chat">unmuted</string>
     <string name="blocked">Blocked</string>
+    <string name="auto_download_attachments">Auto-Download attachments</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>
