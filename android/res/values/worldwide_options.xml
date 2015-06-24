@@ -23,4 +23,10 @@
         <item>43200000</item>
         <item>86400000</item>
     </string-array>
+
+    <string-array name="worldwide_tutorial_options">
+        <item>Deactivate immediatly</item>
+        <item>after 30 minutes</item>
+        <item>after 6 hours</item>
+    </string-array>
 </resources>

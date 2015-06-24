@@ -1,8 +1,18 @@
 package com.hoccer.xo.android.fragment;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.WorldwideController;
@@ -24,6 +34,46 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
         createAdapter();
     }
 
+    private void displayWorldwideTutorialIfNeeded() {
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        boolean isTutorialViewed = preferences.getBoolean("tutorial_viewed", false);
+        if(!isTutorialViewed) {
+            final DialogFragment dialogFragment = new DialogFragment() {
+                @Override
+                public Dialog onCreateDialog(Bundle savedInstanceState) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setTitle("Worldwide");
+                    View view = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_ww_tutorial, null);
+                    ListView optionsListView = (ListView) view.findViewById(R.id.lv_dialog_ww_tutorial);
+                    optionsListView.setAdapter(new ArrayAdapter<String>(getActivity(), R.layout.simple_list_item_centered,
+                            getResources().getStringArray(R.array.worldwide_tutorial_options)));
+                    optionsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                            SharedPreferences.Editor editor = preferences.edit();
+                            switch(position) {
+                                case 0:
+                                    editor.putString(getString(R.string.preference_key_worldwide_timetolive), "0"); // immediatly
+                                    break;
+                                case 1:
+                                    editor.putString(getString(R.string.preference_key_worldwide_timetolive), "1800000"); // 30 minutes
+                                    break;
+                                case 2:
+                                    editor.putString(getString(R.string.preference_key_worldwide_timetolive), "21600000"); // 6 hours
+                                    break;
+                            }
+                            editor.putBoolean("tutorial_viewed", true);
+                            editor.commit();
+                            dismiss();
+                        }
+                    });
+                    builder.setView(view);
+                    return builder.create();
+                }
+            };
+            dialogFragment.show(getActivity().getFragmentManager(), "ww_tutorial");
+        }
+    }
     @Override
     public void onDestroy() {
         if (mListAdapter != null) {
@@ -69,6 +119,7 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
 
         TalkClientContact group = XoApplication.get().getXoClient().getCurrentWorldwideGroup();
         mListAdapter.scheduleUpdate(group);
+        displayWorldwideTutorialIfNeeded();
     }
 
     @Override
