@@ -450,7 +450,7 @@
     <string name="unmute_contact">laut schalten</string>
     <string name="toast_mute_chat">stumm geschaltet</string>
     <string name="toast_unmute_chat">laut geschaltet</string>
-    <string name="ww_tutorial_message">Im Weltweit-Modus kannst du mit zufälligen Benutzern, die ebenfalls im Weltweit-Modus sind kommunizieren. Bitte sieh dir die verfügbaren Optionen in den Einstellungen zum Weltweit-Modus an. Wie lange möchtest du, das der Weltweit-Modus aktiv bleibt nachdem du die Weltweit Ansicht verlassen hast?
+    <string name="ww_tutorial_message">Mit der Weltweit-Funktion, kannst du mit zufällig ausgewählten Teilnehmern kommunizieren, die ebenfalls ‚Weltweit‘ aktiviert haben. Mache dich bitte mit den Einstellungen zu diesem Modus vertraut. Wie lange möchtest du nach Verlassen der „Weltweit“-Ansicht noch weltweit erreichbar sein? 
     </string>
 
     <plurals name="contact_count">
