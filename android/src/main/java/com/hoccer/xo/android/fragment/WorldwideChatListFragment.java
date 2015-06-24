@@ -54,19 +54,23 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
                         @Override
                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                             SharedPreferences.Editor editor = preferences.edit();
+                            String ttl = "0";
                             switch(position) {
                                 case 0:
-                                    editor.putString(getString(R.string.preference_key_worldwide_timetolive), "3600000"); // 1 hour
+                                    ttl = "3600000"; // 1 hour
                                     break;
                                 case 1:
+                                    ttl = "21600000"; // 1 hour
                                     editor.putString(getString(R.string.preference_key_worldwide_timetolive), "21600000"); // 6 hours
                                     break;
                                 case 2:
-                                    editor.putString(getString(R.string.preference_key_worldwide_timetolive), "86400000"); // 24 hours
+                                    ttl = "86400000"; // 1 hour
                                     break;
                             }
+                            editor.putString(getString(R.string.preference_key_worldwide_timetolive), ttl); // 24 hours
                             editor.putBoolean(PREFERENCE_KEY_WORLDWIDE_TUTORIAL_VIEWED, true);
                             editor.commit();
+                            WorldwideController.get().updateTimeToLive(Long.parseLong(ttl));
                             dismiss();
                         }
                     });
