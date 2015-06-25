@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.v4.app.Fragment;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,6 +36,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     private String mPairingToken;
     private ContactsMenuItemActionProvider mContactsMenuItemActionProvider;
+    private PowerManager.WakeLock mWl;
 
 
     @Override
@@ -244,6 +246,10 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     @Override
     public void onBecameBackground(Activity activity) {
         LOG.debug("onBecameBackground()");
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        mWl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Background disconnet");
+        mWl.acquire(); //TODO release wake lock as soon as possible
+
         getXoClient().setPresenceStatus(TalkPresence.STATUS_BACKGROUND);
     }
 }
