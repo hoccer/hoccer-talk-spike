@@ -27,7 +27,6 @@ import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.talk.model.TalkGroupMembership;
-import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.base.XoFragment;
@@ -39,19 +38,13 @@ import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionGestureListener;
 import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.util.UriUtils;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -192,7 +185,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
 
         try {
             String string = preferences.getString(KEY_ATTACHMENTS + contactId, null);
-            if(string != null) {
+            if (string != null) {
                 JSONArray attachmentJsonArray = new JSONArray(string);
                 if (attachmentJsonArray != null) {
                     int length = attachmentJsonArray.length();
@@ -217,7 +210,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     }
 
     private static SelectedContent stringToSelectedContent(String selectedContentString) throws IOException, ClassNotFoundException {
-        byte [] data = Base64.decode(selectedContentString, Base64.DEFAULT);
+        byte[] data = Base64.decode(selectedContentString, Base64.DEFAULT);
         ObjectInputStream ois = new ObjectInputStream(
                 new ByteArrayInputStream(data));
         SelectedContent selectedContent = (SelectedContent) ois.readObject();
@@ -266,19 +259,23 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
             mSelectedContent.clear();
 
             if (resultCode == Activity.RESULT_OK) {
-                try {
-                    if (mAttachmentSelection.getSelector() instanceof MultiImageSelector) {
-                        MultiImageSelector selector = (MultiImageSelector) mAttachmentSelection.getSelector();
+                if (mAttachmentSelection.getSelector() instanceof MultiImageSelector) {
+                    MultiImageSelector selector = (MultiImageSelector) mAttachmentSelection.getSelector();
+                    try {
                         mSelectedContent = selector.createObjectsFromSelectionResult(getActivity(), intent);
-                    } else {
-                        IContentSelector selector = mAttachmentSelection.getSelector();
-                        SelectedContent content = selector.createObjectFromSelectionResult(getActivity(), intent);
-                        CollectionUtils.addIgnoreNull(mSelectedContent, content);
+                    } catch (Exception e) {
+                        LOG.error("Could not create object from selection result.", e);
                     }
-                } catch (Exception e) {
-                    LOG.error("Could not create object from selection result.");
+                } else {
+                    IContentSelector selector = mAttachmentSelection.getSelector();
+                    SelectedContent content = null;
+                    try {
+                        content = selector.createObjectFromSelectionResult(getActivity(), intent);
+                    } catch (Exception e) {
+                        LOG.error("Could not create object from selection result.", e);
+                    }
+                    CollectionUtils.addIgnoreNull(mSelectedContent, content);
                 }
-
                 if (mSelectedContent.isEmpty()) {
                     Toast.makeText(getActivity(), R.string.error_attachment_selection, Toast.LENGTH_LONG).show();
                 }
@@ -605,10 +602,12 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
 
     private class TextFieldWatcher implements TextWatcher {
         @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
 
         @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
 
         @Override
         public void afterTextChanged(Editable s) {
