@@ -40,7 +40,7 @@ import java.util.List;
  * Fragment for display and editing of group profiles.
  */
 public class GroupProfileFragment extends ProfileFragment
-        implements IXoContactListener, View.OnClickListener, ActionMode.Callback, AdapterView.OnItemClickListener {
+        implements IXoContactListener, ActionMode.Callback, AdapterView.OnItemClickListener {
 
     private static final Logger LOG = Logger.getLogger(GroupProfileFragment.class);
 
@@ -119,7 +119,20 @@ public class GroupProfileFragment extends ProfileFragment
         mNameEditText.setOnKeyListener(new BackPressListener());
 
         mInviteAllButton = (Button) view.findViewById(R.id.profile_group_button_invite_all);
-        mInviteAllButton.setOnClickListener(this);
+        mInviteAllButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                inviteOrDisinviteMembersAsFriends();
+            }
+        });
+    }
+
+    private void inviteOrDisinviteMembersAsFriends() {
+        if (mContactsToDisinviteAsFriend.isEmpty()) {
+            inviteAllMembersAsFriends();
+        } else {
+            disinviteAllMembersAsFriends();
+        }
     }
 
     private void showMessagingActivity() {
@@ -295,7 +308,6 @@ public class GroupProfileFragment extends ProfileFragment
         getXoClient().setGroupName(mContact, newGroupName);
     }
 
-//    @Override
     protected void updateViews() {
         updateAvatarView();
         updateChatContainer();
@@ -511,7 +523,7 @@ public class GroupProfileFragment extends ProfileFragment
                 @Override
                 public void run() {
                     updateContact();
-                    configureOptionsMenuItems(mOptionsMenu);
+                    getActivity().invalidateOptionsMenu();
                 }
             });
         }
@@ -524,7 +536,7 @@ public class GroupProfileFragment extends ProfileFragment
                 @Override
                 public void run() {
                     updateContact();
-                    configureOptionsMenuItems(mOptionsMenu);
+                    getActivity().invalidateOptionsMenu();
                 }
             });
         }
@@ -534,22 +546,6 @@ public class GroupProfileFragment extends ProfileFragment
         refreshContact();
         updateActionBar();
         updateInviteButton();
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.profile_group_profile_image:
-                enterAvatarEditMode();
-                break;
-            case R.id.profile_group_button_invite_all:
-                if (mContactsToDisinviteAsFriend.isEmpty()) {
-                    inviteAllMembersAsFriends();
-                } else {
-                    disinviteAllMembersAsFriends();
-                }
-                break;
-        }
     }
 
     private void updateInviteButton() {
@@ -660,16 +656,13 @@ public class GroupProfileFragment extends ProfileFragment
     }
 
     private void configureActionMenuItems(Menu menu) {
-
         MenuItem addPerson = menu.findItem(R.id.menu_group_profile_add_person);
         MenuItem deleteGroup = menu.findItem(R.id.menu_group_profile_delete);
 
         addPerson.setVisible(false);
         deleteGroup.setVisible(false);
-        mAvatarImage.setOnClickListener(null);
 
         if (mMode == Mode.EDIT_GROUP) {
-            mAvatarImage.setOnClickListener(this);
             deleteGroup.setVisible(true);
             addPerson.setVisible(true);
         }
@@ -681,6 +674,14 @@ public class GroupProfileFragment extends ProfileFragment
 
         mMode = Mode.EDIT_GROUP;
         configureActionMenuItems(menu);
+
+        mAvatarImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                enterAvatarEditMode();
+            }
+        });
+
         updateViews();
 
         return true;
@@ -737,7 +738,7 @@ public class GroupProfileFragment extends ProfileFragment
         mMode = Mode.PROFILE;
         updateViews();
 
-        configureOptionsMenuItems(mOptionsMenu);
+        getActivity().invalidateOptionsMenu();
     }
 
     @Override
