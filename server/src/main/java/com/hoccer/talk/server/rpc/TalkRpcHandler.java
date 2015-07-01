@@ -2783,7 +2783,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
             TalkEnvironment myEnvironment = mDatabase.findEnvironmentByClientId(environment.getType(), mConnection.getClientId());
 
             // TODO: set to trace for production
-            if (LOG.isDebugEnabled()) {
+            if (LOG.isTraceEnabled()) {
                 // begin debug output code
                 if (environment.isWorldwide()) {
                     int i = 0;
