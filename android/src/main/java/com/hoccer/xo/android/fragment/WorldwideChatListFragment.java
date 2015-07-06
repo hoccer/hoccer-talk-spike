@@ -1,8 +1,10 @@
 package com.hoccer.xo.android.fragment;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
 import com.artcom.hoccer.R;
@@ -18,15 +20,52 @@ import static com.hoccer.talk.model.TalkEnvironment.TYPE_WORLDWIDE;
 public class WorldwideChatListFragment extends EnvironmentChatListFragment {
 
     private static final String DIALOG_TAG = "ww_tutorial";
+    private boolean mPageSelected;
+    private boolean mOnResumeHandled;
 
     public WorldwideChatListFragment() {
         mPlaceholder = new Placeholder(R.drawable.placeholder_world, R.string.placeholder_worldwide_text);
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
+
+        if (mPageSelected) {
+            activateWorldwide();
+        }
+
+        mOnResumeHandled = true;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        mOnResumeHandled = false;
+    }
+
+    private void activateWorldwide() {
+        WorldwideController.get().activateWorldwide();
+
+        TalkClientContact group = XoApplication.get().getXoClient().getCurrentWorldwideGroup();
         createAdapter();
+        mListAdapter.scheduleUpdate(group);
+
+        displayWorldwideTutorialIfNeeded();
+    }
+
+    private void displayWorldwideTutorialIfNeeded() {
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        boolean isTutorialViewed = preferences.getBoolean(WorldWideTutorialDialog.PREFERENCE_KEY_WORLDWIDE_TUTORIAL_VIEWED, false);
+        if(!isTutorialViewed) {
+            new WorldWideTutorialDialog().show(getActivity().getFragmentManager(), DIALOG_TAG);
+        }
     }
 
     @Override
@@ -70,24 +109,15 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
 
     @Override
     public void onPageSelected() {
-        WorldwideController.get().activateWorldwide();
-
-        TalkClientContact group = XoApplication.get().getXoClient().getCurrentWorldwideGroup();
-        mListAdapter.scheduleUpdate(group);
-
-        displayWorldwideTutorialIfNeeded();
-    }
-
-    private void displayWorldwideTutorialIfNeeded() {
-        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        boolean isTutorialViewed = preferences.getBoolean(WorldWideTutorialDialog.PREFERENCE_KEY_WORLDWIDE_TUTORIAL_VIEWED, false);
-        if(!isTutorialViewed) {
-            new WorldWideTutorialDialog().show(getActivity().getFragmentManager(), DIALOG_TAG);
+        mPageSelected = true;
+        if (mOnResumeHandled) {
+            activateWorldwide();
         }
     }
 
     @Override
     public void onPageUnselected() {
+        mPageSelected = false;
         WorldwideController.get().deactivateWorldWide();
     }
 

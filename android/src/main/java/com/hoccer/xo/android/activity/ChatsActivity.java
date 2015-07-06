@@ -35,19 +35,22 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     private String mPairingToken;
     private ContactsMenuItemActionProvider mContactsMenuItemActionProvider;
-
+    private ViewPagerActivityComponent mViewPagerActivityComponent;
+    private WorldwideChatListFragment mWorldwideChatListFragment;
+    private boolean mTest = true; //TODO
 
     @Override
     protected ActivityComponent[] createComponents() {
         MediaPlayerActivityComponent mediaPlayerActivityComponent = new MediaPlayerActivityComponent(this);
 
-        ViewPagerActivityComponent viewPagerActivityComponent = new ViewPagerActivityComponent(this,
+        mWorldwideChatListFragment = new WorldwideChatListFragment();
+        mViewPagerActivityComponent = new ViewPagerActivityComponent(this,
                 R.id.pager,
                 new ChatListFragment(),
                 new NearbyChatListFragment(),
-                new WorldwideChatListFragment());
+                mWorldwideChatListFragment);
 
-        return new ActivityComponent[]{mediaPlayerActivityComponent, viewPagerActivityComponent};
+        return new ActivityComponent[]{mediaPlayerActivityComponent, mViewPagerActivityComponent};
     }
 
     @Override
@@ -79,6 +82,11 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         showProfileIfClientIsNotRegistered();
         registerListeners();
         mContactsMenuItemActionProvider.updateNotificationBadge();
+
+        if (mTest) {
+            mViewPagerActivityComponent.selectFragment(mWorldwideChatListFragment);
+            mTest = false;
+        }
     }
 
     @Override
