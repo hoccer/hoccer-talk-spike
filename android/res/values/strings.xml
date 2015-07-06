@@ -465,8 +465,7 @@
     <string name="toast_unmute_chat">unmuted</string>
     <string name="blocked">Blocked</string>
     <string name="auto_download_attachments">Auto-Download attachments</string>
-    <string name="ww_tutorial_message">In Worldwide mode you can chat with random users worldwide who have also activated Worldwide mode. Please take a look at the available settings for Worldwide mode. How long do you want to keep Worldwide mode activated after leaving the Worldwide view?
-    </string>
+    <string name="worldwide_tutorial_message">In Worldwide mode you can chat with random users worldwide who have also activated Worldwide mode. Please take a look at the available settings for Worldwide. How long do you want to keep Worldwide activated and therefore visible for others after leaving the Worldwide view?</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>
