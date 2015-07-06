@@ -29,13 +29,6 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
         createAdapter();
     }
 
-    private void displayWorldwideTutorialIfNeeded() {
-        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        boolean isTutorialViewed = preferences.getBoolean(WorldWideTutorialDialog.PREFERENCE_KEY_WORLDWIDE_TUTORIAL_VIEWED, false);
-        if(!isTutorialViewed) {
-            new WorldWideTutorialDialog().show(getActivity().getFragmentManager(), DIALOG_TAG);
-        }
-    }
     @Override
     public void onDestroy() {
         if (mListAdapter != null) {
@@ -82,6 +75,14 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
         TalkClientContact group = XoApplication.get().getXoClient().getCurrentWorldwideGroup();
         mListAdapter.scheduleUpdate(group);
         displayWorldwideTutorialIfNeeded();
+    }
+
+    private void displayWorldwideTutorialIfNeeded() {
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        boolean isTutorialViewed = preferences.getBoolean(WorldWideTutorialDialog.PREFERENCE_KEY_WORLDWIDE_TUTORIAL_VIEWED, false);
+        if(!isTutorialViewed) {
+            new WorldWideTutorialDialog().show(getActivity().getFragmentManager(), DIALOG_TAG);
+        }
     }
 
     @Override
