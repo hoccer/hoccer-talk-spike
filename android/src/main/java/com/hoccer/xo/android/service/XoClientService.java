@@ -593,7 +593,7 @@ public class XoClientService extends Service {
                     }
                 });
             }
-            if (client.isDisconnected()) {
+            if (client.isDisconnected() && mWakeLock != null) {
                 mWakeLock.release();
             }
         }
