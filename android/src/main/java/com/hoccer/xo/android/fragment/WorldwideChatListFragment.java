@@ -74,6 +74,7 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
 
         TalkClientContact group = XoApplication.get().getXoClient().getCurrentWorldwideGroup();
         mListAdapter.scheduleUpdate(group);
+
         displayWorldwideTutorialIfNeeded();
     }
 
