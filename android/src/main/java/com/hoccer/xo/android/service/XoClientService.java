@@ -1,9 +1,6 @@
 package com.hoccer.xo.android.service;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.Service;
+import android.app.*;
 import android.content.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,6 +11,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import com.artcom.hoccer.R;
@@ -24,6 +22,8 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.model.TalkPresence;
+import com.hoccer.xo.android.BackgroundManager;
 import com.hoccer.xo.android.XoAndroidClient;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ChatsActivity;
@@ -110,6 +110,8 @@ public class XoClientService extends Service {
 
     private ClientIdReceiver m_clientIdReceiver;
 
+    private PowerManager.WakeLock mWakeLock;
+
     @Override
     public void onCreate() {
         LOG.debug("onCreate()");
@@ -125,6 +127,8 @@ public class XoClientService extends Service {
             mClient.registerContactListener(mClientListener);
             mClient.getDownloadAgent().registerListener(mClientListener);
             mClient.getUploadAgent().registerListener(mClientListener);
+
+            BackgroundManager.get().registerListener(mClientListener);
         }
 
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -174,6 +178,8 @@ public class XoClientService extends Service {
             mClient.getDownloadAgent().unregisterListener(mClientListener);
             mClient.getUploadAgent().unregisterListener(mClientListener);
             mClientListener = null;
+
+            BackgroundManager.get().unregisterListener(mClientListener);
         }
 
         // unregister client listeners
@@ -439,12 +445,12 @@ public class XoClientService extends Service {
         int unseenMessagesCount = 0;
         Map<Integer, ContactUnseenMessageHolder> relevantContactsMap = new HashMap<Integer, ContactUnseenMessageHolder>();
         for (Map.Entry<Integer, ContactUnseenMessageHolder> entry : contactsMap.entrySet()) {
-            if(!entry.getValue().getContact().isNotificationsDisabled()) {
+            if (!entry.getValue().getContact().isNotificationsDisabled()) {
                 unseenMessagesCount += entry.getValue().getUnseenMessages().size();
                 relevantContactsMap.put(entry.getKey(), entry.getValue());
             }
         }
-        if(relevantContactsMap.isEmpty()) {
+        if (relevantContactsMap.isEmpty()) {
             return;
         }
 
@@ -572,6 +578,7 @@ public class XoClientService extends Service {
             IXoMessageListener,
             IXoContactListener,
             TransferListener,
+            BackgroundManager.Listener,
             MediaScannerConnection.OnScanCompletedListener {
 
         @Override
@@ -585,6 +592,9 @@ public class XoClientService extends Service {
                         doUpdateGcm(TalkPushService.GCM_ALWAYS_UPDATE);
                     }
                 });
+            }
+            if (client.isDisconnected()) {
+                mWakeLock.release();
             }
         }
 
@@ -699,6 +709,23 @@ public class XoClientService extends Service {
         @Override
         public void onGroupMembershipChanged(TalkClientContact contact) {
             updateUnseenMessageNotification(false);
+        }
+
+        @Override
+        public void onBecameForeground(Activity activity) {}
+
+        @Override
+        public void onBecameBackground(Activity activity) {
+            LOG.debug("onBecameBackground()");
+            acquireWakeLockToComleteDisconnect();
+
+            mClient.setPresenceStatus(TalkPresence.STATUS_BACKGROUND);
+        }
+
+        private void acquireWakeLockToComleteDisconnect() {
+            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Background disconnect");
+            mWakeLock.acquire();
         }
     }
 
