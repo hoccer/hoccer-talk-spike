@@ -81,6 +81,8 @@ public class WorldwideController {
         if (mEnvironment != null) {
             mEnvironment.setTimeToLive(timeToLive);
             sendEnvironmentUpdate();
+        } else {
+            XoApplication.get().getXoClient().getServerRpc().releaseEnvironmentUpdatingParameters(TalkEnvironment.TYPE_WORLDWIDE, timeToLive, mConfiguration.getNotificationPreferenceForWorldwide());
         }
     }
 
@@ -88,6 +90,8 @@ public class WorldwideController {
         if (mEnvironment != null) {
             mEnvironment.setNotificationPreference(notificationPreference);
             sendEnvironmentUpdate();
+        } else {
+            XoApplication.get().getXoClient().getServerRpc().releaseEnvironmentUpdatingParameters(TalkEnvironment.TYPE_WORLDWIDE, mConfiguration.getTimeToLiveInWorldwide(), notificationPreference);
         }
     }
 }
