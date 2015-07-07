@@ -3,9 +3,10 @@ package com.hoccer.xo.android.activity;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -13,7 +14,6 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
-import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.*;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
@@ -32,12 +32,12 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private static final Logger LOG = Logger.getLogger(ChatsActivity.class);
 
     public static final String INTENT_EXTRA_EXIT = "exit";
+    private static final String PREFERENCE_KEY_WORLDWIDE_PAGE_SHOWN_ON_FIRST_START = "worldwide_page_shown_on_first_start";
 
     private String mPairingToken;
     private ContactsMenuItemActionProvider mContactsMenuItemActionProvider;
     private ViewPagerActivityComponent mViewPagerActivityComponent;
     private WorldwideChatListFragment mWorldwideChatListFragment;
-    private boolean mTest = true; //TODO
 
     @Override
     protected ActivityComponent[] createComponents() {
@@ -83,10 +83,25 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         registerListeners();
         mContactsMenuItemActionProvider.updateNotificationBadge();
 
-        if (mTest) {
+        selectWorldwidePageOnFirstStart();
+    }
+
+    private void selectWorldwidePageOnFirstStart() {
+        if (shouldSelectWorldwidePage()) {
             mViewPagerActivityComponent.selectFragment(mWorldwideChatListFragment);
-            mTest = false;
+
+            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean(PREFERENCE_KEY_WORLDWIDE_PAGE_SHOWN_ON_FIRST_START, true);
+            editor.apply();
         }
+    }
+
+    private boolean shouldSelectWorldwidePage() {
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean worldwidePageShown = preferences.getBoolean(PREFERENCE_KEY_WORLDWIDE_PAGE_SHOWN_ON_FIRST_START, false);
+
+        return !worldwidePageShown;
     }
 
     @Override
