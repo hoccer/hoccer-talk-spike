@@ -22,7 +22,7 @@ public class WorldWideTutorialDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(R.string.worldwide);
+        builder.setTitle(R.string.worldwide_capitalized);
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_ww_tutorial, null);
         ListView optionsListView = (ListView) view.findViewById(R.id.lv_dialog_ww_tutorial);
         optionsListView.setAdapter(new ArrayAdapter<String>(getActivity(), R.layout.simple_list_item_centered,
