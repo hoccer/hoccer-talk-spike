@@ -50,7 +50,7 @@ public class BackgroundConnectionHandler implements BackgroundManager.Listener, 
 
     @Override
     public void onBecameBackground(Activity activity) {
-        if (mPowerManager.isScreenOn()) {
+        if (!mPowerManager.isScreenOn()) {
             acquireWakeLockToCompleteDisconnect();
         }
         mClient.setPresenceStatus(TalkPresence.STATUS_BACKGROUND);
