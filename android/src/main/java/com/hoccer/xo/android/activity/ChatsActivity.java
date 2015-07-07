@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -87,7 +89,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     }
 
     private void selectWorldwidePageOnFirstStart() {
-        if (shouldSelectWorldwidePage()) {
+        if (isFirstStartOfWorldwideFeaturedVersion()) {
             mViewPagerActivityComponent.selectFragment(mWorldwideChatListFragment);
 
             final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -97,11 +99,23 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         }
     }
 
-    private boolean shouldSelectWorldwidePage() {
-        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean worldwidePageShown = preferences.getBoolean(PREFERENCE_KEY_WORLDWIDE_PAGE_SHOWN_ON_FIRST_START, false);
+    private boolean isFirstStartOfWorldwideFeaturedVersion() {
+        PackageInfo packageInfo;
+        try {
+            packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            LOG.error(e.getMessage(), e);
+            return false;
+        }
 
-        return !worldwidePageShown;
+        if (packageInfo.versionCode < 379) {
+            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            boolean worldwidePageShown = preferences.getBoolean(PREFERENCE_KEY_WORLDWIDE_PAGE_SHOWN_ON_FIRST_START, false);
+
+            return !worldwidePageShown;
+        }
+
+        return false;
     }
 
     @Override
