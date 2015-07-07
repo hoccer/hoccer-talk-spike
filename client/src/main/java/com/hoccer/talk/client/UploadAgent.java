@@ -109,8 +109,13 @@ public class UploadAgent extends TransferAgent {
         for (TalkClientUpload upload : mClient.getDatabase().findAllPendingUploads()) {
             getOrCreateUploadAction(upload);
 
+            if (upload.getState() == NEW) {
+                register(upload);
+                startUpload(upload);
+            }
+
             if (upload.getState() == REGISTERING) {
-                upload.switchState(PAUSED);
+                upload.switchState(NEW);
                 register(upload);
                 startUpload(upload);
             }
