@@ -11,7 +11,6 @@ import com.hoccer.xo.android.activity.ComposableActivity;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.artcom.hoccer.R;
-import com.hoccer.xo.android.profile.ClientProfileCreationFragment;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;

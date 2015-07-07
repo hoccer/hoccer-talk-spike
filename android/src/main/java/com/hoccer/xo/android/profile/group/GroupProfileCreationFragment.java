@@ -99,7 +99,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
             @Override
             public void onClick(View view) {
                 createGroup();
-            }
+            } 
         });
 
         mGroupNameEdit.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -154,11 +154,16 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
         mGroupMemberAdapter.registerListeners();
         mGroupMemberAdapter.loadContacts();
 
+        getXoClient().registerContactListener(this);
+
         mGroupNameEdit.requestFocus();
     }
 
     public void onPause() {
         super.onPause();
+
+        getXoClient().unregisterContactListener(this);
+
         mGroupMemberAdapter.unRegisterListeners();
     }
 
