@@ -12,11 +12,14 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import com.artcom.hoccer.R;
+import com.hoccer.xo.android.FeatureProvider;
 import com.hoccer.xo.android.WorldwideController;
+
+import static com.hoccer.xo.android.FeatureProvider.PREFERENCE_KEY_WORLDWIDE_TUTORIAL_VIEWED;
 
 public class WorldWideTutorialDialog extends DialogFragment {
 
-    public static final String PREFERENCE_KEY_WORLDWIDE_TUTORIAL_VIEWED = "worldwide_tutorial_viewed";
+    public static final String DIALOG_TAG = "worldwide_tutorial";
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {

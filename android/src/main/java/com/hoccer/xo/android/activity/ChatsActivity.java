@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -34,7 +32,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private static final Logger LOG = Logger.getLogger(ChatsActivity.class);
 
     public static final String INTENT_EXTRA_EXIT = "exit";
-    private static final String PREFERENCE_KEY_WORLDWIDE_PAGE_SHOWN_ON_FIRST_START = "worldwide_page_shown_on_first_start";
 
     private String mPairingToken;
     private ContactsMenuItemActionProvider mContactsMenuItemActionProvider;
@@ -85,37 +82,9 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         registerListeners();
         mContactsMenuItemActionProvider.updateNotificationBadge();
 
-        selectWorldwidePageOnFirstStart();
-    }
-
-    private void selectWorldwidePageOnFirstStart() {
-        if (isFirstStartOfWorldwideFeaturedVersion()) {
-            mViewPagerActivityComponent.selectFragment(mWorldwideChatListFragment);
-
-            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putBoolean(PREFERENCE_KEY_WORLDWIDE_PAGE_SHOWN_ON_FIRST_START, true);
-            editor.apply();
+        if (isRegistered()) {
+            FeatureProvider.selectWorldwidePageOnFirstStart(this, mViewPagerActivityComponent, mWorldwideChatListFragment);
         }
-    }
-
-    private boolean isFirstStartOfWorldwideFeaturedVersion() {
-        PackageInfo packageInfo;
-        try {
-            packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            LOG.error(e.getMessage(), e);
-            return false;
-        }
-
-        if (packageInfo.versionCode < 379) {
-            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            boolean worldwidePageShown = preferences.getBoolean(PREFERENCE_KEY_WORLDWIDE_PAGE_SHOWN_ON_FIRST_START, false);
-
-            return !worldwidePageShown;
-        }
-
-        return false;
     }
 
     @Override
@@ -181,10 +150,14 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     }
 
     private void showProfileIfClientIsNotRegistered() {
-        if (!getXoClient().getSelfContact().getSelf().isRegistrationConfirmed()) {
+        if (!isRegistered()) {
             Intent intent = new Intent(this, RegistrationActivity.class);
             startActivity(intent);
         }
+    }
+
+    private boolean isRegistered() {
+        return getXoClient().getSelfContact().getSelf().isRegistrationConfirmed();
     }
 
     private void registerListeners() {

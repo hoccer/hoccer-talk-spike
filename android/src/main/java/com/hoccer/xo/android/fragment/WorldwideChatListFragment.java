@@ -7,6 +7,7 @@ import android.preference.PreferenceManager;
 import android.view.View;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.xo.android.FeatureProvider;
 import com.hoccer.xo.android.WorldwideController;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.adapter.EnvironmentChatListAdapter;
@@ -17,7 +18,6 @@ import static com.hoccer.talk.model.TalkEnvironment.TYPE_WORLDWIDE;
 
 public class WorldwideChatListFragment extends EnvironmentChatListFragment {
 
-    private static final String DIALOG_TAG = "worldwide_tutorial";
     private boolean mPageSelected;
     private boolean mOnResumeHandled;
 
@@ -50,15 +50,7 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
         createAdapter();
         mListAdapter.scheduleUpdate(group);
 
-        displayWorldwideTutorialIfNeeded();
-    }
-
-    private void displayWorldwideTutorialIfNeeded() {
-        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        boolean isTutorialViewed = preferences.getBoolean(WorldWideTutorialDialog.PREFERENCE_KEY_WORLDWIDE_TUTORIAL_VIEWED, false);
-        if(!isTutorialViewed) {
-            new WorldWideTutorialDialog().show(getActivity().getFragmentManager(), DIALOG_TAG);
-        }
+        FeatureProvider.displayWorldwideTutorialIfNeeded(getActivity());
     }
 
     @Override
