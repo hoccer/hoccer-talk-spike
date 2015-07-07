@@ -456,6 +456,7 @@
 
     <string name="nearby">nearby</string>
     <string name="worldwide">worldwide</string>
+    <string name="worldwide_capitalized">Worldwide</string>
     <string name="worldwide_mode">worldwide mode</string>
     <string name="leave_after">Leave after..</string>
     <string name="group_notifications">Group notifications</string>

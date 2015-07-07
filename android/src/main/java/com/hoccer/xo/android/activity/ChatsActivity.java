@@ -29,18 +29,21 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     private String mPairingToken;
     private ContactsMenuItemActionProvider mContactsMenuItemActionProvider;
+    private ViewPagerActivityComponent mViewPagerActivityComponent;
+    private WorldwideChatListFragment mWorldwideChatListFragment;
 
     @Override
     protected ActivityComponent[] createComponents() {
         MediaPlayerActivityComponent mediaPlayerActivityComponent = new MediaPlayerActivityComponent(this);
 
-        ViewPagerActivityComponent viewPagerActivityComponent = new ViewPagerActivityComponent(this,
+        mWorldwideChatListFragment = new WorldwideChatListFragment();
+        mViewPagerActivityComponent = new ViewPagerActivityComponent(this,
                 R.id.pager,
                 new ChatListFragment(),
                 new NearbyChatListFragment(),
-                new WorldwideChatListFragment());
+                mWorldwideChatListFragment);
 
-        return new ActivityComponent[]{mediaPlayerActivityComponent, viewPagerActivityComponent};
+        return new ActivityComponent[]{mediaPlayerActivityComponent, mViewPagerActivityComponent};
     }
 
     @Override
@@ -72,6 +75,10 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         showProfileIfClientIsNotRegistered();
         registerListeners();
         mContactsMenuItemActionProvider.updateNotificationBadge();
+
+        if (isRegistered()) {
+            FeaturePromoter.selectWorldwidePageOnFirstStart(this, mViewPagerActivityComponent, mWorldwideChatListFragment);
+        }
     }
 
     @Override
@@ -136,10 +143,14 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     }
 
     private void showProfileIfClientIsNotRegistered() {
-        if (!getXoClient().getSelfContact().getSelf().isRegistrationConfirmed()) {
+        if (!isRegistered()) {
             Intent intent = new Intent(this, RegistrationActivity.class);
             startActivity(intent);
         }
+    }
+
+    private boolean isRegistered() {
+        return getXoClient().getSelfContact().getSelf().isRegistrationConfirmed();
     }
 
     private void registerListeners() {
