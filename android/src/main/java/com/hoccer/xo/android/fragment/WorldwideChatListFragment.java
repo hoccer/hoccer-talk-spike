@@ -1,10 +1,8 @@
 package com.hoccer.xo.android.fragment;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
 import com.artcom.hoccer.R;
@@ -19,17 +17,12 @@ import static com.hoccer.talk.model.TalkEnvironment.TYPE_WORLDWIDE;
 
 public class WorldwideChatListFragment extends EnvironmentChatListFragment {
 
-    private static final String DIALOG_TAG = "ww_tutorial";
+    private static final String DIALOG_TAG = "worldwide_tutorial";
     private boolean mPageSelected;
     private boolean mOnResumeHandled;
 
     public WorldwideChatListFragment() {
         mPlaceholder = new Placeholder(R.drawable.placeholder_world, R.string.placeholder_worldwide_text);
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
     }
 
     @Override
