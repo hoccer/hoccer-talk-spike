@@ -12,10 +12,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import com.artcom.hoccer.R;
-import com.hoccer.xo.android.FeatureProvider;
 import com.hoccer.xo.android.WorldwideController;
 
-import static com.hoccer.xo.android.FeatureProvider.PREFERENCE_KEY_WORLDWIDE_TUTORIAL_VIEWED;
+import static com.hoccer.xo.android.FeaturePromoter.PREFERENCE_KEY_WORLDWIDE_TUTORIAL_VIEWED;
 
 public class WorldWideTutorialDialog extends DialogFragment {
 

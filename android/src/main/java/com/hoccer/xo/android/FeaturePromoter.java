@@ -11,7 +11,7 @@ import com.hoccer.xo.android.fragment.WorldwideChatListFragment;
 
 import static com.hoccer.xo.android.dialog.WorldWideTutorialDialog.DIALOG_TAG;
 
-public class FeatureProvider {
+public class FeaturePromoter {
 
     /**
      * Select worldwide tab on first start
@@ -43,7 +43,7 @@ public class FeatureProvider {
 
     public static final String PREFERENCE_KEY_WORLDWIDE_TUTORIAL_VIEWED = "worldwide_tutorial_viewed";
 
-    public static void displayWorldwideTutorialIfNeeded(Activity activity) {
+    public static void displayWorldwideTutorialOnFirstStart(Activity activity) {
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
         boolean isTutorialViewed = preferences.getBoolean(PREFERENCE_KEY_WORLDWIDE_TUTORIAL_VIEWED, false);
         if (!isTutorialViewed) {

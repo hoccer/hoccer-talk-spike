@@ -1,17 +1,14 @@
 package com.hoccer.xo.android.fragment;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.preference.PreferenceManager;
 import android.view.View;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.xo.android.FeatureProvider;
+import com.hoccer.xo.android.FeaturePromoter;
 import com.hoccer.xo.android.WorldwideController;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.adapter.EnvironmentChatListAdapter;
-import com.hoccer.xo.android.dialog.WorldWideTutorialDialog;
 import com.hoccer.xo.android.view.Placeholder;
 
 import static com.hoccer.talk.model.TalkEnvironment.TYPE_WORLDWIDE;
@@ -50,7 +47,7 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
         createAdapter();
         mListAdapter.scheduleUpdate(group);
 
-        FeatureProvider.displayWorldwideTutorialIfNeeded(getActivity());
+        FeaturePromoter.displayWorldwideTutorialOnFirstStart(getActivity());
     }
 
     @Override

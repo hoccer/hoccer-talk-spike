@@ -3,10 +3,8 @@ package com.hoccer.xo.android.activity;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -83,7 +81,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         mContactsMenuItemActionProvider.updateNotificationBadge();
 
         if (isRegistered()) {
-            FeatureProvider.selectWorldwidePageOnFirstStart(this, mViewPagerActivityComponent, mWorldwideChatListFragment);
+            FeaturePromoter.selectWorldwidePageOnFirstStart(this, mViewPagerActivityComponent, mWorldwideChatListFragment);
         }
     }
 
