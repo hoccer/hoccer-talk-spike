@@ -127,8 +127,6 @@ public class XoClientService extends Service {
             mClient.registerContactListener(mClientListener);
             mClient.getDownloadAgent().registerListener(mClientListener);
             mClient.getUploadAgent().registerListener(mClientListener);
-
-            BackgroundManager.get().registerListener(mClientListener);
         }
 
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -178,8 +176,6 @@ public class XoClientService extends Service {
             mClient.getDownloadAgent().unregisterListener(mClientListener);
             mClient.getUploadAgent().unregisterListener(mClientListener);
             mClientListener = null;
-
-            BackgroundManager.get().unregisterListener(mClientListener);
         }
 
         // unregister client listeners
@@ -578,7 +574,6 @@ public class XoClientService extends Service {
             IXoMessageListener,
             IXoContactListener,
             TransferListener,
-            BackgroundManager.Listener,
             MediaScannerConnection.OnScanCompletedListener {
 
         @Override
@@ -592,9 +587,6 @@ public class XoClientService extends Service {
                         doUpdateGcm(TalkPushService.GCM_ALWAYS_UPDATE);
                     }
                 });
-            }
-            if (client.isDisconnected() && mWakeLock != null) {
-                mWakeLock.release();
             }
         }
 
@@ -709,23 +701,6 @@ public class XoClientService extends Service {
         @Override
         public void onGroupMembershipChanged(TalkClientContact contact) {
             updateUnseenMessageNotification(false);
-        }
-
-        @Override
-        public void onBecameForeground(Activity activity) {}
-
-        @Override
-        public void onBecameBackground(Activity activity) {
-            LOG.debug("onBecameBackground()");
-            acquireWakeLockToComleteDisconnect();
-
-            mClient.setPresenceStatus(TalkPresence.STATUS_BACKGROUND);
-        }
-
-        private void acquireWakeLockToComleteDisconnect() {
-            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-            mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Background disconnect");
-            mWakeLock.acquire();
         }
     }
 
