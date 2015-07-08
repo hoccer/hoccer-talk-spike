@@ -116,6 +116,8 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         initializeSendButton(view);
         initializeAttachmentButton(view);
         initializeAttachmentTypeViews(view);
+
+        applyCompositionIfAvailable();
     }
 
     private void initializeTextField(View view) {
@@ -172,14 +174,12 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         mTextField.addTextChangedListener(mTextFieldWatcher);
         updateAttachmentButton();
         updateSendButton();
-        applyCompositionIfAvailable();
     }
 
     private void applyCompositionIfAvailable() {
-        SharedPreferences preferences = getXoActivity().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
-
         String contactId = mContact.isClient() ? mContact.getClientId() : mContact.getGroupId();
 
+        SharedPreferences preferences = getXoActivity().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
         String text = preferences.getString(KEY_COMPOSITION_TEXT + contactId, "");
         mTextField.setText(text);
 
@@ -187,26 +187,23 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
             String string = preferences.getString(KEY_ATTACHMENTS + contactId, null);
             if (string != null) {
                 JSONArray attachmentJsonArray = new JSONArray(string);
-                if (attachmentJsonArray != null) {
-                    int length = attachmentJsonArray.length();
-                    for (int i = 0; i < length; i++) {
-                        try {
-                            SelectedContent selectedContent = stringToSelectedContent(attachmentJsonArray.getString(i));
-                            mSelectedContent.add(selectedContent);
-                        } catch (IOException e) {
-                            LOG.error(e.getMessage());
-                        } catch (ClassNotFoundException e) {
-                            LOG.error(e.getMessage());
-                        }
+                int length = attachmentJsonArray.length();
+                for (int i = 0; i < length; i++) {
+                    try {
+                        SelectedContent selectedContent = stringToSelectedContent(attachmentJsonArray.getString(i));
+                        mSelectedContent.add(selectedContent);
+                    } catch (IOException e) {
+                        LOG.error(e.getMessage());
+                    } catch (ClassNotFoundException e) {
+                        LOG.error(e.getMessage());
                     }
-                    updateAttachmentButton();
-                    updateSendButton();
                 }
+                updateAttachmentButton();
+                updateSendButton();
             }
         } catch (JSONException e) {
             LOG.error(e.getMessage());
         }
-
     }
 
     private static SelectedContent stringToSelectedContent(String selectedContentString) throws IOException, ClassNotFoundException {
