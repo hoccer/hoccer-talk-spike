@@ -8,6 +8,6 @@
         android:clickable="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        custom:cornerRadius="65"
+        custom:cornerRadius="180"
         custom:defaultAvatarImageUrl="@drawable/avatar_contact"
         tools:showIn="@layout/item_chat_client"/>
