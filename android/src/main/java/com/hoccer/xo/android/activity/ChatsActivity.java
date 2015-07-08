@@ -28,7 +28,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private static final Logger LOG = Logger.getLogger(ChatsActivity.class);
 
     public static final String INTENT_EXTRA_EXIT = "exit";
-    public static final int REGISTER_REQUEST_CODE = 99;
+    public static final int REGISTER_REQUEST_CODE = 1;
 
     private String mPairingToken;
     private ContactsMenuItemActionProvider mContactsMenuItemActionProvider;
