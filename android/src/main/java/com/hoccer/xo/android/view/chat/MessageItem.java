@@ -575,25 +575,21 @@ public class MessageItem implements AttachmentTransferListener {
 
     public boolean isDeliveryFailed() {
         if(mMessage.getDelivery().isGroupDelivery()) {
-            boolean isDeliveryFailed = true;
+            boolean isDeliveryFailed = false;
             try {
                 List<TalkDelivery> deliveriesForMessage = mDatabase.getDeliveriesForMessage(mMessage);
                 for (TalkDelivery delivery : deliveriesForMessage) {
-                    if(delivery.isDelivered()) {
-                        isDeliveryFailed = false;
+                    if(delivery.isFailure()) {
+                        isDeliveryFailed = true;
                         break;
                     }
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+                LOG.error("SQL error", e);
             }
             return isDeliveryFailed;
         } else {
-            if (mMessage.getDelivery().isFailure()) {
-                return true;
-            } else {
-                return false;
-            }
+            return mMessage.getDelivery().isFailure();
         }
     }
 }
