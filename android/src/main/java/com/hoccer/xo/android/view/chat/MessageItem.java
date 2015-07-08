@@ -23,7 +23,7 @@ import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.hoccer.xo.android.view.avatar.SimpleAvatarView;
-import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
+import com.hoccer.xo.android.view.chat.attachments.TransferControlView;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferHandler;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferListener;
 import com.hoccer.xo.android.view.chat.attachments.ChatItemType;
@@ -55,7 +55,7 @@ public class MessageItem implements AttachmentTransferListener {
     protected TextView mContentDescription;
     protected RelativeLayout mAttachmentView;
     protected LinearLayout mContentWrapper;
-    protected AttachmentTransferControlView mContentTransferControl;
+    protected TransferView mTransferView;
     protected SimpleAvatarView mSimpleAvatarView;
 
     public MessageItem(Context context, TalkClientMessage message) {
@@ -408,7 +408,7 @@ public class MessageItem implements AttachmentTransferListener {
 
         // configure transfer progress view
         mContentTransferProgress = (RelativeLayout) mAttachmentView.findViewById(R.id.rl_content_transfer_progress);
-        mContentTransferControl = (AttachmentTransferControlView) mContentTransferProgress.findViewById(R.id.atcv_content_transfer_control);
+        mTransferView = (TransferControlView) mContentTransferProgress.findViewById(R.id.atcv_content_transfer_control);
         mContentDescription = (TextView) mContentTransferProgress.findViewById(R.id.tv_content_description_text);
         XoTransfer attachment = mMessage.getAttachmentUpload();
         if (attachment == null) {
@@ -426,11 +426,11 @@ public class MessageItem implements AttachmentTransferListener {
 
             // create handler for a pending attachment transfer
             if (mAttachmentTransferHandler == null) {
-                mAttachmentTransferHandler = new AttachmentTransferHandler(mContentTransferControl, attachment, this);
+                mAttachmentTransferHandler = new AttachmentTransferHandler(mTransferView, attachment, this);
             }
 
             attachment.registerTransferListener(mAttachmentTransferHandler);
-            mContentTransferControl.setOnClickListener(new AttachmentTransferHandler(mContentTransferControl, attachment, this));
+            mTransferView.setOnClickListener(new AttachmentTransferHandler(mTransferView, attachment, this));
 
         } else {
             displayAttachment(attachment);
@@ -480,7 +480,7 @@ public class MessageItem implements AttachmentTransferListener {
      */
     protected void displayAttachment(XoTransfer transfer) {
         mContentTransferProgress.setVisibility(View.GONE);
-        mContentTransferControl.setOnClickListener(null);
+        mTransferView.setOnClickListener(null);
         mContentWrapper.setVisibility(View.VISIBLE);
         configureContextMenu(mContentWrapper);
     }

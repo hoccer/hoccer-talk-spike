@@ -78,7 +78,7 @@
     <string name="attachment_over_limit_title">Nachricht versenden?</string>
     <string name="attachment_over_limit_upload_question">Der Anhang ist %1$s groß. Willst du die Nachricht wirklich versenden?</string>
     <string name="attachment_over_limit_confirm">Senden</string>
-    <string name="attachment_on_hold_download_question">%1$s runterladen?</string>
+    <string name="attachment_on_hold_download_question">%1$s herunterladen?</string>
     <string name="attachment_encoding_error">Fehler während der Dateiverarbeitung. Anhang kann nicht versendet werden.</string>
 
     <!-- Messaging fragment -->
