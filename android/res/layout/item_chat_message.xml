@@ -37,25 +37,21 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/tv_message_time"
             android:layout_toRightOf="@id/av_message_avatar"
-            android:layout_toEndOf="@id/av_message_avatar">
+            android:layout_toEndOf="@id/av_message_avatar"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:minHeight="50dp">
 
         <TextView
                 android:id="@+id/tv_message_text"
                 android:layout_alignWithParentIfMissing="true"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:layout_marginBottom="2dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="30dp"
-                android:minHeight="50dp"
-                android:gravity="center_vertical"
-                android:paddingLeft="25dp"
+                android:layout_centerVertical="true"
                 android:textIsSelectable="true"
                 android:autoLink="all"
                 android:layout_alignParentRight="true"
-                android:text="@string/message_text"
-                style="@style/AppBaseTheme.Message.Outgoing"/>
+                android:text="@string/message_text"/>
 
         <!--<RelativeLayout-->
         <!--android:id="@+id/rl_message_attachment"-->
@@ -69,32 +65,32 @@
         <!--android:visibility="gone"-->
         <!--style="@style/AppBaseTheme.Message.Incoming"/>-->
 
-        <RelativeLayout android:id="@+id/rl_message_attachment"
+        <RelativeLayout android:id="@+id/rl_attachment_container"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:visibility="gone">
             <include layout="@layout/layout_attachment"/>
         </RelativeLayout>
 
-        <TextView
-                android:id="@+id/tv_message_contact_info"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="30dp"
-                android:textColor="@android:color/secondary_text_dark"
-                android:layout_alignParentLeft="true"
-                android:layout_below="@+id/tv_message_text"
-                android:textSize="6pt"/>
-
-        <TextView
-                android:id="@+id/tv_message_delivery_info"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="30dp"
-                android:textColor="@android:color/secondary_text_dark"
-                android:layout_below="@+id/tv_message_text"
-                android:layout_alignParentRight="true"
-                android:textSize="6pt"/>
-
     </RelativeLayout>
+
+    <TextView
+            android:id="@+id/tv_message_contact_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:textColor="@android:color/secondary_text_dark"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/rl_message_container"
+            android:textSize="6pt"/>
+
+    <TextView
+            android:id="@+id/tv_message_delivery_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="30dp"
+            android:textColor="@android:color/secondary_text_dark"
+            android:layout_below="@+id/rl_message_container"
+            android:layout_alignParentRight="true"
+            android:textSize="6pt"/>
 
 </RelativeLayout>

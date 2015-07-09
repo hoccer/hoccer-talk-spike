@@ -26,7 +26,6 @@ import com.hoccer.xo.android.view.avatar.SimpleAvatarView;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferHandler;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferListener;
 import com.hoccer.xo.android.view.chat.attachments.ChatItemType;
-import com.hoccer.xo.android.view.chat.attachments.TransferControlView;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -138,6 +137,7 @@ public class MessageItem implements AttachmentTransferListener {
         }
 
         mSimpleAvatarView = (SimpleAvatarView) view.findViewById(R.id.av_message_avatar);
+        RelativeLayout messageContainer = (RelativeLayout) view.findViewById(R.id.rl_message_container);
         TextView messageTime = (TextView) view.findViewById(R.id.tv_message_time);
         TextView messageText = (TextView) view.findViewById(R.id.tv_message_text);
         TextView messageContactInfo = (TextView) view.findViewById(R.id.tv_message_contact_info);
@@ -160,15 +160,15 @@ public class MessageItem implements AttachmentTransferListener {
             messageDeliveryInfo.setVisibility(View.GONE);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                messageText.setBackground(getIncomingBackgroundDrawable());
+                messageContainer.setBackground(getIncomingBackgroundDrawable());
             } else {
-                messageText.setBackgroundDrawable(getIncomingBackgroundDrawable());
+                messageContainer.setBackgroundDrawable(getIncomingBackgroundDrawable());
             }
 
             messageText.setTextColor(mContext.getResources().getColorStateList(R.color.message_incoming_text));
             messageText.setLinkTextColor(mContext.getResources().getColorStateList(R.color.message_incoming_text));
 
-            updateLeftAndRightMargin(messageText, 10, 30);
+            updateLeftAndRightMargin(messageContainer, 10, 30);
         } else {
             mSimpleAvatarView.setVisibility(View.GONE);
             boolean isDeliveryFailed = isDeliveryFailed();
@@ -177,15 +177,15 @@ public class MessageItem implements AttachmentTransferListener {
             messageContactInfo.setVisibility(View.GONE);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                messageText.setBackground(getOutgoingBackgroundDrawable(isDeliveryFailed));
+                messageContainer.setBackground(getOutgoingBackgroundDrawable(isDeliveryFailed));
             } else {
-                messageText.setBackgroundDrawable(getOutgoingBackgroundDrawable(isDeliveryFailed));
+                messageContainer.setBackgroundDrawable(getOutgoingBackgroundDrawable(isDeliveryFailed));
             }
 
             messageText.setTextColor(mContext.getResources().getColorStateList(R.color.message_outgoing_text));
             messageText.setLinkTextColor(mContext.getResources().getColorStateList(R.color.message_incoming_text));
 
-            updateLeftAndRightMargin(messageText, 30, 10);
+            updateLeftAndRightMargin(messageContainer, 30, 10);
         }
 
         messageTime.setText(getMessageTimestamp(mMessage));
@@ -198,13 +198,13 @@ public class MessageItem implements AttachmentTransferListener {
         view.setTag(this);
     }
 
-    private void updateLeftAndRightMargin(TextView messageText, int leftMargin, int rightMargin) {
-        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) messageText.getLayoutParams();
+    private void updateLeftAndRightMargin(RelativeLayout messageContainer, int leftMargin, int rightMargin) {
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) messageContainer.getLayoutParams();
         float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, leftMargin, mContext.getResources().getDisplayMetrics());
         float marginRight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, rightMargin, mContext.getResources().getDisplayMetrics());
         layoutParams.leftMargin = (int) marginLeft;
         layoutParams.rightMargin = (int) marginRight;
-        messageText.setLayoutParams(layoutParams);
+        messageContainer.setLayoutParams(layoutParams);
     }
 
     private void updateIncomingMessageStatus(View view) {
@@ -365,10 +365,10 @@ public class MessageItem implements AttachmentTransferListener {
     }
 
     protected void configureAttachmentView(View view) {
-        mAttachmentContainer = (RelativeLayout) view.findViewById(R.id.rl_message_attachment);
+        mAttachmentContainer = (RelativeLayout) view.findViewById(R.id.rl_attachment_container);
         mAttachmentContainer.setVisibility(View.VISIBLE);
 
-        mAttachmentContentContainer = (LinearLayout) mAttachmentContainer.findViewById(R.id.ll_content);
+        mAttachmentContentContainer = (LinearLayout) mAttachmentContainer.findViewById(R.id.ll_content_container);
 
 //        // adjust layout for incoming / outgoing attachment
 //        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mAttachmentContainer.getLayoutParams();

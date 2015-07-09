@@ -8,7 +8,7 @@
         android:layout_height="wrap_content">
 
     <LinearLayout
-            android:id="@+id/ll_content"
+            android:id="@+id/ll_content_container"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -49,7 +49,9 @@
 
             <TextView android:id="@+id/tv_transfer_state"
                       android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"/>
+                      android:layout_height="wrap_content"
+                      android:layout_gravity="center"
+                      android:textColor="@color/attachment_transfer_control"/>
 
             <TextView
                     android:id="@+id/tv_content_description_text"
