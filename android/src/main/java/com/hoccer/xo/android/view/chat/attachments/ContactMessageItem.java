@@ -40,25 +40,19 @@ public class ContactMessageItem extends MessageItem {
     }
 
     @Override
-    protected void configureViewForMessage(View view) {
-        super.configureViewForMessage(view);
-        configureAttachmentViewForMessage(view);
-    }
-
-    @Override
-    protected void displayAttachment(XoTransfer attachment) {
-        super.displayAttachment(attachment);
+    protected void displayAttachment() {
+        super.displayAttachment();
 
         // add view lazily
-        if (mContentWrapper.getChildCount() == 0) {
+        if (mAttachmentContentContainer.getChildCount() == 0) {
             LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             RelativeLayout contactLayout = (RelativeLayout) inflater.inflate(R.layout.content_vcard, null);
-            mContentWrapper.addView(contactLayout);
+            mAttachmentContentContainer.addView(contactLayout);
         }
 
-        TextView contactName = (TextView) mContentWrapper.findViewById(R.id.tv_vcard_name);
-        TextView contactDescription = (TextView) mContentWrapper.findViewById(R.id.tv_vcard_description);
-        ImageButton showButton = (ImageButton) mContentWrapper.findViewById(R.id.ib_vcard_show_button);
+        TextView contactName = (TextView) mAttachmentContentContainer.findViewById(R.id.tv_vcard_name);
+        TextView contactDescription = (TextView) mAttachmentContentContainer.findViewById(R.id.tv_vcard_description);
+        ImageButton showButton = (ImageButton) mAttachmentContentContainer.findViewById(R.id.ib_vcard_show_button);
 
         int textColor = (mMessage.isIncoming()) ? mContext.getResources().getColor(R.color.message_incoming_text) : mContext.getResources().getColor(R.color.compose_message_text);
 

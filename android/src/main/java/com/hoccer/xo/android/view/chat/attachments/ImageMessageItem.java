@@ -42,26 +42,20 @@ public class ImageMessageItem extends MessageItem {
     }
 
     @Override
-    protected void configureViewForMessage(View view) {
-        super.configureViewForMessage(view);
-        configureAttachmentViewForMessage(view);
-    }
-
-    @Override
-    protected void displayAttachment(final XoTransfer attachment) {
-        super.displayAttachment(attachment);
+    protected void displayAttachment() {
+        super.displayAttachment();
 
         // add view lazily
-        if (mContentWrapper.getChildCount() == 0) {
+        if (mAttachmentContentContainer.getChildCount() == 0) {
             LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             RelativeLayout imageLayout = (RelativeLayout) inflater.inflate(R.layout.content_image, null);
-            mContentWrapper.addView(imageLayout);
+            mAttachmentContentContainer.addView(imageLayout);
         }
 
-        mContentWrapper.setOnClickListener(new View.OnClickListener() {
+        mAttachmentContentContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openImage(attachment);
+                openImage(mAttachment);
             }
         });
 
@@ -69,35 +63,35 @@ public class ImageMessageItem extends MessageItem {
         double widthScaleFactor = mSimpleAvatarView.getVisibility() == View.VISIBLE ? WIDTH_AVATAR_SCALE_FACTOR : WIDTH_SCALE_FACTOR;
         int maxWidth = (int) (DisplayUtils.getDisplaySize(mContext).x * widthScaleFactor);
         int maxHeight = (int) (DisplayUtils.getDisplaySize(mContext).y * HEIGHT_SCALE_FACTOR);
-        double aspectRatio = attachment.getContentAspectRatio();
+        double aspectRatio = mAttachment.getContentAspectRatio();
         Point boundImageSize = ImageUtils.getImageSizeInBounds(aspectRatio, maxWidth, maxHeight);
         int width = boundImageSize.x;
         int height = boundImageSize.y;
 
-        RelativeLayout rootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
+        RelativeLayout rootView = (RelativeLayout) mAttachmentContentContainer.findViewById(R.id.rl_root);
         rootView.getLayoutParams().width = width;
         rootView.getLayoutParams().height = height;
 
         // set gravity and message bubble mask
         ImageView overlayView = (ImageView) rootView.findViewById(R.id.iv_picture_overlay);
         if (mMessage.isIncoming()) {
-            mContentWrapper.setGravity(Gravity.LEFT);
+            mAttachmentContentContainer.setGravity(Gravity.LEFT);
             overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_incoming));
         } else {
-            mContentWrapper.setGravity(Gravity.RIGHT);
+            mAttachmentContentContainer.setGravity(Gravity.RIGHT);
             overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_outgoing));
         }
 
         // we need to copy the background to rootview which will have the correct bubble size
-        rootView.setBackgroundDrawable(mAttachmentView.getBackground());
+        rootView.setBackgroundDrawable(mAttachmentContainer.getBackground());
         rootView.setPadding(0, 0, 0, 0);
-        mAttachmentView.setBackgroundDrawable(null);
-        mAttachmentView.setPadding(0, 0, 0, 0);
+        mAttachmentContainer.setBackgroundDrawable(null);
+        mAttachmentContainer.setPadding(0, 0, 0, 0);
 
         mTargetView = (ImageView) rootView.findViewById(R.id.iv_picture);
         Picasso.with(mContext).setLoggingEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
 
-        Uri imageUri = UriUtils.getAbsoluteFileUri(attachment.getFilePath());
+        Uri imageUri = UriUtils.getAbsoluteFileUri(mAttachment.getFilePath());
         Picasso.with(mContext).load(imageUri)
                 .placeholder(R.drawable.ic_img_placeholder)
                 .error(R.drawable.ic_img_placeholder)

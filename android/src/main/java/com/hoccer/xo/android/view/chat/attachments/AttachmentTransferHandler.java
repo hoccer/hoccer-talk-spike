@@ -4,6 +4,8 @@ package com.hoccer.xo.android.view.chat.attachments;
 import android.content.res.Resources;
 import android.text.format.Formatter;
 import android.view.View;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.TransferStateListener;
 import com.hoccer.talk.client.XoTransfer;
@@ -32,15 +34,20 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
     }
 
     private final AttachmentTransferListener mListener;
+    private final TextView mTransferState;
     private final TransferControlView mTransferControlView;
     private TransferAction mTransferAction = TransferAction.NONE;
 
     private final XoTransfer mTransfer;
 
-    public AttachmentTransferHandler(TransferControlView transferControlView, XoTransfer transfer, AttachmentTransferListener listener) {
+    public AttachmentTransferHandler(RelativeLayout transferContainer, XoTransfer transfer, AttachmentTransferListener listener) {
         mListener = listener;
-        mTransferControlView = transferControlView;
         mTransfer = transfer;
+
+        mTransferState = (TextView) transferContainer.findViewById(R.id.tv_transfer_state);;
+        mTransferControlView = (TransferControlView) transferContainer.findViewById(R.id.view_transfer_control);
+        mTransferControlView.setOnClickListener(this);
+
         setTransferAction(mTransfer.getContentState());
     }
 
@@ -149,8 +156,8 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
                     case DOWNLOAD_NEW:
                         mTransferControlView.setVisibility(View.VISIBLE);
                         mTransferControlView.prepareToDownload();
-                        mTransferControlView.setStateText(res.getString(R.string.transfer_state_pause));
                         mTransferControlView.pause();
+                        mTransferState.setText(res.getString(R.string.transfer_state_pause));
                         break;
 
                     case DOWNLOAD_PAUSED:
@@ -158,9 +165,9 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
                         progress = mTransfer.getTransferProgress();
                         mTransferControlView.setMax(length);
                         mTransferControlView.setProgressImmediately(progress);
-                        mTransferControlView.setStateText(res.getString(R.string.transfer_state_pause));
                         mTransferControlView.prepareToDownload();
                         mTransferControlView.pause();
+                        mTransferState.setText(res.getString(R.string.transfer_state_pause));
                         break;
 
                     case DOWNLOAD_ON_HOLD:
@@ -170,9 +177,9 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
                         mTransferControlView.setProgressImmediately(progress);
                         TalkClientDownload download = (TalkClientDownload) mTransfer;
                         fileSize = Formatter.formatShortFileSize(mTransferControlView.getContext(), download.getTransmittedContentLength());
-                        mTransferControlView.setStateText(res.getString(R.string.attachment_on_hold_download_question, fileSize));
                         mTransferControlView.prepareToDownload();
                         mTransferControlView.pause();
+                        mTransferState.setText(res.getString(R.string.attachment_on_hold_download_question, fileSize));
                         break;
 
                     case DOWNLOAD_DOWNLOADING:
@@ -182,14 +189,14 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
                             length = 360;
                         }
                         mTransferControlView.prepareToDownload();
-                        mTransferControlView.setStateText(res.getString(R.string.transfer_state_downloading));
                         mTransferControlView.setMax(length);
                         mTransferControlView.setProgressImmediately(progress);
+                        mTransferState.setText(res.getString(R.string.transfer_state_downloading));
                         break;
 
                     case DOWNLOAD_DECRYPTING:
-                        mTransferControlView.setStateText(res.getString(R.string.transfer_state_decrypting));
                         mTransferControlView.spin();
+                        mTransferState.setText(res.getString(R.string.transfer_state_decrypting));
                         break;
 
                     case DOWNLOAD_COMPLETE:
@@ -199,7 +206,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
 
                     case DOWNLOAD_FAILED:
                         mTransferControlView.setOnClickListener(null);
-                        mTransferControlView.setStateText(res.getString(R.string.transfer_state_downloading_failed));
+                        mTransferState.setText(res.getString(R.string.transfer_state_downloading_failed));
                         break;
 
                     case UPLOAD_REGISTERING:
@@ -207,15 +214,15 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
 
                     case UPLOAD_NEW:
                         mTransferControlView.prepareToUpload();
-                        mTransferControlView.setStateText(res.getString(R.string.transfer_state_encrypting));
                         mTransferControlView.setVisibility(View.VISIBLE);
+                        mTransferState.setText(res.getString(R.string.transfer_state_encrypting));
                         break;
 
                     case UPLOAD_ENCRYPTING:
                         mTransferControlView.prepareToUpload();
-                        mTransferControlView.setStateText(res.getString(R.string.transfer_state_encrypting));
                         mTransferControlView.setVisibility(View.VISIBLE);
                         mTransferControlView.spin();
+                        mTransferState.setText(res.getString(R.string.transfer_state_encrypting));
                         break;
 
                     case UPLOAD_PAUSED:
@@ -223,17 +230,17 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
                         progress = mTransfer.getTransferProgress();
                         mTransferControlView.setMax(length);
                         mTransferControlView.setProgressImmediately(progress);
-                        mTransferControlView.setStateText(res.getString(R.string.transfer_state_pause));
                         mTransferControlView.pause();
+                        mTransferState.setText(res.getString(R.string.transfer_state_pause));
                         break;
 
                     case UPLOAD_UPLOADING:
                         mTransferControlView.finishSpinningAndProceed();
-                        mTransferControlView.setStateText(res.getString(R.string.transfer_state_uploading));
                         length = mTransfer.getTransferLength();
                         progress = mTransfer.getTransferProgress();
                         mTransferControlView.setMax(length);
                         mTransferControlView.setProgressImmediately(progress);
+                        mTransferState.setText(res.getString(R.string.transfer_state_uploading));
                         break;
 
                     case UPLOAD_COMPLETE:
@@ -243,7 +250,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
 
                     case UPLOAD_FAILED:
                         mTransferControlView.setOnClickListener(null);
-                        mTransferControlView.setStateText(res.getString(R.string.transfer_state_uploading_failed));
+                        mTransferState.setText(res.getString(R.string.transfer_state_uploading_failed));
                         break;
 
                     default:

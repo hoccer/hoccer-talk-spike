@@ -74,9 +74,9 @@ public class HistoryMessagesAdapter extends ChatMessagesAdapter {
             markMessageAsSeen(chatItem.getMessage());
         }
         if (convertView == null || (convertView.getTag() != null && convertView.getTag().equals(TalkClientMessage.TYPE_SEPARATOR))) {
-            convertView = chatItem.createViewForMessage();
+            convertView = chatItem.createAndUpdateView();
         } else {
-            convertView = chatItem.recycleViewForMessage(convertView);
+            convertView = chatItem.updateView(convertView);
         }
         return convertView;
     }

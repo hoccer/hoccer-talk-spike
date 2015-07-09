@@ -40,24 +40,18 @@ public class LocationMessageItem extends MessageItem {
     }
 
     @Override
-    protected void configureViewForMessage(View view) {
-        super.configureViewForMessage(view);
-        configureAttachmentViewForMessage(view);
-    }
-
-    @Override
-    protected void displayAttachment(final XoTransfer attachment) {
-        super.displayAttachment(attachment);
+    protected void displayAttachment() {
+        super.displayAttachment();
 
         // add view lazily
-        if (mContentWrapper.getChildCount() == 0) {
+        if (mAttachmentContentContainer.getChildCount() == 0) {
             LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             RelativeLayout locationLayout = (RelativeLayout) inflater.inflate(R.layout.content_location, null);
-            mContentWrapper.addView(locationLayout);
+            mAttachmentContentContainer.addView(locationLayout);
         }
-        TextView locationTextView = (TextView) mContentWrapper.findViewById(R.id.tv_location_description);
-        TextView locationTitleView = (TextView) mContentWrapper.findViewById(R.id.tv_location_title);
-        ImageButton locationButton = (ImageButton) mContentWrapper.findViewById(R.id.ib_content_location);
+        TextView locationTextView = (TextView) mAttachmentContentContainer.findViewById(R.id.tv_location_description);
+        TextView locationTitleView = (TextView) mAttachmentContentContainer.findViewById(R.id.tv_location_title);
+        ImageButton locationButton = (ImageButton) mAttachmentContentContainer.findViewById(R.id.ib_content_location);
 
         int textColor = (mMessage.isIncoming()) ? mContext.getResources().getColor(R.color.message_incoming_text) : mContext.getResources().getColor(R.color.compose_message_text);
 
@@ -74,8 +68,8 @@ public class LocationMessageItem extends MessageItem {
         locationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (attachment.isContentAvailable()) {
-                    Uri uri = UriUtils.getAbsoluteFileUri(attachment.getFilePath());
+                if (mAttachment.isContentAvailable()) {
+                    Uri uri = UriUtils.getAbsoluteFileUri(mAttachment.getFilePath());
                     LatLng location = loadGeoJson(uri);
                     if (location != null) {
                         String label = "Received Location";

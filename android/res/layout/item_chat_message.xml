@@ -7,7 +7,6 @@
         android:layout_height="match_parent"
         android:paddingBottom="10dp">
 
-
     <TextView
             android:id="@+id/tv_message_time"
             android:text="13:23"
@@ -25,7 +24,7 @@
             android:layout_width="45dp"
             android:layout_height="45dp"
             android:layout_alignParentLeft="true"
-            android:layout_alignBottom="@+id/rl_container"
+            android:layout_alignBottom="@+id/rl_message_container"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:scaleType="centerCrop"
@@ -33,15 +32,15 @@
             custom:defaultAvatarImageUrl="@drawable/avatar_contact"/>
 
     <RelativeLayout
-            android:id="@+id/rl_container"
+            android:id="@+id/rl_message_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/tv_message_time"
-            android:layout_toRightOf="@id/av_message_avatar">
+            android:layout_toRightOf="@id/av_message_avatar"
+            android:layout_toEndOf="@id/av_message_avatar">
 
         <TextView
                 android:id="@+id/tv_message_text"
-                android:layout_below="@+id/rl_message_attachment"
                 android:layout_alignWithParentIfMissing="true"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -58,17 +57,23 @@
                 android:text="@string/message_text"
                 style="@style/AppBaseTheme.Message.Outgoing"/>
 
-        <RelativeLayout
-                android:id="@+id/rl_message_attachment"
-                android:layout_marginTop="2dp"
-                android:layout_marginBottom="2dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="30dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignWithParentIfMissing="true"
-                android:visibility="gone"
-                style="@style/AppBaseTheme.Message.Incoming"/>
+        <!--<RelativeLayout-->
+        <!--android:id="@+id/rl_message_attachment"-->
+        <!--android:layout_marginTop="2dp"-->
+        <!--android:layout_marginBottom="2dp"-->
+        <!--android:layout_marginLeft="10dp"-->
+        <!--android:layout_marginRight="30dp"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignWithParentIfMissing="true"-->
+        <!--android:visibility="gone"-->
+        <!--style="@style/AppBaseTheme.Message.Incoming"/>-->
+
+        <RelativeLayout android:id="@+id/rl_message_attachment"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:visibility="gone">
+            <include layout="@layout/layout_attachment"/>
+        </RelativeLayout>
 
         <TextView
                 android:id="@+id/tv_message_contact_info"
