@@ -121,11 +121,8 @@ public class ChatVideoItem extends MessageItem {
             overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_outgoing));
         }
 
-        // we need to copy the background to rootview which will have the correct bubble size
-        rootView.setBackgroundDrawable(mAttachmentContainer.getBackground());
-        rootView.setPadding(0, 0, 0, 0);
-        mAttachmentContainer.setBackgroundDrawable(null);
-        mAttachmentContainer.setPadding(0, 0, 0, 0);
+        mMessageContainer.setBackgroundDrawable(null);
+        mMessageContainer.setPadding(0, 0, 0, 0);
 
         // load thumbnail with picasso
         mTargetView = (ImageView) rootView.findViewById(R.id.iv_picture);

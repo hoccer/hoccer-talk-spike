@@ -15,7 +15,7 @@
             android:layout_alignParentTop="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="10dp"
+            android:textSize="10sp"
             tools:ignore="HardcodedText"/>
 
     <com.hoccer.xo.android.view.avatar.SimpleAvatarView
@@ -51,19 +51,8 @@
                 android:textIsSelectable="true"
                 android:autoLink="all"
                 android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:text="@string/message_text"/>
-
-        <!--<RelativeLayout-->
-        <!--android:id="@+id/rl_message_attachment"-->
-        <!--android:layout_marginTop="2dp"-->
-        <!--android:layout_marginBottom="2dp"-->
-        <!--android:layout_marginLeft="10dp"-->
-        <!--android:layout_marginRight="30dp"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_alignWithParentIfMissing="true"-->
-        <!--android:visibility="gone"-->
-        <!--style="@style/AppBaseTheme.Message.Incoming"/>-->
 
         <RelativeLayout android:id="@+id/rl_attachment_container"
                         android:layout_width="match_parent" android:layout_height="wrap_content"

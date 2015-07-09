@@ -45,7 +45,6 @@ public class ImageMessageItem extends MessageItem {
     protected void displayAttachment() {
         super.displayAttachment();
 
-        // add view lazily
         if (mAttachmentContentContainer.getChildCount() == 0) {
             LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             RelativeLayout imageLayout = (RelativeLayout) inflater.inflate(R.layout.content_image, null);
@@ -82,11 +81,8 @@ public class ImageMessageItem extends MessageItem {
             overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_outgoing));
         }
 
-        // we need to copy the background to rootview which will have the correct bubble size
-        rootView.setBackgroundDrawable(mAttachmentContainer.getBackground());
-        rootView.setPadding(0, 0, 0, 0);
-        mAttachmentContainer.setBackgroundDrawable(null);
-        mAttachmentContainer.setPadding(0, 0, 0, 0);
+        mMessageContainer.setBackgroundDrawable(null);
+        mMessageContainer.setPadding(0, 0, 0, 0);
 
         mTargetView = (ImageView) rootView.findViewById(R.id.iv_picture);
         Picasso.with(mContext).setLoggingEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
