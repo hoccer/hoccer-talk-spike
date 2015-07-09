@@ -113,7 +113,7 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
         if (contact.isWorldwideGroup()) {
             nameView.setText(mXoActivity.getResources().getString(R.string.all_worldwide) + " (" + (mContacts.size() - 1) + ")");
         } else if (contact.isNearbyGroup()) {
-            nameView.setText(R.string.all_nearby);
+            nameView.setText(mXoActivity.getResources().getString(R.string.all_nearby) + " (" + (mContacts.size() - 1) + ")");
         } else {
             nameView.setText(contact.getNickname());
         }
