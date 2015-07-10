@@ -20,7 +20,7 @@
             tools:ignore="HardcodedText"/>
 
     <com.hoccer.xo.android.view.avatar.SimpleAvatarView
-            android:id="@+id/av_message_avatar"
+            android:id="@+id/view_avatar_simple"
             android:padding="2dp"
             android:layout_width="45dp"
             android:layout_height="45dp"
@@ -37,7 +37,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/tv_message_time"
-            android:layout_toRightOf="@id/av_message_avatar">
+            android:layout_toRightOf="@id/view_avatar_simple">
 
         <TextView
                 android:id="@+id/tv_message_text"
