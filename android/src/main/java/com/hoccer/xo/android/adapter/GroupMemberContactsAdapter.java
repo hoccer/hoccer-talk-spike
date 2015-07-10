@@ -45,22 +45,8 @@ public class GroupMemberContactsAdapter extends ContactsAdapter {
     }
 
     @Override
-    protected int getGroupLayout() {
-        return R.layout.item_contact_group_member;
-    }
-
-    @Override
     protected int getSeparatorLayout() {
         return R.layout.item_contact_separator;
-    }
-
-    @Override
-    protected int getNearbyHistoryLayout() {
-        return -1;
-    }
-
-    @Override
-    protected void updateNearbyHistoryLayout(View v) {
     }
 
     @Override
@@ -68,16 +54,6 @@ public class GroupMemberContactsAdapter extends ContactsAdapter {
         LOG.debug("updateContact(" + contact.getClientContactId() + ")");
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
         nameView.setText(contact.getNickname());
-
-        ViewGroup avatarContainer = (ViewGroup) view.findViewById(R.id.fl_avatar);
-        avatarContainer.removeAllViews();
-        avatarContainer.addView(AvatarView.inflate(contact, mActivity), 0);
-        avatarContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mActivity.showContactProfile(contact);
-            }
-        });
 
         TextView statusView = (TextView) view.findViewById(R.id.status);
         statusView.setText(getMemberStatus(contact, view.getResources()));

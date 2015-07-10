@@ -6,12 +6,13 @@
         android:layout_height="wrap_content"
         android:layout_margin="15dp">
 
-    <FrameLayout
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:id="@+id/fl_avatar"
-            android:layout_centerVertical="true"
-            style="@style/AppBaseTheme.Contact.Avatar"/>
+    <RelativeLayout android:id="@+id/avatar_container"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    style="@style/AppBaseTheme.Contact.Avatar">
+        <ViewStub android:id="@+id/vs_avatar" android:layout_width="match_parent"
+                  android:layout_height="match_parent"/>
+    </RelativeLayout>
 
     <TextView
             android:id="@+id/contact_name"
@@ -23,7 +24,7 @@
             android:maxLines="1"
             android:singleLine="true"
             android:layout_marginRight="85dp"
-            android:layout_toRightOf="@+id/fl_avatar"
+            android:layout_toRightOf="@+id/avatar_container"
             android:layout_centerVertical="true"
             style="@style/AppBaseTheme.Contact.Name"/>
 
