@@ -39,12 +39,15 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
     private final Set<IContactSelectionListener> mContactSelectionListeners = new HashSet<IContactSelectionListener>();
     private final Context mContext;
 
+    private Filter mFilter;
+
     public interface IContactSelectionListener {
         public void onContactSelectionChanged(int count);
     }
 
-    public ContactSelectionAdapter(Context context) {
+    public ContactSelectionAdapter(Context context, Filter filter) {
         mContext = context;
+        mFilter = filter;
         setContacts(loadContacts());
     }
 
@@ -165,7 +168,7 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
         try {
             XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
             for (TalkClientContact contact : database.findAllContactsExceptSelfOrderedByRecentMessage()) {
-                if (shouldShow(contact)) {
+                if (mFilter.shouldShow(contact)) {
                     contacts.add(contact);
                 }
             }
@@ -184,30 +187,6 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
         newSelectedContacts.addAll(CollectionUtils.intersection(mContacts, mSelectedContacts));
         mSelectedContacts.clear();
         mSelectedContacts.addAll(newSelectedContacts);
-    }
-
-    private static boolean shouldShow(TalkClientContact contact) {
-        boolean shouldShow = false;
-        if (contact.isGroup()) {
-            if (contact.isGroupInvolved() && contact.isGroupExisting() && groupHasOtherContacts(contact.getGroupId())) {
-                shouldShow = true;
-            }
-        } else if (contact.isClient()) {
-            if (contact.isClientFriend() || contact.isInEnvironment() || (contact.isClientRelated() && contact.getClientRelationship().isBlocked())) {
-                shouldShow = true;
-            }
-        }
-
-        return shouldShow;
-    }
-
-    private static boolean groupHasOtherContacts(String groupId) {
-        try {
-            return XoApplication.get().getXoClient().getDatabase().findMembershipsInGroupByState(groupId, TalkGroupMembership.STATE_JOINED).size() > 1;
-        } catch (SQLException e) {
-            LOG.error(e);
-        }
-        return false;
     }
 
     @Override
@@ -260,5 +239,9 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
 
     private class ViewHolder {
         public CheckedTextView checkedNameTextView;
+    }
+
+    public interface Filter {
+        public boolean shouldShow(TalkClientContact contact);
     }
 }

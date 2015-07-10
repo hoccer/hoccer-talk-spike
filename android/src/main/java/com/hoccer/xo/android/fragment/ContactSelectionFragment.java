@@ -2,7 +2,9 @@ package com.hoccer.xo.android.fragment;
 
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.view.*;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AbsListView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -15,14 +17,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class ContactSelectionFragment extends ListFragment{
+public class ContactSelectionFragment extends ListFragment {
 
     private static final Logger LOG = Logger.getLogger(ContactSelectionFragment.class);
 
     public static final String EXTRA_SELECTED_CONTACT_IDS = "com.hoccer.xo.android.extra.SELECTED_CONTACT_IDS";
 
     private ContactSelectionAdapter mContactSelectionAdapter;
-    private Menu mMenu;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -44,7 +45,8 @@ public class ContactSelectionFragment extends ListFragment{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mContactSelectionAdapter = new ContactSelectionAdapter(getActivity());
+
+        mContactSelectionAdapter = new ContactSelectionAdapter(getActivity(), (ContactSelectionAdapter.Filter) getActivity());
         mContactSelectionAdapter.addContactSelectionListener((ContactSelectionAdapter.IContactSelectionListener) getActivity());
         mContactSelectionAdapter.registerListeners();
         updateSelectedContacts();
