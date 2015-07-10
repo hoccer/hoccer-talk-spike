@@ -166,9 +166,9 @@ public class ChatMessagesAdapter extends MessagesAdapter implements IXoMessageLi
         }
 
         if (convertView == null) {
-            convertView = chatItem.createViewForMessage();
+            convertView = chatItem.createAndUpdateView();
         } else {
-            convertView = chatItem.recycleViewForMessage(convertView);
+            convertView = chatItem.updateView(convertView);
         }
 
         return convertView;

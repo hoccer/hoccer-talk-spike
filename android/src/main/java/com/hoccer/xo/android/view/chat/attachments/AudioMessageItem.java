@@ -34,22 +34,14 @@ public class AudioMessageItem extends MessageItem implements MediaPlayer.Listene
     }
 
     @Override
-    protected void configureViewForMessage(View view) {
-        super.configureViewForMessage(view);
-        configureAttachmentViewForMessage(view);
-    }
-
-    @Override
-    protected void displayAttachment(final XoTransfer transfer) {
-        super.displayAttachment(transfer);
-
+    protected void displayAttachment() {
         // add view lazily
-        if (mContentWrapper.getChildCount() == 0) {
+        if (mAttachmentContentContainer.getChildCount() == 0) {
             LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
             View v = inflater.inflate(R.layout.content_audio, null);
-            mContentWrapper.addView(v);
+            mAttachmentContentContainer.addView(v);
         }
-        LinearLayout audioLayout = (LinearLayout) mContentWrapper.getChildAt(0);
+        LinearLayout audioLayout = (LinearLayout) mAttachmentContentContainer.getChildAt(0);
         TextView captionTextView = (TextView) audioLayout.findViewById(R.id.tv_content_audio_caption);
         TextView nameTextView = (TextView) audioLayout.findViewById(R.id.tv_content_audio_name);
         mPlayPauseButton = (ImageButton) audioLayout.findViewById(R.id.ib_content_audio_play);
@@ -63,7 +55,7 @@ public class AudioMessageItem extends MessageItem implements MediaPlayer.Listene
             nameTextView.setTextColor(mContext.getResources().getColor(R.color.compose_message_text));
         }
 
-        MediaMetaData metaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(transfer.getFilePath()).getPath());
+        MediaMetaData metaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(mAttachment.getFilePath()).getPath());
         if (metaData.getArtist().isEmpty()) {
             nameTextView.setText(metaData.getTitleOrFilename());
         } else {

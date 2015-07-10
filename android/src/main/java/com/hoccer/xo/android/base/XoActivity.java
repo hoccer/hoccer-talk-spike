@@ -43,7 +43,7 @@ import com.hoccer.xo.android.fragment.DeviceContactsInvitationFragment;
 import com.hoccer.xo.android.profile.client.ClientProfileActivity;
 import com.hoccer.xo.android.profile.group.GroupProfileActivity;
 import com.hoccer.xo.android.view.chat.MessageItem;
-import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
+import com.hoccer.xo.android.view.chat.attachments.TransferControlView;
 import net.hockeyapp.android.CrashManager;
 import net.hockeyapp.android.CrashManagerListener;
 import net.hockeyapp.android.Strings;
@@ -83,7 +83,7 @@ public abstract class XoActivity extends FragmentActivity {
 
     boolean mUpEnabled;
 
-    private AttachmentTransferControlView mSpinner;
+    private TransferControlView mSpinner;
     private Handler mDialogDismisser;
     private Dialog mDialog;
     private XoAlertListener mAlertListener;
@@ -291,7 +291,7 @@ public abstract class XoActivity extends FragmentActivity {
     public void createDialog() {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.waiting_dialog, null);
-        mSpinner = (AttachmentTransferControlView) view.findViewById(R.id.content_progress);
+        mSpinner = (TransferControlView) view.findViewById(R.id.content_progress);
 
         mDialog = new Dialog(this);
         mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
