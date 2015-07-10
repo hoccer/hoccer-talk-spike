@@ -71,30 +71,14 @@ public class ContactSearchResultAdapter extends ContactsAdapter {
     }
 
     @Override
-    protected int getGroupLayout() {
-        return R.layout.item_contact_search_result;
-    }
-
-    @Override
     protected int getSeparatorLayout() {
         return 0;
     }
 
     @Override
-    protected int getNearbyHistoryLayout() {
-        return 0;
-    }
-
-    @Override
-    protected void updateNearbyHistoryLayout(View v) {}
-
-    @Override
     protected void updateContact(View view, TalkClientContact contact) {
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
         nameView.setText(getHighlightedSearchResult(contact.getName()));
-
-        PresenceAvatarView avatarView = (PresenceAvatarView) view.findViewById(R.id.avatar);
-        avatarView.setContact(contact);
     }
 
     private Spannable getHighlightedSearchResult(String text) {

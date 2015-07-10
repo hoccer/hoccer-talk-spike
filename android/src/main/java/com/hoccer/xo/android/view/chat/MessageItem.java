@@ -139,7 +139,7 @@ public class MessageItem implements AttachmentTransferListener {
             item.detachView();
         }
 
-        mSimpleAvatarView = (SimpleAvatarView) view.findViewById(R.id.av_message_avatar);
+        mSimpleAvatarView = (SimpleAvatarView) view.findViewById(R.id.view_avatar_simple);
         TextView messageTime = (TextView) view.findViewById(R.id.tv_message_time);
         TextView messageText = (TextView) view.findViewById(R.id.tv_message_text);
         TextView messageContactInfo = (TextView) view.findViewById(R.id.tv_message_contact_info);
