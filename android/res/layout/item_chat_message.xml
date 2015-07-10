@@ -29,7 +29,7 @@
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:scaleType="centerCrop"
-            custom:cornerRadius="60"
+            custom:cornerRadius="180"
             custom:defaultAvatarImageUrl="@drawable/avatar_contact"/>
 
     <RelativeLayout
