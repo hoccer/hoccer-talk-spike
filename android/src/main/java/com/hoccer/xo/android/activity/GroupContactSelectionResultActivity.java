@@ -16,7 +16,7 @@ public class GroupContactSelectionResultActivity extends ContactSelectionResultA
     public boolean shouldShow(TalkClientContact contact) {
         boolean shouldShow = false;
         if (contact.isClient()) {
-            if (contact.isClientFriend() || contact.isInEnvironment() || (contact.isClientRelated() && contact.getClientRelationship().isBlocked())) {
+            if (contact.isClientFriend() || contact.isInEnvironment() || contact.isKept()) {
                 shouldShow = true;
             }
         }
