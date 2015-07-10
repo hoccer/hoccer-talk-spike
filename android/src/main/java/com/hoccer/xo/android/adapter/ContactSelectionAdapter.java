@@ -24,10 +24,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ContactSelectionAdapter extends BaseAdapter implements IXoContactListener {
 
@@ -170,6 +167,11 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
             for (TalkClientContact contact : database.findAllContactsExceptSelfOrderedByRecentMessage()) {
                 if (mFilter.shouldShow(contact)) {
                     contacts.add(contact);
+                }
+            }
+            for (TalkClientContact selectedContact : mSelectedContacts) {
+                if (!contacts.contains(selectedContact)) {
+                    contacts.add(selectedContact);
                 }
             }
         } catch (SQLException e) {
