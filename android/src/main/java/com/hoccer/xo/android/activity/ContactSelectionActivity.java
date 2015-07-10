@@ -2,6 +2,7 @@ package com.hoccer.xo.android.activity;
 
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -11,9 +12,10 @@ import com.hoccer.xo.android.fragment.ContactSelectionFragment;
 
 import java.util.List;
 
-public abstract class ContactSelectionActivity extends XoActivity {
+public abstract class ContactSelectionActivity extends XoActivity implements ContactSelectionAdapter.IContactSelectionListener {
 
     private ContactSelectionFragment mContactSelectionFragment;
+    protected Menu mMenu;
 
     @Override
     protected int getLayoutResource() {
@@ -45,7 +47,7 @@ public abstract class ContactSelectionActivity extends XoActivity {
         super.onCreateOptionsMenu(menu);
         menu.findItem(R.id.menu_my_profile).setVisible(false);
         menu.findItem(R.id.menu_settings).setVisible(false);
-
+        mMenu = menu;
         return true;
     }
 
@@ -62,5 +64,14 @@ public abstract class ContactSelectionActivity extends XoActivity {
 
     private List<TalkClientContact> getSelectedContactsFromFragment() {
         return ((ContactSelectionAdapter)mContactSelectionFragment.getListAdapter()).getSelectedContacts();
+    }
+
+    @Override
+    public void onContactSelectionChanged(int count) {
+        if (count == 0) {
+            mMenu.findItem(R.id.menu_contact_selection_ok).setVisible(false);
+        } else {
+            mMenu.findItem(R.id.menu_contact_selection_ok).setVisible(true);
+        }
     }
 }

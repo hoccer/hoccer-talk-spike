@@ -173,8 +173,12 @@
 
         <activity
                 android:name="com.hoccer.xo.android.activity.ContactSelectionResultActivity"
-                android:label="@string/select_recipients"
-                android:screenOrientation="portrait">
+                android:label="@string/select_recipients">
+        </activity>
+
+        <activity
+                android:name="com.hoccer.xo.android.activity.GroupContactSelectionResultActivity"
+                android:label="@string/manage_group_members">
         </activity>
 
         <activity

@@ -34,13 +34,13 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
     static final Logger LOG = Logger.getLogger(ContactSelectionAdapter.class);
 
     private final List<TalkClientContact> mContacts = new ArrayList<TalkClientContact>();
-    private final List<TalkClientContact> mSelectedContacts = new ArrayList<TalkClientContact>();
+    private List<TalkClientContact> mSelectedContacts = new ArrayList<TalkClientContact>();
 
     private final Set<IContactSelectionListener> mContactSelectionListeners = new HashSet<IContactSelectionListener>();
     private final Context mContext;
 
     public interface IContactSelectionListener {
-        public void onContactSelectionChanged();
+        public void onContactSelectionChanged(int count);
     }
 
     public ContactSelectionAdapter(Context context) {
@@ -104,7 +104,7 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
                 viewHolder.checkedNameTextView.setChecked(!viewHolder.checkedNameTextView.isChecked());
 
                 for (IContactSelectionListener listener : mContactSelectionListeners) {
-                    listener.onContactSelectionChanged();
+                    listener.onContactSelectionChanged(mSelectedContacts.size());
                 }
             }
         });
@@ -227,6 +227,10 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
         refreshList();
     }
 
+    public void setSelectedContacts(List<TalkClientContact> selectedContactIds) {
+        mSelectedContacts = selectedContactIds;
+    }
+
     public List<TalkClientContact> getSelectedContacts() {
         return mSelectedContacts;
     }
@@ -239,7 +243,7 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
             public void run() {
                 setContacts(contacts);
                 for (IContactSelectionListener listener : mContactSelectionListeners) {
-                    listener.onContactSelectionChanged();
+                    listener.onContactSelectionChanged(mSelectedContacts.size());
                 }
                 notifyDataSetChanged();
             }

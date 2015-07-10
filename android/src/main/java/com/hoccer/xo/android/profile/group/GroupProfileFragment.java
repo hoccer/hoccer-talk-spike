@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.profile.group;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -20,20 +21,25 @@ import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.ChatActivity;
+import com.hoccer.xo.android.activity.ContactSelectionResultActivity;
+import com.hoccer.xo.android.activity.GroupContactSelectionResultActivity;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupMemberContactsAdapter;
-import com.hoccer.xo.android.dialog.GroupManageDialog;
+import com.hoccer.xo.android.fragment.ContactSelectionFragment;
 import com.hoccer.xo.android.profile.ProfileFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.UriUtils;
 import com.squareup.picasso.Picasso;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.hoccer.talk.client.model.TalkClientContact.transformToContactIds;
 
 
 /**
@@ -43,6 +49,8 @@ public class GroupProfileFragment extends ProfileFragment
         implements IXoContactListener, ActionMode.Callback, AdapterView.OnItemClickListener {
 
     private static final Logger LOG = Logger.getLogger(GroupProfileFragment.class);
+
+    public static final int SELECT_CONTACT_REQUEST = 1;
 
     private boolean mBackPressed;
     public static final String ARG_START_IN_ACTION_MODE = "ARG_START_IN_ACTION_MODE";
@@ -66,9 +74,6 @@ public class GroupProfileFragment extends ProfileFragment
     @Nullable
     private ContactsAdapter mGroupMemberAdapter;
 
-    private Menu mOptionsMenu;
-
-    private final List<TalkClientContact> mCurrentClientsInGroup = new ArrayList<TalkClientContact>();
     private final ArrayList<TalkClientContact> mContactsToDisinviteAsFriend = new ArrayList<TalkClientContact>();
     private ArrayList<TalkClientContact> mContactsToInviteAsFriend = new ArrayList<TalkClientContact>();
 
@@ -210,7 +215,6 @@ public class GroupProfileFragment extends ProfileFragment
 
         menuInflater.inflate(R.menu.fragment_group_profile, menu);
 
-        mOptionsMenu = menu;
         configureOptionsMenuItems(menu);
     }
 
@@ -479,12 +483,36 @@ public class GroupProfileFragment extends ProfileFragment
     }
 
     private void manageGroupMembers() {
-        if (mCurrentClientsInGroup.isEmpty()) {
-            mCurrentClientsInGroup.addAll(mGroupMemberAdapter.getContacts());
+        Intent intent = new Intent(getActivity(), GroupContactSelectionResultActivity.class);
+        intent.putIntegerArrayListExtra(ContactSelectionFragment.EXTRA_SELECTED_CONTACT_IDS, transformToContactIds(mGroupMemberAdapter.getContacts()));
+        startActivityForResult(intent, SELECT_CONTACT_REQUEST);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK && requestCode == SELECT_CONTACT_REQUEST) {
+            List<Integer> selectedContactIds = data.getIntegerArrayListExtra(ContactSelectionFragment.EXTRA_SELECTED_CONTACT_IDS);
+            try {
+                updateMemberships(selectedContactIds);
+            } catch (SQLException e) {
+                LOG.error("SQL error", e);
+            }
         }
-        GroupManageDialog dialog = new GroupManageDialog(mContact, mCurrentClientsInGroup);
-        dialog.setTargetFragment(this, 0);
-        dialog.show(getActivity().getSupportFragmentManager(), "GroupManageDialog");
+    }
+
+    private void updateMemberships(List<Integer> selectedContactIds) throws SQLException {
+        List<Integer> contactIdsToKick = (List<Integer>) CollectionUtils.subtract(transformToContactIds(mGroupMemberAdapter.getContacts()), selectedContactIds);
+        List<Integer> contactIdsToInvite = (List<Integer>) CollectionUtils.subtract(selectedContactIds, transformToContactIds(mGroupMemberAdapter.getContacts()));
+
+        for (int contactId : contactIdsToInvite) {
+            TalkClientContact contact = XoApplication.get().getXoClient().getDatabase().findContactById(contactId);
+            XoApplication.get().getXoClient().inviteClientToGroup(mContact.getGroupId(), contact.getClientId());
+        }
+        for (int contactId : contactIdsToKick) {
+            TalkClientContact contact = XoApplication.get().getXoClient().getDatabase().findContactById(contactId);
+            XoApplication.get().getXoClient().kickClientFromGroup(mContact.getGroupId(), contact.getClientId());
+        }
     }
 
     private boolean isCurrentGroup(TalkClientContact contact) {

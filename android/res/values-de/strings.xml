@@ -180,7 +180,7 @@
     <string name="dialog_delete_account_ok">Löschen</string>
 
     <!-- Group manage selection dialog -->
-    <string name="dialog_manage_group_title">Gruppenmitglieder verwalten</string>
+    <string name="manage_group_members">Gruppenmitglieder verwalten</string>
 
     <!-- Location selection activity -->
     <string name="selectlocation_title">Standort auswählen</string>

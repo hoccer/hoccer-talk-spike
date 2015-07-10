@@ -1,15 +1,11 @@
 package com.hoccer.xo.android.adapter;
 
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewStub;
 import android.widget.CheckedTextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.view.avatar.AvatarView;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;

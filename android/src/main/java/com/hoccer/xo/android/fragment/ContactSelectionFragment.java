@@ -5,10 +5,19 @@ import android.support.v4.app.ListFragment;
 import android.view.*;
 import android.widget.AbsListView;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.adapter.ContactSelectionAdapter;
+import org.apache.log4j.Logger;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 
-public class ContactSelectionFragment extends ListFragment implements ContactSelectionAdapter.IContactSelectionListener{
+public class ContactSelectionFragment extends ListFragment{
+
+    private static final Logger LOG = Logger.getLogger(ContactSelectionFragment.class);
 
     public static final String EXTRA_SELECTED_CONTACT_IDS = "com.hoccer.xo.android.extra.SELECTED_CONTACT_IDS";
 
@@ -36,32 +45,37 @@ public class ContactSelectionFragment extends ListFragment implements ContactSel
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContactSelectionAdapter = new ContactSelectionAdapter(getActivity());
-        mContactSelectionAdapter.addContactSelectionListener(this);
+        mContactSelectionAdapter.addContactSelectionListener((ContactSelectionAdapter.IContactSelectionListener) getActivity());
         mContactSelectionAdapter.registerListeners();
+        updateSelectedContacts();
+
         setListAdapter(mContactSelectionAdapter);
 
         setHasOptionsMenu(true);
+    }
+
+    private void updateSelectedContacts() {
+        List<TalkClientContact> contacts = new ArrayList<TalkClientContact>();
+        List<Integer> contactIds = getActivity().getIntent().getIntegerArrayListExtra(EXTRA_SELECTED_CONTACT_IDS);
+        if (contactIds == null) {
+            return;
+        }
+
+        for (Integer contactId : contactIds) {
+            try {
+                TalkClientContact contact = XoApplication.get().getXoClient().getDatabase().findContactById(contactId);
+                contacts.add(contact);
+            } catch (SQLException e) {
+                LOG.error("SQL error", e);
+            }
+        }
+        mContactSelectionAdapter.setSelectedContacts(contacts);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         mContactSelectionAdapter.unregisterListeners();
-        mContactSelectionAdapter.removeContactSelectionListener(this);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        mMenu = menu;
-    }
-
-    @Override
-    public void onContactSelectionChanged() {
-        if (mContactSelectionAdapter.getSelectedContacts().size() == 0) {
-            mMenu.findItem(R.id.menu_contact_selection_ok).setVisible(false);
-        } else {
-            mMenu.findItem(R.id.menu_contact_selection_ok).setVisible(true);
-        }
+        mContactSelectionAdapter.removeContactSelectionListener((ContactSelectionAdapter.IContactSelectionListener) getActivity());
     }
 }
