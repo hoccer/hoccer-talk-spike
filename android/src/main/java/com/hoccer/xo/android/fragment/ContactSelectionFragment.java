@@ -27,13 +27,18 @@ public class ContactSelectionFragment extends ListFragment implements ContactSel
         setupListView();
     }
 
+    private void setupListView() {
+        getListView().setItemsCanFocus(false);
+        getListView().setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContactSelectionAdapter = new ContactSelectionAdapter();
-        setListAdapter(mContactSelectionAdapter);
         mContactSelectionAdapter.addContactSelectionListener(this);
         mContactSelectionAdapter.registerListeners();
+        setListAdapter(mContactSelectionAdapter);
 
         setHasOptionsMenu(true);
     }
@@ -43,11 +48,6 @@ public class ContactSelectionFragment extends ListFragment implements ContactSel
         super.onDestroy();
         mContactSelectionAdapter.unregisterListeners();
         mContactSelectionAdapter.removeContactSelectionListener(this);
-    }
-
-    private void setupListView() {
-        getListView().setItemsCanFocus(false);
-        getListView().setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
     }
 
     @Override
