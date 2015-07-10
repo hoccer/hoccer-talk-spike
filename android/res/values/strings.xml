@@ -190,8 +190,7 @@
     <string name="button_delete_account_title">Delete Account on Server</string>
     <string name="dialog_delete_account_ok">Delete</string>
 
-    <!-- Group manage selection dialog -->
-    <string name="dialog_manage_group_title">Manage Members</string>
+    <string name="manage_group_members">Manage group members</string>
 
     <!-- Location selection activity -->
     <string name="selectlocation_title">Select location</string>
@@ -454,8 +453,6 @@
 
     <string name="progress_cancelling">Cancelling..</string>
 
-    <string name="nearby">nearby</string>
-    <string name="worldwide">worldwide</string>
     <string name="worldwide_capitalized">Worldwide</string>
     <string name="worldwide_mode">worldwide mode</string>
     <string name="leave_after">Leave after..</string>

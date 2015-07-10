@@ -4,11 +4,12 @@ import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.model.*;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.Transformer;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.Set;
+import java.util.*;
 
 /**
  * These represent a target of communication
@@ -532,5 +533,18 @@ public class TalkClientContact implements Serializable {
     @Override
     public int hashCode() {
         return clientContactId;
+    }
+
+    public static ArrayList<Integer> transformToContactIds(List<TalkClientContact> selectedContacts) {
+        ArrayList<Integer> selectedContactIds = new ArrayList<Integer>();
+        Collection<Integer> collection = CollectionUtils.collect(selectedContacts, new Transformer<TalkClientContact, Integer>() {
+            @Override
+            public Integer transform(TalkClientContact contact) {
+                return contact.getClientContactId();
+            }
+        });
+
+        selectedContactIds.addAll(collection);
+        return selectedContactIds;
     }
 }

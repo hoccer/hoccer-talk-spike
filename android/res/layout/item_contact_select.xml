@@ -5,10 +5,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-    <include android:layout_width="45dp"
-             android:layout_height="45dp"
-             style="@style/AppBaseTheme.Group.Members.MemberAvatar"
-             layout="@layout/view_avatar_presence"/>
+    <RelativeLayout android:id="@+id/avatar_container"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    style="@style/AppBaseTheme.Group.Members.MemberAvatar">
+        <ViewStub android:id="@+id/vs_avatar" android:layout_width="match_parent"
+                  android:layout_height="match_parent"/>
+    </RelativeLayout>
 
     <CheckedTextView
             android:id="@+id/contact_name_checked"
