@@ -124,7 +124,7 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
         List<TalkClientContact> contacts = new ArrayList<TalkClientContact>();
         try {
             XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
-            for (TalkClientContact contact : database.findAllContacts()) {
+            for (TalkClientContact contact : database.findAllContactsExceptSelfOrderedByRecentMessage()) {
                 if (shouldShow(contact)) {
                     contacts.add(contact);
                 }
