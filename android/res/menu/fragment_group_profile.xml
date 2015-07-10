@@ -1,5 +1,4 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-
     <item
             android:id="@+id/menu_group_profile_leave"
             android:title="@string/menu_group_profile_leave"
@@ -22,4 +21,10 @@
           android:visible="false"
           android:showAsAction="ifRoom"
           android:orderInCategory="260" />
+
+    <item android:id="@+id/menu_group_profile_request_friends"
+          android:title="@string/menu_group_remove"
+          android:visible="false"
+          android:showAsAction="never"
+          android:orderInCategory="1000" />
 </menu>
