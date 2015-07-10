@@ -35,7 +35,7 @@ public class ContactSelectionFragment extends ListFragment implements ContactSel
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mContactSelectionAdapter = new ContactSelectionAdapter();
+        mContactSelectionAdapter = new ContactSelectionAdapter(getActivity());
         mContactSelectionAdapter.addContactSelectionListener(this);
         mContactSelectionAdapter.registerListeners();
         setListAdapter(mContactSelectionAdapter);

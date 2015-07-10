@@ -1,10 +1,13 @@
 package com.hoccer.xo.android.adapter;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.widget.BaseAdapter;
 import android.widget.CheckedTextView;
 import com.artcom.hoccer.R;
@@ -13,6 +16,8 @@ import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.profile.client.ClientProfileActivity;
+import com.hoccer.xo.android.profile.group.GroupProfileActivity;
 import com.hoccer.xo.android.view.avatar.AvatarView;
 import com.hoccer.xo.android.view.avatar.PresenceAvatarView;
 import org.apache.commons.collections4.CollectionUtils;
@@ -32,12 +37,14 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
     private final List<TalkClientContact> mSelectedContacts = new ArrayList<TalkClientContact>();
 
     private final Set<IContactSelectionListener> mContactSelectionListeners = new HashSet<IContactSelectionListener>();
+    private final Context mContext;
 
     public interface IContactSelectionListener {
         public void onContactSelectionChanged();
     }
 
-    public ContactSelectionAdapter() {
+    public ContactSelectionAdapter(Context context) {
+        mContext = context;
         setContacts(loadContacts());
     }
 
@@ -60,20 +67,20 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
     public View getView(int position, View convertView, ViewGroup parent) {
         final ViewHolder viewHolder;
 
+        final TalkClientContact contact = mContacts.get(position);
+
         if (convertView == null) {
             convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_contact_select, parent, false);
 
             viewHolder = new ViewHolder();
-            viewHolder.avatarView = (PresenceAvatarView) (convertView.findViewById(R.id.avatar));
+
+            updateAvatarView(convertView, contact);
+
             viewHolder.checkedNameTextView = (CheckedTextView) (convertView.findViewById(R.id.contact_name_checked));
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-
-        final TalkClientContact contact = mContacts.get(position);
-        viewHolder.contact = contact;
-        viewHolder.avatarView.setContact(contact);
 
         if (contact.isNearbyGroup()) {
             viewHolder.checkedNameTextView.setText(R.string.all_nearby);
@@ -81,13 +88,6 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
             viewHolder.checkedNameTextView.setText(R.string.all_worldwide);
         } else {
             viewHolder.checkedNameTextView.setText(contact.getNickname());
-            if (!contact.isFriendOrBlocked()) {
-                if (contact.isNearby()) {
-                    viewHolder.checkedNameTextView.setText(contact.getNickname() + " (" + parent.getContext().getString(R.string.nearby) + ")");
-                } else if (contact.isWorldwide()) {
-                    viewHolder.checkedNameTextView.setText(contact.getNickname() + " (" + parent.getContext().getString(R.string.worldwide) + ")");
-                }
-            }
         }
 
         viewHolder.checkedNameTextView.setChecked(mSelectedContacts.contains(contact));
@@ -96,10 +96,10 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
             @Override
             public void onClick(View v) {
                 ViewHolder viewHolder = (ViewHolder) v.getTag();
-                if (mSelectedContacts.contains(viewHolder.contact)) {
-                    mSelectedContacts.remove(viewHolder.contact);
+                if (mSelectedContacts.contains(contact)) {
+                    mSelectedContacts.remove(contact);
                 } else {
-                    mSelectedContacts.add(viewHolder.contact);
+                    mSelectedContacts.add(contact);
                 }
                 viewHolder.checkedNameTextView.setChecked(!viewHolder.checkedNameTextView.isChecked());
 
@@ -110,6 +110,46 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
         });
 
         return convertView;
+    }
+
+    private void updateAvatarView(View convertView, final TalkClientContact contact) {
+        AvatarView avatarView = (AvatarView) convertView.findViewById(R.id.avatar);
+        if (avatarView == null) {
+            ViewStub avatarStub = (ViewStub) convertView.findViewById(R.id.vs_avatar);
+
+            int layoutId = AvatarView.getLayoutResource(contact);
+            avatarStub.setLayoutResource(layoutId);
+
+            avatarView = (AvatarView) avatarStub.inflate();
+            avatarView.setTag(layoutId);
+        } else if ((Integer) avatarView.getTag() != AvatarView.getLayoutResource(contact)) {
+            ViewGroup viewGroup = (ViewGroup) convertView.findViewById(R.id.avatar_container);
+            viewGroup.removeView(avatarView);
+
+            int layoutId = AvatarView.getLayoutResource(contact);
+            avatarView = (AvatarView) LayoutInflater.from(convertView.getContext()).inflate(layoutId, viewGroup, false);
+            viewGroup.addView(avatarView);
+
+            avatarView.setTag(layoutId);
+        }
+
+        avatarView.setContact(contact);
+        avatarView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent;
+                if (contact.isGroup()) {
+                    intent = new Intent(mContext, GroupProfileActivity.class)
+                            .setAction(GroupProfileActivity.ACTION_SHOW)
+                            .putExtra(GroupProfileActivity.EXTRA_CLIENT_CONTACT_ID, contact.getClientContactId());
+                } else {
+                    intent = new Intent(mContext, ClientProfileActivity.class)
+                            .setAction(ClientProfileActivity.ACTION_SHOW)
+                            .putExtra(ClientProfileActivity.EXTRA_CLIENT_CONTACT_ID, contact.getClientContactId());
+                }
+                mContext.startActivity(intent);
+            }
+        });
     }
 
     public void registerListeners() {
@@ -215,8 +255,6 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
     }
 
     private class ViewHolder {
-        public AvatarView avatarView;
         public CheckedTextView checkedNameTextView;
-        public TalkClientContact contact;
     }
 }
