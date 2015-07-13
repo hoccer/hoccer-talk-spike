@@ -22,6 +22,7 @@ import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupMemberContactsAdapter;
 import com.hoccer.xo.android.base.XoFragment;
+import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.util.UriUtils;
 import com.squareup.picasso.Picasso;
 import org.apache.commons.collections4.CollectionUtils;
@@ -51,6 +52,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
     private List<TalkClientContact> mContactsToInvite = Collections.emptyList();
     private String mGroupTag;
     private boolean mIsGroupCreated;
+    private ListView mGroupMemberList;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -86,7 +88,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
         mGroupNameEdit = (EditText) view.findViewById(R.id.profile_group_name_edit);
         mGroupCreateButton = (Button) view.findViewById(R.id.profile_group_button_create);
         TextView groupMembersTitle = (TextView) view.findViewById(R.id.profile_group_members_title);
-        ListView groupMemberList = (ListView) view.findViewById(R.id.profile_group_members_list);
+        mGroupMemberList = (ListView) view.findViewById(R.id.profile_group_members_list);
 
         mAvatarImageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -138,11 +140,11 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
                 return mContactsToInvite.contains(contact);
             }
         });
-        groupMemberList.setAdapter(mGroupMemberAdapter);
+        mGroupMemberList.setAdapter(mGroupMemberAdapter);
 
         if (mContactsToInvite.isEmpty()) {
             groupMembersTitle.setVisibility(View.GONE);
-            groupMemberList.setVisibility(View.GONE);
+            mGroupMemberList.setVisibility(View.GONE);
         }
 
         updateAvatarView(null);
@@ -153,6 +155,8 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
         super.onResume();
         mGroupMemberAdapter.registerListeners();
         mGroupMemberAdapter.loadContacts();
+
+        DisplayUtils.setListViewHeightBasedOnChildren(mGroupMemberList);
 
         getXoClient().registerContactListener(this);
 

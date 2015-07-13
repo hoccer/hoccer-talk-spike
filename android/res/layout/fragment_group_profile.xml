@@ -67,35 +67,8 @@
                 layout="@layout/profile_chat_stats_container"
                 style="@style/ProfileContainerStyle"/>
 
-        <LinearLayout
-                android:id="@+id/profile_group_members_container"
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp">
+        <include layout="@layout/inc_profile_group_member_list"/>
 
-            <TextView
-                    android:id="@+id/profile_group_members_title"
-                    android:text="@string/profile_group_members_title"
-                    android:gravity="left"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    style="@style/AppBaseTheme.Group.Members.Title"/>
-
-            <View
-                    android:layout_width="fill_parent"
-                    style="@style/AppBaseTheme.Group.HorizontalDivider"/>
-
-            <ListView
-                    android:id="@+id/profile_group_members_list"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:divider="@null"
-                    android:dividerHeight="10dp"
-                    android:layout_marginTop="10dp"
-                    android:paddingLeft="15dp"
-                    android:paddingRight="15dp"
-                    style="@style/AppBaseTheme.Group.List"/>
-        </LinearLayout>
     </LinearLayout>
+
 </ScrollView>

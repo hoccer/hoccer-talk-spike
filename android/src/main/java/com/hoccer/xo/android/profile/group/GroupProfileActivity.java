@@ -74,18 +74,6 @@ public class GroupProfileActivity extends ComposableActivity {
         getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
-    @Override
-    protected void onResume() {
-        LOG.debug("onResume()");
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        LOG.debug("onPause()");
-        super.onPause();
-    }
-
     public void showGroupProfileCreationFragment(@Nullable String cloneGroupId) {
         GroupProfileCreationFragment groupProfileCreationFragment = new GroupProfileCreationFragment();
 
