@@ -282,7 +282,6 @@ public class GroupProfileFragment extends ProfileFragment
     private void updateMemberContentVisibility() {
         if (mGroupMemberAdapter == null || mGroupMemberAdapter.getContacts().isEmpty()) {
             mGroupMembersContainer.setVisibility(View.GONE);
-            mFriendsRequestMenuItem.setVisible(false);
         }
     }
 
