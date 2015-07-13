@@ -3070,7 +3070,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         }
 
         try {
-            TalkGroupMembership oldMemebership = groupContact.getGroupMembership();
+            TalkGroupMembership oldMembership = groupContact.getGroupMembership();
 
             // update membership in database
             TalkGroupMembership dbMembership = mDatabase.findMembershipInGroupByClientId(newMembership.getGroupId(), newMembership.getClientId());
@@ -3113,7 +3113,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 mDatabase.saveContact(clientContact);
             }
 
-            updateGroupKeptState(oldMemebership, newMembership, groupContact, clientContact);
+            updateGroupKeptState(oldMembership, newMembership, groupContact, clientContact);
 
         } catch (SQLException e) {
             LOG.error("sql error", e);
