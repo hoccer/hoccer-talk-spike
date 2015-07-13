@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.*;
@@ -153,11 +154,16 @@ public class GroupProfileFragment extends ProfileFragment
             mGroupMemberAdapter = new GroupMemberContactsAdapter(getXoActivity(), mContact.getGroupId());
             mGroupMemberAdapter.setFilter(mInvitedOrJoinedClientFilter);
             mGroupMemberAdapter.registerListeners();
+            mGroupMemberAdapter.registerDataSetObserver(new DataSetObserver() {
+                @Override
+                public void onInvalidated() {
+                    super.onInvalidated();
+                    DisplayUtils.setListViewHeightBasedOnChildren(mGroupMembersList);
+                }
+            });
             mGroupMembersList.setAdapter(mGroupMemberAdapter);
         }
         mGroupMemberAdapter.loadContacts();
-
-        DisplayUtils.setListViewHeightBasedOnChildren(mGroupMembersList);
 
         if (mContact.isNearbyGroup() || mContact.isWorldwideGroup()) {
             mGroupMembersList.setOnItemClickListener(this);
