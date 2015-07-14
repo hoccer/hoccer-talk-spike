@@ -87,11 +87,20 @@ public class MessageItem implements AttachmentTransferListener {
     }
 
     public View updateView(View view) {
+        // if there is an old item attached to this view destroy it now
+        MessageItem item = (MessageItem) view.getTag();
+        if (item != null) {
+            item.detachView();
+        }
+
         configureViewForMessage(view);
 
         if (mAttachment != null) {
             configureAttachmentView(view);
         }
+
+        // set item as tag for this view
+        view.setTag(this);
 
         return view;
     }
@@ -108,6 +117,9 @@ public class MessageItem implements AttachmentTransferListener {
     }
 
     public void detachView() {
+        if (mAttachment != null) {
+            mAttachment.unregisterTransferListener(mAttachmentTransferHandler);
+        }
     }
 
     /**
@@ -129,12 +141,6 @@ public class MessageItem implements AttachmentTransferListener {
      * @param view The given layout
      */
     protected void configureViewForMessage(View view) {
-        // if there is an old item attached to this view destroy it now
-        MessageItem item = (MessageItem) view.getTag();
-        if (item != null) {
-            item.detachView();
-        }
-
         mSimpleAvatarView = (SimpleAvatarView) view.findViewById(R.id.view_avatar_simple);
         mMessageContainer = (RelativeLayout) view.findViewById(R.id.rl_message_container);
         TextView messageTime = (TextView) view.findViewById(R.id.tv_message_time);
@@ -192,9 +198,6 @@ public class MessageItem implements AttachmentTransferListener {
 
         mMessageText = messageText;
         configureContextMenu(messageText);
-
-        // set item as tag for this view
-        view.setTag(this);
     }
 
     private void updateLeftAndRightMargin(RelativeLayout messageContainer, int leftMargin, int rightMargin) {

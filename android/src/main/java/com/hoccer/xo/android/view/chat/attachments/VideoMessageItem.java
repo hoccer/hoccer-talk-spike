@@ -147,6 +147,7 @@ public class VideoMessageItem extends MessageItem {
 
     @Override
     public void detachView() {
+        super.detachView();
         // cancel image loading if in case display attachment has been called
         if (mTargetView != null) {
             Picasso.with(mContext).cancelRequest(mTargetView);

@@ -92,6 +92,7 @@ public class AudioMessageItem extends MessageItem implements MediaPlayer.Listene
 
     @Override
     public void detachView() {
+        super.detachView();
         MediaPlayer.get().unregisterListener(this);
     }
 
