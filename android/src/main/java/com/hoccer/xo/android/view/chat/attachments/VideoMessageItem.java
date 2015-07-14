@@ -31,27 +31,21 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
 
-public class ChatVideoItem extends MessageItem {
+public class VideoMessageItem extends MessageItem {
 
-    private final static Logger LOG = Logger.getLogger(ChatVideoItem.class);
+    private final static Logger LOG = Logger.getLogger(VideoMessageItem.class);
 
     private String mThumbnailPath;
     private ImageView mTargetView;
     private MediaScannedReceiver mMediaScannedReceiver;
 
-    public ChatVideoItem(Context context, TalkClientMessage message) {
+    public VideoMessageItem(Context context, TalkClientMessage message) {
         super(context, message);
     }
 
     @Override
     public ChatItemType getType() {
         return ChatItemType.ChatItemWithVideo;
-    }
-
-    @Override
-    protected void configureViewForMessage(View view) {
-        super.configureViewForMessage(view);
-        configureAttachmentView(view);
     }
 
     @Override

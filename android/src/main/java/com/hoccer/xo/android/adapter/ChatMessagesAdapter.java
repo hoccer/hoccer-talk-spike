@@ -225,7 +225,7 @@ public class ChatMessagesAdapter extends MessagesAdapter implements IXoMessageLi
         if (itemType == ChatItemType.ChatItemWithImage) {
             return new ImageMessageItem(mActivity, message);
         } else if (itemType == ChatItemType.ChatItemWithVideo) {
-            return new ChatVideoItem(mActivity, message);
+            return new VideoMessageItem(mActivity, message);
         } else if (itemType == ChatItemType.ChatItemWithAudio) {
             return new AudioMessageItem(mActivity, message);
         } else if (itemType == ChatItemType.ChatItemWithData) {
