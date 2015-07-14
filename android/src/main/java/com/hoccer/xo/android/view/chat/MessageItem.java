@@ -366,7 +366,7 @@ public class MessageItem implements AttachmentTransferListener {
         }
     }
 
-    protected void configureAttachmentView(View view) {
+    private void configureAttachmentView(View view) {
         RelativeLayout attachmentContainer = (RelativeLayout) view.findViewById(R.id.rl_attachment_container);
         attachmentContainer.setVisibility(View.VISIBLE);
 
