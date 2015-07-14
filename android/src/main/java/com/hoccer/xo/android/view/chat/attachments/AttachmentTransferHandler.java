@@ -128,8 +128,6 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
             case UPLOAD_UPLOADING:
                 mTransferAction = TransferAction.CANCEL_UPLOAD;
                 break;
-            case SELECTED:
-                break;
             case UPLOAD_COMPLETE:
                 break;
             default:
