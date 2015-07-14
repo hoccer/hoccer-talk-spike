@@ -384,15 +384,12 @@ public class MessageItem implements AttachmentTransferListener {
     }
 
     private void displayTransferControl() {
-        mAttachmentTransferContainer.setVisibility(View.VISIBLE);
         mAttachmentContentContainer.setVisibility(View.GONE);
+        mAttachmentTransferContainer.setVisibility(View.VISIBLE);
 
-        // create handler for a pending attachment transfer
-        if (mAttachmentTransferHandler == null) {
-            mAttachmentTransferHandler = new AttachmentTransferHandler(mAttachmentTransferContainer, mAttachment, this);
-        }
 
-        mAttachment.registerTransferListener(mAttachmentTransferHandler);
+        mAttachmentTransferHandler = new AttachmentTransferHandler(mAttachmentTransferContainer, mAttachment, this);
+        mAttachment.registerTransferStateListener(mAttachmentTransferHandler);
     }
 
     protected void displayAttachment() {
