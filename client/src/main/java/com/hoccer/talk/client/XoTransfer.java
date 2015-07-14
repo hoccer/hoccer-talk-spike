@@ -69,7 +69,7 @@ public abstract class XoTransfer {
         return getTransferType() == Type.ATTACHMENT;
     }
 
-    public abstract void registerTransferListener(TransferStateListener listener);
+    public abstract void registerTransferStateListener(TransferStateListener listener);
 
     public abstract void unregisterTransferListener(TransferStateListener listener);
 }

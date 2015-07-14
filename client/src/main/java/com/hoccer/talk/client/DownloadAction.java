@@ -41,7 +41,7 @@ public class DownloadAction implements TransferStateListener {
     public DownloadAction(DownloadAgent downloadAgent, TalkClientDownload download) {
         mDownloadAgent = downloadAgent;
         mDownload = download;
-        download.registerTransferListener(this);
+        download.registerTransferStateListener(this);
     }
 
     public void setFuture(Future downloadFuture) {
