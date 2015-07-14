@@ -159,16 +159,16 @@ public class ChatMessagesAdapter extends MessagesAdapter implements IXoMessageLi
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        MessageItem chatItem = getItem(position);
+        MessageItem messageItem = getItem(position);
 
-        if (!chatItem.getMessage().isSeen()) {
-            markMessageAsSeen(chatItem.getMessage());
+        if (!messageItem.getMessage().isSeen()) {
+            markMessageAsSeen(messageItem.getMessage());
         }
 
         if (convertView == null) {
-            convertView = chatItem.createAndUpdateView();
+            convertView = messageItem.createAndUpdateView();
         } else {
-            convertView = chatItem.updateView(convertView);
+            convertView = messageItem.updateView(convertView);
         }
 
         return convertView;
