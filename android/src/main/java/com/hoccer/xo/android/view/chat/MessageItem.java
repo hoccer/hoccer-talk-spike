@@ -371,14 +371,13 @@ public class MessageItem implements AttachmentTransferListener {
         attachmentContainer.setVisibility(View.VISIBLE);
 
         mAttachmentContentContainer = (LinearLayout) attachmentContainer.findViewById(R.id.ll_content_container);
-
         mAttachmentTransferContainer = (RelativeLayout) attachmentContainer.findViewById(R.id.rl_transfer);
         mContentDescription = (TextView) mAttachmentTransferContainer.findViewById(R.id.tv_content_description_text);
 
-        if (shouldDisplayTransferControl()) {
-            displayTransferControl();
-        } else {
+        if (isTransferCompleted()) {
             displayAttachment();
+        } else {
+            displayTransferControl();
         }
 
         mContentDescription.setText(ContentRegistry.getContentDescription(mAttachment));
@@ -402,9 +401,9 @@ public class MessageItem implements AttachmentTransferListener {
         configureContextMenu(mAttachmentContentContainer);
     }
 
-    protected boolean shouldDisplayTransferControl() {
+    protected boolean isTransferCompleted() {
         ContentState contentState = mAttachment.getContentState();
-        return !(contentState == ContentState.SELECTED || contentState == ContentState.UPLOAD_COMPLETE || contentState == ContentState.DOWNLOAD_COMPLETE);
+        return contentState == ContentState.UPLOAD_COMPLETE || contentState == ContentState.DOWNLOAD_COMPLETE;
     }
 
     private void configureContextMenu(View view) {
