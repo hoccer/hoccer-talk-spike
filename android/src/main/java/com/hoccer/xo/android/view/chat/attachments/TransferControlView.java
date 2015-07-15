@@ -225,7 +225,7 @@ public class TransferControlView extends View {
         }
     }
 
-    private void clean() {
+    public void clean() {
         mGoneAfterFinished = false;
         mGone = false;
         mIsSpinning = false;

@@ -70,7 +70,7 @@ public class ContactMessageItem extends MessageItem {
             public void onClick(View v) {
                 LOG.debug("onClick(showButton)");
                 Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setDataAndType(UriUtils.getAbsoluteFileUri(mAttachment.getFilePath()), mAttachment.getMimeType());
+                intent.setDataAndType(UriUtils.getAbsoluteFileUri(mAttachment.getFilePath()), "text/x-vcard");
                 XoActivity activity = (XoActivity) mContext;
                 activity.startExternalActivity(intent);
             }

@@ -35,6 +35,8 @@ public class AudioMessageItem extends MessageItem implements MediaPlayer.Listene
 
     @Override
     protected void displayAttachment() {
+        super.displayAttachment();
+
         // add view lazily
         if (mAttachmentContentContainer.getChildCount() == 0) {
             LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
@@ -90,6 +92,7 @@ public class AudioMessageItem extends MessageItem implements MediaPlayer.Listene
 
     @Override
     public void detachView() {
+        super.detachView();
         MediaPlayer.get().unregisterListener(this);
     }
 

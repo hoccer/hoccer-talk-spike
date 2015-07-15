@@ -380,7 +380,7 @@ public class TalkClientUpload extends XoTransfer implements IProgressListener {
     }
 
     @Override
-    public void registerTransferListener(TransferStateListener listener) {
+    public void registerTransferStateListener(TransferStateListener listener) {
         if (!mTransferListeners.contains(listener)) {
             mTransferListeners.add(listener);
         }
