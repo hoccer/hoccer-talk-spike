@@ -1365,15 +1365,16 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
         syncGroupPresences();
 
+        LOG.debug("sync: syncing group memberships");
+        long startMillisGroupMemberships = System.currentTimeMillis();
         syncGroupMemberships();
+        LOG.debug("sync: groupMemberships finished in " + TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startMillisGroupMemberships) + " sec");
 
         // ensure we are finished with generating pub/private keys
         sendPresenceFuture.get();
     }
 
     private void syncGroupMemberships() throws SQLException {
-        LOG.debug("sync: syncing group memberships");
-        long startMillisGroupMemberships = System.currentTimeMillis();
         List<TalkClientContact> contacts = mDatabase.findAllGroupContacts();
         List<TalkClientContact> groupContacts = new ArrayList<TalkClientContact>();
         List<String> groupIds = new ArrayList<String>();
@@ -1433,7 +1434,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 LOG.debug("sync: " + TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - groupMembershipMillis) + " sec");
             }
         }
-        LOG.debug("sync: groupMemberships finished in " + TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startMillisGroupMemberships) + " sec");
     }
 
     private Date getLatestDateChangeForGroupMembers() {
