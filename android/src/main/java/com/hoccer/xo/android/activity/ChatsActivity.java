@@ -70,10 +70,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         BackgroundConnectionHandler.get();
 
         PasswordProtection.get();
-
-        if (isRegistered()) {
-            selectWorldwidePage();
-        }
     }
 
     @Override
@@ -82,10 +78,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         showProfileIfClientIsNotRegistered();
         registerListeners();
         mContactsMenuItemActionProvider.updateNotificationBadge();
-    }
-
-    public void selectWorldwidePage() {
-        mViewPagerActivityComponent.selectFragment(mWorldwideChatListFragment);
     }
 
     @Override
@@ -160,7 +152,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
         if (resultCode == RESULT_OK && requestCode == REGISTER_REQUEST_CODE) {
-            selectWorldwidePage();
+            FeaturePromoter.selectWorldwidePageOnFirstStart(this, mViewPagerActivityComponent, mWorldwideChatListFragment);
         }
     }
 
