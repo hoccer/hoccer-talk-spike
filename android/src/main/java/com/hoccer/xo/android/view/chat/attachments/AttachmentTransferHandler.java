@@ -169,7 +169,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
             case DOWNLOAD_NEW:
                 mTransferControlView.setEnabled(false);
                 mTransferControlView.setVisibility(View.GONE);
-                mTransferStateView.setText(res.getString(R.string.transfer_state_initializing));
+                mTransferStateView.setText(res.getString(R.string.transfer_state_initializing_download));
                 break;
 
             case DOWNLOAD_PAUSED:
@@ -227,7 +227,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
             case UPLOAD_NEW:
                 mTransferControlView.prepareToUpload();
                 mTransferControlView.setVisibility(View.VISIBLE);
-                mTransferStateView.setText(res.getString(R.string.transfer_state_encrypting));
+                mTransferStateView.setText(res.getString(R.string.transfer_state_initializing_upload));
                 break;
 
             case UPLOAD_ENCRYPTING:

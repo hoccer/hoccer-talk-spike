@@ -226,6 +226,8 @@
     <string name="profile_name_text">Name</string>
     <string name="profile_key_text">Key</string>
 
+    <string name="transfer_state_initializing_download">Waiting for download..</string>
+    <string name="transfer_state_initializing_upload">Starting upload..</string>
     <string name="transfer_state_encrypting">Encrypting..</string>
     <string name="transfer_state_decrypting">Decrypting..</string>
     <string name="transfer_state_downloading">Downloading..</string>
@@ -464,8 +466,6 @@
     <string name="blocked">Blocked</string>
     <string name="auto_download_attachments">Auto-Download attachments</string>
     <string name="worldwide_tutorial_message">In Worldwide mode you can chat with random users worldwide who have also activated Worldwide mode. Please take a look at the available settings for Worldwide. How long do you want to keep Worldwide activated and therefore visible for others after leaving the Worldwide view?</string>
-
-    <string name="transfer_state_initializing">Initializing download..</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>

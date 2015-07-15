@@ -215,6 +215,8 @@
     <string name="profile_name_text">Name</string>
     <string name="profile_key_text">Schlüssel</string>
 
+    <string name="transfer_state_initializing_download">Warte auf Download..</string>
+    <string name="transfer_state_initializing_upload">Starte Upload..</string>
     <string name="transfer_state_encrypting">Verschlüsseln..</string>
     <string name="transfer_state_decrypting">Entschlüsseln..</string>
     <string name="transfer_state_downloading">Lade..</string>
@@ -454,8 +456,6 @@
     <string name="blocked">Blockiert</string>
     <string name="auto_download_attachments">Anhänge automatisch laden</string>
     <string name="worldwide_tutorial_message">Mit der Weltweit-Funktion kannst du zufällig mit ausgewählten Teilnehmern kommunizieren, die ebenfalls Weltweit aktiviert haben. Mache dich bitte mit den Einstellungen zu diesem Modus vertraut. Wie lange möchtest du nach Verlassen der Weltweit-Ansicht noch weltweit erreichbar und somit für andere Nutzer sichtbar sein?</string>
-
-    <string name="transfer_state_initializing">Initialisiere Download..</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Kontakt</item>
