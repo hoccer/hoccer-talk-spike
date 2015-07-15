@@ -81,7 +81,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
                             public void run() {
                                 XoApplication.get().getXoClient().getDownloadAgent().pauseDownload(download);
                             }
-                        });
+                        }).start();
                     }
                     break;
                 case REQUEST_UPLOAD:
@@ -93,7 +93,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
                             public void run() {
                                 XoApplication.get().getXoClient().getUploadAgent().resumeUpload(upload);
                             }
-                        });
+                        }).start();
                     }
                     break;
                 case CANCEL_UPLOAD:
@@ -105,7 +105,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
                             public void run() {
                                 XoApplication.get().getXoClient().getUploadAgent().pauseUpload(upload);
                             }
-                        });
+                        }).start();
                     }
             }
             mTransferControlView.post(new Runnable() {
