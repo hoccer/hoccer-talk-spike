@@ -1353,34 +1353,25 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     private void doSync() throws Exception {
         LOG.debug("doSync()");
 
-        Date never = new Date(0);
-
         LOG.debug("sync: HELLO");
         hello();
 
         LOG.debug("sync: updating self presence");
         ScheduledFuture sendPresenceFuture = sendPresence();
 
-        LOG.debug("sync: syncing presences");
-        TalkPresence[] presences = mServerRpc.getPresences(never);
-        for (TalkPresence presence : presences) {
-            updateClientPresence(presence, null);
-        }
+        syncPresences();
 
-        LOG.debug("sync: syncing relationships");
-        TalkRelationship[] relationships = mServerRpc.getRelationships(never);
-        for (TalkRelationship relationship : relationships) {
-            updateClientRelationship(relationship);
-        }
+        syncRelationships();
 
-        LOG.debug("sync: syncing groups");
-        TalkGroupPresence[] groupPresences = mServerRpc.getGroups(never);
-        for (TalkGroupPresence groupPresence : groupPresences) {
-            if (groupPresence.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
-                updateGroupPresence(groupPresence);
-            }
-        }
+        syncGroupPresences();
 
+        syncGroupMemberships();
+
+        // ensure we are finished with generating pub/private keys
+        sendPresenceFuture.get();
+    }
+
+    private void syncGroupMemberships() throws SQLException {
         LOG.debug("sync: syncing group memberships");
         long startMillisGroupMemberships = System.currentTimeMillis();
         List<TalkClientContact> contacts = mDatabase.findAllGroupContacts();
@@ -1400,7 +1391,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 LOG.debug("sync: membership in group (" + groupContact.getGroupId() + ", " + groupContact.getGroupPresence().getGroupName() + ") : '" + groupMembershipFlags[i] + "'");
                 long groupMembershipMillis = System.currentTimeMillis();
                 if (groupMembershipFlags[i]) {
-                    TalkGroupMembership[] memberships = mServerRpc.getGroupMembers(groupContact.getGroupId(), never);
+                    TalkGroupMembership[] memberships = mServerRpc.getGroupMembers(groupContact.getGroupId(), getLatestDateChangeForGroupMembers());
                     if (groupContact.isWorldwideGroup()) {
                         mWorldwideGroupId = groupContact.getGroupId();
                     }
@@ -1443,9 +1434,48 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             }
         }
         LOG.debug("sync: groupMemberships finished in " + TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startMillisGroupMemberships) + " sec");
+    }
 
-        // ensure we are finished with generating pub/private keys
-        sendPresenceFuture.get();
+    private Date getLatestDateChangeForGroupMembers() {
+        return new Date(0);
+    }
+
+    private void syncGroupPresences() {
+        LOG.debug("sync: syncing groups");
+        TalkGroupPresence[] groupPresences = mServerRpc.getGroups(getLatestDateChangeForGroups());
+        for (TalkGroupPresence groupPresence : groupPresences) {
+            if (groupPresence.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
+                updateGroupPresence(groupPresence);
+            }
+        }
+    }
+
+    private Date getLatestDateChangeForGroups() {
+        return new Date(0);
+    }
+
+    private void syncRelationships() {
+        LOG.debug("sync: syncing relationships");
+        TalkRelationship[] relationships = mServerRpc.getRelationships(getLatestDateChangeForRelationships());
+        for (TalkRelationship relationship : relationships) {
+            updateClientRelationship(relationship);
+        }
+    }
+
+    private Date getLatestDateChangeForRelationships() {
+        return new Date(0);
+    }
+
+    private void syncPresences() {
+        LOG.debug("sync: syncing presences");
+        TalkPresence[] presences = mServerRpc.getPresences(getLatestDateChangeForPresences());
+        for (TalkPresence presence : presences) {
+            updateClientPresence(presence, null);
+        }
+    }
+
+    private Date getLatestDateChangeForPresences() {
+        return new Date(0);
     }
 
     private void scheduleDisconnectTimeout() {
