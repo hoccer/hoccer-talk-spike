@@ -31,7 +31,7 @@ public class UploadAction implements TransferStateListener {
     public UploadAction(UploadAgent uploadAgent, TalkClientUpload upload) {
         mUploadAgent = uploadAgent;
         mUpload = upload;
-        upload.registerTransferListener(this);
+        upload.registerTransferStateListener(this);
     }
 
     public void setFuture(Future downloadFuture) {
