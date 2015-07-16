@@ -1201,4 +1201,32 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
         return senderContact.isWorldwide() && !senderContact.isNearby() && !senderContact.isClientFriend();
     }
+
+    public TalkPresence getLatestPresence() throws SQLException {
+        QueryBuilder<TalkPresence, ?> queryBuilder = mPresences.queryBuilder();
+        queryBuilder.orderBy("timestamp", false);
+
+        return queryBuilder.queryForFirst();
+    }
+
+    public TalkRelationship getLatestRelationship() throws SQLException {
+        QueryBuilder<TalkRelationship, ?> queryBuilder = mRelationships.queryBuilder();
+        queryBuilder.orderBy("lastChanged", false);
+
+        return queryBuilder.queryForFirst();
+    }
+
+    public TalkGroupPresence getLatestGroupPresence() throws SQLException {
+        QueryBuilder<TalkGroupPresence, ?> queryBuilder = mGroupPresences.queryBuilder();
+        queryBuilder.orderBy("lastChanged", false);
+
+        return queryBuilder.queryForFirst();
+    }
+
+    public TalkGroupMembership getLatestGroupMember() throws SQLException {
+        QueryBuilder<TalkGroupMembership, ?> queryBuilder = mGroupMemberships.queryBuilder();
+        queryBuilder.orderBy("lastChanged", false);
+
+        return queryBuilder.queryForFirst();
+    }
 }
