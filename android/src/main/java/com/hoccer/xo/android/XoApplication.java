@@ -198,14 +198,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         // add srp secret change listener
         mClient.registerStateListener(new SrpChangeListener(this));
 
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread t, Throwable e) {
-                saveCrashed(true);
-                Thread.getDefaultUncaughtExceptionHandler().uncaughtException(t, e);
-            }
-        });
-
         if (isFirstConnectionAfterCrashOrUpdate()) {
             mClient.setFullSyncRequired(true);
             if (isCrashedBefore()) {
@@ -269,6 +261,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     public void uncaughtException(Thread thread, Throwable ex) {
         sLog.error("uncaught exception on thread " + thread.getName(), ex);
         if (mPreviousHandler != null) {
+            saveCrashed(true);
             mPreviousHandler.uncaughtException(thread, ex);
         }
     }
