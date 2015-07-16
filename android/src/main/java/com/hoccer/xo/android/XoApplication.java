@@ -1,7 +1,11 @@
 package com.hoccer.xo.android;
 
 import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Environment;
@@ -191,6 +195,10 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         // add srp secret change listener
         mClient.registerStateListener(new SrpChangeListener(this));
 
+//        if (isFirstConnectionAfterCrashOrUpdate()) {
+            mClient.setFullSyncRequired(true);
+//        }
+
         // create sound pool instance
         sSoundPool = new XoSoundPool(this);
 
@@ -201,6 +209,28 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
         Intent xoClientServiceIntent = new Intent(this, XoClientService.class);
         startService(xoClientServiceIntent);
+    }
+
+    private boolean isFirstConnectionAfterCrashOrUpdate() {
+        return isApplicationUpdated();
+    }
+
+    private boolean isApplicationUpdated() {
+        try {
+            PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            int versionCode = packageInfo.versionCode;
+
+            SharedPreferences preferences = getSharedPreferences("sharedPreferences", Context.MODE_PRIVATE);
+            int oldVersionCode = preferences.getInt("versionCode", -1);
+            if (oldVersionCode == -1 || oldVersionCode < versionCode) {
+                preferences.edit().putInt("versionCode", versionCode).apply();
+                return true;
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
     @Override
