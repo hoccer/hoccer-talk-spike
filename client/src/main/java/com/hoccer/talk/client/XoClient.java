@@ -3206,9 +3206,18 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             LOG.error("sql error", e);
         }
 
-        for (IXoContactListener listener : mContactListeners) {
-            listener.onGroupMembershipChanged(groupContact);
-        }
+        notifyGroupMembershipChanged(groupContact);
+    }
+
+    private void notifyGroupMembershipChanged(final TalkClientContact groupContact) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (IXoContactListener listener : mContactListeners) {
+                    listener.onGroupMembershipChanged(groupContact);
+                }
+            }
+        }).start();
     }
 
     private void updateGroupKeptState(TalkGroupMembership oldMembership, TalkGroupMembership newMembership, TalkClientContact groupContact, TalkClientContact clientContact) throws SQLException {
