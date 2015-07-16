@@ -1376,10 +1376,15 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     private void syncDatabase() throws SQLException {
+        long startMillis = System.currentTimeMillis();
+
         syncPresences();
         syncRelationships();
         syncGroupPresences();
         syncGroupMemberships();
+
+        LOG.debug("syncDatabase: full sync: " + mFullSyncRequired);
+        LOG.debug("syncDatabase: " + TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startMillis) + " sec");
     }
 
     private void syncPresences() throws SQLException {
@@ -1464,11 +1469,9 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                         mWorldwideGroupId = groupContact.getGroupId();
                     }
 
-                    long updateGroupMembershipStartMillis = System.currentTimeMillis();
                     for (TalkGroupMembership membership : memberships) {
                         updateGroupMembership(membership);
                     }
-                    LOG.debug("sync: updateGroupMembership " + TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - updateGroupMembershipStartMillis) + " sec");
                 } else {
                     TalkGroupPresence groupPresence = groupContact.getGroupPresence();
                     if (groupPresence != null && groupPresence.isTypeNearby()) {
@@ -1498,7 +1501,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                         listener.onGroupPresenceChanged(groupContact);
                     }
                 }
-                LOG.debug("sync: " + TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - groupMembershipMillis) + " sec");
+                LOG.debug("sync: " + (System.currentTimeMillis() - groupMembershipMillis) + " ms");
             }
         }
         LOG.debug("sync: groupMemberships finished in " + TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startMillisGroupMemberships) + " sec");
@@ -3088,7 +3091,9 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     private void updateGroupMembership(TalkGroupMembership newMembership) {
-        LOG.info("updateGroupMembership(groupId: '" + newMembership.getGroupId() + "', clientId: '" + newMembership.getClientId() + "', state: '" + newMembership.getState() + "')");
+        long startMillis = System.currentTimeMillis();
+
+        LOG.info("sync: updateGroupMembership(groupId: '" + newMembership.getGroupId() + "', clientId: '" + newMembership.getClientId() + "', state: '" + newMembership.getState() + "')");
 
         TalkClientContact groupContact;
         TalkClientContact clientContact;
@@ -3108,6 +3113,8 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 }
             }
 
+            LOG.debug("sync: updateGroupMembership 1: " + (System.currentTimeMillis() - startMillis));
+
             clientContact = mDatabase.findContactByClientId(newMembership.getClientId(), false);
             if (clientContact == null) {
                 boolean createContact = newMembership.isInvolved() && !newMembership.isGroupRemoved();
@@ -3119,15 +3126,18 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     return;
                 }
             }
+
+            LOG.debug("sync: updateGroupMembership 2: " + (System.currentTimeMillis() - startMillis));
+
         } catch (SQLException e) {
             LOG.error("SQL error", e);
             return;
         }
         if (clientContact == null) {
-            LOG.error("groupMemberUpdate for unknown client: " + newMembership.getClientId());
+            LOG.error("sync: groupMemberUpdate for unknown client: " + newMembership.getClientId());
         }
         if (groupContact == null) {
-            LOG.error("groupMemberUpdate for unknown group: " + newMembership.getGroupId());
+            LOG.error("sync: groupMemberUpdate for unknown group: " + newMembership.getGroupId());
         }
         if (clientContact == null || groupContact == null) {
             return;
@@ -3155,6 +3165,8 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
             mDatabase.saveGroupMembership(dbMembership);
 
+            LOG.debug("sync: updateGroupMembership 3: " + (System.currentTimeMillis() - startMillis));
+
             // if this concerns our own membership
             if (clientContact.isSelf()) {
                 LOG.info("groupMember is about us, decrypting group key");
@@ -3173,6 +3185,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     }
                 }
             }
+
             // if this concerns the membership of someone else
             if (clientContact.isClient()) {
                 /* Mark as nearby or worldwide contact and save to database. */
@@ -3186,6 +3199,8 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             }
 
             updateGroupKeptState(oldMembership, newMembership, groupContact, clientContact);
+
+            LOG.debug("sync: updateGroupMembership 4: " + (System.currentTimeMillis() - startMillis));
 
         } catch (SQLException e) {
             LOG.error("sql error", e);
