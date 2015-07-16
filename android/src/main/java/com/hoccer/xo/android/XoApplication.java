@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hoccer.talk.client.IXoClientHost;
 import com.hoccer.talk.client.model.TalkClientDownload;
@@ -28,6 +29,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+
+import static android.content.SharedPreferences.Editor;
 
 /**
  * This class handles the application lifecycle and is responsible
@@ -195,9 +198,20 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         // add srp secret change listener
         mClient.registerStateListener(new SrpChangeListener(this));
 
-//        if (isFirstConnectionAfterCrashOrUpdate()) {
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread t, Throwable e) {
+                saveCrashed(true);
+                Thread.getDefaultUncaughtExceptionHandler().uncaughtException(t, e);
+            }
+        });
+
+        if (isFirstConnectionAfterCrashOrUpdate()) {
             mClient.setFullSyncRequired(true);
-//        }
+            if (isCrashedBefore()) {
+                saveCrashed(false);
+            }
+        }
 
         // create sound pool instance
         sSoundPool = new XoSoundPool(this);
@@ -211,8 +225,15 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         startService(xoClientServiceIntent);
     }
 
+    private void saveCrashed(boolean crashed) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        Editor editor = sharedPreferences.edit();
+        editor.putBoolean("crash", crashed);
+        editor.apply();
+    }
+
     private boolean isFirstConnectionAfterCrashOrUpdate() {
-        return isApplicationUpdated();
+        return isApplicationUpdated() || isCrashedBefore();
     }
 
     private boolean isApplicationUpdated() {
@@ -231,6 +252,11 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         }
 
         return false;
+    }
+
+    private boolean isCrashedBefore() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        return sharedPreferences.getBoolean("crash", false);
     }
 
     @Override
