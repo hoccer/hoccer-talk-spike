@@ -1376,6 +1376,8 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     private void syncDatabase() throws SQLException {
+        LOG.debug("syncDatabase() full sync: " + mFullSyncRequired);
+
         long startMillis = System.currentTimeMillis();
 
         syncPresences();
@@ -1383,8 +1385,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         syncGroupPresences();
         syncGroupMemberships();
 
-        LOG.debug("syncDatabase: full sync: " + mFullSyncRequired);
-        LOG.debug("syncDatabase: " + TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startMillis) + " sec");
+        LOG.debug("syncDatabase() duration: " + TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startMillis) + " sec");
     }
 
     private void syncPresences() throws SQLException {
