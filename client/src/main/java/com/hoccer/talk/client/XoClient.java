@@ -1382,6 +1382,62 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         syncGroupMemberships();
     }
 
+    private void syncPresences() throws SQLException {
+        LOG.debug("sync: syncing presences");
+        TalkPresence[] presences = mServerRpc.getPresences(getLatestDateChangeForPresences());
+        for (TalkPresence presence : presences) {
+            updateClientPresence(presence, null);
+        }
+    }
+
+    private Date getLatestDateChangeForPresences() throws SQLException {
+        if (!mFullSyncRequired) {
+            TalkPresence presence = mDatabase.getLatestPresence();
+            if (presence != null) {
+                return presence.getTimestamp();
+            }
+        }
+        return new Date(0);
+    }
+
+    private void syncRelationships() throws SQLException {
+        LOG.debug("sync: syncing relationships");
+        TalkRelationship[] relationships = mServerRpc.getRelationships(getLatestDateChangeForRelationships());
+        for (TalkRelationship relationship : relationships) {
+            updateClientRelationship(relationship);
+        }
+    }
+
+    private Date getLatestDateChangeForRelationships() throws SQLException {
+        if (!mFullSyncRequired) {
+            TalkRelationship relationship = mDatabase.getLatestRelationship();
+            if (relationship != null) {
+                return relationship.getLastChanged();
+            }
+        }
+        return new Date(0);
+    }
+
+    private void syncGroupPresences() throws SQLException {
+        LOG.debug("sync: syncing groups");
+        TalkGroupPresence[] groupPresences = mServerRpc.getGroups(getLatestDateChangeForGroups());
+        for (TalkGroupPresence groupPresence : groupPresences) {
+            if (groupPresence.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
+                updateGroupPresence(groupPresence);
+            }
+        }
+    }
+
+    private Date getLatestDateChangeForGroups() throws SQLException {
+        if (!mFullSyncRequired) {
+            TalkGroupPresence groupPresence = mDatabase.getLatestGroupPresence();
+            if (groupPresence != null) {
+                return groupPresence.getLastChanged();
+            }
+        }
+        return new Date(0);
+    }
+
     private void syncGroupMemberships() throws SQLException {
         LOG.debug("sync: syncing group memberships");
         long startMillisGroupMemberships = System.currentTimeMillis();
@@ -1453,62 +1509,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             TalkGroupMembership groupMembership = mDatabase.getLatestGroupMember();
             if (groupMembership != null) {
                 return groupMembership.getLastChanged();
-            }
-        }
-        return new Date(0);
-    }
-
-    private void syncGroupPresences() throws SQLException {
-        LOG.debug("sync: syncing groups");
-        TalkGroupPresence[] groupPresences = mServerRpc.getGroups(getLatestDateChangeForGroups());
-        for (TalkGroupPresence groupPresence : groupPresences) {
-            if (groupPresence.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
-                updateGroupPresence(groupPresence);
-            }
-        }
-    }
-
-    private Date getLatestDateChangeForGroups() throws SQLException {
-        if (!mFullSyncRequired) {
-            TalkGroupPresence groupPresence = mDatabase.getLatestGroupPresence();
-            if (groupPresence != null) {
-                return groupPresence.getLastChanged();
-            }
-        }
-        return new Date(0);
-    }
-
-    private void syncRelationships() throws SQLException {
-        LOG.debug("sync: syncing relationships");
-        TalkRelationship[] relationships = mServerRpc.getRelationships(getLatestDateChangeForRelationships());
-        for (TalkRelationship relationship : relationships) {
-            updateClientRelationship(relationship);
-        }
-    }
-
-    private Date getLatestDateChangeForRelationships() throws SQLException {
-        if (!mFullSyncRequired) {
-            TalkRelationship relationship = mDatabase.getLatestRelationship();
-            if (relationship != null) {
-                return relationship.getLastChanged();
-            }
-        }
-        return new Date(0);
-    }
-
-    private void syncPresences() throws SQLException {
-        LOG.debug("sync: syncing presences");
-        TalkPresence[] presences = mServerRpc.getPresences(getLatestDateChangeForPresences());
-        for (TalkPresence presence : presences) {
-            updateClientPresence(presence, null);
-        }
-    }
-
-    private Date getLatestDateChangeForPresences() throws SQLException {
-        if (!mFullSyncRequired) {
-            TalkPresence presence = mDatabase.getLatestPresence();
-            if (presence != null) {
-                return presence.getTimestamp();
             }
         }
         return new Date(0);
