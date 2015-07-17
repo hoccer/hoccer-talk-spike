@@ -1385,6 +1385,8 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         syncGroupPresences();
         syncGroupMemberships();
 
+        mFullSyncRequired = false;
+
         LOG.debug("syncDatabase() duration: " + TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startMillis) + " sec");
     }
 
@@ -1593,6 +1595,8 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             if (mConnectBackoffPotency == 0) {
                 mConnectBackoffPotency = 1;
             }
+
+            mFullSyncRequired = true;
 
             if (mState != State.CONNECTING) {
                 switchState(State.CONNECTING, "reconnect after connection closed");
