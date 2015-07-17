@@ -62,8 +62,7 @@ public class ConnectionStateView extends LinearLayout implements IXoStateListene
                 break;
             case SYNCING:
                 this.setVisibility(View.VISIBLE);
-                //TODO remove "full" text after testing
-                mConnectionStateTextView.setText((XoApplication.get().getXoClient().mFullSyncRequired ? "full " : "") + getResources().getString(R.string.connection_state_syncing));
+                mConnectionStateTextView.setText(getResources().getString(R.string.connection_state_syncing));
                 break;
             case READY:
                 this.setVisibility(View.GONE);
