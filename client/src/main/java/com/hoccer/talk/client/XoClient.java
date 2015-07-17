@@ -131,7 +131,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
     private boolean mIsTimedOut;
 
-    private boolean mFullSyncRequired;
+    public boolean mFullSyncRequired; //TODO set back to private after testing
 
     /**
      * Create a Hoccer Talk client using the given client database
