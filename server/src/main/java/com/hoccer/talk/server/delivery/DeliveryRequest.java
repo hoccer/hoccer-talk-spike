@@ -42,6 +42,7 @@ public class DeliveryRequest {
 
     private boolean performIncoming(List<TalkDelivery> inDeliveries, ITalkRpcClient rpc, TalkRpcConnection connection) {
         boolean currentlyConnected = true;
+        Date lastLogin = connection.getClient().getTimeLastLogin();
         for (TalkDelivery delivery : inDeliveries) {
             // we lost the connection somehow
             if (!currentlyConnected) {
@@ -75,7 +76,9 @@ public class DeliveryRequest {
                         LOG.trace("delivery:"+delivery.toString());
                         LOG.trace("latestDelivery:"+latestDelivery.toString());
                     }
-                    if (!mForceAll && (latestDelivery.getTimeUpdatedIn().getTime() > latestDelivery.getTimeChanged().getTime())) {
+                    boolean updatedInDuringThisLoginSession = latestDelivery.getTimeUpdatedIn().getTime() > lastLogin.getTime();
+                    if (!mForceAll && (latestDelivery.getTimeUpdatedIn().getTime() > latestDelivery.getTimeChanged().getTime())
+                            && updatedInDuringThisLoginSession) { // do not bail out here when last update has been in a previous login session
                         LOG.debug("performIncoming(2): clientId: '" + mClientId + ", delivery has not changed since last up'd in="+ delivery.getTimeUpdatedIn().getTime()+",changed="+delivery.getTimeChanged().getTime());
                         continue;
                     }
@@ -83,7 +86,10 @@ public class DeliveryRequest {
                     // post the delivery for the client
 
                     boolean recentlyDelivered = (latestDelivery.getTimeUpdatedIn() != null &&
+                            updatedInDuringThisLoginSession &&
                             latestDelivery.getTimeUpdatedIn().getTime() + 15 * 1000 > new Date().getTime());
+
+                    LOG.debug("performIncoming(2): clientId: '" + mClientId + ", updatedInDuringThisLoginSession="+ updatedInDuringThisLoginSession + ", recentlyDelivered="+recentlyDelivered);
 
                     if (!recentlyDelivered && (TalkDelivery.STATE_DELIVERING.equals(latestDelivery.getState()) /*|| mForceAll*/)) {
                         TalkDelivery filtered = new TalkDelivery();
