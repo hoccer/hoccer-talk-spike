@@ -9,10 +9,11 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.LinearLayout;
 import com.artcom.hoccer.R;
 
 
-public class AttachmentTransferControlView extends View {
+public class TransferControlView extends View {
 
     private static final float SPINNER_LENGTH = 50;
     private static final float SPINNER_STEP = 1.5f;
@@ -22,7 +23,6 @@ public class AttachmentTransferControlView extends View {
 
     private final Paint mInnerWheelPaint = new Paint();
     private final Paint mOuterWheelPaint = new Paint();
-    private final Paint mTextPaint = new Paint();
 
     private float mProgressCompleted = 360;
     private float mSpinnerLength;
@@ -115,33 +115,24 @@ public class AttachmentTransferControlView extends View {
         }
     };
 
-    private int mTextMargin;
-    private int mTextSize;
-    private String mText;
+    public TransferControlView(Context context) {
+        super(context);
+    }
 
-    public AttachmentTransferControlView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public TransferControlView(Context context, AttributeSet attrs) {
+        this(context, attrs, -1);
+    }
+
+    public TransferControlView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         parseAttributes(context.obtainStyledAttributes(attrs,
                 R.styleable.TransferWheel));
-    }
-
-    public AttachmentTransferControlView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        parseAttributes(context.obtainStyledAttributes(attrs,
-                R.styleable.TransferWheel));
-    }
-
-    public AttachmentTransferControlView(Context context) {
-        super(context);
     }
 
     private void parseAttributes(TypedArray a) {
         mOuterWheelSize = (int) a.getDimension(R.styleable.TransferWheel_outerWheelSize, 0);
         mInnerWheelSize = (int) a.getDimension(R.styleable.TransferWheel_innerWheelSize, 0);
         mWheelDiameter = (int) a.getDimension(R.styleable.TransferWheel_wheelDiameter, 0);
-        mTextMargin = (int) a.getDimension(R.styleable.TransferWheel_textMargin, 0);
-        mTextSize = a.getInt(R.styleable.TransferWheel_textSize, 0);
-        mText = a.getString(R.styleable.TransferWheel_text);
         mWheelColor = a.getColor(R.styleable.TransferWheel_wheelColor, 0);
         mIsStatesEnable = a.getBoolean(R.styleable.TransferWheel_enableStates, mIsStatesEnable);
         a.recycle();
@@ -157,12 +148,6 @@ public class AttachmentTransferControlView extends View {
         mOuterWheelPaint.setStyle(Paint.Style.STROKE);
         mOuterWheelPaint.setStrokeWidth(mOuterWheelSize);
         mOuterWheelPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
-
-        mTextPaint.setColor(mWheelColor);
-        mTextPaint.setStyle(Paint.Style.FILL);
-        mTextPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
-        mTextPaint.setTextSize(mTextSize);
-        mTextPaint.setTextAlign(Paint.Align.CENTER);
     }
 
     private void setupWheels() {
@@ -210,7 +195,6 @@ public class AttachmentTransferControlView extends View {
                 canvas.drawLines(mArrowUpload, mOuterWheelPaint);
             }
         }
-        canvas.drawText(mText, mLayoutWidth / 2, mLayoutHeight / 2 + mWheelDiameter / 2.0f + mTextMargin, mTextPaint);
     }
 
     public void setMax(long length) {
@@ -241,7 +225,7 @@ public class AttachmentTransferControlView extends View {
         }
     }
 
-    private void clean() {
+    public void clean() {
         mGoneAfterFinished = false;
         mGone = false;
         mIsSpinning = false;
@@ -347,9 +331,5 @@ public class AttachmentTransferControlView extends View {
         mArrowPause[5] = centerY - innerRadius + offsetFromWheelEdges;
         mArrowPause[6] = centerX + pauseOffset;
         mArrowPause[7] = centerY + innerRadius - offsetFromWheelEdges;
-    }
-
-    public void setText(String text) {
-        mText = text;
     }
 }

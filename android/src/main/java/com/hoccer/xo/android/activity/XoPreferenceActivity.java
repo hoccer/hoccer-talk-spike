@@ -23,7 +23,7 @@ import com.hoccer.xo.android.passwordprotection.PasswordProtection;
 import com.hoccer.xo.android.passwordprotection.activity.PasswordChangeActivity;
 import com.hoccer.xo.android.passwordprotection.activity.PasswordPromptActivity;
 import com.hoccer.xo.android.passwordprotection.activity.PasswordSetActivity;
-import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
+import com.hoccer.xo.android.view.chat.attachments.TransferControlView;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
@@ -42,7 +42,7 @@ public class XoPreferenceActivity extends PreferenceActivity
     private static final int REQUEST_ACTIVATE_PASSWORD = 2;
     private static final int REQUEST_DEACTIVATE_PASSWORD = 3;
 
-    private AttachmentTransferControlView mSpinner;
+    private TransferControlView mSpinner;
 
     private Handler mDialogDismisser;
 
@@ -199,7 +199,7 @@ public class XoPreferenceActivity extends PreferenceActivity
     public void createDialog() {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.waiting_dialog, null);
-        mSpinner = (AttachmentTransferControlView) view.findViewById(R.id.content_progress);
+        mSpinner = (TransferControlView) view.findViewById(R.id.content_progress);
 
         mWaitingDialog = new Dialog(this);
         mWaitingDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);

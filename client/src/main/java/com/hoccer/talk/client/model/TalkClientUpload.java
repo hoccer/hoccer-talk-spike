@@ -13,17 +13,17 @@ import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @DatabaseTable(tableName = "clientUpload")
 public class TalkClientUpload extends XoTransfer implements IProgressListener {
 
     private final static Logger LOG = Logger.getLogger(TalkClientUpload.class);
 
-    private final List<TransferStateListener> mTransferListeners = new ArrayList<TransferStateListener>();
+    private final List<TransferStateListener> mTransferListeners = new CopyOnWriteArrayList<TransferStateListener>();
 
     public enum State implements IXoTransferState {
         NEW {
@@ -380,7 +380,7 @@ public class TalkClientUpload extends XoTransfer implements IProgressListener {
     }
 
     @Override
-    public void registerTransferListener(TransferStateListener listener) {
+    public void registerTransferStateListener(TransferStateListener listener) {
         if (!mTransferListeners.contains(listener)) {
             mTransferListeners.add(listener);
         }

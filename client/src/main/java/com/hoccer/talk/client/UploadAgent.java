@@ -8,8 +8,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
-import static com.hoccer.talk.client.model.TalkClientUpload.State.PAUSED;
-import static com.hoccer.talk.client.model.TalkClientUpload.State.UPLOADING;
+import static com.hoccer.talk.client.model.TalkClientUpload.State.*;
 
 public class UploadAgent extends TransferAgent {
 
@@ -93,7 +92,7 @@ public class UploadAgent extends TransferAgent {
     public void onUploadStateChanged(TalkClientUpload upload) {
         LOG.info("onUploadStateChanged(id: " + upload.getClientUploadId() + ")");
 
-        if (upload.getState() == TalkClientUpload.State.PAUSED) {
+        if (upload.getState() == PAUSED) {
             LOG.debug("Upload paused. " + upload.getClientUploadId() + " Removing from queue.");
         }
 
@@ -109,9 +108,21 @@ public class UploadAgent extends TransferAgent {
     public void startPendingUploads() throws SQLException {
         for (TalkClientUpload upload : mClient.getDatabase().findAllPendingUploads()) {
             getOrCreateUploadAction(upload);
-            if (upload.getState() != TalkClientUpload.State.PAUSED) {
-                upload.switchState(PAUSED);
+
+            if (upload.getState() == NEW) {
+                register(upload);
                 startUpload(upload);
+            }
+
+            if (upload.getState() == REGISTERING) {
+                upload.switchState(NEW);
+                register(upload);
+                startUpload(upload);
+            }
+
+            if (upload.getState() == UPLOADING) {
+                upload.switchState(PAUSED);
+                resumeUpload(upload);
             }
         }
     }

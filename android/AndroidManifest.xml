@@ -3,7 +3,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.artcom.hoccer"
 
-          android:versionCode="378"
+          android:versionCode="384"
           android:versionName="${project.version}">
 
     <!-- We run on 4.0 (14) and up, we use features from up to 4.2 (17) -->
@@ -173,8 +173,12 @@
 
         <activity
                 android:name="com.hoccer.xo.android.activity.ContactSelectionResultActivity"
-                android:label="@string/select_recipients"
-                android:screenOrientation="portrait">
+                android:label="@string/select_recipients">
+        </activity>
+
+        <activity
+                android:name="com.hoccer.xo.android.activity.GroupContactSelectionResultActivity"
+                android:label="@string/manage_group_members">
         </activity>
 
         <activity

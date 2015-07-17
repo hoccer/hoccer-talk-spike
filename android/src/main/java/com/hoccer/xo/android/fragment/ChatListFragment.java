@@ -238,7 +238,7 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
         if (shouldShowChat(item)) {
             TalkClientContact contact = ((ContactChatItem) item).getContact();
             showChat(contact);
-        } else if (shouldShowClientHistory(item)) {
+        } else if (shouldShowContactHistory(item)) {
             TalkClientContact contact = ((ContactChatItem) item).getContact();
             showHistory(contact);
         } else if (item instanceof NearbyGroupHistoryChatItem) {
@@ -259,11 +259,11 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
         return false;
     }
 
-    private boolean shouldShowClientHistory(ChatItem item) {
+    private boolean shouldShowContactHistory(ChatItem item) {
         if (item instanceof ContactChatItem) {
             ContactChatItem contactChatItem = (ContactChatItem) item;
             TalkClientContact contact = contactChatItem.getContact();
-            return contact.isKept();
+            return contact.isKept() || contact.isKeptGroup();
         }
         return false;
     }

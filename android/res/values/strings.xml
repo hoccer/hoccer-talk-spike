@@ -14,8 +14,8 @@
 
     <!-- Menu entries -->
     <string name="menu_my_profile">My profile</string>
-    <string name="menu_pair">Pair with someone</string>
-    <string name="menu_group_profile_add_person">Add person</string>
+    <string name="menu_pair">Add contacts</string>
+    <string name="menu_group_profile_add_person">Add contact</string>
     <string name="menu_new_group">Create group</string>
     <string name="menu_profile">Profile</string>
     <string name="menu_settings">Settings</string>
@@ -50,7 +50,7 @@
     <string name="group_request_decline_invitation_message">Do you really want to decline the group invitation?</string>
 
     <!-- Deleting attachments -->
-    <string name="dialog_attachment_delete_title">Delete Attachment</string>
+    <string name="dialog_attachment_delete_title">Delete attachment</string>
     <string name="dialog_attachment_delete_message">Delete selected attachments and related chat messages?</string>
     <string name="deleted_attachment">[Deleted Attachment]</string>
 
@@ -63,8 +63,8 @@
     </string-array>
 
     <!-- Nearby location request -->
-    <string name="dialog_enable_location_service_title">Location Services</string>
-    <string name="dialog_enable_location_service_message">This feature uses location service
+    <string name="dialog_enable_location_service_title">Location services</string>
+    <string name="dialog_enable_location_service_message">This feature uses location services
         (GPS or Network location). Do you want to enable it?</string>
 
     <!-- Nearby delete archive request -->
@@ -75,16 +75,16 @@
     <string name="multi_invitation_button">continue</string>
 
     <!-- Contact list items -->
-    <string name="contact_name_new_client">New Friend</string>
-    <string name="contact_name_new_group">New Group</string>
+    <string name="contact_name_new_client">New friend</string>
+    <string name="contact_name_new_group">New group</string>
     <string name="contact_role_owner">Owner</string>
 
     <!-- Composition fragment -->
     <string name="composition_text_hint">Type message</string>
-    <string name="dialog_empty_group_title">Can Not Send Message</string>
-    <string name="dialog_empty_group_message">You can not send a message to this group because there are no members except you. Please invite friends to this group.</string>
+    <string name="dialog_empty_group_title">Can not send message</string>
+    <string name="dialog_empty_group_message">You can not send a message to this group because there are no members except you. Start inviting friends to this group.</string>
 
-    <string name="attachment_over_limit_title">Really send Message?</string>
+    <string name="attachment_over_limit_title">Really send message?</string>
     <string name="attachment_over_limit_upload_question">Attachment size is %1$s. Do you really want to send this message?</string>
     <string name="attachment_over_limit_confirm">Send</string>
     <string name="attachment_on_hold_download_question">Download %1$s?</string>
@@ -97,7 +97,7 @@
     <string name="context_menu_delete_message">Delete</string>
 
     <!-- Pairing toast messages -->
-    <string name="toast_pairing_successful">You have successfully paired.</string>
+    <string name="toast_pairing_successful">You are friends now.</string>
     <string name="toast_pairing_failed">Incorrect code, please try again.</string>
 
     <!-- Invitation dialog -->
@@ -117,7 +117,7 @@
 
     <!-- QR code scanner fragment -->
     <string name="enter_code">Enter code</string>
-    <string name="invite_code">Invite code</string>
+    <string name="invite_code">enter invitation code</string>
 
     <!-- Profile fragment -->
     <string name="dialog_avatar_options_title">Avatar options</string>
@@ -163,7 +163,7 @@
     <string name="content_images">Image</string>
     <string name="content_multi_images">Multiple images</string>
     <string name="content_video">Video</string>
-    <string name="content_capture">Take Photo</string>
+    <string name="content_capture">Take photo</string>
     <string name="content_music">Further media</string>
     <string name="content_contact">Contact</string>
     <string name="content_location">Location</string>
@@ -183,15 +183,14 @@
     <!-- Contact remove dialog -->
     <string name="dialog_discard_contact_title">Remove contact?</string>
     <string name="dialog_discard_contact_message">Are you sure you want to remove this contact? All messages
-        from and to it will be deleted.</string>
+        from and to this contact will be deleted.</string>
 
     <!-- Account deletion dialog -->
-    <string name="dialog_delete_account_warning">Do you really want to delete your Account? All your contacts, group memberships and your account will be gone forever. The data already on your phone will also be affected.</string>
-    <string name="button_delete_account_title">Delete Account on Server</string>
+    <string name="dialog_delete_account_warning">Do you really want to delete your Account? All your contacts, group memberships and your account will be gone for good. The data already on your phone will also be affected.</string>
+    <string name="button_delete_account_title">Delete account on server</string>
     <string name="dialog_delete_account_ok">Delete</string>
 
-    <!-- Group manage selection dialog -->
-    <string name="dialog_manage_group_title">Manage Members</string>
+    <string name="manage_group_members">Manage group members</string>
 
     <!-- Location selection activity -->
     <string name="selectlocation_title">Select location</string>
@@ -207,13 +206,13 @@
     <string name="dialog_remove_group_message">Are you sure you want to remove this group?</string>
     <string name="dialog_leave_group_title">Leave group</string>
     <string name="dialog_leave_group_message">Are you sure you want to leave this group? You will have to be
-        re-invited to participate again.
+        reinvited to participate again.
     </string>
     <string name="state_invited">Invited</string>
     <string name="state_friend">Friend</string>
     <string name="menu_licenses">Licenses</string>
-    <string name="file_chooser_string">choose a file to attach</string>
-    <string name="error_no_videoplayer">can\'t handle video. Please install a proper videoplayer.
+    <string name="file_chooser_string">Choose a file to attach</string>
+    <string name="error_no_videoplayer">Can\'t handle video. Please try another videoplayer.
     </string>
     <string name="menu_group_delete_profile">Close group</string>
     <string name="menu_group_edit_profile">Edit group</string>
@@ -223,21 +222,23 @@
 
     <string name="location">Location</string>
     <string name="show_location_instruction">Use button to show on map</string>
-    <string name="vcard_description">with all contact details</string>
+    <string name="vcard_description">With all contact details</string>
     <string name="profile_name_text">Name</string>
     <string name="profile_key_text">Key</string>
 
-    <string name="transfer_state_encrypting">Encrypting…</string>
-    <string name="transfer_state_decrypting">Decrypting…</string>
-    <string name="transfer_state_downloading">Downloading…</string>
-    <string name="transfer_state_uploading">Uploading…</string>
+    <string name="transfer_state_initializing_download">Waiting for download..</string>
+    <string name="transfer_state_initializing_upload">Starting upload..</string>
+    <string name="transfer_state_encrypting">Encrypting..</string>
+    <string name="transfer_state_decrypting">Decrypting..</string>
+    <string name="transfer_state_downloading">Downloading..</string>
+    <string name="transfer_state_uploading">Uploading..</string>
     <string name="transfer_state_pause">Paused</string>
     <string name="transfer_state_downloading_failed">Download failed</string>
     <string name="transfer_state_uploading_failed">Upload failed</string>
-    <string name="dialog_attachment_choose_reselect_option">Choose another Attachment</string>
+    <string name="dialog_attachment_choose_reselect_option">Choose another attachment</string>
     <string name="dialog_attachment_choose_discard_option">Remove attachment</string>
-    <string name="dialog_attachment_title">Edit Attachment</string>
-    <string name="dialog_block_user_title">Block Contact</string>
+    <string name="dialog_attachment_title">Edit attachment</string>
+    <string name="dialog_block_user_title">Block contact</string>
     <string name="dialog_block_user_message">Do you really want to block this contact? You will not
         receive any further messages from this contact.
     </string>
@@ -259,7 +260,7 @@
     <string name="share_with_contact">Share</string>
     <string name="added_attachment_to_collection">Added %1$s to \'%2$s\' collection</string>
     <string name="select_recipients">Select recipients</string>
-    <string name="rename_collection">Rename Collection</string>
+    <string name="rename_collection">Rename collection</string>
     <string name="dialog_delete_collection_title">Delete collections</string>
     <string name="dialog_delete_collection_message">Are you sure you want to delete the selected collection(s)? The attachments
         will not be deleted.
@@ -276,29 +277,29 @@
 
     <!-- Preferences -->
     <string name="preference_keysize_summary">Renew RSA key with selected size</string>
-    <string name="preference_keysize_title">RSA Key Size</string>
+    <string name="preference_keysize_title">RSA key size</string>
     <string name="category">Category</string>
 
-    <string name="pref_category_image_encoding">Image Attachment Compression</string>
+    <string name="pref_category_image_encoding">Image attachment compression</string>
     <string name="pref_image_size">Image size</string>
     <string name="pref_image_quality">Image quality</string>
-    <string name="pref_category_transfer_mobile">Cellular Attachment Transfer</string>
-    <string name="pref_category_transfer_wifi">WI-FI Attachment Transfer</string>
-    <string name="pref_upload_limit">Auto Upload limit</string>
-    <string name="pref_download_limit">Auto Download limit</string>
+    <string name="pref_category_transfer_mobile">Cellular attachment transfer</string>
+    <string name="pref_category_transfer_wifi">WI-FI attachment transfer</string>
+    <string name="pref_upload_limit">Auto upload limit</string>
+    <string name="pref_download_limit">Auto download limit</string>
 
     <string name="pref_confirm_messages_seen">Confirm seen messages</string>
     <string name="pref_credentials">Credentials</string>
     <string name="pref_export_credentials">Export credentials</string>
     <string name="pref_import_credentials">Import credentials</string>
-    <string name="pref_legal_information">Legal Information</string>
+    <string name="pref_legal_information">Legal information</string>
     <string name="pref_about_information">About</string>
     <string name="pref_encryption">Encryption</string>
     <string name="profile_compare_key_description">For extra security compare this fingerprint with the fingerprint seen by your friends in your contact card.</string>
     <string name="pref_support">Support</string>
     <string name="pref_report_crashes">Send crash reports</string>
-    <string name="pref_report_crashes_summary">Help us improve ${app.name} by sending your crash logs to the development team. Please find detailed information about crash reports in the FAQ.</string>
-    <string name="dialog_report_crash_title">Crash Data</string>
+    <string name="pref_report_crashes_summary">Help us improve ${app.name} by sending your crash logs to the development team. Please find detailed information about crash reports in our FAQ.</string>
+    <string name="dialog_report_crash_title">Crash data</string>
     <string name="dialog_report_crash_message">Crash information available. We kindly ask you to send this information to ${app.name} developers and help us improving our service.</string>
     <string name="dialog_report_crash_negative">Dismiss</string>
     <string name="dialog_report_crash_positive">Send</string>
@@ -308,7 +309,7 @@
     <string name="my_profile_title">My profile</string>
     <string name="contact_item_received_attachment">Received %1$s attachment</string>
     <string name="contact_item_sent_attachment">Sent %1$s attachment</string>
-    <string name="error_avatar_selection">The image you have selected is not suitable as Avatar.</string>
+    <string name="error_avatar_selection">The image you have selected is not suitable as avatar.</string>
     <string name="error_attachment_selection">The file you have selected cannot be used as an attachment.</string>
     <string name="sms_invitation_text">Hey! I\'m now using the free app ${app.name} for secure chatting. Download it now and add me as a contact:\n%1$s%2$s\n%3$s</string>
     <string name="email_invitation_subject">Join me at ${app.name}!</string>
@@ -319,7 +320,7 @@
 
     <string name="dialog_import_credentials_title">Import credentials</string>
     <string name="import_credentials_success">Successfully imported your credentials.\nPlease restart the app.</string>
-    <string name="import_credentials_failure">Error while importing your credentials.</string>
+    <string name="import_credentials_failure">Error while importing your credentials. Please try again.</string>
 
     <string name="enter_password">Password:</string>
     <string name="no_password">Please enter a Password.</string>
@@ -355,7 +356,7 @@
     <string name="about_version_description">Version %1$s (%2$d)</string>
 
     <string name="search_section_caption_contacts">Contacts</string>
-    <string name="search_section_caption_audio_files">Audio Files</string>
+    <string name="search_section_caption_audio_files">Audio files</string>
 
     <!-- media types for "expecting ..." in message states -->
     <string name="attachment_expects_text">expecting %1$s</string>
@@ -392,19 +393,19 @@
 
     <!-- Hoccer XO Credentials Import -->
     <string name="existing_hoccer_xo_profile">Hey, we\'ve found an existing Hoccer XO Profile you can use.</string>
-    <string name="import_or_create_new_profile">You can import your old Profile or create a fresh new one.</string>
-    <string name="import_credentials">Import Credentials</string>
-    <string name="new_profile">New Profile</string>
+    <string name="import_or_create_new_profile">You can import your old profile or create a fresh new one.</string>
+    <string name="import_credentials">Import credentials</string>
+    <string name="new_profile">New profile</string>
     <string name="reading_profile_data">Reading profile data ..</string>
     <string name="existing_hoccer_xo">Hey, we\'ve found an existing Hoccer XO version.</string>
-    <string name="update_and_import_profile">You can import your old Profile, but you have to update Hoccer XO first.</string>
+    <string name="update_and_import_profile">You can import your old profile but you have to update Hoccer XO first.</string>
     <string name="update_hoccer_xo">Update Hoccer XO</string>
     <string name="hoccer_3_0">Hoccer 3.0</string>
     <string name="welcome_hoccer_classic_users">Hoccer now supports full messaging functions next to nearby data sharing. You can stay anonymous or connect with your friends. Yay.</string>
 
     <!-- Backup and Restore -->
-    <string name="backup_title">Create Backup</string>
-    <string name="backup_in_progress_title">Creating Backup..</string>
+    <string name="backup_title">Create backup</string>
+    <string name="backup_in_progress_title">Creating backup..</string>
     <string name="backup_in_progress_subtitle">Creating backup in progress</string>
     <string name="backup_success_title">Backup successful</string>
     <string name="backup_success_message">Successfully created backup.</string>
@@ -416,9 +417,9 @@
     <string name="backup_dialog_complete_backup_warning">Caution: High demand of storage, battery &amp; time</string>
 
     <string name="restore_choose_backup">Choose backup</string>
-    <string name="restore_title">Restore Backup</string>
-    <string name="restore_in_progress_title">Restoring Backup..</string>
-    <string name="restore_in_progress_subtitle">Restoring backup in Progress</string>
+    <string name="restore_title">Restore backup</string>
+    <string name="restore_in_progress_title">Restoring backup..</string>
+    <string name="restore_in_progress_subtitle">Restoring backup in progress</string>
     <string name="restore_success_title">Restore successful</string>
     <string name="restore_success_message">Backup was successfully restored.</string>
     <string name="restore_failure_title">Restore failed</string>
@@ -433,8 +434,8 @@
     <string name="password_protection">Password protection</string>
     <string name="activate">Activate</string>
     <string name="unlock">Unlock</string>
-    <string name="change_password">Change password</string>
-    <string name="set_password">Set password</string>
+    <string name="change_password">Change your password</string>
+    <string name="set_password">Set your password</string>
     <string name="password">Password</string>
     <string name="password_note">Please note, that we cannot reset or restore your password.</string>
     <string name="confirm_password">Confirm your password</string>
@@ -454,19 +455,17 @@
 
     <string name="progress_cancelling">Cancelling..</string>
 
-    <string name="nearby">nearby</string>
-    <string name="worldwide">worldwide</string>
-    <string name="worldwide_mode">worldwide mode</string>
+    <string name="worldwide_capitalized">Worldwide</string>
+    <string name="worldwide_mode">Worldwide mode</string>
     <string name="leave_after">Leave after..</string>
     <string name="group_notifications">Group notifications</string>
-    <string name="mute_contact">mute</string>
-    <string name="unmute_contact">unmute</string>
-    <string name="toast_mute_chat">muted</string>
-    <string name="toast_unmute_chat">unmuted</string>
+    <string name="mute_contact">Mute contact</string>
+    <string name="unmute_contact">Unmute contact</string>
+    <string name="toast_mute_chat">Contact is muted</string>
+    <string name="toast_unmute_chat">Contact is unmuted</string>
     <string name="blocked">Blocked</string>
-    <string name="auto_download_attachments">Auto-Download attachments</string>
-    <string name="ww_tutorial_message">In Worldwide mode you can chat with random users worldwide who have also activated Worldwide mode. Please take a look at the available settings for Worldwide mode. How long do you want to keep Worldwide mode activated after leaving the Worldwide view?
-    </string>
+    <string name="auto_download_attachments">Auto-download attachments</string>
+    <string name="worldwide_tutorial_message">In Worldwide mode you can chat with random users worldwide who have also activated Worldwide mode. Please take a look at the available settings for Worldwide. How long do you want to keep Worldwide activated and therefore visible for others after leaving the Worldwide view?</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>

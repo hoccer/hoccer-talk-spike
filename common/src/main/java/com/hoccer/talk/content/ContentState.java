@@ -1,8 +1,6 @@
 package com.hoccer.talk.content;
 
 public enum ContentState {
-    /* content selected by user */
-    SELECTED,
     /* content being downloaded in various states */
     DOWNLOAD_NEW,
     DOWNLOAD_DOWNLOADING,

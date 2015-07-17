@@ -20,13 +20,7 @@ public class DataMessageItem extends MessageItem {
     }
 
     @Override
-    protected void configureViewForMessage(View view) {
-        super.configureViewForMessage(view);
-        configureAttachmentViewForMessage(view);
-    }
-
-    @Override
-    protected void displayAttachment(XoTransfer attachment) {
-        super.displayAttachment(attachment);
+    protected void displayAttachment() {
+        super.displayAttachment();
     }
 }

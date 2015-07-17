@@ -14,7 +14,7 @@
             android:paddingRight="20dp"
             android:paddingTop="10dp"
             android:paddingBottom="10dp"
-            android:text="@string/ww_tutorial_message"/>
+            android:text="@string/worldwide_tutorial_message"/>
 
     <View
             android:layout_width="wrap_content"

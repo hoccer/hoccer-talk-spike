@@ -1,4 +1,4 @@
-package com.hoccer.xo.android.profile;
+package com.hoccer.xo.android.profile.client;
 
 import android.app.Activity;
 import android.content.Context;

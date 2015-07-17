@@ -22,7 +22,7 @@
     <string name="menu_settings">Einstellungen</string>
     <string name="menu_about">Über ${app.name}</string>
     <string name="menu_music_viewer">Medien</string>
-    <string name="menu_reconnect">erneut verbinden</string>
+    <string name="menu_reconnect">Erneut verbinden</string>
     <string name="menu_clear_conversation">Chat löschen</string>
     <string name="menu_contacts">Kontakte</string>
 
@@ -49,7 +49,7 @@
     <string name="group_request_decline_invitation_message">Möchtest du die Gruppeneinladung wirklich ablehnen?</string>
 
     <!-- Deleting attachments -->
-    <string name="dialog_attachment_delete_title">Anhang Löschen</string>
+    <string name="dialog_attachment_delete_title">Anhang löschen</string>
     <string name="dialog_attachment_delete_message">Willst du die ausgewählten Anhänge wirklich löschen?</string>
     <string name="deleted_attachment">[Gelöschter Anhang]</string>
 
@@ -63,7 +63,7 @@
 
     <!-- Nearby location request -->
     <string name="dialog_enable_location_service_title">Ortungsdienste</string>
-    <string name="dialog_enable_location_service_message">Um diese Funktion nutzen zu können musst Du Ortungsdienste aktivieren. (GPS oder Netzwerkposition). Willst Du es aktivieren?</string>
+    <string name="dialog_enable_location_service_message">Um diese Funktion nutzen zu können, musst du die Ortungsdienste aktivieren (GPS oder Netzwerkposition). Willst du diese aktivieren?</string>
 
     <!-- Contact list items -->
     <string name="contact_name_new_client">Neuer Kontakt</string>
@@ -73,12 +73,12 @@
     <!-- Composition fragment -->
     <string name="composition_text_hint">Nachricht eingeben</string>
     <string name="dialog_empty_group_title">Nachricht kann nicht gesendet werden</string>
-    <string name="dialog_empty_group_message">Du kannst keine Nachrichten an die Gruppe verschicken, weil sie außer Dir keine Mitglieder hat. Du kannst aber deine Freunde in die Gruppe einladen.</string>
+    <string name="dialog_empty_group_message">Du kannst keine Nachrichten an die Gruppe verschicken, weil außer dir bisher keine Mitglieder beigetreten sind.</string>
 
     <string name="attachment_over_limit_title">Nachricht versenden?</string>
     <string name="attachment_over_limit_upload_question">Der Anhang ist %1$s groß. Willst du die Nachricht wirklich versenden?</string>
     <string name="attachment_over_limit_confirm">Senden</string>
-    <string name="attachment_on_hold_download_question">%1$s runterladen?</string>
+    <string name="attachment_on_hold_download_question">%1$s herunterladen?</string>
     <string name="attachment_encoding_error">Fehler während der Dateiverarbeitung. Anhang kann nicht versendet werden.</string>
 
     <!-- Messaging fragment -->
@@ -88,7 +88,7 @@
     <string name="context_menu_delete_message">Löschen</string>
 
     <!-- Pairing toast messages -->
-    <string name="toast_pairing_successful">Du hast dich erfolgreich befreundet.</string>
+    <string name="toast_pairing_successful">Als Freund hinzugefügt!.</string>
     <string name="toast_pairing_failed">Ungültiger Code. Bitte versuche es erneut.</string>
 
     <!-- Invitation dialog -->
@@ -161,7 +161,7 @@
     <string name="content_clipboard">Aus Zwischenablage</string>
 
     <!-- FullscreenPlayer -->
-    <string name="deleted_contact_name">Entfernter Kontakt</string>
+    <string name="deleted_contact_name">Gelöschter Kontakt</string>
 
     <!-- Attachment type selection dialog -->
     <string name="selectattachment_title">Anhang auswählen</string>
@@ -180,7 +180,7 @@
     <string name="dialog_delete_account_ok">Löschen</string>
 
     <!-- Group manage selection dialog -->
-    <string name="dialog_manage_group_title">Gruppenmitglieder verwalten</string>
+    <string name="manage_group_members">Gruppenmitglieder verwalten</string>
 
     <!-- Location selection activity -->
     <string name="selectlocation_title">Standort auswählen</string>
@@ -201,7 +201,7 @@
     <string name="state_friend">Freund</string>
     <string name="menu_licenses">Lizenzen</string>
     <string name="file_chooser_string">Datei auswählen</string>
-    <string name="error_no_videoplayer">Video nicht abspielbar. Bitte anderen Videoplayer installieren.
+    <string name="error_no_videoplayer">Video nicht abspielbar. Bitte anderen Videoplayer verwenden.
     </string>
     <string name="menu_group_delete_profile">Gruppe schließen</string>
     <string name="menu_group_edit_profile">Gruppe bearbeiten</string>
@@ -215,10 +215,12 @@
     <string name="profile_name_text">Name</string>
     <string name="profile_key_text">Schlüssel</string>
 
-    <string name="transfer_state_encrypting">Verschlüsseln…</string>
-    <string name="transfer_state_decrypting">Entschlüsseln…</string>
-    <string name="transfer_state_downloading">Downloading…</string>
-    <string name="transfer_state_uploading">Uploading…</string>
+    <string name="transfer_state_initializing_download">Warte auf Download..</string>
+    <string name="transfer_state_initializing_upload">Starte Upload..</string>
+    <string name="transfer_state_encrypting">Verschlüsseln..</string>
+    <string name="transfer_state_decrypting">Entschlüsseln..</string>
+    <string name="transfer_state_downloading">Lade..</string>
+    <string name="transfer_state_uploading">Versende..</string>
     <string name="transfer_state_pause">Pausiert</string>
     <string name="transfer_state_downloading_failed">Download Fehler</string>
     <string name="transfer_state_uploading_failed">Upload Fehler</string>
@@ -244,7 +246,7 @@
     <string name="enter_new_collection_name">Bitte gib einen Namen für die neue Sammlung ein:</string>
     <string name="add_to_collection">Einer Sammlung hinzufügen</string>
     <string name="share_with_contact">Teilen</string>
-    <string name="added_attachment_to_collection">%1$s zur Sammlung \'%2$s\' hinzugefügt</string>
+    <string name="added_attachment_to_collection">%1$s wurde zur Sammlung \'%2$s\' hinzugefügt</string>
     <string name="select_recipients">Empfänger auswählen</string>
     <string name="rename_collection">Sammlung umbenennen</string>
     <string name="dialog_delete_collection_title">Sammlungen entfernen</string>
@@ -271,8 +273,8 @@
     <string name="pref_image_quality">Bildqualität</string>
     <string name="pref_category_transfer_mobile">Mobildaten Attachment Transfer</string>
     <string name="pref_category_transfer_wifi">WLAN Attachment Transfer</string>
-    <string name="pref_upload_limit">Auto Upload limit</string>
-    <string name="pref_download_limit">Auto Download limit</string>
+    <string name="pref_upload_limit">Auto Upload Limit</string>
+    <string name="pref_download_limit">Auto Download Limit</string>
 
     <string name="pref_confirm_messages_seen">Lesebestätigung senden</string>
     <string name="pref_credentials">Zugangsdaten</string>
@@ -284,8 +286,8 @@
     <string name="pref_support">Technischer Support</string>
     <string name="pref_report_crashes">Abstürze melden</string>
     <string name="pref_report_crashes_summary">Unterstütze ${app.name} bei der Weiterentwicklung indem du deine Abstürze meldest. Welche Informationen an ${app.name} geschickt werden, kannst du in den FAQ einsehen.</string>
-    <string name="dialog_report_crash_title">Crash Information</string>
-    <string name="dialog_report_crash_message">Es wurde eine Aufzeichnung des letzten Crashs gefunden. Bitte schicke diesen Report an ${app.name}, damit wir den Fehler schnellst möglich beheben können.</string>
+    <string name="dialog_report_crash_title">Crash-Information</string>
+    <string name="dialog_report_crash_message">Es wurde eine Aufzeichnung des letzten Crashs gefunden. Bitte schicke diesen Bericht an ${app.name}, damit wir den Fehler schnellst möglich beheben können.</string>
     <string name="dialog_report_crash_negative">Abbrechen</string>
     <string name="dialog_report_crash_positive">Senden</string>
     <string name="pref_please_wait">Bitte warten…</string>
@@ -301,11 +303,11 @@
     <string name="email_invitation_text">Hey!&lt;br&gt;Ich nutze jetzt die Gratis-App ${app.name} zum sicheren Chatten! Jetzt herunterladen und mich als Kontakt hinzufügen:&lt;br&gt;&lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;&lt;br&gt;&lt;br&gt;%3$s</string>
     <string name="dialog_export_credentials_title">Zugangsdaten exportieren</string>
     <string name="export_credentials_success">Zugangsdaten erfolgreich exportiert.</string>
-    <string name="export_credentials_failure">Es ist ein Fehler beim Exportieren der Zugangsdaten aufgetreten.</string>
+    <string name="export_credentials_failure">Es ist ein Fehler beim Exportieren der Zugangsdaten aufgetreten. Bitte versuche es erneut.</string>
 
     <string name="dialog_import_credentials_title">Zugangsdaten importieren</string>
     <string name="import_credentials_success">Zugangsdaten erfolgreich importiert.\nBitte starte die App neu.</string>
-    <string name="import_credentials_failure">Es ist ein Fehler beim Importieren der Zugangsdaten aufgetreten.</string>
+    <string name="import_credentials_failure">Es ist ein Fehler beim Importieren der Zugangsdaten aufgetreten. Bitte versuche es erneut.</string>
 
     <string name="enter_password">Passwort:</string>
     <string name="no_password">Bitte gib ein Passwort ein.</string>
@@ -365,7 +367,7 @@
 
     <string name="nearby_saved">Nahebei gespeichert</string>
     <string name="worldwide_saved">Weltweit gespeichert</string>
-    <string name="error_compatible_app_unavailable">Keine App zum öffnen des gewählten Objekts gefunden.</string>
+    <string name="error_compatible_app_unavailable">Keine App zum Öffnen des gewählten Objekts gefunden.</string>
 
     <!-- Nearby all invite texts -->
     <string name="group_invite_all">%1$d Mitglieder als Freunde einladen</string>
@@ -379,7 +381,7 @@
 
     <!-- Hoccer XO Credentials Import -->
     <string name="existing_hoccer_xo_profile">Hey, wir haben ein existierendes Hoccer XO Profil gefunden.</string>
-    <string name="import_or_create_new_profile">Du kannst dein bestehendes Profil weiterverwenden oder ein neues erstellen.</string>
+    <string name="import_or_create_new_profile">Du kannst dein bestehendes Profil weiterverwenden oder ein Neues erstellen.</string>
     <string name="import_credentials">Profil importieren</string>
     <string name="new_profile">Neues Profil</string>
     <string name="reading_profile_data">Lese Profil Daten ..</string>
@@ -392,7 +394,7 @@
     <!-- Backup and Restore -->
     <string name="backup_title">Backup erstellen</string>
     <string name="backup_in_progress_title">Erstelle Backup..</string>
-    <string name="backup_in_progress_subtitle">Backup Erstellung läuft</string>
+    <string name="backup_in_progress_subtitle">Backup-Erstellung läuft</string>
     <string name="backup_success_title">Backup erfolgreich</string>
     <string name="backup_success_message">Backup erfolgreich erstellt.</string>
     <string name="backup_failure_title">Backup fehlgeschlagen</string>
@@ -443,6 +445,7 @@
 
     <string name="nearby">in der Nähe</string>
     <string name="worldwide">weltweit</string>
+    <string name="worldwide_capitalized">Weltweit</string>
     <string name="worldwide_mode">weltweit modus</string>
     <string name="leave_after">Verlassen nach..</string>
     <string name="group_notifications">Gruppen Benachrichtigungen</string>
@@ -452,8 +455,7 @@
     <string name="toast_unmute_chat">laut geschaltet</string>
     <string name="blocked">Blockiert</string>
     <string name="auto_download_attachments">Anhänge automatisch laden</string>
-    <string name="ww_tutorial_message">Mit der Weltweit-Funktion, kannst du mit zufällig ausgewählten Teilnehmern kommunizieren, die ebenfalls ‚Weltweit‘ aktiviert haben. Mache dich bitte mit den Einstellungen zu diesem Modus vertraut. Wie lange möchtest du nach Verlassen der „Weltweit“-Ansicht noch weltweit erreichbar sein? 
-    </string>
+    <string name="worldwide_tutorial_message">Mit der Weltweit-Funktion kannst du zufällig mit ausgewählten Teilnehmern kommunizieren, die ebenfalls Weltweit aktiviert haben. Mache dich bitte mit den Einstellungen zu diesem Modus vertraut. Wie lange möchtest du nach Verlassen der Weltweit-Ansicht noch weltweit erreichbar und somit für andere Nutzer sichtbar sein?</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Kontakt</item>

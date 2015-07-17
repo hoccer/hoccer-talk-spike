@@ -66,6 +66,7 @@ public class RegistrationActivity extends XoActivity {
     public void startNewClientRegistration() {
         startActivity(new Intent(this, ClientProfileActivity.class)
                 .setAction(ClientProfileActivity.ACTION_CREATE_SELF));
+        setResult(RESULT_OK);
         finish();
     }
 

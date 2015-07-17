@@ -159,16 +159,16 @@ public class ChatMessagesAdapter extends MessagesAdapter implements IXoMessageLi
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        MessageItem chatItem = getItem(position);
+        MessageItem messageItem = getItem(position);
 
-        if (!chatItem.getMessage().isSeen()) {
-            markMessageAsSeen(chatItem.getMessage());
+        if (!messageItem.getMessage().isSeen()) {
+            markMessageAsSeen(messageItem.getMessage());
         }
 
         if (convertView == null) {
-            convertView = chatItem.createViewForMessage();
+            convertView = messageItem.createAndUpdateView();
         } else {
-            convertView = chatItem.recycleViewForMessage(convertView);
+            convertView = messageItem.updateView(convertView);
         }
 
         return convertView;
@@ -225,7 +225,7 @@ public class ChatMessagesAdapter extends MessagesAdapter implements IXoMessageLi
         if (itemType == ChatItemType.ChatItemWithImage) {
             return new ImageMessageItem(mActivity, message);
         } else if (itemType == ChatItemType.ChatItemWithVideo) {
-            return new ChatVideoItem(mActivity, message);
+            return new VideoMessageItem(mActivity, message);
         } else if (itemType == ChatItemType.ChatItemWithAudio) {
             return new AudioMessageItem(mActivity, message);
         } else if (itemType == ChatItemType.ChatItemWithData) {

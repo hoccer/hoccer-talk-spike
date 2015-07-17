@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/profile_group_members_container"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp" tools:showIn="@layout/fragment_group_profile">
+
+    <TextView
+            android:id="@+id/profile_group_members_title"
+            android:text="@string/profile_group_members_title"
+            android:gravity="left"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/AppBaseTheme.Group.Members.Title"/>
+
+    <View
+            android:layout_width="fill_parent"
+            style="@style/AppBaseTheme.Group.HorizontalDivider"/>
+
+    <ListView
+            android:id="@+id/profile_group_members_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:divider="@null"
+            android:dividerHeight="10dp"
+            android:layout_marginTop="10dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp"
+            style="@style/AppBaseTheme.Group.List"/>
+</LinearLayout>

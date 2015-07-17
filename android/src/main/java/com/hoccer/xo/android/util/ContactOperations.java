@@ -12,10 +12,14 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.talk.content.SelectedFile;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.Transformer;
 import org.apache.log4j.Logger;
 
 import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**

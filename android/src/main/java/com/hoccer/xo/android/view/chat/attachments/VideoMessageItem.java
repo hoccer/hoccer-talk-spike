@@ -31,15 +31,15 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
 
-public class ChatVideoItem extends MessageItem {
+public class VideoMessageItem extends MessageItem {
 
-    private final static Logger LOG = Logger.getLogger(ChatVideoItem.class);
+    private final static Logger LOG = Logger.getLogger(VideoMessageItem.class);
 
     private String mThumbnailPath;
     private ImageView mTargetView;
     private MediaScannedReceiver mMediaScannedReceiver;
 
-    public ChatVideoItem(Context context, TalkClientMessage message) {
+    public VideoMessageItem(Context context, TalkClientMessage message) {
         super(context, message);
     }
 
@@ -49,35 +49,29 @@ public class ChatVideoItem extends MessageItem {
     }
 
     @Override
-    protected void configureViewForMessage(View view) {
-        super.configureViewForMessage(view);
-        configureAttachmentViewForMessage(view);
-    }
-
-    @Override
-    protected void displayAttachment(final XoTransfer attachment) {
-        super.displayAttachment(attachment);
+    protected void displayAttachment() {
+        super.displayAttachment();
 
         // add view lazily
-        if (mContentWrapper.getChildCount() == 0) {
+        if (mAttachmentContentContainer.getChildCount() == 0) {
             LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             RelativeLayout videoLayout = (RelativeLayout) inflater.inflate(R.layout.content_video, null);
-            mContentWrapper.addView(videoLayout);
+            mAttachmentContentContainer.addView(videoLayout);
         }
 
-        ImageButton playButton = (ImageButton) mContentWrapper.findViewById(R.id.ib_play_button);
+        ImageButton playButton = (ImageButton) mAttachmentContentContainer.findViewById(R.id.ib_play_button);
         playButton.setBackgroundResource(R.drawable.ic_light_play);
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openVideo(attachment);
+                openVideo(mAttachment);
             }
         });
 
-        mContentWrapper.setOnClickListener(new View.OnClickListener() {
+        mAttachmentContentContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openVideo(attachment);
+                openVideo(mAttachment);
             }
         });
 
@@ -90,7 +84,7 @@ public class ChatVideoItem extends MessageItem {
 
         // retrieve thumbnail path if not set already
         if (mThumbnailPath == null) {
-            mThumbnailPath = retrieveThumbnailPath(UriUtils.getAbsoluteFileUri(attachment.getFilePath()));
+            mThumbnailPath = retrieveThumbnailPath(UriUtils.getAbsoluteFileUri(mAttachment.getFilePath()));
         }
 
         // adjust width/height based on thumbnail size if it exists
@@ -107,25 +101,22 @@ public class ChatVideoItem extends MessageItem {
         }
 
         // register layout change listener and resize thumbnail view
-        RelativeLayout rootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
+        RelativeLayout rootView = (RelativeLayout) mAttachmentContentContainer.findViewById(R.id.rl_root);
         rootView.getLayoutParams().width = width;
         rootView.getLayoutParams().height = height;
 
         // set gravity and message bubble mask
-        ImageView overlayView = (ImageView) mContentWrapper.findViewById(R.id.iv_picture_overlay);
+        ImageView overlayView = (ImageView) mAttachmentContentContainer.findViewById(R.id.iv_picture_overlay);
         if (mMessage.isIncoming()) {
-            mContentWrapper.setGravity(Gravity.LEFT);
+            mAttachmentContentContainer.setGravity(Gravity.LEFT);
             overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_incoming));
         } else {
-            mContentWrapper.setGravity(Gravity.RIGHT);
+            mAttachmentContentContainer.setGravity(Gravity.RIGHT);
             overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_outgoing));
         }
 
-        // we need to copy the background to rootview which will have the correct bubble size
-        rootView.setBackgroundDrawable(mAttachmentView.getBackground());
-        rootView.setPadding(0, 0, 0, 0);
-        mAttachmentView.setBackgroundDrawable(null);
-        mAttachmentView.setPadding(0, 0, 0, 0);
+        mMessageContainer.setBackgroundDrawable(null);
+        mMessageContainer.setPadding(0, 0, 0, 0);
 
         // load thumbnail with picasso
         mTargetView = (ImageView) rootView.findViewById(R.id.iv_picture);
@@ -156,6 +147,7 @@ public class ChatVideoItem extends MessageItem {
 
     @Override
     public void detachView() {
+        super.detachView();
         // cancel image loading if in case display attachment has been called
         if (mTargetView != null) {
             Picasso.with(mContext).cancelRequest(mTargetView);
@@ -229,7 +221,7 @@ public class ChatVideoItem extends MessageItem {
             Uri scannedFileUri = intent.getParcelableExtra(IntentHelper.EXTRA_ATTACHMENT_FILE_URI);
             Uri videoFileUri = UriUtils.getAbsoluteFileUri(mAttachment.getFilePath());
             if (scannedFileUri.equals(videoFileUri)) {
-                displayAttachment(mAttachment);
+                displayAttachment();
                 listenToMediaScannedIntent(false);
             }
         }
