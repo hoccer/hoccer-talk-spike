@@ -25,4 +25,8 @@ public interface IXoClientConfiguration {
     public float getReconnectBackoffVariableMaximum();
 
     public boolean isSendDeliveryConfirmationEnabled();
+
+    public long getTimeToLiveInWorldwide();
+    public String getNotificationPreferenceForWorldwide();
+    public boolean isAutomaticWorldwideDownloadEnabled();
 }

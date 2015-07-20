@@ -116,7 +116,7 @@
 
         <EditText
                 android:id="@+id/messaging_composer_text"
-                android:inputType="textShortMessage|textMultiLine"
+                android:inputType="text|textMultiLine|textCapSentences"
                 android:hint="@string/composition_text_hint"
                 android:singleLine="false"
                 android:maxLines="10"

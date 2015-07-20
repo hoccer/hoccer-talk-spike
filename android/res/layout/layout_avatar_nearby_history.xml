@@ -18,7 +18,7 @@
             android:layout_alignLeft="@+id/avatar_image"
             android:layout_alignStart="@+id/avatar_image"
             android:layout_alignBottom="@+id/avatar_image"
-            android:background="@drawable/shape_nearby_indicator_badge"
+            android:background="@drawable/shape_indicator_history"
             android:layout_width="12dp"
             android:layout_height="12dp"
             android:gravity="center">

@@ -5,6 +5,7 @@ import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServer;
 import com.hoccer.talk.server.TalkServerConfiguration;
 import com.hoccer.talk.server.filecache.FilecacheClient;
+import com.hoccer.talk.server.rpc.TalkRpcHandler;
 import com.hoccer.talk.util.NamedThreadFactory;
 import org.apache.log4j.Logger;
 
@@ -52,6 +53,7 @@ public class CleaningAgent {
 
 
     private boolean firstRunDone = false;
+    private boolean firstEnvironmentRunDone = false;
 
     public CleaningAgent(TalkServer server) {
         mServer = server;
@@ -61,31 +63,7 @@ public class CleaningAgent {
                 mConfig.getCleaningAgentThreadPoolSize(),
                 new NamedThreadFactory("cleaning-agent")
         );
- /*
-       LOG.info("Cleaning clients scheduling will start in '" + mConfig.getCleanupAllClientsDelay() + "' seconds.");
-        mExecutor.schedule(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    scheduleCleanAllClients();
-                } catch (Throwable t) {
-                    LOG.error("caught and swallowed exception escaping runnable", t);
-                }
-            }
-        }, mConfig.getCleanupAllClientsDelay(), TimeUnit.SECONDS);
 
-        LOG.info("Cleaning deliveries scheduling will start in '" + mConfig.getCleanupAllDeliveriesDelay() + "' seconds.");
-        mExecutor.schedule(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    scheduleCleanAllDeliveries();
-                } catch (Throwable t) {
-                    LOG.error("caught and swallowed exception escaping runnable", t);
-                }
-            }
-        }, mConfig.getCleanupAllDeliveriesDelay(), TimeUnit.SECONDS);
-*/
         LOG.info("Cleaning scheduling will start in '" + mConfig.getCleanupAllClientsDelay() + "' seconds.");
         mExecutor.schedule(new Runnable() {
             @Override
@@ -98,8 +76,62 @@ public class CleaningAgent {
             }
         }, mConfig.getCleanupAllClientsDelay(), TimeUnit.SECONDS);
 
+        mExecutor.schedule(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    scheduleCleanEnvironments();
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                }
+            }
+        }, mConfig.getCleanupEnvironmentsDelay(), TimeUnit.SECONDS);
 
     }
+
+    private void scheduleCleanAll() {
+
+        int cleanUpInInterval = firstRunDone ? mConfig.getCleanupAllClientsInterval() : 1;
+        LOG.info("scheduling full cleanup in '" + cleanUpInInterval + "' seconds.");
+        mExecutor.schedule(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    doCleanAllDeliveries();
+                    doCleanAllClients();
+                    doCleanGroups();
+                    doCleanRelationships();
+                    mServer.cleanAllLocks();
+                    firstRunDone = true;
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                } finally {
+                    scheduleCleanAll();
+                }
+            }
+        } , cleanUpInInterval, TimeUnit.SECONDS);
+    }
+
+    private void scheduleCleanEnvironments() {
+
+        int cleanUpInInterval = firstEnvironmentRunDone ? mConfig.getCleanupEnvironmentsInterval() : 1;
+        LOG.info("scheduling environment cleanup in '" + cleanUpInInterval + "' seconds.");
+        mExecutor.schedule(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    TalkRpcHandler.expireEnvironments(mServer);
+                    firstEnvironmentRunDone = true;
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                } finally {
+                    scheduleCleanEnvironments();
+                }
+            }
+        } , cleanUpInInterval, TimeUnit.SECONDS);
+    }
+
+
 
     public static boolean timeAgo(Date when, long milliSeconds) {
         long ago = new Date().getTime() - when.getTime();
@@ -121,13 +153,13 @@ public class CleaningAgent {
                 }
                 if (timeAgo(lastLogin, UNUSED_CLIENT_LIFE_TIME)) {
                     // delete client that has not been active for UNUSED_CLIENT_LIFE_TIME months
-                    LOG.info("deleting unused client id '" + clientId + "'");
+                    LOG.debug("deleting unused client id '" + clientId + "'");
                     client.setSrpVerifier("");
                     client.setReasonDeleted("unused-lifetime-expired");
                     mDatabase.markClientDeleted(client);
                     mServer.getUpdateAgent().performAccountDeletion(clientId);
                 } else {
-                    LOG.info("keeping used client id '" + clientId + "', just cleaning keys and tokens");
+                    LOG.debug("keeping used client id '" + clientId + "', just cleaning keys and tokens");
                     doCleanKeysForClient(clientId);
                     doCleanTokensForClient(clientId);
                 }
@@ -140,14 +172,14 @@ public class CleaningAgent {
 
             if (client != null && timeAgo(client.getTimeDeleted(), DELETED_CLIENT_LIFE_TIME)) {
                 // finally remove deleted client
-                LOG.info("removing deleted expired client id '" + clientId + "'");
+                LOG.debug("removing deleted expired client id '" + clientId + "'");
                 mDatabase.deleteClient(client);
 
                 TalkPresence presence = mDatabase.findPresenceForClient(originalClientId);
                 if (presence != null) {
                     mDatabase.deletePresence(presence);
                 } else {
-                    LOG.info("no presence for expired client id '" + clientId + "'");
+                    LOG.debug("no presence for expired client id '" + clientId + "'");
                 }
 
                 TalkClientHostInfo clientHostInfo = mDatabase.findClientHostInfoForClient(originalClientId);
@@ -156,65 +188,10 @@ public class CleaningAgent {
                 }
                 mServer.getFilecacheClient().deleteAccount(originalClientId);
             } else {
-                LOG.info("keeping deleted expired client id '" + clientId + "', has been marked for deletion on "+client.getTimeDeleted());
+                LOG.debug("keeping deleted expired client id '" + clientId + "', has been marked for deletion on "+client.getTimeDeleted());
             }
         }
     }
-    /*
-    private void scheduleCleanAllDeliveries() {
-        LOG.info("scheduling deliveries cleanup in '" + mConfig.getCleanupAllDeliveriesInterval() + "' seconds.");
-        mExecutor.schedule(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    doCleanAllFinishedDeliveries();
-                    scheduleCleanAllDeliveries();
-                } catch (Throwable t) {
-                    LOG.error("caught and swallowed exception escaping runnable", t);
-                }
-            }
-        }, mConfig.getCleanupAllDeliveriesInterval(), TimeUnit.SECONDS);
-    }
-
-    private void scheduleCleanAllClients() {
-        LOG.info("scheduling client cleanup in '" + mConfig.getCleanupAllClientsInterval() + "' seconds.");
-        mExecutor.schedule(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    doCleanAllClients();
-                    doCleanGroups();
-                    doCleanRelationships();
-                    scheduleCleanAllClients();
-                } catch (Throwable t) {
-                    LOG.error("caught and swallowed exception escaping runnable", t);
-                }
-            }
-        } , mConfig.getCleanupAllClientsInterval(), TimeUnit.SECONDS);
-    }
-    */
-    private void scheduleCleanAll() {
-
-        int cleanUpInInterval = firstRunDone ? mConfig.getCleanupAllClientsInterval() : 1;
-        LOG.info("scheduling cleanup in '" + mConfig.getCleanupAllClientsInterval() + "' seconds.");
-        mExecutor.schedule(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    doCleanAllDeliveries();
-                    doCleanAllClients();
-                    doCleanGroups();
-                    doCleanRelationships();
-                    firstRunDone = true;
-                } catch (Throwable t) {
-                    LOG.error("caught and swallowed exception escaping runnable", t);
-                } finally {
-                    scheduleCleanAll();
-                }
-            }
-        } , cleanUpInInterval, TimeUnit.SECONDS);
-    }
-
 
     public void cleanFinishedDelivery(final TalkDelivery finishedDelivery) {
         mExecutor.execute(new Runnable() {
@@ -236,7 +213,9 @@ public class CleaningAgent {
         LOG.info("Cleaning '" + allClients.size() + "' clients...");
         long current = 0;
         for (TalkClient client : allClients) {
-            LOG.info("Clean client " + current++ + "/"+allClients.size() + " clients...");
+            if (current++ % 10000 == 0) {
+                LOG.info("Clean client " + current + "/" + allClients.size() + " clients...");
+            }
             cleanClientData(client.getClientId());
         }
         long endTime = System.currentTimeMillis();
@@ -400,61 +379,30 @@ public class CleaningAgent {
     }
 
     private void doCleanGroups() {
-        LOG.debug("doCleanGroups");
         Date oldGroupDate = new Date(new Date().getTime() - DELETED_GROUP_PRESENCE_LIFE_TIME);
+        LOG.info("doCleanGroups: cleaning expired groups deleted before "+ oldGroupDate);
 
         int deleted = mDatabase.deleteGroupPresencesWithStateChangedBefore(TalkGroupPresence.STATE_DELETED, oldGroupDate);
-        LOG.debug("doCleanGroups: deleted "+deleted+" group presences");
-
-        /*
-        List<TalkGroupPresence> groupPresences = mDatabase.findGroupPresencesWithStateChangedBefore(TalkGroupPresence.STATE_DELETED, oldGroupDate);
-        LOG.debug("doCleanGroups: deleting "+groupPresences.size()+" group presences");
-        int counter = 0;
-        for (TalkGroupPresence groupPresence : groupPresences) {
-            mDatabase.deleteGroupPresence(groupPresence);
-            if (counter++ % 100 == 0) {
-                LOG.debug("doCleanGroups: deleted "+ counter + "/"+groupPresences.size()+" group presences");
-            }
-        }
-        */
+        LOG.info("doCleanGroups: deleted "+deleted+" group presences");
 
         Date oldGroupMemberDate = new Date(new Date().getTime() - DELETED_GROUP_MEMBER_LIFE_TIME);
+
+        LOG.info("doCleanGroups: cleaning expired group memberships deleted before "+ oldGroupMemberDate);
 
         deleted = mDatabase.deleteGroupMembershipsWithStatesChangedBefore(
                 new String[]{TalkGroupMembership.STATE_GROUP_REMOVED, TalkGroupMembership.STATE_NONE}, oldGroupMemberDate);
 
-        LOG.debug("doCleanGroups: deleted "+deleted+" group members");
-
-        /*
-        List<TalkGroupMembership> groupMembers =
-                mDatabase.findGroupMembershipsWithStatesChangedBefore(
-                        new String[]{TalkGroupMembership.STATE_GROUP_REMOVED, TalkGroupMembership.STATE_NONE}, oldGroupMemberDate);
-        LOG.debug("doCleanGroups: deleting "+groupMembers.size()+" group members");
-        counter = 0;
-        for (TalkGroupMembership membership : groupMembers) {
-            mDatabase.deleteGroupMembership(membership);
-            if (counter++ % 100 == 0) {
-                LOG.debug("doCleanGroups: deleted " + counter + "/" + groupMembers.size() + " group members");
-            }
-        }
-        */
-
+        LOG.info("doCleanGroups: deleted "+deleted+" group members");
+        // TODO: clean dangling nearby and worldwide groups and memberships without environments (there shouldn't be any,but we should check)
     }
 
     private void doCleanRelationships() {
-        LOG.debug("doCleanRelationships");
+        LOG.info("doCleanRelationships");
         Date oldDate = new Date(new Date().getTime() - NO_RELATIONSHIP_LIFE_TIME);
-        int deleted = mDatabase.deleteGroupMembershipsWithStatesChangedBefore(new String[]{TalkRelationship.STATE_NONE}, oldDate);
-        LOG.debug("doCleanRelationships: deleted "+deleted+" relationships");
- /*
-        List<TalkRelationship> relationships = mDatabase.findRelationshipsWithStatesChangedBefore(
-                new String[]{TalkRelationship.STATE_NONE}, oldDate);
-
-        LOG.debug("doCleanRelationships: deleting " + relationships.size() + " relationships");
-        for (TalkRelationship relationship : relationships) {
-            mDatabase.deleteRelationship(relationship);
-        }
- */
+        LOG.info("doCleanRelationships: cleaning expired relationships deleted before "+ oldDate);
+        int deleted = mDatabase.deleteRelationshipsWithStatesAndNotNotificationsDisabledChangedBefore(new String[]{TalkRelationship.STATE_NONE}, oldDate);
+        LOG.info("doCleanRelationships: deleted "+deleted+" relationships");
+        // TODO: Cleaning might cause unidirectional relationships - we should handle that properly
     }
 
 }

@@ -1,14 +1,11 @@
 package com.hoccer.xo.android.adapter;
 
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.CheckedTextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.view.avatar.AvatarView;
-import com.hoccer.xo.android.view.avatar.SimpleAvatarView;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -43,22 +40,8 @@ public class GroupManagementContactsAdapter extends ContactsAdapter {
     }
 
     @Override
-    protected int getGroupLayout() {
-        return R.layout.item_contact_checked;
-    }
-
-    @Override
     protected int getSeparatorLayout() {
         return R.layout.item_contact_separator;
-    }
-
-    @Override
-    protected int getNearbyHistoryLayout() {
-        return -1;
-    }
-
-    @Override
-    protected void updateNearbyHistoryLayout(View v) {
     }
 
     @Override
@@ -66,9 +49,6 @@ public class GroupManagementContactsAdapter extends ContactsAdapter {
         LOG.debug("updateContact(" + contact.getClientContactId() + ")");
         CheckedTextView checkedTextView = (CheckedTextView) view.findViewById(R.id.contact_name_checked);
         checkedTextView.setText(contact.getNickname());
-
-        ViewGroup avatarContainer = (ViewGroup) view.findViewById(R.id.fl_avatar);
-        avatarContainer.addView(AvatarView.inflate(contact, mActivity));
 
         try {
             TalkGroupMembership membership = mDatabase.findMembershipInGroupByClientId(mGroup.getGroupId(), contact.getClientId());
@@ -84,5 +64,4 @@ public class GroupManagementContactsAdapter extends ContactsAdapter {
             LOG.error(e);
         }
     }
-
 }

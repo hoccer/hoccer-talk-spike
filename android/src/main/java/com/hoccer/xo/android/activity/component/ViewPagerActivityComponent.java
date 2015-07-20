@@ -10,20 +10,25 @@ import android.support.v4.view.ViewPager;
 import android.view.View;
 import com.hoccer.xo.android.fragment.IPagerFragment;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Adds and manages an activity ViewPager.
  */
 public class ViewPagerActivityComponent extends ActivityComponent {
 
     private ViewPager mViewPager;
-    private final Fragment[] mFragments;
+    private final List<Fragment> mFragments = new ArrayList<Fragment>();
     private final int mViewPagerId;
     private boolean mResumeAfterPause;
 
-    public <T extends Fragment & IPagerFragment> ViewPagerActivityComponent(FragmentActivity activity, int viewPagerId, T... fragments) {
+    public <T extends Fragment & IPagerFragment> ViewPagerActivityComponent(FragmentActivity activity, int viewPagerId, Fragment... fragments) {
         super(activity);
 
-        mFragments = fragments;
+        for (Fragment fragment : fragments) {
+            mFragments.add(fragment);
+        }
         mViewPagerId = viewPagerId;
     }
 
@@ -36,12 +41,12 @@ public class ViewPagerActivityComponent extends ActivityComponent {
         mViewPager.setAdapter(new FragmentPagerAdapter(getActivity().getSupportFragmentManager()) {
             @Override
             public Fragment getItem(int position) {
-                return mFragments[position];
+                return mFragments.get(position);
             }
 
             @Override
             public int getCount() {
-                return mFragments.length;
+                return mFragments.size();
             }
         });
         mViewPager.setOnPageChangeListener(new PageChangeListener());
@@ -73,15 +78,15 @@ public class ViewPagerActivityComponent extends ActivityComponent {
         super.onResume();
 
         // do not call onPageResume() on Activity start because this is already done in TabListener.onTabSelected()
-        if(mResumeAfterPause) {
-            ((IPagerFragment) mFragments[mViewPager.getCurrentItem()]).onPageResume();
+        if (mResumeAfterPause) {
+            ((IPagerFragment) mFragments.get(mViewPager.getCurrentItem())).onPageResume();
         }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        ((IPagerFragment) mFragments[mViewPager.getCurrentItem()]).onPagePause();
+        ((IPagerFragment) mFragments.get(mViewPager.getCurrentItem())).onPagePause();
         mResumeAfterPause = true;
     }
 
@@ -91,12 +96,17 @@ public class ViewPagerActivityComponent extends ActivityComponent {
     }
 
     public Fragment getSelectedFragment() {
-        return mFragments[mViewPager.getCurrentItem()];
+        return mFragments.get(mViewPager.getCurrentItem());
+    }
+
+    public void selectFragment(Fragment fragment) {
+        mViewPager.setCurrentItem(mFragments.indexOf(fragment));
     }
 
     private class PageChangeListener implements ViewPager.OnPageChangeListener {
         @Override
-        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        }
 
         @Override
         public void onPageSelected(int position) {
@@ -109,7 +119,7 @@ public class ViewPagerActivityComponent extends ActivityComponent {
 
         @Override
         public void onPageScrollStateChanged(int state) {
-            ((IPagerFragment) mFragments[mViewPager.getCurrentItem()]).onPageScrollStateChanged(state);
+            ((IPagerFragment) mFragments.get(mViewPager.getCurrentItem())).onPageScrollStateChanged(state);
         }
     }
 
@@ -119,7 +129,7 @@ public class ViewPagerActivityComponent extends ActivityComponent {
             int position = tab.getPosition();
             mViewPager.setCurrentItem(position);
 
-            IPagerFragment fragment = (IPagerFragment) mFragments[position];
+            IPagerFragment fragment = (IPagerFragment) mFragments.get(position);
             fragment.onPageResume();
             fragment.onPageSelected();
         }
@@ -128,12 +138,13 @@ public class ViewPagerActivityComponent extends ActivityComponent {
         public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
             int position = tab.getPosition();
 
-            IPagerFragment fragment = (IPagerFragment) mFragments[position];
+            IPagerFragment fragment = (IPagerFragment) mFragments.get(position);
             fragment.onPageUnselected();
             fragment.onPagePause();
         }
 
         @Override
-        public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {}
+        public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
+        }
     }
 }

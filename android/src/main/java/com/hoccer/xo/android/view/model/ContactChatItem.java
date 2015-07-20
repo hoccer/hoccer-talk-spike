@@ -2,9 +2,7 @@ package com.hoccer.xo.android.view.model;
 
 import android.content.Context;
 import android.content.Intent;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoClientDatabase;
@@ -12,24 +10,28 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
+import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.activity.GroupProfileActivity;
-import com.hoccer.xo.android.activity.SingleProfileActivity;
 import com.hoccer.xo.android.adapter.SearchAdapter;
+import com.hoccer.xo.android.profile.client.ClientProfileActivity;
+import com.hoccer.xo.android.profile.group.GroupProfileActivity;
 import com.hoccer.xo.android.view.avatar.AvatarView;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class ContactChatItem extends ChatItem implements SearchAdapter.Searchable {
 
     private static final Logger LOG = Logger.getLogger(ContactChatItem.class);
 
-    private final Context mContext;
-    private TalkClientContact mContact;
+    protected TalkClientContact mContact;
 
     @Nullable
     private Date mLastMessageTimeStamp;
@@ -37,8 +39,8 @@ public class ContactChatItem extends ChatItem implements SearchAdapter.Searchabl
     private Date mContactCreationTimeStamp;
 
     public ContactChatItem(TalkClientContact contact, Context context) {
+        super(context);
         mContact = contact;
-        mContext = context;
         update();
     }
 
@@ -69,20 +71,38 @@ public class ContactChatItem extends ChatItem implements SearchAdapter.Searchabl
         }
     }
 
-    protected View updateView(View view) {
-        AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
-        TextView nameView = (TextView) view.findViewById(R.id.contact_name);
-        TextView lastMessageTextView = (TextView) view.findViewById(R.id.contact_last_message);
-        TextView lastMessageTimeView = (TextView) view.findViewById(R.id.contact_time);
-        TextView unseenView = (TextView) view.findViewById(R.id.contact_unseen_messages);
+    @Override
+    protected int getAvatarLayout() {
+        return AvatarView.getLayoutResource(mContact);
+    }
 
-        nameView.setText(mContact.getNickname());
+    @Override
+    protected View updateView(View convertView) {
+        TextView nameView = (TextView) convertView.findViewById(R.id.contact_name);
+        TextView lastMessageTextView = (TextView) convertView.findViewById(R.id.contact_last_message);
+        TextView lastMessageTimeView = (TextView) convertView.findViewById(R.id.contact_time);
+        TextView unseenView = (TextView) convertView.findViewById(R.id.contact_unseen_messages);
+
+        if (mContact.isWorldwideGroup()) {
+            List<TalkClientContact> contacts = new ArrayList<TalkClientContact>();
+            try {
+                contacts = XoApplication.get().getXoClient().getDatabase().findContactsInGroupByState(mContact.getGroupId(), TalkGroupMembership.STATE_JOINED);
+                CollectionUtils.filterInverse(contacts, TalkClientContactPredicates.IS_SELF_PREDICATE);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            nameView.setText(mContext.getResources().getString(R.string.all_worldwide) + " (" + contacts.size() + ")");
+        } else if (mContact.isNearbyGroup()) {
+            nameView.setText(R.string.all_nearby);
+        } else {
+            nameView.setText(mContact.getNickname());
+        }
         setLastMessageTime(lastMessageTimeView);
         lastMessageTextView.setText(mLastMessageText);
         setUnseenMessages(unseenView);
 
-        avatarView.setContact(mContact);
-        avatarView.setOnClickListener(new View.OnClickListener() {
+        mAvatarView.setContact(mContact);
+        mAvatarView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent;
@@ -91,15 +111,15 @@ public class ContactChatItem extends ChatItem implements SearchAdapter.Searchabl
                             .setAction(GroupProfileActivity.ACTION_SHOW)
                             .putExtra(GroupProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId());
                 } else {
-                    intent = new Intent(mContext, SingleProfileActivity.class)
-                            .setAction(SingleProfileActivity.ACTION_SHOW)
-                            .putExtra(SingleProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId());
+                    intent = new Intent(mContext, ClientProfileActivity.class)
+                            .setAction(ClientProfileActivity.ACTION_SHOW)
+                            .putExtra(ClientProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId());
                 }
                 mContext.startActivity(intent);
             }
         });
 
-        return view;
+        return convertView;
     }
 
     private void updateLastMessageText(TalkClientMessage message) {
@@ -127,8 +147,7 @@ public class ContactChatItem extends ChatItem implements SearchAdapter.Searchabl
         }
     }
 
-    @Override
-    public TalkClientContact getContent() {
+    public TalkClientContact getContact() {
         return mContact;
     }
 

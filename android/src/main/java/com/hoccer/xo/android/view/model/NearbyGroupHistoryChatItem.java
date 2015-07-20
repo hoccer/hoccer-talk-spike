@@ -1,8 +1,8 @@
 package com.hoccer.xo.android.view.model;
 
-import android.view.LayoutInflater;
+import android.content.Context;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientMessage;
@@ -28,7 +28,8 @@ public class NearbyGroupHistoryChatItem extends ChatItem implements SearchAdapte
     private Date mLastMessageTimeStamp;
     private String mLastMessageText = "";
 
-    public NearbyGroupHistoryChatItem() {
+    public NearbyGroupHistoryChatItem(Context context) {
+        super(context);
         update();
     }
 
@@ -55,8 +56,12 @@ public class NearbyGroupHistoryChatItem extends ChatItem implements SearchAdapte
     }
 
     @Override
+    protected int getAvatarLayout() {
+        return R.layout.view_avatar_simple;
+    }
+
+    @Override
     protected View updateView(View view) {
-        AvatarView simpleAvatarView = (AvatarView) view.findViewById(R.id.contact_icon);
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
         TextView lastMessageTextView = (TextView) view.findViewById(R.id.contact_last_message);
         TextView lastMessageTimeView = (TextView) view.findViewById(R.id.contact_time);
@@ -67,15 +72,10 @@ public class NearbyGroupHistoryChatItem extends ChatItem implements SearchAdapte
         lastMessageTextView.setText(mLastMessageText);
         setUnseenMessages(unseenView);
 
-        simpleAvatarView.setAvatarImage(R.drawable.avatar_default_location);
-        simpleAvatarView.setClickable(false);
+        mAvatarView.setAvatarImage(R.drawable.avatar_location);
+        mAvatarView.setClickable(false);
 
         return view;
-    }
-
-    @Override
-    public Object getContent() {
-        return "nearbyArchived";
     }
 
     @Override

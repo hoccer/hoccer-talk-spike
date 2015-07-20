@@ -131,6 +131,7 @@ public class JongoDatabase implements ITalkServerDatabase {
         mGroupMemberships.ensureIndex("{groupId:1, state:1, role:1}");
         mGroupMemberships.ensureIndex("{groupId:1, state:1, lastChanged:1}");
         mGroupMemberships.ensureIndex("{clientId:1, state:1}");
+        mGroupMemberships.ensureIndex("{clientId:1, state:1, role:1}");
         mGroupMemberships.ensureIndex("{state:1, lastChanged:1}");
 
         mMessages.ensureIndex("{messageId:1, senderId:1}");
@@ -141,10 +142,12 @@ public class JongoDatabase implements ITalkServerDatabase {
         mDeliveries.ensureIndex("{messageId:1, senderId:1, receiverId:1}");
         mDeliveries.ensureIndex("{messageId:1}");
         mDeliveries.ensureIndex("{senderId:1}");
+        mDeliveries.ensureIndex("{groupId:1}");
         mDeliveries.ensureIndex("{senderId:1, state:1}");
         mDeliveries.ensureIndex("{senderId:1, state:1, attachmentState:1}");
         mDeliveries.ensureIndex("{receiverId:1}");
         mDeliveries.ensureIndex("{receiverId:1, state:1}");
+        mDeliveries.ensureIndex("{receiverId:1, groupId:1, state:1}");
         mDeliveries.ensureIndex("{receiverId:1, state:1, attachmentState:1}");
         mDeliveries.ensureIndex("{state:1}");
         mDeliveries.ensureIndex("{state:1, attachmentState:1}");
@@ -153,6 +156,8 @@ public class JongoDatabase implements ITalkServerDatabase {
         mEnvironments.ensureIndex("{geoLocation: '2dsphere'}");
         mEnvironments.ensureIndex("{groupId: 1}");
         mEnvironments.ensureIndex("{clientId: 1}");
+        mEnvironments.ensureIndex("{groupId: 1, clientId: 1}");
+        mEnvironments.ensureIndex("{type: 1, clientId: 1}");
 
         mClientHostInfos.ensureIndex("{clientId: 1}");
         mClientHostInfos.ensureIndex("{clientLanguage: 1, clientName:1}");
@@ -250,9 +255,9 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     @NotNull
-    public List<TalkMessage> findMessagesFromClient(String clientId) {
+    public List<TalkMessage> findMessagesFromClient(String senderId) {
         Iterator<TalkMessage> it = mMessages
-                .find("{senderId:#}", clientId)
+                .find("{senderId:#}", senderId)
                 .as(TalkMessage.class)
                 .iterator();
 
@@ -271,8 +276,8 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     @Nullable
-    public TalkDelivery findDelivery(String messageId, String clientId) {
-        return mDeliveries.findOne("{messageId:#,receiverId:#}", messageId, clientId)
+    public TalkDelivery findDelivery(String messageId, String receiverId) {
+        return mDeliveries.findOne("{messageId:#,receiverId:#}", messageId, receiverId)
                 .as(TalkDelivery.class);
     }
 
@@ -323,9 +328,9 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     @NotNull
-    public List<TalkDelivery> findDeliveriesForClient(String clientId) {
+    public List<TalkDelivery> findDeliveriesForClient(String receiverId) {
         Iterator<TalkDelivery> it = mDeliveries
-                .find("{receiverId:#}", clientId)
+                .find("{receiverId:#}", receiverId)
                 .as(TalkDelivery.class)
                 .iterator();
 
@@ -334,9 +339,9 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     @NotNull
-    public List<TalkDelivery> findDeliveriesFromClient(String clientId) {
+    public List<TalkDelivery> findDeliveriesFromClient(String senderId) {
         Iterator<TalkDelivery> it = mDeliveries
-                .find("{senderId:#}", clientId)
+                .find("{senderId:#}", senderId)
                 .as(TalkDelivery.class)
                 .iterator();
 
@@ -345,9 +350,9 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     @NotNull
-    public List<TalkDelivery> findDeliveriesForClientInState(String clientId, String state) {
+    public List<TalkDelivery> findDeliveriesForClientInState(String receiverId, String state) {
         Iterator<TalkDelivery> it = mDeliveries
-                .find("{receiverId:#,state:#}", clientId, state)
+                .find("{receiverId:#,state:#}", receiverId, state)
                 .as(TalkDelivery.class)
                 .iterator();
 
@@ -356,9 +361,25 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     @NotNull
-    public List<TalkDelivery> findDeliveriesForClientInDeliveryAndAttachmentStates(String clientId, String[] deliveryStates, String[] attachmentStates) {
+    public List<TalkDelivery> findDeliveriesForClientInGroupInState(String receiverId, String groupId, String state) {
         Iterator<TalkDelivery> it = mDeliveries
-                .find("{receiverId:#, state: { $in: # }, attachmentState: {$in: # } }", clientId, Arrays.asList(deliveryStates), Arrays.asList(attachmentStates))
+                .find("{receiverId:#, groupId:#, state:#}", receiverId, groupId, state)
+                .as(TalkDelivery.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
+    }
+
+    @Override
+    public long countDeliveriesForClientInGroupInState(String receiverId, String groupId, String state) {
+        return mDeliveries.count("{receiverId:#, groupId:#, state:#}", receiverId, groupId, state);
+    }
+
+    @Override
+    @NotNull
+    public List<TalkDelivery> findDeliveriesForClientInDeliveryAndAttachmentStates(String receiverId, String[] deliveryStates, String[] attachmentStates) {
+        Iterator<TalkDelivery> it = mDeliveries
+                .find("{receiverId:#, state: { $in: # }, attachmentState: {$in: # } }", receiverId, Arrays.asList(deliveryStates), Arrays.asList(attachmentStates))
                 .as(TalkDelivery.class)
                 .iterator();
 
@@ -367,9 +388,28 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     @NotNull
-    public List<TalkDelivery> findDeliveriesFromClientInState(String clientId, String state) {
+    public List<TalkDelivery> findDeliveriesFromClientInState(String senderId, String state) {
         Iterator<TalkDelivery> it = mDeliveries
-                .find("{senderId:#,state:#}", clientId, state)
+                .find("{senderId:#,state:#}", senderId, state)
+                .as(TalkDelivery.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
+    }
+    @Override
+    public long countDeliveriesFromClientInState(String senderId, String state) {
+        return mDeliveries.count("{senderId:#,state:#}", senderId, state);
+    }
+    @Override
+    public long countDeliveriesBetweenClientsInState(String senderId, String receiverId, String state) {
+        return mDeliveries.count("{senderId:#, receiverId:#, state:#}", senderId, receiverId, state);
+    }
+
+    @Override
+    @NotNull
+    public List<TalkDelivery> findDeliveriesFromClientInStates(String senderId, String[] deliveryStates) {
+        Iterator<TalkDelivery> it = mDeliveries
+                .find("{senderId:#, state: { $in: # } }", senderId, Arrays.asList(deliveryStates))
                 .as(TalkDelivery.class)
                 .iterator();
 
@@ -378,9 +418,9 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     @NotNull
-    public List<TalkDelivery> findDeliveriesFromClientInStates(String clientId, String[] deliveryStates) {
+    public List<TalkDelivery> findDeliveriesFromClientInDeliveryAndAttachmentStates(String senderId, String[] deliveryStates, String[] attachmentStates) {
         Iterator<TalkDelivery> it = mDeliveries
-                .find("{senderId:#, state: { $in: # } }", clientId, Arrays.asList(deliveryStates))
+                .find("{senderId:#, state: { $in: # }, attachmentState: {$in: #} }", senderId, Arrays.asList(deliveryStates), Arrays.asList(attachmentStates))
                 .as(TalkDelivery.class)
                 .iterator();
 
@@ -388,21 +428,32 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
-    @NotNull
-    public List<TalkDelivery> findDeliveriesFromClientInDeliveryAndAttachmentStates(String clientId, String[] deliveryStates, String[] attachmentStates) {
-        Iterator<TalkDelivery> it = mDeliveries
-                .find("{senderId:#, state: { $in: # }, attachmentState: {$in: #} }", clientId, Arrays.asList(deliveryStates), Arrays.asList(attachmentStates))
-                .as(TalkDelivery.class)
-                .iterator();
-
-        return IteratorUtils.toList(it);
+    public long countDeliveriesFromClientInDeliveryAndAttachmentStates(String senderId, String[] deliveryStates, String[] attachmentStates) {
+        return mDeliveries.count("{senderId:#, state: { $in: # }, attachmentState: {$in: #} }", senderId, Arrays.asList(deliveryStates), Arrays.asList(attachmentStates));
     }
 
     @Override
+    public long countDeliveriesBetweenClientsInDeliveryAndAttachmentStates(String senderId, String receiverId, String[] deliveryStates, String[] attachmentStates) {
+        return mDeliveries.count("{senderId:#, receiverId:#, state: { $in: # }, attachmentState: {$in: #} }",
+                senderId, receiverId, Arrays.asList(deliveryStates), Arrays.asList(attachmentStates));
+    }
+
+
+        @Override
     @NotNull
     public List<TalkDelivery> findDeliveriesForMessage(String messageId) {
         Iterator<TalkDelivery> it = mDeliveries
                 .find("{messageId:#}", messageId)
+                .as(TalkDelivery.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
+    }
+    @Override
+    @NotNull
+    public List<TalkDelivery> findDeliveriesFromClientForMessage(String senderId, String messageId) {
+        Iterator<TalkDelivery> it = mDeliveries
+                .find("{senderId:#, messageId:#}", senderId, messageId)
                 .as(TalkDelivery.class)
                 .iterator();
 
@@ -484,45 +535,101 @@ public class JongoDatabase implements ITalkServerDatabase {
     public List<TalkPresence> findPresencesChangedAfter(String clientId, Date lastKnown) {
         // result array
         List<TalkPresence> res = new ArrayList<TalkPresence>();
+
         // set to collect clients into
         Set<String> clients = new HashSet<String>();
+
         // set to collect clients which may have been added to the presence set
         // since the client has received presences the last time
         Set<String> mustInclude = new HashSet<String>();
+
         // collect clients known through relationships
+
+        /*
+        // With the following (former) variant in this comment we will also get presences
+        // for clients that have (only) blocked us which is not what we want. Note that this is
+        // however the same code used in performPresenceUpdate() to determine to which
+        // clients a presence update should be sent, but this is a different case.
+
         List<TalkRelationship> relationships = findRelationshipsByOtherClient(clientId);
         for (TalkRelationship relationship : relationships) {
-            if (relationship.isDirectlyRelated()) {
+            if (relationship.isRelated()) {
+                LOG.info("including "+relationship.getClientId()+" because related");
                 clients.add(relationship.getClientId());
                 if (relationship.getLastChanged().after(lastKnown)) {
+                    LOG.info("must include "+relationship.getClientId()+" because related");
                     mustInclude.add(relationship.getClientId());
                 }
             }
         }
+        The following code however will also include presence updates for clients *we* (clientId) do block,
+        which is fine because there are corner cases like online indication and group key management
+        that we also have to perform for clients we block. Semantically it is also ok because
+        we might want to unblock them, so we actually have a relationship.
+
+        Note that this code needs to behave the same way like performPresenceUpdate() regarding
+        the decision if a particular presence is sent to a particular client.
+
+        It also has to play well with the isContactOf() call which will also return true for a
+        contact we have blocked, but false for a contact that *only* has blocked us without
+        us have a relationShip to this blocking client.
+
+        */
+        List<TalkRelationship> relationships = findRelationships(clientId);
+        for (TalkRelationship relationship : relationships) {
+            if (relationship.isRelated()) {
+                LOG.trace("including "+relationship.getOtherClientId()+" because related");
+                clients.add(relationship.getOtherClientId());
+                if (relationship.getLastChanged().after(lastKnown)) {
+                    LOG.trace("must include "+relationship.getOtherClientId()+" because related");
+                    mustInclude.add(relationship.getOtherClientId());
+                }
+            }
+        }
+
         // collect clients known through groups
         List<TalkGroupMembership> ownMemberships = findGroupMembershipsForClient(clientId);
         for (TalkGroupMembership ownMembership : ownMemberships) {
             String groupId = ownMembership.getGroupId();
-            if (ownMembership.isInvited() || ownMembership.isJoined()) {
+            if (ownMembership.isInvited() || ownMembership.isJoined() || ownMembership.isSuspended()) {
                 List<TalkGroupMembership> otherMemberships = findGroupMembershipsById(groupId);
                 for (TalkGroupMembership otherMembership : otherMemberships) {
-                    if (otherMembership.isInvited() || otherMembership.isJoined()) {
+                    if (otherMembership.isInvited() || otherMembership.isJoined() || otherMembership.isSuspended()) {
                         clients.add(otherMembership.getClientId());
+                        LOG.trace("include "+otherMembership.getClientId()+" because common membership");
                         if (otherMembership.getLastChanged().after(lastKnown) || ownMembership.getLastChanged().after(lastKnown)) {
+                            LOG.trace("must include "+otherMembership.getClientId()+" because memberships changed");
                             mustInclude.add(otherMembership.getClientId());
                         }
                     }
                 }
             }
         }
+
+        // treat former senders with unfinished deliveries as contact
+        final List<TalkDelivery> deliveries = findDeliveriesForClientInState(clientId, TalkDelivery.STATE_DELIVERING);
+        for (TalkDelivery delivery : deliveries) {
+            clients.add(delivery.getSenderId());
+            if (delivery.getTimeChanged().after(lastKnown)) {
+                mustInclude.add(delivery.getSenderId());
+            }
+        }
+        final List<TalkDelivery> attachmentDeliveries =
+                findDeliveriesForClientInDeliveryAndAttachmentStates(clientId,
+                        TalkDelivery.IN_ATTACHMENT_DELIVERY_STATES, TalkDelivery.IN_ATTACHMENT_STATES);
+        for (TalkDelivery delivery : attachmentDeliveries) {
+            clients.add(delivery.getSenderId());
+            if (delivery.getTimeChanged().after(lastKnown)) {
+                mustInclude.add(delivery.getSenderId());
+            }
+        }
+
         // remove self
         clients.remove(clientId);
         // collect presences
         for (String client : clients) {
             TalkPresence pres = findPresenceForClient(client);
-            if (pres != null &&
-                    (pres.getTimestamp().after(lastKnown) ||
-                            mustInclude.contains(client))) {
+            if (pres != null && (pres.getTimestamp().after(lastKnown) || mustInclude.contains(client))) {
                 res.add(pres);
             }
         }
@@ -656,6 +763,12 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public int deleteRelationshipsWithStatesAndNotNotificationsDisabledChangedBefore(String[] states, Date lastChanged) {
+        WriteResult result = mRelationships.remove("{state: { $in: # }, lastChanged: { $lt:# } , notificationPreference: { $ne:#} }", Arrays.asList(states), lastChanged, TalkRelationship.NOTIFICATIONS_DISABLED);
+        return result.getN();
+    }
+
+    @Override
     public void deleteRelationship(TalkRelationship relationship) {
         mRelationships.remove("{clientId:#,otherClientId:#}",
                 relationship.getClientId(), relationship.getOtherClientId());
@@ -688,7 +801,7 @@ public class JongoDatabase implements ITalkServerDatabase {
         List<TalkGroupPresence> res = new ArrayList<TalkGroupPresence>();
         List<TalkGroupMembership> memberships = findGroupMembershipsForClient(clientId);
         for (TalkGroupMembership membership : memberships) {
-            if (membership.isMember() || membership.isInvited()) {
+            if (membership.isMember() || membership.isInvited() || membership.isSuspended()) {
                 TalkGroupPresence groupPresence = findGroupPresenceById(membership.getGroupId());
                 if (groupPresence == null) {
                     // TODO: Define and throw a dedicated exception instead of using a generic one (from sonarqube)
@@ -705,7 +818,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     private List<TalkGroupPresence> findGroupsByClientIdChangedAfterV2(String clientId, Date lastKnown) {
         // indirect query
         List<TalkGroupPresence> res = new ArrayList<TalkGroupPresence>();
-        List<TalkGroupMembership> memberships = findGroupMembershipsByIdWithStates(clientId, new String[]{TalkGroupMembership.STATE_JOINED, TalkGroupMembership.STATE_INVITED});
+        List<TalkGroupMembership> memberships = findGroupMembershipsByIdWithStates(clientId, new String[]{TalkGroupMembership.STATE_JOINED, TalkGroupMembership.STATE_INVITED, TalkGroupMembership.STATE_SUSPENDED});
         for (TalkGroupMembership membership : memberships) {
                 TalkGroupPresence groupPresence = findGroupPresenceById(membership.getGroupId());
                 if (groupPresence == null) {
@@ -773,7 +886,17 @@ public class JongoDatabase implements ITalkServerDatabase {
     @Override
     public List<TalkGroupMembership> findGroupMembershipsByIdWithStatesAndRoles(String groupId, String[] states, String[] roles) {
         Iterator<TalkGroupMembership> it = mGroupMemberships
-                .find("{groupId:#, state: { $in: # }, role: {$in: #}", groupId, Arrays.asList(states), Arrays.asList(roles))
+                .find("{groupId:#, state: { $in: # }, role: {$in: #} }", groupId, Arrays.asList(states), Arrays.asList(roles))
+                .as(TalkGroupMembership.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
+    }
+
+    @Override
+    public List<TalkGroupMembership> findGroupMembershipsWithStatesAndRoles(String[] states, String[] roles) {
+        Iterator<TalkGroupMembership> it = mGroupMemberships
+                .find("{state: { $in: # }, role: {$in: #} }", Arrays.asList(states), Arrays.asList(roles))
                 .as(TalkGroupMembership.class)
                 .iterator();
 
@@ -838,6 +961,16 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public List<TalkGroupMembership> findGroupMembershipsForClientWithStatesAndRoles(String clientId, String[] states, String[] roles) {
+        Iterator<TalkGroupMembership> it = mGroupMemberships
+                .find("{clientId:#, state: { $in: # }, role: { $in: # }}", clientId, Arrays.asList(states),  Arrays.asList(roles))
+                .as(TalkGroupMembership.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
+    }
+
+    @Override
     public TalkGroupMembership findGroupMembershipForClient(String groupId, String clientId) {
         return mGroupMemberships.findOne("{groupId:#,clientId:#}", groupId, clientId)
                 .as(TalkGroupMembership.class);
@@ -847,6 +980,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     public void saveGroupMembership(TalkGroupMembership membership) {
         mGroupMemberships.save(membership);
     }
+
     @Override
     public void deleteGroupMembership(TalkGroupMembership membership) {
         mGroupMemberships.remove("{groupId:#,clientId:#}", membership.getGroupId(), membership.getClientId());
@@ -868,6 +1002,12 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public TalkEnvironment findEnvironmentByClientIdForGroup(String clientId, String groupId) {
+        return mEnvironments.findOne("{clientId:#, groupId:#}", clientId, groupId)
+                .as(TalkEnvironment.class);
+    }
+
+    @Override
     public List<TalkEnvironment> findEnvironmentsForGroup(String groupId) {
         Iterator<TalkEnvironment> it = mEnvironments
                 .find("{groupId:#}", groupId)
@@ -881,6 +1021,26 @@ public class JongoDatabase implements ITalkServerDatabase {
     public List<TalkEnvironment> findEnvironmentsForClient(String clientId) {
         Iterator<TalkEnvironment> it = mEnvironments
                 .find("{clientId:#}", clientId)
+                .as(TalkEnvironment.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
+    }
+
+    @Override
+    public List<TalkEnvironment> findEnvironmentsByType(String type) {
+        Iterator<TalkEnvironment> it = mEnvironments
+                .find("{type:#}", type)
+                .as(TalkEnvironment.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
+    }
+
+    @Override
+    public List<TalkEnvironment> findEnvironmentsForClient(String clientId, String type) {
+        Iterator<TalkEnvironment> it = mEnvironments
+                .find("{clientId:#, type:#}", clientId, type)
                 .as(TalkEnvironment.class)
                 .iterator();
 

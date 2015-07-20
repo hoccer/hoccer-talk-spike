@@ -9,8 +9,11 @@ import android.provider.MediaStore;
 import com.hoccer.talk.client.IXoClientDatabaseBackend;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.talk.model.TalkGroupPresence;
+import com.hoccer.talk.model.TalkPresence;
+import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.util.UriUtils;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
@@ -29,7 +32,7 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
 
     private static final Logger LOG = Logger.getLogger(AndroidTalkDatabase.class);
 
-    private static final int DATABASE_VERSION = 26;
+    private static final int DATABASE_VERSION = 29;
 
     public static final String DATABASE_NAME_DEFAULT = "hoccer-talk.db";
 
@@ -103,11 +106,50 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
                 db.execSQL("ALTER TABLE 'groupPresence' ADD COLUMN 'isKept' SMALLINT");
             }
 
+            if (oldVersion < 27) {
+                db.execSQL("ALTER TABLE 'groupMembership' ADD COLUMN 'notificationPreference' VARCHAR");
+                db.execSQL("ALTER TABLE 'relationship' ADD COLUMN 'notificationPreference' VARCHAR");
+                db.execSQL("ALTER TABLE 'clientContact' ADD COLUMN 'worldwide' SMALLINT");
+                updateAcquaintanceTypeColumn(db);
+            }
+
+            if (oldVersion < 28) {
+                uniteDeliveryFieldsAndSaveDeliveryDirection(db);
+            }
+
+            if (oldVersion < 29) {
+                updateRelationshipUnblockState(db);
+            }
         } catch (android.database.SQLException e) {
             LOG.error("Android SQL error upgrading database", e);
         } catch (SQLException e) {
             LOG.error("OrmLite SQL error upgrading database", e);
         }
+    }
+
+    private void updateRelationshipUnblockState(SQLiteDatabase db) {
+        db.execSQL("UPDATE relationship SET unblockState = '" + TalkRelationship.STATE_FRIEND + "' WHERE state = '" + TalkRelationship.STATE_BLOCKED + "'");
+    }
+
+    private void uniteDeliveryFieldsAndSaveDeliveryDirection(SQLiteDatabase db) throws SQLException {
+        db.execSQL("ALTER TABLE 'clientMessage' ADD COLUMN 'direction' VARCHAR");
+        db.execSQL("ALTER TABLE 'clientMessage' ADD COLUMN 'delivery_id' INTEGER");
+
+        Cursor cursor = db.rawQuery("SELECT * FROM clientMessage", null);
+        while (cursor.moveToNext()) {
+            int deliveryId = cursor.getInt(cursor.getColumnIndex("incomingDelivery_id"));
+            if (deliveryId > 0) {
+                db.execSQL("UPDATE clientMessage SET delivery_id = '" + deliveryId + "', direction = '" + TalkClientMessage.TYPE_INCOMING + "' WHERE incomingDelivery_id = '" + deliveryId + "'");
+            } else {
+                deliveryId = cursor.getInt(cursor.getColumnIndex("outgoingDelivery_id"));
+                db.execSQL("UPDATE clientMessage SET delivery_id = '" + deliveryId + "', direction = '" + TalkClientMessage.TYPE_OUTGOING + "' WHERE outgoingDelivery_id = '" + deliveryId + "'");
+            }
+        }
+    }
+
+    private void updateAcquaintanceTypeColumn(SQLiteDatabase db) throws SQLException {
+        db.execSQL("ALTER TABLE 'presence' ADD COLUMN 'acquaintanceType' VARCHAR");
+        db.execSQL("UPDATE presence SET acquaintanceType = '" + TalkPresence.TYPE_ACQUAINTANCE_NEARBY + "' WHERE isNearbyAcquaintance = '1'");
     }
 
     private static void makeTransferDataFileRelative(SQLiteDatabase db) {

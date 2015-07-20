@@ -14,14 +14,16 @@ import android.view.*;
 import android.widget.ListAdapter;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.model.TalkGroupMembership;
+import com.hoccer.xo.android.WorldwideController;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.backup.*;
+import com.hoccer.xo.android.passwordprotection.PasswordProtection;
 import com.hoccer.xo.android.passwordprotection.activity.PasswordChangeActivity;
 import com.hoccer.xo.android.passwordprotection.activity.PasswordPromptActivity;
-import com.hoccer.xo.android.passwordprotection.PasswordProtection;
 import com.hoccer.xo.android.passwordprotection.activity.PasswordSetActivity;
-import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
+import com.hoccer.xo.android.view.chat.attachments.TransferControlView;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
@@ -40,17 +42,17 @@ public class XoPreferenceActivity extends PreferenceActivity
     private static final int REQUEST_ACTIVATE_PASSWORD = 2;
     private static final int REQUEST_DEACTIVATE_PASSWORD = 3;
 
-    private AttachmentTransferControlView mSpinner;
+    private TransferControlView mSpinner;
 
     private Handler mDialogDismisser;
 
     private Dialog mWaitingDialog;
     private BackupController mBackupController;
+    private SharedPreferences mDefaultSharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        preferences.registerOnSharedPreferenceChangeListener(this);
+        mDefaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         LOG.debug("onCreate()");
         super.onCreate(savedInstanceState);
 
@@ -69,7 +71,7 @@ public class XoPreferenceActivity extends PreferenceActivity
         activatePasswordPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
-                boolean oldValue = preferences.getBoolean(getString(R.string.preference_key_activate_passcode), false);
+                boolean oldValue = mDefaultSharedPreferences.getBoolean(getString(R.string.preference_key_activate_passcode), false);
                 if (oldValue != newValue) {
                     boolean activatePassword = (Boolean) newValue;
                     if (activatePassword && !isPasswordSet()) {
@@ -154,6 +156,8 @@ public class XoPreferenceActivity extends PreferenceActivity
     protected void onResume() {
         super.onResume();
 
+        mDefaultSharedPreferences.registerOnSharedPreferenceChangeListener(this);
+
         if (isPasswordSet()) {
             findPreference(getString(R.string.preference_key_change_passcode)).setEnabled(true);
         }
@@ -165,6 +169,9 @@ public class XoPreferenceActivity extends PreferenceActivity
     @Override
     protected void onPause() {
         super.onPause();
+
+        mDefaultSharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
+
         mBackupController.unregisterAndUnbind();
     }
 
@@ -192,7 +199,7 @@ public class XoPreferenceActivity extends PreferenceActivity
     public void createDialog() {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.waiting_dialog, null);
-        mSpinner = (AttachmentTransferControlView) view.findViewById(R.id.content_progress);
+        mSpinner = (TransferControlView) view.findViewById(R.id.content_progress);
 
         mWaitingDialog = new Dialog(this);
         mWaitingDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -231,6 +238,24 @@ public class XoPreferenceActivity extends PreferenceActivity
         if ("preference_keysize".equals(key)) {
             createDialog();
             regenerateKeys();
+        } else if (getString(R.string.preference_key_worldwide_timetolive).equals(key)) {
+            updateWorldwideTimeToLive(sharedPreferences);
+        } else if (getString(R.string.preference_key_worldwide_enable_notifications).equals(key)) {
+            updateWorldwideNotificationPreference(sharedPreferences);
+        }
+    }
+
+    private void updateWorldwideTimeToLive(SharedPreferences sharedPreferences) {
+        long timeToLive = Long.parseLong(sharedPreferences.getString("preference_key_worldwide_timetolive", "0"));
+        WorldwideController.get().updateTimeToLive(timeToLive);
+    }
+
+    private void updateWorldwideNotificationPreference(SharedPreferences sharedPreferences) {
+        Boolean notificationsEnabled = sharedPreferences.getBoolean(getString(R.string.preference_key_worldwide_enable_notifications), false);
+        if (notificationsEnabled) {
+            WorldwideController.get().updateNotificationPreference(TalkGroupMembership.NOTIFICATIONS_ENABLED);
+        } else {
+            WorldwideController.get().updateNotificationPreference(TalkGroupMembership.NOTIFICATIONS_DISABLED);
         }
     }
 

@@ -6,7 +6,7 @@ import android.view.View;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.activity.GroupProfileActivity;
+import com.hoccer.xo.android.profile.group.GroupProfileActivity;
 import com.hoccer.xo.android.adapter.ContactListAdapter;
 import com.hoccer.xo.android.adapter.GroupContactListAdapter;
 import com.hoccer.xo.android.base.XoActivity;
@@ -18,10 +18,7 @@ import java.sql.SQLException;
 public class GroupContactListFragment extends ContactListFragment {
 
     private static final Logger LOG = Logger.getLogger(GroupContactListFragment.class);
-    private static final Placeholder PLACEHOLDER = new Placeholder(
-            R.drawable.placeholder_group,
-            R.drawable.placeholder_group_head,
-            R.string.placeholder_groups_text);
+    private static final Placeholder PLACEHOLDER = new Placeholder(R.drawable.placeholder_group, R.string.placeholder_groups_text);
 
     public GroupContactListFragment() {
         super(R.string.contacts_tab_groups);

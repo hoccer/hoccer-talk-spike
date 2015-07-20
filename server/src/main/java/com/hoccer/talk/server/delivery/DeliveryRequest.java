@@ -1,14 +1,13 @@
 package com.hoccer.talk.server.delivery;
 
-import com.hoccer.talk.model.TalkClient;
-import com.hoccer.talk.model.TalkDelivery;
-import com.hoccer.talk.model.TalkMessage;
+import com.hoccer.talk.model.*;
 import com.hoccer.talk.rpc.ITalkRpcClient;
 import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServer;
 import com.hoccer.talk.server.rpc.TalkRpcConnection;
 import org.apache.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -43,16 +42,17 @@ public class DeliveryRequest {
 
     private boolean performIncoming(List<TalkDelivery> inDeliveries, ITalkRpcClient rpc, TalkRpcConnection connection) {
         boolean currentlyConnected = true;
+        Date lastLogin = connection.getClient().getTimeLastLogin();
         for (TalkDelivery delivery : inDeliveries) {
             // we lost the connection somehow
             if (!currentlyConnected) {
-                LOG.info("performIncoming: clientId: '" + mClientId + "no longer connected");
+                LOG.debug("performIncoming: clientId: '" + mClientId + "no longer connected");
                 break;
             }
 
             delivery.ensureDates();
             if (!mForceAll && (delivery.getTimeUpdatedIn().getTime() > delivery.getTimeChanged().getTime())) {
-                LOG.info("performIncoming: clientId: '" + mClientId + ",delivery has not changed since last up'd in="+ delivery.getTimeUpdatedIn().getTime()+",changed="+delivery.getTimeChanged().getTime());
+                LOG.debug("performIncoming: clientId: '" + mClientId + ",delivery has not changed since last up'd in="+ delivery.getTimeUpdatedIn().getTime()+",changed="+delivery.getTimeChanged().getTime());
                 continue;
             }
 
@@ -72,19 +72,24 @@ public class DeliveryRequest {
 
                     // remove for production build
                     if (!latestDelivery.equals(delivery)) {
-                        LOG.info("latestDelivery (in) has changed");
-                        LOG.info("delivery:"+delivery.toString());
-                        LOG.info("latestDelivery:"+latestDelivery.toString());
+                        LOG.trace("latestDelivery (in) has changed");
+                        LOG.trace("delivery:"+delivery.toString());
+                        LOG.trace("latestDelivery:"+latestDelivery.toString());
                     }
-                    if (!mForceAll && (latestDelivery.getTimeUpdatedIn().getTime() > latestDelivery.getTimeChanged().getTime())) {
-                        LOG.info("performIncoming(2): clientId: '" + mClientId + ", delivery has not changed since last up'd in="+ delivery.getTimeUpdatedIn().getTime()+",changed="+delivery.getTimeChanged().getTime());
+                    boolean updatedInDuringThisLoginSession = latestDelivery.getTimeUpdatedIn().getTime() > lastLogin.getTime();
+                    if (!mForceAll && (latestDelivery.getTimeUpdatedIn().getTime() > latestDelivery.getTimeChanged().getTime())
+                            && updatedInDuringThisLoginSession) { // do not bail out here when last update has been in a previous login session
+                        LOG.debug("performIncoming(2): clientId: '" + mClientId + ", delivery has not changed since last up'd in="+ delivery.getTimeUpdatedIn().getTime()+",changed="+delivery.getTimeChanged().getTime());
                         continue;
                     }
 
                     // post the delivery for the client
 
                     boolean recentlyDelivered = (latestDelivery.getTimeUpdatedIn() != null &&
+                            updatedInDuringThisLoginSession &&
                             latestDelivery.getTimeUpdatedIn().getTime() + 15 * 1000 > new Date().getTime());
+
+                    LOG.debug("performIncoming(2): clientId: '" + mClientId + ", updatedInDuringThisLoginSession="+ updatedInDuringThisLoginSession + ", recentlyDelivered="+recentlyDelivered);
 
                     if (!recentlyDelivered && (TalkDelivery.STATE_DELIVERING.equals(latestDelivery.getState()) /*|| mForceAll*/)) {
                         TalkDelivery filtered = new TalkDelivery();
@@ -100,7 +105,7 @@ public class DeliveryRequest {
                     latestDelivery.setTimeUpdatedIn(new Date());
                     mDatabase.saveDelivery(latestDelivery);
                 } catch (Exception e) {
-                    LOG.info("Exception calling incomingDelivery() for clientId: '" + mClientId + "'", e);
+                    LOG.warn("Exception calling incomingDelivery() for clientId: '" + mClientId + "'", e);
                     //currentlyConnected = false; XXX do this when we can differentiate
                 }
             }
@@ -118,7 +123,7 @@ public class DeliveryRequest {
         for (TalkDelivery delivery : outDeliveries) {
             // we lost the connection somehow
             if (!currentlyConnected) {
-                LOG.info("performOutgoing: clientId: '" + mClientId + "no longer connected");
+                LOG.debug("performOutgoing: clientId: '" + mClientId + "no longer connected");
                 break;
             }
             synchronized (mServer.idLock(delivery.getMessageId())) {
@@ -126,10 +131,10 @@ public class DeliveryRequest {
                 delivery.ensureDates();
 
                 if (delivery.isInStaleFor(30000)) {
-                    LOG.info("performOutgoing: clientId: '" + mClientId + ", delivery (state:"+delivery.getState()+","+delivery.getAttachmentState()+") is stale, up'd out="+ delivery.getTimeUpdatedOut().getTime()+",changed="+delivery.getTimeChanged().getTime());
+                    LOG.debug("performOutgoing: clientId: '" + mClientId + ", delivery (state:"+delivery.getState()+","+delivery.getAttachmentState()+") is stale, up'd out="+ delivery.getTimeUpdatedOut().getTime()+",changed="+delivery.getTimeChanged().getTime());
                 } else {
                     if (!mForceAll && delivery.isOutUpToDate()) {
-                        LOG.info("performOutgoing: clientId: '" + mClientId + ", delivery (state:"+delivery.getState()+","+delivery.getAttachmentState()+") has not changed since last up'd out="+ delivery.getTimeUpdatedOut().getTime()+",changed="+delivery.getTimeChanged().getTime());
+                        LOG.debug("performOutgoing: clientId: '" + mClientId + ", delivery (state:"+delivery.getState()+","+delivery.getAttachmentState()+") has not changed since last up'd out="+ delivery.getTimeUpdatedOut().getTime()+",changed="+delivery.getTimeChanged().getTime());
                         continue;
                     }
                 }
@@ -141,16 +146,16 @@ public class DeliveryRequest {
 
                 // remove for production build
                 if (!latestDelivery.equals(delivery)) {
-                    LOG.info("latestDelivery (out) has changed");
-                    LOG.info("delivery:"+delivery.toString());
-                    LOG.info("latestDelivery:"+latestDelivery.toString());
+                    LOG.trace("latestDelivery (out) has changed");
+                    LOG.trace("delivery:"+delivery.toString());
+                    LOG.trace("latestDelivery:"+latestDelivery.toString());
                 }
 
                 if (delivery.isInStaleFor(30000)) {
-                    LOG.info("performOutgoing: clientId: '" + mClientId + ", delivery (state:"+delivery.getState()+","+delivery.getAttachmentState()+") is stale, up'd out="+ delivery.getTimeUpdatedOut().getTime()+",changed="+delivery.getTimeChanged().getTime());
+                    LOG.debug("performOutgoing: clientId: '" + mClientId + ", delivery (state:"+delivery.getState()+","+delivery.getAttachmentState()+") is stale, up'd out="+ delivery.getTimeUpdatedOut().getTime()+",changed="+delivery.getTimeChanged().getTime());
                 } else {
                     if (!mForceAll && delivery.isOutUpToDate()) {
-                        LOG.info("####### performOutgoing(2): clientId: '" + mClientId + ", delivery has not changed since last up'd out="+ delivery.getTimeUpdatedOut().getTime()+",changed="+delivery.getTimeChanged().getTime());
+                        LOG.debug("####### performOutgoing(2): clientId: '" + mClientId + ", delivery has not changed since last up'd out="+ delivery.getTimeUpdatedOut().getTime()+",changed="+delivery.getTimeChanged().getTime());
                         continue;
                     }
                 }
@@ -158,7 +163,10 @@ public class DeliveryRequest {
                 // notify it
                 try {
                     TalkDelivery filtered = new TalkDelivery();
+                    //LOG.info("Delivery orig:"+delivery.dump());
                     filtered.updateWith(delivery, TalkDelivery.REQUIRED_OUT_UPDATE_FIELDS_SET);
+                    //LOG.info("Delivery filtered:"+delivery.dump());
+                    //LOG.info("Delivery filtered: hasValidRecipient:"+filtered.hasValidRecipient()+", isExpandedGroupDelivery:"+filtered.isExpandedGroupDelivery());
                     if (filtered.hasValidRecipient() || filtered.isExpandedGroupDelivery()) {
                         rpc.outgoingDeliveryUpdated(filtered);
                         delivery.setTimeUpdatedOut(new Date());
@@ -168,7 +176,7 @@ public class DeliveryRequest {
                         throw new RuntimeException("delivery is missing group and receiver, deleted");
                     }
                 } catch (Exception e) {
-                    LOG.info("Exception calling outgoingDelivery() for clientId: '" + mClientId + "'", e);
+                    LOG.warn("Exception calling outgoingDelivery() for clientId: '" + mClientId + "'", e);
                 }
             }
             // check for disconnects
@@ -181,8 +189,7 @@ public class DeliveryRequest {
 
 
     void perform() {
-        LOG.info("DeliverRequest.perform for clientId: '" + mClientId);
-        boolean needToNotify = false;
+        LOG.debug("DeliverRequest.perform for clientId: '" + mClientId);
         boolean currentlyConnected = false;
 
         // determine if the client is currently connected
@@ -192,17 +199,18 @@ public class DeliveryRequest {
             currentlyConnected = true;
             rpc = connection.getClientRpc();
         }
-        LOG.info("DeliverRequest.perform for clientId: '" + mClientId + ", currentlyConnected=" + currentlyConnected);
+        List<TalkDelivery> inDeliveries = new ArrayList<TalkDelivery>();
+
+        LOG.debug("DeliverRequest.perform for clientId: '" + mClientId + ", currentlyConnected=" + currentlyConnected);
         boolean deliveryReady = false;
         if (currentlyConnected) {
 
             // get all outstanding deliveries for the client
-            List<TalkDelivery> inDeliveries =
-                    mDatabase.findDeliveriesForClientInState(mClientId, TalkDelivery.STATE_DELIVERING);
-            LOG.info("clientId: '" + mClientId + "' has " + inDeliveries.size() + " incoming deliveries");
+            inDeliveries = mDatabase.findDeliveriesForClientInState(mClientId, TalkDelivery.STATE_DELIVERING);
+            LOG.debug("clientId: '" + mClientId + "' has " + inDeliveries.size() + " incoming deliveries");
             if (!inDeliveries.isEmpty()) {
                 // we will need to push if we don't succeed
-                needToNotify = true;
+                //needToNotify = true;
                 // deliver one by one
                 currentlyConnected = performIncoming(inDeliveries,rpc,connection);
             }
@@ -211,7 +219,7 @@ public class DeliveryRequest {
                 // get all deliveries for the client with not yet completed attachment transfers
                 List<TalkDelivery> inAttachmentDeliveries =
                         mDatabase.findDeliveriesForClientInDeliveryAndAttachmentStates(mClientId, TalkDelivery.IN_ATTACHMENT_DELIVERY_STATES, TalkDelivery.IN_ATTACHMENT_STATES);
-                LOG.info("clientId: '" + mClientId + "' has " + inAttachmentDeliveries.size() + " incoming deliveries with relevant attachment states");
+                LOG.debug("clientId: '" + mClientId + "' has " + inAttachmentDeliveries.size() + " incoming deliveries with relevant attachment states");
                 if (!inAttachmentDeliveries.isEmpty()) {
                     // deliver one by one
                     currentlyConnected = performIncoming(inAttachmentDeliveries,rpc,connection);
@@ -221,7 +229,7 @@ public class DeliveryRequest {
             if (currentlyConnected) {
                 List<TalkDelivery> outDeliveries =
                         mDatabase.findDeliveriesFromClientInStates(mClientId, TalkDelivery.OUT_STATES);
-                LOG.info("clientId: '" + mClientId + "' has " + outDeliveries.size() + " outgoing deliveries");
+                LOG.debug("clientId: '" + mClientId + "' has " + outDeliveries.size() + " outgoing deliveries");
                 if (!outDeliveries.isEmpty())      {
                     // deliver one by one
                     currentlyConnected = performOutgoing(outDeliveries, rpc, connection);
@@ -231,7 +239,7 @@ public class DeliveryRequest {
             if (currentlyConnected) {
                 List<TalkDelivery> outDeliveries =
                         mDatabase.findDeliveriesFromClientInDeliveryAndAttachmentStates(mClientId, TalkDelivery.OUT_ATTACHMENT_DELIVERY_STATES, TalkDelivery.OUT_ATTACHMENT_STATES);
-                LOG.info("clientId: '" + mClientId + "' has " + outDeliveries.size() + " outgoing deliveries with relevant attachment states");
+                LOG.debug("clientId: '" + mClientId + "' has " + outDeliveries.size() + " outgoing deliveries with relevant attachment states");
                 if (!outDeliveries.isEmpty())      {
                     // deliver one by one
                     currentlyConnected = performOutgoing(outDeliveries,rpc, connection);
@@ -239,19 +247,46 @@ public class DeliveryRequest {
             }
             mForceAll = false;
         } else {
-            List<TalkDelivery> inDeliveries =
-                    mDatabase.findDeliveriesForClientInState(mClientId, TalkDelivery.STATE_DELIVERING);
-            LOG.info("unconnected clientId: '" + mClientId + "' has " + inDeliveries.size() + " incoming deliveries");
-            if (!inDeliveries.isEmpty()) {
-                needToNotify = true;
+            inDeliveries = mDatabase.findDeliveriesForClientInState(mClientId, TalkDelivery.STATE_DELIVERING);
+            LOG.debug("unconnected clientId: '" + mClientId + "' has " + inDeliveries.size() + " incoming deliveries");
+          }
+
+        // initiate push delivery if needed
+        if (!inDeliveries.isEmpty() && !currentlyConnected) {
+            LOG.debug("check if push-notify " + mClientId);
+
+            boolean needToNotify = false;
+
+            for (TalkDelivery delivery : inDeliveries) {
+                TalkRelationship relationship = mDatabase.findRelationshipBetween(delivery.getReceiverId(), delivery.getSenderId());
+                if (relationship != null && TalkRelationship.NOTIFICATIONS_DISABLED.equals(relationship.getNotificationPreference())) {
+                    LOG.debug("notifications disabled for sender "+delivery.getSenderId()+ " by " + mClientId);
+                } else if (delivery.getGroupId() != null) {
+                     TalkGroupMembership membership = mDatabase.findGroupMembershipForClient(delivery.getGroupId(), mClientId);
+                    if (membership == null) {
+                        LOG.debug("notifications: no membership for group " + delivery.getGroupId() + " by " + mClientId);
+                    } else {
+                        LOG.debug("notifications: preferences are '"+membership.getNotificationPreference()+"' for group " + delivery.getGroupId() + " by " + mClientId);
+                    }
+                     if (membership == null || TalkGroupMembership.NOTIFICATIONS_DISABLED.equals(membership.getNotificationPreference())) {
+                         LOG.debug("notifications disabled for group "+delivery.getGroupId()+ " by " + mClientId);
+                     } else {
+                         LOG.debug("notifications not disabled for group "+delivery.getGroupId()+ " by " + mClientId);
+                         needToNotify = true;
+                         break;
+                     }
+                 } else {
+                    LOG.debug("notifications not disabled for sender "+delivery.getSenderId()+ " by " + mClientId);
+                    needToNotify = true;
+                    break;
+                }
+            }
+            if (needToNotify) {
+                LOG.debug("pushing " + mClientId);
+                performPush();
             }
         }
-        // initiate push delivery if needed
-        if (needToNotify && !currentlyConnected) {
-            LOG.info("pushing " + mClientId);
-            performPush();
-        }
-        if (currentlyConnected && !needToNotify) {
+        if (currentlyConnected && inDeliveries.isEmpty()) {
             rpc.deliveriesReady();
         }
     }
@@ -263,7 +298,7 @@ public class DeliveryRequest {
         if (client.isPushCapable()) {
             mServer.getPushAgent().submitRequest(client);
         } else {
-            LOG.info("push unconfigured for " + mClientId);
+            LOG.warn("push unconfigured for " + mClientId);
         }
     }
 

@@ -9,6 +9,12 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+/* A TalkRelationship has the following semantics:
+ *  Normally on the server there should be always two relationship records with reversed "clientId" and "otherClientId"
+ *  The "clientId" denotes the client that receives and stores the particular TalkRelationship record
+ *  TODO: more documentation
+ */
+
 @DatabaseTable(tableName = "relationship")
 public class TalkRelationship {
 
@@ -17,6 +23,13 @@ public class TalkRelationship {
     public static final String STATE_INVITED_ME = "invitedMe";
     public static final String STATE_FRIEND = "friend";
     public static final String STATE_BLOCKED = "blocked";
+
+    public static final String NOTIFICATIONS_DISABLED = "disabled";
+    public static final String NOTIFICATIONS_ENABLED = "enabled";
+
+    public static boolean isValidNotificationPreference(String preference) {
+        return NOTIFICATIONS_DISABLED.equals(preference) || NOTIFICATIONS_ENABLED.equals(preference);
+    }
 
     public static final String LOCK_PREFIX = "rel-";
 
@@ -51,9 +64,17 @@ public class TalkRelationship {
     @DatabaseField
     Date lastChanged;
 
+    @DatabaseField
+    String notificationPreference;
+
     @JsonIgnore
     public boolean isRelated() {
         return STATES_RELATED_SET.contains(state);
+    }
+
+    @JsonIgnore
+    public boolean hasNotificationPreference() {
+        return NOTIFICATIONS_DISABLED.equals(notificationPreference);
     }
 
     @JsonIgnore
@@ -76,16 +97,22 @@ public class TalkRelationship {
         return STATE_INVITED.equals(state);
     }
 
+
+    @JsonIgnore
+    public boolean isNotificationsDisabled() {
+        return NOTIFICATIONS_DISABLED.equals(notificationPreference);
+    }
+
     @JsonIgnore
     public boolean invitedMe() {
         return STATE_INVITED_ME.equals(state);
     }
-
+ /*
     @JsonIgnore
     public boolean isDirectlyRelated() {
         return isFriend() || isInvited() || isBlocked() || invitedMe();
     }
-
+*/
     public String getClientId() {
         return clientId;
     }
@@ -129,11 +156,21 @@ public class TalkRelationship {
         this.lastChanged = lastChanged;
     }
 
+    public String getNotificationPreference() {
+        return notificationPreference;
+    }
+
+    public void setNotificationPreference(String notificationPreference) {
+        this.notificationPreference = notificationPreference;
+    }
+
     @JsonIgnore
     public void updateWith(TalkRelationship r) {
         this.setClientId(r.getClientId());
         this.setOtherClientId(r.getOtherClientId());
         this.setState(r.getState());
+        this.setUnblockState(r.getUnblockState());
         this.setLastChanged(r.getLastChanged());
+        this.setNotificationPreference(r.getNotificationPreference());
     }
 }

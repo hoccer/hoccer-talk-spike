@@ -8,6 +8,7 @@ import com.hoccer.xo.android.credentialtransfer.CredentialImporter;
 import com.hoccer.xo.android.fragment.ImportCredentialFragment;
 import com.hoccer.xo.android.fragment.ImportCredentialUpdateFragment;
 import com.artcom.hoccer.R;
+import com.hoccer.xo.android.profile.client.ClientProfileActivity;
 
 /**
  * Activity handles credential import procedure or starts the new client registration.
@@ -63,8 +64,9 @@ public class RegistrationActivity extends XoActivity {
     }
 
     public void startNewClientRegistration() {
-        startActivity(new Intent(this, SingleProfileActivity.class)
-                .setAction(SingleProfileActivity.ACTION_CREATE_SELF));
+        startActivity(new Intent(this, ClientProfileActivity.class)
+                .setAction(ClientProfileActivity.ACTION_CREATE_SELF));
+        setResult(RESULT_OK);
         finish();
     }
 

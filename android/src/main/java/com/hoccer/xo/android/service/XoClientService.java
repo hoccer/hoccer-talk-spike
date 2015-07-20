@@ -1,9 +1,6 @@
 package com.hoccer.xo.android.service;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.Service;
+import android.app.*;
 import android.content.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,6 +11,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import com.artcom.hoccer.R;
@@ -24,6 +22,8 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.model.TalkPresence;
+import com.hoccer.xo.android.BackgroundManager;
 import com.hoccer.xo.android.XoAndroidClient;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ChatsActivity;
@@ -109,6 +109,8 @@ public class XoClientService extends Service {
     int mCurrentConversationContactId = -1;
 
     private ClientIdReceiver m_clientIdReceiver;
+
+    private PowerManager.WakeLock mWakeLock;
 
     @Override
     public void onCreate() {
@@ -437,8 +439,15 @@ public class XoClientService extends Service {
     private void createUnseenMessageNotification(Map<Integer, ContactUnseenMessageHolder> contactsMap, boolean doAlarm) {
         // sum up all unseen messages
         int unseenMessagesCount = 0;
-        for (ContactUnseenMessageHolder holder : contactsMap.values()) {
-            unseenMessagesCount += holder.getUnseenMessages().size();
+        Map<Integer, ContactUnseenMessageHolder> relevantContactsMap = new HashMap<Integer, ContactUnseenMessageHolder>();
+        for (Map.Entry<Integer, ContactUnseenMessageHolder> entry : contactsMap.entrySet()) {
+            if (!entry.getValue().getContact().isNotificationsDisabled()) {
+                unseenMessagesCount += entry.getValue().getUnseenMessages().size();
+                relevantContactsMap.put(entry.getKey(), entry.getValue());
+            }
+        }
+        if (relevantContactsMap.isEmpty()) {
+            return;
         }
 
         // build the notification
@@ -464,9 +473,9 @@ public class XoClientService extends Service {
         }
 
         // fill in content
-        if (contactsMap.size() == 1) {
+        if (relevantContactsMap.size() == 1) {
             // create intent to start the messaging activity for the right contact
-            ContactUnseenMessageHolder holder = contactsMap.values().iterator().next();
+            ContactUnseenMessageHolder holder = relevantContactsMap.values().iterator().next();
             TalkClientContact contact = holder.getContact();
 
             Intent intent = new Intent(this, ChatsActivity.class);
@@ -496,7 +505,7 @@ public class XoClientService extends Service {
 
             // concatenate contact names
             StringBuilder sb = new StringBuilder();
-            for (ContactUnseenMessageHolder holder : contactsMap.values()) {
+            for (ContactUnseenMessageHolder holder : relevantContactsMap.values()) {
                 sb.append(getContactName(holder.getContact())).append(CONTACT_DELIMETER);
             }
 
@@ -518,15 +527,17 @@ public class XoClientService extends Service {
 
         // log all unseen messages found
         StringBuilder logMessage = new StringBuilder("Notifying about unseen messages: ");
-        for (ContactUnseenMessageHolder holder : contactsMap.values()) {
+        for (ContactUnseenMessageHolder holder : relevantContactsMap.values()) {
             logMessage.append(getContactName(holder.getContact())).append("(").append(holder.getUnseenMessages().size()).append(") ");
         }
         LOG.debug(logMessage);
     }
 
     private String getContactName(TalkClientContact contact) {
-        if (contact.isGroup() && contact.getGroupPresence() != null && contact.getGroupPresence().isTypeNearby()) {
-            return getString(R.string.nearby_text);
+        if (contact.isNearbyGroup()) {
+            return getString(R.string.all_nearby);
+        } else if (contact.isWorldwideGroup()) {
+            return getString(R.string.all_worldwide);
         } else {
             return contact.getNickname();
         }

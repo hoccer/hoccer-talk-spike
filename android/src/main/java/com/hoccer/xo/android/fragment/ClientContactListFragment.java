@@ -6,7 +6,7 @@ import android.view.View;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.activity.SingleProfileActivity;
+import com.hoccer.xo.android.profile.client.ClientProfileActivity;
 import com.hoccer.xo.android.adapter.ClientContactListAdapter;
 import com.hoccer.xo.android.adapter.ContactListAdapter;
 import com.hoccer.xo.android.base.XoActivity;
@@ -18,10 +18,7 @@ import java.sql.SQLException;
 public class ClientContactListFragment extends ContactListFragment {
 
     private static final Logger LOG = Logger.getLogger(ClientContactListFragment.class);
-    private static final Placeholder PLACEHOLDER = new Placeholder(
-            R.drawable.placeholder_chats,
-            R.drawable.placeholder_chats_head,
-            R.string.placeholder_conversations_text);
+    private static final Placeholder PLACEHOLDER = new Placeholder(R.drawable.placeholder_chats, R.string.placeholder_conversations_text);
 
     public ClientContactListFragment() {
         super(R.string.contacts_tab_friends);
@@ -45,9 +42,9 @@ public class ClientContactListFragment extends ContactListFragment {
 
     @Override
     protected Intent getProfileActivityIntent(TalkClientContact contact) {
-        return new Intent(getActivity(), SingleProfileActivity.class)
-                .setAction(SingleProfileActivity.ACTION_SHOW)
-                .putExtra(SingleProfileActivity.EXTRA_CLIENT_CONTACT_ID, contact.getClientContactId());
+        return new Intent(getActivity(), ClientProfileActivity.class)
+                .setAction(ClientProfileActivity.ACTION_SHOW)
+                .putExtra(ClientProfileActivity.EXTRA_CLIENT_CONTACT_ID, contact.getClientContactId());
     }
 
     @Override

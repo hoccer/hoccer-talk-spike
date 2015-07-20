@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoDefaultClientConfiguration;
+import com.hoccer.talk.model.TalkGroupMembership;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -16,12 +17,13 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
 
     private static final Logger LOG = Logger.getLogger(XoAndroidClientConfiguration.class);
 
-    private final SharedPreferences mPreferences;
+    private final SharedPreferences mSharedPreferences;
     private final Properties mProperties;
     private final String mAppName;
 
     public XoAndroidClientConfiguration(Context context) {
-        mPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
         mProperties = new Properties();
         mAppName = context.getString(R.string.app_name);
 
@@ -51,14 +53,14 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
 
     @Override
     public int getRSAKeysize() {
-        String keySizeString = mPreferences.getString("preference_keysize", "2048");
+        String keySizeString = mSharedPreferences.getString("preference_keysize", "2048");
         Integer keySize = Integer.parseInt(keySizeString);
         return keySize;
     }
 
     @Override
     public boolean isSendDeliveryConfirmationEnabled() {
-        return mPreferences.getBoolean("preference_confirm_messages_seen", true);
+        return mSharedPreferences.getBoolean("preference_confirm_messages_seen", true);
     }
 
     // The following configuration settings are specific to the Android app
@@ -71,7 +73,7 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
         if (mProperties.getProperty("hoccer.android.enable.crash.reporting") != null) {
             return Boolean.parseBoolean(mProperties.getProperty("hoccer.android.enable.crash.reporting"));
         }
-        return mPreferences.getBoolean("preference_report_crashes", true);
+        return mSharedPreferences.getBoolean("preference_report_crashes", true);
     }
 
     public String getBackupDirectory() {
@@ -108,5 +110,21 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
 
     public String getCredentialImportPackage() {
         return mProperties.getProperty("hoccer.android.credential.import.package", null);
+    }
+
+    @Override
+    public long getTimeToLiveInWorldwide() {
+        return Long.parseLong(mSharedPreferences.getString("preference_key_worldwide_timetolive", "0"));
+    }
+
+    @Override
+    public String getNotificationPreferenceForWorldwide() {
+        Boolean notificationsEnabled = mSharedPreferences.getBoolean("preference_key_worldwide_enable_notifications", false);
+        return notificationsEnabled ? TalkGroupMembership.NOTIFICATIONS_ENABLED : TalkGroupMembership.NOTIFICATIONS_DISABLED;
+    }
+
+    @Override
+    public boolean isAutomaticWorldwideDownloadEnabled() {
+        return mSharedPreferences.getBoolean("preference_key_worldwide_enable_automatic_download", false);
     }
 }

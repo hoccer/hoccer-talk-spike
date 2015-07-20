@@ -118,8 +118,9 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     // Count connections attempts for back-off
     int mConnectBackoffPotency;
 
-    // temporary group for geolocation grouping
-    String mEnvironmentGroupId;
+    String mWorldwideGroupId;
+    String mNearbyGroupId;
+
     AtomicBoolean mEnvironmentUpdateCallPending = new AtomicBoolean(false);
 
     ObjectMapper mJsonMapper;
@@ -967,7 +968,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             for (IXoMessageListener listener : mMessageListeners) {
                 listener.onMessageCreated(message);
             }
-            if (TalkDelivery.STATE_NEW.equals(message.getOutgoingDelivery().getState())) {
+            if (TalkDelivery.STATE_NEW.equals(message.getDelivery().getState())) {
                 requestDelivery(message);
             }
         } catch (SQLException e) {
@@ -1210,7 +1211,11 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     switchState(State.LOGIN, "login after registration");
                 } catch (Exception e) {
                     LOG.error("Exception while registering", e);
-                    switchState(State.CONNECTING, "reconnect after registration failed");
+                    if (mConnection.isConnected()) {
+                        scheduleRegistration();
+                    } else {
+                        switchState(State.CONNECTING, "reconnect after registration failed");
+                    }
                 }
             }
         }, 0, TimeUnit.SECONDS);
@@ -1272,7 +1277,11 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     switchState(State.SYNCING, "sync after login");
                 } catch (Exception e) {
                     LOG.error("Exception while logging in", e);
-                    switchState(State.CONNECTING, "reconnect after login failed");
+                    if (mConnection.isConnected()) {
+                        scheduleLogin();
+                    } else {
+                        switchState(State.CONNECTING, "reconnect after login failed");
+                    }
                 }
             }
         }, 0, TimeUnit.SECONDS);
@@ -1324,7 +1333,11 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     switchState(State.READY, "ready after sync");
                 } catch (Exception e) {
                     LOG.error("Exception while syncing", e);
-                    switchState(State.CONNECTING, "reconnect after sync failed");
+                    if (mConnection.isConnected()) {
+                        scheduleSync();
+                    } else {
+                        switchState(State.CONNECTING, "reconnect after sync failed");
+                    }
                 }
             }
         }, 0, TimeUnit.SECONDS);
@@ -1386,6 +1399,11 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
                 if (groupMembershipFlags[i]) {
                     TalkGroupMembership[] memberships = mServerRpc.getGroupMembers(groupContact.getGroupId(), never);
+
+                    if (groupContact.isWorldwideGroup()) {
+                        mWorldwideGroupId = groupContact.getGroupId();
+                    }
+
                     for (TalkGroupMembership membership : memberships) {
                         updateGroupMembership(membership);
                     }
@@ -1393,6 +1411,8 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     TalkGroupPresence groupPresence = groupContact.getGroupPresence();
                     if (groupPresence != null && groupPresence.isTypeNearby()) {
                         destroyNearbyGroup(groupContact);
+                    } else if (groupPresence != null && groupPresence.isTypeWorldwide()) {
+                        destroyWorldwideGroup(groupContact);
                     } else {
                         if (groupPresence != null) {
                             if (groupContact.getGroupMembership().isInvolved() && hasMembersOrMessages(groupContact)) {
@@ -1410,6 +1430,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                         }
                     }
 
+                    // TODO this can cause java.util.ConcurrentModificationException
                     for (IXoContactListener listener : mContactListeners) {
                         listener.onGroupMembershipChanged(groupContact);
                         listener.onGroupPresenceChanged(groupContact);
@@ -1770,7 +1791,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
     private void performDelivery(TalkClientMessage clientMessage) {
         final TalkMessage message = clientMessage.getMessage();
-        final TalkDelivery delivery = clientMessage.getOutgoingDelivery();
+        final TalkDelivery delivery = clientMessage.getDelivery();
         LOG.debug("preparing delivery of message " + clientMessage.getClientMessageId());
         try {
             encryptMessage(clientMessage, delivery, message);
@@ -1780,7 +1801,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         }
 
         TalkDelivery[] deliveries = new TalkDelivery[1];
-        deliveries[0] = clientMessage.getOutgoingDelivery();
+        deliveries[0] = clientMessage.getDelivery();
 
         LOG.debug(" delivering message " + clientMessage.getClientMessageId());
 
@@ -1915,6 +1936,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
     public void sendEnvironmentUpdate(final TalkEnvironment environment) {
         LOG.debug("sendEnvironmentUpdate()");
+
         if (isReady() && environment != null) {
             if (mEnvironmentUpdateCallPending.compareAndSet(false, true)) {
                 mExecutor.execute(new Runnable() {
@@ -1922,8 +1944,18 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     public void run() {
                         try {
                             environment.setClientId(mSelfContact.getClientId());
-                            environment.setGroupId(mEnvironmentGroupId);
-                            mEnvironmentGroupId = mServerRpc.updateEnvironment(environment);
+
+                            if (environment.isWorldwide()) {
+                                environment.setGroupId(mWorldwideGroupId);
+                            }
+
+                            String environmentGroupId = mServerRpc.updateEnvironment(environment);
+
+                            if (environment.isWorldwide()) {
+                                mWorldwideGroupId = environmentGroupId;
+                            } else {
+                                mNearbyGroupId = environmentGroupId;
+                            }
                         } catch (Throwable t) {
                             LOG.error("sendEnvironmentUpdate: other error", t);
                         }
@@ -1938,20 +1970,16 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         }
     }
 
-    public TalkClientContact getCurrentEnvironmentGroup() {
-        TalkClientContact currentEnvironmentGroup = null;
+    public TalkClientContact getCurrentNearbyGroup() {
+        TalkClientContact currentNearbyGroup = null;
         try {
-            if (mEnvironmentGroupId != null) {
-                currentEnvironmentGroup = mDatabase.findGroupContactByGroupId(mEnvironmentGroupId, false);
+            if (mNearbyGroupId != null) {
+                currentNearbyGroup = mDatabase.findGroupContactByGroupId(mNearbyGroupId, false);
             }
         } catch (SQLException e) {
             LOG.error("SQL Error while retrieving current environment group ", e);
         }
-        return currentEnvironmentGroup;
-    }
 
-    public TalkClientContact getCurrentNearbyGroup() {
-        final TalkClientContact currentNearbyGroup = getCurrentEnvironmentGroup();
         if (currentNearbyGroup == null) {
             return null;
         }
@@ -1967,7 +1995,15 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     public TalkClientContact getCurrentWorldwideGroup() {
-        final TalkClientContact currentWorldwideGroup = getCurrentEnvironmentGroup();
+        TalkClientContact currentWorldwideGroup = null;
+        try {
+            if (mWorldwideGroupId != null) {
+                currentWorldwideGroup = mDatabase.findGroupContactByGroupId(mWorldwideGroupId, false);
+            }
+        } catch (SQLException e) {
+            LOG.error("SQL Error while retrieving current environment group ", e);
+        }
+
         if (currentWorldwideGroup == null) {
             return null;
         }
@@ -1985,12 +2021,16 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
     public void sendDestroyEnvironment(final String type) {
         if (isReady()) {
-            mEnvironmentGroupId = null;
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        mServerRpc.destroyEnvironment(type);
+                        if (TalkEnvironment.TYPE_NEARBY.equals(type)) {
+                            mServerRpc.destroyEnvironment(type);
+                            mNearbyGroupId = null;
+                        } else {
+                            mServerRpc.releaseEnvironment(type);
+                        }
                     } catch (Throwable t) {
                         LOG.error("sendDestroyEnvironment: other error", t);
                     }
@@ -2025,7 +2065,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             }
 
             if (groupContact == null) {
-                keepNearbyAcquaintance(clientContact);
+                keepAcquaintance(clientContact);
             }
 
             String messageId = delivery.getMessageId();
@@ -2059,7 +2099,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         clientMessage.updateOutgoing(delivery);
 
         try {
-            mDatabase.saveDelivery(clientMessage.getOutgoingDelivery());
+            mDatabase.saveDelivery(clientMessage.getDelivery());
             mDatabase.saveClientMessage(clientMessage);
         } catch (SQLException e) {
             LOG.error("SQL error", e);
@@ -2211,10 +2251,10 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         try {
             clientMessage.updateIncoming(delivery);
             TalkClientDownload download = clientMessage.getAttachmentDownload();
-            mDatabase.updateDelivery(clientMessage.getIncomingDelivery());
+            mDatabase.updateDelivery(clientMessage.getDelivery());
 
             if (download != null) {
-                if (download.isAttachment() && TalkDelivery.ATTACHMENT_STATE_UPLOADING.equals(delivery.getAttachmentState())) {
+                if (download.isAttachment()) {
                     mDownloadAgent.startDownload(download);
                 }
             }
@@ -2280,7 +2320,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 mDatabase.saveClientDownload(clientMessage.getAttachmentDownload());
             }
             mDatabase.saveMessage(clientMessage.getMessage());
-            mDatabase.saveDelivery(clientMessage.getIncomingDelivery());
+            mDatabase.saveDelivery(clientMessage.getDelivery());
             mDatabase.saveClientMessage(clientMessage);
 
             for (IXoMessageListener listener : mMessageListeners) {
@@ -2294,7 +2334,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             messageFailed = false;
 
             if (groupContact == null) {
-                keepNearbyAcquaintance(senderContact);
+                keepAcquaintance(senderContact);
             }
 
         } catch (GeneralSecurityException e) {
@@ -2349,14 +2389,18 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         sendDownloadAttachmentDeliveryConfirmation(delivery);
     }
 
-    private void keepNearbyAcquaintance(TalkClientContact clientContact) throws SQLException, NoClientIdInPresenceException {
-        if (clientContact.isClient() && clientContact.isNearby() && (
-                clientContact.getClientRelationship() == null
-                        || clientContact.getClientRelationship().isNone()
-                        || clientContact.getClientRelationship().isInvited()
-                        || clientContact.getClientRelationship().invitedMe())) {
+    private void keepAcquaintance(TalkClientContact clientContact) throws SQLException, NoClientIdInPresenceException {
+        boolean wasWorldWide = mDatabase.isClientContactInGroupOfType(TalkGroupPresence.GROUP_TYPE_WORLDWIDE, clientContact.getClientId());
+        if (clientContact.isClient() && (clientContact.isInEnvironment() || wasWorldWide) && (clientContact.getClientRelationship() == null
+                || clientContact.getClientRelationship().isNone()
+                || clientContact.getClientRelationship().isInvited()
+                || clientContact.getClientRelationship().invitedMe())) {
+            if (clientContact.isNearby()) {
+                clientContact.getClientPresence().setAcquaintanceType(TalkEnvironment.TYPE_NEARBY);
+            } else if (clientContact.isWorldwide() || wasWorldWide) {
+                clientContact.getClientPresence().setAcquaintanceType(TalkEnvironment.TYPE_WORLDWIDE);
+            }
             clientContact.getClientPresence().setKept(true);
-            clientContact.getClientPresence().setNearbyAcquaintance(true);
             mDatabase.savePresence(clientContact.getClientPresence());
             mDatabase.saveContact(clientContact);
         }
@@ -2793,8 +2837,13 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 clientContact.getClientPresence().setKept(false);
             } else if (friendshipCancelled(newRelationship, oldRelationShip)) {
                 clientContact.getClientPresence().setKept(true);
-                clientContact.getClientPresence().setNearbyAcquaintance(false);
+                clientContact.getClientPresence().setAcquaintanceType(TalkPresence.TYPE_ACQUAINTANCE_NONE);
             }
+
+            if (isBlockedAcquaintance(newRelationship) && !clientContact.isKept()) {
+                keepAcquaintance(clientContact);
+            }
+
             clientContact.updateRelationship(newRelationship);
             mDatabase.saveRelationship(clientContact.getClientRelationship());
             mDatabase.savePresence(clientContact.getClientPresence());
@@ -2811,11 +2860,18 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     private boolean friendshipCancelled(TalkRelationship newRelationship, TalkRelationship oldRelationShip) {
-        return newRelationship.isNone() && oldRelationShip != null && (oldRelationShip.isFriend() || oldRelationShip.isBlocked());
+        return ((newRelationship.isNone() || newRelationship.isBlocked() && TalkRelationship.STATE_NONE.equals(newRelationship.getUnblockState())) &&
+                oldRelationShip != null &&
+                (oldRelationShip.isFriend() ||
+                        oldRelationShip.isBlocked() && TalkRelationship.STATE_FRIEND.equals(oldRelationShip.getUnblockState())));
     }
 
     private boolean becameFriend(TalkRelationship newRelationship, TalkRelationship oldRelationShip) {
         return (oldRelationShip == null || !(oldRelationShip.isFriend() || oldRelationShip.isBlocked())) && newRelationship.isFriend();
+    }
+
+    private boolean isBlockedAcquaintance(TalkRelationship newRelationship) {
+        return newRelationship.isBlocked() && TalkRelationship.STATE_NONE.equals(newRelationship.getUnblockState());
     }
 
     private void updateGroupPresence(TalkGroupPresence groupPresence) {
@@ -2865,6 +2921,8 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         // quietly destroy nearby group
         if (groupPresence.isTypeNearby() && !groupPresence.exists()) {
             destroyNearbyGroup(groupContact);
+        } else if (groupPresence.isTypeWorldwide() && !groupPresence.exists()) {
+            destroyWorldwideGroup(groupContact);
         }
 
         LOG.info("updateGroupPresence(" + groupPresence.getGroupId() + ") - saved");
@@ -2884,7 +2942,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 LOG.error("Can not destroy nearby group since groupPresence is null");
                 return;
             }
-            groupPresence.setKept(true);
 
             // save group
             mDatabase.saveContact(groupContact);
@@ -2905,6 +2962,43 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             }
         } catch (SQLException e) {
             LOG.error("Error while destroying nearby group " + groupContact.getGroupId());
+        }
+    }
+
+    private void destroyWorldwideGroup(TalkClientContact groupContact) {
+        LOG.debug("destroying worldwide group with id " + groupContact.getGroupId());
+
+        try {
+            // reset group state
+            TalkGroupPresence groupPresence = groupContact.getGroupPresence();
+            if (groupPresence == null) {
+                LOG.error("Can not destroy worldwide group since groupPresence is null");
+                return;
+            }
+
+            // save group
+            mDatabase.saveContact(groupContact);
+            mDatabase.saveGroupPresence(groupPresence);
+
+            // set member states to none
+            List<TalkGroupMembership> memberships = mDatabase.findMembershipsInGroup(groupContact.getGroupId());
+            for (TalkGroupMembership membership : memberships) {
+                membership.setState(TalkGroupMembership.STATE_NONE);
+                mDatabase.saveGroupMembership(membership);
+            }
+
+            // set worldwide state to false
+            List<TalkClientContact> contacts = mDatabase.findContactsInGroup(groupContact.getGroupId());
+            for (TalkClientContact contact : contacts) {
+                contact.setWorldwide(false);
+                mDatabase.saveContact(contact);
+            }
+
+            if (groupContact.getGroupId().equals(mWorldwideGroupId)) {
+                mWorldwideGroupId = null;
+            }
+        } catch (SQLException e) {
+            LOG.error("Error while destroying worldwide group " + groupContact.getGroupId());
         }
     }
 
@@ -3002,14 +3096,19 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     TalkGroupPresence groupPresence = groupContact.getGroupPresence();
                     if (groupPresence != null && groupPresence.isTypeNearby()) {
                         destroyNearbyGroup(groupContact);
+                    } else if (groupPresence != null && groupPresence.isTypeWorldwide()) {
+                        destroyWorldwideGroup(groupContact);
                     }
                 }
             }
             // if this concerns the membership of someone else
             if (clientContact.isClient()) {
-                /* Mark as nearby contact and save to database. */
-                boolean isJoinedInNearbyGroup = groupContact.getGroupPresence() != null && groupContact.getGroupPresence().isTypeNearby() && newMembership.isJoined();
-                clientContact.setNearby(isJoinedInNearbyGroup);
+                /* Mark as nearby or worldwide contact and save to database. */
+                if (groupContact.isNearbyGroup()) {
+                    clientContact.setNearby(newMembership.isJoined());
+                } else if (groupContact.isWorldwideGroup()) {
+                    clientContact.setWorldwide(newMembership.isJoined());
+                }
 
                 mDatabase.saveContact(clientContact);
             }
@@ -3025,8 +3124,13 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         }
     }
 
-    private void updateGroupKeptState(TalkGroupMembership oldMemebership, TalkGroupMembership newMembership, TalkClientContact groupContact, TalkClientContact clientContact) throws SQLException {
-        if (selfHasDeclined(oldMemebership, newMembership) || selfHasJoinedGroup(newMembership, clientContact)) {
+    private void updateGroupKeptState(TalkGroupMembership oldMembership, TalkGroupMembership newMembership, TalkClientContact groupContact, TalkClientContact clientContact) throws SQLException {
+        if (groupContact.isEnvironmentGroup()) {
+            return;
+        }
+
+        // TODO: This can throw null pointer exceptions since groupContact.getGroupPresence() can be null.
+        if (selfHasDeclined(oldMembership, newMembership) || selfHasJoinedGroup(newMembership, clientContact)) {
             groupContact.getGroupPresence().setKept(false);
         } else {
             if (((newMembership.isGroupRemoved() || selfHasLeftGroup(newMembership, clientContact)) && hasMembersOrMessages(groupContact))) {
@@ -3164,9 +3268,9 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     public void markMessageAsAborted(TalkClientMessage message) {
-        message.getOutgoingDelivery().setState(TalkDelivery.STATE_ABORTED); // TODO: ABORTED OR ABORTED_ACKNOWLEDGED?
+        message.getDelivery().setState(TalkDelivery.STATE_ABORTED); // TODO: ABORTED OR ABORTED_ACKNOWLEDGED?
         try {
-            mDatabase.saveDelivery(message.getOutgoingDelivery());
+            mDatabase.saveDelivery(message.getDelivery());
         } catch (SQLException e) {
             LOG.error("error while saving a message which will never be sent since the receiver is blocked or the group is empty", e);
         }

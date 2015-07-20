@@ -28,8 +28,9 @@ public class ClientContactListAdapter extends ContactListAdapter {
     private static final Logger LOG = Logger.getLogger(ClientContactListAdapter.class);
     private static final int TYPE_PRESENCE = 0;
     private static final int TYPE_NEARBY_HISTORY = 1;
-    private static final int TYPE_HISTORY = 2;
-    private static final int TYPE_SIMPLE = 3;
+    private static final int TYPE_WORLDWIDE_HISTORY = 2;
+    private static final int TYPE_HISTORY = 3;
+    private static final int TYPE_SIMPLE = 4;
 
     public ClientContactListAdapter(Activity activity) {
         super(activity);
@@ -40,14 +41,14 @@ public class ClientContactListAdapter extends ContactListAdapter {
         List<TalkClientContact> invitedMe;
         List<TalkClientContact> invited;
         List<TalkClientContact> friends;
-        List<TalkClientContact> blocked;
+        List<TalkClientContact> blockedFriends;
 
         try {
             XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
             invitedMe = database.findClientContactsByState(TalkRelationship.STATE_INVITED_ME);
             invited = database.findClientContactsByState(TalkRelationship.STATE_INVITED);
             friends = database.findClientContactsByState(TalkRelationship.STATE_FRIEND);
-            blocked = database.findClientContactsByState(TalkRelationship.STATE_BLOCKED);
+            blockedFriends = database.findClientContactsByState(TalkRelationship.STATE_BLOCKED, TalkRelationship.STATE_FRIEND);
         } catch (SQLException e) {
             LOG.error("Could not fetch client contacts", e);
             return Collections.emptyList();
@@ -55,9 +56,9 @@ public class ClientContactListAdapter extends ContactListAdapter {
 
         Collections.sort(invited, CLIENT_CONTACT_COMPARATOR);
         Collections.sort(friends, CLIENT_CONTACT_COMPARATOR);
-        Collections.sort(blocked, CLIENT_CONTACT_COMPARATOR);
+        Collections.sort(blockedFriends, CLIENT_CONTACT_COMPARATOR);
 
-        return ListUtils.union(invitedMe, ListUtils.union(invited, ListUtils.union(friends, blocked)));
+        return ListUtils.union(invitedMe, ListUtils.union(invited, ListUtils.union(friends, blockedFriends)));
     }
 
     @Override
@@ -89,10 +90,12 @@ public class ClientContactListAdapter extends ContactListAdapter {
     private int getViewTypeForContact(TalkClientContact contact) {
         int type;
 
-        if (contact.getClientRelationship().isFriend() || contact.getClientRelationship().isBlocked() || contact.isNearby()) {
+        if (contact.getClientRelationship().isFriend() || contact.getClientRelationship().isBlocked() || contact.isNearby() || contact.isWorldwide()) {
             type = TYPE_PRESENCE;
         } else if (contact.isKept() && contact.isNearbyAcquaintance()) {
             type = TYPE_NEARBY_HISTORY;
+        } else if (contact.isKept() && contact.isWorldwideAcquaintance()) {
+            type = TYPE_WORLDWIDE_HISTORY;
         } else if (contact.isKept()) {
             type = TYPE_HISTORY;
         } else {
@@ -108,6 +111,8 @@ public class ClientContactListAdapter extends ContactListAdapter {
             convertView = inflater.inflate(R.layout.item_contact_client_presence, null);
         } else if (type == TYPE_NEARBY_HISTORY) {
             convertView = inflater.inflate(R.layout.item_contact_client_history_nearby, null);
+        } else if (type == TYPE_WORLDWIDE_HISTORY) {
+            convertView = inflater.inflate(R.layout.item_contact_client_history_worldwide, null);
         } else if (type == TYPE_HISTORY) {
             convertView = inflater.inflate(R.layout.item_contact_client_history, null);
         } else {
@@ -206,7 +211,7 @@ public class ClientContactListAdapter extends ContactListAdapter {
     private ViewHolder createAndInitViewHolder(View convertView) {
         ViewHolder viewHolder;
         viewHolder = new ViewHolder();
-        viewHolder.avatarView = (AvatarView) convertView.findViewById(R.id.contact_icon);
+        viewHolder.avatarView = (AvatarView) convertView.findViewById(R.id.avatar);
         viewHolder.contactNameTextView = (TextView) convertView.findViewById(R.id.contact_name);
         viewHolder.invitedMeLayout = (LinearLayout) convertView.findViewById(R.id.ll_invited_me);
         viewHolder.acceptButton = (Button) convertView.findViewById(R.id.btn_accept);

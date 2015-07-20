@@ -22,6 +22,7 @@
                 <extra android:name="URL" android:value="@string/link_faq"></extra>
             </intent>
         </Preference>
+
         <Preference
                 android:title="@string/menu_tutorial"
                 android:key="preference_tutorial">
@@ -43,6 +44,24 @@
         <SwitchPreference android:title="@string/activate"
                           android:key="@string/preference_key_activate_passcode"
                           android:defaultValue="false"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="@string/worldwide_mode">
+        <ListPreference
+                android:key="@string/preference_key_worldwide_timetolive"
+                android:title="@string/leave_after"
+                android:entries="@array/worldwide_timetolive"
+                android:entryValues="@array/worldwide_timetolive_values"
+                android:defaultValue="0"/>
+        <SwitchPreference
+                android:key="@string/preference_key_worldwide_enable_notifications"
+                android:title="@string/group_notifications"
+                android:defaultValue="false"/>
+        <SwitchPreference
+                android:key="@string/preference_key_worldwide_enable_automatic_download"
+                android:title="@string/auto_download_attachments"
+                android:defaultValue="false"/>
     </PreferenceCategory>
 
     <PreferenceCategory

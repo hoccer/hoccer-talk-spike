@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+            android:id="@+id/menu_profile_block"
+            android:icon="@drawable/ic_action_block"
+            android:orderInCategory="102"
+            android:showAsAction="always"
+            android:title="@string/profile_user_block_button"/>
+    <item
+            android:id="@+id/menu_profile_unblock"
+            android:icon="@drawable/ic_action_unblock"
+            android:orderInCategory="103"
+            android:showAsAction="always"
+            android:title="@string/profile_user_unblock_button"/>
+    <item
+            android:id="@+id/menu_profile_delete"
+            android:icon="@drawable/ic_action_delete"
+            android:orderInCategory="104"
+            android:showAsAction="always"
+            android:title="@string/profile_user_delete_button"/>
+</menu>

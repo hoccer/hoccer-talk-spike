@@ -35,7 +35,7 @@ public class ImageUtils {
             result.orientation = getOrientationInDegree(exif);
 
             String dateTimeString = exif.getAttribute(ExifInterface.TAG_DATETIME);
-            result.dateTime = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss").parse(dateTimeString).getTime();
+            result.dateTime = dateTimeString == null ? 0 : new SimpleDateFormat("yyyy:MM:dd HH:mm:ss").parse(dateTimeString).getTime();
 
             float latLong[] = new float[2];
             exif.getLatLong(latLong);

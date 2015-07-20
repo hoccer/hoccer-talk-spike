@@ -4,10 +4,10 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:custom="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/contact_icon"
+        android:id="@+id/avatar"
         android:clickable="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        custom:cornerRadius="65"
-        custom:defaultAvatarImageUrl="@drawable/avatar_default_contact"
+        custom:cornerRadius="180"
+        custom:defaultAvatarImageUrl="@drawable/avatar_contact"
         tools:showIn="@layout/item_chat_client"/>

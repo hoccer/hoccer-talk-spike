@@ -1,17 +1,22 @@
 package com.hoccer.xo.android.adapter;
 
+import android.content.Intent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
+import android.widget.BaseAdapter;
 import android.widget.TextView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
-import com.hoccer.talk.client.IXoMessageListener;
-import com.hoccer.talk.client.TransferListener;
+import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
-import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.base.XoAdapter;
+import com.hoccer.xo.android.profile.client.ClientProfileActivity;
+import com.hoccer.xo.android.profile.group.GroupProfileActivity;
+import com.hoccer.xo.android.view.avatar.AvatarView;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.log4j.Logger;
 
@@ -26,8 +31,7 @@ import java.util.List;
  * <p/>
  * It also has a filter feature that allows restricting the displayed set of contacts.
  */
-public abstract class ContactsAdapter extends XoAdapter
-        implements IXoContactListener, IXoMessageListener, TransferListener {
+public abstract class ContactsAdapter extends BaseAdapter implements IXoContactListener {
 
     private static final Logger LOG = Logger.getLogger(ContactsAdapter.class);
 
@@ -37,21 +41,15 @@ public abstract class ContactsAdapter extends XoAdapter
 
     protected final static int VIEW_TYPE_SEPARATOR = 0;
     protected final static int VIEW_TYPE_CLIENT = 1;
-    protected final static int VIEW_TYPE_GROUP = 2;
-    protected static final int VIEW_TYPE_NEARBY_HISTORY = 3;
 
-    protected final static int VIEW_TYPE_COUNT = 4;
+    protected final static int VIEW_TYPE_COUNT = 2;
 
-    private boolean showNearbyHistory;
-    private long mNearbyMessagesCount;
+    protected final XoClientDatabase mDatabase;
+    protected final XoActivity mActivity;
 
     protected ContactsAdapter(XoActivity activity) {
-        super(activity);
-    }
-
-    protected ContactsAdapter(XoActivity activity, boolean showNearbyHistory) {
-        super(activity);
-        this.showNearbyHistory = showNearbyHistory;
+        mActivity = activity;
+        mDatabase = XoApplication.get().getXoClient().getDatabase();
     }
 
     Filter mFilter;
@@ -66,39 +64,23 @@ public abstract class ContactsAdapter extends XoAdapter
         this.mFilter = filter;
     }
 
-    @Override
-    public void onCreate() {
-        LOG.debug("onCreate()");
-        super.onCreate();
-        getXoClient().registerContactListener(this);
-        getXoClient().registerMessageListener(this);
-        getXoClient().getDownloadAgent().registerListener(this);
-        getXoClient().getUploadAgent().registerListener(this);
+    public void registerListeners() {
+        XoApplication.get().getXoClient().registerContactListener(this);
     }
 
-    @Override
-    public void onDestroy() {
-        LOG.debug("onDestroy()");
-        super.onDestroy();
-        getXoClient().unregisterContactListener(this);
-        getXoClient().unregisterMessageListener(this);
-        getXoClient().getDownloadAgent().unregisterListener(this);
-        getXoClient().getUploadAgent().unregisterListener(this);
+    public void unRegisterListeners() {
+        XoApplication.get().getXoClient().unregisterContactListener(this);
     }
 
-    @Override
-    public void onReloadRequest() {
-        LOG.debug("onReloadRequest()");
-        super.onReloadRequest();
+    public void loadContacts() {
+        List<TalkClientContact> newContacts = new ArrayList<TalkClientContact>();
         synchronized (this) {
             try {
-                List<TalkClientContact> newContacts = mDatabase.findAllContactsExceptSelfOrderedByRecentMessage();
-                LOG.debug("found " + newContacts.size() + " contacts");
+                newContacts = mDatabase.findAllContactsExceptSelfOrderedByRecentMessage();
 
                 if (mFilter != null) {
                     newContacts = filter(newContacts, mFilter);
                 }
-                LOG.debug("filtered " + newContacts.size() + " contacts");
 
                 for (TalkClientContact contact : newContacts) {
                     TalkClientDownload avatarDownload = contact.getAvatarDownload();
@@ -106,16 +88,16 @@ public abstract class ContactsAdapter extends XoAdapter
                         mDatabase.refreshClientDownload(avatarDownload);
                     }
                 }
-
-                mContacts = newContacts;
             } catch (SQLException e) {
                 LOG.error("SQL error", e);
             }
         }
-        runOnUiThread(new Runnable() {
+
+        final List<TalkClientContact> finalNewContacts = newContacts;
+        mActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                reloadFinished();
+                mContacts = finalNewContacts;
                 notifyDataSetInvalidated();
             }
         });
@@ -133,84 +115,22 @@ public abstract class ContactsAdapter extends XoAdapter
 
     @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
-        requestReload();
+        loadContacts();
     }
 
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
-        requestReload();
+        loadContacts();
     }
 
     @Override
     public void onGroupPresenceChanged(TalkClientContact contact) {
-        requestReload();
+        loadContacts();
     }
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
-        requestReload();
-    }
-
-    @Override
-    public void onMessageCreated(TalkClientMessage message) {
-        requestReload();
-    }
-
-    @Override
-    public void onMessageDeleted(TalkClientMessage message) {
-    }
-
-    @Override
-    public void onMessageUpdated(TalkClientMessage message) {
-    }
-
-    @Override
-    public void onDownloadRegistered(TalkClientDownload download) {
-    }
-
-    @Override
-    public void onDownloadStarted(TalkClientDownload download) {
-    }
-
-    @Override
-    public void onDownloadProgress(TalkClientDownload download) {
-    }
-
-    @Override
-    public void onDownloadFinished(TalkClientDownload download) {
-    }
-
-    @Override
-    public void onDownloadFailed(TalkClientDownload download) {
-    }
-
-    @Override
-    public void onDownloadStateChanged(TalkClientDownload download) {
-        if (download.isAvatar() && download.getState() == TalkClientDownload.State.COMPLETE) {
-            requestReload();
-        }
-    }
-
-    @Override
-    public void onUploadStarted(TalkClientUpload upload) {
-    }
-
-    @Override
-    public void onUploadProgress(TalkClientUpload upload) {
-    }
-
-    @Override
-    public void onUploadFinished(TalkClientUpload upload) {
-    }
-
-    public void onUploadFailed(TalkClientUpload upload) {
-    }
-
-    @Override
-    public void onUploadStateChanged(TalkClientUpload upload) {
-        if (upload.isAvatar()) {
-            requestReload();
-        }
+        loadContacts();
     }
 
     @Override
@@ -225,34 +145,13 @@ public abstract class ContactsAdapter extends XoAdapter
 
     @Override
     public int getCount() {
-        int count = 0;
-        count += mContacts.size();
-
-        // add saved nearby messages
-        if (showNearbyHistory) {
-
-            // TODO: only if nearby history was found in db
-            try {
-                mNearbyMessagesCount = mDatabase.getNearbyGroupMessageCount();
-                if (mNearbyMessagesCount > 0) {
-                    count++;
-                }
-            } catch (SQLException e) {
-                LOG.error("SQL Error while retrieving archived nearby messages", e);
-            }
-        }
-        return count;
+        return mContacts.size();
     }
 
     @Override
     public Object getItem(int position) {
         if (position >= 0 && position < mContacts.size()) {
             return mContacts.get(position);
-        }
-
-        // TODO: only if nearby history was found in db
-        if (position == getCount() - 1 && mNearbyMessagesCount > 0) {
-            return "nearbyArchived";
         }
         return null;
     }
@@ -261,11 +160,6 @@ public abstract class ContactsAdapter extends XoAdapter
     public int getItemViewType(int position) {
         if (position >= 0 && position < mContacts.size()) {
             return VIEW_TYPE_CLIENT;
-        }
-
-        // TODO: only if nearby history was found in db
-        if (position == getCount() - 1 && mNearbyMessagesCount > 0) {
-            return VIEW_TYPE_NEARBY_HISTORY;
         }
         return VIEW_TYPE_SEPARATOR;
     }
@@ -286,51 +180,75 @@ public abstract class ContactsAdapter extends XoAdapter
         View view = convertView;
         switch (type) {
             case VIEW_TYPE_CLIENT:
+                TalkClientContact contact = (TalkClientContact) getItem(position);
+
                 if (view == null) {
-                    view = mInflater.inflate(getClientLayout(), null);
+                    view = mActivity.getLayoutInflater().inflate(getClientLayout(), null);
                 }
-                updateContact(view, (TalkClientContact) getItem(position));
-                break;
-            case VIEW_TYPE_GROUP:
-                if (view == null) {
-                    view = mInflater.inflate(getGroupLayout(), null);
-                }
-                updateContact(view, (TalkClientContact) getItem(position));
+                updateAvatarView(view, contact);
+                updateContact(view, contact);
                 break;
             case VIEW_TYPE_SEPARATOR:
                 if (view == null) {
-                    view = mInflater.inflate(getSeparatorLayout(), null);
+                    view = mActivity.getLayoutInflater().inflate(getSeparatorLayout(), null);
                 }
                 updateSeparator(view, position);
                 break;
-            case VIEW_TYPE_NEARBY_HISTORY:
-                if (view == null) {
-                    view = mInflater.inflate(getNearbyHistoryLayout(), null);
-                }
-                updateNearbyHistoryLayout(view);
-                break;
             default:
-                view = mInflater.inflate(getSeparatorLayout(), null);
+                view = mActivity.getLayoutInflater().inflate(getSeparatorLayout(), null);
                 break;
         }
 
         return view;
     }
 
+    private void updateAvatarView(View convertView, final TalkClientContact contact) {
+        AvatarView avatarView = (AvatarView) convertView.findViewById(R.id.avatar);
+        if (avatarView == null) {
+            ViewStub avatarStub = (ViewStub) convertView.findViewById(R.id.vs_avatar);
+
+            int layoutId = AvatarView.getLayoutResource(contact);
+            avatarStub.setLayoutResource(layoutId);
+
+            avatarView = (AvatarView) avatarStub.inflate();
+            avatarView.setTag(layoutId);
+        } else if ((Integer) avatarView.getTag() != AvatarView.getLayoutResource(contact)) {
+            ViewGroup viewGroup = (ViewGroup) convertView.findViewById(R.id.avatar_container);
+            viewGroup.removeView(avatarView);
+
+            int layoutId = AvatarView.getLayoutResource(contact);
+            avatarView = (AvatarView) LayoutInflater.from(convertView.getContext()).inflate(layoutId, viewGroup, false);
+            viewGroup.addView(avatarView);
+
+            avatarView.setTag(layoutId);
+        }
+
+        avatarView.setContact(contact);
+        avatarView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent;
+                if (contact.isGroup()) {
+                    intent = new Intent(mActivity, GroupProfileActivity.class)
+                            .setAction(GroupProfileActivity.ACTION_SHOW)
+                            .putExtra(GroupProfileActivity.EXTRA_CLIENT_CONTACT_ID, contact.getClientContactId());
+                } else {
+                    intent = new Intent(mActivity, ClientProfileActivity.class)
+                            .setAction(ClientProfileActivity.ACTION_SHOW)
+                            .putExtra(ClientProfileActivity.EXTRA_CLIENT_CONTACT_ID, contact.getClientContactId());
+                }
+                mActivity.startActivity(intent);
+            }
+        });
+    }
+
     protected abstract int getClientLayout();
 
-    protected abstract int getGroupLayout();
-
     protected abstract int getSeparatorLayout();
-
-    protected abstract int getNearbyHistoryLayout();
-
-    protected abstract void updateNearbyHistoryLayout(View v);
 
     protected abstract void updateContact(View view, final TalkClientContact contact);
 
     protected void updateSeparator(View view, int position) {
-        LOG.debug("updateSeparator()");
         TextView separator = (TextView) view;
         separator.setText((String) getItem(position));
     }

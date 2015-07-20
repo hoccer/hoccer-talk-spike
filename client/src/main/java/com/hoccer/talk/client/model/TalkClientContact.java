@@ -1,15 +1,15 @@
 package com.hoccer.talk.client.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.model.*;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.Transformer;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.Set;
+import java.util.*;
 
 /**
  * These represent a target of communication
@@ -29,9 +29,9 @@ public class TalkClientContact implements Serializable {
     public @interface SelfMethodOnly {}
 
     public static final String TYPE_SELF = "self";
+
     public static final String TYPE_CLIENT = "client";
     public static final String TYPE_GROUP = "group";
-
     @DatabaseField(generatedId = true)
     private int clientContactId;
 
@@ -86,6 +86,9 @@ public class TalkClientContact implements Serializable {
 
     @DatabaseField
     private boolean isNearby;
+
+    @DatabaseField
+    private boolean worldwide;
 
     @DatabaseField
     private String nickname;
@@ -153,7 +156,19 @@ public class TalkClientContact implements Serializable {
     }
 
     public boolean isClientFriend() {
+        return isFriend() || isFriendBlocked();
+    }
+
+    public boolean isClientBlocked() {
+        return isClient() && this.clientRelationship != null && this.clientRelationship.isBlocked();
+    }
+
+    private boolean isFriend() {
         return isClient() && this.clientRelationship != null && this.clientRelationship.isFriend();
+    }
+
+    private boolean isFriendBlocked() {
+        return isClient() && this.clientRelationship != null && this.clientRelationship.isBlocked() && TalkRelationship.STATE_FRIEND.equals(this.clientRelationship.getUnblockState());
     }
 
     public boolean isFriendOrBlocked() {
@@ -162,6 +177,10 @@ public class TalkClientContact implements Serializable {
 
     public boolean isNearbyAcquaintance() {
         return isClient() && this.clientPresence.isNearbyAcquaintance();
+    }
+
+    public boolean isWorldwideAcquaintance() {
+        return isClient() && this.clientPresence.isWorldwideAcquaintance();
     }
 
     public boolean isKept() {
@@ -194,6 +213,18 @@ public class TalkClientContact implements Serializable {
 
     public boolean isNearbyGroup() {
         return isGroup() && this.groupPresence != null && this.groupPresence.isTypeNearby();
+    }
+
+    public boolean isWorldwideGroup() {
+        return isGroup() && this.groupPresence != null && this.groupPresence.isTypeWorldwide();
+    }
+
+    public boolean isEnvironmentGroup() {
+        return isWorldwideGroup() || isNearbyGroup();
+    }
+
+    public boolean isInEnvironment() {
+        return isNearby() || isWorldwide();
     }
 
     public String getName() {
@@ -389,6 +420,14 @@ public class TalkClientContact implements Serializable {
         this.isNearby = isNearby;
     }
 
+    public boolean isWorldwide() {
+        return worldwide;
+    }
+
+    public void setWorldwide(boolean worldwide) {
+        this.worldwide = worldwide;
+    }
+
     @SelfMethodOnly
     public boolean initializeSelf() {
         boolean changed = false;
@@ -478,6 +517,14 @@ public class TalkClientContact implements Serializable {
         }
     }
 
+    public boolean isNotificationsDisabled() {
+        if(isGroup()) {
+            return getGroupMembership() != null && getGroupMembership().isNotificationsDisabled();
+        } else {
+            return getClientRelationship() != null && getClientRelationship().isNotificationsDisabled();
+        }
+    }
+
     @Override
     public boolean equals(Object obj) {
         return obj != null && obj instanceof TalkClientContact && clientContactId == ((TalkClientContact) obj).clientContactId;
@@ -486,5 +533,18 @@ public class TalkClientContact implements Serializable {
     @Override
     public int hashCode() {
         return clientContactId;
+    }
+
+    public static ArrayList<Integer> transformToContactIds(List<TalkClientContact> selectedContacts) {
+        ArrayList<Integer> selectedContactIds = new ArrayList<Integer>();
+        Collection<Integer> collection = CollectionUtils.collect(selectedContacts, new Transformer<TalkClientContact, Integer>() {
+            @Override
+            public Integer transform(TalkClientContact contact) {
+                return contact.getClientContactId();
+            }
+        });
+
+        selectedContactIds.addAll(collection);
+        return selectedContactIds;
     }
 }

@@ -56,7 +56,7 @@ public class PingAgent {
         if (mConfig.getPerformPingAtInterval()) {
             schedulePingAllReadyClients();
         } else {
-            LOG.info("Not scheduling regular ping since it is deactivated by configuration.");
+            LOG.warn("Not scheduling regular ping since it is deactivated by configuration.");
         }
     }
 

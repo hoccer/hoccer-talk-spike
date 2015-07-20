@@ -13,14 +13,32 @@ public class TalkGroupMembership {
     public static final String STATE_INVITED = "invited";
     public static final String STATE_JOINED = "joined";
     public static final String STATE_GROUP_REMOVED = "groupRemoved";
+    public static final String STATE_SUSPENDED = "suspended";
 
+    public static final String ROLE_NONE = "none";
     public static final String ROLE_ADMIN = "admin";
     public static final String ROLE_MEMBER = "member";
     public static final String ROLE_NEARBY_MEMBER = "nearbyMember";
     public static final String ROLE_WORLDWIDE_MEMBER = "worldwideMember";
 
-    public static boolean isValidRole(String role) {
-        return ROLE_ADMIN.equals(role) || ROLE_MEMBER.equals(role);
+    public static final String NOTIFICATIONS_DISABLED = "disabled";
+    public static final String NOTIFICATIONS_ENABLED = "enabled";
+
+    public static final String LOCK_PREFIX = "mbr-";
+
+    public static boolean isValidRoleForGroupType(String role, String type) {
+        if (TalkGroupPresence.GROUP_TYPE_USER.equals(type)) {
+            return ROLE_ADMIN.equals(role) || ROLE_MEMBER.equals(role);
+        } else if (TalkGroupPresence.GROUP_TYPE_NEARBY.equals(type)) {
+            return ROLE_NEARBY_MEMBER.equals(role);
+        } else if (TalkGroupPresence.GROUP_TYPE_WORLDWIDE.equals(type)) {
+            return ROLE_WORLDWIDE_MEMBER.equals(role);
+        } else {
+            return false;
+        }
+    }
+    public static boolean isValidNotificationPreference(String preference) {
+        return NOTIFICATIONS_DISABLED.equals(preference) || NOTIFICATIONS_ENABLED.equals(preference);
     }
 
     public static final String[] ACTIVE_STATES = {
@@ -67,6 +85,9 @@ public class TalkGroupMembership {
     @DatabaseField
     Date lastChanged;
 
+    @DatabaseField
+    String notificationPreference;
+
     public TalkGroupMembership() {
         this.role = ROLE_MEMBER;
         this.state = STATE_NONE;
@@ -74,41 +95,55 @@ public class TalkGroupMembership {
 
     @JsonIgnore
     public boolean isAdmin() {
-        return this.state.equals(STATE_JOINED) && this.role.equals(ROLE_ADMIN);
+        return isJoined() && ROLE_ADMIN.equals(this.role);
     }
 
     @JsonIgnore
     public boolean isNearby() {
-        return this.state.equals(STATE_JOINED) && this.role.equals(ROLE_NEARBY_MEMBER);
+        return isJoined() && ROLE_NEARBY_MEMBER.equals(this.role);
     }
     @JsonIgnore
     public boolean isWorldwide() {
-        return this.state.equals(STATE_JOINED) && this.role.equals(ROLE_WORLDWIDE_MEMBER);
+        return (isJoined() || isSuspended()) && ROLE_WORLDWIDE_MEMBER.equals(this.role);
     }
 
     @JsonIgnore
     public boolean isMember() {
-        return this.state.equals(STATE_JOINED) && (this.role.equals(ROLE_MEMBER) || this.role.equals(ROLE_NEARBY_MEMBER) || this.role.equals(ROLE_WORLDWIDE_MEMBER)|| this.role.equals(ROLE_ADMIN));
+        return isJoined() &&
+                (ROLE_MEMBER.equals(this.role) ||
+                ROLE_NEARBY_MEMBER.equals(this.role) ||
+                ROLE_WORLDWIDE_MEMBER.equals(this.role) ||
+                ROLE_ADMIN.equals(this.role));
     }
 
     @JsonIgnore
     public boolean isJoined() {
-        return this.state.equals(STATE_JOINED);
+        return STATE_JOINED.equals(this.state);
     }
 
     @JsonIgnore
     public boolean isInvited() {
-        return this.state.equals(STATE_INVITED);
+        return STATE_INVITED.equals(this.state);
+    }
+
+    @JsonIgnore
+    public boolean isSuspended() {
+        return STATE_SUSPENDED.equals(this.state);
     }
 
     @JsonIgnore
     public boolean isGroupRemoved() {
-        return this.state.equals(STATE_GROUP_REMOVED);
+        return STATE_GROUP_REMOVED.equals(this.state);
     }
+    @JsonIgnore
+    public boolean isNone() {
+        return STATE_NONE.equals(this.state);
+    }
+
 
     @JsonIgnore
     public boolean isInvolved() {
-        return !this.state.equals(STATE_NONE);
+        return !isNone() && !isGroupRemoved();
     }
 
     public String getClientId() {
@@ -200,6 +235,14 @@ public class TalkGroupMembership {
         this.sharedKeyDate = sharedKeyDate;
     }
 
+    public String getNotificationPreference() {
+        return notificationPreference;
+    }
+
+    public void setNotificationPreference(String notificationPreference) {
+        this.notificationPreference = notificationPreference;
+    }
+
     @JsonIgnore
     public void updateWith(TalkGroupMembership membership) {
         this.setClientId(membership.getClientId());
@@ -213,6 +256,7 @@ public class TalkGroupMembership {
         this.setSharedKeyIdSalt(membership.getSharedKeyIdSalt());
         this.setKeySupplier(membership.getKeySupplier());
         this.setSharedKeyDate(membership.getSharedKeyDate());
+        this.setNotificationPreference(membership.getNotificationPreference());
     }
 
     // only copies the field where a foreign member is interested in
@@ -233,5 +277,11 @@ public class TalkGroupMembership {
         this.setSharedKeyId(null);
         this.setEncryptedGroupKey(null);
         this.setKeySupplier(null);
+        this.setNotificationPreference(null);
+    }
+
+    @JsonIgnore
+    public boolean isNotificationsDisabled() {
+        return NOTIFICATIONS_DISABLED.equals(notificationPreference);
     }
 }

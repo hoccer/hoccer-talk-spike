@@ -247,8 +247,7 @@ public class TalkDeliveryTest {
         assertEquals(new Date(30000), secondDelivery.getTimeUpdatedOut());
         assertEquals(new Date(40000), secondDelivery.getTimeAttachmentReceived());
 
-        // It seems only reason is not copied over - is this intentional?
-        assertNull(secondDelivery.getReason());
+        assertEquals("because", secondDelivery.getReason());
     }
 
     @Test
@@ -293,8 +292,7 @@ public class TalkDeliveryTest {
         assertEquals(new Date(30000), secondDelivery.getTimeUpdatedOut());
         assertEquals(new Date(40000), secondDelivery.getTimeAttachmentReceived());
 
-        // It seems only reason is not copied over - is this intentional?
-        assertNull(secondDelivery.getReason());
+        assertEquals("because", secondDelivery.getReason());
     }
 
     @Test
@@ -365,6 +363,6 @@ public class TalkDeliveryTest {
         assertEquals(new Date(40001), secondDelivery.getTimeAttachmentReceived());
 
         // It seems only reason is not copied over - is this intentional?
-        assertEquals("_because", secondDelivery.getReason());
+        assertEquals("because", secondDelivery.getReason());
     }
 }

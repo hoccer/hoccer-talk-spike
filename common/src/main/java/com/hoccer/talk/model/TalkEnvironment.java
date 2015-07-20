@@ -9,6 +9,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.Date;
 
 
@@ -76,6 +77,19 @@ public class TalkEnvironment {
     // a group tag for worldwide grouping
     @DatabaseField
     String tag;
+
+    // preferences for group notifications
+    @DatabaseField
+    String notificationPreference;
+
+    // time to live in milliseconds
+    @DatabaseField
+    long timeToLive;
+
+    // server provided timestamp when releaseEnvironment has been called
+    @DatabaseField
+    Date timeReleased;
+
 
     public TalkEnvironment() {
     }
@@ -191,6 +205,31 @@ public class TalkEnvironment {
         this.tag = tag;
     }
 
+    @Nullable
+    public String getNotificationPreference() {
+        return notificationPreference;
+    }
+
+    public void setNotificationPreference(String notificationPreference) {
+        this.notificationPreference = notificationPreference;
+    }
+
+    public long getTimeToLive() {
+        return timeToLive;
+    }
+
+    public void setTimeToLive(long timeToLive) {
+        this.timeToLive = timeToLive;
+    }
+
+    public Date getTimeReleased() {
+        return timeReleased;
+    }
+
+    public void setTimeReleased(Date timeReleased) {
+        this.timeReleased = timeReleased;
+    }
+
     public void updateWith(TalkEnvironment environment) {
         this.type = environment.type;
         this.name = environment.name;
@@ -204,6 +243,9 @@ public class TalkEnvironment {
         this.bssids = environment.bssids;
         this.identifiers = environment.identifiers;
         this.tag = environment.tag;
+        this.notificationPreference = environment.notificationPreference;
+        this.timeToLive = environment.timeToLive;
+        this.timeReleased = environment.timeReleased;
     }
 
     @JsonIgnore
@@ -225,5 +267,51 @@ public class TalkEnvironment {
         }
 
         return false;
+    }
+
+
+    // expire any environment 25 hours after it has been received
+    public final static long MAX_LIFE_TIME = 25 * 60 * 60 * 1000;
+
+    @JsonIgnore
+    public boolean hasExpired() {
+        long expiredMillis;
+        if (timeReleased != null) {
+            expiredMillis = this.getTimeReleased().getTime() + this.getTimeToLive();
+        } else {
+            expiredMillis = this.getTimeReceived().getTime() + MAX_LIFE_TIME;
+        }
+        return (expiredMillis <= new Date().getTime());
+    }
+
+    @JsonIgnore
+    public boolean willLiveAfterRelease() {
+        if (!this.isNearby() && this.getTimeToLive() > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "TalkEnvironment{" +
+                "_id='" + _id + '\'' +
+                ", clientId='" + clientId + '\'' +
+                ", groupId='" + groupId + '\'' +
+                ", type='" + type + '\'' +
+                ", name='" + name + '\'' +
+                ", timestamp=" + timestamp +
+                ", timeReceived=" + timeReceived +
+                ", locationType='" + locationType + '\'' +
+                ", geoLocation=" + Arrays.toString(geoLocation) +
+                ", accuracy=" + accuracy +
+                ", bssids=" + Arrays.toString(bssids) +
+                ", identifiers=" + Arrays.toString(identifiers) +
+                ", tag='" + tag + '\'' +
+                ", notificationPreference='" + notificationPreference + '\'' +
+                ", timeToLive=" + timeToLive +
+                ", timeReleased=" + timeReleased +
+                '}';
     }
 }

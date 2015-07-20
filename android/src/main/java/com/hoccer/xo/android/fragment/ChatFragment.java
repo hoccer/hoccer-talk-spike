@@ -8,18 +8,19 @@ import android.view.*;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.activity.GroupProfileActivity;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
-import com.hoccer.xo.android.activity.SingleProfileActivity;
-import com.hoccer.xo.android.adapter.ChatAdapter;
-import com.hoccer.xo.android.base.XoAdapter;
-import com.hoccer.xo.android.base.XoListFragment;
+import com.hoccer.xo.android.adapter.ChatMessagesAdapter;
+import com.hoccer.xo.android.base.MessagesAdapter;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionInterpreter;
+import com.hoccer.xo.android.profile.client.ClientProfileActivity;
+import com.hoccer.xo.android.profile.group.GroupProfileActivity;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.MessageItem;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -31,13 +32,15 @@ import java.util.List;
 /**
  * Fragment for conversations
  */
-public class ChatFragment extends XoListFragment
+public class ChatFragment extends XoChatListFragment
         implements SearchView.OnQueryTextListener,
-        XoAdapter.AdapterReloadListener, IXoContactListener {
+        MessagesAdapter.AdapterReloadListener, IXoContactListener {
 
     public static final String ARG_CLIENT_CONTACT_ID = "com.hoccer.xo.android.fragment.ARG_CLIENT_CONTACT_ID";
 
     private static final Logger LOG = Logger.getLogger(ChatFragment.class);
+
+    private static final String KEY_SCROLL_POSITION = "scroll_position:";
 
     private ListView mMessageListView;
 
@@ -47,7 +50,7 @@ public class ChatFragment extends XoListFragment
 
     private TalkClientContact mContact;
 
-    private ChatAdapter mAdapter;
+    private ChatMessagesAdapter mAdapter;
 
     private CompositionFragment mCompositionFragment;
 
@@ -81,11 +84,8 @@ public class ChatFragment extends XoListFragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        LOG.debug("onCreateView()");
         super.onCreateView(inflater, container, savedInstanceState);
-
-        View view = inflater.inflate(R.layout.fragment_messaging, container, false);
-        return view;
+        return inflater.inflate(R.layout.fragment_messaging, container, false);
     }
 
     @Override
@@ -124,7 +124,7 @@ public class ChatFragment extends XoListFragment
         setHasOptionsMenu(true);
         mMessageListView = getListView();
 
-        mAdapter = new ChatAdapter(mMessageListView, getXoActivity(), mContact);
+        mAdapter = new ChatMessagesAdapter(mMessageListView, getXoActivity(), mContact);
         mAdapter.setAdapterReloadListener(this);
         mAdapter.onCreate();
 
@@ -138,6 +138,7 @@ public class ChatFragment extends XoListFragment
         intent.setAction(IntentHelper.ACTION_CONTACT_ID_IN_CONVERSATION);
         intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mContact.getClientContactId());
         getActivity().sendBroadcast(intent);
+        applySavedScrollPosition();
     }
 
     @Override
@@ -153,6 +154,12 @@ public class ChatFragment extends XoListFragment
         intent.setAction(IntentHelper.ACTION_CONTACT_ID_IN_CONVERSATION);
         intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
         getActivity().sendBroadcast(intent);
+        saveScrollPosition();
+    }
+
+    @Override
+    protected String getScrollPositionId() {
+        return mContact.isClient() ? mContact.getClientId() : mContact.getGroupId();
     }
 
     @Override
@@ -175,17 +182,31 @@ public class ChatFragment extends XoListFragment
     }
 
     @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        MenuItem mMuteItem = menu.findItem(R.id.menu_mute_contact);
+        if(mContact.isNotificationsDisabled()) {
+            mMuteItem.setIcon(R.drawable.ic_action_notifications_disabled);
+        } else {
+            mMuteItem.setIcon(R.drawable.ic_action_notifications_enabled);
+        }
+        super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
 
         inflater.inflate(R.menu.fragment_messaging, menu);
-
         // select client/group profile entry for appropriate icon
         if (mContact != null) {
-            if (mContact.isGroup() && mContact.getGroupPresence() != null && mContact.getGroupPresence().isTypeNearby()) {
-                getActivity().getActionBar().setTitle(getActivity().getResources().getString(R.string.nearby_text));
+            if (mContact.isNearbyGroup()) {
+                getActivity().getActionBar().setTitle(getActivity().getResources().getString(R.string.all_nearby));
+            } else if (mContact.isWorldwideGroup()) {
+                getActivity().getActionBar().setTitle(getActivity().getResources().getString(R.string.all_worldwide));
             } else {
                 getActivity().getActionBar().setTitle(mContact.getNickname());
+                MenuItem muteItem = menu.findItem(R.id.menu_mute_contact);
+                muteItem.setVisible(true);
             }
 
             MenuItem clientItem = menu.findItem(R.id.menu_profile_single);
@@ -198,8 +219,7 @@ public class ChatFragment extends XoListFragment
             musicItem.setVisible(true);
 
             MenuItem createPermanentGroupItem = menu.findItem(R.id.menu_group_profile_create_permanent_group);
-            boolean shouldShow = (mContact.isGroup() && mContact.getGroupPresence() != null && mContact.getGroupPresence().isTypeNearby());
-            createPermanentGroupItem.setVisible(shouldShow);
+            createPermanentGroupItem.setVisible(mContact.isNearbyGroup() || mContact.isWorldwideGroup());
         }
     }
 
@@ -210,9 +230,9 @@ public class ChatFragment extends XoListFragment
         switch (item.getItemId()) {
             case R.id.menu_profile_single:
                 if (mContact != null) {
-                    startActivity(new Intent(getActivity(), SingleProfileActivity.class)
-                            .setAction(SingleProfileActivity.ACTION_SHOW)
-                            .putExtra(SingleProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId()));
+                    startActivity(new Intent(getActivity(), ClientProfileActivity.class)
+                            .setAction(ClientProfileActivity.ACTION_SHOW)
+                            .putExtra(ClientProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId()));
                 }
                 break;
             case R.id.menu_profile_group:
@@ -234,6 +254,9 @@ public class ChatFragment extends XoListFragment
                             .putExtra(GroupProfileActivity.EXTRA_GROUP_ID, mContact.getGroupId()));
                 }
                 break;
+            case R.id.menu_mute_contact:
+                onMuteItemClick();
+                break;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -241,13 +264,13 @@ public class ChatFragment extends XoListFragment
     }
 
     @Override
-    public void onAdapterReloadStarted(XoAdapter adapter) {
+    public void onAdapterReloadStarted(MessagesAdapter adapter) {
         LOG.debug("onAdapterReloadStarted()");
         mEmptyText.setText(R.string.messaging_loading);
     }
 
     @Override
-    public void onAdapterReloadFinished(XoAdapter adapter) {
+    public void onAdapterReloadFinished(MessagesAdapter adapter) {
         LOG.debug("onAdapterReloadFinished()");
         mEmptyText.setText(R.string.messaging_no_messages);
     }
@@ -278,17 +301,48 @@ public class ChatFragment extends XoListFragment
     public void onClientPresenceChanged(TalkClientContact contact) {}
 
     @Override
-    public void onClientRelationshipChanged(TalkClientContact contact) {}
+    public void onClientRelationshipChanged(TalkClientContact contact) {
+        if(contact.equals(mContact)) {
+            getActivity().invalidateOptionsMenu();
+        }
+    }
 
     @Override
     public void onGroupPresenceChanged(TalkClientContact contact) {}
 
     @Override
-    public void onGroupMembershipChanged(TalkClientContact contact) {}
+    public void onGroupMembershipChanged(TalkClientContact contact) {
+        if(contact.equals(mContact)) {
+            getActivity().invalidateOptionsMenu();
+        }
+    }
 
     public void showAudioAttachmentList() {
         Intent intent = new Intent(getActivity(), MediaBrowserActivity.class);
         intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mContact.getClientContactId());
         startActivity(intent);
     }
+
+    public void onKeyboardOpen() {
+        mMessageListView.setSelection(mMessageListView.getCount() - 1);
+    }
+
+    private void onMuteItemClick() {
+        String notificationPreference;
+        int toastText;
+        if(mContact.isNotificationsDisabled()) {
+            notificationPreference = TalkRelationship.NOTIFICATIONS_ENABLED;
+            toastText = R.string.toast_unmute_chat;
+        } else {
+            notificationPreference = TalkRelationship.NOTIFICATIONS_DISABLED;
+            toastText = R.string.toast_mute_chat;
+        }
+        if(mContact.isGroup()) {
+            getXoActivity().getXoClient().getServerRpc().setGroupNotifications(mContact.getGroupId(), notificationPreference);
+        } else {
+            getXoActivity().getXoClient().getServerRpc().setClientNotifications(mContact.getClientId(), notificationPreference);
+        }
+        Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
+    }
+
 }

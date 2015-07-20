@@ -6,29 +6,30 @@ import android.content.Intent;
 import android.database.DataSetObserver;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.adapter.HistoryAdapter;
+import com.hoccer.xo.android.adapter.HistoryMessagesAdapter;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.chat.MessageItem;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 
-public class HistoryFragment extends ListFragment {
+public class HistoryFragment extends XoChatListFragment {
 
     static final Logger LOG = Logger.getLogger(HistoryFragment.class);
     public static final String ARG_CLIENT_CONTACT_ID = "com.hoccer.xo.android.fragment.ARG_CLIENT_CONTACT_ID";
+    public static final String ARG_GROUP_HISTORY = "com.hoccer.xo.android.fragment.ARG_GROUP_HISTORY";
 
-    private HistoryAdapter mAdapter;
+    private String mHistoryId = null;
+    private HistoryMessagesAdapter mAdapter;
+
+
 
     private final DataSetObserver mDataSetObserver = new DataSetObserver() {
         @Override
@@ -52,6 +53,7 @@ public class HistoryFragment extends ListFragment {
             }
         }
     };
+
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -85,7 +87,7 @@ public class HistoryFragment extends ListFragment {
                                         });
                                     }
                                 }
-                            }, null);
+                            });
                 }
             }
         });
@@ -94,34 +96,42 @@ public class HistoryFragment extends ListFragment {
             int contactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
             try {
                 TalkClientContact contact = XoApplication.get().getXoClient().getDatabase().findContactById(contactId);
-                mAdapter = new HistoryAdapter(getListView(), (XoActivity) getActivity(), contact);
+                mHistoryId = contact.isClient() ? contact.getClientId() : contact.getGroupId();
+                mAdapter = new HistoryMessagesAdapter(getListView(), (XoActivity) getActivity(), contact);
             } catch (SQLException e) {
                 LOG.error("Client contact with id '" + contactId + "' does not exist", e);
                 return;
             }
-        } else if (getArguments() == null) {
-            mAdapter = new HistoryAdapter(getListView(), (XoActivity) getActivity(), null);
+        } else if (getArguments() != null && getArguments().getString(ARG_GROUP_HISTORY) != null) {
+            mHistoryId = getArguments().getString(ARG_GROUP_HISTORY);
+            mAdapter = new HistoryMessagesAdapter(getListView(), (XoActivity) getActivity(), mHistoryId);
         }
 
         mAdapter.onCreate();
         setListAdapter(mAdapter);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        getListAdapter().registerDataSetObserver(mDataSetObserver);
-    }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        getListAdapter().unregisterDataSetObserver(mDataSetObserver);
+    protected String getScrollPositionId() {
+        return mHistoryId;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         mAdapter.onDestroy();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        applySavedScrollPosition();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        saveScrollPosition();
     }
 }

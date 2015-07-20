@@ -53,7 +53,7 @@ public class GroupContactListAdapter extends ContactListAdapter {
         }
 
         Collections.sort(joined, CLIENT_CONTACT_COMPARATOR);
-        CollectionUtils.filterInverse(joined, TalkClientContactPredicates.IS_NEARBY_GROUP_PREDICATE);
+        CollectionUtils.filterInverse(joined, TalkClientContactPredicates.IS_ENVIRONMENT_GROUP_PREDICATE);
 
         return ListUtils.union(invitedMe, joined);
     }
@@ -171,7 +171,7 @@ public class GroupContactListAdapter extends ContactListAdapter {
 
     private ViewHolder createAndInitViewHolder(View convertView) {
         ViewHolder viewHolder = new ViewHolder();
-        viewHolder.avatarView = (SimpleAvatarView) convertView.findViewById(R.id.contact_icon);
+        viewHolder.avatarView = (SimpleAvatarView) convertView.findViewById(R.id.avatar);
         viewHolder.contactNameTextView = (TextView) convertView.findViewById(R.id.contact_name);
         viewHolder.invitedMeLayout = (LinearLayout) convertView.findViewById(R.id.ll_invited_me);
         viewHolder.acceptButton = (Button) convertView.findViewById(R.id.btn_accept);

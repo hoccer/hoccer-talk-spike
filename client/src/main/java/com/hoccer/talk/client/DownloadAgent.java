@@ -24,7 +24,7 @@ public class DownloadAgent extends TransferAgent {
     }
 
     public void startDownload(TalkClientDownload download) {
-        if (manualDownloadActivated() || exceedsTransferLimit(download)) {
+        if (isManualDownload(download)) {
             holdDownload(download);
         } else {
             DownloadAction downloadAction = getOrCreateDownloadAction(download);
@@ -35,14 +35,38 @@ public class DownloadAgent extends TransferAgent {
     }
 
     public void forceStartDownload(TalkClientDownload download) {
-        if (manualDownloadActivated() || exceedsTransferLimit(download)) {
+        if (isManualDownload(download)) {
             holdDownload(download);
         } else {
             startDownloadTask(download);
         }
     }
 
-    private boolean manualDownloadActivated() {
+    private boolean isManualDownload(TalkClientDownload download) {
+        if (manualDownloadsActivated() || exceedsTransferLimit(download)) {
+            return true;
+        }
+        return isManualWorldwideDownload(download);
+    }
+
+    private boolean isManualWorldwideDownload(TalkClientDownload download) {
+        return isManualWorldwideDownloadEnabled() && isWorldwideDownload(download);
+    }
+
+    private boolean isManualWorldwideDownloadEnabled() {
+        return !mClient.getConfiguration().isAutomaticWorldwideDownloadEnabled();
+    }
+
+    private boolean isWorldwideDownload(TalkClientDownload download) {
+        try {
+            return mClient.getDatabase().isWorldwideDownload(download.getClientDownloadId());
+        } catch (SQLException e) {
+            LOG.error("SQL error", e);
+        }
+        return false;
+    }
+
+    private boolean manualDownloadsActivated() {
         return mClient.getDownloadLimit() == MANUAL;
     }
 

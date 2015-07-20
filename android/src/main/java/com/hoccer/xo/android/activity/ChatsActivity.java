@@ -1,10 +1,9 @@
 package com.hoccer.xo.android.activity;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -12,36 +11,42 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
-import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.*;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.activity.component.ViewPagerActivityComponent;
 import com.hoccer.xo.android.fragment.ChatListFragment;
 import com.hoccer.xo.android.fragment.NearbyChatListFragment;
+import com.hoccer.xo.android.fragment.WorldwideChatListFragment;
 import com.hoccer.xo.android.passwordprotection.PasswordProtection;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.ContactsMenuItemActionProvider;
 import org.apache.log4j.Logger;
 
-public class ChatsActivity extends ComposableActivity implements IXoStateListener, IXoPairingListener, BackgroundManager.Listener {
+public class ChatsActivity extends ComposableActivity implements IXoStateListener, IXoPairingListener {
 
     private static final Logger LOG = Logger.getLogger(ChatsActivity.class);
 
     public static final String INTENT_EXTRA_EXIT = "exit";
+    public static final int REGISTER_REQUEST_CODE = 1;
 
     private String mPairingToken;
     private ContactsMenuItemActionProvider mContactsMenuItemActionProvider;
+    private ViewPagerActivityComponent mViewPagerActivityComponent;
+    private WorldwideChatListFragment mWorldwideChatListFragment;
 
     @Override
     protected ActivityComponent[] createComponents() {
-        return new ActivityComponent[]{
-                new MediaPlayerActivityComponent(this),
-                new ViewPagerActivityComponent(this,
-                        R.id.pager,
-                        new ChatListFragment(),
-                        new NearbyChatListFragment())
-        };
+        MediaPlayerActivityComponent mediaPlayerActivityComponent = new MediaPlayerActivityComponent(this);
+
+        mWorldwideChatListFragment = new WorldwideChatListFragment();
+        mViewPagerActivityComponent = new ViewPagerActivityComponent(this,
+                R.id.pager,
+                new ChatListFragment(),
+                new NearbyChatListFragment(),
+                mWorldwideChatListFragment);
+
+        return new ActivityComponent[]{mediaPlayerActivityComponent, mViewPagerActivityComponent};
     }
 
     @Override
@@ -62,7 +67,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
         handleIntent(getIntent());
 
-        BackgroundManager.get().registerListener(this);
+        BackgroundConnectionHandler.get();
 
         PasswordProtection.get();
     }
@@ -73,6 +78,10 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         showProfileIfClientIsNotRegistered();
         registerListeners();
         mContactsMenuItemActionProvider.updateNotificationBadge();
+
+        if (isRegistered()) {
+            FeaturePromoter.selectWorldwidePageOnFirstStart(this, mViewPagerActivityComponent, mWorldwideChatListFragment);
+        }
     }
 
     @Override
@@ -86,7 +95,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         super.onDestroy();
         MediaPlayer.get().removeNotification();
         NearbyController.get().removeNotification();
-        BackgroundManager.get().unregisterListener(this);
     }
 
     @Override
@@ -112,7 +120,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
             handleContactIdIntent(intent);
         } else if (intent.hasExtra(IntentHelper.EXTRA_PUSH_MESSAGE)) {
             handlePushMessageIntent(intent);
-        } else if(intent.getBooleanExtra(INTENT_EXTRA_EXIT, false)) {
+        } else if (intent.getBooleanExtra(INTENT_EXTRA_EXIT, false)) {
             finish();
             XoApplication.restartApplication();
         }
@@ -138,10 +146,21 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     }
 
     private void showProfileIfClientIsNotRegistered() {
-        if (!getXoClient().getSelfContact().getSelf().isRegistrationConfirmed()) {
+        if (!isRegistered()) {
             Intent intent = new Intent(this, RegistrationActivity.class);
-            startActivity(intent);
+            startActivityForResult(intent, REGISTER_REQUEST_CODE);
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+        if (resultCode == RESULT_OK && requestCode == REGISTER_REQUEST_CODE) {
+        }
+    }
+
+    private boolean isRegistered() {
+        return getXoClient().getSelfContact().getSelf().isRegistrationConfirmed();
     }
 
     private void registerListeners() {
@@ -216,28 +235,5 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private void startMediaBrowserActivity() {
         Intent intent = new Intent(this, MediaBrowserActivity.class);
         startActivity(intent);
-    }
-
-    @Override
-    public void onBecameForeground(Activity activity) {
-        LOG.debug("onBecameForeground()");
-        getXoClient().setPresenceStatus(TalkPresence.STATUS_ONLINE);
-
-        if (getXoClient().isDisconnected()) {
-            connectClientIfNetworkAvailable();
-        }
-    }
-
-    public void connectClientIfNetworkAvailable() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected()) {
-            getXoClient().connect();
-        }
-    }
-
-    @Override
-    public void onBecameBackground(Activity activity) {
-        LOG.debug("onBecameBackground()");
-        getXoClient().setPresenceStatus(TalkPresence.STATUS_BACKGROUND);
     }
 }

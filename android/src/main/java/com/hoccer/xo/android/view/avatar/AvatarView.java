@@ -7,14 +7,16 @@ import android.net.Uri;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.activity.GroupProfileActivity;
-import com.hoccer.xo.android.activity.SingleProfileActivity;
+import com.hoccer.xo.android.profile.client.ClientProfileActivity;
+import com.hoccer.xo.android.profile.group.GroupProfileActivity;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.AspectImageView;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -40,7 +42,7 @@ public abstract class AvatarView extends LinearLayout {
         TypedArray a = getContext().getTheme()
                 .obtainStyledAttributes(attributes, R.styleable.SimpleAvatarView, 0, 0);
         try {
-            mDefaultAvatarImageUri = Uri.parse("drawable://" + a.getResourceId(R.styleable.SimpleAvatarView_defaultAvatarImageUrl, R.drawable.avatar_default_contact));
+            mDefaultAvatarImageUri = Uri.parse("drawable://" + a.getResourceId(R.styleable.SimpleAvatarView_defaultAvatarImageUrl, R.drawable.avatar_contact));
             mCornerRadius = a.getFloat(R.styleable.SimpleAvatarView_cornerRadius, 0.0f);
         } finally {
             a.recycle();
@@ -73,9 +75,9 @@ public abstract class AvatarView extends LinearLayout {
                             .setAction(GroupProfileActivity.ACTION_SHOW)
                             .putExtra(GroupProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId());
                 } else {
-                    intent = new Intent(getContext(), SingleProfileActivity.class)
-                            .setAction(SingleProfileActivity.ACTION_SHOW)
-                            .putExtra(SingleProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId());
+                    intent = new Intent(getContext(), ClientProfileActivity.class)
+                            .setAction(ClientProfileActivity.ACTION_SHOW)
+                            .putExtra(ClientProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId());
                 }
                 getContext().startActivity(intent);
             }
@@ -98,15 +100,51 @@ public abstract class AvatarView extends LinearLayout {
         if (avatarUri == null) {
             if (mContact.isGroup()) {
                 if (mContact.getGroupPresence() != null && mContact.getGroupPresence().isTypeNearby()) {
-                    setAvatarImage(R.drawable.avatar_default_location);
+                    setAvatarImage(R.drawable.avatar_location);
+                } else if (mContact.getGroupPresence() != null && mContact.getGroupPresence().isTypeWorldwide()) {
+                    setAvatarImage(R.drawable.avatar_world);
                 } else {
-                    setAvatarImage(R.drawable.avatar_default_group);
+                    setAvatarImage(R.drawable.avatar_group);
                 }
             } else {
-                setAvatarImage(R.drawable.avatar_default_contact);
+                setAvatarImage(R.drawable.avatar_contact);
             }
         } else {
             setAvatarImage(avatarUri);
+        }
+
+        updateAvatarBlocked();
+    }
+
+    private void updateAvatarBlocked() {
+        if (mContact.isClient() && mContact.getClientRelationship() != null && mContact.getClientRelationship().isBlocked()) {
+            if (findViewWithTag("blockedLayout") != null) {
+                return;
+            }
+
+            View backgroundLayerView = new View(getContext());
+            backgroundLayerView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            backgroundLayerView.setBackgroundResource(R.drawable.shape_round_black_transparency);
+
+            ImageView imageView = new ImageView(getContext());
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+            imageView.setLayoutParams(params);
+            imageView.setImageResource(R.drawable.ic_action_block);
+
+            RelativeLayout blockedLayout = new RelativeLayout(getContext());
+            blockedLayout.setTag("blockedLayout");
+            blockedLayout.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            blockedLayout.addView(backgroundLayerView);
+            blockedLayout.addView(imageView);
+
+            ViewGroup parent = (ViewGroup) mAvatarImage.getParent();
+            int avatarImageIndex = parent.indexOfChild(mAvatarImage);
+            parent.addView(blockedLayout, avatarImageIndex + 1);
+
+        } else if (mContact.isClient() && mContact.getClientRelationship() != null) {
+            View blockedLayout = findViewWithTag("blockedLayout");
+            ((ViewGroup) mAvatarImage.getParent()).removeView(blockedLayout);
         }
     }
 
@@ -127,27 +165,22 @@ public abstract class AvatarView extends LinearLayout {
      * @param avatarImageUri Url of the given image resource  to load.
      */
     public void setAvatarImage(final Uri avatarImageUri) {
-        post(new Runnable() {
-            @Override
-            public void run() {
-                if (isInEditMode()) {
-                    ImageView avatar = (ImageView) findViewById(R.id.avatar_image);
-                    avatar.setImageResource(R.drawable.avatar_default_contact);
-                } else {
-                    mAvatarImage.setVisibility(View.VISIBLE);
-                    if (avatarImageUri != null) {
-                        ImageLoader.getInstance()
-                                .displayImage(avatarImageUri.toString(), mAvatarImage, mDefaultOptions, null);
-                    } else if (mDefaultAvatarImageUri != null) {
-                        ImageLoader.getInstance()
-                                .displayImage(mDefaultAvatarImageUri.toString(), mAvatarImage, mDefaultOptions,
-                                        null);
-                    } else {
-                        mAvatarImage.setVisibility(View.INVISIBLE);
-                    }
-                }
+        if (isInEditMode()) {
+            ImageView avatar = (ImageView) findViewById(R.id.avatar_image);
+            avatar.setImageResource(R.drawable.avatar_contact);
+        } else {
+            mAvatarImage.setVisibility(View.VISIBLE);
+            if (avatarImageUri != null) {
+                ImageLoader.getInstance()
+                        .displayImage(avatarImageUri.toString(), mAvatarImage, mDefaultOptions, null);
+            } else if (mDefaultAvatarImageUri != null) {
+                ImageLoader.getInstance()
+                        .displayImage(mDefaultAvatarImageUri.toString(), mAvatarImage, mDefaultOptions,
+                                null);
+            } else {
+                mAvatarImage.setVisibility(View.INVISIBLE);
             }
-        });
+        }
     }
 
     public void setAvatarImage(int resourceId) {
@@ -155,16 +188,30 @@ public abstract class AvatarView extends LinearLayout {
     }
 
     public static AvatarView inflate(TalkClientContact contact, Context context) {
+        AvatarView avatarView = (AvatarView) LayoutInflater.from(context).inflate(getLayoutResource(contact), null);
+        avatarView.setContact(contact);
+        return avatarView;
+    }
+
+    public static int getLayoutResource(TalkClientContact contact) {
         int layoutId;
-        if (!contact.isFriendOrBlocked() && contact.isNearbyAcquaintance()) {
-            layoutId = R.layout.view_avatar_nearby_history;
-        } else if (!(contact.isFriendOrBlocked() || contact.isNearby()) || contact.isKeptGroup()) {
-            layoutId = R.layout.view_avatar_history;
+
+        if (contact.isWorldwide() && !contact.isClientFriend()) {
+            layoutId = R.layout.view_avatar_client_presence_worldwide;
+        } else if (contact.isNearby() && !contact.isClientFriend()) {
+            layoutId = R.layout.view_avatar_client_presence_nearby;
+        } else if (contact.isKept() && contact.isNearbyAcquaintance()) {
+            layoutId = R.layout.view_avatar_client_acquaintance_nearby;
+        } else if (contact.isKept() && contact.isWorldwideAcquaintance()) {
+            layoutId = R.layout.view_avatar_client_acquaintance_worldwide;
+        } else if (contact.isKept() || contact.isKeptGroup()) {
+            layoutId = R.layout.view_avatar_client_kept;
+        } else if (contact.isWorldwideGroup()) {
+            layoutId = R.layout.view_avatar_group_worldwide;
         } else {
             layoutId = R.layout.view_avatar_presence;
         }
-        AvatarView avatarView = (AvatarView) LayoutInflater.from(context).inflate(layoutId, null);
-        avatarView.setContact(contact);
-        return avatarView;
+
+        return layoutId;
     }
 }

@@ -38,13 +38,13 @@ public interface ITalkServerDatabase {
 
     public List<TalkMessage> findMessagesWithAttachmentFileId(String fileId);
 
-    public List<TalkMessage> findMessagesFromClient(String clientId);
+    public List<TalkMessage> findMessagesFromClient(String senderId);
 
     public void deleteMessage(TalkMessage message);
 
     public void saveMessage(TalkMessage message);
 
-    public TalkDelivery findDelivery(String messageId, String clientId);
+    public TalkDelivery findDelivery(String messageId, String receiverId);
 
     public List<TalkDelivery> findDeliveriesInState(String state);
 
@@ -54,21 +54,31 @@ public interface ITalkServerDatabase {
 
     public List<TalkDelivery> findDeliveriesInStatesAndAttachmentStates(String[] states, String[] attachmentStates);
 
-    public List<TalkDelivery> findDeliveriesForClient(String clientId);
+    public List<TalkDelivery> findDeliveriesForClient(String receiverId);
 
-    public List<TalkDelivery> findDeliveriesForClientInState(String clientId, String state);
+    public List<TalkDelivery> findDeliveriesForClientInState(String receiverId, String state);
 
-    public List<TalkDelivery> findDeliveriesForClientInDeliveryAndAttachmentStates(String clientId, String[] deliveryStates, String[] attachmentStates);
+    public List<TalkDelivery> findDeliveriesForClientInGroupInState(String receiverId, String groupId, String state);
 
-    public List<TalkDelivery> findDeliveriesFromClient(String clientId);
+    public long countDeliveriesForClientInGroupInState(String receiverId, String groupId, String state);
 
-    public List<TalkDelivery> findDeliveriesFromClientInState(String clientId, String state);
+    public List<TalkDelivery> findDeliveriesForClientInDeliveryAndAttachmentStates(String receiverId, String[] deliveryStates, String[] attachmentStates);
 
-    public List<TalkDelivery> findDeliveriesFromClientInStates(String clientId, String[] states);
+    public List<TalkDelivery> findDeliveriesFromClient(String senderId);
 
-    public List<TalkDelivery> findDeliveriesFromClientInDeliveryAndAttachmentStates(String clientId, String[] deliveryStates, String[] attachmentStates);
+    public List<TalkDelivery> findDeliveriesFromClientInState(String senderId, String state);
+    public long countDeliveriesFromClientInState(String senderId, String state);
+    public long countDeliveriesBetweenClientsInState(String senderId, String receiverId, String state);
+
+    public List<TalkDelivery> findDeliveriesFromClientInStates(String senderId, String[] states);
+
+    public List<TalkDelivery> findDeliveriesFromClientInDeliveryAndAttachmentStates(String senderId, String[] deliveryStates, String[] attachmentStates);
+    public long countDeliveriesFromClientInDeliveryAndAttachmentStates(String senderId, String[] deliveryStates, String[] attachmentStates);
+    public long countDeliveriesBetweenClientsInDeliveryAndAttachmentStates(String senderId, String receiverId, String[] deliveryStates, String[] attachmentStates);
 
     public List<TalkDelivery> findDeliveriesForMessage(String messageId);
+
+    public List<TalkDelivery> findDeliveriesFromClientForMessage(String senderId, String messageId);
 
     public List<TalkDelivery> findDeliveriesAcceptedBefore(Date limit);
 
@@ -115,6 +125,7 @@ public interface ITalkServerDatabase {
     public List<TalkRelationship> findRelationshipsWithStatesChangedBefore(String[] states, Date lastChanged);
 
     public int deleteRelationshipsWithStatesChangedBefore(String[] states, Date lastChanged);
+    public int deleteRelationshipsWithStatesAndNotNotificationsDisabledChangedBefore(String[] states, Date lastChanged);
 
     @Nullable
     public TalkRelationship findRelationshipBetween(String client, String otherClient);
@@ -149,11 +160,15 @@ public interface ITalkServerDatabase {
 
     public List<TalkGroupMembership> findGroupMembershipsByIdWithStatesAndRoles(String groupId, String[] states, String[] roles);
 
+    public List<TalkGroupMembership> findGroupMembershipsWithStatesAndRoles(String[] states, String[] roles);
+
     public List<TalkGroupMembership> findGroupMembershipsByIdChangedAfter(String groupId, Date lastKnown);
 
     public List<TalkGroupMembership> findGroupMembershipsForClient(String clientId);
 
     public List<TalkGroupMembership> findGroupMembershipsForClientWithStates(String clientId, String[] states);
+
+    public List<TalkGroupMembership> findGroupMembershipsForClientWithStatesAndRoles(String clientId, String[] states, String[] roles);
 
     public TalkGroupMembership findGroupMembershipForClient(String groupId, String clientId);
 
@@ -165,9 +180,15 @@ public interface ITalkServerDatabase {
 
     public TalkEnvironment findEnvironmentByClientId(String type, String clientId);
 
+    public TalkEnvironment findEnvironmentByClientIdForGroup(String clientId, String groupId);
+
     public List<TalkEnvironment> findEnvironmentsForGroup(String groupId);
 
     public List<TalkEnvironment> findEnvironmentsForClient(String clientId);
+
+    public List<TalkEnvironment> findEnvironmentsByType(String type);
+
+    public List<TalkEnvironment> findEnvironmentsForClient(String clientId, String type);
 
     public List<TalkEnvironment> findEnvironmentsMatching(TalkEnvironment environment);
 

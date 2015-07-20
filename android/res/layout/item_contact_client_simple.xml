@@ -13,14 +13,14 @@
         android:orientation="horizontal">
 
     <com.hoccer.xo.android.view.avatar.SimpleAvatarView
-            android:id="@+id/contact_icon"
+            android:id="@+id/avatar"
             android:clickable="false"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginRight="16dp"
             android:layout_marginEnd="16dp"
             custom:cornerRadius="65"
-            custom:defaultAvatarImageUrl="@drawable/avatar_default_contact"
+            custom:defaultAvatarImageUrl="@drawable/avatar_contact"
             android:layout_gravity="center_vertical" />
 
     <include layout="@layout/include_item_contact_client"/>

@@ -27,6 +27,7 @@ import com.hoccer.talk.server.rpc.TalkRpcConnection;
 import com.hoccer.talk.server.update.UpdateAgent;
 import com.hoccer.talk.util.CountedSet;
 import de.undercouch.bson4jackson.BsonFactory;
+import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -40,6 +41,8 @@ import java.util.concurrent.locks.Lock;
  * references to common database mapping helpers and so on.
  */
 public class TalkServer {
+
+    protected final Logger LOG = Logger.getLogger(getClass());
 
     /**
      * server-global JSON mapper
@@ -275,15 +278,50 @@ public class TalkServer {
         }
     }
 
-    // TODO: call this when we are through with an id (e.g. message)
-    public void removeIdLock(String id) {
-        mIdLocks.remove(id);
+    private void cleanIdLocks() {
+        LOG.debug("cleanIdLocks removing locks");
+
+        synchronized (mIdLocks) {
+            long count = mIdLocks.size();
+            Iterator it = mIdLocks.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry)it.next();
+                synchronized (pair.getValue()) {
+                    it.remove();
+                }
+            }
+            LOG.debug("cleanIdLocks removed "+count+" locks");
+        }
     }
 
+    private void cleanNonReentrantLocks() {
+        LOG.debug("cleanNonReentrantLocks removing locks");
 
-        /**
-         * @return the JSON mapper used by this server
-         */
+        synchronized (mNonReentrantIdLocks) {
+            long count = mNonReentrantIdLocks.size();
+            long removed = 0;
+            Iterator it = mNonReentrantIdLocks.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry)it.next();
+                NonReentrantLock lock =  (NonReentrantLock)pair.getValue();
+                if (lock.tryLock()) {
+                    it.remove();
+                    lock.unlock();
+                    ++removed;
+                }
+            }
+            LOG.debug("cleanNonReentrantLocks removed "+removed+" of "+count+" locks");
+        }
+    }
+
+    public void cleanAllLocks () {
+        cleanIdLocks();
+        cleanNonReentrantLocks();
+    }
+
+    /**
+     * @return the JSON mapper used by this server
+     */
     public ObjectMapper getJsonMapper() {
         return mJsonMapper;
     }
@@ -418,7 +456,7 @@ public class TalkServer {
             oldConnection.disconnect();
         }
         connection.getServerHandler().destroyEnvironment(TalkEnvironment.TYPE_NEARBY);  // after logon, destroy possibly left over environments
-        connection.getServerHandler().destroyEnvironment(TalkEnvironment.TYPE_WORLDWIDE);  // after logon, destroy possibly left over environments
+        connection.getServerHandler().releaseEnvironment(TalkEnvironment.TYPE_WORLDWIDE);  // after logon, release possibly left over environments
         mConnectionsByClientId.put(clientId, connection);
     }
 
@@ -463,7 +501,7 @@ public class TalkServer {
             // update presence for connection status change
             mUpdateAgent.requestPresenceUpdate(clientId, CONNECTION_STATUS_UPDATE_FIELDS);
             connection.getServerHandler().destroyEnvironment(TalkEnvironment.TYPE_NEARBY);
-            connection.getServerHandler().destroyEnvironment(TalkEnvironment.TYPE_WORLDWIDE);
+            connection.getServerHandler().releaseEnvironment(TalkEnvironment.TYPE_WORLDWIDE);
             mDeliveryAgent.requestDelivery(clientId, false);
         }
         // disconnect if we still are

@@ -1,9 +1,13 @@
 package com.hoccer.xo.android.base;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.v4.app.ListFragment;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.content.SelectedContent;
+import com.hoccer.xo.android.activity.ChatActivity;
+
 import org.apache.log4j.Logger;
 
 import java.io.File;

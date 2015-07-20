@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="worldwide_timetolive">
+        <item>immediately (not recommended)</item>
+        <item>10 minutes</item>
+        <item>30 minutes</item>
+        <item>1 hour</item>
+        <item>6 hours</item>
+        <item>12 hours</item>
+        <item>24 hours</item>
+    </string-array>
+
+    <string-array name="worldwide_timetolive_values">
+        <item>0</item>
+        <item>600000</item>
+        <item>1800000</item>
+        <item>3600000</item>
+        <item>21600000</item>
+        <item>43200000</item>
+        <item>86400000</item>
+    </string-array>
+
+    <string-array name="worldwide_tutorial_options">
+        <item>after 1 hour</item>
+        <item>after 6 hours</item>
+        <item>after 24 hours</item>
+    </string-array>
+</resources>

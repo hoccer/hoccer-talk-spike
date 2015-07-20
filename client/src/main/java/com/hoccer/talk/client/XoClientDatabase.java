@@ -190,6 +190,17 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return contacts.join(relationships).query();
     }
 
+    public List<TalkClientContact> findClientContactsByState(String state, String unblockState) throws SQLException {
+        QueryBuilder<TalkRelationship, Long> relationships = mRelationships.queryBuilder();
+        relationships.where()
+                .eq("state", state)
+                .and()
+                .eq("unblockState", unblockState);
+
+        QueryBuilder<TalkClientContact, Integer> contacts = mClientContacts.queryBuilder();
+        return contacts.join(relationships).query();
+    }
+
     //////////////////////////////////
     //////// Group Management ////////
     //////////////////////////////////
@@ -206,6 +217,26 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     public List<TalkClientContact> findAllGroupContacts() throws SQLException {
         return mClientContacts.queryForEq("contactType", TalkClientContact.TYPE_GROUP);
+    }
+
+    public boolean isClientContactInGroupOfType(String groupType, String clientId) throws SQLException {
+        List<TalkGroupPresence> groupPresences = mGroupPresences.queryBuilder().where()
+                .eq("groupType", groupType)
+                .query();
+
+        List<TalkGroupMembership> memberships = mGroupMemberships.queryBuilder().where()
+                .eq("clientId", clientId)
+                .query();
+
+        for (TalkGroupMembership groupMembership : memberships) {
+            for (TalkGroupPresence groupPresence : groupPresences) {
+                if (groupMembership.getGroupId().equals(groupPresence.getGroupId())) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     public List<TalkClientContact> findGroupContactsByMembershipState(String state) throws SQLException {
@@ -320,8 +351,9 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
             for (TalkDelivery newDelivery : newDeliveries) {
                 TalkClientMessage message = mClientMessages.queryBuilder().where()
                         .eq("deleted", false)
-                        .eq("outgoingDelivery" + "_id", newDelivery)
-                        .and(2)
+                        .eq("delivery_id", newDelivery)
+                        .eq("direction", TalkClientMessage.TYPE_OUTGOING)
+                        .and(3)
                         .queryForFirst();
 
                 if (message != null) {
@@ -428,21 +460,62 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return orderedMessages;
     }
 
+    public long getWorldwideGroupMessageCount() throws SQLException {
+        return getAllWorldwideGroupMessages().size();
+    }
+
+    public List<TalkClientMessage> getAllWorldwideGroupMessages() throws SQLException {
+        List<TalkClientMessage> messages = mClientMessages.queryBuilder()
+                .orderBy("timestamp", true).where()
+                .eq("deleted", false)
+                .query();
+
+        ArrayList<TalkClientMessage> worldwideMessages = new ArrayList<TalkClientMessage>();
+        for (TalkClientMessage message : messages) {
+            TalkClientContact conversationContact = message.getConversationContact();
+            if (conversationContact != null && conversationContact.getContactType() != null) {
+                if (conversationContact.isWorldwideGroup()) {
+                    worldwideMessages.add(message);
+                }
+            }
+        }
+        ArrayList<TalkClientContact> allWorldwideGroupsOrdered = new ArrayList<TalkClientContact>();
+        for (TalkClientMessage m : worldwideMessages) {
+            if (!allWorldwideGroupsOrdered.contains(m.getConversationContact())) {
+                allWorldwideGroupsOrdered.add(m.getConversationContact());
+            }
+        }
+        ArrayList<TalkClientMessage> orderedMessages = new ArrayList<TalkClientMessage>();
+        for (TalkClientContact c : allWorldwideGroupsOrdered) {
+            TalkClientMessage separator = new TalkClientMessage();
+            separator.setConversationContact(c);
+            separator.setMessageId(TalkClientMessage.TYPE_SEPARATOR);
+            orderedMessages.add(separator);
+            orderedMessages.addAll(findMessagesByContactId(c.getClientContactId(), worldwideMessages.size(), 0));
+        }
+        return orderedMessages;
+    }
+
     public List<TalkClientMessage> findMessagesByContactId(int contactId, long count, long offset) throws SQLException {
-        QueryBuilder<TalkClientMessage, Integer> builder = mClientMessages.queryBuilder();
+
+        QueryBuilder<TalkClientMessage, Integer> clientMessages = mClientMessages.queryBuilder();
         if (count >= 0) {
-            builder.limit(count);
+            clientMessages.limit(count);
         }
-        builder.orderBy("timestamp", true);
-        if (offset >= 0) {
-            builder.offset(offset);
-        }
-        Where<TalkClientMessage, Integer> where = builder.where()
+        Where<TalkClientMessage, Integer> where = clientMessages.where()
                 .eq("conversationContact_id", contactId)
                 .eq("deleted", false)
                 .and(2);
-        builder.setWhere(where);
-        return mClientMessages.query(builder.prepare());
+        clientMessages.setWhere(where);
+
+        QueryBuilder<TalkDelivery, ?> deliveries = mDeliveries.queryBuilder().orderBy("timeAccepted", true);
+
+        QueryBuilder<TalkClientMessage, ?> join = clientMessages.join(deliveries);
+        if (offset >= 0) {
+            join.offset(offset);
+        }
+
+        return join.query();
     }
 
     public Vector<Integer> findMessageIdsByContactId(int contactId) throws SQLException {
@@ -557,6 +630,12 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return clientMessages.join(clientDownloads).where()
                 .eq("deleted", false)
                 .queryForFirst();
+    }
+
+    public List<TalkDelivery> getDeliveriesForMessage(TalkClientMessage message) throws SQLException {
+        QueryBuilder<TalkDelivery, Long> deliveries = mDeliveries.queryBuilder();
+        deliveries.where().eq(TalkDelivery.FIELD_MESSAGE_TAG, message.getMessageTag());
+        return deliveries.query();
     }
 
     ////////////////////////////////////////////
@@ -810,7 +889,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     public TalkDelivery deliveryForUpload(TalkClientUpload upload) throws SQLException {
         TalkClientMessage message = getClientMessageForUpload(upload);
         if (message != null) {
-            return message.getOutgoingDelivery();
+            return message.getDelivery();
         }
         return null;
     }
@@ -818,7 +897,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     public TalkDelivery deliveryForDownload(TalkClientDownload download) throws SQLException {
         TalkClientMessage message = getClientMessageForDownload(download);
         if (message != null) {
-            return message.getIncomingDelivery();
+            return message.getDelivery();
         }
         return null;
     }
@@ -1109,5 +1188,17 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     private TalkClientMediaCollection prepareMediaCollection(TalkClientMediaCollection collection) {
         collection.setDatabase(this);
         return collection;
+    }
+
+    public boolean isWorldwideDownload(int clientDownloadId) throws SQLException {
+        QueryBuilder<TalkClientDownload, ?> dowloadQueryBuilder = mClientDownloads.queryBuilder();
+        dowloadQueryBuilder.where()
+                .eq("clientDownloadId", clientDownloadId);
+        QueryBuilder<TalkClientMessage, ?> clientMessageQueryBuilder = mClientMessages.queryBuilder();
+
+        TalkClientMessage clientMessage = clientMessageQueryBuilder.join(dowloadQueryBuilder).queryForFirst();
+        TalkClientContact senderContact = clientMessage.getSenderContact();
+
+        return senderContact.isWorldwide() && !senderContact.isNearby() && !senderContact.isClientFriend();
     }
 }

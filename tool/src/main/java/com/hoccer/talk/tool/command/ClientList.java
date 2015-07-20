@@ -3,7 +3,6 @@ package com.hoccer.talk.tool.command;
 import better.cli.annotations.CLICommand;
 import better.cli.utils.PrintUtils;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.model.TalkGroupPresence;
 import com.hoccer.talk.tool.TalkToolCommand;
 import com.hoccer.talk.tool.TalkToolContext;
 import com.hoccer.talk.tool.client.TalkToolClient;
@@ -13,22 +12,9 @@ import java.util.List;
 @CLICommand(name = "clist", description = "List clients")
 public class ClientList extends TalkToolCommand {
 
-    final String[] COLUMN_NAMES = new String[]{
-        "id", "state", "environment", "clientId"
+    static final String[] COLUMN_NAMES = new String[]{
+        "id", "name", "state", "isNearby", "isWorldwide", "clientId"
     };
-
-    private static String getEnvironmentType(final TalkToolClient client) {
-        final TalkClientContact envGroup = client.getClient().getCurrentEnvironmentGroup();
-        if (envGroup == null) {
-            return "none";
-        }
-        final TalkGroupPresence groupPresence = envGroup.getGroupPresence();
-        if (groupPresence != null) {
-            return groupPresence.getGroupType();
-        } else {
-            return "none";
-        }
-    }
 
     @Override
     protected void run(final TalkToolContext context) throws Exception {
@@ -39,11 +25,25 @@ public class ClientList extends TalkToolCommand {
         for (int i = 1; i < numLines; i++) {
             final TalkToolClient client = clients.get(i - 1);
             final String[] columns = new String[COLUMN_NAMES.length];
+            // id
             columns[0] = Integer.toString(client.getId());
-            columns[1] = client.getClient().getState().toString();
-            columns[2] = getEnvironmentType(client);
+            // name
+            String name = client.getClient().getSelfContact().getName();
+            if (name == null) {
+                name = "";
+            }
+            columns[1] = name;
+            // state
+            columns[2] = client.getClient().getState().toString();
+            // isNearby
+            TalkClientContact nearbyGroup = client.getClient().getCurrentNearbyGroup();
+            columns[3] = (nearbyGroup == null) ? "*inactive*" : nearbyGroup.getGroupId();
+            // isWorldwide
+            TalkClientContact worldwideGroup = client.getClient().getCurrentWorldwideGroup();
+            columns[4] = (worldwideGroup == null) ? "*inactive*" : worldwideGroup.getGroupId();
+            // clientId
             final String c = client.getDatabase().findSelfContact(true).getClientId();
-            columns[3] = (c == null) ? "" : c;
+            columns[5] = (c == null) ? "" : c;
             rows[i] = columns;
         }
         PrintUtils.printTable(rows);

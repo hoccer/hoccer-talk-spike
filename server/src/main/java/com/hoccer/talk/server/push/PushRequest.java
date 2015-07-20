@@ -76,9 +76,9 @@ public class PushRequest {
             performApns(deliveringCount);
         } else {
             if (mClient.isPushCapable()) {
-                LOG.warn("client " + mClient + " push not available");
+                LOG.warn("PushRequest.perform: client " + mClient + " push not available");
             } else {
-                LOG.info("client " + mClientId + " has no registration");
+                LOG.warn("PushRequest.perform: client " + mClientId + " has no registration");
             }
             return;
         }
@@ -87,7 +87,7 @@ public class PushRequest {
     }
 
     private void performGcm() {
-        LOG.info("GCM push for " + mClientId);
+        LOG.debug("GCM push for " + mClientId);
         Message message = new Message.Builder()
                 .collapseKey("com.hoccer.talk.wake")
                 .timeToLive(TalkServerConfiguration.GCM_WAKE_TTL)
@@ -125,7 +125,7 @@ public class PushRequest {
         ApnsService apnsService = mAgent.getApnsService(clientName, type);
 
         if (apnsService != null) {
-            LOG.info("APNS push for " + mClientId + " using " + type + " type");
+            LOG.debug("APNS push for " + mClientId + " using " + type + " type");
 
             PayloadBuilder b = APNS.newPayload();
 
@@ -133,7 +133,7 @@ public class PushRequest {
 
             if (TalkClient.APNS_MODE_BACKGROUND.equals(mClient.getApnsMode())) {
                 // background message
-                LOG.info("APNS background push configured for clientName '" + clientName + "' and type '" + type + "'");
+                LOG.debug("APNS background push configured for clientName '" + clientName + "' and type '" + type + "'");
                 b.badge(messageCount);
                 b.forNewsstand();
             }  else {
