@@ -30,7 +30,7 @@ import java.util.concurrent.ScheduledExecutorService;
  * for such things as initializing the logger and setting up the
  * XO client itself. All global initialization should go here.
  */
-public class XoApplication extends Application implements Thread.UncaughtExceptionHandler {
+public class XoApplication extends Application {
 
     private static Logger sLog;
 
@@ -59,9 +59,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     // global executor for incoming connections
     private static ScheduledExecutorService sIncomingExecutor;
 
-    private static Thread.UncaughtExceptionHandler sUncaughtExceptionHandler;
-    private Thread.UncaughtExceptionHandler mPreviousHandler;
-
     private XoAndroidClient mClient;
     private static XoAndroidClientConfiguration sConfiguration;
     private static XoSoundPool sSoundPool;
@@ -70,6 +67,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     private static StartupTasks sStartupTasks;
 
     private static XoApplication sInstance;
+    private CrashMonitor mCrashMonitor;
 
     public static XoApplication get() {
         return sInstance;
@@ -81,8 +79,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
         sInstance = this;
 
-        // currently we use our own instance here
-        sUncaughtExceptionHandler = this;
+        mCrashMonitor = CrashMonitor.get(this);
 
         // initialize storage roots (do so early for log files)
         sExternalStorage = Environment.getExternalStorageDirectory();
@@ -118,8 +115,8 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
         // install a default exception handler
         sLog.info("setting up default exception handler");
-        mPreviousHandler = Thread.getDefaultUncaughtExceptionHandler();
-        Thread.setDefaultUncaughtExceptionHandler(this);
+
+        Thread.setDefaultUncaughtExceptionHandler(mCrashMonitor);
 
         // log storage roots
         sLog.info("internal storage at " + sInternalStorage);
@@ -169,11 +166,11 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         sLog.info("creating background executor");
         ThreadFactoryBuilder tfb = new ThreadFactoryBuilder();
         tfb.setNameFormat("client-%d");
-        tfb.setUncaughtExceptionHandler(this);
+        tfb.setUncaughtExceptionHandler(mCrashMonitor);
         mExecutor = Executors.newScheduledThreadPool(CLIENT_THREAD_COUNT, tfb.build());
         ThreadFactoryBuilder tfb2 = new ThreadFactoryBuilder();
         tfb2.setNameFormat("receiving client-%d");
-        tfb2.setUncaughtExceptionHandler(this);
+        tfb2.setUncaughtExceptionHandler(mCrashMonitor);
         sIncomingExecutor = Executors.newScheduledThreadPool(CLIENT_THREAD_COUNT, tfb2.build());
 
         // create client instance
@@ -191,6 +188,11 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         // add srp secret change listener
         mClient.registerStateListener(new SrpChangeListener(this));
 
+        if (isFirstConnectionAfterCrashOrUpdate()) {
+            mClient.setFullSyncRequired(true);
+            mCrashMonitor.saveCrashState(false);
+        }
+
         // create sound pool instance
         sSoundPool = new XoSoundPool(this);
 
@@ -203,18 +205,14 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         startService(xoClientServiceIntent);
     }
 
+    private boolean isFirstConnectionAfterCrashOrUpdate() {
+        return XoVersion.isApplicationUpdated(this) || mCrashMonitor.isCrashedBefore();
+    }
+
     @Override
     public void onTrimMemory(int level) {
         super.onTrimMemory(level);
         sLog.warn("Received onTrimMemory(" + level + ").");
-    }
-
-    @Override
-    public void uncaughtException(Thread thread, Throwable ex) {
-        sLog.error("uncaught exception on thread " + thread.getName(), ex);
-        if (mPreviousHandler != null) {
-            mPreviousHandler.uncaughtException(thread, ex);
-        }
     }
 
     public static void ensureDirectory(File directory) {
@@ -304,10 +302,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
     public static File getExternalStorage() {
         return sExternalStorage;
-    }
-
-    public static Thread.UncaughtExceptionHandler getUncaughtExceptionHandler() {
-        return sUncaughtExceptionHandler;
     }
 
     public static DisplayImageOptions getImageOptions() {
