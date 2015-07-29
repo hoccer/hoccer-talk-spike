@@ -21,6 +21,7 @@
     </string-array>
 
     <string-array name="worldwide_tutorial_options">
+        <item>leave immediately</item>
         <item>after 1 hour</item>
         <item>after 6 hours</item>
         <item>after 24 hours</item>
