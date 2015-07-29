@@ -19,7 +19,7 @@ public class FeaturePromoter {
 
     private static final String PREFERENCE_KEY_WORLDWIDE_PAGE_SHOWN_ON_FIRST_START = "worldwide_page_shown_on_first_start";
 
-    public static void cleanupSelectWorldwidePageOnFirstStart(Context context) {
+    public static void cleanupForSelectWorldwidePageOnFirstStart(Context context) {
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = preferences.edit();
         editor.remove(PREFERENCE_KEY_WORLDWIDE_PAGE_SHOWN_ON_FIRST_START).apply();

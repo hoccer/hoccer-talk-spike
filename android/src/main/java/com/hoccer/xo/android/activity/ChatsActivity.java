@@ -69,7 +69,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
         PasswordProtection.get();
 
-        FeaturePromoter.cleanupSelectWorldwidePageOnFirstStart(this);
+        FeaturePromoter.cleanupForSelectWorldwidePageOnFirstStart(this);
     }
 
     @Override
