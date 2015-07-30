@@ -23,7 +23,7 @@ public class ViewPagerActivityComponent extends ActivityComponent {
     private final int mViewPagerId;
     private boolean mResumeAfterPause;
 
-    public <T extends Fragment & IPagerFragment> ViewPagerActivityComponent(FragmentActivity activity, int viewPagerId, Fragment... fragments) {
+    public ViewPagerActivityComponent(FragmentActivity activity, int viewPagerId, Fragment... fragments) {
         super(activity);
 
         for (Fragment fragment : fragments) {
