@@ -17,6 +17,9 @@ import static com.hoccer.talk.model.TalkEnvironment.TYPE_NEARBY;
 
 public class NearbyChatListFragment extends EnvironmentChatListFragment {
 
+    private boolean mPageResumed;
+    private boolean mOnResumeHandled;
+
     public NearbyChatListFragment() {
         mPlaceholder = new Placeholder(R.drawable.placeholder_nearby, R.string.placeholder_nearby_text);
     }
@@ -24,7 +27,42 @@ public class NearbyChatListFragment extends EnvironmentChatListFragment {
     @Override
     public void onResume() {
         super.onResume();
-        createAdapter();
+
+        if (mPageResumed) {
+            activateNearby();
+        }
+
+        mOnResumeHandled = true;
+    }
+
+    private void activateNearby() {
+        if (NearbyController.get().locationServicesEnabled()) {
+            NearbyController.get().enableNearbyMode();
+            createAdapter();
+        } else {
+            showLocationServiceDialog();
+        }
+    }
+
+    private void showLocationServiceDialog() {
+        XoDialogs.showYesNoDialog("EnableLocationServiceDialog",
+                R.string.dialog_enable_location_service_title,
+                R.string.dialog_enable_location_service_message,
+                getActivity(),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        getActivity().startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    }
+                }
+        );
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        mOnResumeHandled = false;
     }
 
     @Override
@@ -74,29 +112,15 @@ public class NearbyChatListFragment extends EnvironmentChatListFragment {
 
     @Override
     public void onPageResume() {
-        if (NearbyController.get().locationServicesEnabled()) {
-            NearbyController.get().enableNearbyMode();
-        } else {
-            showLocationServiceDialog();
+        mPageResumed = true;
+        if (mOnResumeHandled) {
+            activateNearby();
         }
-    }
-
-    private void showLocationServiceDialog() {
-        XoDialogs.showYesNoDialog("EnableLocationServiceDialog",
-                R.string.dialog_enable_location_service_title,
-                R.string.dialog_enable_location_service_message,
-                getActivity(),
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        getActivity().startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                    }
-                }
-        );
     }
 
     @Override
     public void onPagePause() {
+        mPageResumed = false;
     }
 
     @Override
