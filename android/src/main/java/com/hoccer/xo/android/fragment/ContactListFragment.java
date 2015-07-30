@@ -126,16 +126,10 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     protected abstract Intent getProfileActivityIntent(TalkClientContact contact);
 
     @Override
-    public void onPageResume() {}
-
-    @Override
     public void onPageSelected() {}
 
     @Override
     public void onPageUnselected() {}
-
-    @Override
-    public void onPagePause() {}
 
     @Override
     public void onPageScrollStateChanged(int state) {}

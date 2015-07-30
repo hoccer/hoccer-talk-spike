@@ -22,7 +22,7 @@ public class ViewPagerActivityComponent extends ActivityComponent {
     private ViewPager mViewPager;
     private final List<Fragment> mFragments = new ArrayList<Fragment>();
     private final int mViewPagerId;
-    private boolean mResumeAfterPause;
+//    private boolean mResumeAfterPause;
 
     public ViewPagerActivityComponent(FragmentActivity activity, int viewPagerId, Fragment... fragments) {
         super(activity);
@@ -77,16 +77,16 @@ public class ViewPagerActivityComponent extends ActivityComponent {
         super.onResume();
 
         // do not call onPageResume() on Activity start because this is already done in TabListener.onTabSelected()
-        if (mResumeAfterPause) {
-            ((IPagerFragment) mFragments.get(mViewPager.getCurrentItem())).onPageResume();
-        }
+//        if (mResumeAfterPause) {
+//            ((IPagerFragment) mFragments.get(mViewPager.getCurrentItem())).onPageResume();
+//        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        ((IPagerFragment) mFragments.get(mViewPager.getCurrentItem())).onPagePause();
-        mResumeAfterPause = true;
+//        ((IPagerFragment) mFragments.get(mViewPager.getCurrentItem())).onPagePause();
+//        mResumeAfterPause = true;
     }
 
     @Override
@@ -129,8 +129,10 @@ public class ViewPagerActivityComponent extends ActivityComponent {
             mViewPager.setCurrentItem(position);
 
             IPagerFragment fragment = (IPagerFragment) mFragments.get(position);
-            fragment.onPageResume();
-            fragment.onPageSelected();
+
+            if (((Fragment) fragment).isAdded()) {
+                fragment.onPageSelected();
+            }
         }
 
         @Override
@@ -139,7 +141,6 @@ public class ViewPagerActivityComponent extends ActivityComponent {
 
             IPagerFragment fragment = (IPagerFragment) mFragments.get(position);
             fragment.onPageUnselected();
-            fragment.onPagePause();
         }
 
         @Override

@@ -202,12 +202,6 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
         mCameraPreviewView.startPreview();
     }
 
-    @Override
-    public void onPageResume() {}
-
-    @Override
-    public void onPagePause() {}
-
     private void stopScanning() {
         stopPreview();
         closeCamera();

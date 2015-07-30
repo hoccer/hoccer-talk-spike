@@ -66,26 +66,18 @@ public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment,
     }
 
     @Override
-    public void onPageResume() {
+    public void onPageSelected() {
         if (!isTokenGenerated()) {
             generateToken();
         }
 
         XoApplication.get().getXoClient().registerContactListener(this);
-        XoApplication.get().getXoClient().registerStateListener(this);
-    }
+        XoApplication.get().getXoClient().registerStateListener(this);}
 
     @Override
-    public void onPageSelected() {}
-
-    @Override
-    public void onPageUnselected() {}
-
-    @Override
-    public void onPagePause() {
+    public void onPageUnselected() {
         XoApplication.get().getXoClient().unregisterContactListener(this);
-        XoApplication.get().getXoClient().unregisterStateListener(this);
-    }
+        XoApplication.get().getXoClient().unregisterStateListener(this);}
 
     @Override
     public void onPageScrollStateChanged(final int state) {

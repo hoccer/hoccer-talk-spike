@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.view.View;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.model.TalkEnvironment;
 import com.hoccer.xo.android.NearbyController;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.EnvironmentChatListAdapter;
@@ -17,22 +16,8 @@ import static com.hoccer.talk.model.TalkEnvironment.TYPE_NEARBY;
 
 public class NearbyChatListFragment extends EnvironmentChatListFragment {
 
-    private boolean mPageResumed;
-    private boolean mOnResumeHandled;
-
     public NearbyChatListFragment() {
         mPlaceholder = new Placeholder(R.drawable.placeholder_nearby, R.string.placeholder_nearby_text);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        if (mPageResumed) {
-            activateNearby();
-        }
-
-        mOnResumeHandled = true;
     }
 
     private void activateNearby() {
@@ -61,8 +46,6 @@ public class NearbyChatListFragment extends EnvironmentChatListFragment {
     @Override
     public void onPause() {
         super.onPause();
-
-        mOnResumeHandled = false;
     }
 
     @Override
@@ -103,24 +86,12 @@ public class NearbyChatListFragment extends EnvironmentChatListFragment {
 
     @Override
     public void onPageSelected() {
+        activateNearby();
     }
 
     @Override
     public void onPageUnselected() {
         NearbyController.get().disableNearbyMode();
-    }
-
-    @Override
-    public void onPageResume() {
-        mPageResumed = true;
-        if (mOnResumeHandled) {
-            activateNearby();
-        }
-    }
-
-    @Override
-    public void onPagePause() {
-        mPageResumed = false;
     }
 
     @Override

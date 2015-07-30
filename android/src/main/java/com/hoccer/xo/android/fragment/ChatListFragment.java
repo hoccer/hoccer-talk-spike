@@ -313,14 +313,6 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
     }
 
     @Override
-    public void onPageResume() {
-    }
-
-    @Override
-    public void onPagePause() {
-    }
-
-    @Override
     public void onPageScrollStateChanged(int state) {
     }
 }

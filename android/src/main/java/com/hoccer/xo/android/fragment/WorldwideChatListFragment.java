@@ -87,9 +87,6 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
     }
 
     @Override
-    public void onPageResume() {}
-
-    @Override
     public void onPageSelected() {
         mPageSelected = true;
         if (mOnResumeHandled) {
@@ -102,9 +99,6 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
         mPageSelected = false;
         WorldwideController.get().deactivateWorldWide();
     }
-
-    @Override
-    public void onPagePause() {}
 
     @Override
     public void onPageScrollStateChanged(int state) {}
