@@ -11,6 +11,7 @@ import android.view.View;
 import com.hoccer.xo.android.fragment.IPagerFragment;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -26,9 +27,7 @@ public class ViewPagerActivityComponent extends ActivityComponent {
     public ViewPagerActivityComponent(FragmentActivity activity, int viewPagerId, Fragment... fragments) {
         super(activity);
 
-        for (Fragment fragment : fragments) {
-            mFragments.add(fragment);
-        }
+        Collections.addAll(mFragments, fragments);
         mViewPagerId = viewPagerId;
     }
 
