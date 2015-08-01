@@ -261,7 +261,7 @@ public abstract class JsonRpcConnection {
         LOG.trace("handleRequest done id="+ request.get("id"));
         if (mDisconnectAfterRequest) {
             LOG.warn("handleRequest done id="+ request.get("id")+", terminating connection ["+mConnectionId+"] because internally requested.");
-            this.disconnectAfterRequest();
+            this.disconnect();
         }
     }
 
