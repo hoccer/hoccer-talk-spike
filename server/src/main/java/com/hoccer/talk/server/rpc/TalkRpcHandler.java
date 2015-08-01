@@ -234,9 +234,13 @@ public class TalkRpcHandler implements ITalkRpcServer {
         logCall("generateId()");
 
         if (mConnection.isLoggedIn()) {
+            LOG.error("generateId: Can't register while logged in, disconnecting: clientId="+mConnection.getClientId());
+            mConnection.disconnectAfterRequest();
             throw new RuntimeException("Can't register while logged in");
         }
         if (mConnection.isRegistering()) {
+            LOG.error("generateId: Can't register more than one identity per connection: clientId="+mConnection.getClientId());
+            mConnection.disconnectAfterRequest();
             throw new RuntimeException("Can't register more than one identity per connection");
         }
 
@@ -250,6 +254,8 @@ public class TalkRpcHandler implements ITalkRpcServer {
         logCall("srpRegister(verifier: '" + verifier + "', salt: '" + salt + "')");
 
         if (mConnection.isLoggedIn()) {
+            LOG.error("srpRegister: Can't register while logged in, disconnecting: clientId="+mConnection.getClientId());
+            mConnection.disconnectAfterRequest();
             throw new RuntimeException("Can't register while logged in");
         }
 
@@ -313,6 +319,8 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
         // check if we aren't logged in already
         if (mConnection.isLoggedIn()) {
+            LOG.error("srpPhase1: Can not authenticate while logged in, disconnecting: clientId="+mConnection.getClientId());
+            mConnection.disconnectAfterRequest();
             throw new RuntimeException("Can not authenticate while logged in");
         }
         try {
@@ -321,6 +329,8 @@ public class TalkRpcHandler implements ITalkRpcServer {
             if (mSrpServer == null) {
                 mSrpServer = new SRP6VerifyingServer();
             } else {
+                LOG.error("srpPhase1: Can only attempt SRP once per connection, disconnecting: clientId="+mConnection.getClientId());
+                mConnection.disconnectAfterRequest();
                 throw new RuntimeException("Can only attempt SRP once per connection");
             }
 
@@ -381,6 +391,8 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
         // check if we aren't logged in already
         if (mConnection.isLoggedIn()) {
+            LOG.error("srpPhase2: Can't authenticate while logged in, disconnecting: clientId="+mConnection.getClientId());
+            mConnection.disconnectAfterRequest();
             throw new RuntimeException("Can't authenticate while logged in");
         }
 
@@ -2677,6 +2689,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
     @Override
     public String updateEnvironment(TalkEnvironment environment) {
         logCall("updateEnvironment(clientId: '" + mConnection.getClientId() + "')");
+        LOG.info("updateEnvironment(clientId: " + mConnection.getClientId() + ", type: "+environment.getType()+", group: "+environment.getGroupId()+")+");
 
         requireIdentification(true);
 
