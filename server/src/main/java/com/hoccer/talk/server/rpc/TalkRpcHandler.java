@@ -2689,7 +2689,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
     @Override
     public String updateEnvironment(TalkEnvironment environment) {
         logCall("updateEnvironment(clientId: '" + mConnection.getClientId() + "')");
-        LOG.info("updateEnvironment(clientId: " + mConnection.getClientId() + ", type: "+environment.getType()+", group: "+environment.getGroupId()+")+");
+        LOG.info("updateEnvironment(clientId: " + mConnection.getClientId() + ", type: "+environment.getType()+", group: "+environment.getGroupId()+", geo:"+environment.getGeoLocation()+", loctype:"+environment.getLocationType()+", accuracy:"+environment.getAccuracy()+ ", bssids:"+environment.getBssids());
 
         requireIdentification(true);
 
@@ -2712,6 +2712,9 @@ public class TalkRpcHandler implements ITalkRpcServer {
         environment.setTimeReleased(null);
 
         String lockId = "env-"+environment.getType();
+        if (TalkEnvironment.TYPE_NEARBY.equals(environment.getType())) {
+            lockId = "env-nearby-"+mConnection.getClientId();
+        }
 
         synchronized (mServer.idLock(lockId)) {
 
@@ -2910,6 +2913,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                                 // lets destroy all environments
                                 destroyEnvironment(mServer, te);
                                 destroyEnvironment(mServer, myEnvironment);
+                                LOG.debug("updateEnvironment: different group id for client=" + mConnection.getClientId() + " myEnvironment.groupId=" + myEnvironment.getGroupId() + ", te.groupId=" + te.getGroupId() +" environment.groupId=" + environment.getGroupId());
                                 throw new RuntimeException("illegal group id in environment");
                             }
                             myEnvironment.updateWith(environment);
