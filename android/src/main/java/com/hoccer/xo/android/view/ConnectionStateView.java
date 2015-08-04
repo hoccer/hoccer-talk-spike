@@ -62,7 +62,7 @@ public class ConnectionStateView extends LinearLayout implements IXoStateListene
                 break;
             case SYNCING:
                 this.setVisibility(View.VISIBLE);
-                mConnectionStateTextView.setText(R.string.connection_state_syncing);
+                mConnectionStateTextView.setText(getResources().getString(R.string.connection_state_syncing));
                 break;
             case READY:
                 this.setVisibility(View.GONE);

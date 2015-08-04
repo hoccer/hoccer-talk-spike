@@ -119,7 +119,7 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
 
     @Override
     public String getNotificationPreferenceForWorldwide() {
-        Boolean notificationsEnabled = mSharedPreferences.getBoolean("preference_key_worldwide_enable_notifications", false);
+        Boolean notificationsEnabled = mSharedPreferences.getBoolean("preference_key_worldwide_enable_notifications", true);
         return notificationsEnabled ? TalkGroupMembership.NOTIFICATIONS_ENABLED : TalkGroupMembership.NOTIFICATIONS_DISABLED;
     }
 

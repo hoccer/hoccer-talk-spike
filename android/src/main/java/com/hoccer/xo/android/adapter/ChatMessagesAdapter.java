@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -34,6 +35,7 @@ import java.util.List;
 public class ChatMessagesAdapter extends MessagesAdapter implements IXoMessageListener, TransferListener {
 
     private static final Logger LOG = Logger.getLogger(ChatMessagesAdapter.class);
+
 
     /**
      * Number of TalkClientMessage objects in a batch
@@ -195,6 +197,7 @@ public class ChatMessagesAdapter extends MessagesAdapter implements IXoMessageLi
         ChatItemType chatItemType = ChatItemType.ChatItemWithText;
         String mediaType = null;
 
+
         if (message.getAttachmentDownload() != null) {
             mediaType = message.getAttachmentDownload().getMediaType();
         } else if (message.getAttachmentUpload() != null) {
@@ -269,7 +272,8 @@ public class ChatMessagesAdapter extends MessagesAdapter implements IXoMessageLi
                 public void run() {
                     MessageItem messageItem = getItemForMessage(message);
                     if (!mMessageItems.contains(messageItem)) {
-                        mMessageItems.add(messageItem);
+                        insertMessageItemAndSort(messageItem);;
+
                         notifyDataSetChanged();
 
                         // autoscroll to new item
@@ -282,6 +286,16 @@ public class ChatMessagesAdapter extends MessagesAdapter implements IXoMessageLi
                 }
             });
         }
+    }
+
+    private void insertMessageItemAndSort(MessageItem messageItem) {
+        mMessageItems.add(messageItem);
+        Collections.sort(mMessageItems, new Comparator<MessageItem>() {
+            @Override
+            public int compare(MessageItem o1, MessageItem o2) {
+                return o1.getMessage().getDelivery().getTimeAccepted().getTime() < o2.getMessage().getDelivery().getTimeAccepted().getTime() ? -1 : 1;
+            }
+        });
     }
 
     @Override

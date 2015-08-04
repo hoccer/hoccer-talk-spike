@@ -57,7 +57,7 @@
         <SwitchPreference
                 android:key="@string/preference_key_worldwide_enable_notifications"
                 android:title="@string/group_notifications"
-                android:defaultValue="false"/>
+                android:defaultValue="true"/>
         <SwitchPreference
                 android:key="@string/preference_key_worldwide_enable_automatic_download"
                 android:title="@string/auto_download_attachments"
