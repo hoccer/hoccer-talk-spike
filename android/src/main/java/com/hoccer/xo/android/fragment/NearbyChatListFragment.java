@@ -20,29 +20,6 @@ public class NearbyChatListFragment extends EnvironmentChatListFragment {
         mPlaceholder = new Placeholder(R.drawable.placeholder_nearby, R.string.placeholder_nearby_text);
     }
 
-    private void activateNearby() {
-        if (NearbyController.get().locationServicesEnabled()) {
-            NearbyController.get().enableNearbyMode();
-            createAdapter();
-        } else {
-            showLocationServiceDialog();
-        }
-    }
-
-    private void showLocationServiceDialog() {
-        XoDialogs.showYesNoDialog("EnableLocationServiceDialog",
-                R.string.dialog_enable_location_service_title,
-                R.string.dialog_enable_location_service_message,
-                getActivity(),
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        getActivity().startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                    }
-                }
-        );
-    }
-
     @Override
     public void onPause() {
         super.onPause();
@@ -87,6 +64,29 @@ public class NearbyChatListFragment extends EnvironmentChatListFragment {
     @Override
     public void onPageSelected() {
         activateNearby();
+    }
+
+    private void activateNearby() {
+        if (NearbyController.get().locationServicesEnabled()) {
+            NearbyController.get().enableNearbyMode();
+            createAdapter();
+        } else {
+            showLocationServiceDialog();
+        }
+    }
+
+    private void showLocationServiceDialog() {
+        XoDialogs.showYesNoDialog("EnableLocationServiceDialog",
+                R.string.dialog_enable_location_service_title,
+                R.string.dialog_enable_location_service_message,
+                getActivity(),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        getActivity().startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    }
+                }
+        );
     }
 
     @Override

@@ -22,24 +22,6 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
         mPlaceholder = new Placeholder(R.drawable.placeholder_world, R.string.placeholder_worldwide_text);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        if (mPageSelected) {
-            activateWorldwide();
-        }
-
-        mOnResumeHandled = true;
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        mOnResumeHandled = false;
-    }
-
     private void activateWorldwide() {
         WorldwideController.get().activateWorldwide();
 
@@ -88,18 +70,15 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
 
     @Override
     public void onPageSelected() {
-        mPageSelected = true;
-        if (mOnResumeHandled) {
-            activateWorldwide();
-        }
+        activateWorldwide();
     }
 
     @Override
     public void onPageUnselected() {
-        mPageSelected = false;
         WorldwideController.get().deactivateWorldWide();
     }
 
     @Override
-    public void onPageScrollStateChanged(int state) {}
+    public void onPageScrollStateChanged(int state) {
+    }
 }

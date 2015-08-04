@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.fragment;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -43,6 +44,11 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
 
     private MenuItem mMyProfileMenuItem;
     private MenuItem mContactsMenuItem;
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -305,6 +311,7 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
 
     @Override
     public void onPageSelected() {
+        getActivity().toString();
     }
 
     @Override

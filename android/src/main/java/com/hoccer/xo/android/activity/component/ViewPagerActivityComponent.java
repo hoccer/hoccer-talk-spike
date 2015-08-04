@@ -22,7 +22,6 @@ public class ViewPagerActivityComponent extends ActivityComponent {
     private ViewPager mViewPager;
     private final List<Fragment> mFragments = new ArrayList<Fragment>();
     private final int mViewPagerId;
-//    private boolean mResumeAfterPause;
 
     public ViewPagerActivityComponent(FragmentActivity activity, int viewPagerId, Fragment... fragments) {
         super(activity);
@@ -68,28 +67,6 @@ public class ViewPagerActivityComponent extends ActivityComponent {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        // do not call onPageResume() on Activity start because this is already done in TabListener.onTabSelected()
-//        if (mResumeAfterPause) {
-//            ((IPagerFragment) mFragments.get(mViewPager.getCurrentItem())).onPageResume();
-//        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-//        ((IPagerFragment) mFragments.get(mViewPager.getCurrentItem())).onPagePause();
-//        mResumeAfterPause = true;
-    }
-
-    @Override
     public void onDestroy() {
         super.onDestroy();
     }
@@ -111,8 +88,13 @@ public class ViewPagerActivityComponent extends ActivityComponent {
         public void onPageSelected(int position) {
             ActionBar actionBar = getActivity().getActionBar();
 
-            if (actionBar.getSelectedNavigationIndex() != mViewPager.getCurrentItem()) {
+            IPagerFragment fragment = (IPagerFragment) mFragments.get(position);
+
+            if (actionBar.getSelectedNavigationIndex() == mViewPager.getCurrentItem()) {
                 getActivity().getActionBar().setSelectedNavigationItem(mViewPager.getCurrentItem());
+                fragment.onPageSelected();
+            } else {
+                fragment.onPageUnselected();
             }
         }
 
@@ -127,20 +109,10 @@ public class ViewPagerActivityComponent extends ActivityComponent {
         public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
             int position = tab.getPosition();
             mViewPager.setCurrentItem(position);
-
-            IPagerFragment fragment = (IPagerFragment) mFragments.get(position);
-
-            if (((Fragment) fragment).isAdded()) {
-                fragment.onPageSelected();
-            }
         }
 
         @Override
         public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
-            int position = tab.getPosition();
-
-            IPagerFragment fragment = (IPagerFragment) mFragments.get(position);
-            fragment.onPageUnselected();
         }
 
         @Override
