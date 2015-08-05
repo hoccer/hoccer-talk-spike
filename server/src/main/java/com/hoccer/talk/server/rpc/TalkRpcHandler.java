@@ -2689,7 +2689,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
     @Override
     public String updateEnvironment(TalkEnvironment environment) {
         logCall("updateEnvironment(clientId: '" + mConnection.getClientId() + "')");
-        LOG.info("updateEnvironment(clientId: " + mConnection.getClientId() + ", type: "+environment.getType()+", group: "+environment.getGroupId()+", geo:"+environment.getGeoLocation()+", loctype:"+environment.getLocationType()+", accuracy:"+environment.getAccuracy()+ ", bssids:"+environment.getBssids());
+        LOG.info("updateEnvironment(clientId: " + mConnection.getClientId() + ", type: "+environment.getType()+", group: "+environment.getGroupId()+", geo:"+Arrays.toString(environment.getGeoLocation())+", loctype:"+environment.getLocationType()+", accuracy:"+environment.getAccuracy()+ ", bssids:"+Arrays.toString(environment.getBssids()));
 
         requireIdentification(true);
 
