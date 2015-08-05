@@ -420,6 +420,11 @@ public class UpdateAgent extends NotificationDeferrer {
                     // Calling Client via RPC
                     ITalkRpcClient rpc = connection.getClientRpc();
                     for (TalkGroupMembership membership : memberships) {
+                        if (membership.getClientId() == null) {
+                            LOG.error("Membership record for group id "+membership.getGroupId()+" without clientId:"+newMembership.getClientId());
+                            mDatabase.deleteGroupMembership(membership);
+                            continue;
+                        }
                         // do not send out updates for own membership or dead members
                         if (!membership.getClientId().equals(newMemberClientId) && (membership.isJoined() || membership.isInvited() || membership.isSuspended())) {
                             try {
