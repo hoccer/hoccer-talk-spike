@@ -580,7 +580,7 @@ public class JongoDatabase implements ITalkServerDatabase {
             if (relationship.isRelated()) {
                 LOG.trace("including "+relationship.getOtherClientId()+" because related");
                 clients.add(relationship.getOtherClientId());
-                if (relationship.getLastChanged().after(lastKnown)) {
+                if (relationship.getLastChanged() != null && relationship.getLastChanged().after(lastKnown)) {
                     LOG.trace("must include "+relationship.getOtherClientId()+" because related");
                     mustInclude.add(relationship.getOtherClientId());
                 }
@@ -597,7 +597,8 @@ public class JongoDatabase implements ITalkServerDatabase {
                     if (otherMembership.isInvited() || otherMembership.isJoined() || otherMembership.isSuspended()) {
                         clients.add(otherMembership.getClientId());
                         LOG.trace("include "+otherMembership.getClientId()+" because common membership");
-                        if (otherMembership.getLastChanged().after(lastKnown) || ownMembership.getLastChanged().after(lastKnown)) {
+                        if ((otherMembership.getLastChanged() != null && otherMembership.getLastChanged().after(lastKnown)) ||
+                                (ownMembership.getLastChanged() != null && ownMembership.getLastChanged().after(lastKnown))) {
                             LOG.trace("must include "+otherMembership.getClientId()+" because memberships changed");
                             mustInclude.add(otherMembership.getClientId());
                         }
@@ -610,7 +611,7 @@ public class JongoDatabase implements ITalkServerDatabase {
         final List<TalkDelivery> deliveries = findDeliveriesForClientInState(clientId, TalkDelivery.STATE_DELIVERING);
         for (TalkDelivery delivery : deliveries) {
             clients.add(delivery.getSenderId());
-            if (delivery.getTimeChanged().after(lastKnown)) {
+            if (delivery.getTimeChanged() != null && delivery.getTimeChanged().after(lastKnown)) {
                 mustInclude.add(delivery.getSenderId());
             }
         }
@@ -619,7 +620,7 @@ public class JongoDatabase implements ITalkServerDatabase {
                         TalkDelivery.IN_ATTACHMENT_DELIVERY_STATES, TalkDelivery.IN_ATTACHMENT_STATES);
         for (TalkDelivery delivery : attachmentDeliveries) {
             clients.add(delivery.getSenderId());
-            if (delivery.getTimeChanged().after(lastKnown)) {
+            if (delivery.getTimeChanged() != null && delivery.getTimeChanged().after(lastKnown)) {
                 mustInclude.add(delivery.getSenderId());
             }
         }

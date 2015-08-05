@@ -620,6 +620,10 @@ public class TalkRpcHandler implements ITalkRpcServer {
         requireIdentification(true);
         logCall("getPresences(lastKnown: '" + lastKnown + "')");
 
+        if (lastKnown == null) {
+            lastKnown = new Date(0);
+        }
+
         List<TalkPresence> presences = mDatabase.findPresencesChangedAfter(mConnection.getClientId(), lastKnown);
         // update connection status and convert results to array
         TalkPresence[] result = new TalkPresence[presences.size()];
