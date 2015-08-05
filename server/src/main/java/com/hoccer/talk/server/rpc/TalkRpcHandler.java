@@ -2689,7 +2689,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
     @Override
     public String updateEnvironment(TalkEnvironment environment) {
         logCall("updateEnvironment(clientId: '" + mConnection.getClientId() + "')");
-        LOG.info("updateEnvironment(clientId: " + mConnection.getClientId() + ", type: "+environment.getType()+", group: "+environment.getGroupId()+", geo:"+Arrays.toString(environment.getGeoLocation())+", loctype:"+environment.getLocationType()+", accuracy:"+environment.getAccuracy()+ ", bssids:"+Arrays.toString(environment.getBssids()));
+        LOG.info("updateEnvironment(clientId: " + mConnection.getClientId() + ", type: " + environment.getType() + ", group: " + environment.getGroupId() + ", geo:" + Arrays.toString(environment.getGeoLocation()) + ", loctype:" + environment.getLocationType() + ", accuracy:" + environment.getAccuracy() + ", bssids:" + Arrays.toString(environment.getBssids()));
 
         requireIdentification(true);
 
@@ -2786,6 +2786,8 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 //       until the environment expires. However, if the number of environments increases, these
                 //       groups will be repopulated before new groups will be created.
                 //   Yeah!
+            }  else {
+                LOG.info("updateEnvironment: nearby matching:"+matching.size()+", clientId: " + mConnection.getClientId() + ", type: "+environment.getType()+", group: "+environment.getGroupId()+", geo:"+Arrays.toString(environment.getGeoLocation())+", loctype:"+environment.getLocationType()+", accuracy:"+environment.getAccuracy()+ ", bssids:"+Arrays.toString(environment.getBssids()));
             }
 
             // determine how many environments in the matching list belong to how many different groups
@@ -2849,14 +2851,21 @@ public class TalkRpcHandler implements ITalkRpcServer {
                             // everything seems fine, but are we in the right group?
                             if (myMembership.isNearby()) {
                                 // for nearby, we want to be in the largest group
+                                LOG.info("updateEnvironment: nearby matching:"+matching.size()+", clientId: " + mConnection.getClientId() +", environmentsPerGroup:" + environmentsPerGroup.size());
                                 if (environmentsPerGroup.size() > 1) {
                                     if (!environmentsPerGroup.get(0).getLeft().equals(te.getGroupId())) {
                                         // we are not in the largest group, lets move over
                                         destroyEnvironment(mServer, myEnvironment);
                                         // join the largest group
-                                        TalkGroupPresence largestGroup = mDatabase.findGroupPresenceById(environmentsPerGroup.get(0).getLeft());
-                                        joinGroupWithEnvironment(largestGroup, environment);
-                                        return largestGroup.getGroupId();
+                                        String largestGroupId = environmentsPerGroup.get(0).getLeft();
+                                        TalkGroupPresence largestGroup = mDatabase.findGroupPresenceById(largestGroupId);
+                                        if (largestGroup != null) {
+                                            LOG.info("updateEnvironment: nearby moving to largest group:" + largestGroup.getGroupId() + ", clientId: " + mConnection.getClientId());
+                                            joinGroupWithEnvironment(largestGroup, environment);
+                                            return largestGroup.getGroupId();
+                                        } else {
+                                            LOG.error("updateEnvironment: nearby largest group not found:"+ largestGroupId + ", clientId: " + mConnection.getClientId());
+                                        }
                                     }
                                 }
                             } else {
@@ -2913,7 +2922,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                                 // lets destroy all environments
                                 destroyEnvironment(mServer, te);
                                 destroyEnvironment(mServer, myEnvironment);
-                                LOG.debug("updateEnvironment: different group id for client=" + mConnection.getClientId() + " myEnvironment.groupId=" + myEnvironment.getGroupId() + ", te.groupId=" + te.getGroupId() +" environment.groupId=" + environment.getGroupId());
+                                LOG.warn("updateEnvironment: different group id for client=" + mConnection.getClientId() + " myEnvironment.groupId=" + myEnvironment.getGroupId() + ", te.groupId=" + te.getGroupId() +" environment.groupId=" + environment.getGroupId());
                                 throw new RuntimeException("illegal group id in environment");
                             }
                             myEnvironment.updateWith(environment);
@@ -2946,7 +2955,9 @@ public class TalkRpcHandler implements ITalkRpcServer {
                     String largestGroupId = environmentsPerGroup.get(0).getLeft();
                     TalkGroupPresence largestGroup = mDatabase.findGroupPresenceById(largestGroupId);
                     if (largestGroup.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
+                        LOG.info("updateEnvironment: nearby joining largest group:" + largestGroupId + ", clientId: " + mConnection.getClientId());
                         joinGroupWithEnvironment(largestGroup, environment);
+                        LOG.info("updateEnvironment: nearby joined largest group:" + largestGroupId + ", clientId: " + mConnection.getClientId());
                         return largestGroup.getGroupId();
                     } else {
                         LOG.warn("the (largest) nearby group we were supposed to join is gone or does not exist, largestGroup=" + largestGroup);
@@ -2973,7 +2984,9 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 }
             }
             // we are alone or first at the location, lets create a new group
+            LOG.info("updateEnvironment: creating new group type:" + environment.getType() + ", clientId: " + mConnection.getClientId());
             createGroupWithEnvironment(environment);
+            LOG.info("updateEnvironment: created new group type:" + environment.getType() + ", clientId: " + mConnection.getClientId() + ", groupId="+environment.getGroupId());
             return environment.getGroupId();
         }
     }
