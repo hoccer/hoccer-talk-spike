@@ -144,7 +144,7 @@ public class ChatActivity extends ComposableActivity {
         switch (item.getItemId()) {
             case R.id.menu_copy_message:
                 if (messageItem.getAttachment() != null && messageItem.getAttachment().isContentAvailable()) {
-                    Clipboard.getInstance().setContent(messageItem.getAttachment());
+                    Clipboard.get().setContent(messageItem.getAttachment());
                 } else {
                     putMessageTextInSystemClipboard(messageItem);
                 }

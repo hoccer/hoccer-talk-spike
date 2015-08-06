@@ -16,7 +16,7 @@ public class ClipboardTest {
     @Before
     public void setUp() throws Exception {
         resetStaticClipboardInstance();
-        mClipboard = Clipboard.getInstance();
+        mClipboard = Clipboard.get();
         mTestContent = new SelectedLocation("hello".getBytes());
     }
 
