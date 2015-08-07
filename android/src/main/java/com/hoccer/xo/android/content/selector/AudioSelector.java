@@ -50,6 +50,6 @@ public class AudioSelector implements IContentSelector {
 
     private boolean isMimeTypeAudio(Context context, Intent intent) {
         String mimeType = UriUtils.getMimeType(context, intent.getData());
-        return mimeType.startsWith("audio");
+        return mimeType.startsWith("audio") ||  mimeType.startsWith("application/ogg");
     }
 }
