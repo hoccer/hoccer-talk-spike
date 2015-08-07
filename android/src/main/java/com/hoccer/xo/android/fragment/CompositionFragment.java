@@ -1,9 +1,6 @@
 package com.hoccer.xo.android.fragment;
 
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -27,6 +24,7 @@ import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.talk.model.TalkGroupMembership;
+import com.hoccer.xo.android.BackgroundManager;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.base.XoFragment;
@@ -286,6 +284,19 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         mContentSelector = contentSelector;
         if (mContentSelector instanceof ClipboardSelector) {
             setSelectedContent(null);
+        } else {
+            Intent intent = contentSelector.createSelectionIntent(getActivity());
+            startExternalActivityForResult(intent);
+        }
+    }
+
+    private void startExternalActivityForResult(Intent intent) {
+        BackgroundManager.get().ignoreNextBackgroundPhase();
+        try {
+            startActivityForResult(intent, REQUEST_SELECT_ATTACHMENT);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(getActivity(), R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
+            LOG.error(e.getMessage());
         }
     }
 
@@ -543,6 +554,12 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         upload.setTempCompressedFilePath(compressedImageFile.getAbsolutePath());
     }
 
+    private void showSelectAttachmentDialog() {
+        DialogFragment dialogFragment = new AttachmentSelectionDialog();
+        dialogFragment.setTargetFragment(this, REQUEST_SELECT_ATTACHMENT);
+        dialogFragment.show(getActivity().getSupportFragmentManager(), DIALOG_TAG);
+    }
+
     private void showEditAttachmentDialog() {
         XoDialogs.showSingleChoiceDialog(
                 "AttachmentResetDialog",
@@ -575,12 +592,6 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
                 showEditAttachmentDialog();
             }
         }
-    }
-
-    private void showSelectAttachmentDialog() {
-        DialogFragment dialogFragment = new AttachmentSelectionDialog();
-        dialogFragment.setTargetFragment(this, REQUEST_SELECT_ATTACHMENT);
-        dialogFragment.show(getActivity().getSupportFragmentManager(), DIALOG_TAG);
     }
 
     private class SendButtonListener implements View.OnClickListener, View.OnLongClickListener {

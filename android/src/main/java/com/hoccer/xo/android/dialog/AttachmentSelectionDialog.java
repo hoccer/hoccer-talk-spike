@@ -2,18 +2,14 @@ package com.hoccer.xo.android.dialog;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.SimpleAdapter;
-import android.widget.Toast;
 import com.artcom.hoccer.R;
-import com.hoccer.xo.android.BackgroundManager;
 import com.hoccer.xo.android.content.Clipboard;
 import com.hoccer.xo.android.content.MultiImageSelector;
 import com.hoccer.xo.android.content.selector.*;
@@ -105,26 +101,11 @@ public class AttachmentSelectionDialog extends DialogFragment {
                         mCurrentSelector = (IContentSelector) option.get(CONTENT_SELECTOR);
                         callback.onSelected(mCurrentSelector);
 
-                        if (!(mCurrentSelector instanceof ClipboardSelector)) {
-                            Intent intent = mCurrentSelector.createSelectionIntent(getActivity());
-                            startExternalActivityForResult(intent);
-                        }
-
                         dialog.dismiss();
                     }
                 }
         );
 
         return builder.create();
-    }
-
-    private void startExternalActivityForResult(Intent intent) {
-        BackgroundManager.get().ignoreNextBackgroundPhase();
-        try {
-            getTargetFragment().startActivityForResult(intent, getTargetRequestCode());
-        } catch (ActivityNotFoundException e) {
-            Toast.makeText(getActivity(), R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
-            LOG.error(e.getMessage());
-        }
     }
 }
