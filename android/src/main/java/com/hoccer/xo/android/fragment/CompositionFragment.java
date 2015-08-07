@@ -284,6 +284,8 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         mContentSelector = contentSelector;
         if (mContentSelector instanceof ClipboardSelector) {
             setSelectedContent(null);
+            updateAttachmentButton();
+            updateSendButton();
         } else {
             Intent intent = contentSelector.createSelectionIntent(getActivity());
             startExternalActivityForResult(intent);
