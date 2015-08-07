@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="worldwide_timetolive">
-        <item>immediately (not recommended)</item>
+        <item>immediately</item>
         <item>10 minutes</item>
         <item>30 minutes</item>
         <item>1 hour</item>
@@ -21,8 +21,9 @@
     </string-array>
 
     <string-array name="worldwide_tutorial_options">
-        <item>after 1 hour</item>
-        <item>after 6 hours</item>
-        <item>after 24 hours</item>
+        <item>leave immediately</item>
+        <item>for 1 hour</item>
+        <item>for 6 hours</item>
+        <item>for 24 hours</item>
     </string-array>
 </resources>
