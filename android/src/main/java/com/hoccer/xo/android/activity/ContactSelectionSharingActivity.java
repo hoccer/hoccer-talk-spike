@@ -11,6 +11,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.SelectedContent;
+import com.hoccer.xo.android.content.ContentSelection;
 import com.hoccer.xo.android.content.selector.AudioSelector;
 import com.hoccer.xo.android.content.selector.IContentSelector;
 import com.hoccer.xo.android.content.selector.ImageSelector;
@@ -89,19 +90,7 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity {
         Intent intent = new Intent();
         intent.setData(contentUri);
 
-        return getContentSelector(mimeType).createObjectFromSelectionResult(this, intent);
-    }
-
-    private IContentSelector getContentSelector(String mimeType) throws Exception {
-        if (mimeType.startsWith("image/")) {
-            return new ImageSelector(this);
-        } else if (mimeType.startsWith("video/")) {
-            return new VideoSelector(this);
-        } else if (mimeType.startsWith("audio/")) {
-            return new AudioSelector(this);
-        } else {
-            throw new Exception("Content is not supported.");
-        }
+        return ContentSelection.createContentSelectorByMimeType(mimeType, this).createObjectFromSelectionResult(this, intent);
     }
 
     private void sendUploadsToContacts(List<TalkClientUpload> uploads, List<TalkClientContact> selectedContacts) {
