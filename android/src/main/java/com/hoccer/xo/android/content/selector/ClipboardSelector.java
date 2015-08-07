@@ -44,8 +44,4 @@ public class ClipboardSelector implements IContentSelector {
         mClipboard.clearContent();
         return content;
     }
-
-    public boolean hasContent() {
-        return mClipboard.hasContent();
-    }
 }

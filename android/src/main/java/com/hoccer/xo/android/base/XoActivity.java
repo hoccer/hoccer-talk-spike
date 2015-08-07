@@ -1,10 +1,7 @@
 package com.hoccer.xo.android.base;
 
 import android.annotation.SuppressLint;
-import android.app.ActionBar;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.TaskStackBuilder;
+import android.app.*;
 import android.content.*;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -36,7 +33,6 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.XoSoundPool;
 import com.hoccer.xo.android.activity.*;
-import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.content.ContentSelection;
 import com.hoccer.xo.android.content.selector.ImageSelector;
 import com.hoccer.xo.android.fragment.DeviceContactsInvitationFragment;
@@ -209,7 +205,7 @@ public abstract class XoActivity extends FragmentActivity {
             intent = selectedAvatarPreProcessing(intent);
             if (intent != null) {
                 try {
-                    SelectedContent content = ContentRegistry.createSelectedAvatar(mAvatarSelection, intent);
+                    SelectedContent content = createSelectedAvatar(mAvatarSelection, intent);
                     if (content != null) {
                         LOG.debug("selected avatar " + content.getFilePath());
                         for (IXoFragment fragment : mTalkFragments) {
@@ -223,6 +219,10 @@ public abstract class XoActivity extends FragmentActivity {
                 showAvatarSelectionError();
             }
         }
+    }
+
+    private SelectedContent createSelectedAvatar(ContentSelection selection, Intent intent) throws Exception {
+        return selection.getSelector().createObjectFromSelectionResult(this, intent);
     }
 
     @Override
@@ -571,7 +571,15 @@ public abstract class XoActivity extends FragmentActivity {
 
     public void selectAvatar() {
         LOG.debug("selectAvatar()");
-        mAvatarSelection = ContentRegistry.get(this).selectAvatar(this, REQUEST_SELECT_AVATAR);
+        mAvatarSelection = selectAvatar(this, REQUEST_SELECT_AVATAR);
+    }
+
+    public ContentSelection selectAvatar(Activity activity, int requestCode) {
+        ImageSelector imageSelector = new ImageSelector(this);
+        ContentSelection cs = new ContentSelection(imageSelector);
+        Intent intent = imageSelector.createSelectionIntent(activity);
+        startExternalActivityForResult(intent, requestCode);
+        return cs;
     }
 
     public void showPopupForMessageItem(MessageItem messageItem, View messageItemView) {

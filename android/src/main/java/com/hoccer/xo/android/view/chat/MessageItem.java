@@ -16,11 +16,11 @@ import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
+import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.ContentState;
 import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.hoccer.xo.android.view.avatar.SimpleAvatarView;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferHandler;
@@ -49,7 +49,6 @@ public class MessageItem implements AttachmentTransferListener {
     protected SimpleAvatarView mSimpleAvatarView;
     protected TextView mContentDescription;
     protected XoTransfer mAttachment;
-    protected ContentRegistry mContentRegistry;
     protected RelativeLayout mAttachmentTransferContainer;
     protected AttachmentTransferHandler mAttachmentTransferHandler;
     protected LinearLayout mAttachmentContentContainer;
@@ -65,8 +64,6 @@ public class MessageItem implements AttachmentTransferListener {
         if (mAttachment == null) {
             mAttachment = mMessage.getAttachmentDownload();
         }
-
-        mContentRegistry = ContentRegistry.get(context);
     }
 
     public TalkClientMessage getMessage() {
@@ -380,7 +377,44 @@ public class MessageItem implements AttachmentTransferListener {
             displayTransferControl();
         }
 
-        mContentDescription.setText(ContentRegistry.getContentDescription(mAttachment));
+        mContentDescription.setText(getContentDescription(mAttachment));
+    }
+
+    private String getContentDescription(XoTransfer transfer) {
+        String mediaTypeString = "Unknown file";
+        String mediaType = transfer.getMediaType();
+        if (ContentMediaType.IMAGE.equals(mediaType)) {
+            mediaTypeString = "Image";
+        } else if (ContentMediaType.AUDIO.equals(mediaType)) {
+            mediaTypeString = "Audio";
+        } else if (ContentMediaType.VIDEO.equals(mediaType)) {
+            mediaTypeString = "Video";
+        } else if (ContentMediaType.VCARD.equals(mediaType)) {
+            mediaTypeString = "Contact";
+        } else if (ContentMediaType.LOCATION.equals(mediaType)) {
+            mediaTypeString = "Location";
+        } else if (ContentMediaType.DATA.equals(mediaType)) {
+            mediaTypeString = "Data";
+        }
+
+        String sizeString = "";
+        if (transfer.getContentLength() > 0) {
+            sizeString = " — " + humanReadableByteCount(transfer.getContentLength(), true);
+        } else if (transfer.getTransferLength() > 0) {
+            sizeString = " — " + humanReadableByteCount(transfer.getTransferLength(), true);
+        }
+
+        return mediaTypeString + sizeString;
+    }
+
+    private static String humanReadableByteCount(long bytes, boolean si) {
+        int unit = si ? 1000 : 1024;
+        if (bytes < unit) {
+            return bytes + " B";
+        }
+        int exp = (int) (Math.log(bytes) / Math.log(unit));
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
+        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
     }
 
     private void displayTransferControl() {

@@ -1,6 +1,5 @@
 package com.hoccer.xo.android.fragment;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -9,6 +8,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.Formatter;
@@ -30,10 +30,10 @@ import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.base.XoFragment;
-import com.hoccer.xo.android.content.ContentRegistry;
-import com.hoccer.xo.android.content.ContentSelection;
 import com.hoccer.xo.android.content.MultiImageSelector;
+import com.hoccer.xo.android.content.selector.ClipboardSelector;
 import com.hoccer.xo.android.content.selector.IContentSelector;
+import com.hoccer.xo.android.dialog.AttachmentSelectionDialog;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionGestureListener;
 import com.hoccer.xo.android.util.ImageUtils;
@@ -50,7 +50,10 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 
-public class CompositionFragment extends XoFragment implements MotionGestureListener {
+import static android.app.Activity.RESULT_OK;
+import static com.hoccer.xo.android.dialog.AttachmentSelectionDialog.DIALOG_TAG;
+
+public class CompositionFragment extends XoFragment implements MotionGestureListener, AttachmentSelectionDialog.OnAttachmentSelectedListener {
 
     private static final Logger LOG = Logger.getLogger(CompositionFragment.class);
 
@@ -63,6 +66,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     private static final String KEY_ATTACHMENTS = "composition_attachment:";
 
     private static final String SHARED_PREFERENCES = "chats";
+    private IContentSelector mContentSelector;
 
     private enum AttachmentSelectionType {
         NONE,
@@ -73,7 +77,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         LOCATION,
         DATA,
         MULTIPLE,
-        ERROR
+        ERROR;
     }
 
     private TextFieldWatcher mTextFieldWatcher;
@@ -81,7 +85,6 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     private EditText mTextField;
     private ImageButton mSendButton;
 
-    private ContentSelection mAttachmentSelection;
     private EnumMap<AttachmentSelectionType, View> mAttachmentTypeViews;
     private ArrayList<SelectedContent> mSelectedContent = new ArrayList<SelectedContent>();
     private TalkClientContact mContact;
@@ -254,32 +257,35 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
 
         if (requestCode == REQUEST_SELECT_ATTACHMENT) {
             mSelectedContent.clear();
-
-            if (resultCode == Activity.RESULT_OK) {
-                if (mAttachmentSelection.getSelector() instanceof MultiImageSelector) {
-                    MultiImageSelector selector = (MultiImageSelector) mAttachmentSelection.getSelector();
-                    try {
-                        mSelectedContent = selector.createObjectsFromSelectionResult(getActivity(), intent);
-                    } catch (Exception e) {
-                        LOG.error("Could not create object from selection result.", e);
-                    }
-                } else {
-                    IContentSelector selector = mAttachmentSelection.getSelector();
-                    SelectedContent content = null;
-                    try {
-                        content = selector.createObjectFromSelectionResult(getActivity(), intent);
-                    } catch (Exception e) {
-                        LOG.error("Could not create object from selection result.", e);
-                    }
-                    CollectionUtils.addIgnoreNull(mSelectedContent, content);
-                }
-                if (mSelectedContent.isEmpty()) {
-                    Toast.makeText(getActivity(), R.string.error_attachment_selection, Toast.LENGTH_LONG).show();
-                }
+            if (resultCode == RESULT_OK) {
+                setSelectedContent(intent);
             }
+        }
+    }
 
-            updateAttachmentButton();
-            updateSendButton();
+    private void setSelectedContent(Intent intent) {
+        if (mContentSelector instanceof MultiImageSelector) {
+            try {
+                mSelectedContent = MultiImageSelector.createObjectsFromSelectionResult(getActivity(), intent);
+            } catch (Exception e) {
+                LOG.error("Could not create object from selection result.", e);
+            }
+        } else {
+            SelectedContent content = null;
+            try {
+                content = mContentSelector.createObjectFromSelectionResult(getActivity(), intent);
+            } catch (Exception e) {
+                LOG.error("Could not create object from selection result.", e);
+            }
+            CollectionUtils.addIgnoreNull(mSelectedContent, content);
+        }
+    }
+
+    @Override
+    public void onSelected(IContentSelector contentSelector) {
+        mContentSelector = contentSelector;
+        if (mContentSelector instanceof ClipboardSelector) {
+            setSelectedContent(null);
         }
     }
 
@@ -537,10 +543,6 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         upload.setTempCompressedFilePath(compressedImageFile.getAbsolutePath());
     }
 
-    private void showSelectAttachmentDialog() {
-        mAttachmentSelection = ContentRegistry.get(getActivity()).selectAttachment(this, REQUEST_SELECT_ATTACHMENT);
-    }
-
     private void showEditAttachmentDialog() {
         XoDialogs.showSingleChoiceDialog(
                 "AttachmentResetDialog",
@@ -573,6 +575,12 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
                 showEditAttachmentDialog();
             }
         }
+    }
+
+    private void showSelectAttachmentDialog() {
+        DialogFragment dialogFragment = new AttachmentSelectionDialog();
+        dialogFragment.setTargetFragment(this, REQUEST_SELECT_ATTACHMENT);
+        dialogFragment.show(getActivity().getSupportFragmentManager(), DIALOG_TAG);
     }
 
     private class SendButtonListener implements View.OnClickListener, View.OnLongClickListener {
