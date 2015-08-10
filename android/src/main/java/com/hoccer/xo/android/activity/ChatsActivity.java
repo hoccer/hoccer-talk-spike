@@ -42,8 +42,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
                 R.id.pager,
                 new ChatListFragment(),
                 new NearbyChatListFragment(),
-                mWorldwideChatListFragment,
-                new SimplePageFragment());
+                mWorldwideChatListFragment);
 
         return new ActivityComponent[]{mediaPlayerActivityComponent, mViewPagerActivityComponent};
     }
