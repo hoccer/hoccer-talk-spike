@@ -145,15 +145,11 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
 
     @Override
     public void onPageSelected() {
-        mIsSelected = true;
-        if (isResumed()) {
-            startScanning();
-        }
+        startScanning();
     }
 
     @Override
     public void onPageUnselected() {
-        mIsSelected = false;
         stopScanning();
     }
 
@@ -229,6 +225,16 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
         } else {
             stopPreview();
         }
+    }
+
+    @Override
+    public void onTabSelected() {
+        mIsSelected = true;
+    }
+
+    @Override
+    public void onTabUnselected() {
+        mIsSelected = false;
     }
 
     @Override

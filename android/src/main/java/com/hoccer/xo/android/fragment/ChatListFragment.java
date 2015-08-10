@@ -304,6 +304,9 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
     }
 
     @Override
+    public void onPageSelected() {}
+
+    @Override
     public void onPageUnselected() {
         leaveSearchMode();
     }
@@ -311,4 +314,10 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
     @Override
     public void onPageScrollStateChanged(int state) {
     }
+
+    @Override
+    public void onTabSelected() {}
+
+    @Override
+    public void onTabUnselected() {}
 }

@@ -83,6 +83,12 @@ public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment,
     public void onPageScrollStateChanged(final int state) {
     }
 
+    @Override
+    public void onTabSelected() {}
+
+    @Override
+    public void onTabUnselected() {}
+
     private boolean isTokenGenerated() {
         return mQrCodeView.getVisibility() == View.VISIBLE;
     }

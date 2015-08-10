@@ -15,9 +15,6 @@ import static com.hoccer.talk.model.TalkEnvironment.TYPE_WORLDWIDE;
 
 public class WorldwideChatListFragment extends EnvironmentChatListFragment {
 
-    private boolean mPageSelected;
-    private boolean mOnResumeHandled;
-
     public WorldwideChatListFragment() {
         mPlaceholder = new Placeholder(R.drawable.placeholder_world, R.string.placeholder_worldwide_text);
     }
@@ -77,6 +74,12 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
     public void onPageUnselected() {
         WorldwideController.get().deactivateWorldWide();
     }
+
+    @Override
+    public void onTabSelected() {}
+
+    @Override
+    public void onTabUnselected() {}
 
     @Override
     public void onPageScrollStateChanged(int state) {

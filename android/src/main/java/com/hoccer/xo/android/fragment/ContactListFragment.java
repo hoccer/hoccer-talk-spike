@@ -132,6 +132,12 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     public void onPageUnselected() {}
 
     @Override
+    public void onTabSelected() {}
+
+    @Override
+    public void onTabUnselected() {}
+
+    @Override
     public void onPageScrollStateChanged(int state) {}
 
     @Override

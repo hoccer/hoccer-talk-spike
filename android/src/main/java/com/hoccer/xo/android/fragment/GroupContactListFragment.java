@@ -62,4 +62,10 @@ public class GroupContactListFragment extends ContactListFragment {
 
         return 0;
     }
+
+    @Override
+    public void onTabSelected() {}
+
+    @Override
+    public void onTabUnselected() {}
 }

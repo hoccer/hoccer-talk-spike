@@ -102,11 +102,14 @@ public class ViewPagerActivityComponent extends ActivityComponent {
         public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
             int position = tab.getPosition();
             mViewPager.setCurrentItem(position);
+
             mCurrentFragment = (IPagerFragment) mFragments.get(position);
+            mCurrentFragment.onTabSelected();
         }
 
         @Override
         public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
+            mCurrentFragment.onTabUnselected();
         }
 
         @Override
