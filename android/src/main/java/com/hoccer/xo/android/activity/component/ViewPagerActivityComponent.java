@@ -22,6 +22,7 @@ public class ViewPagerActivityComponent extends ActivityComponent {
     private ViewPager mViewPager;
     private final List<Fragment> mFragments = new ArrayList<Fragment>();
     private final int mViewPagerId;
+    private IPagerFragment mCurrentFragment;
 
     public ViewPagerActivityComponent(FragmentActivity activity, int viewPagerId, Fragment... fragments) {
         super(activity);
@@ -75,10 +76,6 @@ public class ViewPagerActivityComponent extends ActivityComponent {
         return mFragments.get(mViewPager.getCurrentItem());
     }
 
-    public void selectFragment(Fragment fragment) {
-        mViewPager.setCurrentItem(mFragments.indexOf(fragment));
-    }
-
     private class PageChangeListener implements ViewPager.OnPageChangeListener {
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -86,16 +83,12 @@ public class ViewPagerActivityComponent extends ActivityComponent {
 
         @Override
         public void onPageSelected(int position) {
-            ActionBar actionBar = getActivity().getActionBar();
+            mCurrentFragment.onPageUnselected();
 
-            IPagerFragment fragment = (IPagerFragment) mFragments.get(position);
+            IPagerFragment selectedFragment = (IPagerFragment) mFragments.get(position);
+            selectedFragment.onPageSelected();
 
-            if (actionBar.getSelectedNavigationIndex() == mViewPager.getCurrentItem()) {
-                getActivity().getActionBar().setSelectedNavigationItem(mViewPager.getCurrentItem());
-                fragment.onPageSelected();
-            } else {
-                fragment.onPageUnselected();
-            }
+            getActivity().getActionBar().setSelectedNavigationItem(position);
         }
 
         @Override
@@ -109,6 +102,7 @@ public class ViewPagerActivityComponent extends ActivityComponent {
         public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
             int position = tab.getPosition();
             mViewPager.setCurrentItem(position);
+            mCurrentFragment = (IPagerFragment) mFragments.get(position);
         }
 
         @Override
