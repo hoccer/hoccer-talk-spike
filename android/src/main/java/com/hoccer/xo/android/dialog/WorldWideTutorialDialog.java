@@ -36,12 +36,15 @@ public class WorldWideTutorialDialog extends DialogFragment {
                 String timeToLive = "0";
                 switch (position) {
                     case 0:
-                        timeToLive = "3600000"; // 1 hour
+                        timeToLive = "0"; // 1 hour
                         break;
                     case 1:
-                        timeToLive = "21600000"; // 6 hour
+                        timeToLive = "3600000"; // 1 hour
                         break;
                     case 2:
+                        timeToLive = "21600000"; // 6 hour
+                        break;
+                    case 3:
                         timeToLive = "86400000"; // 24 hour
                         break;
                 }
