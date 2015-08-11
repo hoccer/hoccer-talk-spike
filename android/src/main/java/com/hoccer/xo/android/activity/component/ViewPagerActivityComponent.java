@@ -83,11 +83,6 @@ public class ViewPagerActivityComponent extends ActivityComponent {
 
         @Override
         public void onPageSelected(int position) {
-            mCurrentFragment.onPageUnselected();
-
-            IPagerFragment selectedFragment = (IPagerFragment) mFragments.get(position);
-            selectedFragment.onPageSelected();
-
             getActivity().getActionBar().setSelectedNavigationItem(position);
         }
 

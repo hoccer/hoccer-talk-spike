@@ -7,7 +7,6 @@ import android.content.res.Resources;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.view.*;
 import android.widget.Toast;
@@ -15,6 +14,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
+import com.hoccer.xo.android.base.XoPagerFragment;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.CameraPreviewView;
 import net.sourceforge.zbar.*;
@@ -22,7 +22,7 @@ import org.apache.log4j.Logger;
 
 import java.util.HashSet;
 
-public class QrCodeScannerFragment extends Fragment implements IPagerFragment, IXoPairingListener {
+public class QrCodeScannerFragment extends XoPagerFragment implements IXoPairingListener {
 
     private static final Logger LOG = Logger.getLogger(QrCodeScannerFragment.class);
 
@@ -36,7 +36,6 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
 
     private final HashSet<String> mScannedCodes = new HashSet<String>();
     private boolean mEnterCodeDialogVisible;
-    private boolean mIsSelected;
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
@@ -130,26 +129,8 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        if (mIsSelected && !mEnterCodeDialogVisible) {
-            startScanning();
-        }
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
-        stopScanning();
-    }
-
-    @Override
-    public void onPageSelected() {
-        startScanning();
-    }
-
-    @Override
-    public void onPageUnselected() {
         stopScanning();
     }
 
@@ -228,13 +209,15 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
     }
 
     @Override
-    public void onTabSelected() {
-        mIsSelected = true;
+    protected void onPageResume() {
+        if (!mEnterCodeDialogVisible) {
+            startScanning();
+        }
     }
 
     @Override
-    public void onTabUnselected() {
-        mIsSelected = false;
+    protected void onPagePause() {
+        stopScanning();
     }
 
     @Override

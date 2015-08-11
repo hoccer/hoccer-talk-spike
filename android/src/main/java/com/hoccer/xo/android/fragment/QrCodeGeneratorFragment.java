@@ -21,11 +21,12 @@ import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.base.XoPagerFragment;
 
 import java.util.EnumMap;
 import java.util.Map;
 
-public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment, IXoContactListener, IXoStateListener {
+public class QrCodeGeneratorFragment extends XoPagerFragment implements IXoContactListener, IXoStateListener {
 
     private ImageView mQrCodeView;
     private TextView mPairingTokenView;
@@ -66,28 +67,24 @@ public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment,
     }
 
     @Override
-    public void onPageSelected() {
+    public void onPageScrollStateChanged(final int state) {
+    }
+
+    @Override
+    protected void onPageResume() {
         if (!isTokenGenerated()) {
             generateToken();
         }
 
         XoApplication.get().getXoClient().registerContactListener(this);
-        XoApplication.get().getXoClient().registerStateListener(this);}
-
-    @Override
-    public void onPageUnselected() {
-        XoApplication.get().getXoClient().unregisterContactListener(this);
-        XoApplication.get().getXoClient().unregisterStateListener(this);}
-
-    @Override
-    public void onPageScrollStateChanged(final int state) {
+        XoApplication.get().getXoClient().registerStateListener(this);
     }
 
     @Override
-    public void onTabSelected() {}
-
-    @Override
-    public void onTabUnselected() {}
+    protected void onPagePause() {
+        XoApplication.get().getXoClient().unregisterContactListener(this);
+        XoApplication.get().getXoClient().unregisterStateListener(this);
+    }
 
     private boolean isTokenGenerated() {
         return mQrCodeView.getVisibility() == View.VISIBLE;

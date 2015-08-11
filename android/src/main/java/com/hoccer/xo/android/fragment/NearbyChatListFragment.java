@@ -16,18 +16,18 @@ import static com.hoccer.talk.model.TalkEnvironment.TYPE_NEARBY;
 
 public class NearbyChatListFragment extends EnvironmentChatListFragment {
 
-    private boolean mIsSelected;
-
     public NearbyChatListFragment() {
         mPlaceholder = new Placeholder(R.drawable.placeholder_nearby, R.string.placeholder_nearby_text);
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        if (mIsSelected && !NearbyController.get().isNearbyEnabled()) {
-            activateNearby();
-        }
+    protected void onPageResume() {
+        activateNearby();
+    }
+
+    @Override
+    protected void onPagePause() {
+        NearbyController.get().disableNearbyMode();
     }
 
     @Override
@@ -66,12 +66,11 @@ public class NearbyChatListFragment extends EnvironmentChatListFragment {
         return resources.getString(R.string.nearby_tab_name);
     }
 
-    @Override
-    public void onPageSelected() {
-        activateNearby();
-    }
-
     private void activateNearby() {
+        if (NearbyController.get().isNearbyEnabled()) {
+            return;
+        }
+
         if (NearbyController.get().locationServicesEnabled()) {
             NearbyController.get().enableNearbyMode();
             createAdapter();
@@ -95,21 +94,6 @@ public class NearbyChatListFragment extends EnvironmentChatListFragment {
     }
 
     @Override
-    public void onPageUnselected() {
-        NearbyController.get().disableNearbyMode();
-    }
-
-    @Override
     public void onPageScrollStateChanged(int state) {
-    }
-
-    @Override
-    public void onTabSelected() {
-        mIsSelected = true;
-    }
-
-    @Override
-    public void onTabUnselected() {
-        mIsSelected = false;
     }
 }

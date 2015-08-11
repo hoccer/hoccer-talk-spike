@@ -19,6 +19,11 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
         mPlaceholder = new Placeholder(R.drawable.placeholder_world, R.string.placeholder_worldwide_text);
     }
 
+    @Override
+    protected void onPageResume() {
+        activateWorldwide();
+    }
+
     private void activateWorldwide() {
         WorldwideController.get().activateWorldwide();
 
@@ -27,6 +32,11 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
         mListAdapter.scheduleUpdate(group);
 
         FeaturePromoter.displayWorldwideTutorialOnFirstStart(getActivity());
+    }
+
+    @Override
+    protected void onPagePause() {
+        WorldwideController.get().deactivateWorldWide();
     }
 
     @Override
@@ -64,22 +74,6 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
     public String getTabName(Resources resources) {
         return resources.getString(R.string.worldwide_tab_name);
     }
-
-    @Override
-    public void onPageSelected() {
-        activateWorldwide();
-    }
-
-    @Override
-    public void onPageUnselected() {
-        WorldwideController.get().deactivateWorldWide();
-    }
-
-    @Override
-    public void onTabSelected() {}
-
-    @Override
-    public void onTabUnselected() {}
 
     @Override
     public void onPageScrollStateChanged(int state) {
