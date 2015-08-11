@@ -309,12 +309,12 @@ public class ChatListFragment extends XoSearchablePagerListFragment {
     }
 
     @Override
-    protected void onPageResume() {
+    public void onPageResume() {
 
     }
 
     @Override
-    protected void onPagePause() {
+    public void onPagePause() {
         leaveSearchMode();
     }
 }

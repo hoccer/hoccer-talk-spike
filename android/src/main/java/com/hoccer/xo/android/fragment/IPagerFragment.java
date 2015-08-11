@@ -33,4 +33,8 @@ public interface IPagerFragment {
     void onTabSelected();
 
     void onTabUnselected();
+
+    void onPageResume();
+
+    void onPagePause();
 }

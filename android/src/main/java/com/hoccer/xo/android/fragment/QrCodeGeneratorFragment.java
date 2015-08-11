@@ -71,7 +71,7 @@ public class QrCodeGeneratorFragment extends XoPagerFragment implements IXoConta
     }
 
     @Override
-    protected void onPageResume() {
+    public void onPageResume() {
         if (!isTokenGenerated()) {
             generateToken();
         }
@@ -81,7 +81,7 @@ public class QrCodeGeneratorFragment extends XoPagerFragment implements IXoConta
     }
 
     @Override
-    protected void onPagePause() {
+    public void onPagePause() {
         XoApplication.get().getXoClient().unregisterContactListener(this);
         XoApplication.get().getXoClient().unregisterStateListener(this);
     }

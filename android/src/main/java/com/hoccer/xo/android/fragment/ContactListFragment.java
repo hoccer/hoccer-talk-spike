@@ -163,12 +163,12 @@ public abstract class ContactListFragment extends XoSearchablePagerListFragment 
     }
 
     @Override
-    protected void onPageResume() {
+    public void onPageResume() {
 
     }
 
     @Override
-    protected void onPagePause() {
+    public void onPagePause() {
 
     }
 }

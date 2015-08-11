@@ -209,14 +209,14 @@ public class QrCodeScannerFragment extends XoPagerFragment implements IXoPairing
     }
 
     @Override
-    protected void onPageResume() {
+    public void onPageResume() {
         if (!mEnterCodeDialogVisible) {
             startScanning();
         }
     }
 
     @Override
-    protected void onPagePause() {
+    public void onPagePause() {
         stopScanning();
     }
 

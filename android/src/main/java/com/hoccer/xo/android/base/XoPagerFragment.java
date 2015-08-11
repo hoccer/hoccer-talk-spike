@@ -6,31 +6,21 @@ import com.hoccer.xo.android.fragment.IPagerFragment;
 
 public abstract class XoPagerFragment extends Fragment implements IPagerFragment {
 
-    private boolean mIsSelected;
+    private PagerLifecycle mPagerLifecycle = new PagerLifecycle();
 
     @Override
     public void onResume() {
         super.onResume();
-        if (mIsSelected) {
-            onPageResume();
-        }
+        mPagerLifecycle.onResume(this);
     }
 
     @Override
     public void onTabSelected() {
-        mIsSelected = true;
-        if (isResumed()) {
-            onPageResume();
-        }
+        mPagerLifecycle.onTabSelected(this);
     }
 
     @Override
     public void onTabUnselected() {
-        mIsSelected = false;
-        onPagePause();
+        mPagerLifecycle.onTabUnselected(this);
     }
-
-    protected abstract void onPageResume();
-
-    protected abstract void onPagePause();
 }
