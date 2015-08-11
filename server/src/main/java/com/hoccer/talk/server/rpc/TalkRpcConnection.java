@@ -233,7 +233,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      * Disconnect the underlying connection and finish up
      */
     public void disconnect() {
-        LOG.info("[connectionId: '" + getConnectionId() + "'] disconnect");
+        LOG.info("[connectionId: '" + getConnectionId() + "'] disconnecting");
         synchronized (this) {
             if (mTalkClient != null && (mTalkClient.isReady() || mTalkClient.isConnected())) {
                 // set client to not ready
@@ -249,6 +249,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
             mTalkClient = null;
             mConnection.disconnect();
         }
+        LOG.info("[connectionId: '" + getConnectionId() + "'] disconnected");
     }
 
     /**
