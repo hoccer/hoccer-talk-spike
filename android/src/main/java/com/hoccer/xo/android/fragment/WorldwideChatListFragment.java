@@ -20,7 +20,7 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
     }
 
     @Override
-    public void onPageResume() {
+    public void onPageSelected() {
         activateWorldwide();
     }
 
@@ -35,7 +35,7 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
     }
 
     @Override
-    public void onPagePause() {
+    public void onPageUnselected() {
         WorldwideController.get().deactivateWorldWide();
     }
 

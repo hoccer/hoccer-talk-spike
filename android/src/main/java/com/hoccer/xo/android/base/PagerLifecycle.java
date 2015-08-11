@@ -9,7 +9,7 @@ public class PagerLifecycle {
 
     public void onResume(IPagerFragment fragment) {
         if (mIsSelected) {
-            fragment.onPageResume();
+            fragment.onPageSelected();
         }
     }
 
@@ -17,12 +17,12 @@ public class PagerLifecycle {
         mIsSelected = true;
 
         if (((Fragment) fragment).isResumed()) {
-            fragment.onPageResume();
+            fragment.onPageSelected();
         }
     }
 
     public void onTabUnselected(IPagerFragment fragment) {
         mIsSelected = false;
-        fragment.onPagePause();
+        fragment.onPageUnselected();
     }
 }

@@ -163,12 +163,10 @@ public abstract class ContactListFragment extends XoSearchablePagerListFragment 
     }
 
     @Override
-    public void onPageResume() {
-
-    }
+    public void onPageSelected() {}
 
     @Override
-    public void onPagePause() {
-
+    public void onPageUnselected() {
+        leaveSearchMode();
     }
 }

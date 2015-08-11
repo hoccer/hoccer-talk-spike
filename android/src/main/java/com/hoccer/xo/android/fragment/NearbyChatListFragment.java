@@ -21,12 +21,12 @@ public class NearbyChatListFragment extends EnvironmentChatListFragment {
     }
 
     @Override
-    public void onPageResume() {
+    public void onPageSelected() {
         activateNearby();
     }
 
     @Override
-    public void onPagePause() {
+    public void onPageUnselected() {
         NearbyController.get().disableNearbyMode();
     }
 
