@@ -33,7 +33,7 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.XoSoundPool;
 import com.hoccer.xo.android.activity.*;
-import com.hoccer.xo.android.content.ContentSelection;
+import com.hoccer.xo.android.content.selector.IContentSelector;
 import com.hoccer.xo.android.content.selector.ImageSelector;
 import com.hoccer.xo.android.fragment.DeviceContactsInvitationFragment;
 import com.hoccer.xo.android.profile.client.ClientProfileActivity;
@@ -72,10 +72,7 @@ public abstract class XoActivity extends FragmentActivity {
      */
     ArrayList<IXoFragment> mTalkFragments = new ArrayList<IXoFragment>();
 
-    /**
-     * Ongoing avatar selection
-     */
-    ContentSelection mAvatarSelection;
+    ImageSelector mAvatarSelector;
 
     boolean mUpEnabled;
 
@@ -191,7 +188,7 @@ public abstract class XoActivity extends FragmentActivity {
         }
 
         if (requestCode == REQUEST_SELECT_AVATAR) {
-            if (mAvatarSelection != null) {
+            if (mAvatarSelector != null) {
                 final Intent finalIntent = intent;
                 // defer activity start after application came to foreground and XoApplication.setActiveInBackground() has been reset
                 new Handler().post(new Runnable() {
@@ -205,7 +202,7 @@ public abstract class XoActivity extends FragmentActivity {
             intent = selectedAvatarPreProcessing(intent);
             if (intent != null) {
                 try {
-                    SelectedContent content = createSelectedAvatar(mAvatarSelection, intent);
+                    SelectedContent content = createSelectedAvatar(mAvatarSelector, intent);
                     if (content != null) {
                         LOG.debug("selected avatar " + content.getFilePath());
                         for (IXoFragment fragment : mTalkFragments) {
@@ -221,8 +218,8 @@ public abstract class XoActivity extends FragmentActivity {
         }
     }
 
-    private SelectedContent createSelectedAvatar(ContentSelection selection, Intent intent) throws Exception {
-        return selection.getSelector().createObjectFromSelectionResult(this, intent);
+    private SelectedContent createSelectedAvatar(IContentSelector selection, Intent intent) throws Exception {
+        return selection.createObjectFromSelectionResult(this, intent);
     }
 
     @Override
@@ -571,15 +568,14 @@ public abstract class XoActivity extends FragmentActivity {
 
     public void selectAvatar() {
         LOG.debug("selectAvatar()");
-        mAvatarSelection = selectAvatar(this, REQUEST_SELECT_AVATAR);
+        mAvatarSelector = selectAvatar(this, REQUEST_SELECT_AVATAR);
     }
 
-    public ContentSelection selectAvatar(Activity activity, int requestCode) {
+    public ImageSelector selectAvatar(Activity activity, int requestCode) {
         ImageSelector imageSelector = new ImageSelector(this);
-        ContentSelection cs = new ContentSelection(imageSelector);
         Intent intent = imageSelector.createSelectionIntent(activity);
         startExternalActivityForResult(intent, requestCode);
-        return cs;
+        return imageSelector;
     }
 
     public void showPopupForMessageItem(MessageItem messageItem, View messageItemView) {

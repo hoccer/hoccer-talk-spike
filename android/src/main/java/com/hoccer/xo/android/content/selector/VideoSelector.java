@@ -10,7 +10,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.talk.content.SelectedFile;
-import com.hoccer.xo.android.content.ContentSelection;
+import com.hoccer.xo.android.content.ContentUtils;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 
@@ -47,7 +47,7 @@ public class VideoSelector implements IContentSelector {
     @Override
     public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) throws Exception {
         String mimeType = UriUtils.getMimeType(context, intent.getData());
-        if (!ContentSelection.isMimeTypeVideo(mimeType)) {
+        if (!ContentUtils.isMimeTypeVideo(mimeType)) {
             throw new Exception("Mime type is not 'video/*'");
         }
 
