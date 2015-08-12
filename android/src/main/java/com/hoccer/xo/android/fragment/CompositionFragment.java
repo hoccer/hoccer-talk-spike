@@ -31,7 +31,7 @@ import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.content.MultiImageSelector;
 import com.hoccer.xo.android.content.selector.ClipboardSelector;
 import com.hoccer.xo.android.content.selector.IContentSelector;
-import com.hoccer.xo.android.dialog.AttachmentSelectionDialog;
+import com.hoccer.xo.android.dialog.ContentSelectionDialogFragment;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionGestureListener;
 import com.hoccer.xo.android.util.ImageUtils;
@@ -49,9 +49,9 @@ import java.util.EnumMap;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
-import static com.hoccer.xo.android.dialog.AttachmentSelectionDialog.DIALOG_TAG;
+import static com.hoccer.xo.android.dialog.ContentSelectionDialogFragment.DIALOG_TAG;
 
-public class CompositionFragment extends XoFragment implements MotionGestureListener, AttachmentSelectionDialog.OnAttachmentSelectedListener {
+public class CompositionFragment extends XoFragment implements MotionGestureListener, ContentSelectionDialogFragment.OnAttachmentSelectedListener {
 
     private static final Logger LOG = Logger.getLogger(CompositionFragment.class);
 
@@ -557,7 +557,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     }
 
     private void showSelectAttachmentDialog() {
-        DialogFragment dialogFragment = new AttachmentSelectionDialog();
+        DialogFragment dialogFragment = new ContentSelectionDialogFragment();
         dialogFragment.setTargetFragment(this, REQUEST_SELECT_ATTACHMENT);
         dialogFragment.show(getActivity().getSupportFragmentManager(), DIALOG_TAG);
     }

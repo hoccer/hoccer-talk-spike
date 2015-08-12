@@ -13,22 +13,19 @@ import com.artcom.hoccer.R;
 import com.hoccer.xo.android.content.Clipboard;
 import com.hoccer.xo.android.content.MultiImageSelector;
 import com.hoccer.xo.android.content.selector.*;
-import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AttachmentSelectionDialog extends DialogFragment {
+public class ContentSelectionDialogFragment extends DialogFragment {
 
     public static final String DIALOG_TAG = "AttachmentSelectionDialog";
 
     private static final String ICON = "icon";
     private static final String NAME = "name";
     private static final String CONTENT_SELECTOR = "selector";
-
-    private static final Logger LOG = Logger.getLogger(AttachmentSelectionDialog.class);
 
     private OnAttachmentSelectedListener callback;
 
@@ -51,6 +48,24 @@ public class AttachmentSelectionDialog extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        final List<Map<String, Object>> data = createDataForSelectionAdapter();
+        SimpleAdapter adapter = createSelectionAdapter(data);
+        return createSelectionDialog(data, adapter);
+    }
+
+    private List<Map<String, Object>> createDataForSelectionAdapter() {
+        final List<Map<String, Object>> options = new ArrayList<Map<String, Object>>();
+        for (IContentSelector selector : createContentSelectors()) {
+            Map<String, Object> fields = new HashMap<String, Object>();
+            fields.put(ICON, selector.getContentIcon());
+            fields.put(NAME, selector.getName());
+            fields.put(CONTENT_SELECTOR, selector);
+            options.add(fields);
+        }
+        return options;
+    }
+
+    private List<IContentSelector> createContentSelectors() {
         List<IContentSelector> contentSelectors = new ArrayList<IContentSelector>();
         contentSelectors.add(new ImageSelector(getActivity()));
         contentSelectors.add(new MultiImageSelector(getActivity()));
@@ -63,14 +78,10 @@ public class AttachmentSelectionDialog extends DialogFragment {
             contentSelectors.add(new ClipboardSelector(getActivity()));
         }
 
-        final List<Map<String, Object>> options = new ArrayList<Map<String, Object>>();
-        for (IContentSelector selector : contentSelectors) {
-            Map<String, Object> fields = new HashMap<String, Object>();
-            fields.put(ICON, selector.getContentIcon());
-            fields.put(NAME, selector.getName());
-            fields.put(CONTENT_SELECTOR, selector);
-            options.add(fields);
-        }
+        return contentSelectors;
+    }
+
+    private SimpleAdapter createSelectionAdapter(List<Map<String, Object>> options) {
         SimpleAdapter adapter = new SimpleAdapter(getActivity(), options, R.layout.select_content,
                 new String[]{ICON, NAME}, new int[]{R.id.select_content_icon, R.id.select_content_text});
         adapter.setViewBinder(new SimpleAdapter.ViewBinder() {
@@ -84,7 +95,10 @@ public class AttachmentSelectionDialog extends DialogFragment {
                 return false;
             }
         });
+        return adapter;
+    }
 
+    private Dialog createSelectionDialog(final List<Map<String, Object>> options, SimpleAdapter adapter) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.selectattachment_title);
         builder.setCancelable(true);
