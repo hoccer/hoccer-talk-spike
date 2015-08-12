@@ -74,6 +74,16 @@ public abstract class BaseActivity extends FragmentActivity {
         getClient().registerAlertListener(mAlertListener);
     }
 
+    private void checkKeys() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
+        boolean needToRegenerateKey = preferences.getBoolean("NEED_TO_REGENERATE_KEYS", true);
+
+        if (needToRegenerateKey) {
+            createDialog();
+            regenerateKeys();
+        }
+    }
+
     private void checkForCrashesIfEnabled() {
         if (XoApplication.getConfiguration().isCrashReportingEnabled()) {
             CrashManager.register(this, XoApplication.getConfiguration().getHockeyAppId(), new CrashManagerListener() {
@@ -93,16 +103,6 @@ public abstract class BaseActivity extends FragmentActivity {
                     }
                 }
             });
-        }
-    }
-
-    private void checkKeys() {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
-        boolean needToRegenerateKey = preferences.getBoolean("NEED_TO_REGENERATE_KEYS", true);
-
-        if (needToRegenerateKey) {
-            createDialog();
-            regenerateKeys();
         }
     }
 
