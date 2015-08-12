@@ -3,7 +3,6 @@ package com.hoccer.xo.android;
 
 import android.content.Context;
 import android.media.AudioManager;
-import android.media.SoundPool;
 import com.artcom.hoccer.R;
 
 /**
