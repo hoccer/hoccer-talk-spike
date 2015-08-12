@@ -18,7 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.hoccer.talk.client.IXoAlertListener;
+import com.hoccer.talk.client.ServerAlertListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -40,7 +40,7 @@ public abstract class BaseActivity extends FragmentActivity {
 
     boolean mUpEnabled;
 
-    private XoAlertListener mAlertListener;
+    private ServerAlertHandler mAlertListener;
 
     private boolean mOptionsMenuEnabled = true;
 
@@ -50,7 +50,7 @@ public abstract class BaseActivity extends FragmentActivity {
 
         setContentView(getLayoutResource());
         getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        mAlertListener = new XoAlertListener(this);
+        mAlertListener = new ServerAlertHandler();
     }
 
     @Override
@@ -278,29 +278,7 @@ public abstract class BaseActivity extends FragmentActivity {
         startActivity(new Intent(this, XoPreferenceActivity.class));
     }
 
-    /**
-     * This class is an implementation of IXoAlertListener which displays alerts inside an AlertDialog.
-     * Links and other data inside the message text are tappable.
-     */
-    public class XoAlertListener implements IXoAlertListener {
-
-        private final Context mContext;
-
-        XoAlertListener(Context context) {
-            mContext = context;
-        }
-
-        @Override
-        public void onInternalAlert(String title, String message) {
-            final String alertTitle = title;
-            final String alertMessage = message;
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    displayAlert(alertTitle, alertMessage);
-                }
-            });
-        }
+    public class ServerAlertHandler implements ServerAlertListener {
 
         @Override
         public void onAlertMessageReceived(String message) {
@@ -313,20 +291,13 @@ public abstract class BaseActivity extends FragmentActivity {
             });
         }
 
-        /**
-         * Displays an AlertDialog from a given title and message string.
-         * The displayed message text is interactive: links etc. can be tapped.
-         *
-         * @param title   The given alert title
-         * @param message The given alert message
-         */
         private void displayAlert(String title, String message) {
 
             // Scan for urls other information
             final SpannableString interactiveMessage = new SpannableString(message);
             Linkify.addLinks(interactiveMessage, Linkify.ALL);
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            AlertDialog.Builder builder = new AlertDialog.Builder(BaseActivity.this);
             if (title != null) {
                 builder.setTitle(title);
             }

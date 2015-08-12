@@ -110,7 +110,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     List<IXoContactListener> mContactListeners = new CopyOnWriteArrayList<IXoContactListener>();
     List<IXoMessageListener> mMessageListeners = new ArrayList<IXoMessageListener>();
     List<IXoStateListener> mStateListeners = new ArrayList<IXoStateListener>();
-    List<IXoAlertListener> mAlertListeners = new ArrayList<IXoAlertListener>();
+    List<ServerAlertListener> mAlertListeners = new ArrayList<ServerAlertListener>();
 
     // The current state of this client
     State mState = State.DISCONNECTED;
@@ -384,13 +384,13 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         mMessageListeners.remove(listener);
     }
 
-    public synchronized void registerAlertListener(IXoAlertListener listener) {
+    public synchronized void registerAlertListener(ServerAlertListener listener) {
         if (!mAlertListeners.contains(listener)) {
             mAlertListeners.add(listener);
         }
     }
 
-    public synchronized void unregisterAlertListener(IXoAlertListener listener) {
+    public synchronized void unregisterAlertListener(ServerAlertListener listener) {
         mAlertListeners.remove(listener);
     }
 
@@ -1784,7 +1784,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             LOG.debug("server: alertUser()");
             LOG.info("ALERTING USER: \"" + message + "\"");
 
-            for (IXoAlertListener listener : mAlertListeners) {
+            for (ServerAlertListener listener : mAlertListeners) {
                 listener.onAlertMessageReceived(message);
             }
         }
