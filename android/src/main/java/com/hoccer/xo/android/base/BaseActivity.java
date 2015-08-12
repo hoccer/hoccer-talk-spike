@@ -170,14 +170,12 @@ public abstract class BaseActivity extends FragmentActivity {
     }
 
     protected void enableUpNavigation() {
-        LOG.debug("enableUpNavigation()");
         mUpEnabled = true;
         getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @SuppressLint("NewApi")
     private void navigateUp() {
-        LOG.debug("navigateUp()");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN && mUpEnabled) {
             Intent upIntent = getParentActivityIntent();
             if (upIntent != null) {
