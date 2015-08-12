@@ -35,7 +35,7 @@ public abstract class MessagesAdapter extends BaseAdapter {
 
     private static final long RATE_LIMIT_MSECS = 1000;
 
-    protected final XoActivity mActivity;
+    protected final BaseActivity mActivity;
 
     protected final XoClientDatabase mDatabase;
 
@@ -53,9 +53,9 @@ public abstract class MessagesAdapter extends BaseAdapter {
     private boolean mNeedsReload;
     private long mNotifyTimestamp;
 
-    protected MessagesAdapter(XoActivity activity) {
+    protected MessagesAdapter(BaseActivity activity) {
         mActivity = activity;
-        mDatabase = mActivity.getXoDatabase();
+        mDatabase = mActivity.getDatabase();
         mInflater = mActivity.getLayoutInflater();
         mResources = mActivity.getResources();
         mExecutor = XoApplication.get().getExecutor();
@@ -66,7 +66,7 @@ public abstract class MessagesAdapter extends BaseAdapter {
     }
 
     public XoClient getXoClient() {
-        return XoApplication.get().getXoClient();
+        return XoApplication.get().getClient();
     }
 
     public File getAvatarDirectory() {

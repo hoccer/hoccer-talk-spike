@@ -24,7 +24,7 @@ public class DatabaseBackup extends Backup {
 
         String filename = BackupFileUtils.createUniqueBackupFilename(XoApplication.getConfiguration().getAppName());
         File backupFile = new File(XoApplication.getBackupDirectory(), filename + "." + BackupFileUtils.FILE_EXTENSION_ZIP);
-        String clientName = XoApplication.get().getXoClient().getSelfContact().getName();
+        String clientName = XoApplication.get().getClient().getSelfContact().getName();
 
         BackupMetadata metadata = new BackupMetadata(BackupType.DATABASE, clientName, new Date());
         BackupFileUtils.createBackupFile(backupFile, metadata, database, password);

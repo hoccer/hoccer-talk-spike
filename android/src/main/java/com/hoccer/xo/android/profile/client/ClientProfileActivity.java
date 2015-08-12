@@ -77,7 +77,7 @@ public class ClientProfileActivity extends ComposableActivity {
 
     private void showClientProfileFragment(int contactId) {
         try {
-            TalkClientContact contact = XoApplication.get().getXoClient().getDatabase().findContactById(contactId);
+            TalkClientContact contact = XoApplication.get().getClient().getDatabase().findContactById(contactId);
             Fragment fragment;
             if (contact.isSelf()) {
                 fragment = new SelfClientProfileFragment();

@@ -1,8 +1,10 @@
 package com.hoccer.xo.android.base;
 
 import com.hoccer.xo.android.fragment.IPagerFragment;
+import com.hoccer.xo.android.fragment.SearchableListFragment;
 
-public abstract class XoPagerListFragment extends XoListFragment implements IPagerFragment {
+
+public abstract class SearchablePagerListFragment extends SearchableListFragment implements IPagerFragment {
 
     private PagerLifecycle mPagerLifecycle = new PagerLifecycle();
 

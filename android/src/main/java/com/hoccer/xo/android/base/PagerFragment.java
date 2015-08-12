@@ -4,7 +4,7 @@ import android.support.v4.app.Fragment;
 import com.hoccer.xo.android.fragment.IPagerFragment;
 
 
-public abstract class XoPagerFragment extends Fragment implements IPagerFragment {
+public abstract class PagerFragment extends Fragment implements IPagerFragment {
 
     private PagerLifecycle mPagerLifecycle = new PagerLifecycle();
 

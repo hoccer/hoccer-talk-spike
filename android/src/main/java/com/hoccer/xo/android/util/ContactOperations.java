@@ -12,14 +12,10 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.talk.content.SelectedFile;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.Transformer;
 import org.apache.log4j.Logger;
 
 import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -40,9 +36,9 @@ public class ContactOperations {
         TalkClientUpload upload = new TalkClientUpload();
         upload.initializeAsAttachment(content);
 
-        String messageTag = XoApplication.get().getXoClient().composeClientMessage(contact, "", upload).getMessageTag();
+        String messageTag = XoApplication.get().getClient().composeClientMessage(contact, "", upload).getMessageTag();
         LOG.debug("Sending Attachment " + upload + " to contact " + contact);
-        XoApplication.get().getXoClient().sendMessage(messageTag);
+        XoApplication.get().getClient().sendMessage(messageTag);
     }
 
     public static void sendSMS(Context context, String message, String[] recipients) {

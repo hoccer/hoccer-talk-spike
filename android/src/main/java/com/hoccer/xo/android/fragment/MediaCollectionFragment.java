@@ -61,7 +61,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
 
         if (getArguments() != null) {
             try {
-                mDatabase = XoApplication.get().getXoClient().getDatabase();
+                mDatabase = XoApplication.get().getClient().getDatabase();
                 int collectionId = getArguments().getInt(ARG_MEDIA_COLLECTION_ID);
                 mCollection = mDatabase.findMediaCollectionById(collectionId);
                 mCollectionAdapter = new MediaCollectionItemAdapter(mCollection);
@@ -233,7 +233,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
             XoTransfer clickedItem = (XoTransfer) getListAdapter().getItem(position);
 
             MediaPlaylist playlist = isSearchModeEnabled() ?
-                    new SingleItemPlaylist(XoApplication.get().getXoClient().getDatabase(), clickedItem) :
+                    new SingleItemPlaylist(XoApplication.get().getClient().getDatabase(), clickedItem) :
                     new MediaCollectionPlaylist(mCollection);
 
             MediaPlayer.get().playItemInPlaylist(clickedItem, playlist);

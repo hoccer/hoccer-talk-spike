@@ -94,7 +94,7 @@ public abstract class ClientProfileFragment extends ProfileFragment {
 
     protected void refreshContactFromDatabase() {
         try {
-            XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
+            XoClientDatabase database = XoApplication.get().getClient().getDatabase();
             database.refreshClientContact(mContact);
             if (mContact.getAvatarDownload() != null) {
                 database.refreshClientDownload(mContact.getAvatarDownload());

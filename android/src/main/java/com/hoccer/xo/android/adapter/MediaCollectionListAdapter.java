@@ -26,7 +26,7 @@ public class MediaCollectionListAdapter extends BaseAdapter implements IXoMediaC
 
     public MediaCollectionListAdapter() {
         try {
-            XoApplication.get().getXoClient().getDatabase().registerMediaCollectionListener(this);
+            XoApplication.get().getClient().getDatabase().registerMediaCollectionListener(this);
             loadMediaCollections();
         } catch (SQLException e) {
             LOG.error("Loading media collections failed.", e);
@@ -112,7 +112,7 @@ public class MediaCollectionListAdapter extends BaseAdapter implements IXoMediaC
     }
 
     private void loadMediaCollections() throws SQLException {
-        mMediaCollections = XoApplication.get().getXoClient().getDatabase().findAllMediaCollections();
+        mMediaCollections = XoApplication.get().getClient().getDatabase().findAllMediaCollections();
     }
 
     @Override

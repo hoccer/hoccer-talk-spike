@@ -30,7 +30,7 @@ public class SelectedContact extends SelectedContent {
         InputStream is = null;
         File file = new File(XoApplication.getAttachmentDirectory(), UUID.randomUUID().toString());
         try {
-            is = XoApplication.get().getXoClient().getHost().openInputStreamForUrl(mVcardContentUri);
+            is = XoApplication.get().getClient().getHost().openInputStreamForUrl(mVcardContentUri);
             FileUtils.copyInputStreamToFile(is, file);
         } catch (IOException e) {
             LOG.error("Could not save contact vcard to file", e);

@@ -9,10 +9,9 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.base.BaseActivity;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.MessageItem;
@@ -71,7 +70,7 @@ public class ContactMessageItem extends MessageItem {
                 LOG.debug("onClick(showButton)");
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setDataAndType(UriUtils.getAbsoluteFileUri(mAttachment.getFilePath()), "text/x-vcard");
-                XoActivity activity = (XoActivity) mContext;
+                BaseActivity activity = (BaseActivity) mContext;
                 activity.startExternalActivity(intent);
             }
         });
@@ -97,7 +96,7 @@ public class ContactMessageItem extends MessageItem {
         Uri fileUri = UriUtils.getAbsoluteFileUri(mAttachment.getFilePath());
         InputStream inputStream;
         try {
-            inputStream = XoApplication.get().getXoClient().getHost().openInputStreamForUrl(fileUri.toString());
+            inputStream = XoApplication.get().getClient().getHost().openInputStreamForUrl(fileUri.toString());
         } catch (IOException e) {
             LOG.error("Could not open VCard at " + mAttachment.getFilePath(), e);
             return;

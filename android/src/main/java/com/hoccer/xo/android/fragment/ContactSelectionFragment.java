@@ -65,7 +65,7 @@ public class ContactSelectionFragment extends ListFragment {
 
         for (Integer contactId : contactIds) {
             try {
-                TalkClientContact contact = XoApplication.get().getXoClient().getDatabase().findContactById(contactId);
+                TalkClientContact contact = XoApplication.get().getClient().getDatabase().findContactById(contactId);
                 contacts.add(contact);
             } catch (SQLException e) {
                 LOG.error("SQL error", e);

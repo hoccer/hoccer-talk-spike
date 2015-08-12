@@ -8,7 +8,6 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.MediaPlayer;
 import com.hoccer.xo.android.XoApplication;
@@ -86,7 +85,7 @@ public class AudioMessageItem extends MessageItem implements MediaPlayer.Listene
     }
 
     private void play() {
-        MediaPlaylist playlist = new SingleItemPlaylist(XoApplication.get().getXoClient().getDatabase(), mAttachment);
+        MediaPlaylist playlist = new SingleItemPlaylist(XoApplication.get().getClient().getDatabase(), mAttachment);
         MediaPlayer.get().playItemInPlaylist(mAttachment, playlist);
     }
 

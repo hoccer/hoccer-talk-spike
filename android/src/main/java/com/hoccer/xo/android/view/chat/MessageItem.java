@@ -1,5 +1,7 @@
 package com.hoccer.xo.android.view.chat;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -7,8 +9,10 @@ import android.os.Build;
 import android.text.format.DateUtils;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
@@ -16,11 +20,12 @@ import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
+import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.ContentState;
 import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.content.ContentRegistry;
+import com.hoccer.xo.android.base.BaseActivity;
+import com.hoccer.xo.android.content.Clipboard;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.hoccer.xo.android.view.avatar.SimpleAvatarView;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferHandler;
@@ -49,7 +54,6 @@ public class MessageItem implements AttachmentTransferListener {
     protected SimpleAvatarView mSimpleAvatarView;
     protected TextView mContentDescription;
     protected XoTransfer mAttachment;
-    protected ContentRegistry mContentRegistry;
     protected RelativeLayout mAttachmentTransferContainer;
     protected AttachmentTransferHandler mAttachmentTransferHandler;
     protected LinearLayout mAttachmentContentContainer;
@@ -58,15 +62,13 @@ public class MessageItem implements AttachmentTransferListener {
     public MessageItem(Context context, TalkClientMessage message) {
         super();
         mContext = context;
-        mDatabase = XoApplication.get().getXoClient().getDatabase();
+        mDatabase = XoApplication.get().getClient().getDatabase();
         mMessage = message;
 
         mAttachment = mMessage.getAttachmentUpload();
         if (mAttachment == null) {
             mAttachment = mMessage.getAttachmentDownload();
         }
-
-        mContentRegistry = ContentRegistry.get(context);
     }
 
     public TalkClientMessage getMessage() {
@@ -359,7 +361,7 @@ public class MessageItem implements AttachmentTransferListener {
                 public void onClick(View v) {
                     if (!contact.isSelf()) {
                         // TODO: reevaluate - might not work
-                        ((XoActivity) mContext).showContactProfile(contact);
+                        ((BaseActivity) mContext).showContactProfile(contact);
                     }
                 }
             });
@@ -380,7 +382,53 @@ public class MessageItem implements AttachmentTransferListener {
             displayTransferControl();
         }
 
-        mContentDescription.setText(ContentRegistry.getContentDescription(mAttachment));
+        mContentDescription.setText(getContentDescription(mAttachment));
+    }
+
+    private String getContentDescription(XoTransfer transfer) {
+        String mediaTypeString = getMediaType(transfer);
+        String sizeString = getHumanReadableSize(transfer);
+
+        return mediaTypeString + sizeString;
+    }
+
+    private String getMediaType(XoTransfer transfer) {
+        String mediaTypeString = "Unknown file";
+        String mediaType = transfer.getMediaType();
+        if (ContentMediaType.IMAGE.equals(mediaType)) {
+            mediaTypeString = "Image";
+        } else if (ContentMediaType.AUDIO.equals(mediaType)) {
+            mediaTypeString = "Audio";
+        } else if (ContentMediaType.VIDEO.equals(mediaType)) {
+            mediaTypeString = "Video";
+        } else if (ContentMediaType.VCARD.equals(mediaType)) {
+            mediaTypeString = "Contact";
+        } else if (ContentMediaType.LOCATION.equals(mediaType)) {
+            mediaTypeString = "Location";
+        } else if (ContentMediaType.DATA.equals(mediaType)) {
+            mediaTypeString = "Data";
+        }
+        return mediaTypeString;
+    }
+
+    private String getHumanReadableSize(XoTransfer transfer) {
+        String sizeString = "";
+        if (transfer.getContentLength() > 0) {
+            sizeString = " — " + humanReadableByteCount(transfer.getContentLength(), true);
+        } else if (transfer.getTransferLength() > 0) {
+            sizeString = " — " + humanReadableByteCount(transfer.getTransferLength(), true);
+        }
+        return sizeString;
+    }
+
+    private static String humanReadableByteCount(long bytes, boolean si) {
+        int unit = si ? 1000 : 1024;
+        if (bytes < unit) {
+            return bytes + " B";
+        }
+        int exp = (int) (Math.log(bytes) / Math.log(unit));
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
+        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
     }
 
     private void displayTransferControl() {
@@ -408,11 +456,43 @@ public class MessageItem implements AttachmentTransferListener {
         view.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                XoActivity activity = (XoActivity) mContext;
-                activity.showPopupForMessageItem(messageItem, v);
+                showPopupForMessageItem(messageItem, v);
                 return true;
             }
         });
+    }
+
+    public void showPopupForMessageItem(final MessageItem messageItem, View messageItemView) {
+        PopupMenu popup = new PopupMenu(mContext, messageItemView);
+        popup.getMenuInflater().inflate(R.menu.popup_menu_messaging, popup.getMenu());
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            public boolean onMenuItemClick(MenuItem item) {
+                popupItemSelected(item, messageItem);
+                return true;
+            }
+        });
+        popup.show();
+    }
+
+    private void popupItemSelected(MenuItem item, MessageItem messageItem) {
+        switch (item.getItemId()) {
+            case R.id.menu_copy_message:
+                if (messageItem.getAttachment() != null && messageItem.getAttachment().isContentAvailable()) {
+                    Clipboard.get().setContent(messageItem.getAttachment());
+                } else {
+                    putMessageTextInSystemClipboard(messageItem);
+                }
+                break;
+            case R.id.menu_delete_message:
+                XoApplication.get().getClient().deleteMessage(messageItem.getMessage());
+                break;
+        }
+    }
+
+    private void putMessageTextInSystemClipboard(MessageItem messageItem) {
+        ClipboardManager clipboardText = (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("simple text", messageItem.getText());
+        clipboardText.setPrimaryClip(clip);
     }
 
     @Override

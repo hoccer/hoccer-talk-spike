@@ -19,7 +19,7 @@ public class ClipboardSelector implements IContentSelector {
     public ClipboardSelector(Context context) {
         mName = context.getResources().getString(R.string.content_clipboard);
         mIcon = ColoredDrawable.getFromCache(R.drawable.ic_attachment_select_data, R.color.primary);
-        mClipboard = Clipboard.getInstance();
+        mClipboard = Clipboard.get();
     }
 
     @Override
@@ -43,9 +43,5 @@ public class ClipboardSelector implements IContentSelector {
 
         mClipboard.clearContent();
         return content;
-    }
-
-    public boolean hasContent() {
-        return mClipboard.hasContent();
     }
 }

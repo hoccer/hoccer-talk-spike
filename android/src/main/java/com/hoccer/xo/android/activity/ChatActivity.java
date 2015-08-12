@@ -127,40 +127,6 @@ public class ChatActivity extends ComposableActivity {
         super.onSaveInstanceState(outState);
     }
 
-    @Override
-    public void showPopupForMessageItem(final MessageItem messageItem, View messageItemView) {
-        PopupMenu popup = new PopupMenu(this, messageItemView);
-        popup.getMenuInflater().inflate(R.menu.popup_menu_messaging, popup.getMenu());
-        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            public boolean onMenuItemClick(MenuItem item) {
-                popupItemSelected(item, messageItem);
-                return true;
-            }
-        });
-        popup.show();
-    }
-
-    private void popupItemSelected(MenuItem item, MessageItem messageItem) {
-        switch (item.getItemId()) {
-            case R.id.menu_copy_message:
-                if (messageItem.getAttachment() != null && messageItem.getAttachment().isContentAvailable()) {
-                    Clipboard.getInstance().setContent(messageItem.getAttachment());
-                } else {
-                    putMessageTextInSystemClipboard(messageItem);
-                }
-                break;
-            case R.id.menu_delete_message:
-                getXoClient().deleteMessage(messageItem.getMessage());
-                break;
-        }
-    }
-
-    private void putMessageTextInSystemClipboard(MessageItem messageItem) {
-        ClipboardManager clipboardText = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText("simple text", messageItem.getText());
-        clipboardText.setPrimaryClip(clip);
-    }
-
     private void showChatFragment(int contactId) {
         Bundle bundle = new Bundle();
         bundle.putInt(ChatFragment.ARG_CLIENT_CONTACT_ID, contactId);

@@ -11,7 +11,7 @@ import android.widget.RelativeLayout;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.DeviceContactsAdapter;
-import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.base.BaseActivity;
 import com.hoccer.xo.android.util.ContactOperations;
 import com.hoccer.xo.android.util.DeviceContact;
 import com.artcom.hoccer.R;
@@ -81,7 +81,7 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
                 @Override
                 public void run() {
                     try {
-                        String token = XoApplication.get().getXoClient().generatePairingToken();
+                        String token = XoApplication.get().getClient().generatePairingToken();
 
                         if (!mIsInvitationCancelled) {
                             if (token != null) {
@@ -160,8 +160,8 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
         setMenuVisibility(enabled);
 
         // toggle activity options menu
-        if (getActivity() instanceof XoActivity) {
-            ((XoActivity)getActivity()).setOptionsMenuEnabled(enabled);
+        if (getActivity() instanceof BaseActivity) {
+            ((BaseActivity)getActivity()).setOptionsMenuEnabled(enabled);
         }
     }
 
@@ -205,14 +205,14 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
 
     private void composeInviteSms(String[] phoneNumbers, String token) {
         String invitationServerUri = XoApplication.getConfiguration().getInvitationServerUri();
-        String selfName = XoApplication.get().getXoClient().getSelfContact().getName();
+        String selfName = XoApplication.get().getClient().getSelfContact().getName();
         String message = String.format(getString(R.string.sms_invitation_text), invitationServerUri, token, selfName);
         ContactOperations.sendSMS(getActivity(), message, phoneNumbers);
     }
 
     private void composeInviteEmail(String[] eMailAddresses, String token) {
         String invitationServerUri = XoApplication.getConfiguration().getInvitationServerUri();
-        String selfName = XoApplication.get().getXoClient().getSelfContact().getName();
+        String selfName = XoApplication.get().getClient().getSelfContact().getName();
         String subject = getString(R.string.email_invitation_subject);
         String message = String.format(getString(R.string.email_invitation_text), invitationServerUri, token, selfName);
         ContactOperations.sendEMail(getActivity(), subject, message, eMailAddresses);

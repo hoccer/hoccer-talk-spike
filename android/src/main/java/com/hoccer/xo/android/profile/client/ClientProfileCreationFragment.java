@@ -17,7 +17,7 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.base.XoFragment;
+import com.hoccer.xo.android.profile.ProfileFragment;
 import com.hoccer.xo.android.util.UriUtils;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
@@ -25,7 +25,7 @@ import org.apache.log4j.Logger;
 import java.sql.SQLException;
 
 
-public class ClientProfileCreationFragment extends XoFragment implements IXoContactListener, View.OnClickListener, ActionMode.Callback {
+public class ClientProfileCreationFragment extends ProfileFragment implements IXoContactListener, View.OnClickListener, ActionMode.Callback {
 
     private static final String HOCCER_CLASSIC_PREFERENCES = "com.artcom.hoccer_preferences";
 
@@ -67,7 +67,7 @@ public class ClientProfileCreationFragment extends XoFragment implements IXoCont
         mAvatarImage = (ImageView) view.findViewById(R.id.profile_avatar_image);
         mEditName = (EditText) view.findViewById(R.id.et_profile_name);
 
-        mContact = getXoClient().getSelfContact();
+        mContact = XoApplication.get().getClient().getSelfContact();
         if (mActionMode == null) {
             mActionMode = getActivity().startActionMode(this);
         }
@@ -78,13 +78,13 @@ public class ClientProfileCreationFragment extends XoFragment implements IXoCont
     @Override
     public void onResume() {
         super.onResume();
-        getXoClient().registerContactListener(this);
+        XoApplication.get().getClient().registerContactListener(this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        getXoClient().unregisterContactListener(this);
+        XoApplication.get().getClient().unregisterContactListener(this);
     }
 
     @Override
@@ -109,7 +109,7 @@ public class ClientProfileCreationFragment extends XoFragment implements IXoCont
                                 public void onClick(DialogInterface dialog, int id, int selectedItem) {
                                     switch (selectedItem) {
                                         case 0: {
-                                            getXoActivity().selectAvatar();
+                                            selectAvatar();
                                         }
                                         break;
                                         case 1: {
@@ -120,7 +120,7 @@ public class ClientProfileCreationFragment extends XoFragment implements IXoCont
                             }
                     );
                 } else {
-                    getXoActivity().selectAvatar();
+                    selectAvatar();
                 }
             }
         }
@@ -157,9 +157,9 @@ public class ClientProfileCreationFragment extends XoFragment implements IXoCont
                     TalkClientUpload upload = new TalkClientUpload();
                     upload.initializeAsAvatar(avatar);
                     try {
-                        getXoDatabase().saveClientUpload(upload);
+                        XoApplication.get().getClient().getDatabase().saveClientUpload(upload);
                         if (mContact.isSelf()) {
-                            getXoClient().setClientAvatar(upload);
+                            XoApplication.get().getClient().setClientAvatar(upload);
                         }
                     } catch (SQLException e) {
                         LOG.error("sql error", e);
@@ -167,7 +167,7 @@ public class ClientProfileCreationFragment extends XoFragment implements IXoCont
                 }
             });
         } else {
-            getXoClient().setClientAvatar(null);
+            XoApplication.get().getClient().setClientAvatar(null);
         }
     }
 
@@ -200,7 +200,7 @@ public class ClientProfileCreationFragment extends XoFragment implements IXoCont
         mEditName.setVisibility(View.GONE);
         mAvatarImage.setOnClickListener(null);
 
-        getXoClient().setClientString(newUserName, "happy");
+        XoApplication.get().getClient().setClientString(newUserName, "happy");
 
         getActivity().finish();
     }
