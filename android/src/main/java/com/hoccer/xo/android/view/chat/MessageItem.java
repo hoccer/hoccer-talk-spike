@@ -381,6 +381,13 @@ public class MessageItem implements AttachmentTransferListener {
     }
 
     private String getContentDescription(XoTransfer transfer) {
+        String mediaTypeString = getMediaType(transfer);
+        String sizeString = getHumanReadableSize(transfer);
+
+        return mediaTypeString + sizeString;
+    }
+
+    private String getMediaType(XoTransfer transfer) {
         String mediaTypeString = "Unknown file";
         String mediaType = transfer.getMediaType();
         if (ContentMediaType.IMAGE.equals(mediaType)) {
@@ -396,15 +403,17 @@ public class MessageItem implements AttachmentTransferListener {
         } else if (ContentMediaType.DATA.equals(mediaType)) {
             mediaTypeString = "Data";
         }
+        return mediaTypeString;
+    }
 
+    private String getHumanReadableSize(XoTransfer transfer) {
         String sizeString = "";
         if (transfer.getContentLength() > 0) {
             sizeString = " — " + humanReadableByteCount(transfer.getContentLength(), true);
         } else if (transfer.getTransferLength() > 0) {
             sizeString = " — " + humanReadableByteCount(transfer.getTransferLength(), true);
         }
-
-        return mediaTypeString + sizeString;
+        return sizeString;
     }
 
     private static String humanReadableByteCount(long bytes, boolean si) {
