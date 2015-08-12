@@ -26,6 +26,7 @@ import com.hoccer.xo.android.activity.GroupContactSelectionResultActivity;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupMemberContactsAdapter;
+import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.fragment.ContactSelectionFragment;
 import com.hoccer.xo.android.profile.ProfileFragment;
 import com.hoccer.xo.android.util.DisplayUtils;
@@ -83,7 +84,7 @@ public class GroupProfileFragment extends ProfileFragment
         public boolean shouldShow(TalkClientContact contact) {
             try {
                 if (contact.isClient()) {
-                    TalkGroupMembership membership = getXoActivity().getXoDatabase().findMembershipInGroupByClientId(mContact.getGroupId(), contact.getClientId());
+                    TalkGroupMembership membership = XoApplication.get().getXoClient().getDatabase().findMembershipInGroupByClientId(mContact.getGroupId(), contact.getClientId());
                     if (membership != null) {
                         return membership.isInvited() || membership.isJoined();
                     }
@@ -146,12 +147,12 @@ public class GroupProfileFragment extends ProfileFragment
     public void onResume() {
         super.onResume();
 
-        getXoClient().registerContactListener(this);
+        XoApplication.get().getXoClient().registerContactListener(this);
 
         mMode = Mode.PROFILE;
 
         if (mGroupMemberAdapter == null) {
-            mGroupMemberAdapter = new GroupMemberContactsAdapter(getXoActivity(), mContact.getGroupId());
+            mGroupMemberAdapter = new GroupMemberContactsAdapter((XoActivity) getActivity(), mContact.getGroupId());
             mGroupMemberAdapter.setFilter(mInvitedOrJoinedClientFilter);
             mGroupMemberAdapter.registerListeners();
             mGroupMemberAdapter.registerDataSetObserver(new DataSetObserver() {
@@ -186,7 +187,7 @@ public class GroupProfileFragment extends ProfileFragment
     @Override
     public void onPause() {
         super.onPause();
-        getXoClient().unregisterContactListener(this);
+        XoApplication.get().getXoClient().unregisterContactListener(this);
     }
 
     class BackPressListener implements View.OnKeyListener {
@@ -303,11 +304,11 @@ public class GroupProfileFragment extends ProfileFragment
                 XoDialogs.showYesNoDialog("LeaveGroupDialog",
                         R.string.dialog_leave_group_title,
                         R.string.dialog_leave_group_message,
-                        getXoActivity(),
+                        getActivity(),
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
-                                getXoActivity().getXoClient().leaveGroup(mContact.getGroupId());
+                                XoApplication.get().getXoClient().leaveGroup(mContact.getGroupId());
                                 getActivity().finish();
                             }
                         });
@@ -323,7 +324,7 @@ public class GroupProfileFragment extends ProfileFragment
                 XoDialogs.showYesNoDialog("RemoveGroupDialog",
                         R.string.dialog_remove_group_title,
                         R.string.dialog_remove_group_message,
-                        getXoActivity(),
+                        getActivity(),
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
@@ -345,7 +346,7 @@ public class GroupProfileFragment extends ProfileFragment
         if (mContact.getGroupPresence() != null) {
             mContact.getGroupPresence().setKept(false);
             try {
-                getXoDatabase().saveGroupPresence(mContact.getGroupPresence());
+                XoApplication.get().getXoClient().getDatabase().saveGroupPresence(mContact.getGroupPresence());
             } catch (SQLException e) {
                 LOG.error("SQL error", e);
             }
@@ -359,7 +360,7 @@ public class GroupProfileFragment extends ProfileFragment
         }
         mNameText.setText(newGroupName);
 
-        getXoClient().setGroupName(mContact, newGroupName);
+        XoApplication.get().getXoClient().setGroupName(mContact, newGroupName);
     }
 
     protected void updateViews() {
@@ -487,13 +488,13 @@ public class GroupProfileFragment extends ProfileFragment
 
     private void refreshContact() {
         try {
-            getXoDatabase().refreshClientContact(mContact);
+            XoApplication.get().getXoClient().getDatabase().refreshClientContact(mContact);
             if (mMode == Mode.PROFILE) {
                 if (mContact.getAvatarDownload() != null) {
-                    getXoDatabase().refreshClientDownload(mContact.getAvatarDownload());
+                    XoApplication.get().getXoClient().getDatabase().refreshClientDownload(mContact.getAvatarDownload());
                 }
                 if (mContact.getAvatarUpload() != null) {
-                    getXoDatabase().refreshClientUpload(mContact.getAvatarUpload());
+                    XoApplication.get().getXoClient().getDatabase().refreshClientUpload(mContact.getAvatarUpload());
                 }
             }
         } catch (SQLException e) {
@@ -579,7 +580,7 @@ public class GroupProfileFragment extends ProfileFragment
                 mContactsToDisinviteAsFriend.remove(contact);
             }
         }
-        getXoActivity().runOnUiThread(new Runnable() {
+        getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 updateFriendsRequestMenuItem();
@@ -625,14 +626,14 @@ public class GroupProfileFragment extends ProfileFragment
         mContactsToDisinviteAsFriend.clear();
         mContactsToDisinviteAsFriend.addAll(mContactsToInviteAsFriend);
         for (TalkClientContact contact : mContactsToInviteAsFriend) {
-            getXoClient().inviteFriend(contact);
+            XoApplication.get().getXoClient().inviteFriend(contact);
         }
         updateFriendsRequestMenuItem();
     }
 
     private void disinviteAllMembersAsFriends() {
         for (TalkClientContact contact : mContactsToDisinviteAsFriend) {
-            getXoClient().disinviteFriend(contact);
+            XoApplication.get().getXoClient().disinviteFriend(contact);
         }
         mContactsToDisinviteAsFriend.clear();
         updateFriendsRequestMenuItem();
@@ -653,7 +654,7 @@ public class GroupProfileFragment extends ProfileFragment
                             public void onClick(DialogInterface dialog, int id, int selectedItem) {
                                 switch (selectedItem) {
                                     case 0: {
-                                        getXoActivity().selectAvatar();
+                                        selectAvatar();
                                     }
                                     break;
                                     case 1: {
@@ -663,7 +664,7 @@ public class GroupProfileFragment extends ProfileFragment
                             }
                         });
             } else {
-                getXoActivity().selectAvatar();
+                selectAvatar();
             }
         }
     }
@@ -679,13 +680,13 @@ public class GroupProfileFragment extends ProfileFragment
             TalkClientUpload upload = new TalkClientUpload();
             upload.initializeAsAvatar(avatar);
             try {
-                getXoDatabase().saveClientUpload(upload);
-                getXoClient().setGroupAvatar(mContact, upload);
+                XoApplication.get().getXoClient().getDatabase().saveClientUpload(upload);
+                XoApplication.get().getXoClient().setGroupAvatar(mContact, upload);
             } catch (SQLException e) {
                 LOG.error("sql error", e);
             }
         } else {
-            getXoClient().setGroupAvatar(mContact, null);
+            XoApplication.get().getXoClient().setGroupAvatar(mContact, null);
         }
     }
 

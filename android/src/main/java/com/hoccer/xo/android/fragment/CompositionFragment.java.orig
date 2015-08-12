@@ -5,8 +5,11 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+<<<<<<< Updated upstream
 import android.support.v4.app.DialogFragment;
+=======
 import android.support.v4.app.Fragment;
+>>>>>>> Stashed changes
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.Formatter;
@@ -28,6 +31,12 @@ import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.BackgroundManager;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
+<<<<<<< Updated upstream
+import com.hoccer.xo.android.base.XoFragment;
+=======
+import com.hoccer.xo.android.content.ContentRegistry;
+import com.hoccer.xo.android.content.ContentSelection;
+>>>>>>> Stashed changes
 import com.hoccer.xo.android.content.MultiImageSelector;
 import com.hoccer.xo.android.content.selector.ClipboardSelector;
 import com.hoccer.xo.android.content.selector.IContentSelector;
@@ -48,10 +57,14 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 
+<<<<<<< Updated upstream
 import static android.app.Activity.RESULT_OK;
 import static com.hoccer.xo.android.dialog.ContentSelectionDialogFragment.DIALOG_TAG;
 
-public class CompositionFragment extends Fragment implements MotionGestureListener, ContentSelectionDialogFragment.OnAttachmentSelectedListener {
+public class CompositionFragment extends XoFragment implements MotionGestureListener, ContentSelectionDialogFragment.OnAttachmentSelectedListener {
+=======
+public class CompositionFragment extends Fragment implements MotionGestureListener {
+>>>>>>> Stashed changes
 
     private static final Logger LOG = Logger.getLogger(CompositionFragment.class);
 

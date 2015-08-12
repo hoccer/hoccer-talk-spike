@@ -18,10 +18,12 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.talk.model.TalkGroupMembership;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupMemberContactsAdapter;
-import com.hoccer.xo.android.base.XoFragment;
+import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.profile.ProfileFragment;
 import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.util.UriUtils;
 import com.squareup.picasso.Picasso;
@@ -37,7 +39,7 @@ import java.util.List;
 /**
  * Fragment for display and editing of group profiles.
  */
-public class GroupProfileCreationFragment extends XoFragment implements IXoContactListener {
+public class GroupProfileCreationFragment extends ProfileFragment implements IXoContactListener {
 
     private static final Logger LOG = Logger.getLogger(GroupProfileCreationFragment.class);
     public static final String ARG_CLONE_GROUP_ID = "ARG_CLONE_GROUP_ID";
@@ -65,7 +67,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
 
             if (groupId != null) {
                 try {
-                    mContactsToInvite = getXoDatabase().findContactsInGroupByState(groupId, TalkGroupMembership.STATE_JOINED);
+                    mContactsToInvite = XoApplication.get().getXoClient().getDatabase().findContactsInGroupByState(groupId, TalkGroupMembership.STATE_JOINED);
                     CollectionUtils.filterInverse(mContactsToInvite, TalkClientContactPredicates.IS_SELF_PREDICATE);
                 } catch (SQLException e) {
                     LOG.error("Error finding contacts in group", e);
@@ -93,7 +95,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
         mAvatarImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                selectAvatar();
+                chooseAvatar();
             }
         });
 
@@ -101,7 +103,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
             @Override
             public void onClick(View view) {
                 createGroup();
-            } 
+            }
         });
 
         mGroupNameEdit.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -118,7 +120,8 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
 
         mGroupNameEdit.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {}
+            public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+            }
 
             @Override
             public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
@@ -130,10 +133,11 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
             }
 
             @Override
-            public void afterTextChanged(Editable editable) {}
+            public void afterTextChanged(Editable editable) {
+            }
         });
 
-        mGroupMemberAdapter = new GroupMemberContactsAdapter(getXoActivity());
+        mGroupMemberAdapter = new GroupMemberContactsAdapter((XoActivity) getActivity());
         mGroupMemberAdapter.setFilter(new ContactsAdapter.Filter() {
             @Override
             public boolean shouldShow(TalkClientContact contact) {
@@ -158,7 +162,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
 
         DisplayUtils.setListViewHeightBasedOnChildren(mGroupMemberList);
 
-        getXoClient().registerContactListener(this);
+        XoApplication.get().getXoClient().registerContactListener(this);
 
         mGroupNameEdit.requestFocus();
     }
@@ -166,7 +170,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
     public void onPause() {
         super.onPause();
 
-        getXoClient().unregisterContactListener(this);
+        XoApplication.get().getXoClient().unregisterContactListener(this);
 
         mGroupMemberAdapter.unRegisterListeners();
     }
@@ -185,7 +189,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
 
     private void createGroup(String groupName) {
         List<String> memberIds = getClientIdsForContacts(mContactsToInvite);
-        mGroupTag = getXoClient().createGroupWithContacts(groupName, memberIds);
+        mGroupTag = XoApplication.get().getXoClient().createGroupWithContacts(groupName, memberIds);
     }
 
     public static List<String> getClientIdsForContacts(List<TalkClientContact> contacts) {
@@ -196,7 +200,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
         return ids;
     }
 
-    private void selectAvatar() {
+    private void chooseAvatar() {
         if (mAvatar != null) {
             XoDialogs.showRadioSingleChoiceDialog("AvatarSelection",
                     R.string.dialog_avatar_options_title,
@@ -210,7 +214,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
                         public void onClick(DialogInterface dialog, int id, int selectedItem) {
                             switch (selectedItem) {
                                 case 0: {
-                                    getXoActivity().selectAvatar();
+                                    selectAvatar();
                                 }
                                 break;
                                 case 1: {
@@ -220,7 +224,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
                         }
                     });
         } else {
-            getXoActivity().selectAvatar();
+            selectAvatar();
         }
     }
 
@@ -242,10 +246,12 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
     }
 
     @Override
-    public void onClientPresenceChanged(TalkClientContact contact) {}
+    public void onClientPresenceChanged(TalkClientContact contact) {
+    }
 
     @Override
-    public void onClientRelationshipChanged(TalkClientContact contact) {}
+    public void onClientRelationshipChanged(TalkClientContact contact) {
+    }
 
     @Override
     public void onGroupPresenceChanged(TalkClientContact contact) {
@@ -262,8 +268,8 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
             upload.initializeAsAvatar(mAvatar);
 
             try {
-                getXoDatabase().saveClientUpload(upload);
-                getXoClient().setGroupAvatar(group, upload);
+                XoApplication.get().getXoClient().getDatabase().saveClientUpload(upload);
+                XoApplication.get().getXoClient().setGroupAvatar(group, upload);
             } catch (SQLException e) {
                 LOG.error("Error saving group avatar upload", e);
             }
@@ -285,5 +291,6 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
     }
 
     @Override
-    public void onGroupMembershipChanged(TalkClientContact contact) {}
+    public void onGroupMembershipChanged(TalkClientContact contact) {
+    }
 }

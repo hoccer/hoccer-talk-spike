@@ -1,19 +1,17 @@
 package com.hoccer.xo.android.base;
 
 import android.annotation.SuppressLint;
-import android.app.*;
+import android.app.ActionBar;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.TaskStackBuilder;
 import android.content.*;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
-import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
@@ -27,14 +25,11 @@ import com.hoccer.talk.client.IXoAlertListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.BackgroundManager;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.XoSoundPool;
 import com.hoccer.xo.android.activity.*;
-import com.hoccer.xo.android.content.selector.IContentSelector;
-import com.hoccer.xo.android.content.selector.ImageSelector;
 import com.hoccer.xo.android.fragment.DeviceContactsInvitationFragment;
 import com.hoccer.xo.android.profile.client.ClientProfileActivity;
 import com.hoccer.xo.android.profile.group.GroupProfileActivity;
@@ -45,12 +40,7 @@ import net.hockeyapp.android.CrashManagerListener;
 import net.hockeyapp.android.Strings;
 import org.apache.log4j.Logger;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.UUID;
 
 /**
  * Base class for our activities.
@@ -58,21 +48,6 @@ import java.util.UUID;
 public abstract class XoActivity extends FragmentActivity {
 
     private static final Logger LOG = Logger.getLogger(XoActivity.class);
-
-    public final static int REQUEST_SELECT_AVATAR = 23;
-    public final static int REQUEST_CROP_AVATAR = 24;
-
-    /**
-     * Talk client database
-     */
-    XoClientDatabase mDatabase;
-
-    /**
-     * List of all talk fragments
-     */
-    ArrayList<IXoFragment> mTalkFragments = new ArrayList<IXoFragment>();
-
-    ImageSelector mAvatarSelector;
 
     boolean mUpEnabled;
 
@@ -82,6 +57,7 @@ public abstract class XoActivity extends FragmentActivity {
     private XoAlertListener mAlertListener;
 
     private boolean mOptionsMenuEnabled = true;
+    private XoClientDatabase mDatabase;
 
     protected abstract int getLayoutResource();
 
@@ -95,14 +71,6 @@ public abstract class XoActivity extends FragmentActivity {
         return XoApplication.getXoSoundPool();
     }
 
-    public void registerXoFragment(IXoFragment fragment) {
-        mTalkFragments.add(fragment);
-    }
-
-    public void unregisterXoFragment(IXoFragment fragment) {
-        mTalkFragments.remove(fragment);
-    }
-
     public void startExternalActivity(Intent intent) {
         LOG.debug(getClass() + " starting external activity " + intent);
         if (!canStartActivity(intent)) {
@@ -111,21 +79,6 @@ public abstract class XoActivity extends FragmentActivity {
 
         try {
             startActivity(intent);
-            BackgroundManager.get().ignoreNextBackgroundPhase();
-        } catch (ActivityNotFoundException e) {
-            Toast.makeText(this, R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-        }
-    }
-
-    public void startExternalActivityForResult(Intent intent, int requestCode) {
-        LOG.debug(getClass() + " starting external activity " + intent + " for request code: " + requestCode);
-        if (!canStartActivity(intent)) {
-            return;
-        }
-
-        try {
-            startActivityForResult(intent, requestCode);
             BackgroundManager.get().ignoreNextBackgroundPhase();
         } catch (ActivityNotFoundException e) {
             Toast.makeText(this, R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
@@ -176,50 +129,6 @@ public abstract class XoActivity extends FragmentActivity {
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
 
         mAlertListener = new XoAlertListener(this);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        LOG.debug("onActivityResult(" + requestCode + "," + resultCode + ")");
-        super.onActivityResult(requestCode, resultCode, intent);
-
-        if (intent == null) {
-            return;
-        }
-
-        if (requestCode == REQUEST_SELECT_AVATAR) {
-            if (mAvatarSelector != null) {
-                final Intent finalIntent = intent;
-                // defer activity start after application came to foreground and XoApplication.setActiveInBackground() has been reset
-                new Handler().post(new Runnable() {
-                    @Override
-                    public void run() {
-                        startExternalActivityForResult(ImageSelector.createCropIntent(finalIntent.getData()), REQUEST_CROP_AVATAR);
-                    }
-                });
-            }
-        } else if (requestCode == REQUEST_CROP_AVATAR) {
-            intent = selectedAvatarPreProcessing(intent);
-            if (intent != null) {
-                try {
-                    SelectedContent content = createSelectedAvatar(mAvatarSelector, intent);
-                    if (content != null) {
-                        LOG.debug("selected avatar " + content.getFilePath());
-                        for (IXoFragment fragment : mTalkFragments) {
-                            fragment.onAvatarSelected(content);
-                        }
-                    }
-                } catch (Exception e) {
-                    LOG.error("Creating selected avatar failed.", e);
-                }
-            } else {
-                showAvatarSelectionError();
-            }
-        }
-    }
-
-    private SelectedContent createSelectedAvatar(IContentSelector selection, Intent intent) throws Exception {
-        return selection.createObjectFromSelectionResult(this, intent);
     }
 
     @Override
@@ -394,63 +303,6 @@ public abstract class XoActivity extends FragmentActivity {
         return true;
     }
 
-    private Intent selectedAvatarPreProcessing(Intent data) {
-        String uuid = UUID.randomUUID().toString();
-        String filePath = XoApplication.getAvatarDirectory().getPath() + File.separator + uuid
-                + ".jpg";
-        String croppedImagePath = XoApplication.getAttachmentDirectory().getAbsolutePath()
-                + File.separator
-                + "tmp_crop";
-        try {
-            Bitmap bitmap = BitmapFactory.decodeFile(croppedImagePath);
-            if (bitmap == null) {
-                return null;
-            }
-            File avatarFile = new File(filePath);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, new FileOutputStream(avatarFile));
-            Uri uri = getImageContentUri(getBaseContext(), avatarFile);
-            data.setData(uri);
-
-            File tmpImage = new File(croppedImagePath);
-            if (tmpImage.exists()) {
-                tmpImage.delete();
-            }
-
-            return data;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private static Uri getImageContentUri(Context context, File imageFile) {
-        String filePath = imageFile.getAbsolutePath();
-        Cursor cursor = context.getContentResolver().query(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                new String[]{MediaStore.Images.Media._ID},
-                MediaStore.Images.Media.DATA + "=? ",
-                new String[]{filePath}, null);
-        if (cursor != null && cursor.moveToFirst()) {
-            int id = cursor.getInt(cursor
-                    .getColumnIndex(MediaStore.MediaColumns._ID));
-            Uri baseUri = Uri.parse("content://media/external/images/media");
-            return Uri.withAppendedPath(baseUri, "" + id);
-        } else {
-            if (imageFile.exists()) {
-                ContentValues values = new ContentValues();
-                values.put(MediaStore.Images.Media.DATA, filePath);
-                return context.getContentResolver().insert(
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-            } else {
-                return null;
-            }
-        }
-    }
-
-    private void showAvatarSelectionError() {
-        Toast.makeText(this, R.string.error_avatar_selection, Toast.LENGTH_LONG).show();
-    }
-
     protected void enableUpNavigation() {
         LOG.debug("enableUpNavigation()");
         mUpEnabled = true;
@@ -564,18 +416,6 @@ public abstract class XoActivity extends FragmentActivity {
     public void showPreferences() {
         LOG.debug("showPreferences()");
         startActivity(new Intent(this, XoPreferenceActivity.class));
-    }
-
-    public void selectAvatar() {
-        LOG.debug("selectAvatar()");
-        mAvatarSelector = selectAvatar(this, REQUEST_SELECT_AVATAR);
-    }
-
-    public ImageSelector selectAvatar(Activity activity, int requestCode) {
-        ImageSelector imageSelector = new ImageSelector(this);
-        Intent intent = imageSelector.createSelectionIntent(activity);
-        startExternalActivityForResult(intent, requestCode);
-        return imageSelector;
     }
 
     public void showPopupForMessageItem(MessageItem messageItem, View messageItemView) {

@@ -1,12 +1,12 @@
 package com.hoccer.xo.android.fragment;
 
+import android.support.v4.app.ListFragment;
 import com.hoccer.xo.android.activity.ChatActivity;
-import com.hoccer.xo.android.base.XoListFragment;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 
-public abstract class XoChatListFragment extends XoListFragment {
+public abstract class XoChatListFragment extends ListFragment {
 
     private static final String KEY_SCROLL_POSITION = "scroll_position:";
     private static final String KEY_LIST_SIZE = "list_size:";

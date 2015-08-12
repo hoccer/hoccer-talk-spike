@@ -19,6 +19,7 @@ import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.ChatsActivity;
+import com.hoccer.xo.android.base.XoActivity;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 
@@ -110,10 +111,10 @@ public class SelfClientProfileFragment extends ClientProfileFragment implements 
         int blockedCount = 0;
         int groupsCount = 0;
         try {
-            friendsCount = getXoDatabase().findClientContactsByState(TalkRelationship.STATE_FRIEND).size();
-            blockedCount = getXoDatabase().findClientContactsByState(TalkRelationship.STATE_BLOCKED).size();
+            friendsCount = XoApplication.get().getXoClient().getDatabase().findClientContactsByState(TalkRelationship.STATE_FRIEND).size();
+            blockedCount = XoApplication.get().getXoClient().getDatabase().findClientContactsByState(TalkRelationship.STATE_BLOCKED).size();
 
-            List<TalkClientContact> joinedGroups = getXoDatabase().findGroupContactsByMembershipState(TalkGroupMembership.STATE_JOINED);
+            List<TalkClientContact> joinedGroups = XoApplication.get().getXoClient().getDatabase().findGroupContactsByMembershipState(TalkGroupMembership.STATE_JOINED);
             CollectionUtils.filterInverse(joinedGroups, TalkClientContactPredicates.IS_ENVIRONMENT_GROUP_PREDICATE);
             groupsCount = joinedGroups.size();
         } catch (SQLException e) {
@@ -159,7 +160,7 @@ public class SelfClientProfileFragment extends ClientProfileFragment implements 
         if (mContact.getAvatarFilePath() != null) {
             showSetOrDeleteAvatarDialog();
         } else {
-            getXoActivity().selectAvatar();
+            selectAvatar();
         }
     }
 
@@ -176,7 +177,7 @@ public class SelfClientProfileFragment extends ClientProfileFragment implements 
                     public void onClick(DialogInterface dialog, int id, int selectedItem) {
                         switch (selectedItem) {
                             case 0: {
-                                getXoActivity().selectAvatar();
+                                selectAvatar();
                             }
                             break;
                             case 1: {
@@ -207,8 +208,8 @@ public class SelfClientProfileFragment extends ClientProfileFragment implements 
                 TalkClientUpload upload = new TalkClientUpload();
                 upload.initializeAsAvatar(avatar);
                 try {
-                    getXoDatabase().saveClientUpload(upload);
-                    getXoClient().setClientAvatar(upload);
+                    XoApplication.get().getXoClient().getDatabase().saveClientUpload(upload);
+                    XoApplication.get().getXoClient().setClientAvatar(upload);
                 } catch (SQLException e) {
                     LOG.error("sql error", e);
                 }
@@ -217,7 +218,7 @@ public class SelfClientProfileFragment extends ClientProfileFragment implements 
     }
 
     private void removeAvatar() {
-        getXoClient().setClientAvatar(null);
+        XoApplication.get().getXoClient().setClientAvatar(null);
         updateAvatarView(R.drawable.avatar_contact_large);
     }
 
@@ -231,7 +232,7 @@ public class SelfClientProfileFragment extends ClientProfileFragment implements 
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        getXoClient().deleteAccountAndLocalDatabase(getActivity());
+                        XoApplication.get().getXoClient().deleteAccountAndLocalDatabase(getActivity());
                         exitApplication();
                     }
                 }, null);
@@ -259,7 +260,7 @@ public class SelfClientProfileFragment extends ClientProfileFragment implements 
         mAccountDeletionButton.setOnClickListener(null);
         mAvatarImage.setOnClickListener(null);
 
-        getXoClient().setClientString(newUserName, "happier");
+        XoApplication.get().getXoClient().setClientString(newUserName, "happier");
 
         refreshContactFromDatabase();
         updateContent();
