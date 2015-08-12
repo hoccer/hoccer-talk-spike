@@ -43,6 +43,8 @@ public abstract class JsonRpcConnection {
      */
     protected final int mConnectionId = sConnectionIdCounter.incrementAndGet();
 
+    protected boolean mDisconnectAfterRequest = false;
+
 
     /**
      * Object mapper to be used for this connection
@@ -257,6 +259,10 @@ public abstract class JsonRpcConnection {
             }
         }
         LOG.trace("handleRequest done id="+ request.get("id"));
+        if (mDisconnectAfterRequest) {
+            LOG.warn("handleRequest done id="+ request.get("id")+", terminating connection ["+mConnectionId+"] because internally requested.");
+            this.disconnect();
+        }
     }
 
     /**
@@ -406,4 +412,8 @@ public abstract class JsonRpcConnection {
         mConnectionEventListeners.remove(l);
     }
 
+    public void disconnectAfterRequest() {
+        LOG.warn("disconnectAfterRequest set for connection ["+mConnectionId+"]");
+        mDisconnectAfterRequest = true;
+    }
 }

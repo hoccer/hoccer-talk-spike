@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.view.View;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.model.TalkEnvironment;
 import com.hoccer.xo.android.NearbyController;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.EnvironmentChatListAdapter;
@@ -22,9 +21,13 @@ public class NearbyChatListFragment extends EnvironmentChatListFragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        createAdapter();
+    public void onPageSelected() {
+        activateNearby();
+    }
+
+    @Override
+    public void onPageUnselected() {
+        NearbyController.get().disableNearbyMode();
     }
 
     @Override
@@ -63,19 +66,14 @@ public class NearbyChatListFragment extends EnvironmentChatListFragment {
         return resources.getString(R.string.nearby_tab_name);
     }
 
-    @Override
-    public void onPageSelected() {
-    }
+    private void activateNearby() {
+        if (NearbyController.get().isNearbyEnabled()) {
+            return;
+        }
 
-    @Override
-    public void onPageUnselected() {
-        NearbyController.get().disableNearbyMode();
-    }
-
-    @Override
-    public void onPageResume() {
         if (NearbyController.get().locationServicesEnabled()) {
             NearbyController.get().enableNearbyMode();
+            createAdapter();
         } else {
             showLocationServiceDialog();
         }
@@ -93,10 +91,6 @@ public class NearbyChatListFragment extends EnvironmentChatListFragment {
                     }
                 }
         );
-    }
-
-    @Override
-    public void onPagePause() {
     }
 
     @Override

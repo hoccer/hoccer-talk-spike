@@ -19,6 +19,7 @@ import com.hoccer.xo.android.activity.ChatActivity;
 import com.hoccer.xo.android.adapter.ChatListAdapter;
 import com.hoccer.xo.android.adapter.SearchAdapter;
 import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.base.XoSearchablePagerListFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.Placeholder;
 import com.hoccer.xo.android.view.model.ChatItem;
@@ -31,7 +32,7 @@ import java.lang.ref.WeakReference;
 import java.sql.SQLException;
 import java.util.List;
 
-public class ChatListFragment extends SearchableListFragment implements IPagerFragment {
+public class ChatListFragment extends XoSearchablePagerListFragment {
 
     private static final Logger LOG = Logger.getLogger(ChatListFragment.class);
 
@@ -304,23 +305,14 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
     }
 
     @Override
-    public void onPageSelected() {
+    public void onPageScrollStateChanged(int state) {
     }
+
+    @Override
+    public void onPageSelected() {}
 
     @Override
     public void onPageUnselected() {
         leaveSearchMode();
-    }
-
-    @Override
-    public void onPageResume() {
-    }
-
-    @Override
-    public void onPagePause() {
-    }
-
-    @Override
-    public void onPageScrollStateChanged(int state) {
     }
 }

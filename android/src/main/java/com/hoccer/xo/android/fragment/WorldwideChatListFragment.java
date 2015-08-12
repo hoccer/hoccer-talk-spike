@@ -15,29 +15,13 @@ import static com.hoccer.talk.model.TalkEnvironment.TYPE_WORLDWIDE;
 
 public class WorldwideChatListFragment extends EnvironmentChatListFragment {
 
-    private boolean mPageSelected;
-    private boolean mOnResumeHandled;
-
     public WorldwideChatListFragment() {
         mPlaceholder = new Placeholder(R.drawable.placeholder_world, R.string.placeholder_worldwide_text);
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-
-        if (mPageSelected) {
-            activateWorldwide();
-        }
-
-        mOnResumeHandled = true;
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        mOnResumeHandled = false;
+    public void onPageSelected() {
+        activateWorldwide();
     }
 
     private void activateWorldwide() {
@@ -48,6 +32,11 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
         mListAdapter.scheduleUpdate(group);
 
         FeaturePromoter.displayWorldwideTutorialOnFirstStart(getActivity());
+    }
+
+    @Override
+    public void onPageUnselected() {
+        WorldwideController.get().deactivateWorldWide();
     }
 
     @Override
@@ -87,25 +76,6 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
     }
 
     @Override
-    public void onPageResume() {}
-
-    @Override
-    public void onPageSelected() {
-        mPageSelected = true;
-        if (mOnResumeHandled) {
-            activateWorldwide();
-        }
+    public void onPageScrollStateChanged(int state) {
     }
-
-    @Override
-    public void onPageUnselected() {
-        mPageSelected = false;
-        WorldwideController.get().deactivateWorldWide();
-    }
-
-    @Override
-    public void onPagePause() {}
-
-    @Override
-    public void onPageScrollStateChanged(int state) {}
 }

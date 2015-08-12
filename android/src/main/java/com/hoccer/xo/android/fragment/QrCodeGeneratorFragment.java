@@ -21,11 +21,12 @@ import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.base.XoPagerFragment;
 
 import java.util.EnumMap;
 import java.util.Map;
 
-public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment, IXoContactListener, IXoStateListener {
+public class QrCodeGeneratorFragment extends XoPagerFragment implements IXoContactListener, IXoStateListener {
 
     private ImageView mQrCodeView;
     private TextView mPairingTokenView;
@@ -66,7 +67,11 @@ public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment,
     }
 
     @Override
-    public void onPageResume() {
+    public void onPageScrollStateChanged(final int state) {
+    }
+
+    @Override
+    public void onPageSelected() {
         if (!isTokenGenerated()) {
             generateToken();
         }
@@ -76,19 +81,9 @@ public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment,
     }
 
     @Override
-    public void onPageSelected() {}
-
-    @Override
-    public void onPageUnselected() {}
-
-    @Override
-    public void onPagePause() {
+    public void onPageUnselected() {
         XoApplication.get().getXoClient().unregisterContactListener(this);
         XoApplication.get().getXoClient().unregisterStateListener(this);
-    }
-
-    @Override
-    public void onPageScrollStateChanged(final int state) {
     }
 
     private boolean isTokenGenerated() {
