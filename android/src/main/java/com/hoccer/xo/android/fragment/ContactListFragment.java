@@ -13,10 +13,10 @@ import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.adapter.ContactListAdapter;
-import com.hoccer.xo.android.base.XoSearchablePagerListFragment;
+import com.hoccer.xo.android.base.SearchablePagerListFragment;
 import com.hoccer.xo.android.view.NotificationBadgeTextView;
 
-public abstract class ContactListFragment extends XoSearchablePagerListFragment implements IXoContactListener {
+public abstract class ContactListFragment extends SearchablePagerListFragment implements IXoContactListener {
 
     private ContactListAdapter mContactListAdapter;
 

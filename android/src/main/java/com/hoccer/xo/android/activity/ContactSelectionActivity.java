@@ -8,14 +8,14 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.adapter.ContactSelectionAdapter;
-import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.base.BaseActivity;
 import com.hoccer.xo.android.fragment.ContactSelectionFragment;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 import java.util.List;
 
-public abstract class ContactSelectionActivity extends XoActivity implements ContactSelectionAdapter.IContactSelectionListener, ContactSelectionAdapter.Filter {
+public abstract class ContactSelectionActivity extends BaseActivity implements ContactSelectionAdapter.IContactSelectionListener, ContactSelectionAdapter.Filter {
 
     private static final Logger LOG = Logger.getLogger(ContactSelectionActivity.class);
 

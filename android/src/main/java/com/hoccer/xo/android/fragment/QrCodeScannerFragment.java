@@ -14,7 +14,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.base.XoPagerFragment;
+import com.hoccer.xo.android.base.PagerFragment;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.CameraPreviewView;
 import net.sourceforge.zbar.*;
@@ -22,7 +22,7 @@ import org.apache.log4j.Logger;
 
 import java.util.HashSet;
 
-public class QrCodeScannerFragment extends XoPagerFragment implements IXoPairingListener {
+public class QrCodeScannerFragment extends PagerFragment implements IXoPairingListener {
 
     private static final Logger LOG = Logger.getLogger(QrCodeScannerFragment.class);
 

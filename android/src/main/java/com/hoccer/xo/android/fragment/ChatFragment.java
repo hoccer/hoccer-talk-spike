@@ -16,8 +16,8 @@ import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
 import com.hoccer.xo.android.adapter.ChatMessagesAdapter;
+import com.hoccer.xo.android.base.BaseActivity;
 import com.hoccer.xo.android.base.MessagesAdapter;
-import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionInterpreter;
 import com.hoccer.xo.android.profile.client.ClientProfileActivity;
@@ -125,7 +125,7 @@ public class ChatFragment extends XoChatListFragment
         setHasOptionsMenu(true);
         mMessageListView = getListView();
 
-        mAdapter = new ChatMessagesAdapter(mMessageListView, (XoActivity) getActivity(), mContact);
+        mAdapter = new ChatMessagesAdapter(mMessageListView, (BaseActivity) getActivity(), mContact);
         mAdapter.setAdapterReloadListener(this);
         mAdapter.onCreate();
 

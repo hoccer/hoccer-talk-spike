@@ -3,13 +3,11 @@ package com.hoccer.xo.android.adapter;
 import android.content.res.Resources;
 import android.text.TextUtils;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroupMembership;
-import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.view.avatar.AvatarView;
+import com.hoccer.xo.android.base.BaseActivity;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,11 +28,11 @@ public class GroupMemberContactsAdapter extends ContactsAdapter {
     @Nullable
     private final String mGroupId;
 
-    public GroupMemberContactsAdapter(XoActivity activity) {
+    public GroupMemberContactsAdapter(BaseActivity activity) {
         this(activity, null);
     }
 
-    public GroupMemberContactsAdapter(XoActivity activity, @Nullable String groupId) {
+    public GroupMemberContactsAdapter(BaseActivity activity, @Nullable String groupId) {
         super(activity);
         mGroupId = groupId;
     }

@@ -51,8 +51,8 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity {
     private void sendMessageToContacts(String textFromIntent, List<TalkClientContact> selectedContacts) {
         for (TalkClientContact contact : selectedContacts) {
             try {
-                TalkClientMessage message = getXoClient().composeClientMessage(contact, textFromIntent);
-                getXoClient().sendMessage(message.getMessageTag());
+                TalkClientMessage message = getClient().composeClientMessage(contact, textFromIntent);
+                getClient().sendMessage(message.getMessageTag());
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
             }

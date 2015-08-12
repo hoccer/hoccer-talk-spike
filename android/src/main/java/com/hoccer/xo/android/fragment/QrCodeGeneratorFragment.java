@@ -5,7 +5,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,12 +20,12 @@ import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.base.XoPagerFragment;
+import com.hoccer.xo.android.base.PagerFragment;
 
 import java.util.EnumMap;
 import java.util.Map;
 
-public class QrCodeGeneratorFragment extends XoPagerFragment implements IXoContactListener, IXoStateListener {
+public class QrCodeGeneratorFragment extends PagerFragment implements IXoContactListener, IXoStateListener {
 
     private ImageView mQrCodeView;
     private TextView mPairingTokenView;

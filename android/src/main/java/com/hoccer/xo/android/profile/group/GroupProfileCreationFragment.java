@@ -22,7 +22,7 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupMemberContactsAdapter;
-import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.base.BaseActivity;
 import com.hoccer.xo.android.profile.ProfileFragment;
 import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.util.UriUtils;
@@ -137,7 +137,7 @@ public class GroupProfileCreationFragment extends ProfileFragment implements IXo
             }
         });
 
-        mGroupMemberAdapter = new GroupMemberContactsAdapter((XoActivity) getActivity());
+        mGroupMemberAdapter = new GroupMemberContactsAdapter((BaseActivity) getActivity());
         mGroupMemberAdapter.setFilter(new ContactsAdapter.Filter() {
             @Override
             public boolean shouldShow(TalkClientContact contact) {

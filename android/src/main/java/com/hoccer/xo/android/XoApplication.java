@@ -61,7 +61,7 @@ public class XoApplication extends Application {
 
     private XoAndroidClient mClient;
     private static XoAndroidClientConfiguration sConfiguration;
-    private static XoSoundPool sSoundPool;
+    private static SoundPool sSoundPool;
     private static DisplayImageOptions sImageOptions;
 
     private static StartupTasks sStartupTasks;
@@ -194,7 +194,7 @@ public class XoApplication extends Application {
         }
 
         // create sound pool instance
-        sSoundPool = new XoSoundPool(this);
+        sSoundPool = new SoundPool(this);
 
         sStartupTasks = new StartupTasks(this);
         sStartupTasks.executeRegisteredTasks();
@@ -296,7 +296,7 @@ public class XoApplication extends Application {
         return sConfiguration;
     }
 
-    public static XoSoundPool getXoSoundPool() {
+    public static SoundPool getSoundPool() {
         return sSoundPool;
     }
 

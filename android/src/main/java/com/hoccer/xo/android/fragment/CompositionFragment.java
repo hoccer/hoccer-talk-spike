@@ -308,7 +308,7 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
         LOG.debug("Received gesture of type: " + gestureName);
 
         if (isComposed()) {
-            XoApplication.getXoSoundPool().playThrowSound();
+            XoApplication.getSoundPool().playThrowSound();
             processMessage();
         }
     }

@@ -19,7 +19,6 @@ import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.ChatsActivity;
-import com.hoccer.xo.android.base.XoActivity;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 

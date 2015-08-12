@@ -5,7 +5,7 @@ import android.widget.CheckedTextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroupMembership;
-import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.base.BaseActivity;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -26,7 +26,7 @@ public class GroupManagementContactsAdapter extends ContactsAdapter {
     private final ArrayList<TalkClientContact> mContactsToInvite;
     private final ArrayList<TalkClientContact> mContactsToKick;
 
-    public GroupManagementContactsAdapter(XoActivity activity, TalkClientContact group, ArrayList<TalkClientContact> contactsToInvite, ArrayList<TalkClientContact> contactsToKick) {
+    public GroupManagementContactsAdapter(BaseActivity activity, TalkClientContact group, ArrayList<TalkClientContact> contactsToInvite, ArrayList<TalkClientContact> contactsToKick) {
         super(activity);
 
         mGroup = group;

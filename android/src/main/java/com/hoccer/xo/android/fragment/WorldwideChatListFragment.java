@@ -9,7 +9,7 @@ import com.hoccer.xo.android.FeaturePromoter;
 import com.hoccer.xo.android.WorldwideController;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.adapter.EnvironmentChatListAdapter;
-import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.base.BaseActivity;
 import com.hoccer.xo.android.view.Placeholder;
 
 import static com.hoccer.talk.model.TalkEnvironment.TYPE_WORLDWIDE;
@@ -52,7 +52,7 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
 
     private void createAdapter() {
         if (mListAdapter == null) {
-            mListAdapter = new EnvironmentChatListAdapter(TYPE_WORLDWIDE, (XoActivity) getActivity());
+            mListAdapter = new EnvironmentChatListAdapter(TYPE_WORLDWIDE, (BaseActivity) getActivity());
             mListAdapter.registerListeners();
             setListAdapter(mListAdapter);
         }

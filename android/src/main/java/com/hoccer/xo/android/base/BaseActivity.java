@@ -26,9 +26,9 @@ import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.BackgroundManager;
+import com.hoccer.xo.android.SoundPool;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.XoSoundPool;
 import com.hoccer.xo.android.activity.*;
 import com.hoccer.xo.android.fragment.DeviceContactsInvitationFragment;
 import com.hoccer.xo.android.profile.client.ClientProfileActivity;
@@ -42,12 +42,9 @@ import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 
-/**
- * Base class for our activities.
- */
-public abstract class XoActivity extends FragmentActivity {
+public abstract class BaseActivity extends FragmentActivity {
 
-    private static final Logger LOG = Logger.getLogger(XoActivity.class);
+    private static final Logger LOG = Logger.getLogger(BaseActivity.class);
 
     boolean mUpEnabled;
 
@@ -63,12 +60,8 @@ public abstract class XoActivity extends FragmentActivity {
 
     protected abstract int getMenuResource();
 
-    public XoClient getXoClient() {
+    public XoClient getClient() {
         return XoApplication.get().getXoClient();
-    }
-
-    public XoSoundPool getXoSoundPool() {
-        return XoApplication.getXoSoundPool();
     }
 
     public void startExternalActivity(Intent intent) {
@@ -138,7 +131,7 @@ public abstract class XoActivity extends FragmentActivity {
 
         checkForCrashesIfEnabled();
         checkKeys();
-        getXoClient().registerAlertListener(mAlertListener);
+        getClient().registerAlertListener(mAlertListener);
     }
 
     private void checkForCrashesIfEnabled() {
@@ -241,7 +234,7 @@ public abstract class XoActivity extends FragmentActivity {
         LOG.debug("onPause()");
         super.onPause();
 
-        getXoClient().unregisterAlertListener(mAlertListener);
+        getClient().unregisterAlertListener(mAlertListener);
     }
 
     @Override
@@ -336,7 +329,7 @@ public abstract class XoActivity extends FragmentActivity {
         }
     }
 
-    public XoClientDatabase getXoDatabase() {
+    public XoClientDatabase getDatabase() {
         return mDatabase;
     }
 

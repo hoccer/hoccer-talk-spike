@@ -20,7 +20,7 @@ import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
 import com.hoccer.talk.model.TalkEnvironment;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.base.BaseActivity;
 import com.hoccer.xo.android.view.avatar.AvatarView;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
@@ -44,17 +44,17 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
 
     private final XoClientDatabase mDatabase;
     private final ScheduledExecutorService mExecutor;
-    private final XoActivity mXoActivity;
+    private final BaseActivity mBaseActivity;
     private ScheduledFuture<?> mNotifyFuture;
     private long mNotifyTimestamp;
 
     private List<TalkClientContact> mContacts = new ArrayList<TalkClientContact>();
     private TalkClientContact mCurrentEnvironmentGroup;
 
-    public EnvironmentChatListAdapter(String environmentType, XoActivity activity) {
+    public EnvironmentChatListAdapter(String environmentType, BaseActivity activity) {
         super();
         mEnvironmentType = environmentType;
-        mXoActivity = activity;
+        mBaseActivity = activity;
         mDatabase = XoApplication.get().getXoClient().getDatabase();
         mExecutor = XoApplication.get().getExecutor();
     }
@@ -111,9 +111,9 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
         TextView unseenView = (TextView) view.findViewById(R.id.contact_unseen_messages);
 
         if (contact.isWorldwideGroup()) {
-            nameView.setText(mXoActivity.getResources().getString(R.string.all_worldwide) + " (" + (mContacts.size() - 1) + ")");
+            nameView.setText(mBaseActivity.getResources().getString(R.string.all_worldwide) + " (" + (mContacts.size() - 1) + ")");
         } else if (contact.isNearbyGroup()) {
-            nameView.setText(mXoActivity.getResources().getString(R.string.all_nearby) + " (" + (mContacts.size() - 1) + ")");
+            nameView.setText(mBaseActivity.getResources().getString(R.string.all_nearby) + " (" + (mContacts.size() - 1) + ")");
         } else {
             nameView.setText(contact.getNickname());
         }
@@ -155,7 +155,7 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
         avatarView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mXoActivity.showContactProfile(contact);
+                mBaseActivity.showContactProfile(contact);
             }
         });
     }
@@ -197,7 +197,7 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
 
     private void updateFromDatabase(final TalkClientContact group) {
         if (group == null || mDatabase == null) {
-            mXoActivity.runOnUiThread(new Runnable() {
+            mBaseActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     mContacts.clear();
@@ -215,7 +215,7 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
                 contacts.add(0, group);
             }
 
-            mXoActivity.runOnUiThread(new Runnable() {
+            mBaseActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     mContacts = contacts;
@@ -228,7 +228,7 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
     }
 
     private void refreshList() {
-        mXoActivity.runOnUiThread(new Runnable() {
+        mBaseActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 notifyDataSetChanged();
@@ -282,7 +282,7 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
 
     @Override
     public void onMessageCreated(final TalkClientMessage message) {
-        mXoActivity.runOnUiThread(new Runnable() {
+        mBaseActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 TalkClientContact conversationContact = message.getConversationContact();

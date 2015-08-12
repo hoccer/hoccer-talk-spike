@@ -13,7 +13,7 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.xo.android.XoAndroidClient;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.base.BaseActivity;
 import com.hoccer.xo.android.view.model.ChatItem;
 import com.hoccer.xo.android.view.model.ContactChatItem;
 import com.hoccer.xo.android.view.model.NearbyGroupHistoryChatItem;
@@ -52,11 +52,11 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
     private final XoClientDatabase mDatabase;
     private final XoAndroidClient mXoClient;
 
-    private XoActivity mActivity;
+    private BaseActivity mActivity;
     @Nullable
     private Filter mFilter;
 
-    public ChatListAdapter(XoActivity activity, @Nullable Filter filter) {
+    public ChatListAdapter(BaseActivity activity, @Nullable Filter filter) {
         mActivity = activity;
         mFilter = filter;
         mXoClient = XoApplication.get().getXoClient();

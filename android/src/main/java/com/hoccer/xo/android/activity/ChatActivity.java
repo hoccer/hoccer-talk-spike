@@ -150,7 +150,7 @@ public class ChatActivity extends ComposableActivity {
                 }
                 break;
             case R.id.menu_delete_message:
-                getXoClient().deleteMessage(messageItem.getMessage());
+                getClient().deleteMessage(messageItem.getMessage());
                 break;
         }
     }
