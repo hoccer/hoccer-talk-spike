@@ -11,15 +11,20 @@ import com.hoccer.talk.server.push.PushAgent;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import org.eclipse.jetty.jmx.ConnectorServer;
 import org.eclipse.jetty.server.Server;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.Properties;
+import org.eclipse.jetty.jmx.MBeanContainer;
+
+import javax.management.remote.JMXServiceURL;
 
 /**
  * Entrypoint to the Talk server
@@ -58,7 +63,15 @@ public class TalkServerMain {
         managementServer.setStopAtShutdown(true);
         managementServer.setHandler(new TalkServerManagementHandler(talkServer));
 
+        MBeanContainer mbContainer = new MBeanContainer(
+        ManagementFactory.getPlatformMBeanServer());
+        webServer.addBean(mbContainer);
+
         try {
+            ConnectorServer s = new ConnectorServer(new JMXServiceURL("rmi", null, 1099, "/jndi/rmi://localhost:1099/jmxrmi"),
+                    null, "org.eclipse.jetty.jmx:name=rmiconnectorserver");
+            s.start();
+
             LOG.info("Starting server");
             webServer.start();
             managementServer.start();
