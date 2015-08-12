@@ -1,5 +1,7 @@
 package com.hoccer.xo.android.view.chat;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -7,8 +9,10 @@ import android.os.Build;
 import android.text.format.DateUtils;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
@@ -21,6 +25,7 @@ import com.hoccer.talk.content.ContentState;
 import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.BaseActivity;
+import com.hoccer.xo.android.content.Clipboard;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.hoccer.xo.android.view.avatar.SimpleAvatarView;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferHandler;
@@ -451,11 +456,43 @@ public class MessageItem implements AttachmentTransferListener {
         view.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                BaseActivity activity = (BaseActivity) mContext;
-                activity.showPopupForMessageItem(messageItem, v);
+                showPopupForMessageItem(messageItem, v);
                 return true;
             }
         });
+    }
+
+    public void showPopupForMessageItem(final MessageItem messageItem, View messageItemView) {
+        PopupMenu popup = new PopupMenu(mContext, messageItemView);
+        popup.getMenuInflater().inflate(R.menu.popup_menu_messaging, popup.getMenu());
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            public boolean onMenuItemClick(MenuItem item) {
+                popupItemSelected(item, messageItem);
+                return true;
+            }
+        });
+        popup.show();
+    }
+
+    private void popupItemSelected(MenuItem item, MessageItem messageItem) {
+        switch (item.getItemId()) {
+            case R.id.menu_copy_message:
+                if (messageItem.getAttachment() != null && messageItem.getAttachment().isContentAvailable()) {
+                    Clipboard.get().setContent(messageItem.getAttachment());
+                } else {
+                    putMessageTextInSystemClipboard(messageItem);
+                }
+                break;
+            case R.id.menu_delete_message:
+                XoApplication.get().getXoClient().deleteMessage(messageItem.getMessage());
+                break;
+        }
+    }
+
+    private void putMessageTextInSystemClipboard(MessageItem messageItem) {
+        ClipboardManager clipboardText = (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("simple text", messageItem.getText());
+        clipboardText.setPrimaryClip(clip);
     }
 
     @Override

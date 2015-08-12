@@ -26,7 +26,6 @@ import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.BackgroundManager;
-import com.hoccer.xo.android.SoundPool;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.*;
@@ -56,9 +55,94 @@ public abstract class BaseActivity extends FragmentActivity {
     private boolean mOptionsMenuEnabled = true;
     private XoClientDatabase mDatabase;
 
-    protected abstract int getLayoutResource();
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        LOG.debug("onCreate()");
+        super.onCreate(savedInstanceState);
 
-    protected abstract int getMenuResource();
+        // set up database connection
+        mDatabase = XoApplication.get().getXoClient().getDatabase();
+
+        // set layout
+        setContentView(getLayoutResource());
+
+        // get and configure the action bar
+        ActionBar actionBar = getActionBar();
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+
+        mAlertListener = new XoAlertListener(this);
+    }
+
+    @Override
+    protected void onResume() {
+        LOG.debug("onResume()");
+        super.onResume();
+
+        checkForCrashesIfEnabled();
+        checkKeys();
+        getClient().registerAlertListener(mAlertListener);
+    }
+
+    @Override
+    protected void onPause() {
+        LOG.debug("onPause()");
+        super.onPause();
+
+        getClient().unregisterAlertListener(mAlertListener);
+    }
+
+    @Override
+    protected void onDestroy() {
+        LOG.debug("onDestroy()");
+        super.onDestroy();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        LOG.debug("onCreateOptionsMenu()");
+
+        if (mOptionsMenuEnabled) {
+            getMenuInflater().inflate(R.menu.common, menu);
+
+            int activityMenu = getMenuResource();
+            if (activityMenu >= 0) {
+                getMenuInflater().inflate(activityMenu, menu);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        LOG.debug("onOptionsItemSelected(" + item + ")");
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                navigateUp();
+                break;
+            case R.id.menu_my_profile:
+                try {
+                    showContactProfile(mDatabase.findSelfContact(false));
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case R.id.menu_pair:
+                showPairing();
+                break;
+            case R.id.menu_new_group:
+                showNewGroup();
+                break;
+            case R.id.menu_settings:
+                showPreferences();
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+        return true;
+    }
 
     public XoClient getClient() {
         return XoApplication.get().getXoClient();
@@ -104,34 +188,6 @@ public abstract class BaseActivity extends FragmentActivity {
         if (googlePlayServicesErrorDialog != null) {
             googlePlayServicesErrorDialog.show();
         }
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        LOG.debug("onCreate()");
-        super.onCreate(savedInstanceState);
-
-        // set up database connection
-        mDatabase = XoApplication.get().getXoClient().getDatabase();
-
-        // set layout
-        setContentView(getLayoutResource());
-
-        // get and configure the action bar
-        ActionBar actionBar = getActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-
-        mAlertListener = new XoAlertListener(this);
-    }
-
-    @Override
-    protected void onResume() {
-        LOG.debug("onResume()");
-        super.onResume();
-
-        checkForCrashesIfEnabled();
-        checkKeys();
-        getClient().registerAlertListener(mAlertListener);
     }
 
     private void checkForCrashesIfEnabled() {
@@ -229,71 +285,9 @@ public abstract class BaseActivity extends FragmentActivity {
         spinnerStarter.sendEmptyMessageDelayed(0, 500);
     }
 
-    @Override
-    protected void onPause() {
-        LOG.debug("onPause()");
-        super.onPause();
-
-        getClient().unregisterAlertListener(mAlertListener);
-    }
-
-    @Override
-    protected void onDestroy() {
-        LOG.debug("onDestroy()");
-        super.onDestroy();
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        LOG.debug("onCreateOptionsMenu()");
-
-        if (mOptionsMenuEnabled) {
-            getMenuInflater().inflate(R.menu.common, menu);
-
-            int activityMenu = getMenuResource();
-            if (activityMenu >= 0) {
-                getMenuInflater().inflate(activityMenu, menu);
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
     public void setOptionsMenuEnabled(boolean optionsMenuEnabled) {
         mOptionsMenuEnabled = optionsMenuEnabled;
         invalidateOptionsMenu();
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        LOG.debug("onOptionsItemSelected(" + item + ")");
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                navigateUp();
-                break;
-            case R.id.menu_my_profile:
-                try {
-                    showContactProfile(mDatabase.findSelfContact(false));
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-                break;
-            case R.id.menu_pair:
-                showPairing();
-                break;
-            case R.id.menu_new_group:
-                showNewGroup();
-                break;
-            case R.id.menu_settings:
-                showPreferences();
-                break;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-        return true;
     }
 
     protected void enableUpNavigation() {
@@ -411,9 +405,6 @@ public abstract class BaseActivity extends FragmentActivity {
         startActivity(new Intent(this, XoPreferenceActivity.class));
     }
 
-    public void showPopupForMessageItem(MessageItem messageItem, View messageItemView) {
-    }
-
     /**
      * This class is an implementation of IXoAlertListener which displays alerts inside an AlertDialog.
      * Links and other data inside the message text are tappable.
@@ -481,4 +472,11 @@ public abstract class BaseActivity extends FragmentActivity {
             ((TextView) dialog.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
         }
     }
+
+    public void showPopupForMessageItem(MessageItem messageItem, View messageItemView) {
+    }
+
+    protected abstract int getLayoutResource();
+
+    protected abstract int getMenuResource();
 }
