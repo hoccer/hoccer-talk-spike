@@ -6,17 +6,14 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.TaskStackBuilder;
 import android.content.*;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
-import android.view.*;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
@@ -26,16 +23,13 @@ import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.BackgroundManager;
+import com.hoccer.xo.android.XoAndroidClientConfiguration;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.*;
 import com.hoccer.xo.android.fragment.DeviceContactsInvitationFragment;
 import com.hoccer.xo.android.profile.client.ClientProfileActivity;
 import com.hoccer.xo.android.profile.group.GroupProfileActivity;
-import com.hoccer.xo.android.view.chat.attachments.TransferControlView;
-import net.hockeyapp.android.CrashManager;
-import net.hockeyapp.android.CrashManagerListener;
-import net.hockeyapp.android.Strings;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -46,9 +40,6 @@ public abstract class BaseActivity extends FragmentActivity {
 
     boolean mUpEnabled;
 
-    private TransferControlView mSpinner;
-    private Handler mDialogDismisser;
-    private Dialog mDialog;
     private XoAlertListener mAlertListener;
 
     private boolean mOptionsMenuEnabled = true;
@@ -58,10 +49,7 @@ public abstract class BaseActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(getLayoutResource());
-
-        ActionBar actionBar = getActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-
+        getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         mAlertListener = new XoAlertListener(this);
     }
 
@@ -69,41 +57,7 @@ public abstract class BaseActivity extends FragmentActivity {
     protected void onResume() {
         super.onResume();
 
-        checkForCrashesIfEnabled();
-        checkKeys();
         getClient().registerAlertListener(mAlertListener);
-    }
-
-    private void checkKeys() {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
-        boolean needToRegenerateKey = preferences.getBoolean("NEED_TO_REGENERATE_KEYS", true);
-
-        if (needToRegenerateKey) {
-            createDialog();
-            regenerateKeys();
-        }
-    }
-
-    private void checkForCrashesIfEnabled() {
-        if (XoApplication.getConfiguration().isCrashReportingEnabled()) {
-            CrashManager.register(this, XoApplication.getConfiguration().getHockeyAppId(), new CrashManagerListener() {
-                @Override
-                public String getStringForResource(int resourceID) {
-                    switch (resourceID) {
-                        case Strings.CRASH_DIALOG_TITLE_ID:
-                            return getString(R.string.dialog_report_crash_title);
-                        case Strings.CRASH_DIALOG_MESSAGE_ID:
-                            return getString(R.string.dialog_report_crash_message);
-                        case Strings.CRASH_DIALOG_NEGATIVE_BUTTON_ID:
-                            return getString(R.string.dialog_report_crash_negative);
-                        case Strings.CRASH_DIALOG_POSITIVE_BUTTON_ID:
-                            return getString(R.string.dialog_report_crash_positive);
-                        default:
-                            return super.getStringForResource(resourceID);
-                    }
-                }
-            });
-        }
     }
 
     @Override
@@ -165,6 +119,10 @@ public abstract class BaseActivity extends FragmentActivity {
         return XoApplication.get().getClient().getDatabase();
     }
 
+    public XoAndroidClientConfiguration getConfiguration() {
+        return XoApplication.getConfiguration();
+    }
+
     public void startExternalActivity(Intent intent) {
         if (!canStartActivity(intent)) {
             return;
@@ -204,69 +162,6 @@ public abstract class BaseActivity extends FragmentActivity {
         if (googlePlayServicesErrorDialog != null) {
             googlePlayServicesErrorDialog.show();
         }
-    }
-
-    private void regenerateKeys() {
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    XoApplication.get().getClient().regenerateKeyPair();
-
-                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
-                    SharedPreferences.Editor editor = preferences.edit();
-                    editor.putBoolean("NEED_TO_REGENERATE_KEYS", false);
-                    editor.commit();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                } finally {
-                    mDialogDismisser.sendEmptyMessage(0);
-                }
-            }
-        });
-        t.start();
-    }
-
-    public void createDialog() {
-        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.waiting_dialog, null);
-        mSpinner = (TransferControlView) view.findViewById(R.id.content_progress);
-
-        mDialog = new Dialog(this);
-        mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        mDialog.setContentView(view);
-        mDialog.getWindow()
-                .setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-        mDialog.setCanceledOnTouchOutside(false);
-        mDialog.show();
-        mDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
-            @Override
-            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-                return true;
-            }
-        });
-
-        Handler spinnerStarter = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                mSpinner.prepareToUpload();
-                mSpinner.spin();
-            }
-        };
-        mDialogDismisser = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                try {
-                    mDialog.dismiss();
-                    mSpinner.completeAndGone();
-                } catch (IllegalArgumentException e) {
-                    LOG.error("Dialog is not attached to current activity.");
-                    e.printStackTrace();
-                    //TODO: Once upon a time we will redesign all this stuff... Maybe.
-                }
-            }
-        };
-        spinnerStarter.sendEmptyMessageDelayed(0, 500);
     }
 
     public void setOptionsMenuEnabled(boolean optionsMenuEnabled) {
