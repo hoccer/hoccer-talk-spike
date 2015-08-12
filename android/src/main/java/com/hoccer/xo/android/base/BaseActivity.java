@@ -55,13 +55,10 @@ public abstract class BaseActivity extends FragmentActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        LOG.debug("onCreate()");
         super.onCreate(savedInstanceState);
 
-        // set layout
         setContentView(getLayoutResource());
 
-        // get and configure the action bar
         ActionBar actionBar = getActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
 
@@ -71,6 +68,7 @@ public abstract class BaseActivity extends FragmentActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
         checkForCrashesIfEnabled();
         checkKeys();
         getClient().registerAlertListener(mAlertListener);
@@ -79,6 +77,7 @@ public abstract class BaseActivity extends FragmentActivity {
     @Override
     protected void onPause() {
         super.onPause();
+
         getClient().unregisterAlertListener(mAlertListener);
     }
 
@@ -144,7 +143,7 @@ public abstract class BaseActivity extends FragmentActivity {
             BackgroundManager.get().ignoreNextBackgroundPhase();
         } catch (ActivityNotFoundException e) {
             Toast.makeText(this, R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
-            e.printStackTrace();
+            LOG.error(e.getMessage());
         }
     }
 
