@@ -70,9 +70,7 @@ public abstract class BaseActivity extends FragmentActivity {
 
     @Override
     protected void onResume() {
-        LOG.debug("onResume()");
         super.onResume();
-
         checkForCrashesIfEnabled();
         checkKeys();
         getClient().registerAlertListener(mAlertListener);
@@ -80,22 +78,12 @@ public abstract class BaseActivity extends FragmentActivity {
 
     @Override
     protected void onPause() {
-        LOG.debug("onPause()");
         super.onPause();
-
         getClient().unregisterAlertListener(mAlertListener);
     }
 
     @Override
-    protected void onDestroy() {
-        LOG.debug("onDestroy()");
-        super.onDestroy();
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        LOG.debug("onCreateOptionsMenu()");
-
         if (mOptionsMenuEnabled) {
             getMenuInflater().inflate(R.menu.common, menu);
 
@@ -112,7 +100,6 @@ public abstract class BaseActivity extends FragmentActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        LOG.debug("onOptionsItemSelected(" + item + ")");
         switch (item.getItemId()) {
             case android.R.id.home:
                 navigateUp();
@@ -144,7 +131,6 @@ public abstract class BaseActivity extends FragmentActivity {
     }
 
     public void startExternalActivity(Intent intent) {
-        LOG.debug(getClass() + " starting external activity " + intent);
         if (!canStartActivity(intent)) {
             return;
         }
@@ -338,13 +324,11 @@ public abstract class BaseActivity extends FragmentActivity {
     }
 
     public void showNewGroup() {
-        LOG.debug("showNewGroup()");
         startActivity(new Intent(this, GroupProfileActivity.class)
                 .setAction(GroupProfileActivity.ACTION_CREATE));
     }
 
     public void showPairing() {
-        LOG.debug("showPairing()");
         XoDialogs.showSingleChoiceDialog(
                 "SelectPairingMethod",
                 R.string.dialog_add_contact_type_title,
