@@ -96,12 +96,6 @@ public abstract class BaseActivity extends FragmentActivity {
                     e.printStackTrace();
                 }
                 break;
-            case R.id.menu_pair:
-                showPairing();
-                break;
-            case R.id.menu_new_group:
-                showNewGroup();
-                break;
             case R.id.menu_settings:
                 showPreferences();
                 break;
