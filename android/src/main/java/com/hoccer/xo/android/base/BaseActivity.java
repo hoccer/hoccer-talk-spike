@@ -40,7 +40,7 @@ public abstract class BaseActivity extends FragmentActivity {
 
     boolean mUpEnabled;
 
-    private ServerAlertHandler mAlertListener;
+    private ServerAlertHandler mServerAlertHandler;
 
     private boolean mOptionsMenuEnabled = true;
 
@@ -50,21 +50,21 @@ public abstract class BaseActivity extends FragmentActivity {
 
         setContentView(getLayoutResource());
         getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        mAlertListener = new ServerAlertHandler();
+        mServerAlertHandler = new ServerAlertHandler();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        getClient().registerAlertListener(mAlertListener);
+        getClient().registerAlertListener(mServerAlertHandler);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
 
-        getClient().unregisterAlertListener(mAlertListener);
+        getClient().unregisterAlertListener(mServerAlertHandler);
     }
 
     @Override
