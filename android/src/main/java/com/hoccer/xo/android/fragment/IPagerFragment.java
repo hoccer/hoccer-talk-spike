@@ -9,6 +9,7 @@ import android.view.View;
  * @see com.hoccer.xo.android.activity.component.ViewPagerActivityComponent
  */
 public interface IPagerFragment {
+
     /*
      * This method is called initially by the ViewPager.
      * @see getTabName()
@@ -25,28 +26,15 @@ public interface IPagerFragment {
     String getTabName(Resources resources);
 
     /*
-     * @see android.app.Activity.onResume
-     */
-    void onPageResume();
-
-    /*
-     * @see android.app.ActionBar.TabListener.onTabSelected
-     * @see android.support.v4.view.ViewPager.OnPageChangeListener.onPageSelected
-     */
-    void onPageSelected();
-
-    /*
-     * android.app.ActionBar.TabListener.onTabUnselected
-     */
-    void onPageUnselected();
-
-    /*
-     * @see android.app.Activity.onPause
-     */
-    void onPagePause();
-
-    /*
      * @see android.support.v4.view.ViewPager.OnPageChangeListener.onPageScrollStateChanged
      */
     void onPageScrollStateChanged(int state);
+
+    void onTabSelected();
+
+    void onTabUnselected();
+
+    void onPageSelected();
+
+    void onPageUnselected();
 }

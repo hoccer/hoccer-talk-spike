@@ -141,4 +141,8 @@ public class NearbyController implements BackgroundManager.Listener {
     public boolean locationServicesEnabled() {
         return mNearbyEnvironmentUpdater.locationServicesEnabled();
     }
+
+    public boolean isNearbyEnabled() {
+        return mNearbyEnabled;
+    }
 }
