@@ -130,6 +130,10 @@ public abstract class BaseActivity extends FragmentActivity {
         return XoApplication.get().getClient();
     }
 
+    public XoClientDatabase getDatabase() {
+        return XoApplication.get().getClient().getDatabase();
+    }
+
     public void startExternalActivity(Intent intent) {
         if (!canStartActivity(intent)) {
             return;
@@ -302,10 +306,6 @@ public abstract class BaseActivity extends FragmentActivity {
         } else {
             onBackPressed();
         }
-    }
-
-    public XoClientDatabase getDatabase() {
-        return XoApplication.get().getClient().getDatabase();
     }
 
     public void showContactProfile(TalkClientContact contact) {
