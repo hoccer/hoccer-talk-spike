@@ -558,7 +558,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
 
     private void showSelectAttachmentDialog() {
         DialogFragment dialogFragment = new ContentSelectionDialogFragment();
-        dialogFragment.setTargetFragment(this, REQUEST_SELECT_ATTACHMENT);
+        dialogFragment.setTargetFragment(this, -1);
         dialogFragment.show(getActivity().getSupportFragmentManager(), DIALOG_TAG);
     }
 

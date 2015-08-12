@@ -8,7 +8,6 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.talk.content.SelectedFile;
-import com.hoccer.xo.android.content.ContentSelection;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 
@@ -50,6 +49,6 @@ public class AudioSelector implements IContentSelector {
     }
 
     private boolean isMimeTypeAudio(Context context, Intent intent) {
-        return ContentSelection.isMimeTypeAudio(UriUtils.getMimeType(context, intent.getData()));
+        return ContentSelectorFactory.isMimeTypeAudio(UriUtils.getMimeType(context, intent.getData()));
     }
 }
