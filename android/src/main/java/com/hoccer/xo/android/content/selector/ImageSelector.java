@@ -9,6 +9,7 @@ import android.provider.MediaStore;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.content.ContentSelection;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import org.apache.log4j.Logger;
@@ -57,8 +58,7 @@ public class ImageSelector implements IContentSelector {
     }
 
     private boolean isMimeTypeImage(Context context, Intent intent) {
-        String mimeType = UriUtils.getMimeType(context, intent.getData());
-        return mimeType.startsWith("image");
+        return ContentSelection.isMimeTypeImage(UriUtils.getMimeType(context, intent.getData()));
     }
 
     protected void setName(String name) {

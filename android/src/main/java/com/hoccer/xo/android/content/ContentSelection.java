@@ -20,17 +20,33 @@ public class ContentSelection {
     }
 
     public static IContentSelector createContentSelectorByMimeType(String mimeType, Context context) throws Exception {
-        if (mimeType.startsWith("image/")) {
+        if (isMimeTypeImage(mimeType)) {
             return new ImageSelector(context);
-        } else if (mimeType.startsWith("video/")) {
+        } else if (isMimeTypeVideo(mimeType)) {
             return new VideoSelector(context);
-        } else if (mimeType.startsWith("audio/") || mimeType.startsWith("application/ogg")) {
+        } else if (isMimeTypeAudio(mimeType)) {
             return new AudioSelector(context);
-        } else if (mimeType.startsWith("vnd.android.cursor.item/contact")) {
+        } else if (isMimeTypeContact(mimeType)) {
             return new ContactSelector(context);
         } else {
             throw new Exception("Content is not supported.");
         }
+    }
+
+    public static boolean isMimeTypeContact(String mimeType) {
+        return mimeType.startsWith("vnd.android.cursor.item/contact");
+    }
+
+    public static boolean isMimeTypeAudio(String mimeType) {
+        return mimeType.startsWith("audio/") || mimeType.startsWith("application/ogg");
+    }
+
+    public static boolean isMimeTypeVideo(String mimeType) {
+        return mimeType.startsWith("video/");
+    }
+
+    public static boolean isMimeTypeImage(String mimeType) {
+        return mimeType.startsWith("image/");
     }
 
 }
