@@ -28,7 +28,7 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
     private void activateWorldwide() {
         WorldwideController.get().activateWorldwide();
 
-        TalkClientContact group = XoApplication.get().getXoClient().getCurrentWorldwideGroup();
+        TalkClientContact group = XoApplication.get().getClient().getCurrentWorldwideGroup();
         createAdapter();
         mListAdapter.scheduleUpdate(group);
 

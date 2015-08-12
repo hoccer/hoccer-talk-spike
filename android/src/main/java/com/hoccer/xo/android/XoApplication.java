@@ -288,7 +288,7 @@ public class XoApplication extends Application {
         return mExecutor;
     }
 
-    public XoAndroidClient getXoClient() {
+    public XoAndroidClient getClient() {
         return mClient;
     }
 

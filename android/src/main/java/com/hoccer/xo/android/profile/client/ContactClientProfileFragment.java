@@ -91,8 +91,8 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
     public void onResume() {
         super.onResume();
 
-        XoApplication.get().getXoClient().registerContactListener(this);
-        XoApplication.get().getXoClient().registerMessageListener(this);
+        XoApplication.get().getClient().registerContactListener(this);
+        XoApplication.get().getClient().registerMessageListener(this);
 
         updateMessageText();
     }
@@ -101,8 +101,8 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
     public void onPause() {
         super.onPause();
 
-        XoApplication.get().getXoClient().unregisterContactListener(this);
-        XoApplication.get().getXoClient().unregisterMessageListener(this);
+        XoApplication.get().getClient().unregisterContactListener(this);
+        XoApplication.get().getClient().unregisterMessageListener(this);
     }
 
     private void updateMessageTextOnUiThread() {
@@ -222,17 +222,17 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
     }
 
     private void deleteContact() {
-        XoApplication.get().getXoClient().deleteContact(mContact);
+        XoApplication.get().getClient().deleteContact(mContact);
     }
 
     private void declineAndDiscardContact() {
         if (mContact.getClientRelationship() != null && mContact.getClientRelationship().invitedMe()) {
-            XoApplication.get().getXoClient().declineFriend(mContact);
+            XoApplication.get().getClient().declineFriend(mContact);
         } else if (mContact.getClientRelationship() != null && mContact.getClientRelationship().isInvited()) {
-            XoApplication.get().getXoClient().disinviteFriend(mContact);
+            XoApplication.get().getClient().disinviteFriend(mContact);
         }
         if (mContact.isClientBlocked() && mContact.isKept()) {
-            XoApplication.get().getXoClient().deleteContact(mContact);
+            XoApplication.get().getClient().deleteContact(mContact);
         }
         discardContact();
     }
@@ -240,7 +240,7 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
     private void discardContact() {
         mContact.getClientPresence().setKept(false);
         try {
-            XoApplication.get().getXoClient().getDatabase().savePresence(mContact.getClientPresence());
+            XoApplication.get().getClient().getDatabase().savePresence(mContact.getClientPresence());
         } catch (SQLException e) {
             LOG.error("sql error", e);
         } catch (NoClientIdInPresenceException e) {
@@ -250,7 +250,7 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
 
     protected void updateMessageText() {
         try {
-            int count = (int) XoApplication.get().getXoClient().getDatabase().getMessageCountByContactId(mContact.getClientContactId());
+            int count = (int) XoApplication.get().getClient().getDatabase().getMessageCountByContactId(mContact.getClientContactId());
             updateMessageText(count);
         } catch (SQLException e) {
             LOG.error("SQL Error fetching message count from database.", e);
@@ -326,7 +326,7 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
             inviteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    XoApplication.get().getXoClient().inviteFriend(contact);
+                    XoApplication.get().getClient().inviteFriend(contact);
                 }
             });
         } else if (contact.getClientRelationship().isInvited()) {
@@ -334,7 +334,7 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
             inviteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    XoApplication.get().getXoClient().disinviteFriend(contact);
+                    XoApplication.get().getClient().disinviteFriend(contact);
                 }
             });
         } else if (contact.getClientRelationship().invitedMe()) {
@@ -342,7 +342,7 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
             inviteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    XoApplication.get().getXoClient().acceptFriend(contact);
+                    XoApplication.get().getClient().acceptFriend(contact);
                 }
             });
         } else {
@@ -361,7 +361,7 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
             declineButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    XoApplication.get().getXoClient().declineFriend(contact);
+                    XoApplication.get().getClient().declineFriend(contact);
                 }
             });
         } else {
@@ -394,7 +394,7 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
                 String nickname = mNicknameEditText.getText().toString();
                 mContact.setNickname(nickname);
                 try {
-                    XoApplication.get().getXoClient().getDatabase().saveContact(mContact);
+                    XoApplication.get().getClient().getDatabase().saveContact(mContact);
                 } catch (SQLException e) {
                     LOG.error("error while saving nickname to contact " + mContact.getClientId(), e);
                 }
@@ -436,7 +436,7 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        XoApplication.get().getXoClient().blockContact(mContact);
+                        XoApplication.get().getClient().blockContact(mContact);
                     }
                 }
         );
@@ -444,7 +444,7 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
 
     private void unblockContact() {
         LOG.debug("unblockContact()");
-        XoApplication.get().getXoClient().unblockContact(mContact);
+        XoApplication.get().getClient().unblockContact(mContact);
         getActivity().finish();
     }
 

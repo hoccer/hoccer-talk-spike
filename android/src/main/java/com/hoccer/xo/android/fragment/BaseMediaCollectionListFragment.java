@@ -71,7 +71,7 @@ public abstract class BaseMediaCollectionListFragment extends ListFragment {
 
     private static void addNewMediaCollection(String name) {
         try {
-            XoApplication.get().getXoClient().getDatabase().createMediaCollection(name);
+            XoApplication.get().getClient().getDatabase().createMediaCollection(name);
         } catch (SQLException e) {
             LOG.error("Creating new media collection failed.", e);
         }

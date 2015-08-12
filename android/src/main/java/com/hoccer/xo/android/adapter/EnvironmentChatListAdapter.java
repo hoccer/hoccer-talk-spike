@@ -55,7 +55,7 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
         super();
         mEnvironmentType = environmentType;
         mBaseActivity = activity;
-        mDatabase = XoApplication.get().getXoClient().getDatabase();
+        mDatabase = XoApplication.get().getClient().getDatabase();
         mExecutor = XoApplication.get().getExecutor();
     }
 
@@ -84,17 +84,17 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
     }
 
     public void registerListeners() {
-        XoApplication.get().getXoClient().registerContactListener(this);
-        XoApplication.get().getXoClient().registerMessageListener(this);
-        XoApplication.get().getXoClient().getDownloadAgent().registerListener(this);
-        XoApplication.get().getXoClient().getUploadAgent().registerListener(this);
+        XoApplication.get().getClient().registerContactListener(this);
+        XoApplication.get().getClient().registerMessageListener(this);
+        XoApplication.get().getClient().getDownloadAgent().registerListener(this);
+        XoApplication.get().getClient().getUploadAgent().registerListener(this);
     }
 
     public void unregisterListeners() {
-        XoApplication.get().getXoClient().unregisterContactListener(this);
-        XoApplication.get().getXoClient().unregisterMessageListener(this);
-        XoApplication.get().getXoClient().getDownloadAgent().unregisterListener(this);
-        XoApplication.get().getXoClient().getUploadAgent().unregisterListener(this);
+        XoApplication.get().getClient().unregisterContactListener(this);
+        XoApplication.get().getClient().unregisterMessageListener(this);
+        XoApplication.get().getClient().getDownloadAgent().unregisterListener(this);
+        XoApplication.get().getClient().getUploadAgent().unregisterListener(this);
     }
 
     private void updateContact(final View view, final TalkClientContact contact) {
@@ -274,9 +274,9 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
     @Nullable
     private TalkClientContact getCurrentEnvironmentGroup() {
         if (TalkEnvironment.TYPE_WORLDWIDE.equals(mEnvironmentType)) {
-            return XoApplication.get().getXoClient().getCurrentWorldwideGroup();
+            return XoApplication.get().getClient().getCurrentWorldwideGroup();
         } else {
-            return XoApplication.get().getXoClient().getCurrentNearbyGroup();
+            return XoApplication.get().getClient().getCurrentNearbyGroup();
         }
     }
 

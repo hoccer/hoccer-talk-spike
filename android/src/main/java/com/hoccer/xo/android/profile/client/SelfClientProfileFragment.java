@@ -110,10 +110,10 @@ public class SelfClientProfileFragment extends ClientProfileFragment implements 
         int blockedCount = 0;
         int groupsCount = 0;
         try {
-            friendsCount = XoApplication.get().getXoClient().getDatabase().findClientContactsByState(TalkRelationship.STATE_FRIEND).size();
-            blockedCount = XoApplication.get().getXoClient().getDatabase().findClientContactsByState(TalkRelationship.STATE_BLOCKED).size();
+            friendsCount = XoApplication.get().getClient().getDatabase().findClientContactsByState(TalkRelationship.STATE_FRIEND).size();
+            blockedCount = XoApplication.get().getClient().getDatabase().findClientContactsByState(TalkRelationship.STATE_BLOCKED).size();
 
-            List<TalkClientContact> joinedGroups = XoApplication.get().getXoClient().getDatabase().findGroupContactsByMembershipState(TalkGroupMembership.STATE_JOINED);
+            List<TalkClientContact> joinedGroups = XoApplication.get().getClient().getDatabase().findGroupContactsByMembershipState(TalkGroupMembership.STATE_JOINED);
             CollectionUtils.filterInverse(joinedGroups, TalkClientContactPredicates.IS_ENVIRONMENT_GROUP_PREDICATE);
             groupsCount = joinedGroups.size();
         } catch (SQLException e) {
@@ -207,8 +207,8 @@ public class SelfClientProfileFragment extends ClientProfileFragment implements 
                 TalkClientUpload upload = new TalkClientUpload();
                 upload.initializeAsAvatar(avatar);
                 try {
-                    XoApplication.get().getXoClient().getDatabase().saveClientUpload(upload);
-                    XoApplication.get().getXoClient().setClientAvatar(upload);
+                    XoApplication.get().getClient().getDatabase().saveClientUpload(upload);
+                    XoApplication.get().getClient().setClientAvatar(upload);
                 } catch (SQLException e) {
                     LOG.error("sql error", e);
                 }
@@ -217,7 +217,7 @@ public class SelfClientProfileFragment extends ClientProfileFragment implements 
     }
 
     private void removeAvatar() {
-        XoApplication.get().getXoClient().setClientAvatar(null);
+        XoApplication.get().getClient().setClientAvatar(null);
         updateAvatarView(R.drawable.avatar_contact_large);
     }
 
@@ -231,7 +231,7 @@ public class SelfClientProfileFragment extends ClientProfileFragment implements 
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        XoApplication.get().getXoClient().deleteAccountAndLocalDatabase(getActivity());
+                        XoApplication.get().getClient().deleteAccountAndLocalDatabase(getActivity());
                         exitApplication();
                     }
                 }, null);
@@ -259,7 +259,7 @@ public class SelfClientProfileFragment extends ClientProfileFragment implements 
         mAccountDeletionButton.setOnClickListener(null);
         mAvatarImage.setOnClickListener(null);
 
-        XoApplication.get().getXoClient().setClientString(newUserName, "happier");
+        XoApplication.get().getClient().setClientString(newUserName, "happier");
 
         refreshContactFromDatabase();
         updateContent();

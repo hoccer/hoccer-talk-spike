@@ -66,7 +66,7 @@ public abstract class MessagesAdapter extends BaseAdapter {
     }
 
     public XoClient getXoClient() {
-        return XoApplication.get().getXoClient();
+        return XoApplication.get().getClient();
     }
 
     public File getAvatarDirectory() {

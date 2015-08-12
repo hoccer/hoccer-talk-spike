@@ -96,7 +96,7 @@ public class ContactMessageItem extends MessageItem {
         Uri fileUri = UriUtils.getAbsoluteFileUri(mAttachment.getFilePath());
         InputStream inputStream;
         try {
-            inputStream = XoApplication.get().getXoClient().getHost().openInputStreamForUrl(fileUri.toString());
+            inputStream = XoApplication.get().getClient().getHost().openInputStreamForUrl(fileUri.toString());
         } catch (IOException e) {
             LOG.error("Could not open VCard at " + mAttachment.getFilePath(), e);
             return;

@@ -73,7 +73,7 @@ public class HistoryFragment extends XoChatListFragment {
                                 @Override
                                 public void onClick(DialogInterface dialog, int id) {
                                     try {
-                                        XoApplication.get().getXoClient().getDatabase().deleteAllMessagesFromContactId(chatItem.getConversationContactId());
+                                        XoApplication.get().getClient().getDatabase().deleteAllMessagesFromContactId(chatItem.getConversationContactId());
                                         mAdapter.requestReload();
                                     } catch (SQLException e) {
                                         e.printStackTrace();
@@ -95,7 +95,7 @@ public class HistoryFragment extends XoChatListFragment {
         if (getArguments() != null && getArguments().getInt(ARG_CLIENT_CONTACT_ID, 0) > 0) {
             int contactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
             try {
-                TalkClientContact contact = XoApplication.get().getXoClient().getDatabase().findContactById(contactId);
+                TalkClientContact contact = XoApplication.get().getClient().getDatabase().findContactById(contactId);
                 mHistoryId = contact.isClient() ? contact.getClientId() : contact.getGroupId();
                 mAdapter = new HistoryMessagesAdapter(getListView(), (BaseActivity) getActivity(), contact);
             } catch (SQLException e) {

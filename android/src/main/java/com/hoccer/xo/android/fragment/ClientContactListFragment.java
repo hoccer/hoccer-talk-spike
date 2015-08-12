@@ -55,7 +55,7 @@ public class ClientContactListFragment extends ContactListFragment {
     @Override
     protected int getInvitedMeCount() {
         try {
-            return (int) XoApplication.get().getXoClient().getDatabase().getCountOfInvitedMeClients();
+            return (int) XoApplication.get().getClient().getDatabase().getCountOfInvitedMeClients();
         } catch (SQLException e) {
             LOG.error("Error getting invitation count", e);
         }

@@ -52,8 +52,8 @@ public abstract class ContactListFragment extends SearchablePagerListFragment im
         mContactListAdapter = createAdapter();
         setListAdapter(mContactListAdapter);
 
-        XoApplication.get().getXoClient().registerContactListener(mContactListAdapter);
-        XoApplication.get().getXoClient().registerContactListener(this);
+        XoApplication.get().getClient().registerContactListener(mContactListAdapter);
+        XoApplication.get().getClient().registerContactListener(this);
     }
 
     protected abstract ContactListAdapter createAdapter();
@@ -110,8 +110,8 @@ public abstract class ContactListFragment extends SearchablePagerListFragment im
     @Override
     public void onDestroy() {
         super.onDestroy();
-        XoApplication.get().getXoClient().unregisterContactListener(mContactListAdapter);
-        XoApplication.get().getXoClient().unregisterContactListener(this);
+        XoApplication.get().getClient().unregisterContactListener(mContactListAdapter);
+        XoApplication.get().getClient().unregisterContactListener(this);
     }
 
     @Override

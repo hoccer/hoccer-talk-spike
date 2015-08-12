@@ -94,7 +94,7 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
         if (getArguments() != null) {
             try {
                 int clientContactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
-                mContact = XoApplication.get().getXoClient().getDatabase().findContactById(clientContactId);
+                mContact = XoApplication.get().getClient().getDatabase().findContactById(clientContactId);
             } catch (SQLException e) {
                 LOG.error("sql error", e);
             }
@@ -377,7 +377,7 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
     private static boolean isGroupEmpty(TalkClientContact contact) {
         final List<TalkClientContact> otherContactsInGroup;
         try {
-            otherContactsInGroup = XoApplication.get().getXoClient().getDatabase().findContactsInGroupByState(contact.getGroupId(),
+            otherContactsInGroup = XoApplication.get().getClient().getDatabase().findContactsInGroupByState(contact.getGroupId(),
                     TalkGroupMembership.STATE_JOINED);
             CollectionUtils.filterInverse(otherContactsInGroup, TalkClientContactPredicates.IS_SELF_PREDICATE);
             return otherContactsInGroup.isEmpty();
@@ -408,8 +408,8 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
 
     private void sendMessage() {
         String messageText = mTextField.getText().toString();
-        TalkClientMessage message = XoApplication.get().getXoClient().composeClientMessage(mContact, messageText);
-        XoApplication.get().getXoClient().sendMessage(message.getMessageTag());
+        TalkClientMessage message = XoApplication.get().getClient().composeClientMessage(mContact, messageText);
+        XoApplication.get().getClient().sendMessage(message.getMessageTag());
         clearComposedMessage();
         mLastMessage = messageText;
     }
@@ -428,7 +428,7 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
             protected List<TalkClientUpload> doInBackground(List<TalkClientUpload>... args) {
                 List<TalkClientUpload> uploads = args[0];
                 try {
-                    if (XoApplication.get().getXoClient().isEncodingNecessary()) {
+                    if (XoApplication.get().getClient().isEncodingNecessary()) {
                         for (TalkClientUpload upload : uploads) {
                             if (upload.getMediaType().equals(ContentMediaType.IMAGE)) {
                                 compressImageAttachment(upload);
@@ -490,20 +490,20 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
 
     private void sendMessageWithAttachments(List<TalkClientUpload> uploads) {
         String messageText = mTextField.getText().toString();
-        List<TalkClientMessage> messages = XoApplication.get().getXoClient().composeClientMessage(mContact, messageText, uploads);
+        List<TalkClientMessage> messages = XoApplication.get().getClient().composeClientMessage(mContact, messageText, uploads);
         List<String> messageTags = new ArrayList<String>();
 
         for (TalkClientMessage message : messages) {
             messageTags.add(message.getMessageTag());
 
         }
-        XoApplication.get().getXoClient().sendMessages(messageTags);
+        XoApplication.get().getClient().sendMessages(messageTags);
         clearComposedMessage();
         mLastMessage = messageText;
     }
 
     private boolean sizeExceedsUploadLimit(long attachmentSize) {
-        int transferLimit = XoApplication.get().getXoClient().getUploadLimit();
+        int transferLimit = XoApplication.get().getClient().getUploadLimit();
         if (transferLimit < 0) {
             if (transferLimit == -1) {
                 return false;
@@ -541,12 +541,12 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
         final File imageFile = new File(fileUri.getPath());
         final File compressedImageFile = new File(XoApplication.getCacheStorage(), imageFile.getName());
 
-        Bitmap bitmap = ImageUtils.resizeImageToMaxPixelCount(imageFile, XoApplication.get().getXoClient().getImageUploadMaxPixelCount());
+        Bitmap bitmap = ImageUtils.resizeImageToMaxPixelCount(imageFile, XoApplication.get().getClient().getImageUploadMaxPixelCount());
         if (bitmap == null) {
             throw new IOException("Could not resize image '" + imageFile.getAbsolutePath() + "' to bitmap");
         }
 
-        boolean success = ImageUtils.compressBitmapToFile(bitmap, compressedImageFile, XoApplication.get().getXoClient().getImageUploadEncodingQuality(),
+        boolean success = ImageUtils.compressBitmapToFile(bitmap, compressedImageFile, XoApplication.get().getClient().getImageUploadEncodingQuality(),
                 Bitmap.CompressFormat.JPEG);
         if (!success) {
             throw new IOException("Could not compress bitmap to '" + compressedImageFile.getAbsolutePath() + "'");
@@ -609,7 +609,7 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
             boolean longPressHandled = false;
             if (mLastMessage != null) {
                 for (int i = 0; i < STRESS_TEST_MESSAGE_COUNT; i++) {
-                    XoApplication.get().getXoClient().sendMessage(XoApplication.get().getXoClient().composeClientMessage(mContact, mLastMessage + " " + Integer.toString(i)).getMessageTag());
+                    XoApplication.get().getClient().sendMessage(XoApplication.get().getClient().composeClientMessage(mContact, mLastMessage + " " + Integer.toString(i)).getMessageTag());
                 }
                 longPressHandled = true;
                 clearComposedMessage();

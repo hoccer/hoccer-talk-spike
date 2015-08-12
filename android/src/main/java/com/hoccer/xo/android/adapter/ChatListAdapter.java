@@ -59,7 +59,7 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
     public ChatListAdapter(BaseActivity activity, @Nullable Filter filter) {
         mActivity = activity;
         mFilter = filter;
-        mXoClient = XoApplication.get().getXoClient();
+        mXoClient = XoApplication.get().getClient();
         mDatabase = mXoClient.getDatabase();
     }
 

@@ -56,7 +56,7 @@ public abstract class ProfileFragment extends Fragment {
         if (getArguments() != null && getArguments().containsKey(ARG_CLIENT_CONTACT_ID)) {
             try {
                 int contactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
-                return XoApplication.get().getXoClient().getDatabase().findContactById(contactId);
+                return XoApplication.get().getClient().getDatabase().findContactById(contactId);
             } catch (SQLException e) {
                 LOG.error("SQL error while retrieving contact ", e);
             }

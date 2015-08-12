@@ -84,7 +84,7 @@ public class GroupProfileFragment extends ProfileFragment
         public boolean shouldShow(TalkClientContact contact) {
             try {
                 if (contact.isClient()) {
-                    TalkGroupMembership membership = XoApplication.get().getXoClient().getDatabase().findMembershipInGroupByClientId(mContact.getGroupId(), contact.getClientId());
+                    TalkGroupMembership membership = XoApplication.get().getClient().getDatabase().findMembershipInGroupByClientId(mContact.getGroupId(), contact.getClientId());
                     if (membership != null) {
                         return membership.isInvited() || membership.isJoined();
                     }
@@ -147,7 +147,7 @@ public class GroupProfileFragment extends ProfileFragment
     public void onResume() {
         super.onResume();
 
-        XoApplication.get().getXoClient().registerContactListener(this);
+        XoApplication.get().getClient().registerContactListener(this);
 
         mMode = Mode.PROFILE;
 
@@ -187,7 +187,7 @@ public class GroupProfileFragment extends ProfileFragment
     @Override
     public void onPause() {
         super.onPause();
-        XoApplication.get().getXoClient().unregisterContactListener(this);
+        XoApplication.get().getClient().unregisterContactListener(this);
     }
 
     class BackPressListener implements View.OnKeyListener {
@@ -308,7 +308,7 @@ public class GroupProfileFragment extends ProfileFragment
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
-                                XoApplication.get().getXoClient().leaveGroup(mContact.getGroupId());
+                                XoApplication.get().getClient().leaveGroup(mContact.getGroupId());
                                 getActivity().finish();
                             }
                         });
@@ -346,7 +346,7 @@ public class GroupProfileFragment extends ProfileFragment
         if (mContact.getGroupPresence() != null) {
             mContact.getGroupPresence().setKept(false);
             try {
-                XoApplication.get().getXoClient().getDatabase().saveGroupPresence(mContact.getGroupPresence());
+                XoApplication.get().getClient().getDatabase().saveGroupPresence(mContact.getGroupPresence());
             } catch (SQLException e) {
                 LOG.error("SQL error", e);
             }
@@ -360,7 +360,7 @@ public class GroupProfileFragment extends ProfileFragment
         }
         mNameText.setText(newGroupName);
 
-        XoApplication.get().getXoClient().setGroupName(mContact, newGroupName);
+        XoApplication.get().getClient().setGroupName(mContact, newGroupName);
     }
 
     protected void updateViews() {
@@ -378,7 +378,7 @@ public class GroupProfileFragment extends ProfileFragment
 
     protected void updateMessageText() {
         try {
-            int count = (int) XoApplication.get().getXoClient().getDatabase().getMessageCountByContactId(mContact.getClientContactId());
+            int count = (int) XoApplication.get().getClient().getDatabase().getMessageCountByContactId(mContact.getClientContactId());
             updateMessageText(count);
         } catch (SQLException e) {
             LOG.error("SQL Error fetching message count from database.", e);
@@ -400,7 +400,7 @@ public class GroupProfileFragment extends ProfileFragment
         } else {
             int membershipCount = 0;
             try {
-                membershipCount = XoApplication.get().getXoClient().getDatabase().findMembershipsInGroup(mContact.getGroupId()).size();
+                membershipCount = XoApplication.get().getClient().getDatabase().findMembershipsInGroup(mContact.getGroupId()).size();
             } catch (SQLException e) {
                 LOG.error("SQL error", e);
             }
@@ -488,13 +488,13 @@ public class GroupProfileFragment extends ProfileFragment
 
     private void refreshContact() {
         try {
-            XoApplication.get().getXoClient().getDatabase().refreshClientContact(mContact);
+            XoApplication.get().getClient().getDatabase().refreshClientContact(mContact);
             if (mMode == Mode.PROFILE) {
                 if (mContact.getAvatarDownload() != null) {
-                    XoApplication.get().getXoClient().getDatabase().refreshClientDownload(mContact.getAvatarDownload());
+                    XoApplication.get().getClient().getDatabase().refreshClientDownload(mContact.getAvatarDownload());
                 }
                 if (mContact.getAvatarUpload() != null) {
-                    XoApplication.get().getXoClient().getDatabase().refreshClientUpload(mContact.getAvatarUpload());
+                    XoApplication.get().getClient().getDatabase().refreshClientUpload(mContact.getAvatarUpload());
                 }
             }
         } catch (SQLException e) {
@@ -550,12 +550,12 @@ public class GroupProfileFragment extends ProfileFragment
         List<Integer> contactIdsToInvite = (List<Integer>) CollectionUtils.subtract(selectedContactIds, transformToContactIds(mGroupMemberAdapter.getContacts()));
 
         for (int contactId : contactIdsToInvite) {
-            TalkClientContact contact = XoApplication.get().getXoClient().getDatabase().findContactById(contactId);
-            XoApplication.get().getXoClient().inviteClientToGroup(mContact.getGroupId(), contact.getClientId());
+            TalkClientContact contact = XoApplication.get().getClient().getDatabase().findContactById(contactId);
+            XoApplication.get().getClient().inviteClientToGroup(mContact.getGroupId(), contact.getClientId());
         }
         for (int contactId : contactIdsToKick) {
-            TalkClientContact contact = XoApplication.get().getXoClient().getDatabase().findContactById(contactId);
-            XoApplication.get().getXoClient().kickClientFromGroup(mContact.getGroupId(), contact.getClientId());
+            TalkClientContact contact = XoApplication.get().getClient().getDatabase().findContactById(contactId);
+            XoApplication.get().getClient().kickClientFromGroup(mContact.getGroupId(), contact.getClientId());
         }
     }
 
@@ -626,14 +626,14 @@ public class GroupProfileFragment extends ProfileFragment
         mContactsToDisinviteAsFriend.clear();
         mContactsToDisinviteAsFriend.addAll(mContactsToInviteAsFriend);
         for (TalkClientContact contact : mContactsToInviteAsFriend) {
-            XoApplication.get().getXoClient().inviteFriend(contact);
+            XoApplication.get().getClient().inviteFriend(contact);
         }
         updateFriendsRequestMenuItem();
     }
 
     private void disinviteAllMembersAsFriends() {
         for (TalkClientContact contact : mContactsToDisinviteAsFriend) {
-            XoApplication.get().getXoClient().disinviteFriend(contact);
+            XoApplication.get().getClient().disinviteFriend(contact);
         }
         mContactsToDisinviteAsFriend.clear();
         updateFriendsRequestMenuItem();
@@ -680,13 +680,13 @@ public class GroupProfileFragment extends ProfileFragment
             TalkClientUpload upload = new TalkClientUpload();
             upload.initializeAsAvatar(avatar);
             try {
-                XoApplication.get().getXoClient().getDatabase().saveClientUpload(upload);
-                XoApplication.get().getXoClient().setGroupAvatar(mContact, upload);
+                XoApplication.get().getClient().getDatabase().saveClientUpload(upload);
+                XoApplication.get().getClient().setGroupAvatar(mContact, upload);
             } catch (SQLException e) {
                 LOG.error("sql error", e);
             }
         } else {
-            XoApplication.get().getXoClient().setGroupAvatar(mContact, null);
+            XoApplication.get().getClient().setGroupAvatar(mContact, null);
         }
     }
 
@@ -738,7 +738,7 @@ public class GroupProfileFragment extends ProfileFragment
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
-                                XoApplication.get().getXoClient().deleteContact(mContact);
+                                XoApplication.get().getClient().deleteContact(mContact);
                                 getActivity().finish();
                             }
                         },

@@ -62,7 +62,7 @@ public class MessageItem implements AttachmentTransferListener {
     public MessageItem(Context context, TalkClientMessage message) {
         super();
         mContext = context;
-        mDatabase = XoApplication.get().getXoClient().getDatabase();
+        mDatabase = XoApplication.get().getClient().getDatabase();
         mMessage = message;
 
         mAttachment = mMessage.getAttachmentUpload();
@@ -484,7 +484,7 @@ public class MessageItem implements AttachmentTransferListener {
                 }
                 break;
             case R.id.menu_delete_message:
-                XoApplication.get().getXoClient().deleteMessage(messageItem.getMessage());
+                XoApplication.get().getClient().deleteMessage(messageItem.getMessage());
                 break;
         }
     }

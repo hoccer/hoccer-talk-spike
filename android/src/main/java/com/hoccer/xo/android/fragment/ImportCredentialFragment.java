@@ -65,7 +65,7 @@ public class ImportCredentialFragment extends Fragment {
                     CredentialImporter.setSrpChangeOnNextLoginFlag(mRegistrationActivity);
 
                     try {
-                        XoApplication.get().getXoClient().importCredentials(mCredentials);
+                        XoApplication.get().getClient().importCredentials(mCredentials);
                     } catch (Exception e) {
                         LOG.error("Importing credentials failed.", e);
                     }

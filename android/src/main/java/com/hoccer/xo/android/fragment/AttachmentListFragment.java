@@ -63,7 +63,7 @@ public class AttachmentListFragment extends SearchableListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mDatabase = XoApplication.get().getXoClient().getDatabase();
+        mDatabase = XoApplication.get().getClient().getDatabase();
         if (getActivity().getIntent().hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
             int contactId = getActivity().getIntent().getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
             if (contactId >= 0) {

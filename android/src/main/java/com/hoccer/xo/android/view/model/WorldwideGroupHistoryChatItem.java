@@ -2,13 +2,11 @@ package com.hoccer.xo.android.view.model;
 
 import android.content.Context;
 import android.view.View;
-import android.view.ViewStub;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.adapter.SearchAdapter;
-import com.hoccer.xo.android.view.avatar.AvatarView;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,7 +34,7 @@ public class WorldwideGroupHistoryChatItem extends ChatItem implements SearchAda
     @Override
     public void update() {
         try {
-            mMessages = XoApplication.get().getXoClient().getDatabase().getAllWorldwideGroupMessages();
+            mMessages = XoApplication.get().getClient().getDatabase().getAllWorldwideGroupMessages();
             mUnseenMessageCount = 0;
             for (TalkClientMessage worldwideMessage : mMessages) {
                 if (worldwideMessage.isIncoming() && !worldwideMessage.isSeen()) {

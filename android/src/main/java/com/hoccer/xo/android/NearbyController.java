@@ -39,11 +39,11 @@ public class NearbyController implements BackgroundManager.Listener {
     }
 
     private NearbyController() {
-        mNearbyEnvironmentUpdater = new NearbyEnvironmentUpdater(XoApplication.get(), XoApplication.get().getXoClient());
+        mNearbyEnvironmentUpdater = new NearbyEnvironmentUpdater(XoApplication.get(), XoApplication.get().getClient());
         mNotificationManager = (NotificationManager) XoApplication.get().getSystemService(Context.NOTIFICATION_SERVICE);
 
         BackgroundManager.get().registerListener(this);
-        XoApplication.get().getXoClient().registerStateListener(new IXoStateListener() {
+        XoApplication.get().getClient().registerStateListener(new IXoStateListener() {
             @Override
             public void onClientStateChange(XoClient client) {
                 if (mNearbyEnabled) {
@@ -96,7 +96,7 @@ public class NearbyController implements BackgroundManager.Listener {
     }
 
     private void startEnvironmentUpdates() {
-        if (XoApplication.get().getXoClient().getState() == XoClient.State.READY) {
+        if (XoApplication.get().getClient().getState() == XoClient.State.READY) {
             LOG.info("start environment updates");
             mNearbyEnvironmentUpdater.start();
             showNotification();

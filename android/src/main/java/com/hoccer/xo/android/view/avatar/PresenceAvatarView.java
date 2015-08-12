@@ -32,7 +32,7 @@ public class PresenceAvatarView extends AvatarView implements IXoContactListener
         mIsAttachedToWindow = true;
         updatePresence();
         if (mContact != null) {
-            XoApplication.get().getXoClient().registerContactListener(this);
+            XoApplication.get().getClient().registerContactListener(this);
         }
     }
 
@@ -41,7 +41,7 @@ public class PresenceAvatarView extends AvatarView implements IXoContactListener
         super.onDetachedFromWindow();
         mIsAttachedToWindow = false;
         if (mContact != null) {
-            XoApplication.get().getXoClient().unregisterContactListener(this);
+            XoApplication.get().getClient().unregisterContactListener(this);
         }
     }
 
@@ -50,11 +50,11 @@ public class PresenceAvatarView extends AvatarView implements IXoContactListener
         if (mIsAttachedToWindow) {
             if (mContact == null) {
                 if (contact != null) {
-                    XoApplication.get().getXoClient().registerContactListener(this);
+                    XoApplication.get().getClient().registerContactListener(this);
                 }
             } else {
                 if (contact == null) {
-                    XoApplication.get().getXoClient().unregisterContactListener(this);
+                    XoApplication.get().getClient().unregisterContactListener(this);
                 }
             }
         }

@@ -49,7 +49,7 @@ public abstract class ContactsAdapter extends BaseAdapter implements IXoContactL
 
     protected ContactsAdapter(BaseActivity activity) {
         mActivity = activity;
-        mDatabase = XoApplication.get().getXoClient().getDatabase();
+        mDatabase = XoApplication.get().getClient().getDatabase();
     }
 
     Filter mFilter;
@@ -65,11 +65,11 @@ public abstract class ContactsAdapter extends BaseAdapter implements IXoContactL
     }
 
     public void registerListeners() {
-        XoApplication.get().getXoClient().registerContactListener(this);
+        XoApplication.get().getClient().registerContactListener(this);
     }
 
     public void unRegisterListeners() {
-        XoApplication.get().getXoClient().unregisterContactListener(this);
+        XoApplication.get().getClient().unregisterContactListener(this);
     }
 
     public void loadContacts() {

@@ -53,7 +53,7 @@ public class ContactChatItem extends ChatItem implements SearchAdapter.Searchabl
 
     public void update() {
         try {
-            XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
+            XoClientDatabase database = XoApplication.get().getClient().getDatabase();
             mUnseenMessageCount = database.findUnseenMessageCountByContactId(mContact.getClientContactId());
             TalkClientMessage message = database.findLatestMessageByContactId(mContact.getClientContactId());
             if (message != null) {
@@ -86,7 +86,7 @@ public class ContactChatItem extends ChatItem implements SearchAdapter.Searchabl
         if (mContact.isWorldwideGroup()) {
             List<TalkClientContact> contacts = new ArrayList<TalkClientContact>();
             try {
-                contacts = XoApplication.get().getXoClient().getDatabase().findContactsInGroupByState(mContact.getGroupId(), TalkGroupMembership.STATE_JOINED);
+                contacts = XoApplication.get().getClient().getDatabase().findContactsInGroupByState(mContact.getGroupId(), TalkGroupMembership.STATE_JOINED);
                 CollectionUtils.filterInverse(contacts, TalkClientContactPredicates.IS_SELF_PREDICATE);
             } catch (SQLException e) {
                 e.printStackTrace();

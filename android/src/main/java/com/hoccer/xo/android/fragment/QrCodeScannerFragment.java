@@ -115,7 +115,7 @@ public class QrCodeScannerFragment extends PagerFragment implements IXoPairingLi
     }
 
     private void performTokenPairing(String token) {
-        XoApplication.get().getXoClient().performTokenPairing(token, QrCodeScannerFragment.this);
+        XoApplication.get().getClient().performTokenPairing(token, QrCodeScannerFragment.this);
     }
 
     @Override

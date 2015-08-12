@@ -69,7 +69,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
                     if (mTransfer instanceof TalkClientDownload) {
                         LOG.debug("Will resume download for " + ((TalkClientDownload) mTransfer).getDownloadUrl());
                         TalkClientDownload download = (TalkClientDownload) mTransfer;
-                        XoApplication.get().getXoClient().getDownloadAgent().startDownloadTask(download);
+                        XoApplication.get().getClient().getDownloadAgent().startDownloadTask(download);
                     }
                     break;
                 case CANCEL_DOWNLOAD:
@@ -79,7 +79,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                XoApplication.get().getXoClient().getDownloadAgent().pauseDownload(download);
+                                XoApplication.get().getClient().getDownloadAgent().pauseDownload(download);
                             }
                         }).start();
                     }
@@ -91,7 +91,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                XoApplication.get().getXoClient().getUploadAgent().resumeUpload(upload);
+                                XoApplication.get().getClient().getUploadAgent().resumeUpload(upload);
                             }
                         }).start();
                     }
@@ -103,7 +103,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                XoApplication.get().getXoClient().getUploadAgent().pauseUpload(upload);
+                                XoApplication.get().getClient().getUploadAgent().pauseUpload(upload);
                             }
                         }).start();
                     }

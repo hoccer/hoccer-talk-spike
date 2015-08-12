@@ -21,7 +21,7 @@ public class CredentialsBackup extends Backup {
     }
 
     static Backup create(String password) throws IOException {
-        Credentials credentials = XoApplication.get().getXoClient().exportCredentials();
+        Credentials credentials = XoApplication.get().getClient().exportCredentials();
         final byte[] credentialsContainer = credentials.toEncryptedBytes(password);
 
         if (exists()) {
@@ -59,7 +59,7 @@ public class CredentialsBackup extends Backup {
         byte[] credentialsData = new byte[(int) mBackupFile.length()];
         in.read(credentialsData);
         Credentials credentials = Credentials.fromEncryptedBytes(credentialsData, password);
-        XoApplication.get().getXoClient().importCredentials(credentials);
+        XoApplication.get().getClient().importCredentials(credentials);
     }
 
 

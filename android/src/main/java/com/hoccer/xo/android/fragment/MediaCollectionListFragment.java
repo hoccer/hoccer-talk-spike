@@ -114,7 +114,7 @@ public class MediaCollectionListFragment extends BaseMediaCollectionListFragment
             public void onClick(DialogInterface dialogInterface, int i) {
                 try {
                     for (TalkClientMediaCollection collection : mMediaCollectionListAdapter.getSelectedItems()) {
-                        XoApplication.get().getXoClient().getDatabase().deleteMediaCollection(collection);
+                        XoApplication.get().getClient().getDatabase().deleteMediaCollection(collection);
                     }
                 } catch (SQLException e) {
                     LOG.error(e.getMessage());

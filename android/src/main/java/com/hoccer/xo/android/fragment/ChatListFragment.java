@@ -48,7 +48,7 @@ public class ChatListFragment extends SearchablePagerListFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mDatabase = XoApplication.get().getXoClient().getDatabase();
+        mDatabase = XoApplication.get().getClient().getDatabase();
         createAdapter();
     }
 
@@ -205,7 +205,7 @@ public class ChatListFragment extends SearchablePagerListFragment {
     }
 
     private boolean isSuspendedGroupMember(TalkClientContact contact) {
-        TalkClientContact worldwideGroup = XoApplication.get().getXoClient().getCurrentWorldwideGroup();
+        TalkClientContact worldwideGroup = XoApplication.get().getClient().getCurrentWorldwideGroup();
         if (worldwideGroup != null) {
             try {
                 TalkGroupMembership groupMembership = mDatabase.findMembershipInGroupByClientId(worldwideGroup.getGroupId(), contact.getClientId());

@@ -97,7 +97,7 @@ public abstract class ContactSelectionActivity extends BaseActivity implements C
 
     private static boolean groupHasOtherContacts(String groupId) {
         try {
-            return XoApplication.get().getXoClient().getDatabase().findMembershipsInGroupByState(groupId, TalkGroupMembership.STATE_JOINED).size() > 1;
+            return XoApplication.get().getClient().getDatabase().findMembershipsInGroupByState(groupId, TalkGroupMembership.STATE_JOINED).size() > 1;
         } catch (SQLException e) {
             LOG.error(e);
         }

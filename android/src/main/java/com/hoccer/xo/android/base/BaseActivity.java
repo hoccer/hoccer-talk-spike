@@ -32,7 +32,6 @@ import com.hoccer.xo.android.activity.*;
 import com.hoccer.xo.android.fragment.DeviceContactsInvitationFragment;
 import com.hoccer.xo.android.profile.client.ClientProfileActivity;
 import com.hoccer.xo.android.profile.group.GroupProfileActivity;
-import com.hoccer.xo.android.view.chat.MessageItem;
 import com.hoccer.xo.android.view.chat.attachments.TransferControlView;
 import net.hockeyapp.android.CrashManager;
 import net.hockeyapp.android.CrashManagerListener;
@@ -53,15 +52,11 @@ public abstract class BaseActivity extends FragmentActivity {
     private XoAlertListener mAlertListener;
 
     private boolean mOptionsMenuEnabled = true;
-    private XoClientDatabase mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         LOG.debug("onCreate()");
         super.onCreate(savedInstanceState);
-
-        // set up database connection
-        mDatabase = XoApplication.get().getXoClient().getDatabase();
 
         // set layout
         setContentView(getLayoutResource());
@@ -124,7 +119,7 @@ public abstract class BaseActivity extends FragmentActivity {
                 break;
             case R.id.menu_my_profile:
                 try {
-                    showContactProfile(mDatabase.findSelfContact(false));
+                    showContactProfile(getDatabase().findSelfContact(false));
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -145,7 +140,7 @@ public abstract class BaseActivity extends FragmentActivity {
     }
 
     public XoClient getClient() {
-        return XoApplication.get().getXoClient();
+        return XoApplication.get().getClient();
     }
 
     public void startExternalActivity(Intent intent) {
@@ -227,7 +222,7 @@ public abstract class BaseActivity extends FragmentActivity {
             @Override
             public void run() {
                 try {
-                    XoApplication.get().getXoClient().regenerateKeyPair();
+                    XoApplication.get().getClient().regenerateKeyPair();
 
                     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
                     SharedPreferences.Editor editor = preferences.edit();
@@ -324,7 +319,7 @@ public abstract class BaseActivity extends FragmentActivity {
     }
 
     public XoClientDatabase getDatabase() {
-        return mDatabase;
+        return XoApplication.get().getClient().getDatabase();
     }
 
     public void showContactProfile(TalkClientContact contact) {
@@ -471,9 +466,6 @@ public abstract class BaseActivity extends FragmentActivity {
             // Make message interactive
             ((TextView) dialog.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
         }
-    }
-
-    public void showPopupForMessageItem(MessageItem messageItem, View messageItemView) {
     }
 
     protected abstract int getLayoutResource();

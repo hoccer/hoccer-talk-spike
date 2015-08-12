@@ -67,7 +67,7 @@ public class GroupProfileCreationFragment extends ProfileFragment implements IXo
 
             if (groupId != null) {
                 try {
-                    mContactsToInvite = XoApplication.get().getXoClient().getDatabase().findContactsInGroupByState(groupId, TalkGroupMembership.STATE_JOINED);
+                    mContactsToInvite = XoApplication.get().getClient().getDatabase().findContactsInGroupByState(groupId, TalkGroupMembership.STATE_JOINED);
                     CollectionUtils.filterInverse(mContactsToInvite, TalkClientContactPredicates.IS_SELF_PREDICATE);
                 } catch (SQLException e) {
                     LOG.error("Error finding contacts in group", e);
@@ -162,7 +162,7 @@ public class GroupProfileCreationFragment extends ProfileFragment implements IXo
 
         DisplayUtils.setListViewHeightBasedOnChildren(mGroupMemberList);
 
-        XoApplication.get().getXoClient().registerContactListener(this);
+        XoApplication.get().getClient().registerContactListener(this);
 
         mGroupNameEdit.requestFocus();
     }
@@ -170,7 +170,7 @@ public class GroupProfileCreationFragment extends ProfileFragment implements IXo
     public void onPause() {
         super.onPause();
 
-        XoApplication.get().getXoClient().unregisterContactListener(this);
+        XoApplication.get().getClient().unregisterContactListener(this);
 
         mGroupMemberAdapter.unRegisterListeners();
     }
@@ -189,7 +189,7 @@ public class GroupProfileCreationFragment extends ProfileFragment implements IXo
 
     private void createGroup(String groupName) {
         List<String> memberIds = getClientIdsForContacts(mContactsToInvite);
-        mGroupTag = XoApplication.get().getXoClient().createGroupWithContacts(groupName, memberIds);
+        mGroupTag = XoApplication.get().getClient().createGroupWithContacts(groupName, memberIds);
     }
 
     public static List<String> getClientIdsForContacts(List<TalkClientContact> contacts) {
@@ -268,8 +268,8 @@ public class GroupProfileCreationFragment extends ProfileFragment implements IXo
             upload.initializeAsAvatar(mAvatar);
 
             try {
-                XoApplication.get().getXoClient().getDatabase().saveClientUpload(upload);
-                XoApplication.get().getXoClient().setGroupAvatar(group, upload);
+                XoApplication.get().getClient().getDatabase().saveClientUpload(upload);
+                XoApplication.get().getClient().setGroupAvatar(group, upload);
             } catch (SQLException e) {
                 LOG.error("Error saving group avatar upload", e);
             }

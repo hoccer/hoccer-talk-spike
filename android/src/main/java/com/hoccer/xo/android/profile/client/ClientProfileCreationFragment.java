@@ -67,7 +67,7 @@ public class ClientProfileCreationFragment extends ProfileFragment implements IX
         mAvatarImage = (ImageView) view.findViewById(R.id.profile_avatar_image);
         mEditName = (EditText) view.findViewById(R.id.et_profile_name);
 
-        mContact = XoApplication.get().getXoClient().getSelfContact();
+        mContact = XoApplication.get().getClient().getSelfContact();
         if (mActionMode == null) {
             mActionMode = getActivity().startActionMode(this);
         }
@@ -78,13 +78,13 @@ public class ClientProfileCreationFragment extends ProfileFragment implements IX
     @Override
     public void onResume() {
         super.onResume();
-        XoApplication.get().getXoClient().registerContactListener(this);
+        XoApplication.get().getClient().registerContactListener(this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        XoApplication.get().getXoClient().unregisterContactListener(this);
+        XoApplication.get().getClient().unregisterContactListener(this);
     }
 
     @Override
@@ -157,9 +157,9 @@ public class ClientProfileCreationFragment extends ProfileFragment implements IX
                     TalkClientUpload upload = new TalkClientUpload();
                     upload.initializeAsAvatar(avatar);
                     try {
-                        XoApplication.get().getXoClient().getDatabase().saveClientUpload(upload);
+                        XoApplication.get().getClient().getDatabase().saveClientUpload(upload);
                         if (mContact.isSelf()) {
-                            XoApplication.get().getXoClient().setClientAvatar(upload);
+                            XoApplication.get().getClient().setClientAvatar(upload);
                         }
                     } catch (SQLException e) {
                         LOG.error("sql error", e);
@@ -167,7 +167,7 @@ public class ClientProfileCreationFragment extends ProfileFragment implements IX
                 }
             });
         } else {
-            XoApplication.get().getXoClient().setClientAvatar(null);
+            XoApplication.get().getClient().setClientAvatar(null);
         }
     }
 
@@ -200,7 +200,7 @@ public class ClientProfileCreationFragment extends ProfileFragment implements IX
         mEditName.setVisibility(View.GONE);
         mAvatarImage.setOnClickListener(null);
 
-        XoApplication.get().getXoClient().setClientString(newUserName, "happy");
+        XoApplication.get().getClient().setClientString(newUserName, "happy");
 
         getActivity().finish();
     }

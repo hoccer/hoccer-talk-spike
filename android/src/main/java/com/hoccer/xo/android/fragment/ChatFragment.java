@@ -61,7 +61,7 @@ public class ChatFragment extends XoChatListFragment
         if (getArguments() != null) {
             int clientContactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
             try {
-                mContact = XoApplication.get().getXoClient().getDatabase().findContactById(clientContactId);
+                mContact = XoApplication.get().getClient().getDatabase().findContactById(clientContactId);
             } catch (SQLException e) {
                 LOG.error("sql error", e);
                 return;
@@ -132,7 +132,7 @@ public class ChatFragment extends XoChatListFragment
         mMessageListView.setAdapter(mAdapter);
 
         configureMotionInterpreterForContact(mContact);
-        XoApplication.get().getXoClient().registerContactListener(this);
+        XoApplication.get().getClient().registerContactListener(this);
 
         // send intent to XoClientService that we are conversing with the contact
         Intent intent = new Intent();
@@ -147,7 +147,7 @@ public class ChatFragment extends XoChatListFragment
         super.onPause();
         mAdapter.onPause();
         mMotionInterpreter.deactivate();
-        XoApplication.get().getXoClient().unregisterContactListener(this);
+        XoApplication.get().getClient().unregisterContactListener(this);
         ImageLoader.getInstance().clearMemoryCache();
 
         // send intent to XoClientService that we are not conversing any longer
@@ -341,9 +341,9 @@ public class ChatFragment extends XoChatListFragment
             toastText = R.string.toast_mute_chat;
         }
         if (mContact.isGroup()) {
-            XoApplication.get().getXoClient().getServerRpc().setGroupNotifications(mContact.getGroupId(), notificationPreference);
+            XoApplication.get().getClient().getServerRpc().setGroupNotifications(mContact.getGroupId(), notificationPreference);
         } else {
-            XoApplication.get().getXoClient().getServerRpc().setClientNotifications(mContact.getClientId(), notificationPreference);
+            XoApplication.get().getClient().getServerRpc().setClientNotifications(mContact.getClientId(), notificationPreference);
         }
         Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
     }
