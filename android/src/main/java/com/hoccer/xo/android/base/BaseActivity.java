@@ -74,6 +74,38 @@ public abstract class BaseActivity extends FragmentActivity {
         getClient().registerAlertListener(mAlertListener);
     }
 
+    private void checkForCrashesIfEnabled() {
+        if (XoApplication.getConfiguration().isCrashReportingEnabled()) {
+            CrashManager.register(this, XoApplication.getConfiguration().getHockeyAppId(), new CrashManagerListener() {
+                @Override
+                public String getStringForResource(int resourceID) {
+                    switch (resourceID) {
+                        case Strings.CRASH_DIALOG_TITLE_ID:
+                            return getString(R.string.dialog_report_crash_title);
+                        case Strings.CRASH_DIALOG_MESSAGE_ID:
+                            return getString(R.string.dialog_report_crash_message);
+                        case Strings.CRASH_DIALOG_NEGATIVE_BUTTON_ID:
+                            return getString(R.string.dialog_report_crash_negative);
+                        case Strings.CRASH_DIALOG_POSITIVE_BUTTON_ID:
+                            return getString(R.string.dialog_report_crash_positive);
+                        default:
+                            return super.getStringForResource(resourceID);
+                    }
+                }
+            });
+        }
+    }
+
+    private void checkKeys() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
+        boolean needToRegenerateKey = preferences.getBoolean("NEED_TO_REGENERATE_KEYS", true);
+
+        if (needToRegenerateKey) {
+            createDialog();
+            regenerateKeys();
+        }
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -171,38 +203,6 @@ public abstract class BaseActivity extends FragmentActivity {
         Dialog googlePlayServicesErrorDialog = GooglePlayServicesUtil.getErrorDialog(result, this, 0);
         if (googlePlayServicesErrorDialog != null) {
             googlePlayServicesErrorDialog.show();
-        }
-    }
-
-    private void checkForCrashesIfEnabled() {
-        if (XoApplication.getConfiguration().isCrashReportingEnabled()) {
-            CrashManager.register(this, XoApplication.getConfiguration().getHockeyAppId(), new CrashManagerListener() {
-                @Override
-                public String getStringForResource(int resourceID) {
-                    switch (resourceID) {
-                        case Strings.CRASH_DIALOG_TITLE_ID:
-                            return getString(R.string.dialog_report_crash_title);
-                        case Strings.CRASH_DIALOG_MESSAGE_ID:
-                            return getString(R.string.dialog_report_crash_message);
-                        case Strings.CRASH_DIALOG_NEGATIVE_BUTTON_ID:
-                            return getString(R.string.dialog_report_crash_negative);
-                        case Strings.CRASH_DIALOG_POSITIVE_BUTTON_ID:
-                            return getString(R.string.dialog_report_crash_positive);
-                        default:
-                            return super.getStringForResource(resourceID);
-                    }
-                }
-            });
-        }
-    }
-
-    private void checkKeys() {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
-        boolean needToRegenerateKey = preferences.getBoolean("NEED_TO_REGENERATE_KEYS", true);
-
-        if (needToRegenerateKey) {
-            createDialog();
-            regenerateKeys();
         }
     }
 
