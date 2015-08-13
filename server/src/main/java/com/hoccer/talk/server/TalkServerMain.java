@@ -63,15 +63,29 @@ public class TalkServerMain {
         managementServer.setStopAtShutdown(true);
         managementServer.setHandler(new TalkServerManagementHandler(talkServer));
 
+        // set up JMX monitoring
+        // Note on security: This will start both the RMI registry as well as the RMI exporter on port 1099, using
+        //  'localhost' as the endpoint. This will permit the use of a ssh-reverse tunnel to access JMX remotely.
+        //  It is imperative to block this port on the firewall to prevent direct access to RMI.
+        //  Binding the RMI services to the loopback interface would be better, but would require a lot of code:
+        //     - re-implementing java.rmi.server.RMISocketFactory
+        //     - re-implementing org.eclipse.jetty.jmx.ConnectorServer
+        //  as both create socket listeners on '0.0.0.0'
+
         MBeanContainer mbContainer = new MBeanContainer(
-        ManagementFactory.getPlatformMBeanServer());
+                ManagementFactory.getPlatformMBeanServer());
         webServer.addBean(mbContainer);
-
+        ConnectorServer jmxServer;
         try {
-            ConnectorServer s = new ConnectorServer(new JMXServiceURL("rmi", null, 1099, "/jndi/rmi://localhost:1099/jmxrmi"),
-                    null, "org.eclipse.jetty.jmx:name=rmiconnectorserver");
-            s.start();
+            JMXServiceURL url = new JMXServiceURL("rmi", "localhost", 1099, "/jndi/rmi://localhost:1099/jmxrmi");
+            jmxServer = new ConnectorServer(url, null, "org.eclipse.jetty.jmx:name=rmiconnectorserver");
+            jmxServer.start();
+        } catch (Exception e) {
+            LOG.error("Can't start JMX monitoring:", e);
+        }
 
+        // start main services
+        try {
             LOG.info("Starting server");
             webServer.start();
             managementServer.start();
