@@ -4,6 +4,7 @@ import android.app.*;
 import android.content.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.media.MediaScannerConnection;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -512,7 +513,11 @@ public class XoClientService extends Service {
             // set fields
             builder.setContentTitle(sb.substring(0, sb.length() - 2));
             builder.setContentText(unseenMessagesCount + getResources().getString(R.string.unseen_messages_notification_text));
+
+
         }
+
+        builder.setLights(Color.GREEN,500,500);
 
         // finish up
         Notification notification;
