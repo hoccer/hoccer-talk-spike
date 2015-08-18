@@ -57,7 +57,7 @@ public class XoClientService extends Service {
 
     private static final long NOTIFICATION_ALARM_BACKOFF = 10000;
 
-    private static final int LED_LIGHTCOLOR = 0xFF00FF00;
+    private static final int LED_LIGHTCOLOR = 0xFF4DBFAC;
     private static final int LED_OFFTIME = 1000;
     private static final int LED_ONTIME  = 1000;
 
