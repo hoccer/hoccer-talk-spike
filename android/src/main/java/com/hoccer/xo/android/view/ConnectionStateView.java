@@ -34,18 +34,18 @@ public class ConnectionStateView extends LinearLayout implements IXoStateListene
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        XoApplication.get().getXoClient().registerStateListener(this);
+        XoApplication.get().getClient().registerStateListener(this);
         updateConnectionStateView();
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        XoApplication.get().getXoClient().unregisterStateListener(this);
+        XoApplication.get().getClient().unregisterStateListener(this);
     }
 
     private void updateConnectionStateView() {
-        XoClient.State connectionState = XoApplication.get().getXoClient().getState();
+        XoClient.State connectionState = XoApplication.get().getClient().getState();
 
         switch (connectionState) {
             case DISCONNECTED:

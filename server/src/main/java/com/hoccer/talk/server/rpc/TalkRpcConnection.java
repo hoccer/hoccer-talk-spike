@@ -214,7 +214,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      */
     @Override
     public void onOpen(JsonRpcConnection connection) {
-        LOG.debug("[connectionId: '" + getConnectionId() + "'] connection opened by " + getRemoteAddress());
+        LOG.info("[connectionId: '" + connection.getConnectionId() + "'] connection opened by " + getRemoteAddress());
         mServer.connectionOpened(this);
     }
 
@@ -225,7 +225,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      */
     @Override
     public void onClose(JsonRpcConnection connection) {
-        LOG.debug("[connectionId: '" + getConnectionId() + "'] connection closed");
+        LOG.info("[connectionId: '" + connection.getConnectionId() + "'] connection closed");
         mServer.connectionClosed(this);
     }
 
@@ -233,6 +233,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      * Disconnect the underlying connection and finish up
      */
     public void disconnect() {
+        LOG.info("[connectionId: '" + getConnectionId() + "'] disconnecting");
         synchronized (this) {
             if (mTalkClient != null && (mTalkClient.isReady() || mTalkClient.isConnected())) {
                 // set client to not ready
@@ -248,13 +249,14 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
             mTalkClient = null;
             mConnection.disconnect();
         }
+        LOG.info("[connectionId: '" + getConnectionId() + "'] disconnected");
     }
 
     /**
      * Called by handler when the client has logged in
      */
     public void identifyClient(String clientId) {
-        LOG.debug("[connectionId: '" + getConnectionId() + "'] logged in as " + clientId);
+        LOG.info("[connectionId: '" + getConnectionId() + "'] logged in as " + clientId);
         final ITalkServerDatabase database = mServer.getDatabase();
 
         // mark connection as logged in
@@ -294,7 +296,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
         //    or bugs that cause this function to be called at the wrong time.
         synchronized (this) {
             if (isLoggedIn() && mTalkClient != null) {
-                LOG.debug("[connectionId: '" + getConnectionId() + "'] signalled Ready: " + mTalkClient.getClientId());
+                LOG.info("[connectionId: '" + getConnectionId() + "'] signalled Ready: " + mTalkClient.getClientId());
 
                 // mark connection as logged in
                 ITalkServerDatabase database = mServer.getDatabase();
@@ -321,7 +323,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      * Begins the registration process under the given client id
      */
     public void beginRegistration(String clientId) {
-        LOG.debug("[connectionId: '" + getConnectionId() + "'] begins registration as " + clientId);
+        LOG.info("[connectionId: '" + getConnectionId() + "'] begins registration as " + clientId);
         mUnregisteredClientId = clientId;
     }
 
@@ -329,7 +331,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      * Activate support mode for this connection
      */
     public void activateSupportMode() {
-        LOG.debug("[connectionId: '" + getConnectionId() + "'] activated support mode");
+        LOG.info("[connectionId: '" + getConnectionId() + "'] activated support mode");
         mSupportMode = true;
     }
 
@@ -337,7 +339,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      * Deactivate support mode for this connection
      */
     public void deactivateSupportMode() {
-        LOG.debug("[connectionId: '" + getConnectionId() + "'] deactivated support mode");
+        LOG.info("[connectionId: '" + getConnectionId() + "'] deactivated support mode");
         mSupportMode = false;
     }
 
@@ -386,6 +388,12 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     @Override
     public void onPostHandleResponse(JsonRpcConnection connection, ObjectNode response) {
 
+    }
+
+    public void disconnectAfterRequest() {
+        if (mConnection != null) {
+            mConnection.disconnectAfterRequest();
+        }
     }
 
     private static Object getIdFromRequest(ObjectNode request) {

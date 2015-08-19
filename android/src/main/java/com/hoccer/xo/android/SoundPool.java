@@ -3,25 +3,24 @@ package com.hoccer.xo.android;
 
 import android.content.Context;
 import android.media.AudioManager;
-import android.media.SoundPool;
 import com.artcom.hoccer.R;
 
 /**
  * This class manages all internal sounds of the application.
  */
-public class XoSoundPool {
+public class SoundPool {
 
-    SoundPool mSoundPool;
+    android.media.SoundPool mSoundPool;
 
     private final int mThrowSoundId;
     private final int mCatchSoundId;
 
     private final Context mContext;
 
-    public XoSoundPool(Context pContext) {
+    public SoundPool(Context pContext) {
         mContext = pContext;
 
-        mSoundPool = new SoundPool(1, AudioManager.STREAM_RING, 0);
+        mSoundPool = new android.media.SoundPool(1, AudioManager.STREAM_RING, 0);
         mThrowSoundId = mSoundPool.load(mContext, R.raw.throw_sound, 1);
         mCatchSoundId = mSoundPool.load(mContext, R.raw.catch_sound, 1);
     }

@@ -22,8 +22,6 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.talk.model.TalkPresence;
-import com.hoccer.xo.android.BackgroundManager;
 import com.hoccer.xo.android.XoAndroidClient;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ChatsActivity;
@@ -118,7 +116,7 @@ public class XoClientService extends Service {
         super.onCreate();
 
         mExecutor = XoApplication.get().getExecutor();
-        mClient = XoApplication.get().getXoClient();
+        mClient = XoApplication.get().getClient();
 
         if (mClientListener == null) {
             mClientListener = new ClientListener();
@@ -640,7 +638,7 @@ public class XoClientService extends Service {
             if (temporaryFilePath != null) {
                 try {
                     upload.setTempCompressedFilePath(null);
-                    XoApplication.get().getXoClient().getDatabase().saveClientUpload(upload);
+                    XoApplication.get().getClient().getDatabase().saveClientUpload(upload);
                     FileUtils.deleteQuietly(new File(temporaryFilePath));
                 } catch (SQLException e) {
                     LOG.error("Error updating upload with original file path.");

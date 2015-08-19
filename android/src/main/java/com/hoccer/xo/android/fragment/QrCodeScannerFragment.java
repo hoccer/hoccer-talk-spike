@@ -7,7 +7,6 @@ import android.content.res.Resources;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.view.*;
 import android.widget.Toast;
@@ -15,6 +14,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
+import com.hoccer.xo.android.base.PagerFragment;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.CameraPreviewView;
 import net.sourceforge.zbar.*;
@@ -22,7 +22,7 @@ import org.apache.log4j.Logger;
 
 import java.util.HashSet;
 
-public class QrCodeScannerFragment extends Fragment implements IPagerFragment, IXoPairingListener {
+public class QrCodeScannerFragment extends PagerFragment implements IXoPairingListener {
 
     private static final Logger LOG = Logger.getLogger(QrCodeScannerFragment.class);
 
@@ -36,7 +36,6 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
 
     private final HashSet<String> mScannedCodes = new HashSet<String>();
     private boolean mEnterCodeDialogVisible;
-    private boolean mIsSelected;
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
@@ -116,7 +115,7 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
     }
 
     private void performTokenPairing(String token) {
-        XoApplication.get().getXoClient().performTokenPairing(token, QrCodeScannerFragment.this);
+        XoApplication.get().getClient().performTokenPairing(token, QrCodeScannerFragment.this);
     }
 
     @Override
@@ -130,30 +129,8 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        if (mIsSelected && !mEnterCodeDialogVisible) {
-            startScanning();
-        }
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
-        stopScanning();
-    }
-
-    @Override
-    public void onPageSelected() {
-        mIsSelected = true;
-        if (isResumed()) {
-            startScanning();
-        }
-    }
-
-    @Override
-    public void onPageUnselected() {
-        mIsSelected = false;
         stopScanning();
     }
 
@@ -202,12 +179,6 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
         mCameraPreviewView.startPreview();
     }
 
-    @Override
-    public void onPageResume() {}
-
-    @Override
-    public void onPagePause() {}
-
     private void stopScanning() {
         stopPreview();
         closeCamera();
@@ -235,6 +206,18 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
         } else {
             stopPreview();
         }
+    }
+
+    @Override
+    public void onPageSelected() {
+        if (!mEnterCodeDialogVisible) {
+            startScanning();
+        }
+    }
+
+    @Override
+    public void onPageUnselected() {
+        stopScanning();
     }
 
     @Override

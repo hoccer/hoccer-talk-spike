@@ -264,7 +264,7 @@ public class XoPreferenceActivity extends PreferenceActivity
             @Override
             public void run() {
                 try {
-                    XoApplication.get().getXoClient().regenerateKeyPair();
+                    XoApplication.get().getClient().regenerateKeyPair();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 } finally {

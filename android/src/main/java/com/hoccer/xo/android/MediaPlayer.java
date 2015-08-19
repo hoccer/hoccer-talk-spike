@@ -407,7 +407,7 @@ public class MediaPlayer implements android.media.MediaPlayer.OnErrorListener, a
 
         try {
             TalkClientMessage message;
-            XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
+            XoClientDatabase database = XoApplication.get().getClient().getDatabase();
             if (mCurrentItem instanceof TalkClientDownload) {
                 int attachmentId = ((TalkClientDownload) mCurrentItem).getClientDownloadId();
                 message = database.findClientMessageByTalkClientDownloadId(attachmentId);

@@ -17,7 +17,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.base.BaseActivity;
 import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.util.IntentHelper;
@@ -204,7 +204,7 @@ public class VideoMessageItem extends MessageItem {
             try {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setDataAndType(videoUri, "video/*");
-                XoActivity activity = (XoActivity) mContext;
+                BaseActivity activity = (BaseActivity) mContext;
                 activity.startExternalActivity(intent);
             } catch (ActivityNotFoundException exception) {
                 Toast.makeText(mContext, R.string.error_no_videoplayer, Toast.LENGTH_LONG).show();

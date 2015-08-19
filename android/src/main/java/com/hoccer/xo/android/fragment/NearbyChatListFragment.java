@@ -6,10 +6,10 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.view.View;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.model.TalkEnvironment;
 import com.hoccer.xo.android.NearbyController;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.EnvironmentChatListAdapter;
+import com.hoccer.xo.android.base.BaseActivity;
 import com.hoccer.xo.android.view.Placeholder;
 
 import static com.hoccer.talk.model.TalkEnvironment.TYPE_NEARBY;
@@ -22,9 +22,13 @@ public class NearbyChatListFragment extends EnvironmentChatListFragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        createAdapter();
+    public void onPageSelected() {
+        activateNearby();
+    }
+
+    @Override
+    public void onPageUnselected() {
+        NearbyController.get().disableNearbyMode();
     }
 
     @Override
@@ -39,7 +43,7 @@ public class NearbyChatListFragment extends EnvironmentChatListFragment {
 
     private void createAdapter() {
         if (mListAdapter == null) {
-            mListAdapter = new EnvironmentChatListAdapter(TYPE_NEARBY, mActivity);
+            mListAdapter = new EnvironmentChatListAdapter(TYPE_NEARBY, (BaseActivity) getActivity());
             mListAdapter.registerListeners();
             setListAdapter(mListAdapter);
         }
@@ -63,19 +67,14 @@ public class NearbyChatListFragment extends EnvironmentChatListFragment {
         return resources.getString(R.string.nearby_tab_name);
     }
 
-    @Override
-    public void onPageSelected() {
-    }
+    private void activateNearby() {
+        if (NearbyController.get().isNearbyEnabled()) {
+            return;
+        }
 
-    @Override
-    public void onPageUnselected() {
-        NearbyController.get().disableNearbyMode();
-    }
-
-    @Override
-    public void onPageResume() {
         if (NearbyController.get().locationServicesEnabled()) {
             NearbyController.get().enableNearbyMode();
+            createAdapter();
         } else {
             showLocationServiceDialog();
         }
@@ -93,10 +92,6 @@ public class NearbyChatListFragment extends EnvironmentChatListFragment {
                     }
                 }
         );
-    }
-
-    @Override
-    public void onPagePause() {
     }
 
     @Override

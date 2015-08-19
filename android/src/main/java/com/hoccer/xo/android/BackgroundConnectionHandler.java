@@ -24,7 +24,7 @@ public class BackgroundConnectionHandler implements BackgroundManager.Listener, 
     }
 
     private BackgroundConnectionHandler() {
-        mClient = XoApplication.get().getXoClient();
+        mClient = XoApplication.get().getClient();
 
         mClient.registerStateListener(this);
         BackgroundManager.get().registerListener(this);

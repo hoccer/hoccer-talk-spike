@@ -14,12 +14,10 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.profile.client.ClientProfileActivity;
 import com.hoccer.xo.android.profile.group.GroupProfileActivity;
 import com.hoccer.xo.android.view.avatar.AvatarView;
-import com.hoccer.xo.android.view.avatar.PresenceAvatarView;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 
@@ -153,17 +151,17 @@ public class ContactSelectionAdapter extends BaseAdapter implements IXoContactLi
     }
 
     public void registerListeners() {
-        XoApplication.get().getXoClient().registerContactListener(this);
+        XoApplication.get().getClient().registerContactListener(this);
     }
 
     public void unregisterListeners() {
-        XoApplication.get().getXoClient().unregisterContactListener(this);
+        XoApplication.get().getClient().unregisterContactListener(this);
     }
 
     private List<TalkClientContact> loadContacts() {
         List<TalkClientContact> contacts = new ArrayList<TalkClientContact>();
         try {
-            XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
+            XoClientDatabase database = XoApplication.get().getClient().getDatabase();
             for (TalkClientContact contact : database.findAllContactsExceptSelfOrderedByRecentMessage()) {
                 if (mFilter.shouldShow(contact)) {
                     contacts.add(contact);

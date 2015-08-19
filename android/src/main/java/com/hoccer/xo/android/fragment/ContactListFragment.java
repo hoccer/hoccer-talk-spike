@@ -8,14 +8,15 @@ import android.view.*;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.adapter.ContactListAdapter;
+import com.hoccer.xo.android.base.SearchablePagerListFragment;
 import com.hoccer.xo.android.view.NotificationBadgeTextView;
-import com.artcom.hoccer.R;
 
-public abstract class ContactListFragment extends SearchableListFragment implements IPagerFragment, IXoContactListener {
+public abstract class ContactListFragment extends SearchablePagerListFragment implements IXoContactListener {
 
     private ContactListAdapter mContactListAdapter;
 
@@ -51,8 +52,8 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
         mContactListAdapter = createAdapter();
         setListAdapter(mContactListAdapter);
 
-        XoApplication.get().getXoClient().registerContactListener(mContactListAdapter);
-        XoApplication.get().getXoClient().registerContactListener(this);
+        XoApplication.get().getClient().registerContactListener(mContactListAdapter);
+        XoApplication.get().getClient().registerContactListener(this);
     }
 
     protected abstract ContactListAdapter createAdapter();
@@ -109,8 +110,8 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     @Override
     public void onDestroy() {
         super.onDestroy();
-        XoApplication.get().getXoClient().unregisterContactListener(mContactListAdapter);
-        XoApplication.get().getXoClient().unregisterContactListener(this);
+        XoApplication.get().getClient().unregisterContactListener(mContactListAdapter);
+        XoApplication.get().getClient().unregisterContactListener(this);
     }
 
     @Override
@@ -126,19 +127,8 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     protected abstract Intent getProfileActivityIntent(TalkClientContact contact);
 
     @Override
-    public void onPageResume() {}
-
-    @Override
-    public void onPageSelected() {}
-
-    @Override
-    public void onPageUnselected() {}
-
-    @Override
-    public void onPagePause() {}
-
-    @Override
-    public void onPageScrollStateChanged(int state) {}
+    public void onPageScrollStateChanged(int state) {
+    }
 
     @Override
     public View getCustomTabView(Context context) {
@@ -157,14 +147,26 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     }
 
     @Override
-    public void onClientRelationshipChanged(TalkClientContact contact) {}
+    public void onClientRelationshipChanged(TalkClientContact contact) {
+    }
 
     @Override
-    public void onClientPresenceChanged(TalkClientContact contact) {}
+    public void onClientPresenceChanged(TalkClientContact contact) {
+    }
 
     @Override
-    public void onGroupPresenceChanged(TalkClientContact contact) {}
+    public void onGroupPresenceChanged(TalkClientContact contact) {
+    }
 
     @Override
-    public void onGroupMembershipChanged(TalkClientContact contact) {}
+    public void onGroupMembershipChanged(TalkClientContact contact) {
+    }
+
+    @Override
+    public void onPageSelected() {}
+
+    @Override
+    public void onPageUnselected() {
+        leaveSearchMode();
+    }
 }

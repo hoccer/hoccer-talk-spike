@@ -5,7 +5,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,11 +20,12 @@ import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.base.PagerFragment;
 
 import java.util.EnumMap;
 import java.util.Map;
 
-public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment, IXoContactListener, IXoStateListener {
+public class QrCodeGeneratorFragment extends PagerFragment implements IXoContactListener, IXoStateListener {
 
     private ImageView mQrCodeView;
     private TextView mPairingTokenView;
@@ -66,29 +66,23 @@ public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment,
     }
 
     @Override
-    public void onPageResume() {
+    public void onPageScrollStateChanged(final int state) {
+    }
+
+    @Override
+    public void onPageSelected() {
         if (!isTokenGenerated()) {
             generateToken();
         }
 
-        XoApplication.get().getXoClient().registerContactListener(this);
-        XoApplication.get().getXoClient().registerStateListener(this);
+        XoApplication.get().getClient().registerContactListener(this);
+        XoApplication.get().getClient().registerStateListener(this);
     }
 
     @Override
-    public void onPageSelected() {}
-
-    @Override
-    public void onPageUnselected() {}
-
-    @Override
-    public void onPagePause() {
-        XoApplication.get().getXoClient().unregisterContactListener(this);
-        XoApplication.get().getXoClient().unregisterStateListener(this);
-    }
-
-    @Override
-    public void onPageScrollStateChanged(final int state) {
+    public void onPageUnselected() {
+        XoApplication.get().getClient().unregisterContactListener(this);
+        XoApplication.get().getClient().unregisterStateListener(this);
     }
 
     private boolean isTokenGenerated() {
@@ -101,7 +95,7 @@ public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment,
         XoApplication.get().getExecutor().execute(new Runnable() {
             @Override
             public void run() {
-                final String pairingToken = XoApplication.get().getXoClient().generatePairingToken();
+                final String pairingToken = XoApplication.get().getClient().generatePairingToken();
 
                 if (isResumed()) {
                     getActivity().runOnUiThread(new Runnable() {
@@ -128,7 +122,7 @@ public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment,
         if (pairingToken != null) {
             mPairingTokenView.setText(pairingToken);
 
-            final String invitationUrl = XoApplication.get().getXoClient().getConfiguration().getUrlScheme() + pairingToken;
+            final String invitationUrl = XoApplication.get().getClient().getConfiguration().getUrlScheme() + pairingToken;
             final Bitmap qrCode = createQrCode(invitationUrl, 400, 400);
 
             if (qrCode != null) {

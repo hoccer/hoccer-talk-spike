@@ -11,10 +11,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.SelectedContent;
-import com.hoccer.xo.android.content.selector.AudioSelector;
-import com.hoccer.xo.android.content.selector.IContentSelector;
-import com.hoccer.xo.android.content.selector.ImageSelector;
-import com.hoccer.xo.android.content.selector.VideoSelector;
+import com.hoccer.xo.android.content.selector.ContentSelectorFactory;
 import com.hoccer.xo.android.util.ContactOperations;
 import org.apache.log4j.Logger;
 
@@ -54,8 +51,8 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity {
     private void sendMessageToContacts(String textFromIntent, List<TalkClientContact> selectedContacts) {
         for (TalkClientContact contact : selectedContacts) {
             try {
-                TalkClientMessage message = getXoClient().composeClientMessage(contact, textFromIntent);
-                getXoClient().sendMessage(message.getMessageTag());
+                TalkClientMessage message = getClient().composeClientMessage(contact, textFromIntent);
+                getClient().sendMessage(message.getMessageTag());
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
             }
@@ -89,19 +86,7 @@ public class ContactSelectionSharingActivity extends ContactSelectionActivity {
         Intent intent = new Intent();
         intent.setData(contentUri);
 
-        return getContentSelector(mimeType).createObjectFromSelectionResult(this, intent);
-    }
-
-    private IContentSelector getContentSelector(String mimeType) throws Exception {
-        if (mimeType.startsWith("image/")) {
-            return new ImageSelector(this);
-        } else if (mimeType.startsWith("video/")) {
-            return new VideoSelector(this);
-        } else if (mimeType.startsWith("audio/")) {
-            return new AudioSelector(this);
-        } else {
-            throw new Exception("Content is not supported.");
-        }
+        return ContentSelectorFactory.createContentSelectorByMimeType(mimeType, this).createObjectFromSelectionResult(this, intent);
     }
 
     private void sendUploadsToContacts(List<TalkClientUpload> uploads, List<TalkClientContact> selectedContacts) {

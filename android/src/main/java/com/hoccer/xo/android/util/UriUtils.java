@@ -121,7 +121,7 @@ public class UriUtils {
         if (isContentUri(uri)) {
             mimeType = context.getContentResolver().getType(uri);
         } else if (isFileUri(uri)) {
-            String extension = MimeTypeMap.getFileExtensionFromUrl(uri.getPath());
+            String extension = getFileExtension(uri);
             if (extension != null) {
                 MimeTypeMap mime = MimeTypeMap.getSingleton();
                 mimeType = mime.getMimeTypeFromExtension(extension);
@@ -129,5 +129,16 @@ public class UriUtils {
         }
 
         return mimeType;
+    }
+
+    private static String getFileExtension(Uri uri) {
+        String extension = MimeTypeMap.getFileExtensionFromUrl(uri.getPath());
+        if ("".equals(extension)) {
+            int i = uri.getPath().lastIndexOf('.');
+            if (i > 0) {
+                extension = uri.getPath().substring(i + 1);
+            }
+        }
+        return extension;
     }
 }

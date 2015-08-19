@@ -13,9 +13,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.maps.model.LatLng;
 
-import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.base.BaseActivity;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.MessageItem;
@@ -75,7 +74,7 @@ public class LocationMessageItem extends MessageItem {
                         String label = "Received Location";
                         Uri locationUri = Uri.parse("http://maps.google.com/maps?q=loc:" + location.latitude + "," + location.longitude + " (" + label + ")");
                         Intent intent = new Intent(android.content.Intent.ACTION_VIEW, locationUri);
-                        XoActivity activity = (XoActivity) view.getContext();
+                        BaseActivity activity = (BaseActivity) view.getContext();
                         activity.startExternalActivity(intent);
                     }
                 }

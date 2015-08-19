@@ -14,7 +14,7 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.HistoryMessagesAdapter;
-import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.base.BaseActivity;
 import com.hoccer.xo.android.view.chat.MessageItem;
 import org.apache.log4j.Logger;
 
@@ -73,7 +73,7 @@ public class HistoryFragment extends XoChatListFragment {
                                 @Override
                                 public void onClick(DialogInterface dialog, int id) {
                                     try {
-                                        XoApplication.get().getXoClient().getDatabase().deleteAllMessagesFromContactId(chatItem.getConversationContactId());
+                                        XoApplication.get().getClient().getDatabase().deleteAllMessagesFromContactId(chatItem.getConversationContactId());
                                         mAdapter.requestReload();
                                     } catch (SQLException e) {
                                         e.printStackTrace();
@@ -95,16 +95,16 @@ public class HistoryFragment extends XoChatListFragment {
         if (getArguments() != null && getArguments().getInt(ARG_CLIENT_CONTACT_ID, 0) > 0) {
             int contactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
             try {
-                TalkClientContact contact = XoApplication.get().getXoClient().getDatabase().findContactById(contactId);
+                TalkClientContact contact = XoApplication.get().getClient().getDatabase().findContactById(contactId);
                 mHistoryId = contact.isClient() ? contact.getClientId() : contact.getGroupId();
-                mAdapter = new HistoryMessagesAdapter(getListView(), (XoActivity) getActivity(), contact);
+                mAdapter = new HistoryMessagesAdapter(getListView(), (BaseActivity) getActivity(), contact);
             } catch (SQLException e) {
                 LOG.error("Client contact with id '" + contactId + "' does not exist", e);
                 return;
             }
         } else if (getArguments() != null && getArguments().getString(ARG_GROUP_HISTORY) != null) {
             mHistoryId = getArguments().getString(ARG_GROUP_HISTORY);
-            mAdapter = new HistoryMessagesAdapter(getListView(), (XoActivity) getActivity(), mHistoryId);
+            mAdapter = new HistoryMessagesAdapter(getListView(), (BaseActivity) getActivity(), mHistoryId);
         }
 
         mAdapter.onCreate();

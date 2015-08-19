@@ -18,7 +18,8 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ChatActivity;
 import com.hoccer.xo.android.adapter.ChatListAdapter;
 import com.hoccer.xo.android.adapter.SearchAdapter;
-import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.base.BaseActivity;
+import com.hoccer.xo.android.base.SearchablePagerListFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.Placeholder;
 import com.hoccer.xo.android.view.model.ChatItem;
@@ -31,7 +32,7 @@ import java.lang.ref.WeakReference;
 import java.sql.SQLException;
 import java.util.List;
 
-public class ChatListFragment extends SearchableListFragment implements IPagerFragment {
+public class ChatListFragment extends SearchablePagerListFragment {
 
     private static final Logger LOG = Logger.getLogger(ChatListFragment.class);
 
@@ -47,7 +48,7 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mDatabase = XoApplication.get().getXoClient().getDatabase();
+        mDatabase = XoApplication.get().getClient().getDatabase();
         createAdapter();
     }
 
@@ -62,7 +63,7 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
         PLACEHOLDER.applyToView(view, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((XoActivity) getActivity()).showPairing();
+                ((BaseActivity) getActivity()).showPairing();
             }
         });
 
@@ -200,11 +201,11 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
             }
         };
 
-        mAdapter = new ChatListAdapter((XoActivity) getActivity(), filter);
+        mAdapter = new ChatListAdapter((BaseActivity) getActivity(), filter);
     }
 
     private boolean isSuspendedGroupMember(TalkClientContact contact) {
-        TalkClientContact worldwideGroup = XoApplication.get().getXoClient().getCurrentWorldwideGroup();
+        TalkClientContact worldwideGroup = XoApplication.get().getClient().getCurrentWorldwideGroup();
         if (worldwideGroup != null) {
             try {
                 TalkGroupMembership groupMembership = mDatabase.findMembershipInGroupByClientId(worldwideGroup.getGroupId(), contact.getClientId());
@@ -223,7 +224,7 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
         try {
             TalkClientContact contact = mDatabase.findContactById(contactId);
             if (contact != null) {
-                ((XoActivity) getActivity()).showContactProfile(contact);
+                ((BaseActivity) getActivity()).showContactProfile(contact);
             }
         } catch (SQLException e) {
             LOG.error("SQL error while creating group ", e);
@@ -304,23 +305,14 @@ public class ChatListFragment extends SearchableListFragment implements IPagerFr
     }
 
     @Override
-    public void onPageSelected() {
+    public void onPageScrollStateChanged(int state) {
     }
+
+    @Override
+    public void onPageSelected() {}
 
     @Override
     public void onPageUnselected() {
         leaveSearchMode();
-    }
-
-    @Override
-    public void onPageResume() {
-    }
-
-    @Override
-    public void onPagePause() {
-    }
-
-    @Override
-    public void onPageScrollStateChanged(int state) {
     }
 }

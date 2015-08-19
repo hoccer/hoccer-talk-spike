@@ -11,8 +11,8 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.base.BaseActivity;
 import com.hoccer.xo.android.base.MessagesAdapter;
-import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.chat.MessageItem;
 import com.hoccer.xo.android.view.chat.attachments.*;
 import org.apache.log4j.Logger;
@@ -55,14 +55,14 @@ public class ChatMessagesAdapter extends MessagesAdapter implements IXoMessageLi
 
     private final ListView mListView;
 
-    public ChatMessagesAdapter(ListView listView, XoActivity activity, TalkClientContact contact) {
+    public ChatMessagesAdapter(ListView listView, BaseActivity activity, TalkClientContact contact) {
         super(activity);
         mListView = listView;
         mContact = contact;
         initialize();
     }
 
-    public ChatMessagesAdapter(ListView listView, XoActivity activity) {
+    public ChatMessagesAdapter(ListView listView, BaseActivity activity) {
         super(activity);
         mListView = listView;
     }

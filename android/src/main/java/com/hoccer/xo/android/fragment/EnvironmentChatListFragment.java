@@ -10,11 +10,11 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.activity.ChatActivity;
 import com.hoccer.xo.android.adapter.EnvironmentChatListAdapter;
-import com.hoccer.xo.android.base.XoListFragment;
+import com.hoccer.xo.android.base.PagerListFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.Placeholder;
 
-public abstract class EnvironmentChatListFragment extends XoListFragment implements IPagerFragment {
+public abstract class EnvironmentChatListFragment extends PagerListFragment {
 
     protected Placeholder mPlaceholder;
     protected EnvironmentChatListAdapter mListAdapter;

@@ -10,7 +10,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.model.TalkEnvironment;
-import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.base.BaseActivity;
 import com.hoccer.xo.android.view.chat.MessageItem;
 import org.apache.log4j.Logger;
 
@@ -23,11 +23,11 @@ public class HistoryMessagesAdapter extends ChatMessagesAdapter {
     private static final Logger LOG = Logger.getLogger(HistoryMessagesAdapter.class);
     private String mEnvironmentType;
 
-    public HistoryMessagesAdapter(ListView listView, XoActivity activity, TalkClientContact contact) {
+    public HistoryMessagesAdapter(ListView listView, BaseActivity activity, TalkClientContact contact) {
         super(listView, activity, contact);
     }
 
-    public HistoryMessagesAdapter(ListView listView, XoActivity activity, String environmentType) {
+    public HistoryMessagesAdapter(ListView listView, BaseActivity activity, String environmentType) {
         super(listView, activity);
         mEnvironmentType = environmentType;
         initializeEnvironmentGroupHistory();

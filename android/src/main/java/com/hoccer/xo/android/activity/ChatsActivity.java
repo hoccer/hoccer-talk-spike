@@ -156,20 +156,20 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     }
 
     private boolean isRegistered() {
-        return getXoClient().getSelfContact().getSelf().isRegistrationConfirmed();
+        return getClient().getSelfContact().getSelf().isRegistrationConfirmed();
     }
 
     private void registerListeners() {
-        getXoClient().registerStateListener(this);
+        getClient().registerStateListener(this);
         if (mContactsMenuItemActionProvider != null) {
-            getXoClient().registerContactListener(mContactsMenuItemActionProvider);
+            getClient().registerContactListener(mContactsMenuItemActionProvider);
         }
     }
 
     private void unregisterListeners() {
-        getXoClient().unregisterStateListener(this);
+        getClient().unregisterStateListener(this);
         if (mContactsMenuItemActionProvider != null) {
-            getXoClient().unregisterContactListener(mContactsMenuItemActionProvider);
+            getClient().unregisterContactListener(mContactsMenuItemActionProvider);
         }
     }
 
@@ -192,7 +192,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private void handleTokenPairingIntent(Intent intent) {
         String token = intent.getData().getHost();
 
-        if (getXoClient().isReady()) {
+        if (getClient().isReady()) {
             performTokenPairing(token);
         } else {
             mPairingToken = token;
@@ -203,7 +203,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         XoApplication.get().getExecutor().execute(new Runnable() {
             @Override
             public void run() {
-                getXoClient().performTokenPairing(token, ChatsActivity.this);
+                getClient().performTokenPairing(token, ChatsActivity.this);
             }
         });
     }

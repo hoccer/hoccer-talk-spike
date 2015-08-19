@@ -1,14 +1,12 @@
 package com.hoccer.xo.android.fragment;
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.Formatter;
@@ -27,13 +25,13 @@ import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.talk.model.TalkGroupMembership;
+import com.hoccer.xo.android.BackgroundManager;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.base.XoFragment;
-import com.hoccer.xo.android.content.ContentRegistry;
-import com.hoccer.xo.android.content.ContentSelection;
 import com.hoccer.xo.android.content.MultiImageSelector;
+import com.hoccer.xo.android.content.selector.ClipboardSelector;
 import com.hoccer.xo.android.content.selector.IContentSelector;
+import com.hoccer.xo.android.dialog.ContentSelectionDialogFragment;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionGestureListener;
 import com.hoccer.xo.android.util.ImageUtils;
@@ -50,7 +48,10 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 
-public class CompositionFragment extends XoFragment implements MotionGestureListener {
+import static android.app.Activity.RESULT_OK;
+import static com.hoccer.xo.android.dialog.ContentSelectionDialogFragment.DIALOG_TAG;
+
+public class CompositionFragment extends Fragment implements MotionGestureListener, ContentSelectionDialogFragment.OnAttachmentSelectedListener {
 
     private static final Logger LOG = Logger.getLogger(CompositionFragment.class);
 
@@ -63,6 +64,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     private static final String KEY_ATTACHMENTS = "composition_attachment:";
 
     private static final String SHARED_PREFERENCES = "chats";
+    private IContentSelector mContentSelector;
 
     private enum AttachmentSelectionType {
         NONE,
@@ -73,7 +75,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         LOCATION,
         DATA,
         MULTIPLE,
-        ERROR
+        ERROR;
     }
 
     private TextFieldWatcher mTextFieldWatcher;
@@ -81,7 +83,6 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     private EditText mTextField;
     private ImageButton mSendButton;
 
-    private ContentSelection mAttachmentSelection;
     private EnumMap<AttachmentSelectionType, View> mAttachmentTypeViews;
     private ArrayList<SelectedContent> mSelectedContent = new ArrayList<SelectedContent>();
     private TalkClientContact mContact;
@@ -93,7 +94,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         if (getArguments() != null) {
             try {
                 int clientContactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
-                mContact = XoApplication.get().getXoClient().getDatabase().findContactById(clientContactId);
+                mContact = XoApplication.get().getClient().getDatabase().findContactById(clientContactId);
             } catch (SQLException e) {
                 LOG.error("sql error", e);
             }
@@ -179,7 +180,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     private void applyCompositionIfAvailable() {
         String contactId = mContact.isClient() ? mContact.getClientId() : mContact.getGroupId();
 
-        SharedPreferences preferences = getXoActivity().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences preferences = getActivity().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
         String text = preferences.getString(KEY_COMPOSITION_TEXT + contactId, "");
         mTextField.setText(text);
 
@@ -231,7 +232,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     }
 
     private void saveComposition() {
-        SharedPreferences preferences = getXoActivity().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences preferences = getActivity().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
         SharedPreferences.Editor edit = preferences.edit();
 
         String contactId = mContact.isClient() ? mContact.getClientId() : mContact.getGroupId();
@@ -254,32 +255,50 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
 
         if (requestCode == REQUEST_SELECT_ATTACHMENT) {
             mSelectedContent.clear();
-
-            if (resultCode == Activity.RESULT_OK) {
-                if (mAttachmentSelection.getSelector() instanceof MultiImageSelector) {
-                    MultiImageSelector selector = (MultiImageSelector) mAttachmentSelection.getSelector();
-                    try {
-                        mSelectedContent = selector.createObjectsFromSelectionResult(getActivity(), intent);
-                    } catch (Exception e) {
-                        LOG.error("Could not create object from selection result.", e);
-                    }
-                } else {
-                    IContentSelector selector = mAttachmentSelection.getSelector();
-                    SelectedContent content = null;
-                    try {
-                        content = selector.createObjectFromSelectionResult(getActivity(), intent);
-                    } catch (Exception e) {
-                        LOG.error("Could not create object from selection result.", e);
-                    }
-                    CollectionUtils.addIgnoreNull(mSelectedContent, content);
-                }
-                if (mSelectedContent.isEmpty()) {
-                    Toast.makeText(getActivity(), R.string.error_attachment_selection, Toast.LENGTH_LONG).show();
-                }
+            if (resultCode == RESULT_OK) {
+                setSelectedContent(intent);
             }
+        }
+    }
 
+    private void setSelectedContent(Intent intent) {
+        if (mContentSelector instanceof MultiImageSelector) {
+            try {
+                mSelectedContent = MultiImageSelector.createObjectsFromSelectionResult(getActivity(), intent);
+            } catch (Exception e) {
+                LOG.error("Could not create object from selection result.", e);
+            }
+        } else {
+            SelectedContent content = null;
+            try {
+                content = mContentSelector.createObjectFromSelectionResult(getActivity(), intent);
+            } catch (Exception e) {
+                LOG.error("Could not create object from selection result.", e);
+            }
+            CollectionUtils.addIgnoreNull(mSelectedContent, content);
+        }
+    }
+
+    @Override
+    public void onSelected(IContentSelector contentSelector) {
+        mContentSelector = contentSelector;
+        if (mContentSelector instanceof ClipboardSelector) {
+            setSelectedContent(null);
             updateAttachmentButton();
             updateSendButton();
+        } else {
+            Intent intent = contentSelector.createSelectionIntent(getActivity());
+            startExternalActivityForResult(intent);
+        }
+    }
+
+    private void startExternalActivityForResult(Intent intent) {
+        BackgroundManager.get().ignoreNextBackgroundPhase();
+        try {
+            startActivityForResult(intent, REQUEST_SELECT_ATTACHMENT);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(getActivity(), R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
+            LOG.error(e.getMessage());
         }
     }
 
@@ -289,7 +308,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         LOG.debug("Received gesture of type: " + gestureName);
 
         if (isComposed()) {
-            XoApplication.getXoSoundPool().playThrowSound();
+            XoApplication.getSoundPool().playThrowSound();
             processMessage();
         }
     }
@@ -358,7 +377,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     private static boolean isGroupEmpty(TalkClientContact contact) {
         final List<TalkClientContact> otherContactsInGroup;
         try {
-            otherContactsInGroup = XoApplication.get().getXoClient().getDatabase().findContactsInGroupByState(contact.getGroupId(),
+            otherContactsInGroup = XoApplication.get().getClient().getDatabase().findContactsInGroupByState(contact.getGroupId(),
                     TalkGroupMembership.STATE_JOINED);
             CollectionUtils.filterInverse(otherContactsInGroup, TalkClientContactPredicates.IS_SELF_PREDICATE);
             return otherContactsInGroup.isEmpty();
@@ -375,7 +394,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         }
 
         if (mContact.isClientBlocked()) {
-            Toast.makeText(getXoActivity(), R.string.error_send_message_blocked, Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), R.string.error_send_message_blocked, Toast.LENGTH_LONG).show();
             clearComposedMessage();
             return;
         }
@@ -389,8 +408,8 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
 
     private void sendMessage() {
         String messageText = mTextField.getText().toString();
-        TalkClientMessage message = getXoClient().composeClientMessage(mContact, messageText);
-        getXoClient().sendMessage(message.getMessageTag());
+        TalkClientMessage message = XoApplication.get().getClient().composeClientMessage(mContact, messageText);
+        XoApplication.get().getClient().sendMessage(message.getMessageTag());
         clearComposedMessage();
         mLastMessage = messageText;
     }
@@ -409,7 +428,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
             protected List<TalkClientUpload> doInBackground(List<TalkClientUpload>... args) {
                 List<TalkClientUpload> uploads = args[0];
                 try {
-                    if (getXoClient().isEncodingNecessary()) {
+                    if (XoApplication.get().getClient().isEncodingNecessary()) {
                         for (TalkClientUpload upload : uploads) {
                             if (upload.getMediaType().equals(ContentMediaType.IMAGE)) {
                                 compressImageAttachment(upload);
@@ -442,11 +461,11 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     }
 
     private void showTransferLimitExceededDialog(long attachmentSize, final List<TalkClientUpload> uploads) {
-        String fileSize = Formatter.formatShortFileSize(getXoActivity(), attachmentSize);
+        String fileSize = Formatter.formatShortFileSize(getActivity(), attachmentSize);
         XoDialogs.showPositiveNegativeDialog("TransferLimitExceededDialog",
                 getString(R.string.attachment_over_limit_title),
                 getString(R.string.attachment_over_limit_upload_question, fileSize),
-                getXoActivity(),
+                getActivity(),
                 R.string.attachment_over_limit_confirm,
                 R.string.common_no,
                 new DialogInterface.OnClickListener() {
@@ -471,20 +490,20 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
 
     private void sendMessageWithAttachments(List<TalkClientUpload> uploads) {
         String messageText = mTextField.getText().toString();
-        List<TalkClientMessage> messages = getXoClient().composeClientMessage(mContact, messageText, uploads);
+        List<TalkClientMessage> messages = XoApplication.get().getClient().composeClientMessage(mContact, messageText, uploads);
         List<String> messageTags = new ArrayList<String>();
 
         for (TalkClientMessage message : messages) {
             messageTags.add(message.getMessageTag());
 
         }
-        getXoClient().sendMessages(messageTags);
+        XoApplication.get().getClient().sendMessages(messageTags);
         clearComposedMessage();
         mLastMessage = messageText;
     }
 
     private boolean sizeExceedsUploadLimit(long attachmentSize) {
-        int transferLimit = getXoClient().getUploadLimit();
+        int transferLimit = XoApplication.get().getClient().getUploadLimit();
         if (transferLimit < 0) {
             if (transferLimit == -1) {
                 return false;
@@ -508,7 +527,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         XoDialogs.showOkDialog("EmptyGroupDialog",
                 R.string.dialog_empty_group_title,
                 R.string.dialog_empty_group_message,
-                getXoActivity(),
+                getActivity(),
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int index) {
@@ -522,12 +541,12 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         final File imageFile = new File(fileUri.getPath());
         final File compressedImageFile = new File(XoApplication.getCacheStorage(), imageFile.getName());
 
-        Bitmap bitmap = ImageUtils.resizeImageToMaxPixelCount(imageFile, getXoClient().getImageUploadMaxPixelCount());
+        Bitmap bitmap = ImageUtils.resizeImageToMaxPixelCount(imageFile, XoApplication.get().getClient().getImageUploadMaxPixelCount());
         if (bitmap == null) {
             throw new IOException("Could not resize image '" + imageFile.getAbsolutePath() + "' to bitmap");
         }
 
-        boolean success = ImageUtils.compressBitmapToFile(bitmap, compressedImageFile, getXoClient().getImageUploadEncodingQuality(),
+        boolean success = ImageUtils.compressBitmapToFile(bitmap, compressedImageFile, XoApplication.get().getClient().getImageUploadEncodingQuality(),
                 Bitmap.CompressFormat.JPEG);
         if (!success) {
             throw new IOException("Could not compress bitmap to '" + compressedImageFile.getAbsolutePath() + "'");
@@ -538,7 +557,9 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     }
 
     private void showSelectAttachmentDialog() {
-        mAttachmentSelection = ContentRegistry.get(getActivity()).selectAttachment(this, REQUEST_SELECT_ATTACHMENT);
+        DialogFragment dialogFragment = new ContentSelectionDialogFragment();
+        dialogFragment.setTargetFragment(this, -1);
+        dialogFragment.show(getActivity().getSupportFragmentManager(), DIALOG_TAG);
     }
 
     private void showEditAttachmentDialog() {
@@ -588,7 +609,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
             boolean longPressHandled = false;
             if (mLastMessage != null) {
                 for (int i = 0; i < STRESS_TEST_MESSAGE_COUNT; i++) {
-                    getXoClient().sendMessage(getXoClient().composeClientMessage(mContact, mLastMessage + " " + Integer.toString(i)).getMessageTag());
+                    XoApplication.get().getClient().sendMessage(XoApplication.get().getClient().composeClientMessage(mContact, mLastMessage + " " + Integer.toString(i)).getMessageTag());
                 }
                 longPressHandled = true;
                 clearComposedMessage();

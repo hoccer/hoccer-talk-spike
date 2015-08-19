@@ -28,7 +28,7 @@ public class MultiImageSelector extends ImageSelector {
         return new Intent(context, MultiImagePickerActivity.class);
     }
 
-    public ArrayList<SelectedContent> createObjectsFromSelectionResult(Context context, Intent intent) throws Exception {
+    public static ArrayList<SelectedContent> createObjectsFromSelectionResult(Context context, Intent intent) throws Exception {
         ArrayList<SelectedContent> result = new ArrayList<SelectedContent>();
         if (!hasExtraImages(intent)) {
             return result;

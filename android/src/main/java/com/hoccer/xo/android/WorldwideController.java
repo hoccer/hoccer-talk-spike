@@ -42,9 +42,9 @@ public class WorldwideController {
             }
         };
 
-        XoApplication.get().getXoClient().registerStateListener(mStateListener);
+        XoApplication.get().getClient().registerStateListener(mStateListener);
 
-        mConfiguration = XoApplication.get().getXoClient().getConfiguration();
+        mConfiguration = XoApplication.get().getClient().getConfiguration();
     }
 
     public void activateWorldwide() {
@@ -63,17 +63,17 @@ public class WorldwideController {
     }
 
     private void sendEnvironmentUpdate() {
-        if (XoApplication.get().getXoClient().getState() == XoClient.State.READY) {
+        if (XoApplication.get().getClient().getState() == XoClient.State.READY) {
             if (mEnvironment.isValid()) {
                 LOG.info("Sending environment update: " + mEnvironment.toString());
-                XoApplication.get().getXoClient().sendEnvironmentUpdate(mEnvironment);
+                XoApplication.get().getClient().sendEnvironmentUpdate(mEnvironment);
             }
         }
     }
 
     public void deactivateWorldWide() {
         mShouldActivateWorldwideOnReconnect = false;
-        XoApplication.get().getXoClient().sendDestroyEnvironment(TalkEnvironment.TYPE_WORLDWIDE);
+        XoApplication.get().getClient().sendDestroyEnvironment(TalkEnvironment.TYPE_WORLDWIDE);
         mEnvironment = null;
     }
 
@@ -82,7 +82,7 @@ public class WorldwideController {
             mEnvironment.setTimeToLive(timeToLive);
             sendEnvironmentUpdate();
         } else {
-            XoApplication.get().getXoClient().getServerRpc().releaseEnvironmentUpdatingParameters(TalkEnvironment.TYPE_WORLDWIDE, timeToLive, mConfiguration.getNotificationPreferenceForWorldwide());
+            XoApplication.get().getClient().getServerRpc().releaseEnvironmentUpdatingParameters(TalkEnvironment.TYPE_WORLDWIDE, timeToLive, mConfiguration.getNotificationPreferenceForWorldwide());
         }
     }
 
@@ -91,7 +91,7 @@ public class WorldwideController {
             mEnvironment.setNotificationPreference(notificationPreference);
             sendEnvironmentUpdate();
         } else {
-            XoApplication.get().getXoClient().getServerRpc().releaseEnvironmentUpdatingParameters(TalkEnvironment.TYPE_WORLDWIDE, mConfiguration.getTimeToLiveInWorldwide(), notificationPreference);
+            XoApplication.get().getClient().getServerRpc().releaseEnvironmentUpdatingParameters(TalkEnvironment.TYPE_WORLDWIDE, mConfiguration.getTimeToLiveInWorldwide(), notificationPreference);
         }
     }
 }

@@ -3,7 +3,7 @@ package com.hoccer.xo.android.activity;
 import android.content.Intent;
 import android.support.v4.app.FragmentTransaction;
 import android.view.Menu;
-import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.base.BaseActivity;
 import com.hoccer.xo.android.credentialtransfer.CredentialImporter;
 import com.hoccer.xo.android.fragment.ImportCredentialFragment;
 import com.hoccer.xo.android.fragment.ImportCredentialUpdateFragment;
@@ -13,7 +13,7 @@ import com.hoccer.xo.android.profile.client.ClientProfileActivity;
 /**
  * Activity handles credential import procedure or starts the new client registration.
  */
-public class RegistrationActivity extends XoActivity {
+public class RegistrationActivity extends BaseActivity {
 
     @Override
     protected int getLayoutResource() {

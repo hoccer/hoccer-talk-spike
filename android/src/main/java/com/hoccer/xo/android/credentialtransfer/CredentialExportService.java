@@ -81,7 +81,7 @@ public class CredentialExportService extends IntentService {
 
     private static byte[] createPayload() {
         try {
-            final Credentials credentials = XoApplication.get().getXoClient().exportCredentials();
+            final Credentials credentials = XoApplication.get().getClient().exportCredentials();
             if(credentials != null) {
                 final ObjectMapper mapper = new ObjectMapper();
                 final ObjectNode rootNode = mapper.createObjectNode();
@@ -91,8 +91,8 @@ public class CredentialExportService extends IntentService {
                 credentials.toJsonNode(credentialNode);
 
                 // write friend contact and joined group count
-                final int clients = XoApplication.get().getXoClient().getDatabase().findClientContactsByState(TalkRelationship.STATE_FRIEND).size();
-                final int groups = XoApplication.get().getXoClient().getDatabase().findGroupContactsByMembershipState(TalkGroupMembership.STATE_JOINED).size();
+                final int clients = XoApplication.get().getClient().getDatabase().findClientContactsByState(TalkRelationship.STATE_FRIEND).size();
+                final int groups = XoApplication.get().getClient().getDatabase().findGroupContactsByMembershipState(TalkGroupMembership.STATE_JOINED).size();
                 rootNode.put(CONTACT_COUNT_FIELD_NAME, clients + groups);
 
                 final String payloadString = mapper.writeValueAsString(rootNode);

@@ -1,12 +1,16 @@
 package com.hoccer.xo.android.activity;
 
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import com.artcom.hoccer.R;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.activity.component.ViewPagerActivityComponent;
 import com.hoccer.xo.android.fragment.ClientContactListFragment;
 import com.hoccer.xo.android.fragment.GroupContactListFragment;
+
+import java.sql.SQLException;
 
 public class ContactsActivity extends ComposableActivity {
 
@@ -35,5 +39,20 @@ public class ContactsActivity extends ComposableActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         enableUpNavigation();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_pair:
+                showPairing();
+                break;
+            case R.id.menu_new_group:
+                showNewGroup();
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+        return true;
     }
 }

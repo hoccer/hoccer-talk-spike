@@ -1,24 +1,30 @@
 package com.hoccer.xo.android.activity;
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentTransaction;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewTreeObserver;
+import android.view.*;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.model.TalkEnvironment;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
-import com.hoccer.xo.android.content.Clipboard;
 import com.hoccer.xo.android.fragment.ChatFragment;
 import com.hoccer.xo.android.fragment.HistoryFragment;
 import com.hoccer.xo.android.util.IntentHelper;
-import com.hoccer.xo.android.view.chat.MessageItem;
+import com.hoccer.xo.android.view.chat.attachments.TransferControlView;
+import net.hockeyapp.android.CrashManager;
+import net.hockeyapp.android.CrashManagerListener;
+import net.hockeyapp.android.Strings;
 import org.apache.log4j.Logger;
+
+import java.sql.SQLException;
 
 
 public class ChatActivity extends ComposableActivity {
@@ -33,6 +39,10 @@ public class ChatActivity extends ComposableActivity {
     private ChatFragment mChatFragment;
 
     private boolean mIsKeyboardOpen = false;
+
+    private TransferControlView mSpinner;
+    private Handler mDialogDismisser;
+    private Dialog mDialog;
 
     @Override
     protected ActivityComponent[] createComponents() {
@@ -52,6 +62,9 @@ public class ChatActivity extends ComposableActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        checkForCrashesIfEnabled();
+        checkKeys();
 
         if (getIntent() == null) {
             return;
@@ -79,13 +92,113 @@ public class ChatActivity extends ComposableActivity {
         initKeyboardCallback();
     }
 
+    private void checkKeys() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
+        boolean needToRegenerateKey = preferences.getBoolean("NEED_TO_REGENERATE_KEYS", true);
+
+        if (needToRegenerateKey) {
+            createDialog();
+            regenerateKeys();
+        }
+    }
+
+    private void createDialog() {
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        View view = inflater.inflate(R.layout.waiting_dialog, null);
+        mSpinner = (TransferControlView) view.findViewById(R.id.content_progress);
+
+        mDialog = new Dialog(this);
+        mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        mDialog.setContentView(view);
+        mDialog.getWindow()
+                .setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        mDialog.setCanceledOnTouchOutside(false);
+        mDialog.show();
+        mDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+            @Override
+            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                return true;
+            }
+        });
+
+        Handler spinnerStarter = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                mSpinner.prepareToUpload();
+                mSpinner.spin();
+            }
+        };
+        mDialogDismisser = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                try {
+                    mDialog.dismiss();
+                    mSpinner.completeAndGone();
+                } catch (IllegalArgumentException e) {
+                    LOG.error("Dialog is not attached to current activity.");
+                    e.printStackTrace();
+                    //TODO: Once upon a time we will redesign all this stuff... Maybe.
+                }
+            }
+        };
+        spinnerStarter.sendEmptyMessageDelayed(0, 500);
+    }
+
+    private void regenerateKeys() {
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    getClient().regenerateKeyPair();
+
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putBoolean("NEED_TO_REGENERATE_KEYS", false);
+                    editor.apply();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                } finally {
+                    mDialogDismisser.sendEmptyMessage(0);
+                }
+            }
+        });
+        t.start();
+    }
+
+    private void checkForCrashesIfEnabled() {
+        if (getConfiguration().isCrashReportingEnabled()) {
+            CrashManager.register(this, getConfiguration().getHockeyAppId(), new CrashManagerListener() {
+                @Override
+                public String getStringForResource(int resourceID) {
+                    switch (resourceID) {
+                        case Strings.CRASH_DIALOG_TITLE_ID:
+                            return getString(R.string.dialog_report_crash_title);
+                        case Strings.CRASH_DIALOG_MESSAGE_ID:
+                            return getString(R.string.dialog_report_crash_message);
+                        case Strings.CRASH_DIALOG_NEGATIVE_BUTTON_ID:
+                            return getString(R.string.dialog_report_crash_negative);
+                        case Strings.CRASH_DIALOG_POSITIVE_BUTTON_ID:
+                            return getString(R.string.dialog_report_crash_positive);
+                        default:
+                            return super.getStringForResource(resourceID);
+                    }
+                }
+            });
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
     private void initKeyboardCallback() {
         final LinearLayout view = (LinearLayout) findViewById(R.id.content);
         view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 if ((view.getRootView().getHeight() - view.getHeight()) >
-                        view.getRootView().getHeight()/3) {
+                        view.getRootView().getHeight() / 3) {
                     // keyboard is open
                     onKeyboardOpen(true);
                 } else {
@@ -97,68 +210,19 @@ public class ChatActivity extends ComposableActivity {
     }
 
     private void onKeyboardOpen(boolean isOpen) {
-        if((mIsKeyboardOpen == isOpen) || (mChatFragment == null)) {
+        if ((mIsKeyboardOpen == isOpen) || (mChatFragment == null)) {
             return;
         } else {
             mIsKeyboardOpen = isOpen;
         }
-        if(mIsKeyboardOpen) {
+        if (mIsKeyboardOpen) {
             mChatFragment.onKeyboardOpen();
         }
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
-
-    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public void showPopupForMessageItem(final MessageItem messageItem, View messageItemView) {
-        PopupMenu popup = new PopupMenu(this, messageItemView);
-        popup.getMenuInflater().inflate(R.menu.popup_menu_messaging, popup.getMenu());
-        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            public boolean onMenuItemClick(MenuItem item) {
-                popupItemSelected(item, messageItem);
-                return true;
-            }
-        });
-        popup.show();
-    }
-
-    private void popupItemSelected(MenuItem item, MessageItem messageItem) {
-        switch (item.getItemId()) {
-            case R.id.menu_copy_message:
-                if (messageItem.getAttachment() != null && messageItem.getAttachment().isContentAvailable()) {
-                    Clipboard.getInstance().setContent(messageItem.getAttachment());
-                } else {
-                    putMessageTextInSystemClipboard(messageItem);
-                }
-                break;
-            case R.id.menu_delete_message:
-                getXoClient().deleteMessage(messageItem.getMessage());
-                break;
-        }
-    }
-
-    private void putMessageTextInSystemClipboard(MessageItem messageItem) {
-        ClipboardManager clipboardText = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText("simple text", messageItem.getText());
-        clipboardText.setPrimaryClip(clip);
     }
 
     private void showChatFragment(int contactId) {

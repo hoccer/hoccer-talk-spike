@@ -20,7 +20,7 @@ import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
 import com.hoccer.talk.model.TalkEnvironment;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.base.BaseActivity;
 import com.hoccer.xo.android.view.avatar.AvatarView;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
@@ -44,18 +44,18 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
 
     private final XoClientDatabase mDatabase;
     private final ScheduledExecutorService mExecutor;
-    private final XoActivity mXoActivity;
+    private final BaseActivity mBaseActivity;
     private ScheduledFuture<?> mNotifyFuture;
     private long mNotifyTimestamp;
 
     private List<TalkClientContact> mContacts = new ArrayList<TalkClientContact>();
     private TalkClientContact mCurrentEnvironmentGroup;
 
-    public EnvironmentChatListAdapter(String environmentType, XoActivity activity) {
+    public EnvironmentChatListAdapter(String environmentType, BaseActivity activity) {
         super();
         mEnvironmentType = environmentType;
-        mXoActivity = activity;
-        mDatabase = XoApplication.get().getXoClient().getDatabase();
+        mBaseActivity = activity;
+        mDatabase = XoApplication.get().getClient().getDatabase();
         mExecutor = XoApplication.get().getExecutor();
     }
 
@@ -84,17 +84,17 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
     }
 
     public void registerListeners() {
-        XoApplication.get().getXoClient().registerContactListener(this);
-        XoApplication.get().getXoClient().registerMessageListener(this);
-        XoApplication.get().getXoClient().getDownloadAgent().registerListener(this);
-        XoApplication.get().getXoClient().getUploadAgent().registerListener(this);
+        XoApplication.get().getClient().registerContactListener(this);
+        XoApplication.get().getClient().registerMessageListener(this);
+        XoApplication.get().getClient().getDownloadAgent().registerListener(this);
+        XoApplication.get().getClient().getUploadAgent().registerListener(this);
     }
 
     public void unregisterListeners() {
-        XoApplication.get().getXoClient().unregisterContactListener(this);
-        XoApplication.get().getXoClient().unregisterMessageListener(this);
-        XoApplication.get().getXoClient().getDownloadAgent().unregisterListener(this);
-        XoApplication.get().getXoClient().getUploadAgent().unregisterListener(this);
+        XoApplication.get().getClient().unregisterContactListener(this);
+        XoApplication.get().getClient().unregisterMessageListener(this);
+        XoApplication.get().getClient().getDownloadAgent().unregisterListener(this);
+        XoApplication.get().getClient().getUploadAgent().unregisterListener(this);
     }
 
     private void updateContact(final View view, final TalkClientContact contact) {
@@ -111,9 +111,9 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
         TextView unseenView = (TextView) view.findViewById(R.id.contact_unseen_messages);
 
         if (contact.isWorldwideGroup()) {
-            nameView.setText(mXoActivity.getResources().getString(R.string.all_worldwide) + " (" + (mContacts.size() - 1) + ")");
+            nameView.setText(mBaseActivity.getResources().getString(R.string.all_worldwide) + " (" + (mContacts.size() - 1) + ")");
         } else if (contact.isNearbyGroup()) {
-            nameView.setText(mXoActivity.getResources().getString(R.string.all_nearby) + " (" + (mContacts.size() - 1) + ")");
+            nameView.setText(mBaseActivity.getResources().getString(R.string.all_nearby) + " (" + (mContacts.size() - 1) + ")");
         } else {
             nameView.setText(contact.getNickname());
         }
@@ -155,7 +155,7 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
         avatarView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mXoActivity.showContactProfile(contact);
+                mBaseActivity.showContactProfile(contact);
             }
         });
     }
@@ -197,7 +197,7 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
 
     private void updateFromDatabase(final TalkClientContact group) {
         if (group == null || mDatabase == null) {
-            mXoActivity.runOnUiThread(new Runnable() {
+            mBaseActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     mContacts.clear();
@@ -215,7 +215,7 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
                 contacts.add(0, group);
             }
 
-            mXoActivity.runOnUiThread(new Runnable() {
+            mBaseActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     mContacts = contacts;
@@ -228,7 +228,7 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
     }
 
     private void refreshList() {
-        mXoActivity.runOnUiThread(new Runnable() {
+        mBaseActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 notifyDataSetChanged();
@@ -274,15 +274,15 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
     @Nullable
     private TalkClientContact getCurrentEnvironmentGroup() {
         if (TalkEnvironment.TYPE_WORLDWIDE.equals(mEnvironmentType)) {
-            return XoApplication.get().getXoClient().getCurrentWorldwideGroup();
+            return XoApplication.get().getClient().getCurrentWorldwideGroup();
         } else {
-            return XoApplication.get().getXoClient().getCurrentNearbyGroup();
+            return XoApplication.get().getClient().getCurrentNearbyGroup();
         }
     }
 
     @Override
     public void onMessageCreated(final TalkClientMessage message) {
-        mXoActivity.runOnUiThread(new Runnable() {
+        mBaseActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 TalkClientContact conversationContact = message.getConversationContact();

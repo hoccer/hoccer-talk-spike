@@ -3,20 +3,20 @@ package com.hoccer.xo.android.fragment;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import com.artcom.hoccer.R;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.RegistrationActivity;
-import com.hoccer.xo.android.base.XoFragment;
-import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 /**
  * Fragment handles the credential import from the supported package.
  */
-public class ImportCredentialUpdateFragment extends XoFragment {
+public class ImportCredentialUpdateFragment extends Fragment {
 
     private static final Logger LOG = Logger.getLogger(ImportCredentialUpdateFragment.class);
 

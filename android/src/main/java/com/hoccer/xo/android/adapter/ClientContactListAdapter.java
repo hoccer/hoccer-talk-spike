@@ -44,7 +44,7 @@ public class ClientContactListAdapter extends ContactListAdapter {
         List<TalkClientContact> blockedFriends;
 
         try {
-            XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
+            XoClientDatabase database = XoApplication.get().getClient().getDatabase();
             invitedMe = database.findClientContactsByState(TalkRelationship.STATE_INVITED_ME);
             invited = database.findClientContactsByState(TalkRelationship.STATE_INVITED);
             friends = database.findClientContactsByState(TalkRelationship.STATE_FRIEND);
@@ -128,7 +128,7 @@ public class ClientContactListAdapter extends ContactListAdapter {
         viewHolder.acceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                XoApplication.get().getXoClient().acceptFriend(contact);
+                XoApplication.get().getClient().acceptFriend(contact);
             }
         });
         viewHolder.declineButton.setOnClickListener(new View.OnClickListener() {
@@ -176,7 +176,7 @@ public class ClientContactListAdapter extends ContactListAdapter {
 
     private String getMessageAndAttachmentCount(TalkClientContact contact) {
         try {
-            XoClientDatabase database = XoApplication.get().getXoClient().getDatabase();
+            XoClientDatabase database = XoApplication.get().getClient().getDatabase();
             int messageCount = (int) database.getMessageCountByContactId(contact.getClientContactId());
             int attachmentCount = (int) database.getAttachmentCountByContactId(contact.getClientContactId());
 
@@ -203,7 +203,7 @@ public class ClientContactListAdapter extends ContactListAdapter {
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        XoApplication.get().getXoClient().declineFriend(contact);
+                        XoApplication.get().getClient().declineFriend(contact);
                     }
                 });
     }

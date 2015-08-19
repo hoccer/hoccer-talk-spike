@@ -11,16 +11,14 @@ public class Clipboard {
 
     private SelectedContent mContent;
 
-    public static synchronized Clipboard getInstance() {
+    private Clipboard() {}
+
+    public static synchronized Clipboard get() {
         if (sInstance == null) {
             sInstance = new Clipboard();
         }
 
         return sInstance;
-    }
-
-    private Clipboard() {
-        // private constructor to make sure that getInstance() is used instead
     }
 
     public boolean hasContent() {

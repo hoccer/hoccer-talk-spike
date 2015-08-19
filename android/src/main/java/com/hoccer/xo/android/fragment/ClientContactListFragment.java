@@ -6,10 +6,10 @@ import android.view.View;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.base.BaseActivity;
 import com.hoccer.xo.android.profile.client.ClientProfileActivity;
 import com.hoccer.xo.android.adapter.ClientContactListAdapter;
 import com.hoccer.xo.android.adapter.ContactListAdapter;
-import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.Placeholder;
 import org.apache.log4j.Logger;
 
@@ -30,7 +30,7 @@ public class ClientContactListFragment extends ContactListFragment {
         PLACEHOLDER.applyToView(view, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((XoActivity) getActivity()).showPairing();
+                ((BaseActivity) getActivity()).showPairing();
             }
         });
     }
@@ -55,7 +55,7 @@ public class ClientContactListFragment extends ContactListFragment {
     @Override
     protected int getInvitedMeCount() {
         try {
-            return (int) XoApplication.get().getXoClient().getDatabase().getCountOfInvitedMeClients();
+            return (int) XoApplication.get().getClient().getDatabase().getCountOfInvitedMeClients();
         } catch (SQLException e) {
             LOG.error("Error getting invitation count", e);
         }

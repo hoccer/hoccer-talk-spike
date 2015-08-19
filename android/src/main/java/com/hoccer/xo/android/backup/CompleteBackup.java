@@ -23,7 +23,7 @@ public class CompleteBackup extends DatabaseBackup {
 
         File database = new File(DB_PATH_NAME);
 
-        String clientName = XoApplication.get().getXoClient().getSelfContact().getName();
+        String clientName = XoApplication.get().getClient().getSelfContact().getName();
         BackupMetadata metadata = new BackupMetadata(BackupType.COMPLETE, clientName, new Date());
 
         File[] files = XoApplication.getAttachmentDirectory().listFiles(BackupFileUtils.IS_FILE_AND_NOT_HIDDEN_FILTER);
