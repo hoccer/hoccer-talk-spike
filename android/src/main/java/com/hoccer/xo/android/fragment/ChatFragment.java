@@ -305,7 +305,12 @@ public class ChatFragment extends XoChatListFragment
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
         if (contact.equals(mContact)) {
-            getActivity().invalidateOptionsMenu();
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    getActivity().invalidateOptionsMenu();
+                }
+            });
         }
     }
 
@@ -316,7 +321,12 @@ public class ChatFragment extends XoChatListFragment
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
         if (contact.equals(mContact)) {
-            getActivity().invalidateOptionsMenu();
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    getActivity().invalidateOptionsMenu();
+                }
+            });
         }
     }
 
