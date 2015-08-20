@@ -12,11 +12,17 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.util.Properties;
+
+import javax.management.remote.JMXServiceURL;
+import org.eclipse.jetty.jmx.MBeanContainer;
+import org.eclipse.jetty.jmx.ConnectorServer;
 
 public class CacheMain {
 
@@ -66,6 +72,28 @@ public class CacheMain {
         s.setThreadPool(new QueuedThreadPool(config.getServerThreads()));
         s.setStopAtShutdown(true);
         setupServer(s, db);
+
+        // set up JMX monitoring
+        // Note on security: This will start both the RMI registry as well as the RMI exporter on port 1099, using
+        //  'localhost' as the endpoint. This will permit the use of a ssh-reverse tunnel to access JMX remotely.
+        //  It is imperative to block this port on the firewall to prevent direct access to RMI.
+        //  Binding the RMI services to the loopback interface would be better, but would require a lot of code:
+        //     - re-implementing java.rmi.server.RMISocketFactory
+        //     - re-implementing org.eclipse.jetty.jmx.ConnectorServer
+        //  as both create socket listeners on '0.0.0.0'
+
+        MBeanContainer mbContainer = new MBeanContainer(
+                ManagementFactory.getPlatformMBeanServer());
+        s.addBean(mbContainer);
+        ConnectorServer jmxServer;
+        try {
+            JMXServiceURL url = new JMXServiceURL("rmi", "localhost", config.getJMXListenPort(), "/jndi/rmi://localhost:"+config.getJMXListenPort()+"/jmxrmi");
+            jmxServer = new ConnectorServer(url, null, "org.eclipse.jetty.jmx:name=rmiconnectorserver");
+            jmxServer.start();
+        } catch (Exception e) {
+            LOG.error("Can't start JMX monitoring:", e);
+        }
+
 
         // run and stop when interrupted
         try {
