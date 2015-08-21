@@ -191,9 +191,8 @@ public class XoClientService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         LOG.debug("onStartCommand(" + ((intent == null) ? "null" : intent.toString()) + ")");
         if (intent != null) {
-            if (intent.hasExtra(TalkPushService.EXTRA_SHOW_MESSAGE)) {
-                String message = intent.getStringExtra(TalkPushService.EXTRA_SHOW_MESSAGE);
-                // This seems to happen never. Messages are received the direct way after wakeup.
+            if (intent.hasExtra(TalkPushService.EXTRA_SHOW_GENERIC_PUSH_MESSAGE)) {
+                String message = intent.getStringExtra(TalkPushService.EXTRA_SHOW_GENERIC_PUSH_MESSAGE);
                 createPushMessageNotification(message);
             }
             if (intent.hasExtra(TalkPushService.EXTRA_WAKE_CLIENT)) {
