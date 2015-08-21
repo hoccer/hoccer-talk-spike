@@ -2097,6 +2097,9 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         }
     }
 
+    public String getWorldwideGroupId() {
+        return mWorldwideGroupId;
+    }
 
     public void sendDestroyEnvironment(final String type) {
         if (isReady()) {
