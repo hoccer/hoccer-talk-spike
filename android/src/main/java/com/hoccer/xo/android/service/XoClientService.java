@@ -4,6 +4,7 @@ import android.app.*;
 import android.content.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.media.MediaScannerConnection;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -56,7 +57,9 @@ public class XoClientService extends Service {
 
     private static final long NOTIFICATION_ALARM_BACKOFF = 10000;
 
-    private static final String DEFAULT_TRANSFER_LIMIT = "-1";
+    private static final int LED_LIGHTCOLOR = 0xFF4DBFAC;
+    private static final int LED_OFFTIME = 1000;
+    private static final int LED_ONTIME  = 1000;
 
     private static final int DEFAULT_IMAGE_UPLOAD_MAX_PIXEL_COUNT = -1;
     private static final int DEFAULT_IMAGE_UPLOAD_ENCODING_QUALITY = 100;
@@ -188,8 +191,8 @@ public class XoClientService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         LOG.debug("onStartCommand(" + ((intent == null) ? "null" : intent.toString()) + ")");
         if (intent != null) {
-            if (intent.hasExtra(TalkPushService.EXTRA_SHOW_MESSAGE)) {
-                String message = intent.getStringExtra(TalkPushService.EXTRA_SHOW_MESSAGE);
+            if (intent.hasExtra(TalkPushService.EXTRA_SHOW_GENERIC_PUSH_MESSAGE)) {
+                String message = intent.getStringExtra(TalkPushService.EXTRA_SHOW_GENERIC_PUSH_MESSAGE);
                 createPushMessageNotification(message);
             }
             if (intent.hasExtra(TalkPushService.EXTRA_WAKE_CLIENT)) {
@@ -448,77 +451,57 @@ public class XoClientService extends Service {
             return;
         }
 
-        // build the notification
-        Notification.Builder builder = new Notification.Builder(this);
+        NotificationCompat.Builder builder = createNotificationBuilder(this);
 
-        // always set the small icon (should be different depending on if we have a large one)
-        builder.setSmallIcon(R.drawable.ic_notification_message);
-
-        // large icon
-        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
-        builder.setLargeIcon(largeIcon);
-
-        // determine if alarms should be sounded
         if (doAlarm) {
             builder.setDefaults(Notification.DEFAULT_ALL);
             long now = System.currentTimeMillis();
             mTimeOfLastAlarm = now;
         }
 
-        // set total number of messages of more than one
         if (unseenMessagesCount > 1) {
             builder.setNumber(unseenMessagesCount);
         }
 
-        // fill in content
+        Intent intent = new Intent(this, ChatsActivity.class);
+        String contentTitle;
+        String contentText;
+
         if (relevantContactsMap.size() == 1) {
             // create intent to start the messaging activity for the right contact
             ContactUnseenMessageHolder holder = relevantContactsMap.values().iterator().next();
-            TalkClientContact contact = holder.getContact();
 
-            Intent intent = new Intent(this, ChatsActivity.class);
+            TalkClientContact contact = holder.getContact();
             intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contact.getClientContactId());
 
-            // make a pending intent with correct back-stack
-            PendingIntent pendingIntent = PendingIntent.getActivity(this, NotificationId.UNSEEN_MESSAGES, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-            // add the intent to the notification
-            builder.setContentIntent(pendingIntent);
-
-            // title is always the contact name
-            builder.setContentTitle(getContactName(contact));
+            contentTitle = getContactName(contact);
 
             // text depends on number of messages
             if (holder.getUnseenMessages().size() == 1) {
-                TalkClientMessage singleMessage = holder.getUnseenMessages().get(0);
-                builder.setContentText(singleMessage.getText());
+                contentText = holder.getUnseenMessages().get(0).getText();
             } else {
-                builder.setContentText(holder.getUnseenMessages().size() + getResources().getString(R.string.unseen_messages_notification_text));
+                contentText = holder.getUnseenMessages().size() + getResources().getString(R.string.unseen_messages_notification_text);
             }
         } else {
-            // create pending intent
-            Intent intent = new Intent(this, ChatsActivity.class);
-            PendingIntent pendingIntent = PendingIntent.getActivity(this, NotificationId.UNSEEN_MESSAGES, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            builder.setContentIntent(pendingIntent);
 
-            // concatenate contact names
             StringBuilder sb = new StringBuilder();
             for (ContactUnseenMessageHolder holder : relevantContactsMap.values()) {
                 sb.append(getContactName(holder.getContact())).append(CONTACT_DELIMETER);
             }
 
-            // set fields
-            builder.setContentTitle(sb.substring(0, sb.length() - 2));
-            builder.setContentText(unseenMessagesCount + getResources().getString(R.string.unseen_messages_notification_text));
+            contentTitle = sb.substring(0, sb.length() - 2);
+            contentText = unseenMessagesCount + getResources().getString(R.string.unseen_messages_notification_text);
         }
+
+        // make a pending intent with correct back-stack
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, NotificationId.UNSEEN_MESSAGES, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setContentIntent(pendingIntent);
+        builder.setContentTitle(contentTitle);
+        builder.setContentText(contentText);
 
         // finish up
         Notification notification;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            notification = builder.build();
-        } else {
-            notification = builder.getNotification();
-        }
+        notification = builder.build();
 
         // update the notification
         mNotificationManager.notify(NotificationId.UNSEEN_MESSAGES, notification);
@@ -546,17 +529,22 @@ public class XoClientService extends Service {
         intent.putExtra(IntentHelper.EXTRA_PUSH_MESSAGE, message);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, NotificationId.PUSH_MESSAGE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        Notification notification = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_notification)
-                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
+        Notification notification = createNotificationBuilder(this)
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setContentTitle(getResources().getString(R.string.app_name))
                 .setContentIntent(pendingIntent)
                 .setContentText(message)
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
                 .build();
-
+        LOG.debug("createPushMessageNotification()");
         mNotificationManager.notify(NotificationId.PUSH_MESSAGE, notification);
+    }
+
+    private NotificationCompat.Builder createNotificationBuilder(Context context){
+        NotificationCompat.Builder nb = new NotificationCompat.Builder(context);
+        nb.setSmallIcon(R.drawable.ic_notification_message);
+        nb.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher));
+        nb.setLights(LED_LIGHTCOLOR, LED_ONTIME, LED_OFFTIME);
+        return nb;
     }
 
     private class ConnectivityReceiver extends BroadcastReceiver {
