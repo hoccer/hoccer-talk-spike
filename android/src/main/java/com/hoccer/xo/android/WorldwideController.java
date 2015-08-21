@@ -20,7 +20,6 @@ public enum WorldwideController {
 
     private TalkEnvironment mEnvironment;
 
-    private boolean mShouldActivateWorldwideOnReconnect;
     private boolean mEnvironmentReleased = false;
 
     private WorldwideController() {
@@ -28,7 +27,7 @@ public enum WorldwideController {
             @Override
             public void onClientStateChange(XoClient client) {
                 if (client.isReady()) {
-                    if (mShouldActivateWorldwideOnReconnect) {
+                    if (!mEnvironmentReleased) {
                         updateWorldwide();
                     }
                 }
@@ -40,7 +39,6 @@ public enum WorldwideController {
 
     public void updateWorldwide() {
         mEnvironment = createWorldwideEnvironment();
-        mShouldActivateWorldwideOnReconnect = true;
         mEnvironmentReleased = false;
         sendEnvironmentUpdate();
     }
@@ -64,13 +62,12 @@ public enum WorldwideController {
     }
 
     public void releaseWorldWide() {
-        mShouldActivateWorldwideOnReconnect = false;
         XoApplication.get().getClient().sendDestroyEnvironment(TYPE_WORLDWIDE);
         mEnvironmentReleased = true;
     }
 
     public void updateWorldwideEnvironmentParameters() {
-        if (XoApplication.get().getClient().getWorldwideGroupId() == null) {
+        if (!isWorldwideActive()) {
             return;
         }
 
