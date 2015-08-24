@@ -35,7 +35,7 @@ public abstract class ProfileFragment extends Fragment {
 
     private static final Logger LOG = Logger.getLogger(ProfileFragment.class);
 
-    public final static int REQUEST_SELECT_AVATAR = 1;
+    public final static int REQUEST_SELECT_AVATAR = 3;
     public final static int REQUEST_CROP_AVATAR = 2;
     public final static String ARG_CLIENT_CONTACT_ID = "ARG_CLIENT_CONTACT_ID";
 
