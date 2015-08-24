@@ -305,7 +305,12 @@ public class ChatFragment extends XoChatListFragment
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
         if (contact.equals(mContact)) {
-            getActivity().invalidateOptionsMenu();
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    getActivity().invalidateOptionsMenu();
+                }
+            });
         }
     }
 
@@ -316,7 +321,12 @@ public class ChatFragment extends XoChatListFragment
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
         if (contact.equals(mContact)) {
-            getActivity().invalidateOptionsMenu();
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    getActivity().invalidateOptionsMenu();
+                }
+            });
         }
     }
 
@@ -331,21 +341,26 @@ public class ChatFragment extends XoChatListFragment
     }
 
     private void onMuteItemClick() {
-        String notificationPreference;
-        int toastText;
-        if (mContact.isNotificationsDisabled()) {
-            notificationPreference = TalkRelationship.NOTIFICATIONS_ENABLED;
-            toastText = R.string.toast_unmute_chat;
+        if (XoApplication.get().getClient().isReady()) {
+            boolean muted = toggleMute();
+            int toastText = muted ? R.string.toast_mute_chat : R.string.toast_unmute_chat;
+            Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
         } else {
-            notificationPreference = TalkRelationship.NOTIFICATIONS_DISABLED;
-            toastText = R.string.toast_mute_chat;
+            Toast.makeText(getActivity(), R.string.no_connection_available, Toast.LENGTH_LONG).show();
         }
+    }
+
+    private boolean toggleMute(){
+        boolean mute = !mContact.isNotificationsDisabled();
+        String notificationPreference = mute ? TalkRelationship.NOTIFICATIONS_DISABLED : TalkRelationship.NOTIFICATIONS_ENABLED;
+
         if (mContact.isGroup()) {
             XoApplication.get().getClient().getServerRpc().setGroupNotifications(mContact.getGroupId(), notificationPreference);
         } else {
             XoApplication.get().getClient().getServerRpc().setClientNotifications(mContact.getClientId(), notificationPreference);
         }
-        Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
+
+        return mute;
     }
 
 }

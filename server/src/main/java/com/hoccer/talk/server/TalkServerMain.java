@@ -11,7 +11,7 @@ import com.hoccer.talk.server.push.PushAgent;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
-import org.eclipse.jetty.jmx.ConnectorServer;
+
 import org.eclipse.jetty.server.Server;
 
 import java.io.FileInputStream;
@@ -22,8 +22,9 @@ import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.Properties;
-import org.eclipse.jetty.jmx.MBeanContainer;
 
+import org.eclipse.jetty.jmx.MBeanContainer;
+import org.eclipse.jetty.jmx.ConnectorServer;
 import javax.management.remote.JMXServiceURL;
 
 /**
@@ -74,10 +75,11 @@ public class TalkServerMain {
 
         MBeanContainer mbContainer = new MBeanContainer(
                 ManagementFactory.getPlatformMBeanServer());
-        webServer.addBean(mbContainer);
         ConnectorServer jmxServer;
+        webServer.addBean(mbContainer);
+
         try {
-            JMXServiceURL url = new JMXServiceURL("rmi", "localhost", 1099, "/jndi/rmi://localhost:1099/jmxrmi");
+            JMXServiceURL url = new JMXServiceURL("rmi", "localhost", config.getJMXListenPort(), "/jndi/rmi://localhost:"+config.getJMXListenPort()+"/jmxrmi");
             jmxServer = new ConnectorServer(url, null, "org.eclipse.jetty.jmx:name=rmiconnectorserver");
             jmxServer.start();
         } catch (Exception e) {

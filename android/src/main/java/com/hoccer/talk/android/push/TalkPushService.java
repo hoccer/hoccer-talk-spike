@@ -29,7 +29,7 @@ public class TalkPushService extends GCMBaseIntentService {
     public static final String EXTRA_GCM_REGISTERED = "com.hoccer.xo.GCM_REGISTERED";
     public static final String EXTRA_GCM_UNREGISTERED = "com.hoccer.xo.GCM_UNREGISTERED";
     public static final String EXTRA_WAKE_CLIENT = "com.hoccer.xo.WAKE_CLIENT";
-    public static final String EXTRA_SHOW_MESSAGE = "com.hoccer.xo.SHOW_MESSAGE";
+    public static final String EXTRA_SHOW_GENERIC_PUSH_MESSAGE = "com.hoccer.xo.SHOW_MESSAGE";
 
     private static final Logger LOG = Logger.getLogger(TalkPushService.class);
 
@@ -39,12 +39,11 @@ public class TalkPushService extends GCMBaseIntentService {
 
     @Override
     protected void onMessage(Context context, Intent intent) {
-        LOG.info("onMessage(" + intent + ")");
-
         String message = intent.getStringExtra("message");
+        LOG.debug("onMessage(" + intent + ") message:" + message);
 
         if (message != null) {
-            sendServiceIntent(EXTRA_SHOW_MESSAGE, message);
+            startServiceWithIntent(EXTRA_SHOW_GENERIC_PUSH_MESSAGE, message);
         } else {
             wakeClient();
         }
@@ -71,20 +70,20 @@ public class TalkPushService extends GCMBaseIntentService {
     @Override
     protected void onRegistered(Context context, String registrationId) {
         LOG.info("onRegistered(" + registrationId + ")");
-        sendServiceIntent(EXTRA_GCM_REGISTERED, registrationId);
+        startServiceWithIntent(EXTRA_GCM_REGISTERED, registrationId);
     }
 
     @Override
     protected void onUnregistered(Context context, String registrationId) {
         LOG.info("onUnregistered(" + registrationId + ")");
-        sendServiceIntent(EXTRA_GCM_UNREGISTERED, registrationId);
+        startServiceWithIntent(EXTRA_GCM_UNREGISTERED, registrationId);
     }
 
     private void wakeClient() {
-        sendServiceIntent(EXTRA_WAKE_CLIENT, "dummy");
+        startServiceWithIntent(EXTRA_WAKE_CLIENT, "dummy");
     }
 
-    private void sendServiceIntent(String extra, String extraValue) {
+    private void startServiceWithIntent(String extra, String extraValue) {
         Intent serviceIntent = new Intent(getApplicationContext(), XoClientService.class);
         serviceIntent.putExtra(extra, extraValue);
         startService(serviceIntent);

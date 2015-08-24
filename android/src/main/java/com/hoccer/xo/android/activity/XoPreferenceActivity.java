@@ -238,25 +238,13 @@ public class XoPreferenceActivity extends PreferenceActivity
         if ("preference_keysize".equals(key)) {
             createDialog();
             regenerateKeys();
-        } else if (getString(R.string.preference_key_worldwide_timetolive).equals(key)) {
-            updateWorldwideTimeToLive(sharedPreferences);
-        } else if (getString(R.string.preference_key_worldwide_enable_notifications).equals(key)) {
-            updateWorldwideNotificationPreference(sharedPreferences);
+        } else if (getString(R.string.preference_key_worldwide_timetolive).equals(key) || getString(R.string.preference_key_worldwide_enable_notifications).equals(key)) {
+            updateWorldwideEnvironmentParameters();
         }
     }
 
-    private void updateWorldwideTimeToLive(SharedPreferences sharedPreferences) {
-        long timeToLive = Long.parseLong(sharedPreferences.getString("preference_key_worldwide_timetolive", "0"));
-        WorldwideController.get().updateTimeToLive(timeToLive);
-    }
-
-    private void updateWorldwideNotificationPreference(SharedPreferences sharedPreferences) {
-        Boolean notificationsEnabled = sharedPreferences.getBoolean(getString(R.string.preference_key_worldwide_enable_notifications), false);
-        if (notificationsEnabled) {
-            WorldwideController.get().updateNotificationPreference(TalkGroupMembership.NOTIFICATIONS_ENABLED);
-        } else {
-            WorldwideController.get().updateNotificationPreference(TalkGroupMembership.NOTIFICATIONS_DISABLED);
-        }
+    private void updateWorldwideEnvironmentParameters() {
+        WorldwideController.INSTANCE.updateWorldwideEnvironmentParameters();
     }
 
     private void regenerateKeys() {

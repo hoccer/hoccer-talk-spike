@@ -11,45 +11,35 @@ import java.util.Date;
 
 import static com.hoccer.talk.model.TalkEnvironment.TYPE_WORLDWIDE;
 
-public class WorldwideController {
+public enum WorldwideController {
+    INSTANCE;
 
     private static final Logger LOG = Logger.getLogger(WorldwideController.class);
 
-    private static WorldwideController sInstance;
     private final IXoClientConfiguration mConfiguration;
 
-    private IXoStateListener mStateListener;
     private TalkEnvironment mEnvironment;
 
-    private boolean mShouldActivateWorldwideOnReconnect;
-
-    public static WorldwideController get() {
-        if (sInstance == null) {
-            sInstance = new WorldwideController();
-        }
-        return sInstance;
-    }
+    private boolean mEnvironmentReleased = false;
 
     private WorldwideController() {
-        mStateListener = new IXoStateListener() {
+        XoApplication.get().getClient().registerStateListener(new IXoStateListener() {
             @Override
             public void onClientStateChange(XoClient client) {
                 if (client.isReady()) {
-                    if (mShouldActivateWorldwideOnReconnect) {
-                        activateWorldwide();
+                    if (!mEnvironmentReleased) {
+                        updateWorldwide();
                     }
                 }
             }
-        };
-
-        XoApplication.get().getClient().registerStateListener(mStateListener);
+        });
 
         mConfiguration = XoApplication.get().getClient().getConfiguration();
     }
 
-    public void activateWorldwide() {
-        mShouldActivateWorldwideOnReconnect = true;
+    public void updateWorldwide() {
         mEnvironment = createWorldwideEnvironment();
+        mEnvironmentReleased = false;
         sendEnvironmentUpdate();
     }
 
@@ -63,7 +53,7 @@ public class WorldwideController {
     }
 
     private void sendEnvironmentUpdate() {
-        if (XoApplication.get().getClient().getState() == XoClient.State.READY) {
+        if (XoApplication.get().getClient().isReady()) {
             if (mEnvironment.isValid()) {
                 LOG.info("Sending environment update: " + mEnvironment.toString());
                 XoApplication.get().getClient().sendEnvironmentUpdate(mEnvironment);
@@ -71,27 +61,30 @@ public class WorldwideController {
         }
     }
 
-    public void deactivateWorldWide() {
-        mShouldActivateWorldwideOnReconnect = false;
-        XoApplication.get().getClient().sendDestroyEnvironment(TalkEnvironment.TYPE_WORLDWIDE);
-        mEnvironment = null;
+    public void releaseWorldWide() {
+        XoApplication.get().getClient().sendDestroyEnvironment(TYPE_WORLDWIDE);
+        mEnvironmentReleased = true;
     }
 
-    public void updateTimeToLive(long timeToLive) {
-        if (mEnvironment != null) {
-            mEnvironment.setTimeToLive(timeToLive);
-            sendEnvironmentUpdate();
+    public void updateWorldwideEnvironmentParameters() {
+        if (!isWorldwideActive()) {
+            return;
+        }
+
+        if (mEnvironmentReleased) {
+            releaseEnvironmentUpdatingParameters(mConfiguration.getTimeToLiveInWorldwide(), mConfiguration.getNotificationPreferenceForWorldwide());
         } else {
-            XoApplication.get().getClient().getServerRpc().releaseEnvironmentUpdatingParameters(TalkEnvironment.TYPE_WORLDWIDE, timeToLive, mConfiguration.getNotificationPreferenceForWorldwide());
+            updateWorldwide();
         }
     }
 
-    public void updateNotificationPreference(String notificationPreference) {
-        if (mEnvironment != null) {
-            mEnvironment.setNotificationPreference(notificationPreference);
-            sendEnvironmentUpdate();
-        } else {
-            XoApplication.get().getClient().getServerRpc().releaseEnvironmentUpdatingParameters(TalkEnvironment.TYPE_WORLDWIDE, mConfiguration.getTimeToLiveInWorldwide(), notificationPreference);
+    private void releaseEnvironmentUpdatingParameters(long timeToLive, String notificationPreference) {
+        if (XoApplication.get().getClient().isReady()) {
+            XoApplication.get().getClient().getServerRpc().releaseEnvironmentUpdatingParameters(TYPE_WORLDWIDE, timeToLive, notificationPreference);
         }
+    }
+
+    public boolean isWorldwideActive() {
+        return XoApplication.get().getClient().getWorldwideGroupId() != null;
     }
 }

@@ -15,6 +15,8 @@ public class CacheConfiguration {
     private String mListenAddress = "localhost";
     private int    mListenPort    = 8080;
 
+    private int    mJMXListenPort = 10990; // IANA Auxiliary RMI Port
+
     private String mDataDirectory = null;
     private long   mDataCheckpointInterval = 2000;
 
@@ -71,6 +73,10 @@ public class CacheConfiguration {
     public void setListenPort(int mListenPort) {
         this.mListenPort = mListenPort;
     }
+
+    public int getJMXListenPort() { return mJMXListenPort; }
+
+    public void setJMXListenPort(int mJMXListenPort) {this.mJMXListenPort = mJMXListenPort; }
 
     public String getDataDirectory() {
         return mDataDirectory;
@@ -142,6 +148,11 @@ public class CacheConfiguration {
         if(dataCheckpointInterval != null) {
             mDataCheckpointInterval = Long.parseLong(dataCheckpointInterval);
         }
+        // JMX
+        String dataJMXPort = properties.getProperty(PROPERTY_PREFIX + ".jmx.port", Long.toString(mJMXListenPort));
+        if(dataJMXPort != null) {
+            mJMXListenPort = Integer.parseInt(dataJMXPort, 10);
+        }
         // Database
         mDatabaseBackend = properties.getProperty(PROPERTY_PREFIX + ".database.backend", mDatabaseBackend);
         // ORMlite
@@ -152,23 +163,25 @@ public class CacheConfiguration {
 
     public void report() {
         LOG.info("Current configuration:" +
-                "\n - WebServer Configuration:" +
-                MessageFormat.format("\n   * listen address:                        ''{0}''", mListenAddress) +
-                MessageFormat.format("\n   * listen port:                           ''{0}''", Long.toString(mListenPort)) +
-                MessageFormat.format("\n   * threads:                               ''{0}''", mServerThreads) +
-                "\n - Database Configuration:" +
-                MessageFormat.format("\n   * database backend:                      ''{0}''", mDatabaseBackend) +
-                MessageFormat.format("\n   * ormlite url:                           ''{0}''", mOrmliteUrl) +
-                MessageFormat.format("\n   * ormlite user:                          ''{0}''", mOrmliteUser) +
-                MessageFormat.format("\n   * ormlite pass:                          ''{0}''", mOrmlitePassword) +
-                "\n - Expiry/Cleaning Configuration:" +
-                MessageFormat.format("\n   * storage file expiry time (in days):    ''{0}''", Long.toString(mStorageFileExpiryTime / 3600 / 24)) +
-                MessageFormat.format("\n   * transfer file expiry time (in days):   ''{0}''", Long.toString(mTransferFileExpiryTime / 3600 / 24)) +
-                MessageFormat.format("\n   * files cleanup delay (in s):            ''{0}''", Long.toString(mCleanupFilesDelay)) +
-                MessageFormat.format("\n   * files cleanup interval (in s):         ''{0}''", Long.toString(mCleanupFilesInterval)) +
-                "\n - Other:" +
-                MessageFormat.format("\n   * data directory:                        ''{0}''", mDataDirectory) +
-                MessageFormat.format("\n   * data checkpoint interval:              ''{0}''", Long.toString(mDataCheckpointInterval))
+                        "\n - WebServer Configuration:" +
+                        MessageFormat.format("\n   * listen address:                        ''{0}''", mListenAddress) +
+                        MessageFormat.format("\n   * listen port:                           ''{0}''", Long.toString(mListenPort)) +
+                        MessageFormat.format("\n   * threads:                               ''{0}''", mServerThreads) +
+                        "\n - Remote JMX Configuration:" +
+                        MessageFormat.format("\n   * jmx port:                             {0}", Long.toString(getJMXListenPort())) +
+                        "\n - Database Configuration:" +
+                        MessageFormat.format("\n   * database backend:                      ''{0}''", mDatabaseBackend) +
+                        MessageFormat.format("\n   * ormlite url:                           ''{0}''", mOrmliteUrl) +
+                        MessageFormat.format("\n   * ormlite user:                          ''{0}''", mOrmliteUser) +
+                        MessageFormat.format("\n   * ormlite pass:                          ''{0}''", mOrmlitePassword) +
+                        "\n - Expiry/Cleaning Configuration:" +
+                        MessageFormat.format("\n   * storage file expiry time (in days):    ''{0}''", Long.toString(mStorageFileExpiryTime / 3600 / 24)) +
+                        MessageFormat.format("\n   * transfer file expiry time (in days):   ''{0}''", Long.toString(mTransferFileExpiryTime / 3600 / 24)) +
+                        MessageFormat.format("\n   * files cleanup delay (in s):            ''{0}''", Long.toString(mCleanupFilesDelay)) +
+                        MessageFormat.format("\n   * files cleanup interval (in s):         ''{0}''", Long.toString(mCleanupFilesInterval)) +
+                        "\n - Other:" +
+                        MessageFormat.format("\n   * data directory:                        ''{0}''", mDataDirectory) +
+                        MessageFormat.format("\n   * data checkpoint interval:              ''{0}''", Long.toString(mDataCheckpointInterval))
         );
     }
 

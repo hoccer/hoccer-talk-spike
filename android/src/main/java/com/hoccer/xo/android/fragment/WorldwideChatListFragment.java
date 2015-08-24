@@ -23,21 +23,25 @@ public class WorldwideChatListFragment extends EnvironmentChatListFragment {
     @Override
     public void onPageSelected() {
         activateWorldwide();
+        initAdapter();
+        FeaturePromoter.displayWorldwideTutorialOnFirstStart(getActivity());
     }
 
     private void activateWorldwide() {
-        WorldwideController.get().activateWorldwide();
+        if (!WorldwideController.INSTANCE.isWorldwideActive()){
+            WorldwideController.INSTANCE.updateWorldwide();
+        }
+    }
 
+    private void initAdapter() {
         TalkClientContact group = XoApplication.get().getClient().getCurrentWorldwideGroup();
         createAdapter();
         mListAdapter.scheduleUpdate(group);
-
-        FeaturePromoter.displayWorldwideTutorialOnFirstStart(getActivity());
     }
 
     @Override
     public void onPageUnselected() {
-        WorldwideController.get().deactivateWorldWide();
+        WorldwideController.INSTANCE.releaseWorldWide();
     }
 
     @Override
