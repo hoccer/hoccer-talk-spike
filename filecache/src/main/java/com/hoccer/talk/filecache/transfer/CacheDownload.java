@@ -86,6 +86,7 @@ public class CacheDownload extends CacheTransfer {
                     }
                     limit = cacheFile.getLimit();
                     absoluteLimit = Math.min(limit, absoluteEnd);
+                    LOG.debug("CacheDownload.perform: while (absoluteLimit="+absoluteLimit+" != cacheFile.getContentLength()="+cacheFile.getContentLength()+"), Thread.interrupted()="+Thread.interrupted());
                 }
 
                 // read data from file

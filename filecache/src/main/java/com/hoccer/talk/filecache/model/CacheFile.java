@@ -260,6 +260,7 @@ public class CacheFile {
     }
 
     public void expire() {
+        LOG.debug("expire: fileId=" + mFileId);
         mStateLock.lock();
         try {
             switchState(STATE_EXPIRED, "expiry time reached");
@@ -270,6 +271,7 @@ public class CacheFile {
     }
 
     public void uploadStarts(CacheUpload upload) {
+        LOG.debug("uploadStarts: fileId=" + mFileId);
         mStateLock.lock();
         try {
             if(mState == STATE_NEW) {
@@ -290,6 +292,7 @@ public class CacheFile {
     }
 
     public void uploadAborted(CacheUpload upload) {
+        LOG.debug("uploadAborted: fileId=" + mFileId);
         mStateLock.lock();
         try {
             mUpload = null;
@@ -301,6 +304,7 @@ public class CacheFile {
     }
 
     public void uploadFinished(CacheUpload upload) {
+        LOG.debug("uploadFinished: fileId=" + mFileId);
         mStateLock.lock();
         try {
             mUpload = null;
@@ -312,6 +316,7 @@ public class CacheFile {
     }
 
     public void downloadStarts(CacheDownload download) {
+        LOG.debug("downloadStarts: fileId=" + mFileId);
         mStateLock.lock();
         try {
             mDownloads.add(download);
@@ -326,6 +331,7 @@ public class CacheFile {
     }
 
     public void downloadAborted(CacheDownload download) {
+        LOG.debug("downloadAborted: fileId=" + mFileId);
         mStateLock.lock();
         try {
             mDownloads.remove(download);
@@ -337,6 +343,7 @@ public class CacheFile {
     }
 
     public void downloadFinished(CacheDownload download) {
+        LOG.debug("downloadFinished: fileId=" + mFileId);
         mStateLock.lock();
         try {
             mDownloads.remove(download);
@@ -416,9 +423,10 @@ public class CacheFile {
                 return false;
             }
 
-            LOG.debug("waitForData - wait for state change");
+            LOG.debug("waitForData - wait for state change, state="+stateNames[mState]);
             // wait for state change
             mStateChanged.await();
+            LOG.debug("waitForData - awake from wat state change, state="+stateNames[mState]);
 
             // cases where progress may have
             // been made while waiting
