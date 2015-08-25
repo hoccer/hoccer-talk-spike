@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.util.Date;
 
 /**
  * Active download from the cache
@@ -20,12 +21,15 @@ public class CacheDownload extends CacheTransfer {
     static Logger LOG = Logger.getLogger(CacheDownload.class);
 
     ByteRange byteRange;
+    private int mTimeout;
 
     public CacheDownload(CacheFile file, ByteRange range,
                          HttpServletRequest req,
-                         HttpServletResponse resp) {
+                         HttpServletResponse resp,
+                         int timeout) {
         super(file, req, resp);
         byteRange = range;
+        mTimeout = timeout;
     }
 
     public void perform() throws IOException, InterruptedException {
@@ -78,16 +82,26 @@ public class CacheDownload extends CacheTransfer {
                 int absoluteLimit = Math.min(limit, absoluteEnd);
 
                 // wait for availability
-                while ((absoluteLimit != cacheFile.getContentLength())
-                        && (limit < (absolutePosition + bytesWanted))) {
+                final long SECONDS = 1000;
+                final long TIMEOUT_SECONDS = mTimeout * SECONDS;
+                Date timeoutDate = new Date(new Date().getTime() + TIMEOUT_SECONDS);
+
+                while ((absoluteLimit != cacheFile.getContentLength()) && (limit < (absolutePosition + bytesWanted))) {
+                    LOG.debug("CacheDownload.perform:entering while (limit="+limit+" < "+bytesWanted+"=(absolutePosition="+absolutePosition+"+bytesWanted="+bytesWanted+")), Thread.interrupted()="+Thread.interrupted());
+                    if (new Date().after(timeoutDate)) {
+                        LOG.debug("CacheDownload.perform: reached timeOutdate ="+timeoutDate);
+                        throw new InterruptedException("Timeout");
+                    } else {
+                        LOG.debug("CacheDownload.perform: not yet reached timeOutdate ="+timeoutDate);
+                    }
                     Thread.sleep(100);
-                    if (!cacheFile.waitForData(absoluteLimit + bytesWanted)) {
+                    if (!cacheFile.waitForData(absoluteLimit + bytesWanted, TIMEOUT_SECONDS)) {
                         throw new InterruptedException("File no longer available");
                     }
                     limit = cacheFile.getLimit();
                     absoluteLimit = Math.min(limit, absoluteEnd);
-                    LOG.debug("CacheDownload.perform: while (absoluteLimit="+absoluteLimit+" != cacheFile.getContentLength()="+cacheFile.getContentLength()+"), Thread.interrupted()="+Thread.interrupted());
-                }
+                 }
+                LOG.debug("CacheDownload.perform: passed while (limit="+limit+" < "+bytesWanted+"=(absolutePosition="+absolutePosition+"+bytesWanted="+bytesWanted+")), Thread.interrupted()="+Thread.interrupted());
 
                 // read data from file
                 int bytesRead = inFile.read(buffer, 0, bytesWanted);

@@ -45,7 +45,7 @@ public class CacheMain {
                 description = "Initialize database")
     boolean initdb;
 
-    public static void setupServer(Server s, CacheBackend db) {
+    public static void setupServer(Server s, CacheBackend db, CacheConfiguration config) {
         // log about jetty init
         LOG.info("Configuring jetty");
 
@@ -53,6 +53,7 @@ public class CacheMain {
         ServletContextHandler context = new ServletContextHandler();
         context.setContextPath("/");
         context.setAttribute("backend", db);
+        context.setAttribute("config", config);
         context.addServlet(StatusServlet.class, "/status");
         context.addServlet(ControlServlet.class, "/control");
         context.addServlet(DownloadServlet.class, "/download/*");
@@ -71,7 +72,7 @@ public class CacheMain {
         final Server s = new Server(new InetSocketAddress(config.getListenAddress(), config.getListenPort()));
         s.setThreadPool(new QueuedThreadPool(config.getServerThreads()));
         s.setStopAtShutdown(true);
-        setupServer(s, db);
+        setupServer(s, db, config);
 
         // set up JMX monitoring
         // Note on security: This will start both the RMI registry as well as the RMI exporter on port 1099, using

@@ -18,6 +18,7 @@ import java.util.GregorianCalendar;
 import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -394,7 +395,7 @@ public class CacheFile {
         }
     }
 
-    public boolean waitForData(int wantedPosition) throws InterruptedException {
+    public boolean waitForData(int wantedPosition, long timeout) throws InterruptedException {
         LOG.debug("waitForData wantedPosition="+wantedPosition);
         LOG.debug("file with id '" + mFileId + "' has state: " + stateNames[mState] + " limit="+mLimit);
 
@@ -425,8 +426,8 @@ public class CacheFile {
 
             LOG.debug("waitForData - wait for state change, state="+stateNames[mState]);
             // wait for state change
-            mStateChanged.await();
-            LOG.debug("waitForData - awake from wat state change, state="+stateNames[mState]);
+            mStateChanged.await(timeout, TimeUnit.SECONDS);
+            LOG.debug("waitForData - awake from wait for state change, state=" + stateNames[mState]);
 
             // cases where progress may have
             // been made while waiting

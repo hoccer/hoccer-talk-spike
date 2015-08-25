@@ -62,8 +62,10 @@ public class DownloadServlet extends HttpServlet {
             return;
         }
 
+        int downloadTimeout = getCacheCacheConfiguration().getDownloadTimeout();
+
         // create a transfer object
-        CacheDownload download = new CacheDownload(file, range, req, resp);
+        CacheDownload download = new CacheDownload(file, range, req, resp, downloadTimeout);
 
         // finish response headers
         finishGet(file, req, resp, range);
@@ -172,6 +174,12 @@ public class DownloadServlet extends HttpServlet {
         ServletContext ctx = getServletContext();
         CacheBackend backend = (CacheBackend)ctx.getAttribute("backend");
         return backend;
+    }
+
+    protected CacheConfiguration getCacheCacheConfiguration() {
+        ServletContext ctx = getServletContext();
+        CacheConfiguration config = (CacheConfiguration)ctx.getAttribute("config");
+        return config;
     }
 
 }
