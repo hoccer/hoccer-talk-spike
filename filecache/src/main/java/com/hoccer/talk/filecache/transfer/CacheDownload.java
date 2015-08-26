@@ -82,21 +82,12 @@ public class CacheDownload extends CacheTransfer {
                 int absoluteLimit = Math.min(limit, absoluteEnd);
 
                 // wait for availability
-                final long SECONDS = 1000;
-                final long TIMEOUT_SECONDS = mTimeout * SECONDS;
-                Date timeoutDate = new Date(new Date().getTime() + TIMEOUT_SECONDS);
-
                 while ((absoluteLimit != cacheFile.getContentLength()) && (limit < (absolutePosition + bytesWanted))) {
                     LOG.debug("CacheDownload.perform:entering while (limit="+limit+" < "+bytesWanted+"=(absolutePosition="+absolutePosition+"+bytesWanted="+bytesWanted+")), Thread.interrupted()="+Thread.interrupted());
-                    if (new Date().after(timeoutDate)) {
-                        LOG.debug("CacheDownload.perform: reached timeOutdate ="+timeoutDate);
-                        throw new InterruptedException("Timeout");
-                    } else {
-                        LOG.debug("CacheDownload.perform: not yet reached timeOutdate ="+timeoutDate);
-                    }
+
                     Thread.sleep(100);
-                    if (!cacheFile.waitForData(absoluteLimit + bytesWanted, TIMEOUT_SECONDS)) {
-                        throw new InterruptedException("File no longer available");
+                    if (!cacheFile.waitForData(absoluteLimit + bytesWanted, mTimeout)) {
+                        throw new InterruptedException("Timeout or file no longer available");
                     }
                     limit = cacheFile.getLimit();
                     absoluteLimit = Math.min(limit, absoluteEnd);
@@ -109,7 +100,7 @@ public class CacheDownload extends CacheTransfer {
                     LOG.debug("failed to read from file, bytesread= " + bytesRead);
                     break; // XXX
                 }
-                LOG.debug("writing " + bytesRead + "to output stream");
+                LOG.debug("writing " + bytesRead + " to output stream");
                 // write to http output stream
                 outStream.write(buffer, 0, bytesRead);
 

@@ -424,10 +424,17 @@ public class CacheFile {
                 return false;
             }
 
-            LOG.debug("waitForData - wait for state change, state="+stateNames[mState]);
+            LOG.debug("waitForData - wait "+timeout+" seconds for state change, now state="+stateNames[mState]);
+
             // wait for state change
-            mStateChanged.await(timeout, TimeUnit.SECONDS);
-            LOG.debug("waitForData - awake from wait for state change, state=" + stateNames[mState]);
+            boolean timeoutOccurred = !mStateChanged.await(timeout, TimeUnit.SECONDS);
+
+            LOG.debug("waitForData - awake (timeout="+timeoutOccurred+") from wait for state change, now state=" + stateNames[mState]);
+
+            if (timeoutOccurred) {
+                LOG.info("Download timeout ("+timeout+" secs.) in state " + stateNames[mState] + " for file id "+getFileId());
+                return false;
+            }
 
             // cases where progress may have
             // been made while waiting
