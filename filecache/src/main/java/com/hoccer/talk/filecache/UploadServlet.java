@@ -3,6 +3,7 @@ package com.hoccer.talk.filecache;
 import com.google.appengine.api.blobstore.ByteRange;
 import com.google.appengine.api.blobstore.RangeFormatException;
 import com.hoccer.talk.filecache.model.CacheFile;
+import com.hoccer.talk.filecache.transfer.CacheTransfer;
 import com.hoccer.talk.filecache.transfer.CacheUpload;
 import org.apache.log4j.Logger;
 
@@ -23,13 +24,15 @@ public class UploadServlet extends DownloadServlet {
         CacheFile file = getFileForUpload(req, resp);
         if(file == null) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, "File does not exist");
-            LOG.info("PUT " + req.getPathInfo() + " " + resp.getStatus() + " file not found");
+            LOG.info("PUT " + req.getPathInfo() + " " + resp.getStatus() + " file not found, agent="
+                    + CacheTransfer.getUserAgent(req)+" from "+CacheTransfer.getRemoteAddr(req));
             return;
         }
 
         ByteRange range = beginPut(file, req, resp);
         if(range == null) {
-            LOG.info("PUT " + req.getPathInfo() + " " + resp.getStatus() + " invalid range");
+            LOG.info("PUT " + req.getPathInfo() + " " + resp.getStatus() + " invalid range, agent="
+                    + CacheTransfer.getUserAgent(req)+" from "+CacheTransfer.getRemoteAddr(req));
             return;
         }
 
@@ -39,11 +42,14 @@ public class UploadServlet extends DownloadServlet {
             CacheUpload upload = new CacheUpload(file, req, resp, range);
 
             try {
-                LOG.info("PUT " + req.getPathInfo() + " --- upload started");
+                LOG.info("PUT " + req.getPathInfo() + " --- upload started, agent "+upload.getUserAgent()+
+                        " from "+upload.getRemoteAddr()+", account "+file.getAccountId()+", file "+ file.getFileId());
                 upload.perform();
-                LOG.info("PUT " + req.getPathInfo() + " --- upload finished");
+                LOG.info("PUT " + req.getPathInfo() + " --- upload finished, agent "+upload.getUserAgent()+
+                        " from "+upload.getRemoteAddr()+", account "+file.getAccountId()+", file "+ file.getFileId());
             } catch (InterruptedException e) {
-                LOG.info("PUT " + req.getPathInfo() + " --- upload interrupted");
+                LOG.info("PUT " + req.getPathInfo() + " --- upload interrupted, agent "+upload.getUserAgent()+
+                        " from "+upload.getRemoteAddr()+", account "+file.getAccountId()+", file "+ file.getFileId());
                 return;
             }
         }

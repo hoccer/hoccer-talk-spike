@@ -81,17 +81,30 @@ public class CacheDownload extends CacheTransfer {
                 int limit = cacheFile.getLimit();
                 int absoluteLimit = Math.min(limit, absoluteEnd);
 
+                // calculate timeout date
+                Date absoluteTimeout = new Date(new Date().getTime() + mTimeout * 1000);
+
                 // wait for availability
                 while ((absoluteLimit != cacheFile.getContentLength()) && (limit < (absolutePosition + bytesWanted))) {
+                    // we get here when all available data from the file has already been stuffed into the output stream
                     LOG.debug("CacheDownload.perform:entering while (limit="+limit+" < "+bytesWanted+"=(absolutePosition="+absolutePosition+"+bytesWanted="+bytesWanted+")), Thread.interrupted()="+Thread.interrupted());
 
+                    // give the uploader some time so we do not have to process too small chunks
                     Thread.sleep(100);
+
+                    // wait for new data to arrive
                     if (!cacheFile.waitForData(absoluteLimit + bytesWanted, mTimeout)) {
                         throw new InterruptedException("Timeout or file no longer available");
                     }
+                    // check for absolute timeout because waitForData sometimes returns prior to timeout with no new data
+                    if (new Date().after(absoluteTimeout)) {
+                        LOG.debug("CacheDownload.perform:timeout while (limit="+limit+" < "+bytesWanted+"=(absolutePosition="+absolutePosition+"+bytesWanted="+bytesWanted+")), Thread.interrupted()="+Thread.interrupted());
+                        throw new InterruptedException("Timeout");
+                    }
+
                     limit = cacheFile.getLimit();
                     absoluteLimit = Math.min(limit, absoluteEnd);
-                 }
+                }
                 LOG.debug("CacheDownload.perform: passed while (limit="+limit+" < "+bytesWanted+"=(absolutePosition="+absolutePosition+"+bytesWanted="+bytesWanted+")), Thread.interrupted()="+Thread.interrupted());
 
                 // read data from file

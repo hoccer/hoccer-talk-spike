@@ -75,21 +75,31 @@ public abstract class CacheTransfer {
     }
 
     public String getRemoteAddr() {
-        String forwardedFor = httpRequest.getHeader("X-Forwarded-For");
+        return getRemoteAddr(httpRequest);
+    }
+    public static String getRemoteAddr(HttpServletRequest req) {
+        String forwardedFor = req.getHeader("X-Forwarded-For");
         if (forwardedFor == null) {
-            return httpRequest.getRemoteAddr();
+            return req.getRemoteAddr();
         } else {
             return forwardedFor;
         }
     }
-
     public String getUserAgent() {
-        String userAgent = httpRequest.getHeader("User-Agent");
+        return getUserAgent(httpRequest);
+    }
+
+    public static String getUserAgent(HttpServletRequest req) {
+        String userAgent = req.getHeader("User-Agent");
         if (userAgent == null) {
             return "unknown";
         } else {
             return userAgent;
         }
+    }
+
+    public Thread getThread() {
+        return thread;
     }
 
     public long getBytesTransfered() {
@@ -102,6 +112,10 @@ public abstract class CacheTransfer {
 
     public long getTotalDuration() {
         return totalDuration;
+    }
+
+    public long getDuration() {
+        return System.currentTimeMillis() - rateStartTime;
     }
 
     public double getTotalRate() {
