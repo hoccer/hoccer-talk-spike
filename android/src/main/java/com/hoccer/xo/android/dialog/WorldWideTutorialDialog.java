@@ -51,7 +51,7 @@ public class WorldWideTutorialDialog extends DialogFragment {
                 editor.putString(getString(R.string.preference_key_worldwide_timetolive), timeToLive);
                 editor.putBoolean(PREFERENCE_KEY_WORLDWIDE_TUTORIAL_VIEWED, true);
                 editor.apply();
-                WorldwideController.get().updateTimeToLive(Long.parseLong(timeToLive));
+                WorldwideController.INSTANCE.updateWorldwideEnvironmentParameters();
                 dismiss();
             }
         });
