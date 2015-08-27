@@ -352,7 +352,7 @@
     <string name="nearby_saved">Nearby saved</string>
     <string name="worldwide_saved">Worldwide saved</string>
     <string name="error_send_message_blocked">The contact is blocked. Message will not be sent.</string>
-    <string name="error_client_not_nearby_or_ww">Contact is not in nearby or worldwide mode.</string>
+    <string name="error_client_not_nearby_or_ww">Message will not be sent. Contact has left nearby or worldwide mode and is not your friend.</string>
     <string name="invite_several_entries">Has several entries</string>
 
     <string name="about_advert_text">${app.name} \n- your secure multimedia messenger\n\nSecurity, data protection and the protection of privacy are of extreme importance to us. ${app.name} sets new standards in mobile data transmission and puts mobile privacy to a whole new level, due to latest encryption and transmission technologies. ${app.name} provides an easy and unlimited exchange of data between smartphones and tablets, without constraining users to register and enter confidential data.\n\nShare hugs \u0026 kisses</string>
