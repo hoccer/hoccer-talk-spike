@@ -327,6 +327,8 @@
     
     <string name="pref_privacy_title">Privatspähre</string>
     <string name="error_send_message_blocked">Du hast diesen Kontakt blockiert. Die Nachricht wird nicht gesendet.</string>
+    <string name="error_client_not_nearby_or_ww">Kontakt ist nicht im Nearby- oder Worldwide-Modus.</string>
+
     <string name="multi_invitation_button">weiter</string>
 
     <string name="chats_tab_name">CHATS</string>

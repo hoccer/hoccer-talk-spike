@@ -400,7 +400,7 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
         }
 
         if (!mContact.isClientFriend() && !mContact.isInEnvironment()){
-            Toast.makeText(getActivity(), "Contact is not in nearby or worldwide mode.", Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), R.string.error_client_not_nearby_or_ww, Toast.LENGTH_LONG).show();
             return;
         }
 
