@@ -38,10 +38,7 @@ import java.nio.charset.Charset;
 import java.security.*;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class XoClient implements JsonRpcConnection.Listener, TransferListener {
@@ -98,6 +95,9 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     // Executor doing all the heavy network and database work
     ScheduledExecutorService mExecutor;
 
+    private final BlockingQueue<Runnable> mNotifyQueue;
+    ThreadPoolExecutor mNotifyExecutor;
+
     // Futures keeping track of singleton background operations
     ScheduledFuture<?> mConnectFuture;
     ScheduledFuture<?> mRegistrationFuture;
@@ -147,6 +147,10 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
         // fetch executor and db immediately
         mExecutor = host.getBackgroundExecutor();
+
+        mNotifyQueue  = new ArrayBlockingQueue<Runnable>(150);
+        // Don't like the 100 threads of mExecutor. Slows down things. Therefore, I create another one.
+        mNotifyExecutor = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(),Runtime.getRuntime().availableProcessors(),1,TimeUnit.SECONDS, mNotifyQueue);
 
         // create and initialize the database
         mDatabase = new XoClientDatabase(mClientHost.getDatabaseBackend());
@@ -1453,6 +1457,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         List<TalkClientContact> contacts = mDatabase.findAllGroupContacts();
         List<TalkClientContact> groupContacts = new ArrayList<TalkClientContact>();
         List<String> groupIds = new ArrayList<String>();
+        // contacts contains only group contacts, why doublecheck that?
         for (TalkClientContact contact : contacts) {
             if (contact.isGroup() && contact.isGroupExisting()) {
                 groupContacts.add(contact);
@@ -1475,21 +1480,22 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     for (TalkGroupMembership membership : memberships) {
                         updateGroupMembership(membership);
                     }
+
                 } else {
                     TalkGroupPresence groupPresence = groupContact.getGroupPresence();
-                    if (groupPresence != null && groupPresence.isTypeNearby()) {
-                        destroyNearbyGroup(groupContact);
-                    } else if (groupPresence != null && groupPresence.isTypeWorldwide()) {
-                        destroyWorldwideGroup(groupContact);
-                    } else {
-                        if (groupPresence != null) {
+                    if (groupPresence != null){
+
+                        if (groupPresence.isTypeNearby()) {
+                            destroyNearbyGroup(groupContact);
+                        } else if (groupPresence.isTypeWorldwide()) {
+                            destroyWorldwideGroup(groupContact);
+                        } else {
                             if (groupContact.getGroupMembership().isInvolved() && hasMembersOrMessages(groupContact)) {
                                 groupContact.getGroupPresence().setKept(true);
                             }
                             groupPresence.setState(TalkGroupPresence.STATE_DELETED);
                             mDatabase.saveGroupPresence(groupPresence);
                         }
-
                         // update group member state
                         List<TalkGroupMembership> memberships = mDatabase.findMembershipsInGroup(groupContact.getGroupId());
                         for (TalkGroupMembership membership : memberships) {
@@ -3079,6 +3085,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             if (groupContact.getGroupId().equals(mWorldwideGroupId)) {
                 mWorldwideGroupId = null;
             }
+            mDatabase.eraseAllGroupContacts();
         } catch (SQLException e) {
             LOG.error("Error while destroying worldwide group " + groupContact.getGroupId());
         }
@@ -3099,6 +3106,12 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     private void updateGroupMembership(TalkGroupMembership newMembership) {
+
+        //Hoccer﹕ [client-0] DEBUG com.hoccer.talk.client.XoClient - sync: updateGroupMembership 1: 6ms
+        //08-31 18:14:30.970  19462-19557/com.artcom.hoccer I/Hoccer﹕ [client-0] DEBUG com.hoccer.talk.client.XoClient - sync: updateGroupMembership 2: 36ms
+        //08-31 18:14:31.013  19462-19557/com.artcom.hoccer I/Hoccer﹕ [client-0] DEBUG com.hoccer.talk.client.XoClient - sync: updateGroupMembership 3: 79ms
+        //08-31 18:14:31.092  19462-19557/com.artcom.hoccer I/Hoccer﹕ [client-0] DEBUG com.hoccer.talk.client.XoClient - sync: updateGroupMembership 4: 158ms
+
         long startMillis = System.currentTimeMillis();
 
         LOG.info("sync: updateGroupMembership(groupId: '" + newMembership.getGroupId() + "', clientId: '" + newMembership.getClientId() + "', state: '" + newMembership.getState() + "')");
@@ -3121,7 +3134,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 }
             }
 
-            LOG.debug("sync: updateGroupMembership 1: " + (System.currentTimeMillis() - startMillis));
+            LOG.debug("sync: updateGroupMembership 1: " + (System.currentTimeMillis() - startMillis)+"ms");
 
             clientContact = mDatabase.findContactByClientId(newMembership.getClientId(), false);
             if (clientContact == null) {
@@ -3134,8 +3147,8 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     return;
                 }
             }
-
-            LOG.debug("sync: updateGroupMembership 2: " + (System.currentTimeMillis() - startMillis));
+            // TAKES PRETTY LONG UNTIL HERE
+            LOG.debug("sync: updateGroupMembership 2: " + (System.currentTimeMillis() - startMillis)+"ms");
 
         } catch (SQLException e) {
             LOG.error("SQL error", e);
@@ -3173,7 +3186,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
             mDatabase.saveGroupMembership(dbMembership);
 
-            LOG.debug("sync: updateGroupMembership 3: " + (System.currentTimeMillis() - startMillis));
+            LOG.debug("sync: updateGroupMembership 3: " + (System.currentTimeMillis() - startMillis)+"ms");
 
             // if this concerns our own membership
             if (clientContact.isSelf()) {
@@ -3208,24 +3221,24 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
             updateGroupKeptState(oldMembership, newMembership, groupContact, clientContact);
 
-            LOG.debug("sync: updateGroupMembership 4: " + (System.currentTimeMillis() - startMillis));
+            LOG.debug("sync: updateGroupMembership 4: " + (System.currentTimeMillis() - startMillis)+"ms");
 
         } catch (SQLException e) {
             LOG.error("sql error", e);
         }
-
         notifyGroupMembershipChanged(groupContact);
     }
 
     private void notifyGroupMembershipChanged(final TalkClientContact groupContact) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (IXoContactListener listener : mContactListeners) {
-                    listener.onGroupMembershipChanged(groupContact);
-                }
-            }
-        }).start();
+         mNotifyExecutor.execute(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        for (IXoContactListener listener : mContactListeners) {
+                            listener.onGroupMembershipChanged(groupContact);
+                        }
+                    }
+                });
     }
 
     private void updateGroupKeptState(TalkGroupMembership oldMembership, TalkGroupMembership newMembership, TalkClientContact groupContact, TalkClientContact clientContact) throws SQLException {

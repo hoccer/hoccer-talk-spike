@@ -51,7 +51,7 @@ public class XoApplication extends Application {
      * Background executor thread count
      * AFAIK this must be at least 3 for RPC to work.
      */
-    private static final int CLIENT_THREAD_COUNT = 100;
+    private static final int CLIENT_THREAD_COUNT = 20;
 
     // global executor for client background activity (initialized in onCreate)
     private ScheduledExecutorService mExecutor;

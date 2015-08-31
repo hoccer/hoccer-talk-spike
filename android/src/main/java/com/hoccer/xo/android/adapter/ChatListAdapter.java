@@ -66,8 +66,11 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
     public void loadChatItems() {
         try {
             final List<TalkClientContact> filteredContacts = filter(mDatabase.findAllContacts());
+            LOG.debug("-----------1--------");
             final long nearbyMessageCount = mDatabase.getNearbyGroupMessageCount();
+            LOG.debug("-----------2--------");
             final long worldwideMessageCount = mDatabase.getWorldwideGroupMessageCount();
+            LOG.debug("-----------3--------");
 
             mActivity.runOnUiThread(new Runnable() {
                 @Override
@@ -75,14 +78,20 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
                     mChatItems.clear();
 
                     for (final TalkClientContact contact : filteredContacts) {
+                        LOG.debug("-----------4--------");
+
                         mChatItems.add(new ContactChatItem(contact, mActivity));
                     }
 
                     if (nearbyMessageCount > 0) {
+                        LOG.debug("-----------5--------");
+
                         mChatItems.add(new NearbyGroupHistoryChatItem(mActivity));
                     }
 
                     if (worldwideMessageCount > 0) {
+                        LOG.debug("-----------6--------");
+
                         mChatItems.add(new WorldwideGroupHistoryChatItem(mActivity));
                     }
 
@@ -114,6 +123,8 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
 
     public void setFilter(Filter filter) {
         this.mFilter = filter;
+        LOG.debug("------setFilter---");
+
         loadChatItems();
     }
 
@@ -192,6 +203,7 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
 
     @Override
     public void onClientRelationshipChanged(final TalkClientContact contact) {
+        LOG.debug("------onClientRelationshipChanged---");
         loadChatItems();
     }
 
@@ -214,6 +226,7 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
 
     @Override
     public void onGroupMembershipChanged(final TalkClientContact contact) {
+        LOG.debug("------onGroupMembershipChanged---");
         loadChatItems();
     }
 
@@ -251,6 +264,8 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
                 });
             } else {
                 // message received from worldwide contact which is not in worldwide anymore, so update contacts to list the acquaintance
+                LOG.debug("------updateItemForMessage---");
+
                 loadChatItems();
             }
         } catch (SQLException e) {

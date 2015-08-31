@@ -1006,6 +1006,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         deleteBuilder.delete();
     }
 
+
     private void deleteClientUpload(TalkClientUpload upload) throws SQLException {
         int deletedRowsCount = mClientUploads.delete(upload);
 
