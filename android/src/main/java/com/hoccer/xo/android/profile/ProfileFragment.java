@@ -37,6 +37,8 @@ public abstract class ProfileFragment extends Fragment {
 
     public final static int REQUEST_SELECT_AVATAR = 1;
     public final static int REQUEST_CROP_AVATAR = 2;
+    public static final int REQUEST_SELECT_CONTACT = 3;
+
     public final static String ARG_CLIENT_CONTACT_ID = "ARG_CLIENT_CONTACT_ID";
 
     protected TalkClientContact mContact;
