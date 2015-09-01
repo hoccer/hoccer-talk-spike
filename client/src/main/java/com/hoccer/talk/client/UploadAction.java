@@ -5,6 +5,7 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.crypto.AESCryptor;
 import com.hoccer.talk.rpc.ITalkRpcServer;
 import com.hoccer.talk.util.ProgressOutputHttpEntity;
+import org.apache.commons.io.FileUtils;
 import org.apache.http.*;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.log4j.Logger;
@@ -338,7 +339,8 @@ public class UploadAction implements TransferStateListener {
 
     public void doCompleteAction() {
         deleteTemporaryFile(mUpload.getEncryptedFile());
-        if (mFuture != null){
+        deleteCachedFile(mUpload.getTempCompressedFilePath());
+        if (mFuture != null) {
             mFuture.cancel(false);
         }
         mUploadAgent.onUploadFinished(mUpload);
@@ -346,7 +348,8 @@ public class UploadAction implements TransferStateListener {
 
     public void doFailedAction() {
         deleteTemporaryFile(mUpload.getEncryptedFile());
-        if (mFuture != null){
+        deleteCachedFile(mUpload.getTempCompressedFilePath());
+        if (mFuture != null) {
             mFuture.cancel(false);
         }
         mUploadAgent.onUploadFailed(mUpload);
@@ -355,8 +358,13 @@ public class UploadAction implements TransferStateListener {
     private void deleteTemporaryFile(String encryptedFile) {
         if (encryptedFile != null) {
             String path = mUploadAgent.getXoClient().getEncryptedUploadDirectory() + File.separator + encryptedFile;
-            File file = new File(path);
-            file.delete();
+            FileUtils.deleteQuietly(new File(path));
+        }
+    }
+
+    private void deleteCachedFile(String path) {
+        if (path != null) {
+            FileUtils.deleteQuietly(new File(path));
         }
     }
 
