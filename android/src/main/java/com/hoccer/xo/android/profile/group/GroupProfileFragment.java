@@ -146,6 +146,13 @@ public class GroupProfileFragment extends ProfileFragment
     @Override
     public void onResume() {
         super.onResume();
+        // That could be the right place to enable / disable sync of group memberships
+        XoApplication.get().getExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                //XoApplication.get().getClient().syncGroupMemberships(mContact);
+            }
+        });
 
         XoApplication.get().getClient().registerContactListener(this);
 
