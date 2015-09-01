@@ -995,15 +995,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         }
     }
 
-    public void deleteMessage(int messageId) {
-        try {
-            TalkClientMessage message = mDatabase.findMessageById(messageId);
-            deleteMessage(message);
-        } catch (SQLException e) {
-            LOG.error("SQL Error while deleting message with id: " + messageId, e);
-        }
-    }
-
     public void deleteMessage(TalkClientMessage message) {
         try {
             mDatabase.deleteMessageById(message.getClientMessageId());

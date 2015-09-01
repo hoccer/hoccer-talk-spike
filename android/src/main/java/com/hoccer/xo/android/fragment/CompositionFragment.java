@@ -483,13 +483,17 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         deleteCachedFiles(uploads);
+                        clearAttachment();
                     }
                 });
     }
 
-    private static void deleteCachedFiles(List<TalkClientUpload> uploads) {
+    private void deleteCachedFiles(List<TalkClientUpload> uploads) {
         for (TalkClientUpload upload : uploads) {
-            FileUtils.deleteQuietly(new File(upload.getTempCompressedFilePath()));
+            String path = upload.getTempCompressedFilePath();
+            if (path != null) {
+                FileUtils.deleteQuietly(new File(path));
+            }
         }
     }
 
