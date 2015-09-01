@@ -483,10 +483,10 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
                 });
     }
 
-    private static void deleteCachedFiles(List<TalkClientUpload> uploads) {
+    private void deleteCachedFiles(List<TalkClientUpload> uploads) {
         for (TalkClientUpload upload : uploads) {
             String path = upload.getTempCompressedFilePath();
-            if (path!=null) {
+            if (path != null) {
                 FileUtils.deleteQuietly(new File(path));
             }
         }
