@@ -399,6 +399,11 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
             return;
         }
 
+        if (!(mContact.isInEnvironment() || mContact.isClientFriend() || mContact.isGroup())){
+            Toast.makeText(getActivity(), R.string.error_client_not_nearby_or_ww, Toast.LENGTH_LONG).show();
+            return;
+        }
+
         if (mSelectedContent.isEmpty()) {
             sendMessage();
         } else {

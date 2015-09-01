@@ -327,6 +327,8 @@
     
     <string name="pref_privacy_title">Privatspähre</string>
     <string name="error_send_message_blocked">Du hast diesen Kontakt blockiert. Die Nachricht wird nicht gesendet.</string>
+    <string name="error_client_not_nearby_or_ww">Kontakt ist nicht mehr im In-der-Nähe- oder Weltweit-Modus. Die Nachricht wird nicht gesendet.</string>
+
     <string name="multi_invitation_button">weiter</string>
 
     <string name="chats_tab_name">CHATS</string>
@@ -399,7 +401,7 @@
     <string name="backup_success_title">Backup erfolgreich</string>
     <string name="backup_success_message">Backup erfolgreich erstellt.</string>
     <string name="backup_failure_title">Backup fehlgeschlagen</string>
-    <string name="backup_failure_message">Beim Ertsellen des Backups ist etwas schief gelaufen. Bitte versuche es erneut.</string>
+    <string name="backup_failure_message">Beim Erstellen des Backups ist etwas schief gelaufen. Bitte versuche es erneut.</string>
     <string name="backup_dialog_message">Das Backup wird unter <![CDATA[<br /><i>%1$s</i>]]> gespeichert.</string>
     <string name="backup_dialog_include_attachments">Dateianhänge sichern</string>
     <string name="backup_dialog_dont_forget_password">Falls du dein Passwort vergisst, kann das Backup nicht wiederhergestellt werden.</string>
