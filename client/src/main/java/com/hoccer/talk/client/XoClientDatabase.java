@@ -136,6 +136,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return mClientContacts.queryForId(contactId);
     }
 
+    // method name "find" can be misleading - because there might be something created.
     public synchronized TalkClientContact findContactByClientId(String clientId, boolean create) throws SQLException {
         TalkClientContact contact = mClientContacts.queryBuilder().where()
                 .eq("clientId", clientId)
