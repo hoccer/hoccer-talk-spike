@@ -191,26 +191,30 @@ public class TalkPresence {
 
     @JsonIgnore
     public void updateWith(TalkPresence p, Set<String> fields) {
-        if (fields == null || fields.contains(TalkPresence.FIELD_CLIENT_ID)) {
-            this.setClientId(p.getClientId());
-        }
-        if (fields == null || fields.contains(TalkPresence.FIELD_CLIENT_NAME)) {
-            this.setClientName(p.getClientName());
-        }
-        if (fields == null || fields.contains(TalkPresence.FIELD_CLIENT_STATUS)) {
-            this.setClientStatus(p.getClientStatus());
-        }
-        if (fields == null || fields.contains(TalkPresence.FIELD_TIMESTAMP)) {
-            this.setTimestamp(p.getTimestamp());
-        }
-        if (fields == null || fields.contains(TalkPresence.FIELD_AVATAR_URL)) {
-            this.setAvatarUrl(p.getAvatarUrl());
-        }
-        if (fields == null || fields.contains(TalkPresence.FIELD_KEY_ID)) {
-            this.setKeyId(p.getKeyId());
-        }
-        if (fields == null || fields.contains(TalkPresence.FIELD_CONNECTION_STATUS)) {
-            this.setConnectionStatus(p.getConnectionStatus());
+        if (fields == null) {
+            updateWith(p);
+        } else {
+            if (fields.contains(TalkPresence.FIELD_CLIENT_ID)) {
+                this.setClientId(p.getClientId());
+            }
+            if (fields.contains(TalkPresence.FIELD_CLIENT_NAME)) {
+                this.setClientName(p.getClientName());
+            }
+            if (fields.contains(TalkPresence.FIELD_CLIENT_STATUS)) {
+                this.setClientStatus(p.getClientStatus());
+            }
+            if (fields.contains(TalkPresence.FIELD_TIMESTAMP)) {
+                this.setTimestamp(p.getTimestamp());
+            }
+            if (fields.contains(TalkPresence.FIELD_AVATAR_URL)) {
+                this.setAvatarUrl(p.getAvatarUrl());
+            }
+            if (fields.contains(TalkPresence.FIELD_KEY_ID)) {
+                this.setKeyId(p.getKeyId());
+            }
+            if (fields.contains(TalkPresence.FIELD_CONNECTION_STATUS)) {
+                this.setConnectionStatus(p.getConnectionStatus());
+            }
         }
     }
 
