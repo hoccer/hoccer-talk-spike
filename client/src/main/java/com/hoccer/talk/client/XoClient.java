@@ -1384,28 +1384,36 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
         long startMillis = System.currentTimeMillis();
 
-        getHost().getBackgroundExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    syncPresences();
-                    syncRelationships();
-                    syncGroupPresences();
+//        getHost().getBackgroundExecutor().execute(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    syncPresences();
+//                    syncRelationships();
+//                    syncGroupPresences();
 //                    syncGroupMemberships();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-                mFullSyncRequired = false;
+//                } catch (SQLException e) {
+//                    e.printStackTrace();
+//                }
+//                mFullSyncRequired = false;
+//
+//            }
+//        });
 
-            }
-        });
-
-//        syncPresences();
-//        syncRelationships();
-//        syncGroupPresences();
-//        syncGroupMemberships();
-
-
+        syncPresences();
+        syncRelationships();
+        syncGroupPresences();
+        getHost().getBackgroundExecutor().execute(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            syncGroupMemberships();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
         LOG.debug("syncDatabase() duration: " + TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startMillis) + " sec");
     }
 
@@ -1508,11 +1516,12 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
                 // Member
                 if (groupMembershipFlags[i]) {
-                    TalkGroupMembership[] memberships = mServerRpc.getGroupMembers(groupContact.getGroupId(), getLatestDateChangeForGroupMembers());
+                    final TalkGroupMembership[] memberships = mServerRpc.getGroupMembers(groupContact.getGroupId(), getLatestDateChangeForGroupMembers());
                     if (groupContact.isWorldwideGroup()) {
                         mWorldwideGroupId = groupContact.getGroupId();
                     }
 
+                    // Consumes most of the time
                     for (TalkGroupMembership membership : memberships) {
                         updateGroupMembership(membership);
                     }
@@ -2980,7 +2989,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         }
 
         for (final IXoContactListener listener : mContactListeners) {
-            listener.onClientRelationshipChanged(clientContact);
+            //listener.onClientRelationshipChanged(clientContact);
         }
     }
 
@@ -3267,7 +3276,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     private void notifyGroupMembershipChanged(final TalkClientContact groupContact) {
-         mNotifyExecutor.execute(
+        mNotifyExecutor.execute(
                 new Runnable() {
                     @Override
                     public void run() {
@@ -3276,6 +3285,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                         }
                     }
                 });
+
     }
 
     private void updateGroupKeptState(TalkGroupMembership oldMembership, TalkGroupMembership newMembership, TalkClientContact groupContact, TalkClientContact clientContact) throws SQLException {
