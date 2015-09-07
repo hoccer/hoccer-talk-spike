@@ -3,10 +3,7 @@ package com.hoccer.xo.android.adapter;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import com.hoccer.talk.client.IXoContactListener;
-import com.hoccer.talk.client.IXoMessageListener;
-import com.hoccer.talk.client.TransferListener;
-import com.hoccer.talk.client.XoClientDatabase;
+import com.hoccer.talk.client.*;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
@@ -55,24 +52,34 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
     private BaseActivity mActivity;
     @Nullable
     private Filter mFilter;
+    private boolean mUpdateUI = true;
 
     public ChatListAdapter(BaseActivity activity, @Nullable Filter filter) {
         mActivity = activity;
         mFilter = filter;
         mXoClient = XoApplication.get().getClient();
+        mXoClient.registerStateListener(new IXoStateListener() {
+            @Override
+            public void onClientStateChange(XoClient client) {
+                if (client.getState() == XoClient.State.READY){
+                    mUpdateUI = true;
+                }
+                if (client.getState() == XoClient.State.SYNCING){
+                    mUpdateUI = false;
+                }
+            }
+        });
         mDatabase = mXoClient.getDatabase();
     }
 
     public void loadChatItems() {
-        LOG.debug("isReady----"+mXoClient.isReady());
-        if (mXoClient.isReady()) {
+        if (mUpdateUI) {
+            LOG.debug("----UI updates enabled");
+
             try {
                 final List<TalkClientContact> filteredContacts = filter(mDatabase.findAllContacts());
-                LOG.debug("-----------1--------");
                 final long nearbyMessageCount = mDatabase.getNearbyGroupMessageCount();
-                LOG.debug("-----------2--------");
                 final long worldwideMessageCount = mDatabase.getWorldwideGroupMessageCount();
-                LOG.debug("-----------3--------");
 
                 mActivity.runOnUiThread(new Runnable() {
                     @Override
@@ -80,19 +87,19 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
                         mChatItems.clear();
 
                         for (final TalkClientContact contact : filteredContacts) {
-                            LOG.debug("-----------4--------");
+                            LOG.debug("--------Load contact:"+contact.getName());
 
                             mChatItems.add(new ContactChatItem(contact, mActivity));
                         }
 
                         if (nearbyMessageCount > 0) {
-                            LOG.debug("-----------5--------");
+                            LOG.debug("-------Load groups");
 
                             mChatItems.add(new NearbyGroupHistoryChatItem(mActivity));
                         }
 
                         if (worldwideMessageCount > 0) {
-                            LOG.debug("-----------6--------");
+                            LOG.debug("-------Load WW");
 
                             mChatItems.add(new WorldwideGroupHistoryChatItem(mActivity));
                         }
@@ -103,6 +110,8 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
             } catch (SQLException e) {
                 LOG.error("sql error", e);
             }
+        } else {
+            LOG.debug("-----UI updates disabled while syncing");
         }
     }
 
