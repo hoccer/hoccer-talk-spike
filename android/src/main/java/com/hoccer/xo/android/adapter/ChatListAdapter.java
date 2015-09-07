@@ -64,44 +64,48 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
     }
 
     public void loadChatItems() {
-        try {
-            final List<TalkClientContact> filteredContacts = filter(mDatabase.findAllContacts());
-            LOG.debug("-----------1--------");
-            final long nearbyMessageCount = mDatabase.getNearbyGroupMessageCount();
-            LOG.debug("-----------2--------");
-            final long worldwideMessageCount = mDatabase.getWorldwideGroupMessageCount();
-            LOG.debug("-----------3--------");
+        LOG.debug("isReady----"+mXoClient.isReady());
+        if (mXoClient.isReady()) {
+            try {
+                final List<TalkClientContact> filteredContacts = filter(mDatabase.findAllContacts());
+                LOG.debug("-----------1--------");
+                final long nearbyMessageCount = mDatabase.getNearbyGroupMessageCount();
+                LOG.debug("-----------2--------");
+                final long worldwideMessageCount = mDatabase.getWorldwideGroupMessageCount();
+                LOG.debug("-----------3--------");
 
-            mActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mChatItems.clear();
+                mActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mChatItems.clear();
 
-                    for (final TalkClientContact contact : filteredContacts) {
-                        LOG.debug("-----------4--------");
+                        for (final TalkClientContact contact : filteredContacts) {
+                            LOG.debug("-----------4--------");
 
-                        mChatItems.add(new ContactChatItem(contact, mActivity));
+                            mChatItems.add(new ContactChatItem(contact, mActivity));
+                        }
+
+                        if (nearbyMessageCount > 0) {
+                            LOG.debug("-----------5--------");
+
+                            mChatItems.add(new NearbyGroupHistoryChatItem(mActivity));
+                        }
+
+                        if (worldwideMessageCount > 0) {
+                            LOG.debug("-----------6--------");
+
+                            mChatItems.add(new WorldwideGroupHistoryChatItem(mActivity));
+                        }
+
+                        notifyDataSetChanged();
                     }
-
-                    if (nearbyMessageCount > 0) {
-                        LOG.debug("-----------5--------");
-
-                        mChatItems.add(new NearbyGroupHistoryChatItem(mActivity));
-                    }
-
-                    if (worldwideMessageCount > 0) {
-                        LOG.debug("-----------6--------");
-
-                        mChatItems.add(new WorldwideGroupHistoryChatItem(mActivity));
-                    }
-
-                    notifyDataSetChanged();
-                }
-            });
-        } catch (SQLException e) {
-            LOG.error("sql error", e);
+                });
+            } catch (SQLException e) {
+                LOG.error("sql error", e);
+            }
         }
     }
+
 
     public void registerListeners() {
         mXoClient.registerContactListener(this);
@@ -195,6 +199,7 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
                 if (item == null) {
                     return;
                 }
+                LOG.debug("---MAIN---clientpresence");
                 item.update();
                 notifyDataSetChanged();
             }
@@ -217,6 +222,7 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
             public void run() {
                 ChatItem item = findChatItemForContact(contact);
                 if (item != null) {
+                    LOG.debug("---MAIN---groupPresence");
                     item.update();
                     notifyDataSetChanged();
                 }
@@ -259,6 +265,7 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
                 mActivity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        LOG.debug("---MAIN---Itemformessage");
                         notifyDataSetChanged();
                     }
                 });

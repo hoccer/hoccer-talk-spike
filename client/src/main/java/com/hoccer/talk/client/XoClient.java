@@ -1383,37 +1383,11 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         LOG.debug("syncDatabase() full sync: " + mFullSyncRequired);
 
         long startMillis = System.currentTimeMillis();
-
-//        getHost().getBackgroundExecutor().execute(new Runnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    syncPresences();
-//                    syncRelationships();
-//                    syncGroupPresences();
-//                    syncGroupMemberships();
-//                } catch (SQLException e) {
-//                    e.printStackTrace();
-//                }
-//                mFullSyncRequired = false;
-//
-//            }
-//        });
-
         syncPresences();
         syncRelationships();
         syncGroupPresences();
-        getHost().getBackgroundExecutor().execute(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            syncGroupMemberships();
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
+        syncGroupMemberships();
+        mFullSyncRequired = false;
         LOG.debug("syncDatabase() duration: " + TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startMillis) + " sec");
     }
 
