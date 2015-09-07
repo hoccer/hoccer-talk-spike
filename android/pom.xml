@@ -258,6 +258,8 @@
           <include>values-de/strings.xml</include>
           <include>xml/development_preferences.xml</include>
           <include>xml/preferences.xml</include>
+          <include>xml-v17/development_preferences.xml</include>
+          <include>xml-v17/preferences.xml</include>
         </includes>
       </resource>
     </resources>
