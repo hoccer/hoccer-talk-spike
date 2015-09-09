@@ -96,7 +96,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     ScheduledExecutorService mExecutor;
 
     private final BlockingQueue<Runnable> mNotifyQueue;
-    ThreadPoolExecutor mNotifyExecutor;
+    private final ThreadPoolExecutor mNotifyExecutor;
 
     // Futures keeping track of singleton background operations
     ScheduledFuture<?> mConnectFuture;
@@ -1621,8 +1621,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             if (mConnectBackoffPotency == 0) {
                 mConnectBackoffPotency = 1;
             }
-
-            mFullSyncRequired = true;
+            //mFullSyncRequired = true;
 
             if (mState != State.CONNECTING) {
                 switchState(State.CONNECTING, "reconnect after connection closed");

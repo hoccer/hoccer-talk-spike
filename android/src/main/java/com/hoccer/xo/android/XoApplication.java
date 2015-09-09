@@ -189,6 +189,7 @@ public class XoApplication extends Application {
         mClient.registerStateListener(new SrpChangeListener(this));
 
         if (isFirstConnectionAfterCrashOrUpdate()) {
+            sLog.debug("---First connection after crash");
             mClient.setFullSyncRequired(true);
             mCrashMonitor.saveCrashState(false);
         }

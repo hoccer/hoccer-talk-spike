@@ -19,10 +19,7 @@ import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 
 public class ChatListAdapter extends BaseAdapter implements IXoContactListener, IXoMessageListener, TransferListener {
@@ -75,6 +72,11 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
     public void loadChatItems() {
         if (mUpdateUI) {
             LOG.debug("----UI updates enabled");
+            StringBuffer b = new StringBuffer();
+            for (StackTraceElement s:Thread.currentThread().getStackTrace()){
+                b.append(s.toString()+"\n");
+            }
+            LOG.debug("---"+b.toString());
 
             try {
                 final List<TalkClientContact> filteredContacts = filter(mDatabase.findAllContacts());
@@ -112,9 +114,13 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
             }
         } else {
             LOG.debug("-----UI updates disabled while syncing");
+            StringBuffer b = new StringBuffer();
+            for (StackTraceElement s:Thread.currentThread().getStackTrace()){
+                b.append(s.toString()+"\n");
+            }
+            LOG.debug("---"+b.toString());
         }
     }
-
 
     public void registerListeners() {
         mXoClient.registerContactListener(this);
@@ -137,7 +143,6 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
     public void setFilter(Filter filter) {
         this.mFilter = filter;
         LOG.debug("------setFilter---");
-
         loadChatItems();
     }
 
@@ -280,8 +285,6 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
                 });
             } else {
                 // message received from worldwide contact which is not in worldwide anymore, so update contacts to list the acquaintance
-                LOG.debug("------updateItemForMessage---");
-
                 loadChatItems();
             }
         } catch (SQLException e) {
