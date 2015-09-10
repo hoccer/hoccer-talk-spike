@@ -47,9 +47,10 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
     private final XoAndroidClient mXoClient;
 
     private BaseActivity mActivity;
+
     @Nullable
     private Filter mFilter;
-    private boolean mUpdateUI = true;
+    private boolean mDoUpdateUI = true;
 
     public ChatListAdapter(BaseActivity activity, @Nullable Filter filter) {
         mActivity = activity;
@@ -59,10 +60,12 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
             @Override
             public void onClientStateChange(XoClient client) {
                 if (client.getState() == XoClient.State.READY){
-                    mUpdateUI = true;
+                    LOG.info("XOClient is ready. UI updates enabled.");
+                    mDoUpdateUI = true;
                 }
                 if (client.getState() == XoClient.State.SYNCING){
-                    mUpdateUI = false;
+                    LOG.info("XOClient is syncing. UI updates disabled.");
+                    mDoUpdateUI = false;
                 }
             }
         });
@@ -70,56 +73,36 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
     }
 
     public void loadChatItems() {
-        if (mUpdateUI) {
-            LOG.debug("----UI updates enabled");
-            StringBuffer b = new StringBuffer();
-            for (StackTraceElement s:Thread.currentThread().getStackTrace()){
-                b.append(s.toString()+"\n");
-            }
-            LOG.debug("---"+b.toString());
+        mActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final List<TalkClientContact> filteredContacts = filter(mDatabase.findAllContacts());
+                    final long nearbyMessageCount = mDatabase.getNearbyGroupMessageCount();
+                    final long worldwideMessageCount = mDatabase.getWorldwideGroupMessageCount();
 
-            try {
-                final List<TalkClientContact> filteredContacts = filter(mDatabase.findAllContacts());
-                final long nearbyMessageCount = mDatabase.getNearbyGroupMessageCount();
-                final long worldwideMessageCount = mDatabase.getWorldwideGroupMessageCount();
+                    mChatItems.clear();
 
-                mActivity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mChatItems.clear();
-
-                        for (final TalkClientContact contact : filteredContacts) {
-                            LOG.debug("--------Load contact:"+contact.getName());
-
-                            mChatItems.add(new ContactChatItem(contact, mActivity));
-                        }
-
-                        if (nearbyMessageCount > 0) {
-                            LOG.debug("-------Load groups");
-
-                            mChatItems.add(new NearbyGroupHistoryChatItem(mActivity));
-                        }
-
-                        if (worldwideMessageCount > 0) {
-                            LOG.debug("-------Load WW");
-
-                            mChatItems.add(new WorldwideGroupHistoryChatItem(mActivity));
-                        }
-
-                        notifyDataSetChanged();
+                    for (final TalkClientContact contact : filteredContacts) {
+                        mChatItems.add(new ContactChatItem(contact, mActivity));
                     }
-                });
-            } catch (SQLException e) {
-                LOG.error("sql error", e);
+
+                    if (nearbyMessageCount > 0) {
+                        mChatItems.add(new NearbyGroupHistoryChatItem(mActivity));
+                    }
+
+                    if (worldwideMessageCount > 0) {
+                        mChatItems.add(new WorldwideGroupHistoryChatItem(mActivity));
+                    }
+
+                    notifyDataSetChanged();
+
+
+                } catch (SQLException e) {
+                    LOG.error("sql error", e);
+                }
             }
-        } else {
-            LOG.debug("-----UI updates disabled while syncing");
-            StringBuffer b = new StringBuffer();
-            for (StackTraceElement s:Thread.currentThread().getStackTrace()){
-                b.append(s.toString()+"\n");
-            }
-            LOG.debug("---"+b.toString());
-        }
+        });
     }
 
     public void registerListeners() {
@@ -142,7 +125,6 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
 
     public void setFilter(Filter filter) {
         this.mFilter = filter;
-        LOG.debug("------setFilter---");
         loadChatItems();
     }
 
@@ -213,7 +195,6 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
                 if (item == null) {
                     return;
                 }
-                LOG.debug("---MAIN---clientpresence");
                 item.update();
                 notifyDataSetChanged();
             }
@@ -223,7 +204,10 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
     @Override
     public void onClientRelationshipChanged(final TalkClientContact contact) {
         LOG.debug("------onClientRelationshipChanged---");
-        loadChatItems();
+        if (mDoUpdateUI)
+        {
+            loadChatItems();
+        }
     }
 
     @Override
@@ -236,7 +220,6 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
             public void run() {
                 ChatItem item = findChatItemForContact(contact);
                 if (item != null) {
-                    LOG.debug("---MAIN---groupPresence");
                     item.update();
                     notifyDataSetChanged();
                 }
@@ -247,7 +230,16 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
     @Override
     public void onGroupMembershipChanged(final TalkClientContact contact) {
         LOG.debug("------onGroupMembershipChanged---");
-        loadChatItems();
+        if (mDoUpdateUI) {
+            loadChatItems();
+        } else {
+            LOG.debug("UI updates disabled while syncing");
+            StringBuffer b = new StringBuffer();
+            for (StackTraceElement s:Thread.currentThread().getStackTrace()){
+                b.append(s.toString()+"\n");
+            }
+            LOG.debug("---"+b.toString());
+        }
     }
 
     @Override
@@ -279,13 +271,14 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
                 mActivity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        LOG.debug("---MAIN---Itemformessage");
                         notifyDataSetChanged();
                     }
                 });
             } else {
                 // message received from worldwide contact which is not in worldwide anymore, so update contacts to list the acquaintance
-                loadChatItems();
+                if (mDoUpdateUI) {
+                    loadChatItems();
+                }
             }
         } catch (SQLException e) {
             LOG.error("Error while retrieving contacts for message " + message.getMessageId(), e);

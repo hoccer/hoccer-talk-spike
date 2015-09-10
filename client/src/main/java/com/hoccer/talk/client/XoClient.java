@@ -1621,7 +1621,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             if (mConnectBackoffPotency == 0) {
                 mConnectBackoffPotency = 1;
             }
-            //mFullSyncRequired = true;
 
             if (mState != State.CONNECTING) {
                 switchState(State.CONNECTING, "reconnect after connection closed");
@@ -1968,13 +1967,11 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 LOG.trace("unwrapping public key");
                 PublicKey pubKey = keyPair.getPublic();
                 byte[] pubEnc = RSACryptor.unwrapRSA_X509(pubKey.getEncoded());
-//                String pubStr = Base64.encodeBase64String(pubEnc);
                 String pubStr = new String(Base64.encodeBase64(pubEnc));
 
                 LOG.trace("unwrapping private key");
                 PrivateKey privKey = keyPair.getPrivate();
                 byte[] privEnc = RSACryptor.unwrapRSA_PKCS8(privKey.getEncoded());
-//                String privStr = Base64.encodeBase64String(privEnc);
                 String privStr = new String(Base64.encodeBase64(privEnc));
 
                 LOG.debug("calculating key id");
@@ -2962,7 +2959,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         }
 
         for (final IXoContactListener listener : mContactListeners) {
-            //listener.onClientRelationshipChanged(clientContact);
+            listener.onClientRelationshipChanged(clientContact);
         }
     }
 
@@ -3124,11 +3121,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     private void updateGroupMembership(TalkGroupMembership newMembership) {
-
-        //Hoccer﹕ [client-0] DEBUG com.hoccer.talk.client.XoClient - sync: updateGroupMembership 1: 6ms
-        //08-31 18:14:30.970  19462-19557/com.artcom.hoccer I/Hoccer﹕ [client-0] DEBUG com.hoccer.talk.client.XoClient - sync: updateGroupMembership 2: 36ms
-        //08-31 18:14:31.013  19462-19557/com.artcom.hoccer I/Hoccer﹕ [client-0] DEBUG com.hoccer.talk.client.XoClient - sync: updateGroupMembership 3: 79ms
-        //08-31 18:14:31.092  19462-19557/com.artcom.hoccer I/Hoccer﹕ [client-0] DEBUG com.hoccer.talk.client.XoClient - sync: updateGroupMembership 4: 158ms
 
         long startMillis = System.currentTimeMillis();
 
