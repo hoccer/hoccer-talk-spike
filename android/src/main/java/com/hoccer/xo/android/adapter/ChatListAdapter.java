@@ -203,7 +203,6 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
 
     @Override
     public void onClientRelationshipChanged(final TalkClientContact contact) {
-        LOG.debug("------onClientRelationshipChanged---");
         if (mDoUpdateUI)
         {
             loadChatItems();
@@ -229,16 +228,10 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
 
     @Override
     public void onGroupMembershipChanged(final TalkClientContact contact) {
-        LOG.debug("------onGroupMembershipChanged---");
         if (mDoUpdateUI) {
             loadChatItems();
         } else {
             LOG.debug("UI updates disabled while syncing");
-            StringBuffer b = new StringBuffer();
-            for (StackTraceElement s:Thread.currentThread().getStackTrace()){
-                b.append(s.toString()+"\n");
-            }
-            LOG.debug("---"+b.toString());
         }
     }
 
