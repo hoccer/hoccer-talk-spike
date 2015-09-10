@@ -1449,7 +1449,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
     public void syncGroupMemberships(TalkClientContact groupContact){
         if (groupContact.isGroup()){
-            setFullSyncRequired(true);
             List<TalkClientContact> contact = new ArrayList<TalkClientContact>();
             contact.add(groupContact);
             try {
