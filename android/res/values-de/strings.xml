@@ -89,7 +89,7 @@
     <string name="context_menu_delete_message">Löschen</string>
 
     <!-- Pairing toast messages -->
-    <string name="toast_pairing_successful">Als Freund hinzugefügt!.</string>
+    <string name="toast_pairing_successful">Als Freund hinzugefügt.</string>
     <string name="toast_pairing_failed">Ungültiger Code. Bitte versuche es erneut.</string>
 
     <!-- Invitation dialog -->
