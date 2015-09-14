@@ -376,7 +376,7 @@ public class XoClientService extends Service {
         try {
             unseenMessages = database.findUnseenMessages();
         } catch (SQLException e) {
-            LOG.error("SQL Exception while retrieving lit of unseen messages", e);
+            LOG.error("SQL Exception while retrieving list of unseen messages", e);
             return;
         }
 
@@ -653,7 +653,7 @@ public class XoClientService extends Service {
         @Override
         public void onMessageCreated(TalkClientMessage message) {
             if (message.isIncoming()) {
-                updateUnseenMessageNotification(true);
+                updateUnseenMessageNotification(!message.getConversationContact().isNotificationsDisabled());
             }
         }
 
