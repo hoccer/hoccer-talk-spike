@@ -62,6 +62,7 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
                 if (client.getState() == XoClient.State.READY){
                     LOG.info("XOClient is ready. UI updates enabled.");
                     mDoUpdateUI = true;
+                    loadChatItems();
                 }
                 if (client.getState() == XoClient.State.SYNCING){
                     LOG.info("XOClient is syncing. UI updates disabled.");
@@ -73,13 +74,15 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
     }
 
     public void loadChatItems() {
-        mActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    final List<TalkClientContact> filteredContacts = filter(mDatabase.findAllContacts());
-                    final long nearbyMessageCount = mDatabase.getNearbyGroupMessageCount();
-                    final long worldwideMessageCount = mDatabase.getWorldwideGroupMessageCount();
+        try {
+
+            final List<TalkClientContact> filteredContacts = filter(mDatabase.findAllContacts());
+            final long nearbyMessageCount = mDatabase.getNearbyGroupMessageCount();
+            final long worldwideMessageCount = mDatabase.getWorldwideGroupMessageCount();
+
+            mActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
 
                     mChatItems.clear();
 
@@ -96,13 +99,11 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
                     }
 
                     notifyDataSetChanged();
-
-
-                } catch (SQLException e) {
-                    LOG.error("sql error", e);
                 }
-            }
-        });
+            });
+        } catch (SQLException e) {
+            LOG.error("sql error", e);
+        }
     }
 
     public void registerListeners() {
