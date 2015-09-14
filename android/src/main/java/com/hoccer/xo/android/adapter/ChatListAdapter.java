@@ -204,8 +204,7 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
 
     @Override
     public void onClientRelationshipChanged(final TalkClientContact contact) {
-        if (mDoUpdateUI)
-        {
+        if (mDoUpdateUI) {
             loadChatItems();
         }
     }
@@ -231,8 +230,6 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
     public void onGroupMembershipChanged(final TalkClientContact contact) {
         if (mDoUpdateUI) {
             loadChatItems();
-        } else {
-            LOG.debug("UI updates disabled while syncing");
         }
     }
 
@@ -270,9 +267,7 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
                 });
             } else {
                 // message received from worldwide contact which is not in worldwide anymore, so update contacts to list the acquaintance
-                if (mDoUpdateUI) {
-                    loadChatItems();
-                }
+                loadChatItems();
             }
         } catch (SQLException e) {
             LOG.error("Error while retrieving contacts for message " + message.getMessageId(), e);

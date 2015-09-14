@@ -179,41 +179,41 @@ public class TalkPresence {
     }
 
     @JsonIgnore
-    public void updateWith(TalkPresence p) {
-        this.setClientId(p.getClientId());
-        this.setClientName(p.getClientName());
-        this.setClientStatus(p.getClientStatus());
-        this.setTimestamp(p.getTimestamp());
-        this.setAvatarUrl(p.getAvatarUrl());
-        this.setKeyId(p.getKeyId());
-        this.setConnectionStatus(p.getConnectionStatus());
+    public void updateWith(TalkPresence presence) {
+        this.setClientId(presence.getClientId());
+        this.setClientName(presence.getClientName());
+        this.setClientStatus(presence.getClientStatus());
+        this.setTimestamp(presence.getTimestamp());
+        this.setAvatarUrl(presence.getAvatarUrl());
+        this.setKeyId(presence.getKeyId());
+        this.setConnectionStatus(presence.getConnectionStatus());
     }
 
     @JsonIgnore
-    public void updateWith(TalkPresence p, Set<String> fields) {
+    public void updateWith(TalkPresence presence, Set<String> fields) {
         if (fields == null) {
-            updateWith(p);
+            updateWith(presence);
         } else {
             if (fields.contains(TalkPresence.FIELD_CLIENT_ID)) {
-                this.setClientId(p.getClientId());
+                this.setClientId(presence.getClientId());
             }
             if (fields.contains(TalkPresence.FIELD_CLIENT_NAME)) {
-                this.setClientName(p.getClientName());
+                this.setClientName(presence.getClientName());
             }
             if (fields.contains(TalkPresence.FIELD_CLIENT_STATUS)) {
-                this.setClientStatus(p.getClientStatus());
+                this.setClientStatus(presence.getClientStatus());
             }
             if (fields.contains(TalkPresence.FIELD_TIMESTAMP)) {
-                this.setTimestamp(p.getTimestamp());
+                this.setTimestamp(presence.getTimestamp());
             }
             if (fields.contains(TalkPresence.FIELD_AVATAR_URL)) {
-                this.setAvatarUrl(p.getAvatarUrl());
+                this.setAvatarUrl(presence.getAvatarUrl());
             }
             if (fields.contains(TalkPresence.FIELD_KEY_ID)) {
-                this.setKeyId(p.getKeyId());
+                this.setKeyId(presence.getKeyId());
             }
             if (fields.contains(TalkPresence.FIELD_CONNECTION_STATUS)) {
-                this.setConnectionStatus(p.getConnectionStatus());
+                this.setConnectionStatus(presence.getConnectionStatus());
             }
         }
     }
