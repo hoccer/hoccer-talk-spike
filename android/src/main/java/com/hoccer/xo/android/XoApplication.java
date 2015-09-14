@@ -69,7 +69,6 @@ public class XoApplication extends Application {
 
     private static XoApplication sInstance;
     private CrashMonitor mCrashMonitor;
-    private boolean mForceFullSync;
 
     public static XoApplication get() {
         return sInstance;
@@ -190,9 +189,7 @@ public class XoApplication extends Application {
         // add srp secret change listener
         mClient.registerStateListener(new SrpChangeListener(this));
 
-        mForceFullSync = false;
-
-        if (isFirstConnectionAfterCrashOrUpdate() || mForceFullSync ) {
+        if (isFirstConnectionAfterCrashOrUpdate()) {
             sLog.debug("First connection after crash or update. Full sync triggered.");
             mClient.setFullSyncRequired(true);
             mCrashMonitor.saveCrashState(false);
