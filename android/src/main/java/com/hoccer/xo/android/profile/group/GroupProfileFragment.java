@@ -144,7 +144,6 @@ public class GroupProfileFragment extends ProfileFragment
     @Override
     public void onResume() {
         super.onResume();
-
         XoApplication.get().getClient().registerContactListener(this);
 
         mMode = Mode.PROFILE;
