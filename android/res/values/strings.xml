@@ -316,6 +316,8 @@
     <string name="sms_invitation_text">Hey! I\'m now using the free app ${app.name} for secure chatting. Download it now and add me as a contact:\n%1$s%2$s\n%3$s</string>
     <string name="email_invitation_subject">Join me at ${app.name}!</string>
     <string name="email_invitation_text">Hey!&lt;br&gt;I\'m now using the free app ${app.name} for secure chatting. Download it now and add me as contact:&lt;br&gt;&lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;&lt;br&gt;&lt;br&gt;%3$s</string>
+    <string name="email_invitation_text_plain">Hey!I\'m now using the free app ${app.name} for secure chatting. Download it now and add me as contact:\n%1$s%2$s\n%3$s</string>
+
     <string name="dialog_export_credentials_title">Export credentials</string>
     <string name="export_credentials_success">Successfully saved your credentials.</string>
     <string name="export_credentials_failure">Error while saving your credentials.</string>
