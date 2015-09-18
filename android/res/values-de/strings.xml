@@ -89,7 +89,7 @@
     <string name="context_menu_delete_message">Löschen</string>
 
     <!-- Pairing toast messages -->
-    <string name="toast_pairing_successful">Als Freund hinzugefügt!.</string>
+    <string name="toast_pairing_successful">Als Freund hinzugefügt.</string>
     <string name="toast_pairing_failed">Ungültiger Code. Bitte versuche es erneut.</string>
 
     <!-- Invitation dialog -->
@@ -327,7 +327,7 @@
     
     <string name="pref_privacy_title">Privatspähre</string>
     <string name="error_send_message_blocked">Du hast diesen Kontakt blockiert. Die Nachricht wird nicht gesendet.</string>
-    <string name="error_client_not_nearby_or_ww">Kontakt ist nicht mehr im In-der-Nähe- oder Weltweit-Modus. Die Nachricht wird nicht gesendet.</string>
+    <string name="error_client_not_nearby_or_ww">Nachricht kann nicht gesendet werden: Es existiert keine Beziehung mehr zu diesem Kontakt. Du kannst den Kontakt über das Nutzerprofil als Freund einladen.</string>
 
     <string name="multi_invitation_button">weiter</string>
 

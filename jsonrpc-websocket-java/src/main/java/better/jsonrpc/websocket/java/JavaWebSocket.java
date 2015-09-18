@@ -12,7 +12,10 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.security.KeyStore;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class JavaWebSocket implements JsonRpcWebSocket {
 
@@ -85,13 +88,23 @@ public class JavaWebSocket implements JsonRpcWebSocket {
     }
 
     private class Client extends WebSocketClient {
+
+        private String[] filterSupportedCipherSuites(String[] supportedCipherSuites){
+            Set<String> supported = new HashSet<String>(Arrays.asList(supportedCipherSuites));
+            Set<String> required = new HashSet<String>(Arrays.asList(mCipherSuites));
+            required.retainAll(supported);
+
+            String[] result = required.toArray(new String[required.size()]);
+            return result;
+        }
+
         public Client(URI serviceUri, String protocol, int connectTimeout) {
             super(serviceUri, new Draft_17(), createHeaders(protocol), connectTimeout);
 
             if ("wss".equals(serviceUri.getScheme()) && mSSLSocketFactory != null) {
                 try {
                     SSLSocket socket = (SSLSocket) mSSLSocketFactory.createSocket();
-                    socket.setEnabledCipherSuites(mCipherSuites);
+                    socket.setEnabledCipherSuites(filterSupportedCipherSuites(socket.getSupportedCipherSuites()));
                     setSocket(socket);
                 } catch (IOException e) {
                     LOG.error("Error creating SSLSocket", e);
