@@ -598,9 +598,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 }
                 mDatabase.savePresence(presence);
 
-                for (IXoContactListener listener : mContactListeners) {
-                    listener.onClientPresenceChanged(mSelfContact);
-                }
+                notifyOnClientPresenceChanged(mSelfContact);
 
                 if (isLoggedIn()) {
                     sendPresence();
@@ -626,9 +624,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                         scheduleDisconnectTimeout();
                     }
 
-                    for (IXoContactListener listener : mContactListeners) {
-                        listener.onClientPresenceChanged(mSelfContact);
-                    }
+                    notifyOnClientPresenceChanged(mSelfContact);
 
                     if (isLoggedIn()) {
                         sendPresence();
@@ -668,9 +664,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 mSelfContact.setAvatarUpload(upload);
                 mDatabase.savePresence(presence);
                 mDatabase.saveContact(mSelfContact);
-                for (IXoContactListener listener : mContactListeners) {
-                    listener.onClientPresenceChanged(mSelfContact);
-                }
+                notifyOnClientPresenceChanged(mSelfContact);
                 sendPresence();
             }
         } catch (Exception e) {
@@ -2825,6 +2819,10 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             });
         }
 
+        notifyOnClientPresenceChanged(clientContact);
+    }
+
+    public void notifyOnClientPresenceChanged(TalkClientContact clientContact) {
         for (IXoContactListener listener : mContactListeners) {
             listener.onClientPresenceChanged(clientContact);
         }

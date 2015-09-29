@@ -204,7 +204,12 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
                 if (item == null) {
                     return;
                 }
-                item.update();
+
+                if (!contact.getClientPresence().isKept() && !contact.isClientFriend()) {
+                    mChatItems.remove(item);
+                } else {
+                    item.update();
+                }
                 notifyDataSetChanged();
             }
         });
@@ -342,6 +347,16 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
 
     @Override
     public void onUploadStateChanged(TalkClientUpload upload) {
+    }
+
+    public void removeItem(ContactChatItem item) {
+        mChatItems.remove(item);
+        mActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                notifyDataSetChanged();
+            }
+        });
     }
 
     public interface Filter {
