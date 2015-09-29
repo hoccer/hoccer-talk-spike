@@ -421,7 +421,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return messages;
     }
 
-    public long getNearbyGroupMessageCount() throws SQLException {
+    public long getHistoryGroupMessageCount(String contactType) throws SQLException {
         QueryBuilder<TalkClientMessage, ?> clientMessages = mClientMessages.queryBuilder();
         clientMessages.where()
                 .eq("deleted", false);
@@ -429,7 +429,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         QueryBuilder<TalkClientContact, ?> clientContacts = mClientContacts.queryBuilder();
         clientContacts.where()
                 .eq("deleted", false).and()
-                .eq("contactType", TalkClientContact.TYPE_GROUP);
+                .eq("contactType", contactType);
 
         QueryBuilder<TalkGroupPresence, ?> groupPresences = mGroupPresences.queryBuilder();
         groupPresences.where()
@@ -473,25 +473,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
             orderedMessages.addAll(findMessagesByContactId(c.getClientContactId(), nearbyMessages.size(), 0));
         }
         return orderedMessages;
-    }
-
-    public long getWorldwideGroupMessageCount() throws SQLException {
-        QueryBuilder<TalkClientMessage, ?> clientMessages = mClientMessages.queryBuilder();
-        clientMessages.where()
-                .eq("deleted", false);
-
-        QueryBuilder<TalkClientContact, ?> clientContacts = mClientContacts.queryBuilder();
-        clientContacts.where()
-                .eq("deleted", false).and()
-                .eq("contactType", TalkClientContact.TYPE_GROUP);
-
-        QueryBuilder<TalkGroupPresence, ?> groupPresences = mGroupPresences.queryBuilder();
-        groupPresences.where()
-                .eq("groupType", TalkGroupPresence.GROUP_TYPE_WORLDWIDE);
-
-
-        return clientMessages.join(
-                clientContacts.join(groupPresences)).countOf();
     }
 
     public List<TalkClientMessage> getAllWorldwideGroupMessages() throws SQLException {

@@ -8,6 +8,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.model.TalkGroupPresence;
 import com.hoccer.xo.android.XoAndroidClient;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.BaseActivity;
@@ -20,6 +21,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
 import java.util.*;
+
+import static com.hoccer.talk.model.TalkGroupPresence.GROUP_TYPE_NEARBY;
+import static com.hoccer.talk.model.TalkGroupPresence.GROUP_TYPE_WORLDWIDE;
 
 
 public class ChatListAdapter extends BaseAdapter implements IXoContactListener, IXoMessageListener, TransferListener {
@@ -79,8 +83,8 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
         try {
 
             final List<TalkClientContact> filteredContacts = filter(mDatabase.findAllContacts());
-            final long nearbyMessageCount = mDatabase.getNearbyGroupMessageCount();
-            final long worldwideMessageCount = mDatabase.getWorldwideGroupMessageCount();
+            final long nearbyMessageCount = mDatabase.getHistoryGroupMessageCount(GROUP_TYPE_NEARBY);
+            final long worldwideMessageCount = mDatabase.getHistoryGroupMessageCount(GROUP_TYPE_WORLDWIDE);
 
             mActivity.runOnUiThread(new Runnable() {
                 @Override
