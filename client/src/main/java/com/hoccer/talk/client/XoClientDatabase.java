@@ -422,7 +422,22 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public long getNearbyGroupMessageCount() throws SQLException {
-        return getAllNearbyGroupMessages().size();
+        QueryBuilder<TalkClientMessage, ?> clientMessages = mClientMessages.queryBuilder();
+        clientMessages.where()
+                .eq("deleted", false);
+
+        QueryBuilder<TalkClientContact, ?> clientContacts = mClientContacts.queryBuilder();
+        clientContacts.where()
+                .eq("deleted", false).and()
+                .eq("contactType", TalkClientContact.TYPE_GROUP);
+
+        QueryBuilder<TalkGroupPresence, ?> groupPresences = mGroupPresences.queryBuilder();
+        groupPresences.where()
+                .eq("groupType", TalkGroupPresence.GROUP_TYPE_NEARBY);
+
+
+        return clientMessages.join(
+                clientContacts.join(groupPresences)).countOf();
     }
 
     public List<TalkClientMessage> getAllNearbyGroupMessages() throws SQLException {
@@ -461,7 +476,22 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public long getWorldwideGroupMessageCount() throws SQLException {
-        return getAllWorldwideGroupMessages().size();
+        QueryBuilder<TalkClientMessage, ?> clientMessages = mClientMessages.queryBuilder();
+        clientMessages.where()
+                .eq("deleted", false);
+
+        QueryBuilder<TalkClientContact, ?> clientContacts = mClientContacts.queryBuilder();
+        clientContacts.where()
+                .eq("deleted", false).and()
+                .eq("contactType", TalkClientContact.TYPE_GROUP);
+
+        QueryBuilder<TalkGroupPresence, ?> groupPresences = mGroupPresences.queryBuilder();
+        groupPresences.where()
+                .eq("groupType", TalkGroupPresence.GROUP_TYPE_WORLDWIDE);
+
+
+        return clientMessages.join(
+                clientContacts.join(groupPresences)).countOf();
     }
 
     public List<TalkClientMessage> getAllWorldwideGroupMessages() throws SQLException {
