@@ -83,13 +83,13 @@ public class ChatListFragment extends SearchablePagerListFragment {
         super.onResume();
         if (mAdapter != null) {
             mAdapter.registerListeners();
-            mAdapter.loadChatItems();
+            mAdapter.notifyDataSetChanged();
         }
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onDestroy() {
+        super.onDestroy();
         if (mAdapter != null) {
             mAdapter.unregisterListeners();
         }
