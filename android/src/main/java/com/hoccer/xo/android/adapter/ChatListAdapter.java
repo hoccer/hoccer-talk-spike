@@ -273,9 +273,6 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
                         notifyDataSetChanged();
                     }
                 });
-            } else {
-                // message received from worldwide contact which is not in worldwide anymore, so update contacts to list the acquaintance
-                loadChatItems();
             }
         } catch (SQLException e) {
             LOG.error("Error while retrieving contacts for message " + message.getMessageId(), e);
