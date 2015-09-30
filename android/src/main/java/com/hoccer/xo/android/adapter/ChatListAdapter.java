@@ -19,7 +19,13 @@ import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import static com.hoccer.talk.model.TalkGroupPresence.GROUP_TYPE_NEARBY;
+import static com.hoccer.talk.model.TalkGroupPresence.GROUP_TYPE_WORLDWIDE;
 
 
 public class ChatListAdapter extends BaseAdapter implements IXoContactListener, IXoMessageListener, TransferListener {
@@ -59,12 +65,11 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
         mXoClient.registerStateListener(new IXoStateListener() {
             @Override
             public void onClientStateChange(XoClient client) {
-                if (client.getState() == XoClient.State.READY){
+                if (client.getState() == XoClient.State.READY) {
                     LOG.info("XOClient is ready. UI updates enabled.");
                     mDoUpdateUI = true;
-                    loadChatItems();
                 }
-                if (client.getState() == XoClient.State.SYNCING){
+                if (client.getState() == XoClient.State.SYNCING) {
                     LOG.info("XOClient is syncing. UI updates disabled.");
                     mDoUpdateUI = false;
                 }
@@ -77,8 +82,8 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
         try {
 
             final List<TalkClientContact> filteredContacts = filter(mDatabase.findAllContacts());
-            final long nearbyMessageCount = mDatabase.getNearbyGroupMessageCount();
-            final long worldwideMessageCount = mDatabase.getWorldwideGroupMessageCount();
+            final long nearbyMessageCount = mDatabase.getHistoryGroupMessageCount(GROUP_TYPE_NEARBY);
+            final long worldwideMessageCount = mDatabase.getHistoryGroupMessageCount(GROUP_TYPE_WORLDWIDE);
 
             mActivity.runOnUiThread(new Runnable() {
                 @Override
@@ -193,10 +198,15 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
             @Override
             public void run() {
                 ChatItem item = findChatItemForContact(contact);
-                if (item == null) {
-                    return;
+                if (item != null) {
+                    if (!contact.getClientPresence().isKept() && !contact.isClientFriend()) {
+                        mChatItems.remove(item);
+                    } else {
+                        item.update();
+                    }
+                } else if (contact.getClientPresence().isKept()) {
+                    mChatItems.add(new ContactChatItem(contact, mActivity));
                 }
-                item.update();
                 notifyDataSetChanged();
             }
         });
@@ -265,9 +275,6 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
                         notifyDataSetChanged();
                     }
                 });
-            } else {
-                // message received from worldwide contact which is not in worldwide anymore, so update contacts to list the acquaintance
-                loadChatItems();
             }
         } catch (SQLException e) {
             LOG.error("Error while retrieving contacts for message " + message.getMessageId(), e);

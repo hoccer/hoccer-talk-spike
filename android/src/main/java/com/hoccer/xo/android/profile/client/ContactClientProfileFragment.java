@@ -10,6 +10,7 @@ import android.widget.*;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.IXoMessageListener;
+import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.exceptions.NoClientIdInPresenceException;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -241,6 +242,7 @@ public class ContactClientProfileFragment extends ClientProfileFragment implemen
         mContact.getClientPresence().setKept(false);
         try {
             XoApplication.get().getClient().getDatabase().savePresence(mContact.getClientPresence());
+            XoApplication.get().getClient().notifyOnClientPresenceChanged(mContact);
         } catch (SQLException e) {
             LOG.error("sql error", e);
         } catch (NoClientIdInPresenceException e) {

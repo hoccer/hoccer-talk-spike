@@ -49,7 +49,10 @@ public class ChatListFragment extends SearchablePagerListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mDatabase = XoApplication.get().getClient().getDatabase();
-        createAdapter();
+
+        mAdapter = createAdapter();
+        mAdapter.loadChatItems();
+        mAdapter.registerListeners();
     }
 
     @Override
@@ -81,18 +84,13 @@ public class ChatListFragment extends SearchablePagerListFragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (mAdapter != null) {
-            mAdapter.registerListeners();
-            mAdapter.loadChatItems();
-        }
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        if (mAdapter != null) {
-            mAdapter.unregisterListeners();
-        }
+    public void onDestroy() {
+        super.onDestroy();
+        mAdapter.unregisterListeners();
     }
 
     @Override
@@ -188,7 +186,7 @@ public class ChatListFragment extends SearchablePagerListFragment {
         mAdapter.loadChatItems();
     }
 
-    private void createAdapter() {
+    private ChatListAdapter createAdapter() {
         ChatListAdapter.Filter filter = new ChatListAdapter.Filter() {
             @Override
             public boolean shouldShow(TalkClientContact contact) {
@@ -201,7 +199,7 @@ public class ChatListFragment extends SearchablePagerListFragment {
             }
         };
 
-        mAdapter = new ChatListAdapter((BaseActivity) getActivity(), filter);
+        return new ChatListAdapter((BaseActivity) getActivity(), filter);
     }
 
     private boolean isSuspendedGroupMember(TalkClientContact contact) {
@@ -309,7 +307,8 @@ public class ChatListFragment extends SearchablePagerListFragment {
     }
 
     @Override
-    public void onPageSelected() {}
+    public void onPageSelected() {
+    }
 
     @Override
     public void onPageUnselected() {
