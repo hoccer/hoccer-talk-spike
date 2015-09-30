@@ -66,7 +66,6 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
                 if (client.getState() == XoClient.State.READY){
                     LOG.info("XOClient is ready. UI updates enabled.");
                     mDoUpdateUI = true;
-                    loadChatItems();
                 }
                 if (client.getState() == XoClient.State.SYNCING){
                     LOG.info("XOClient is syncing. UI updates disabled.");

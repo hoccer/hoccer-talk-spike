@@ -202,6 +202,7 @@ public class ChatListFragment extends SearchablePagerListFragment {
         };
 
         mAdapter = new ChatListAdapter((BaseActivity) getActivity(), filter);
+        mAdapter.loadChatItems();
     }
 
     private boolean isSuspendedGroupMember(TalkClientContact contact) {
