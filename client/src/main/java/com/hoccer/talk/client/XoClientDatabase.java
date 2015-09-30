@@ -421,20 +421,18 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return messages;
     }
 
-    public long getHistoryGroupMessageCount(String contactType) throws SQLException {
+    public long getHistoryGroupMessageCount(String groupType) throws SQLException {
         QueryBuilder<TalkClientMessage, ?> clientMessages = mClientMessages.queryBuilder();
         clientMessages.where()
                 .eq("deleted", false);
 
         QueryBuilder<TalkClientContact, ?> clientContacts = mClientContacts.queryBuilder();
         clientContacts.where()
-                .eq("deleted", false).and()
-                .eq("contactType", contactType);
+                .eq("deleted", false);
 
         QueryBuilder<TalkGroupPresence, ?> groupPresences = mGroupPresences.queryBuilder();
         groupPresences.where()
-                .eq("groupType", TalkGroupPresence.GROUP_TYPE_NEARBY);
-
+                .eq("groupType", groupType);
 
         return clientMessages.join(
                 clientContacts.join(groupPresences)).countOf();
