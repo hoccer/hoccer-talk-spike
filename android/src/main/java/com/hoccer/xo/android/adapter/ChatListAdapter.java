@@ -344,16 +344,6 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
     public void onUploadStateChanged(TalkClientUpload upload) {
     }
 
-    public void removeItem(ContactChatItem item) {
-        mChatItems.remove(item);
-        mActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                notifyDataSetChanged();
-            }
-        });
-    }
-
     public interface Filter {
         public boolean shouldShow(TalkClientContact contact);
     }
