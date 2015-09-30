@@ -84,17 +84,13 @@ public class ChatListFragment extends SearchablePagerListFragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (mAdapter != null) {
-            mAdapter.notifyDataSetChanged();
-        }
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mAdapter != null) {
-            mAdapter.unregisterListeners();
-        }
+        mAdapter.unregisterListeners();
     }
 
     @Override
