@@ -2491,6 +2491,8 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             clientContact.getClientPresence().setKept(true);
             mDatabase.savePresence(clientContact.getClientPresence());
             mDatabase.saveContact(clientContact);
+
+            notifyOnClientPresenceChanged(clientContact);
         }
     }
 

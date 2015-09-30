@@ -8,7 +8,6 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.talk.model.TalkGroupPresence;
 import com.hoccer.xo.android.XoAndroidClient;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.BaseActivity;
@@ -20,7 +19,10 @@ import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import static com.hoccer.talk.model.TalkGroupPresence.GROUP_TYPE_NEARBY;
 import static com.hoccer.talk.model.TalkGroupPresence.GROUP_TYPE_WORLDWIDE;
@@ -63,11 +65,11 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
         mXoClient.registerStateListener(new IXoStateListener() {
             @Override
             public void onClientStateChange(XoClient client) {
-                if (client.getState() == XoClient.State.READY){
+                if (client.getState() == XoClient.State.READY) {
                     LOG.info("XOClient is ready. UI updates enabled.");
                     mDoUpdateUI = true;
                 }
-                if (client.getState() == XoClient.State.SYNCING){
+                if (client.getState() == XoClient.State.SYNCING) {
                     LOG.info("XOClient is syncing. UI updates disabled.");
                     mDoUpdateUI = false;
                 }
@@ -196,14 +198,14 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
             @Override
             public void run() {
                 ChatItem item = findChatItemForContact(contact);
-                if (item == null) {
-                    return;
-                }
-
-                if (!contact.getClientPresence().isKept() && !contact.isClientFriend()) {
-                    mChatItems.remove(item);
-                } else {
-                    item.update();
+                if (item != null) {
+                    if (!contact.getClientPresence().isKept() && !contact.isClientFriend()) {
+                        mChatItems.remove(item);
+                    } else {
+                        item.update();
+                    }
+                } else if (contact.getClientPresence().isKept()) {
+                    mChatItems.add(new ContactChatItem(contact, mActivity));
                 }
                 notifyDataSetChanged();
             }
