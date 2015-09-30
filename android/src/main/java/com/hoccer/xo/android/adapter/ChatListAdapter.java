@@ -77,8 +77,6 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
     }
 
     public void loadChatItems() {
-        long start = System.currentTimeMillis();
-
         try {
 
             final List<TalkClientContact> filteredContacts = filter(mDatabase.findAllContacts());
@@ -109,8 +107,6 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
         } catch (SQLException e) {
             LOG.error("sql error", e);
         }
-
-        LOG.info("loadChatItems() " + (System.currentTimeMillis() - start));
     }
 
     public void registerListeners() {
