@@ -1,4 +1,4 @@
-package com.hoccer.xo.android.content;
+package com.hoccer.xo.android.content.selector;
 
 import android.content.Context;
 import android.content.Intent;
@@ -6,8 +6,6 @@ import android.net.Uri;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.activity.MultiImagePickerActivity;
-import com.hoccer.xo.android.content.selector.IContentCreator;
-import com.hoccer.xo.android.content.selector.ImageSelector;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import org.apache.log4j.Logger;
 

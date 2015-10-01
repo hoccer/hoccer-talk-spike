@@ -28,7 +28,7 @@ import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.BackgroundManager;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.content.MultiImageSelector;
+import com.hoccer.xo.android.content.selector.MultiImageSelector;
 import com.hoccer.xo.android.content.selector.ClipboardSelector;
 import com.hoccer.xo.android.content.selector.IContentSelector;
 import com.hoccer.xo.android.dialog.ContentSelectionDialogFragment;

@@ -11,7 +11,7 @@ import android.widget.ImageView;
 import android.widget.SimpleAdapter;
 import com.artcom.hoccer.R;
 import com.hoccer.xo.android.content.Clipboard;
-import com.hoccer.xo.android.content.MultiImageSelector;
+import com.hoccer.xo.android.content.selector.MultiImageSelector;
 import com.hoccer.xo.android.content.selector.*;
 
 import java.util.ArrayList;
@@ -74,6 +74,7 @@ public class ContentSelectionDialogFragment extends DialogFragment {
         contentSelectors.add(new ContactSelector(getActivity()));
         contentSelectors.add(new LocationSelector(getActivity()));
         contentSelectors.add(new CaptureSelector(getActivity()));
+        contentSelectors.add(new FileSelector(getActivity()));
         if (Clipboard.get().hasContent()) {
             contentSelectors.add(new ClipboardSelector(getActivity()));
         }
