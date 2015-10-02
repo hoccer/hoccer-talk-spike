@@ -75,7 +75,7 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
         LOCATION,
         FILE,
         MULTIPLE,
-        ERROR;
+        ERROR
     }
 
     private TextFieldWatcher mTextFieldWatcher;
@@ -246,7 +246,7 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
         } catch (IOException e) {
             LOG.error(e.getMessage());
         }
-        edit.commit();
+        edit.apply();
     }
 
     @Override
