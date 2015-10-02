@@ -27,7 +27,6 @@ public class FaqTutorialActivity extends Activity {
                 if(url.startsWith("mailto:")){
                     Intent intent = new Intent(Intent.ACTION_SENDTO);
                     intent.setData(Uri.parse(url));
-                    intent.setType("text/plain");
                     startActivity(intent);
                     view.reload();
                     return true;
