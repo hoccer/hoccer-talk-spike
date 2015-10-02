@@ -2,6 +2,7 @@ package com.hoccer.xo.android.content.selector;
 
 import android.content.Context;
 import com.hoccer.xo.android.content.ContentUtils;
+import com.hoccer.xo.android.dialog.FileSelector;
 
 public class ContentSelectorFactory {
 
@@ -15,7 +16,7 @@ public class ContentSelectorFactory {
         } else if (ContentUtils.isMimeTypeContact(mimeType)) {
             return new ContactSelector(context);
         } else {
-            throw new Exception("Content is not supported.");
+            return new FileSelector(context);
         }
     }
 }
