@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
@@ -18,16 +17,14 @@ import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.hoccer.xo.android.view.chat.MessageItem;
 import org.apache.log4j.Logger;
 
-import java.io.File;
 
+public class FileMessageItem extends MessageItem {
 
-public class DataMessageItem extends MessageItem {
-
-    private final static Logger LOG = Logger.getLogger(DataMessageItem.class);
+    private final static Logger LOG = Logger.getLogger(FileMessageItem.class);
 
     private ImageButton mOpenFileButton;
 
-    public DataMessageItem(Context context, TalkClientMessage message) {
+    public FileMessageItem(Context context, TalkClientMessage message) {
         super(context, message);
     }
 

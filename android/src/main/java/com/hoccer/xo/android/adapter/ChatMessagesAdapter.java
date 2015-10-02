@@ -232,7 +232,7 @@ public class ChatMessagesAdapter extends MessagesAdapter implements IXoMessageLi
         } else if (itemType == ChatItemType.ChatItemWithAudio) {
             return new AudioMessageItem(mActivity, message);
         } else if (itemType == ChatItemType.ChatItemWithData) {
-            return new DataMessageItem(mActivity, message);
+            return new FileMessageItem(mActivity, message);
         } else if (itemType == ChatItemType.ChatItemWithContact) {
             return new ContactMessageItem(mActivity, message);
         } else if (itemType == ChatItemType.ChatItemWithLocation) {
