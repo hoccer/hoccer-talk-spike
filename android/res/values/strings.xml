@@ -166,10 +166,10 @@
     <string name="content_multi_images">Multiple images</string>
     <string name="content_video">Video</string>
     <string name="content_capture">Take photo</string>
-    <string name="content_music">Further media</string>
+    <string name="content_music">Audio</string>
     <string name="content_contact">Contact</string>
     <string name="content_location">Location</string>
-    <string name="content_data">Data</string>
+    <string name="content_file">File</string>
     <string name="content_clipboard">Clipboard</string>
 
     <!-- FullscreenPlayer -->

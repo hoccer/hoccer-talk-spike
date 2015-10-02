@@ -155,10 +155,10 @@
     <string name="content_multi_images">Mehrere Bilder</string>
     <string name="content_video">Video</string>
     <string name="content_capture">Foto aufnehmen</string>
-    <string name="content_music">Andere Medien</string>
+    <string name="content_music">Audio</string>
     <string name="content_contact">Kontakt</string>
     <string name="content_location">Ort</string>
-    <string name="content_data">Dokument</string>
+    <string name="content_file">Datei</string>
     <string name="content_clipboard">Aus Zwischenablage</string>
 
     <!-- FullscreenPlayer -->

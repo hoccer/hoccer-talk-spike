@@ -18,7 +18,7 @@ public class FileSelector implements IContentSelector {
     private Drawable mIcon;
 
     public FileSelector(Context context) {
-        mName = "File";
+        mName = context.getResources().getString(R.string.content_file);
         mIcon = ColoredDrawable.getFromCache(R.drawable.ic_attachment_select_data, R.color.primary);
     }
 
