@@ -72,7 +72,8 @@ public class ContactOperations {
     public static void sendEMail(Context context, String subject, String message,  String plainMessage, String[] recipients) {
         LOG.debug("Sending EMail with message: " + message);
 
-        Intent email = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"));
+        Intent email = new Intent(Intent.ACTION_SEND, Uri.parse("mailto:"));
+        email.setType("text/html");
         email.putExtra(Intent.EXTRA_SUBJECT, subject);
         email.putExtra(Intent.EXTRA_BCC, recipients);
         email.putExtra(Intent.EXTRA_HTML_TEXT, Html.fromHtml(message));
