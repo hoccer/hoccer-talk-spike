@@ -17,5 +17,4 @@ public class ContentUtils {
     public static boolean isMimeTypeImage(String mimeType) {
         return mimeType.startsWith("image/");
     }
-
 }
