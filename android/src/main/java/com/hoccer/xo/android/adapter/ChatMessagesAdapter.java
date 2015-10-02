@@ -211,7 +211,7 @@ public class ChatMessagesAdapter extends MessagesAdapter implements IXoMessageLi
                 chatItemType = ChatItemType.ChatItemWithVideo;
             } else if (mediaType.equalsIgnoreCase(ContentMediaType.AUDIO)) {
                 chatItemType = ChatItemType.ChatItemWithAudio;
-            } else if (mediaType.equalsIgnoreCase(ContentMediaType.DATA)) {
+            } else if (mediaType.equalsIgnoreCase(ContentMediaType.FILE)) {
                 chatItemType = ChatItemType.ChatItemWithData;
             } else if (mediaType.equalsIgnoreCase(ContentMediaType.VCARD)) {
                 chatItemType = ChatItemType.ChatItemWithContact;

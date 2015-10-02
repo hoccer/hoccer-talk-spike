@@ -405,7 +405,7 @@ public class MessageItem implements AttachmentTransferListener {
             mediaTypeString = "Contact";
         } else if (ContentMediaType.LOCATION.equals(mediaType)) {
             mediaTypeString = "Location";
-        } else if (ContentMediaType.DATA.equals(mediaType)) {
+        } else if (ContentMediaType.FILE.equals(mediaType)) {
             mediaTypeString = "Data";
         }
         return mediaTypeString;

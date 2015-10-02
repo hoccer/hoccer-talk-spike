@@ -73,7 +73,7 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
         AUDIO,
         CONTACT,
         LOCATION,
-        DATA,
+        FILE,
         MULTIPLE,
         ERROR;
     }
@@ -164,7 +164,7 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
         mAttachmentTypeViews.put(AttachmentSelectionType.AUDIO, view.findViewById(R.id.iv_attachment_audio));
         mAttachmentTypeViews.put(AttachmentSelectionType.CONTACT, view.findViewById(R.id.iv_attachment_contact));
         mAttachmentTypeViews.put(AttachmentSelectionType.LOCATION, view.findViewById(R.id.iv_attachment_location));
-        mAttachmentTypeViews.put(AttachmentSelectionType.DATA, view.findViewById(R.id.iv_attachment_data));
+        mAttachmentTypeViews.put(AttachmentSelectionType.FILE, view.findViewById(R.id.iv_attachment_data));
         mAttachmentTypeViews.put(AttachmentSelectionType.MULTIPLE, view.findViewById(R.id.iv_attachment_multiple));
         mAttachmentTypeViews.put(AttachmentSelectionType.ERROR, view.findViewById(R.id.iv_attachment_error));
     }
@@ -336,8 +336,8 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
                 updateAttachmentButtonImage(AttachmentSelectionType.CONTACT);
             } else if (ContentMediaType.LOCATION.equals(mediaType)) {
                 updateAttachmentButtonImage(AttachmentSelectionType.LOCATION);
-            } else if (ContentMediaType.DATA.equals(mediaType)) {
-                updateAttachmentButtonImage(AttachmentSelectionType.DATA);
+            } else if (ContentMediaType.FILE.equals(mediaType)) {
+                updateAttachmentButtonImage(AttachmentSelectionType.FILE);
             } else if (ContentMediaType.AUDIO.equals(mediaType)) {
                 updateAttachmentButtonImage(AttachmentSelectionType.AUDIO);
             } else {
