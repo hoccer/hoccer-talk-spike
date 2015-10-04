@@ -1,6 +1,7 @@
 package com.hoccer.xo.android.util;
 
 import android.annotation.TargetApi;
+import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
@@ -104,19 +105,40 @@ public class UriUtils {
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
     private static String getFilePathByDocumentUri(Uri uri, Context context) {
-        String path = "";
-
+        Uri contentUri = null;
         String id = DocumentsContract.getDocumentId(uri);
-        id = id.split(":")[1];
+        Cursor cursor;
 
-        String[] projection = {MediaStore.Images.Media.DATA};
-        String selection = MediaStore.Images.Media._ID + "=?";
+        String[] projection = new String[]{"_data"};
 
-        Cursor cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
-                selection, new String[]{id}, null);
+        if (uri.getAuthority().equals("com.android.providers.downloads.documents")) {
+            contentUri = ContentUris.withAppendedId(
+                    Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+            cursor = context.getContentResolver().query(contentUri, projection,
+                    null, null, null);
+        } else {
+            String type = id.split(":")[0];
+            id = id.split(":")[1];
+
+            String selection = null;
+            if ("image".equals(type)) {
+                selection = MediaStore.Images.Media._ID + "=?";
+                contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+            } else if ("video".equals(type)) {
+                selection = MediaStore.Video.Media._ID + "=?";
+                contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+            } else if ("audio".equals(type)) {
+                selection = MediaStore.Audio.Media._ID + "=?";
+                contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+            }
+
+            cursor = context.getContentResolver().query(contentUri, projection,
+                    selection, new String[]{id}, null);
+        }
 
         int columnIndex = cursor.getColumnIndex(projection[0]);
 
+        String path = "";
         if (cursor.moveToFirst()) {
             path = cursor.getString(columnIndex);
         }
