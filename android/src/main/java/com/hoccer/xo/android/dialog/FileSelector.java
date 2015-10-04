@@ -3,6 +3,7 @@ package com.hoccer.xo.android.dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.provider.MediaStore;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.content.SelectedContent;
@@ -44,8 +45,14 @@ public class FileSelector implements IContentSelector {
 
     @Override
     public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) throws Exception {
-        String filePath = UriUtils.getFilePathByUri(context, intent.getData(), MediaStore.Images.Media.DATA);
-        String mimeType = UriUtils.getMimeType(context, intent.getData());
+        Uri dataUri = intent.getData();
+
+        if ("com.android.contacts".equals(dataUri.getAuthority())) {
+            return new ContactSelector(context).createObjectFromSelectionResult(context, intent);
+        }
+
+        String filePath = UriUtils.getFilePathByUri(context, dataUri, MediaStore.Images.Media.DATA);
+        String mimeType = UriUtils.getMimeType(context, dataUri);
 
         if (ContentUtils.isMimeTypeImage(mimeType)) {
             return new ImageSelector(context).createObjectFromSelectionResult(context, intent);
