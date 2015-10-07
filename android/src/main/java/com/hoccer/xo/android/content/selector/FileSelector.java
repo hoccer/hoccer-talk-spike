@@ -6,8 +6,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.content.SelectedContent;
-import com.hoccer.xo.android.content.selector.IContentSelector;
-import com.hoccer.xo.android.content.selector.SelectedContentFactory;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 
 public class FileSelector implements IContentSelector {
