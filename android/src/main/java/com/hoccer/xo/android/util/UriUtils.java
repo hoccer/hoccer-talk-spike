@@ -24,6 +24,7 @@ public class UriUtils {
 
     public static final String CONTENT_URI_PREFIX = CONTENT_SCHEME + "://";
     public static final String FILE_URI_PREFIX = FILE_SCHEME + "://";
+    public static final String PROVIDERS_DOWNLOADS_DOCUMENTS = "com.android.providers.downloads.documents";
 
     public static Uri getAbsoluteFileUri(String stringUri) {
         Uri uri = Uri.parse(stringUri);
@@ -121,7 +122,11 @@ public class UriUtils {
 
         String[] projection = new String[]{"_data"};
 
-        if (uri.getAuthority().equals("com.android.providers.downloads.documents")) {
+        if (uri.getAuthority().equals("com.android.externalstorage.documents")) {
+            String relativePath = uri.getLastPathSegment().split(":")[1];
+            return XoApplication.getExternalStorage().getPath() + "/" + relativePath;
+        }
+        if (uri.getAuthority().equals(PROVIDERS_DOWNLOADS_DOCUMENTS)) {
             contentUri = ContentUris.withAppendedId(
                     Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
             cursor = context.getContentResolver().query(contentUri, projection,
