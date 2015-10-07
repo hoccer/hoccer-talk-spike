@@ -78,20 +78,31 @@ public class UriUtils {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 if (isDocumentUri(context, uri)) {
                     filePath = getFilePathByDocumentUri(uri, context);
+                } else {
+                    filePath = getFilePathByContentUri(uri, context);
                 }
             } else {
-                Cursor cursor = context.getContentResolver().query(uri, new String[]{MediaStore.MediaColumns.DATA}, null, null, null);
-                if (cursor == null) {
-                    LOG.error("Query failed! Could not resolve cursor for content uri: " + uri);
-                    return null;
-                }
-                cursor.moveToFirst();
-                filePath = cursor.getString(cursor.getColumnIndex("_data"));
-                cursor.close();
+                filePath = getFilePathByContentUri(uri, context);
             }
-
         } else if (isFileUri(uri)) {
             filePath = uri.getPath();
+        }
+
+        return filePath;
+    }
+
+    private static String getFilePathByContentUri(Uri uri, Context context) {
+        String filePath = null;
+
+        Cursor cursor = context.getContentResolver().query(uri, new String[]{MediaStore.MediaColumns.DATA}, null, null, null);
+        if (cursor == null) {
+            LOG.error("Query failed! Could not resolve cursor for content uri: " + uri);
+            return null;
+        }
+
+        if (cursor.moveToFirst()) {
+            filePath = cursor.getString(cursor.getColumnIndex("_data"));
+            cursor.close();
         }
 
         return filePath;
