@@ -28,7 +28,7 @@ public class NearbyChatListFragment extends EnvironmentChatListFragment {
 
     @Override
     public void onPageUnselected() {
-        NearbyController.get().disableNearbyMode();
+        NearbyController.INSTANCE.disableNearbyMode();
     }
 
     @Override
@@ -68,12 +68,12 @@ public class NearbyChatListFragment extends EnvironmentChatListFragment {
     }
 
     private void activateNearby() {
-        if (NearbyController.get().isNearbyEnabled()) {
+        if (NearbyController.INSTANCE.isNearbyEnabled()) {
             return;
         }
 
-        if (NearbyController.get().locationServicesEnabled()) {
-            NearbyController.get().enableNearbyMode();
+        if (NearbyController.INSTANCE.locationServicesEnabled()) {
+            NearbyController.INSTANCE.enableNearbyMode();
             createAdapter();
         } else {
             showLocationServiceDialog();
