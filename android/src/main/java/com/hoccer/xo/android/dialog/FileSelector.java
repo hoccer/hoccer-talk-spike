@@ -45,25 +45,6 @@ public class FileSelector implements IContentSelector {
 
     @Override
     public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) throws Exception {
-        Uri dataUri = intent.getData();
-
-        if ("com.android.contacts".equals(dataUri.getAuthority())) {
-            return new ContactSelector(context).createObjectFromSelectionResult(context, intent);
-        }
-
-        String filePath = UriUtils.getFilePathByUri(context, dataUri, MediaStore.Images.Media.DATA);
-        String mimeType = UriUtils.getMimeType(context, dataUri);
-
-        if (ContentUtils.isMimeTypeImage(mimeType)) {
-            return new ImageSelector(context).createObjectFromSelectionResult(context, intent);
-        } else if (ContentUtils.isMimeTypeVideo(mimeType)) {
-            return new VideoSelector(context).createObjectFromSelectionResult(context, intent);
-        } else if (ContentUtils.isMimeTypeAudio(mimeType)) {
-            return new AudioSelector(context).createObjectFromSelectionResult(context, intent);
-        } else if (ContentUtils.isMimeTypeContact(mimeType)) {
-            return new ContactSelector(context).createObjectFromSelectionResult(context, intent);
-        } else {
-            return new SelectedFile(filePath, mimeType, FILE);
-        }
+        return SelectedContentFactory.createSelectedContent(intent, context);
     }
 }
