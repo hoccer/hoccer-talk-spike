@@ -29,8 +29,6 @@ public class ContentSelectionDialogFragment extends DialogFragment {
 
     private OnAttachmentSelectedListener callback;
 
-    private IContentSelector mCurrentSelector;
-
     public interface OnAttachmentSelectedListener {
         public void onSelected(IContentSelector contentSelector);
     }
@@ -113,8 +111,7 @@ public class ContentSelectionDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int index) {
                         Map<String, Object> option = options.get(index);
-                        mCurrentSelector = (IContentSelector) option.get(CONTENT_SELECTOR);
-                        callback.onSelected(mCurrentSelector);
+                        callback.onSelected((IContentSelector) option.get(CONTENT_SELECTOR));
 
                         dialog.dismiss();
                     }
