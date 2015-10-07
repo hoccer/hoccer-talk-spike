@@ -2,7 +2,6 @@ package com.hoccer.xo.android.content.selector;
 
 import android.content.Context;
 import com.hoccer.xo.android.content.ContentUtils;
-import com.hoccer.xo.android.dialog.FileSelector;
 
 public class ContentSelectorFactory {
 
