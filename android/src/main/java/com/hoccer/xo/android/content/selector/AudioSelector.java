@@ -40,7 +40,7 @@ public class AudioSelector implements IContentSelector {
     @Override
     public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) throws Exception {
         if (isMimeTypeAudio(context, intent)) {
-            String filePath = UriUtils.getFilePathByUri(context, intent.getData(), MediaStore.Audio.Media.DATA);
+            String filePath = UriUtils.getFilePathByUri(context, intent.getData());
             String mimeType = UriUtils.getMimeType(context, intent.getData());
 
             return new SelectedFile(filePath, mimeType, ContentMediaType.AUDIO);

@@ -15,7 +15,7 @@ public class ImageFileContentCreator implements IContentCreator {
     @Override
     public SelectedContent apply(Context context, Intent intent) {
 
-        String filePath = UriUtils.getFilePathByUri(context, intent.getData(), MediaStore.Images.Media.DATA);
+        String filePath = UriUtils.getFilePathByUri(context, intent.getData());
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;

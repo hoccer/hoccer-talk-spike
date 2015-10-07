@@ -71,23 +71,22 @@ public class UriUtils {
         return contentId;
     }
 
-    public static String getFilePathByUri(Context context, Uri uri, String mediaColumn) {
+    public static String getFilePathByUri(Context context, Uri uri) {
         String filePath = null;
 
         if (isContentUri(uri)) {
-            if (isDocumentUri(context, uri)) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                if (isDocumentUri(context, uri)) {
                     filePath = getFilePathByDocumentUri(uri, context);
                 }
             } else {
-                Cursor cursor = context.getContentResolver().query(uri, new String[]{mediaColumn}, null, null, null);
+                Cursor cursor = context.getContentResolver().query(uri, new String[]{MediaStore.MediaColumns.DATA}, null, null, null);
                 if (cursor == null) {
                     LOG.error("Query failed! Could not resolve cursor for content uri: " + uri);
                     return null;
                 }
-
                 cursor.moveToFirst();
-                filePath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+                filePath = cursor.getString(cursor.getColumnIndex("_data"));
                 cursor.close();
             }
 
