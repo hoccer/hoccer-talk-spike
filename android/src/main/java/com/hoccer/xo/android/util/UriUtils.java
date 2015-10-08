@@ -62,7 +62,7 @@ public class UriUtils {
         String[] projection = {
                 BaseColumns._ID
         };
-        Cursor cursor = context.getContentResolver().query(tableUri, projection, MediaStore.MediaColumns.DATA + " LIKE ?", new String[]{dataPath}, null);
+        Cursor cursor = context.getContentResolver().query(tableUri, projection, "_data LIKE ?", new String[]{dataPath}, null);
 
         long contentId = -1;
         if (cursor.moveToFirst()) {
