@@ -21,7 +21,8 @@ import java.util.Map;
 
 public class ContentSelectionDialogFragment extends DialogFragment {
 
-    public static final String DIALOG_TAG = "AttachmentSelectionDialog";
+    public static final String ATTACHMENT_SELECTION_DIALOG_TAG = "AttachmentSelectionDialog";
+    public static final String ACTIVITY_NOT_FOUND_DIALOG_TAG = "ActivityNotFoundDialog";
 
     private static final String ICON = "icon";
     private static final String NAME = "name";
@@ -36,7 +37,6 @@ public class ContentSelectionDialogFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         try {
             callback = (OnAttachmentSelectedListener) getTargetFragment();
         } catch (ClassCastException e) {

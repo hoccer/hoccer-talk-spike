@@ -31,6 +31,7 @@ import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.content.selector.MultiImageSelector;
 import com.hoccer.xo.android.content.selector.ClipboardSelector;
 import com.hoccer.xo.android.content.selector.IContentSelector;
+import com.hoccer.xo.android.dialog.ActivityNotFoundDialog;
 import com.hoccer.xo.android.dialog.ContentSelectionDialogFragment;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionGestureListener;
@@ -49,7 +50,8 @@ import java.util.EnumMap;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
-import static com.hoccer.xo.android.dialog.ContentSelectionDialogFragment.DIALOG_TAG;
+import static com.hoccer.xo.android.dialog.ContentSelectionDialogFragment.ACTIVITY_NOT_FOUND_DIALOG_TAG;
+import static com.hoccer.xo.android.dialog.ContentSelectionDialogFragment.ATTACHMENT_SELECTION_DIALOG_TAG;
 
 public class CompositionFragment extends Fragment implements MotionGestureListener, ContentSelectionDialogFragment.OnAttachmentSelectedListener {
 
@@ -297,9 +299,22 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
         try {
             startActivityForResult(intent, REQUEST_SELECT_ATTACHMENT);
         } catch (ActivityNotFoundException e) {
-            Toast.makeText(getActivity(), R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
-            LOG.error(e.getMessage());
+            if (Intent.ACTION_GET_CONTENT.equals(intent.getAction())) {
+                showActivityNotFoundDialog(intent.getAction());
+            } else {
+                Toast.makeText(getActivity(), R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
+                LOG.error(e.getMessage());
+            }
         }
+    }
+
+    private void showActivityNotFoundDialog(String action) {
+        Bundle bundle = new Bundle();
+        bundle.putString(ActivityNotFoundDialog.ACTION_KEY, action);
+
+        DialogFragment dialog = new ActivityNotFoundDialog();
+        dialog.setArguments(bundle);
+        dialog.show(getActivity().getSupportFragmentManager(), ACTIVITY_NOT_FOUND_DIALOG_TAG);
     }
 
     @Override
@@ -568,7 +583,7 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
     private void showSelectAttachmentDialog() {
         DialogFragment dialogFragment = new ContentSelectionDialogFragment();
         dialogFragment.setTargetFragment(this, -1);
-        dialogFragment.show(getActivity().getSupportFragmentManager(), DIALOG_TAG);
+        dialogFragment.show(getActivity().getSupportFragmentManager(), ATTACHMENT_SELECTION_DIALOG_TAG);
     }
 
     private void showEditAttachmentDialog() {
