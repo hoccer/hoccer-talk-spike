@@ -5,6 +5,7 @@ import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.crypto.AESCryptor;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.*;
 import org.apache.http.client.methods.HttpGet;
@@ -142,8 +143,8 @@ public class DownloadAction implements TransferStateListener {
             String contentRangeString = response.getFirstHeader("Content-Range").getValue();
             ByteRange contentRange = ByteRange.parseContentRange(contentRangeString);
 
-            String contentType = response.getFirstHeader("Content-Type").getValue();
-            mDownload.setMimeType(contentType);
+//            String contentType = response.getFirstHeader("Content-Type").getValue();
+//            mDownload.setMimeType(contentType);
 
             long bytesStart = mDownload.getTransferProgress();
             if (!mDownload.isValidContentRange(contentRange, bytesToGo) || mDownload.getContentLength() == -1) {
@@ -394,25 +395,30 @@ public class DownloadAction implements TransferStateListener {
      * In case a file with the same name already exists the given file name will be expanded by an underscore and
      * a running number (foo_1.bar) to prevent the existing file from being overwritten.
      *
-     * @param file      The given file name
+     * @param fileName      The given file name
      * @param extension The given file extension
      * @param directory The directory to check
      * @return The file name including running number and extension (foo_1.bar)
      */
-    private static String createUniqueFileNameInDirectory(String file, String extension, String directory) {
-        if (file == null) {
-            file = "unknown_file";
+    private static String createUniqueFileNameInDirectory(String fileName, String extension, String directory) {
+        if (fileName == null) {
+            fileName = "unknown_file";
         }
-        String newFileName = file;
+
+        if (fileName.endsWith(extension)){
+            fileName = fileName.substring(0, fileName.lastIndexOf(extension)-1);
+        }
+
         String path;
-        File f;
+        String newFileName = fileName;
+
         int i = 0;
         while (true) {
             path = directory + File.separator + newFileName + extension;
-            f = new File(path);
-            if (f.exists()) {
+
+            if (new File(path).exists()) {
                 i++;
-                newFileName = file + "_" + i;
+                newFileName = fileName + "_" + i;
             } else {
                 break;
             }
