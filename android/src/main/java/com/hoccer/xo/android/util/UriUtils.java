@@ -116,50 +116,48 @@ public class UriUtils {
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
     private static String getFilePathByDocumentUri(Uri uri, Context context) {
-        Uri contentUri = null;
-        String id = DocumentsContract.getDocumentId(uri);
-        Cursor cursor;
-
-        String[] projection = new String[]{"_data"};
-
         if (uri.getAuthority().equals("com.android.externalstorage.documents")) {
             String relativePath = uri.getLastPathSegment().split(":")[1];
             return XoApplication.getExternalStorage().getPath() + "/" + relativePath;
         }
+
+        String documentId = DocumentsContract.getDocumentId(uri);
+        String projection = "_data";
+        Uri contentUri;
+        String selection = null;
+        String[] selectionArgs = null;
         if (uri.getAuthority().equals(PROVIDERS_DOWNLOADS_DOCUMENTS)) {
             contentUri = ContentUris.withAppendedId(
-                    Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
-            cursor = context.getContentResolver().query(contentUri, projection,
-                    null, null, null);
+                    Uri.parse("content://downloads/public_downloads"), Long.valueOf(documentId));
         } else {
-            String type = id.split(":")[0];
-            id = id.split(":")[1];
-
-            String selection = null;
-            if ("image".equals(type)) {
-                selection = MediaStore.Images.Media._ID + "=?";
-                contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-            } else if ("video".equals(type)) {
-                selection = MediaStore.Video.Media._ID + "=?";
-                contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-            } else if ("audio".equals(type)) {
-                selection = MediaStore.Audio.Media._ID + "=?";
-                contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-            }
-
-            cursor = context.getContentResolver().query(contentUri, projection,
-                    selection, new String[]{id}, null);
+            contentUri = getExternalMediaContentUri(documentId.split(":")[0]);
+            selection = "_id=?";
+            selectionArgs = new String[]{documentId.split(":")[1]};
         }
 
-        int columnIndex = cursor.getColumnIndex(projection[0]);
+        return getFilePathByCursor(projection,
+                context.getContentResolver().query(contentUri, new String[]{projection},
+                        selection, selectionArgs, null));
+    }
 
+    private static Uri getExternalMediaContentUri(String type) {
+        Uri contentUri = null;
+        if ("image".equals(type)) {
+            contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        } else if ("video".equals(type)) {
+            contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+        } else if ("audio".equals(type)) {
+            contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        }
+        return contentUri;
+    }
+
+    private static String getFilePathByCursor(String columnName, Cursor cursor) {
         String path = "";
         if (cursor.moveToFirst()) {
-            path = cursor.getString(columnIndex);
+            path = cursor.getString(cursor.getColumnIndex(columnName));
         }
-
         cursor.close();
-
         return path;
     }
 
