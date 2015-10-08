@@ -215,7 +215,6 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
         String selfName = XoApplication.get().getClient().getSelfContact().getName();
         String subject = getString(R.string.email_invitation_subject);
         String message = String.format(getString(R.string.email_invitation_text), invitationServerUri, token, selfName);
-        String plainMessage =  String.format(getString(R.string.email_invitation_text_plain), invitationServerUri, token, selfName);
-        ContactOperations.sendEMail(getActivity(), subject, message, plainMessage, eMailAddresses);
+        ContactOperations.sendEMail(getActivity(), subject, message, eMailAddresses);
     }
 }

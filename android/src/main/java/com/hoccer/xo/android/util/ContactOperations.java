@@ -69,14 +69,11 @@ public class ContactOperations {
         context.startActivity(intent);
     }
 
-    public static void sendEMail(Context context, String subject, String message,  String plainMessage, String[] recipients) {
-        LOG.debug("Sending EMail with message: " + message);
-
+    public static void sendEMail(Context context, String subject, String message, String[] recipients) {
         Intent email = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"));
         email.putExtra(Intent.EXTRA_SUBJECT, subject);
         email.putExtra(Intent.EXTRA_BCC, recipients);
-        email.putExtra(Intent.EXTRA_HTML_TEXT, Html.fromHtml(message));
-        email.putExtra(Intent.EXTRA_TEXT, plainMessage);
+        email.putExtra(Intent.EXTRA_TEXT, message);
         context.startActivity(Intent.createChooser(email, "Choose Email Client"));
     }
 }
