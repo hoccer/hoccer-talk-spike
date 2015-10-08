@@ -90,7 +90,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     protected void onDestroy() {
         super.onDestroy();
         MediaPlayer.get().removeNotification();
-        NearbyController.get().removeNotification();
+        NearbyController.INSTANCE.removeNotification();
     }
 
     @Override

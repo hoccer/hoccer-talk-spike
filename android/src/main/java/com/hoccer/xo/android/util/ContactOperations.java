@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.Telephony;
 import android.text.Html;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientUpload;
@@ -69,12 +70,10 @@ public class ContactOperations {
     }
 
     public static void sendEMail(Context context, String subject, String message, String[] recipients) {
-        LOG.debug("Sending EMail with message: " + message);
-
         Intent email = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"));
         email.putExtra(Intent.EXTRA_SUBJECT, subject);
         email.putExtra(Intent.EXTRA_BCC, recipients);
-        email.putExtra(Intent.EXTRA_TEXT, Html.fromHtml(message));
+        email.putExtra(Intent.EXTRA_TEXT, message);
         context.startActivity(Intent.createChooser(email, "Choose Email Client"));
     }
 }
