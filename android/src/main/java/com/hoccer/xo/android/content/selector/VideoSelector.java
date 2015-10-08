@@ -46,7 +46,7 @@ public class VideoSelector implements IContentSelector {
 
     @Override
     public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) throws Exception {
-        String filePath = UriUtils.getFilePathByUri(context, intent.getData(), MediaStore.Video.Media.DATA);
+        String filePath = UriUtils.getFilePathByUri(context, intent.getData());
         if (filePath == null || !new File(filePath).exists()) {
             throw new FileNotFoundException("File not found for " + intent.getData());
         }

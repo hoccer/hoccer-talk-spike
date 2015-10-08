@@ -11,7 +11,7 @@ import android.widget.ImageView;
 import android.widget.SimpleAdapter;
 import com.artcom.hoccer.R;
 import com.hoccer.xo.android.content.Clipboard;
-import com.hoccer.xo.android.content.MultiImageSelector;
+import com.hoccer.xo.android.content.selector.MultiImageSelector;
 import com.hoccer.xo.android.content.selector.*;
 
 import java.util.ArrayList;
@@ -21,15 +21,14 @@ import java.util.Map;
 
 public class ContentSelectionDialogFragment extends DialogFragment {
 
-    public static final String DIALOG_TAG = "AttachmentSelectionDialog";
+    public static final String ATTACHMENT_SELECTION_DIALOG_TAG = "AttachmentSelectionDialog";
+    public static final String ACTIVITY_NOT_FOUND_DIALOG_TAG = "ActivityNotFoundDialog";
 
     private static final String ICON = "icon";
     private static final String NAME = "name";
     private static final String CONTENT_SELECTOR = "selector";
 
     private OnAttachmentSelectedListener callback;
-
-    private IContentSelector mCurrentSelector;
 
     public interface OnAttachmentSelectedListener {
         public void onSelected(IContentSelector contentSelector);
@@ -38,7 +37,6 @@ public class ContentSelectionDialogFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         try {
             callback = (OnAttachmentSelectedListener) getTargetFragment();
         } catch (ClassCastException e) {
@@ -74,6 +72,7 @@ public class ContentSelectionDialogFragment extends DialogFragment {
         contentSelectors.add(new ContactSelector(getActivity()));
         contentSelectors.add(new LocationSelector(getActivity()));
         contentSelectors.add(new CaptureSelector(getActivity()));
+        contentSelectors.add(new FileSelector(getActivity()));
         if (Clipboard.get().hasContent()) {
             contentSelectors.add(new ClipboardSelector(getActivity()));
         }
@@ -112,8 +111,7 @@ public class ContentSelectionDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int index) {
                         Map<String, Object> option = options.get(index);
-                        mCurrentSelector = (IContentSelector) option.get(CONTENT_SELECTOR);
-                        callback.onSelected(mCurrentSelector);
+                        callback.onSelected((IContentSelector) option.get(CONTENT_SELECTOR));
 
                         dialog.dismiss();
                     }

@@ -211,7 +211,7 @@ public class ChatMessagesAdapter extends MessagesAdapter implements IXoMessageLi
                 chatItemType = ChatItemType.ChatItemWithVideo;
             } else if (mediaType.equalsIgnoreCase(ContentMediaType.AUDIO)) {
                 chatItemType = ChatItemType.ChatItemWithAudio;
-            } else if (mediaType.equalsIgnoreCase(ContentMediaType.DATA)) {
+            } else if (mediaType.equalsIgnoreCase(ContentMediaType.FILE)) {
                 chatItemType = ChatItemType.ChatItemWithData;
             } else if (mediaType.equalsIgnoreCase(ContentMediaType.VCARD)) {
                 chatItemType = ChatItemType.ChatItemWithContact;
@@ -232,7 +232,7 @@ public class ChatMessagesAdapter extends MessagesAdapter implements IXoMessageLi
         } else if (itemType == ChatItemType.ChatItemWithAudio) {
             return new AudioMessageItem(mActivity, message);
         } else if (itemType == ChatItemType.ChatItemWithData) {
-            return new DataMessageItem(mActivity, message);
+            return new FileMessageItem(mActivity, message);
         } else if (itemType == ChatItemType.ChatItemWithContact) {
             return new ContactMessageItem(mActivity, message);
         } else if (itemType == ChatItemType.ChatItemWithLocation) {
