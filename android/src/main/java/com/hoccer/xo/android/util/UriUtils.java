@@ -179,7 +179,7 @@ public class UriUtils {
         return mimeType;
     }
 
-    private static String getFileExtension(Uri uri) {
+    public static String getFileExtension(Uri uri) {
         String extension = MimeTypeMap.getFileExtensionFromUrl(uri.getPath());
         if ("".equals(extension)) {
             int i = uri.getPath().lastIndexOf('.');

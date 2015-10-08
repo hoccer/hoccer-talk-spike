@@ -4,8 +4,10 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -21,8 +23,6 @@ import org.apache.log4j.Logger;
 public class FileMessageItem extends MessageItem {
 
     private final static Logger LOG = Logger.getLogger(FileMessageItem.class);
-
-    private ImageButton mOpenFileButton;
 
     public FileMessageItem(Context context, TalkClientMessage message) {
         super(context, message);
@@ -45,24 +45,25 @@ public class FileMessageItem extends MessageItem {
         }
 
         LinearLayout layout = (LinearLayout) mAttachmentContentContainer.getChildAt(0);
+        ImageButton openFileButton = (ImageButton) layout.findViewById(R.id.ib_content_file_open);
         TextView filenameTextView = (TextView) layout.findViewById(R.id.tv_filename);
         TextView filetypeTextView = (TextView) layout.findViewById(R.id.tv_filetype);
-        mOpenFileButton = (ImageButton) layout.findViewById(R.id.ib_content_file_open);
 
         filenameTextView.setText(mAttachment.getFilename());
-        filetypeTextView.setText(mAttachment.getMimeType());
+        filetypeTextView.setText(UriUtils.getFileExtension(Uri.parse(mAttachment.getFilePath())));
+        filetypeTextView.setAllCaps(true);
 
         if (mMessage.isIncoming()) {
             filenameTextView.setTextColor(mContext.getResources().getColor(R.color.message_incoming_text));
             filetypeTextView.setTextColor(mContext.getResources().getColor(R.color.message_incoming_text));
-            mOpenFileButton.setBackgroundDrawable(ColoredDrawable.getFromCache(R.drawable.ic_light_data, R.color.attachment_incoming));
+            openFileButton.setBackgroundDrawable(ColoredDrawable.getFromCache(R.drawable.ic_light_data, R.color.attachment_incoming));
         } else {
             filenameTextView.setTextColor(mContext.getResources().getColor(R.color.message_outgoing_text));
             filetypeTextView.setTextColor(mContext.getResources().getColor(R.color.message_outgoing_text));
-            mOpenFileButton.setBackgroundDrawable(ColoredDrawable.getFromCache(R.drawable.ic_light_data, R.color.attachment_outgoing));
+            openFileButton.setBackgroundDrawable(ColoredDrawable.getFromCache(R.drawable.ic_light_data, R.color.attachment_outgoing));
         }
 
-        mOpenFileButton.setOnClickListener(new View.OnClickListener() {
+        openFileButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent();
@@ -72,7 +73,7 @@ public class FileMessageItem extends MessageItem {
                     mContext.startActivity(intent);
                 } catch (ActivityNotFoundException e) {
                     LOG.error(e.getMessage(), e);
-                    Toast.makeText(mContext, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
                 }
             }
         });
