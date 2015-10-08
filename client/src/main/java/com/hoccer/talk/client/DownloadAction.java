@@ -282,44 +282,15 @@ public class DownloadAction implements TransferStateListener {
         File destination = new File(tempDestinationFilePath);
 
         try {
-            InputStream fileInputStream = new FileInputStream(destination);
-            BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
-
-            Metadata metadata = new Metadata();
-            if (mDownload.getMimeType() != null && !"application/octet-stream".equals(mDownload.getMimeType())) {
-                metadata.add(Metadata.CONTENT_TYPE, mDownload.getMimeType());
-            }
-            if (mDownload.getDecryptedFile() != null) {
-                metadata.add(Metadata.RESOURCE_NAME_KEY, mDownload.getDecryptedFile());
-            }
-
-            MediaType detectedMediaType = MIME_DETECTOR.detect(bufferedInputStream, metadata);
-
-            fileInputStream.close();
-
-            if (detectedMediaType != null) {
-                String mediaTypeName = detectedMediaType.toString();
-                LOG.info("[downloadId: '" + mDownload.getClientDownloadId() + "'] detected mime-type '" + mediaTypeName + "'");
-                mDownload.setMimeType(mediaTypeName);
-                MimeType detectedMimeType = MimeTypes.getDefaultMimeTypes().getRegisteredMimeType(mediaTypeName);
-                if (detectedMimeType != null) {
-                    String extension = detectedMimeType.getExtension();
-                    if (extension != null) {
-                        LOG.info("[downloadId: '" + mDownload.getClientDownloadId() + "'] renaming to extension '" + detectedMimeType.getExtension() + "'");
-
-                        String destinationFileName = createUniqueFileNameInDirectory(mDownload.getFilename(), extension, destinationDirectory);
-                        String destinationPath = destinationDirectory + File.separator + destinationFileName;
-
-                        File newName = new File(destinationPath);
-                        if (destination.renameTo(newName)) {
-                            mDownload.setDecryptedFile(destinationFileName);
-                            mDownload.setFilename(destinationFileName);
-                            mDownload.setFilePath(computeRelativeDownloadDirectory(mDownload.getType()) + File.separator + destinationFileName);
-                        } else {
-                            LOG.warn("could not rename file");
-                        }
-                    }
-                }
+            String destinationFileName = createUniqueFileNameInDirectory(mDownload.getFilename(), destinationDirectory);
+            String destinationPath = destinationDirectory + File.separator + destinationFileName;
+            File newName = new File(destinationPath);
+            if (destination.renameTo(newName)) {
+                mDownload.setDecryptedFile(destinationFileName);
+                mDownload.setFilename(destinationFileName);
+                mDownload.setFilePath(computeRelativeDownloadDirectory(mDownload.getType()) + File.separator + destinationFileName);
+            } else {
+                LOG.warn("could not rename file");
             }
             mDownload.switchState(COMPLETE);
         } catch (Exception e) {
@@ -456,14 +427,6 @@ public class DownloadAction implements TransferStateListener {
         if (response.getEntity() != null && response.getEntity().getContent() != null) {
             response.getEntity().consumeContent();
         }
-    }
-
-    private void logGetTrace(String message, int clientDownloadId) {
-        LOG.trace("[downloadId: '" + clientDownloadId + "'] GET " + message);
-    }
-
-    private void logGetWarning(String message, int clientDownloadId) {
-        LOG.warn("[downloadId: '" + clientDownloadId + "'] GET " + message);
     }
 
     private String computeDownloadFile(TalkClientDownload download) {
