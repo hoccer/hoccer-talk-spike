@@ -361,40 +361,27 @@ public class DownloadAction implements TransferStateListener {
         mDownloadAgent.onDownloadFailed(mDownload);
     }
 
-    /**
-     * Creates a unique file name by checking whether a file already exists in a given directory.
-     * In case a file with the same name already exists the given file name will be expanded by an underscore and
-     * a running number (foo_1.bar) to prevent the existing file from being overwritten.
-     *
-     * @param fileName      The given file name
-     * @param extension The given file extension
-     * @param directory The directory to check
-     * @return The file name including running number and extension (foo_1.bar)
-     */
-    private static String createUniqueFileNameInDirectory(String fileName, String extension, String directory) {
-        if (fileName == null) {
-            fileName = "unknown_file";
+    private static String createUniqueFileNameInDirectory(String fileName, String directory) {
+        String fileTitle = fileName;
+        String extension = "";
+
+        if (fileName.contains(".")) {
+            fileTitle = fileName.substring(0, fileName.lastIndexOf("."));
+            extension = fileName.substring(fileName.lastIndexOf("."));
         }
 
-        if (fileName.endsWith(extension)){
-            fileName = fileName.substring(0, fileName.lastIndexOf(extension)-1);
-        }
-
-        String path;
-        String newFileName = fileName;
+        String newFileTitle = fileTitle;
 
         int i = 0;
         while (true) {
-            path = directory + File.separator + newFileName + extension;
-
-            if (new File(path).exists()) {
+            if (new File(directory + File.separator + newFileTitle + extension).exists()) {
                 i++;
-                newFileName = fileName + "_" + i;
+                newFileTitle = fileTitle + "_" + i;
             } else {
                 break;
             }
         }
-        return newFileName + extension;
+        return newFileTitle + extension;
     }
 
     private void copyData(RandomAccessFile randomAccessFile, FileDescriptor fileDescriptor, InputStream inputStream) throws IOException {
