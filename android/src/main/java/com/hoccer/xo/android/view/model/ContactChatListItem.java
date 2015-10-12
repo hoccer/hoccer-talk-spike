@@ -27,9 +27,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class ContactChatItem extends ChatItem implements SearchAdapter.Searchable {
+public class ContactChatListItem extends ChatListItem implements SearchAdapter.Searchable {
 
-    private static final Logger LOG = Logger.getLogger(ContactChatItem.class);
+    private static final Logger LOG = Logger.getLogger(ContactChatListItem.class);
 
     protected TalkClientContact mContact;
 
@@ -38,7 +38,7 @@ public class ContactChatItem extends ChatItem implements SearchAdapter.Searchabl
     private String mLastMessageText;
     private Date mContactCreationTimeStamp;
 
-    public ContactChatItem(TalkClientContact contact, Context context) {
+    public ContactChatListItem(TalkClientContact contact, Context context) {
         super(context);
         mContact = contact;
         update();
