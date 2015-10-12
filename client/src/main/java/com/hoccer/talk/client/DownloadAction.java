@@ -143,9 +143,6 @@ public class DownloadAction implements TransferStateListener {
             String contentRangeString = response.getFirstHeader("Content-Range").getValue();
             ByteRange contentRange = ByteRange.parseContentRange(contentRangeString);
 
-//            String contentType = response.getFirstHeader("Content-Type").getValue();
-//            mDownload.setMimeType(contentType);
-
             long bytesStart = mDownload.getTransferProgress();
             if (!mDownload.isValidContentRange(contentRange, bytesToGo) || mDownload.getContentLength() == -1) {
                 closeResponse(response);
