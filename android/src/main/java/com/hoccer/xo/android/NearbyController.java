@@ -23,8 +23,6 @@ public enum NearbyController implements BackgroundManager.Listener {
 
     private static final Logger LOG = Logger.getLogger(NearbyController.class);
 
-    private static NearbyController sInstance;
-
     private boolean mNearbyEnabled;
     private Runnable mNearbyTimeout;
     private final Handler mNearbyTimeoutHandler = new Handler();
