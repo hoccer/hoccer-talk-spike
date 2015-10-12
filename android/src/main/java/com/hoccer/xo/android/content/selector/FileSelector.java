@@ -37,6 +37,8 @@ public class FileSelector implements IContentSelector {
             intent.setType("file/*");
         }
 
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+
         return intent;
     }
 
