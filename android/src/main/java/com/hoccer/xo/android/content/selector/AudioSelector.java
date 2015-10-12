@@ -18,7 +18,7 @@ public class AudioSelector implements IContentSelector {
     private final Drawable mIcon;
 
     public AudioSelector(Context context) {
-        mName = context.getResources().getString(R.string.content_music);
+        mName = context.getResources().getString(R.string.content_audio);
         mIcon = ColoredDrawable.getFromCache(R.drawable.ic_attachment_select_audio, R.color.primary);
     }
 

@@ -24,7 +24,7 @@ public class ImageSelector implements IContentSelector {
     private Drawable mIcon;
 
     public ImageSelector(Context context) {
-        mName = context.getResources().getString(R.string.content_images);
+        mName = context.getResources().getString(R.string.content_image);
         mIcon = ColoredDrawable.getFromCache(R.drawable.ic_attachment_select_image, R.color.primary);
     }
 

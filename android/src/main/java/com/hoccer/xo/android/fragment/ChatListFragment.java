@@ -22,10 +22,9 @@ import com.hoccer.xo.android.base.BaseActivity;
 import com.hoccer.xo.android.base.SearchablePagerListFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.Placeholder;
-import com.hoccer.xo.android.view.model.ChatItem;
-import com.hoccer.xo.android.view.model.ContactChatItem;
-import com.hoccer.xo.android.view.model.NearbyGroupHistoryChatItem;
-import com.hoccer.xo.android.view.model.WorldwideGroupHistoryChatItem;
+import com.hoccer.xo.android.view.model.*;
+import com.hoccer.xo.android.view.model.ContactChatListItem;
+import com.hoccer.xo.android.view.model.WorldwideGroupHistoryChatListItem;
 import org.apache.log4j.Logger;
 
 import java.lang.ref.WeakReference;
@@ -141,12 +140,12 @@ public class ChatListFragment extends SearchablePagerListFragment {
     }
 
     private void deleteChatHistoryAt(int position) {
-        ChatItem item = ((ChatItem) mAdapter.getItem(position));
-        if (item instanceof ContactChatItem) {
-            clearConversationForContact(((ContactChatItem) item).getContact());
-        } else if (item instanceof NearbyGroupHistoryChatItem) {
+        ChatListItem item = ((ChatListItem) mAdapter.getItem(position));
+        if (item instanceof ContactChatListItem) {
+            clearConversationForContact(((ContactChatListItem) item).getContact());
+        } else if (item instanceof NearbyGroupHistoryChatListItem) {
             clearNearbyGroupHistory();
-        } else if (item instanceof WorldwideGroupHistoryChatItem) {
+        } else if (item instanceof WorldwideGroupHistoryChatListItem) {
             clearWorldwideGroupHistory();
         }
     }
@@ -233,23 +232,23 @@ public class ChatListFragment extends SearchablePagerListFragment {
     public void onListItemClick(ListView listView, View view, int position, long id) {
         super.onListItemClick(listView, view, position, id);
 
-        ChatItem item = ((ChatItem) listView.getItemAtPosition(position));
+        ChatListItem item = ((ChatListItem) listView.getItemAtPosition(position));
         if (shouldShowChat(item)) {
-            TalkClientContact contact = ((ContactChatItem) item).getContact();
+            TalkClientContact contact = ((ContactChatListItem) item).getContact();
             showChat(contact);
         } else if (shouldShowContactHistory(item)) {
-            TalkClientContact contact = ((ContactChatItem) item).getContact();
+            TalkClientContact contact = ((ContactChatListItem) item).getContact();
             showHistory(contact);
-        } else if (item instanceof NearbyGroupHistoryChatItem) {
+        } else if (item instanceof NearbyGroupHistoryChatListItem) {
             showNearbyGroupHistory();
-        } else if (item instanceof WorldwideGroupHistoryChatItem) {
+        } else if (item instanceof WorldwideGroupHistoryChatListItem) {
             showWorldwideGroupHistory();
         }
     }
 
-    private boolean shouldShowChat(ChatItem item) {
-        if (item instanceof ContactChatItem) {
-            TalkClientContact contact = ((ContactChatItem) item).getContact();
+    private boolean shouldShowChat(ChatListItem item) {
+        if (item instanceof ContactChatListItem) {
+            TalkClientContact contact = ((ContactChatListItem) item).getContact();
             return contact.isInEnvironment()
                     || contact.isEnvironmentGroup()
                     || contact.isClientFriend()
@@ -258,9 +257,9 @@ public class ChatListFragment extends SearchablePagerListFragment {
         return false;
     }
 
-    private boolean shouldShowContactHistory(ChatItem item) {
-        if (item instanceof ContactChatItem) {
-            ContactChatItem contactChatItem = (ContactChatItem) item;
+    private boolean shouldShowContactHistory(ChatListItem item) {
+        if (item instanceof ContactChatListItem) {
+            ContactChatListItem contactChatItem = (ContactChatListItem) item;
             TalkClientContact contact = contactChatItem.getContact();
             return contact.isKept() || contact.isKeptGroup();
         }

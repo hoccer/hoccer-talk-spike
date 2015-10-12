@@ -10,7 +10,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.xo.android.view.avatar.AvatarView;
 
 
-public abstract class ChatItem {
+public abstract class ChatListItem {
 
     protected long mUnseenMessageCount;
 
@@ -18,7 +18,7 @@ public abstract class ChatItem {
 
     protected final Context mContext;
 
-    protected ChatItem(Context context) {
+    protected ChatListItem(Context context) {
         mContext = context;
     }
 
