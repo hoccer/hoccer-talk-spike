@@ -7,10 +7,9 @@ import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
+import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.adapter.SearchAdapter;
@@ -123,29 +122,39 @@ public class ContactChatListItem extends ChatListItem implements SearchAdapter.S
     }
 
     private void updateLastMessageText(TalkClientMessage message) {
-        if (message != null) {
-            String mediaType = null;
-            String text = null;
-            TalkClientUpload upload = message.getAttachmentUpload();
-            if (upload != null) {
-                mediaType = upload.getMediaType();
+        String mediaType;
+        String text;
+        if (message.getDelivery().hasAttachment()) {
+            if (message.isIncoming()) {
+                text = mContext.getResources().getString(R.string.contact_item_received_attachment);
+                mediaType = mContext.getResources().getString(getMediaTypeStringId(message.getAttachmentDownload().getMediaType()));
+            } else {
                 text = mContext.getResources().getString(R.string.contact_item_sent_attachment);
-            } else {
-                TalkClientDownload download = message.getAttachmentDownload();
-                if (download != null) {
-                    mediaType = download.getMediaType();
-                    text = mContext.getResources().getString(R.string.contact_item_received_attachment);
-                }
+                mediaType = mContext.getResources().getString(getMediaTypeStringId(message.getAttachmentUpload().getMediaType()));
             }
-            if (text != null) {
-                mLastMessageText = String.format(text, mediaType);
-            } else {
-                mLastMessageText = message.getText();
-            }
+            mLastMessageText = String.format(text, mediaType);
         } else {
-            mLastMessageText = "";
+            mLastMessageText = message.getText();
         }
     }
+
+    private int getMediaTypeStringId(String mediaType) {
+        int resId;
+        if (ContentMediaType.IMAGE.equals(mediaType)) {
+            resId = R.string.content_image;
+        } else if (ContentMediaType.VIDEO.equals(mediaType)) {
+            resId = R.string.content_video;
+        } else if (ContentMediaType.AUDIO.equals(mediaType)) {
+            resId = R.string.content_audio;
+        } else if (ContentMediaType.LOCATION.equals(mediaType)) {
+            resId = R.string.content_location;
+        } else if (ContentMediaType.VCARD.equals(mediaType)) {
+            resId = R.string.content_contact;
+        } else {
+            resId = R.string.content_file;
+        }
+        return resId;
+     }
 
     public TalkClientContact getContact() {
         return mContact;

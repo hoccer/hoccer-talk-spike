@@ -151,11 +151,11 @@
     <string name="unseen_messages_notification_text">\u0020neue Nachrichten</string>
 
     <!-- Content -->
-    <string name="content_images">Bild</string>
+    <string name="content_image">Bild</string>
     <string name="content_multi_images">Mehrere Bilder</string>
     <string name="content_video">Video</string>
     <string name="content_capture">Foto aufnehmen</string>
-    <string name="content_music">Audio</string>
+    <string name="content_audio">Audio</string>
     <string name="content_contact">Kontakt</string>
     <string name="content_location">Ort</string>
     <string name="content_file">Datei</string>
@@ -295,8 +295,8 @@
     <string name="up_down_unlimited_option">unbegrenzt</string>
     <string name="up_down_manual_option">manuell</string>
     <string name="my_profile_title">Mein Profil</string>
-    <string name="contact_item_received_attachment">%1$s Datei erhalten</string>
-    <string name="contact_item_sent_attachment">%1$s Datei gesendet</string>
+    <string name="contact_item_received_attachment">%1$s erhalten</string>
+    <string name="contact_item_sent_attachment">%1$s gesendet</string>
     <string name="error_avatar_selection">Du kannst dieses Bild nicht als Avatar verwenden.</string>
     <string name="error_attachment_selection">Du kannst diese Datei nicht als Anhang verwenden.</string>
     <string name="sms_invitation_text">Hey! Ich nutze die Gratis-App ${app.name} zum sicheren Chatten! Jetzt herunterladen und mich als Kontakt hinzufügen: %1$s%2$s\n%3$s</string>
