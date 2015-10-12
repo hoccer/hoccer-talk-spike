@@ -57,6 +57,8 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
     @Nullable
     private Filter mFilter;
     private boolean mDoUpdateUI = true;
+    private NearbyGroupHistoryChatItem mNearbyGroupHistoryChatItem;
+    private WorldwideGroupHistoryChatItem mWorldwideGroupHistoryChatItem;
 
     public ChatListAdapter(BaseActivity activity, @Nullable Filter filter) {
         mActivity = activity;
@@ -80,7 +82,6 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
 
     public void loadChatItems() {
         try {
-
             final List<TalkClientContact> filteredContacts = filter(mDatabase.findAllContacts());
             final long nearbyMessageCount = mDatabase.getHistoryGroupMessageCount(GROUP_TYPE_NEARBY);
             final long worldwideMessageCount = mDatabase.getHistoryGroupMessageCount(GROUP_TYPE_WORLDWIDE);
@@ -96,11 +97,13 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
                     }
 
                     if (nearbyMessageCount > 0) {
-                        mChatItems.add(new NearbyGroupHistoryChatItem(mActivity));
+                        mNearbyGroupHistoryChatItem = new NearbyGroupHistoryChatItem(mActivity);
+                        mChatItems.add(mNearbyGroupHistoryChatItem);
                     }
 
                     if (worldwideMessageCount > 0) {
-                        mChatItems.add(new WorldwideGroupHistoryChatItem(mActivity));
+                        mWorldwideGroupHistoryChatItem = new WorldwideGroupHistoryChatItem(mActivity);
+                        mChatItems.add(mWorldwideGroupHistoryChatItem);
                     }
 
                     notifyDataSetChanged();
@@ -254,30 +257,24 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
     }
 
     private void updateItemForMessage(TalkClientMessage message) {
-        try {
-            TalkClientContact conversationContact = message.getConversationContact();
-            TalkClientContact contact;
-            if (conversationContact.isGroup()) {
-                contact = mDatabase.findGroupContactByGroupId(conversationContact.getGroupId(), false);
-            } else {
-                contact = mDatabase.findContactByClientId(conversationContact.getClientId(), false);
-            }
-            if (contact == null) {
-                return;
-            }
-            ContactChatItem item = (ContactChatItem) findChatItemForContact(contact);
-            if (item != null) {
-                item.update();
+        TalkClientContact contact = message.getConversationContact();
+        ChatItem item;
+        if (contact.isNearbyGroup()) {
+            item = mNearbyGroupHistoryChatItem;
+        } else if (contact.isWorldwideGroup()) {
+            item = mWorldwideGroupHistoryChatItem;
+        } else {
+            item = findChatItemForContact(contact);
+        }
 
-                mActivity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        notifyDataSetChanged();
-                    }
-                });
-            }
-        } catch (SQLException e) {
-            LOG.error("Error while retrieving contacts for message " + message.getMessageId(), e);
+        if (item != null) {
+            item.update();
+            mActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    notifyDataSetChanged();
+                }
+            });
         }
     }
 
