@@ -9,13 +9,10 @@ import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.content.SelectedContact;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
-import org.apache.log4j.Logger;
 
 import java.io.File;
 
 public class ContactSelector implements IContentSelector {
-
-    private static final Logger LOG = Logger.getLogger(ContactSelector.class);
 
     private final String mName;
     private final Drawable mIcon;
