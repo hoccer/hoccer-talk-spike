@@ -469,7 +469,7 @@
     <string name="toast_unmute_chat">Contact is unmuted</string>
     <string name="blocked">Blocked</string>
     <string name="auto_download_attachments">Auto-download attachments</string>
-    <string name="worldwide_tutorial_message">In Worldwide mode you can chat with random users worldwide who have also activated Worldwide mode. Please take a look at the available settings for Worldwide. How long do you want to keep Worldwide activated and therefore be visible for others after leaving the Worldwide view?</string>
+    <string name="worldwide_tutorial_message">Chat with up to ten random users in Worldwide mode. Please have a look at the available worldwide settings. Do you want to remain visible for other worldwide users after leaving Worldwide?</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>
