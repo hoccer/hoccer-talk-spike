@@ -124,8 +124,8 @@ public class ContactChatListItem extends ChatListItem implements SearchAdapter.S
     private void updateLastMessageText(TalkClientMessage message) {
         String mediaType;
         String text;
-        if (message.getDelivery().hasAttachment()) {
-            if (message.isIncoming()) {
+        if (message.hasAttachment()) {
+            if (message.getAttachmentDownload() != null) {
                 text = mContext.getResources().getString(R.string.contact_item_received_attachment);
                 mediaType = mContext.getResources().getString(getMediaTypeStringId(message.getAttachmentDownload().getMediaType()));
             } else {
@@ -154,7 +154,7 @@ public class ContactChatListItem extends ChatListItem implements SearchAdapter.S
             resId = R.string.content_file;
         }
         return resId;
-     }
+    }
 
     public TalkClientContact getContact() {
         return mContact;
