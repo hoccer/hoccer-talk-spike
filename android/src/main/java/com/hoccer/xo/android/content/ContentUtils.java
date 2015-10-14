@@ -3,7 +3,7 @@ package com.hoccer.xo.android.content;
 public class ContentUtils {
 
     public static boolean isMimeTypeContact(String mimeType) {
-        return mimeType != null && mimeType.startsWith("vnd.android.cursor.item/contact");
+        return mimeType != null && (mimeType.startsWith("vnd.android.cursor.item/contact") || mimeType.startsWith("text/x-vcard"));
     }
 
     public static boolean isMimeTypeAudio(String mimeType) {
