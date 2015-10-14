@@ -7,6 +7,7 @@ import android.provider.ContactsContract;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.content.SelectedContact;
+import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import org.apache.log4j.Logger;
 
@@ -41,9 +42,16 @@ public class ContactSelector implements IContentSelector {
 
     @Override
     public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
-        String lookupUri = intent.getDataString();
-        String vcardUri = lookupUri.replace(ContactsContract.Contacts.CONTENT_LOOKUP_URI.toString(), ContactsContract.Contacts.CONTENT_VCARD_URI.toString());
-        vcardUri = vcardUri.substring(0, vcardUri.lastIndexOf(File.separator));
-        return new SelectedContact(vcardUri);
+        String dataUri = intent.getDataString();
+        if (UriUtils.isLookUpUri(dataUri)) {
+            dataUri = replaceLookUpUriWithVCardUri(dataUri);
+        }
+
+        return new SelectedContact(dataUri);
+    }
+
+    private String replaceLookUpUriWithVCardUri(String lookUpUri) {
+        String vCardUri = lookUpUri.replace(ContactsContract.Contacts.CONTENT_LOOKUP_URI.toString(), ContactsContract.Contacts.CONTENT_VCARD_URI.toString());
+        return vCardUri.substring(0, vCardUri.lastIndexOf(File.separator));
     }
 }
