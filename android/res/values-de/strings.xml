@@ -176,7 +176,7 @@
     <string name="dialog_discard_contact_message">Bist du sicher, dass du diesen Kontakt entfernen möchtest? Alle Nachrichten werden dann unwiderruflich gelöscht.</string>
 
     <!-- Account deletion dialog -->
-    <string name="dialog_delete_account_warning">Willst du wirklich dein Nutzerkonto löschen? All deine Kontakte, Gruppenmitgliedschaften und dieser Zugang werden unwideruflich gelöscht. Die Daten auf deinem Telefon werden ebenfalls gelöscht.</string>
+    <string name="dialog_delete_account_warning">Willst du wirklich dein Nutzerkonto löschen? Alle deine Kontakte, Gruppenmitgliedschaften und dieser Zugang werden unwideruflich gelöscht. Die Daten auf deinem Telefon werden ebenfalls gelöscht.</string>
     <string name="button_delete_account_title">Nutzerkonto auf Server löschen</string>
     <string name="dialog_delete_account_ok">Löschen</string>
 
@@ -459,7 +459,7 @@
     <string name="toast_unmute_chat">laut geschaltet</string>
     <string name="blocked">Blockiert</string>
     <string name="auto_download_attachments">Anhänge automatisch laden</string>
-    <string name="worldwide_tutorial_message">Mit der Weltweit-Funktion kannst du zufällig mit ausgewählten Teilnehmern kommunizieren, die ebenfalls Weltweit aktiviert haben. Mache dich bitte mit den Einstellungen zu diesem Modus vertraut. Wie lange möchtest du nach Verlassen der Weltweit-Ansicht noch weltweit erreichbar und somit für andere Nutzer sichtbar sein?</string>
+    <string name="worldwide_tutorial_message">Chatte mit bis zu zehn zufällig ausgewählten Teilnehmern im Weltweit-Modus. Informiere Dich auch über weitere Einstellungen zu Weltweit. Möchtest Du nach Verlassen des Weltweit-Modus noch für andere Weltweit-Nutzer sichtbar bleiben?</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Kontakt</item>
