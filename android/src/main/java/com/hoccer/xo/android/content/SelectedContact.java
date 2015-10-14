@@ -28,7 +28,7 @@ public class SelectedContact extends SelectedContent {
     @Override
     public String writeContentToFile() {
         InputStream is = null;
-        File file = new File(XoApplication.getAttachmentDirectory(), UUID.randomUUID().toString());
+        File file = new File(XoApplication.getAttachmentDirectory(), UUID.randomUUID().toString() + ".vcf");
         try {
             is = XoApplication.get().getClient().getHost().openInputStreamForUrl(mVcardContentUrl);
             FileUtils.copyInputStreamToFile(is, file);
