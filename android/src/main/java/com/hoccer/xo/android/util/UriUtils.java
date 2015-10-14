@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.BaseColumns;
+import android.provider.ContactsContract;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.webkit.MimeTypeMap;
@@ -107,6 +108,10 @@ public class UriUtils {
         }
 
         return filePath;
+    }
+
+    public static boolean isLookUpUri(String uri) {
+        return uri.startsWith(ContactsContract.Contacts.CONTENT_LOOKUP_URI.toString());
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
