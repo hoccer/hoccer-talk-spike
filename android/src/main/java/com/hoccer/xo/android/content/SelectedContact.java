@@ -18,19 +18,19 @@ public class SelectedContact extends SelectedContent {
 
     private static final Logger LOG = Logger.getLogger(SelectedContact.class);
 
-    private final String mVcardContentUri;
+    private final String mVcardContentUrl;
 
-    public SelectedContact(String vcardContentUri) {
+    public SelectedContact(String vcardContentUrl) {
         super(null, ContactsContract.Contacts.CONTENT_VCARD_TYPE, ContentMediaType.VCARD);
-        mVcardContentUri = vcardContentUri;
+        mVcardContentUrl = vcardContentUrl;
     }
 
     @Override
     public String writeContentToFile() {
         InputStream is = null;
-        File file = new File(XoApplication.getAttachmentDirectory(), UUID.randomUUID().toString());
+        File file = new File(XoApplication.getAttachmentDirectory(), UUID.randomUUID().toString() + ".vcf");
         try {
-            is = XoApplication.get().getClient().getHost().openInputStreamForUrl(mVcardContentUri);
+            is = XoApplication.get().getClient().getHost().openInputStreamForUrl(mVcardContentUrl);
             FileUtils.copyInputStreamToFile(is, file);
         } catch (IOException e) {
             LOG.error("Could not save contact vcard to file", e);

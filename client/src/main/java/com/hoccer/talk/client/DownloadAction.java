@@ -5,6 +5,7 @@ import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.crypto.AESCryptor;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.*;
 import org.apache.http.client.methods.HttpGet;
@@ -142,9 +143,6 @@ public class DownloadAction implements TransferStateListener {
             String contentRangeString = response.getFirstHeader("Content-Range").getValue();
             ByteRange contentRange = ByteRange.parseContentRange(contentRangeString);
 
-            String contentType = response.getFirstHeader("Content-Type").getValue();
-            mDownload.setMimeType(contentType);
-
             long bytesStart = mDownload.getTransferProgress();
             if (!mDownload.isValidContentRange(contentRange, bytesToGo) || mDownload.getContentLength() == -1) {
                 closeResponse(response);
@@ -281,44 +279,15 @@ public class DownloadAction implements TransferStateListener {
         File destination = new File(tempDestinationFilePath);
 
         try {
-            InputStream fileInputStream = new FileInputStream(destination);
-            BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
-
-            Metadata metadata = new Metadata();
-            if (mDownload.getMimeType() != null && !"application/octet-stream".equals(mDownload.getMimeType())) {
-                metadata.add(Metadata.CONTENT_TYPE, mDownload.getMimeType());
-            }
-            if (mDownload.getDecryptedFile() != null) {
-                metadata.add(Metadata.RESOURCE_NAME_KEY, mDownload.getDecryptedFile());
-            }
-
-            MediaType detectedMediaType = MIME_DETECTOR.detect(bufferedInputStream, metadata);
-
-            fileInputStream.close();
-
-            if (detectedMediaType != null) {
-                String mediaTypeName = detectedMediaType.toString();
-                LOG.info("[downloadId: '" + mDownload.getClientDownloadId() + "'] detected mime-type '" + mediaTypeName + "'");
-                mDownload.setMimeType(mediaTypeName);
-                MimeType detectedMimeType = MimeTypes.getDefaultMimeTypes().getRegisteredMimeType(mediaTypeName);
-                if (detectedMimeType != null) {
-                    String extension = detectedMimeType.getExtension();
-                    if (extension != null) {
-                        LOG.info("[downloadId: '" + mDownload.getClientDownloadId() + "'] renaming to extension '" + detectedMimeType.getExtension() + "'");
-
-                        String destinationFileName = createUniqueFileNameInDirectory(mDownload.getFilename(), extension, destinationDirectory);
-                        String destinationPath = destinationDirectory + File.separator + destinationFileName;
-
-                        File newName = new File(destinationPath);
-                        if (destination.renameTo(newName)) {
-                            mDownload.setDecryptedFile(destinationFileName);
-                            mDownload.setFilename(destinationFileName);
-                            mDownload.setFilePath(computeRelativeDownloadDirectory(mDownload.getType()) + File.separator + destinationFileName);
-                        } else {
-                            LOG.warn("could not rename file");
-                        }
-                    }
-                }
+            String destinationFileName = createUniqueFileNameInDirectory(mDownload.getFilename(), destinationDirectory);
+            String destinationPath = destinationDirectory + File.separator + destinationFileName;
+            File newName = new File(destinationPath);
+            if (destination.renameTo(newName)) {
+                mDownload.setDecryptedFile(destinationFileName);
+                mDownload.setFilename(destinationFileName);
+                mDownload.setFilePath(computeRelativeDownloadDirectory(mDownload.getType()) + File.separator + destinationFileName);
+            } else {
+                LOG.warn("could not rename file");
             }
             mDownload.switchState(COMPLETE);
         } catch (Exception e) {
@@ -389,35 +358,27 @@ public class DownloadAction implements TransferStateListener {
         mDownloadAgent.onDownloadFailed(mDownload);
     }
 
-    /**
-     * Creates a unique file name by checking whether a file already exists in a given directory.
-     * In case a file with the same name already exists the given file name will be expanded by an underscore and
-     * a running number (foo_1.bar) to prevent the existing file from being overwritten.
-     *
-     * @param file      The given file name
-     * @param extension The given file extension
-     * @param directory The directory to check
-     * @return The file name including running number and extension (foo_1.bar)
-     */
-    private static String createUniqueFileNameInDirectory(String file, String extension, String directory) {
-        if (file == null) {
-            file = "unknown_file";
+    private static String createUniqueFileNameInDirectory(String fileName, String directory) {
+        String fileTitle = fileName;
+        String extension = "";
+
+        if (fileName.contains(".")) {
+            fileTitle = fileName.substring(0, fileName.lastIndexOf("."));
+            extension = fileName.substring(fileName.lastIndexOf("."));
         }
-        String newFileName = file;
-        String path;
-        File f;
+
+        String newFileTitle = fileTitle;
+
         int i = 0;
         while (true) {
-            path = directory + File.separator + newFileName + extension;
-            f = new File(path);
-            if (f.exists()) {
+            if (new File(directory + File.separator + newFileTitle + extension).exists()) {
                 i++;
-                newFileName = file + "_" + i;
+                newFileTitle = fileTitle + "_" + i;
             } else {
                 break;
             }
         }
-        return newFileName + extension;
+        return newFileTitle + extension;
     }
 
     private void copyData(RandomAccessFile randomAccessFile, FileDescriptor fileDescriptor, InputStream inputStream) throws IOException {
@@ -450,14 +411,6 @@ public class DownloadAction implements TransferStateListener {
         if (response.getEntity() != null && response.getEntity().getContent() != null) {
             response.getEntity().consumeContent();
         }
-    }
-
-    private void logGetTrace(String message, int clientDownloadId) {
-        LOG.trace("[downloadId: '" + clientDownloadId + "'] GET " + message);
-    }
-
-    private void logGetWarning(String message, int clientDownloadId) {
-        LOG.warn("[downloadId: '" + clientDownloadId + "'] GET " + message);
     }
 
     private String computeDownloadFile(TalkClientDownload download) {

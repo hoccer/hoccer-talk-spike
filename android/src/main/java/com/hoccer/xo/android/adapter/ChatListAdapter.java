@@ -11,27 +11,32 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.xo.android.XoAndroidClient;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.BaseActivity;
-import com.hoccer.xo.android.view.model.ChatItem;
-import com.hoccer.xo.android.view.model.ContactChatItem;
-import com.hoccer.xo.android.view.model.NearbyGroupHistoryChatItem;
-import com.hoccer.xo.android.view.model.WorldwideGroupHistoryChatItem;
+import com.hoccer.xo.android.view.model.*;
+import com.hoccer.xo.android.view.model.NearbyGroupHistoryChatListItem;
+import com.hoccer.xo.android.view.model.WorldwideGroupHistoryChatListItem;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import static com.hoccer.talk.model.TalkGroupPresence.GROUP_TYPE_NEARBY;
+import static com.hoccer.talk.model.TalkGroupPresence.GROUP_TYPE_WORLDWIDE;
 
 
 public class ChatListAdapter extends BaseAdapter implements IXoContactListener, IXoMessageListener, TransferListener {
 
     private static final Logger LOG = Logger.getLogger(ChatListAdapter.class);
 
-    private static final Comparator<ChatItem> LATEST_ITEM_COMPARATOR = new Comparator<ChatItem>() {
+    private static final Comparator<ChatListItem> LATEST_ITEM_COMPARATOR = new Comparator<ChatListItem>() {
         @Override
-        public int compare(ChatItem chatItem1, ChatItem chatItem2) {
+        public int compare(ChatListItem chatListItem1, ChatListItem chatListItem2) {
 
-            long value1 = Math.max(chatItem1.getMessageTimeStamp(), chatItem1.getContactCreationTimeStamp());
-            long value2 = Math.max(chatItem2.getMessageTimeStamp(), chatItem2.getContactCreationTimeStamp());
+            long value1 = Math.max(chatListItem1.getMessageTimeStamp(), chatListItem1.getContactCreationTimeStamp());
+            long value2 = Math.max(chatListItem2.getMessageTimeStamp(), chatListItem2.getContactCreationTimeStamp());
 
             if (value1 == value2) {
                 return 0;
@@ -42,7 +47,7 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
         }
     };
 
-    final protected List<ChatItem> mChatItems = new ArrayList<ChatItem>();
+    final protected List<ChatListItem> mChatListItems = new ArrayList<ChatListItem>();
     private final XoClientDatabase mDatabase;
     private final XoAndroidClient mXoClient;
 
@@ -51,6 +56,8 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
     @Nullable
     private Filter mFilter;
     private boolean mDoUpdateUI = true;
+    private NearbyGroupHistoryChatListItem mNearbyGroupHistoryChatListItem;
+    private WorldwideGroupHistoryChatListItem mWorldwideGroupHistoryChatListItem;
 
     public ChatListAdapter(BaseActivity activity, @Nullable Filter filter) {
         mActivity = activity;
@@ -59,12 +66,11 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
         mXoClient.registerStateListener(new IXoStateListener() {
             @Override
             public void onClientStateChange(XoClient client) {
-                if (client.getState() == XoClient.State.READY){
+                if (client.getState() == XoClient.State.READY) {
                     LOG.info("XOClient is ready. UI updates enabled.");
                     mDoUpdateUI = true;
-                    loadChatItems();
                 }
-                if (client.getState() == XoClient.State.SYNCING){
+                if (client.getState() == XoClient.State.SYNCING) {
                     LOG.info("XOClient is syncing. UI updates disabled.");
                     mDoUpdateUI = false;
                 }
@@ -75,27 +81,28 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
 
     public void loadChatItems() {
         try {
-
             final List<TalkClientContact> filteredContacts = filter(mDatabase.findAllContacts());
-            final long nearbyMessageCount = mDatabase.getNearbyGroupMessageCount();
-            final long worldwideMessageCount = mDatabase.getWorldwideGroupMessageCount();
+            final long nearbyMessageCount = mDatabase.getHistoryGroupMessageCount(GROUP_TYPE_NEARBY);
+            final long worldwideMessageCount = mDatabase.getHistoryGroupMessageCount(GROUP_TYPE_WORLDWIDE);
 
             mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
 
-                    mChatItems.clear();
+                    mChatListItems.clear();
 
                     for (final TalkClientContact contact : filteredContacts) {
-                        mChatItems.add(new ContactChatItem(contact, mActivity));
+                        mChatListItems.add(new ContactChatListItem(contact, mActivity));
                     }
 
                     if (nearbyMessageCount > 0) {
-                        mChatItems.add(new NearbyGroupHistoryChatItem(mActivity));
+                        mNearbyGroupHistoryChatListItem = new NearbyGroupHistoryChatListItem(mActivity);
+                        mChatListItems.add(mNearbyGroupHistoryChatListItem);
                     }
 
                     if (worldwideMessageCount > 0) {
-                        mChatItems.add(new WorldwideGroupHistoryChatItem(mActivity));
+                        mWorldwideGroupHistoryChatListItem = new WorldwideGroupHistoryChatListItem(mActivity);
+                        mChatListItems.add(mWorldwideGroupHistoryChatListItem);
                     }
 
                     notifyDataSetChanged();
@@ -142,10 +149,10 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
         return res;
     }
 
-    private ChatItem findChatItemForContact(TalkClientContact contact) {
-        for (ChatItem item : mChatItems) {
-            if (item instanceof ContactChatItem) {
-                if (contact.equals(((ContactChatItem) item).getContact())) {
+    private ChatListItem findChatItemForContact(TalkClientContact contact) {
+        for (ChatListItem item : mChatListItems) {
+            if (item instanceof ContactChatListItem) {
+                if (contact.equals(((ContactChatListItem) item).getContact())) {
                     return item;
                 }
             }
@@ -155,18 +162,18 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
 
     @Override
     public void notifyDataSetChanged() {
-        Collections.sort(mChatItems, LATEST_ITEM_COMPARATOR);
+        Collections.sort(mChatListItems, LATEST_ITEM_COMPARATOR);
         super.notifyDataSetChanged();
     }
 
     @Override
     public int getCount() {
-        return mChatItems.size();
+        return mChatListItems.size();
     }
 
     @Override
     public Object getItem(int i) {
-        return mChatItems.get(i);
+        return mChatListItems.get(i);
     }
 
     @Override
@@ -176,11 +183,11 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        if (position >= mChatItems.size()) {
+        if (position >= mChatListItems.size()) {
             return convertView;
         }
 
-        return mChatItems.get(position).getView(convertView, parent);
+        return mChatListItems.get(position).getView(convertView, parent);
     }
 
     /**
@@ -192,11 +199,16 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
         mActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                ChatItem item = findChatItemForContact(contact);
-                if (item == null) {
-                    return;
+                ChatListItem item = findChatItemForContact(contact);
+                if (item != null) {
+                    if (!contact.getClientPresence().isKept() && !contact.isClientFriend()) {
+                        mChatListItems.remove(item);
+                    } else {
+                        item.update();
+                    }
+                } else if (contact.getClientPresence().isKept()) {
+                    mChatListItems.add(new ContactChatListItem(contact, mActivity));
                 }
-                item.update();
                 notifyDataSetChanged();
             }
         });
@@ -217,7 +229,7 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
         mActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                ChatItem item = findChatItemForContact(contact);
+                ChatListItem item = findChatItemForContact(contact);
                 if (item != null) {
                     item.update();
                     notifyDataSetChanged();
@@ -244,33 +256,24 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
     }
 
     private void updateItemForMessage(TalkClientMessage message) {
-        try {
-            TalkClientContact conversationContact = message.getConversationContact();
-            TalkClientContact contact;
-            if (conversationContact.isGroup()) {
-                contact = mDatabase.findGroupContactByGroupId(conversationContact.getGroupId(), false);
-            } else {
-                contact = mDatabase.findContactByClientId(conversationContact.getClientId(), false);
-            }
-            if (contact == null) {
-                return;
-            }
-            ContactChatItem item = (ContactChatItem) findChatItemForContact(contact);
-            if (item != null) {
-                item.update();
+        TalkClientContact contact = message.getConversationContact();
+        ChatListItem item;
+        if (contact.isNearbyGroup()) {
+            item = mNearbyGroupHistoryChatListItem;
+        } else if (contact.isWorldwideGroup()) {
+            item = mWorldwideGroupHistoryChatListItem;
+        } else {
+            item = findChatItemForContact(contact);
+        }
 
-                mActivity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        notifyDataSetChanged();
-                    }
-                });
-            } else {
-                // message received from worldwide contact which is not in worldwide anymore, so update contacts to list the acquaintance
-                loadChatItems();
-            }
-        } catch (SQLException e) {
-            LOG.error("Error while retrieving contacts for message " + message.getMessageId(), e);
+        if (item != null) {
+            item.update();
+            mActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    notifyDataSetChanged();
+                }
+            });
         }
     }
 

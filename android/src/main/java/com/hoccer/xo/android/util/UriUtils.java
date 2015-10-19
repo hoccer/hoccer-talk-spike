@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.BaseColumns;
+import android.provider.ContactsContract;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.webkit.MimeTypeMap;
@@ -24,8 +25,7 @@ public class UriUtils {
 
     public static final String CONTENT_URI_PREFIX = CONTENT_SCHEME + "://";
     public static final String FILE_URI_PREFIX = FILE_SCHEME + "://";
-
-    public static final String PUBLIC_DOWNLOADS_CONTENT_URI = "content://downloads/public_downloads";
+    public static final String PROVIDERS_DOWNLOADS_DOCUMENTS = "com.android.providers.downloads.documents";
 
     public static Uri getAbsoluteFileUri(String stringUri) {
         Uri uri = Uri.parse(stringUri);
@@ -73,20 +73,19 @@ public class UriUtils {
         return contentId;
     }
 
-    public static String getFilePathByUri(Context context, Uri uri, String mediaColumn) {
+    public static String getFilePathByUri(Context context, Uri uri) {
         String filePath = null;
 
         if (isContentUri(uri)) {
-            uri = getPublicDownloadsUriFromDocumentUri(context, uri);
-            Cursor cursor = context.getContentResolver().query(uri, new String[]{mediaColumn}, null, null, null);
-            if (cursor == null) {
-                LOG.error("Query failed! Could not resolve cursor for content uri: " + uri);
-                return null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                if (isDocumentUri(context, uri)) {
+                    filePath = getFilePathByDocumentUri(uri, context);
+                } else {
+                    filePath = getFilePathByContentUri(uri, context);
+                }
+            } else {
+                filePath = getFilePathByContentUri(uri, context);
             }
-
-            cursor.moveToFirst();
-            filePath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
-            cursor.close();
         } else if (isFileUri(uri)) {
             filePath = uri.getPath();
         }
@@ -94,13 +93,25 @@ public class UriUtils {
         return filePath;
     }
 
-    private static Uri getPublicDownloadsUriFromDocumentUri(Context context, Uri uri) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            if (isDocumentUri(context, uri)) {
-                uri = getContentUriByDocumentUri(uri);
-            }
+    private static String getFilePathByContentUri(Uri uri, Context context) {
+        String filePath = null;
+
+        Cursor cursor = context.getContentResolver().query(uri, new String[]{MediaStore.MediaColumns.DATA}, null, null, null);
+        if (cursor == null) {
+            LOG.error("Query failed! Could not resolve cursor for content uri: " + uri);
+            return null;
         }
-        return uri;
+
+        if (cursor.moveToFirst()) {
+            filePath = cursor.getString(cursor.getColumnIndex("_data"));
+            cursor.close();
+        }
+
+        return filePath;
+    }
+
+    public static boolean isLookUpUri(String uri) {
+        return uri.startsWith(ContactsContract.Contacts.CONTENT_LOOKUP_URI.toString());
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
@@ -109,10 +120,50 @@ public class UriUtils {
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
-    private static Uri getContentUriByDocumentUri(Uri uri) {
-        final String id = DocumentsContract.getDocumentId(uri);
-        uri = ContentUris.withAppendedId(Uri.parse(PUBLIC_DOWNLOADS_CONTENT_URI), Long.valueOf(id));
-        return uri;
+    private static String getFilePathByDocumentUri(Uri uri, Context context) {
+        if (uri.getAuthority().equals("com.android.externalstorage.documents")) {
+            String relativePath = uri.getLastPathSegment().split(":")[1];
+            return XoApplication.getExternalStorage().getPath() + "/" + relativePath;
+        }
+
+        String documentId = DocumentsContract.getDocumentId(uri);
+        String projection = "_data";
+        Uri contentUri;
+        String selection = null;
+        String[] selectionArgs = null;
+        if (uri.getAuthority().equals(PROVIDERS_DOWNLOADS_DOCUMENTS)) {
+            contentUri = ContentUris.withAppendedId(
+                    Uri.parse("content://downloads/public_downloads"), Long.valueOf(documentId));
+        } else {
+            contentUri = getExternalMediaContentUri(documentId.split(":")[0]);
+            selection = "_id=?";
+            selectionArgs = new String[]{documentId.split(":")[1]};
+        }
+
+        return getFilePathByCursor(projection,
+                context.getContentResolver().query(contentUri, new String[]{projection},
+                        selection, selectionArgs, null));
+    }
+
+    private static Uri getExternalMediaContentUri(String type) {
+        Uri contentUri = null;
+        if ("image".equals(type)) {
+            contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        } else if ("video".equals(type)) {
+            contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+        } else if ("audio".equals(type)) {
+            contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        }
+        return contentUri;
+    }
+
+    private static String getFilePathByCursor(String columnName, Cursor cursor) {
+        String path = "";
+        if (cursor.moveToFirst()) {
+            path = cursor.getString(cursor.getColumnIndex(columnName));
+        }
+        cursor.close();
+        return path;
     }
 
     public static String getMimeType(Context context, Uri uri) {
@@ -131,7 +182,7 @@ public class UriUtils {
         return mimeType;
     }
 
-    private static String getFileExtension(Uri uri) {
+    public static String getFileExtension(Uri uri) {
         String extension = MimeTypeMap.getFileExtensionFromUrl(uri.getPath());
         if ("".equals(extension)) {
             int i = uri.getPath().lastIndexOf('.');

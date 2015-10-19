@@ -151,14 +151,14 @@
     <string name="unseen_messages_notification_text">\u0020neue Nachrichten</string>
 
     <!-- Content -->
-    <string name="content_images">Bild</string>
+    <string name="content_image">Bild</string>
     <string name="content_multi_images">Mehrere Bilder</string>
     <string name="content_video">Video</string>
     <string name="content_capture">Foto aufnehmen</string>
-    <string name="content_music">Andere Medien</string>
+    <string name="content_audio">Audio</string>
     <string name="content_contact">Kontakt</string>
     <string name="content_location">Ort</string>
-    <string name="content_data">Dokument</string>
+    <string name="content_file">Datei</string>
     <string name="content_clipboard">Aus Zwischenablage</string>
 
     <!-- FullscreenPlayer -->
@@ -176,7 +176,7 @@
     <string name="dialog_discard_contact_message">Bist du sicher, dass du diesen Kontakt entfernen möchtest? Alle Nachrichten werden dann unwiderruflich gelöscht.</string>
 
     <!-- Account deletion dialog -->
-    <string name="dialog_delete_account_warning">Willst du wirklich dein Nutzerkonto löschen? All deine Kontakte, Gruppenmitgliedschaften und dieser Zugang werden unwideruflich gelöscht. Die Daten auf deinem Telefon werden ebenfalls gelöscht.</string>
+    <string name="dialog_delete_account_warning">Willst du wirklich dein Nutzerkonto löschen? Alle deine Kontakte, Gruppenmitgliedschaften und dieser Zugang werden unwideruflich gelöscht. Die Daten auf deinem Telefon werden ebenfalls gelöscht.</string>
     <string name="button_delete_account_title">Nutzerkonto auf Server löschen</string>
     <string name="dialog_delete_account_ok">Löschen</string>
 
@@ -295,13 +295,14 @@
     <string name="up_down_unlimited_option">unbegrenzt</string>
     <string name="up_down_manual_option">manuell</string>
     <string name="my_profile_title">Mein Profil</string>
-    <string name="contact_item_received_attachment">%1$s Datei erhalten</string>
-    <string name="contact_item_sent_attachment">%1$s Datei gesendet</string>
+    <string name="contact_item_received_attachment">%1$s erhalten</string>
+    <string name="contact_item_sent_attachment">%1$s gesendet</string>
     <string name="error_avatar_selection">Du kannst dieses Bild nicht als Avatar verwenden.</string>
     <string name="error_attachment_selection">Du kannst diese Datei nicht als Anhang verwenden.</string>
     <string name="sms_invitation_text">Hey! Ich nutze die Gratis-App ${app.name} zum sicheren Chatten! Jetzt herunterladen und mich als Kontakt hinzufügen: %1$s%2$s\n%3$s</string>
     <string name="email_invitation_subject">Triff mich bei ${app.name}!</string>
-    <string name="email_invitation_text">Hey!&lt;br&gt;Ich nutze jetzt die Gratis-App ${app.name} zum sicheren Chatten! Jetzt herunterladen und mich als Kontakt hinzufügen:&lt;br&gt;&lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;&lt;br&gt;&lt;br&gt;%3$s</string>
+    <string name="email_invitation_text">Hey! Ich nutze jetzt die Gratis-App ${app.name} zum sicheren Chatten! Jetzt herunterladen und mich als Kontakt hinzufügen:\n%1$s%2$s\n%3$s</string>
+
     <string name="dialog_export_credentials_title">Zugangsdaten exportieren</string>
     <string name="export_credentials_success">Zugangsdaten erfolgreich exportiert.</string>
     <string name="export_credentials_failure">Es ist ein Fehler beim Exportieren der Zugangsdaten aufgetreten. Bitte versuche es erneut.</string>
@@ -458,7 +459,7 @@
     <string name="toast_unmute_chat">laut geschaltet</string>
     <string name="blocked">Blockiert</string>
     <string name="auto_download_attachments">Anhänge automatisch laden</string>
-    <string name="worldwide_tutorial_message">Mit der Weltweit-Funktion kannst du zufällig mit ausgewählten Teilnehmern kommunizieren, die ebenfalls Weltweit aktiviert haben. Mache dich bitte mit den Einstellungen zu diesem Modus vertraut. Wie lange möchtest du nach Verlassen der Weltweit-Ansicht noch weltweit erreichbar und somit für andere Nutzer sichtbar sein?</string>
+    <string name="worldwide_tutorial_message">Chatte mit bis zu zehn zufällig ausgewählten Teilnehmern im Weltweit-Modus. Informiere Dich auch über weitere Einstellungen zu Weltweit. Möchtest Du nach Verlassen des Weltweit-Modus noch für andere Weltweit-Nutzer sichtbar bleiben?</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Kontakt</item>

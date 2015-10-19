@@ -6,21 +6,27 @@ import com.hoccer.xo.android.fragment.SearchableListFragment;
 
 public abstract class SearchablePagerListFragment extends SearchableListFragment implements IPagerFragment {
 
-    private PagerLifecycle mPagerLifecycle = new PagerLifecycle();
+    private boolean mIsSelected;
 
     @Override
     public void onResume() {
         super.onResume();
-        mPagerLifecycle.onResume(this);
+        if (mIsSelected) {
+            onPageSelected();
+        }
     }
 
     @Override
     public void onTabSelected() {
-        mPagerLifecycle.onTabSelected(this);
+        mIsSelected = true;
+        if (isResumed()) {
+            onPageSelected();
+        }
     }
 
     @Override
     public void onTabUnselected() {
-        mPagerLifecycle.onTabUnselected(this);
+        mIsSelected = false;
+        onPageUnselected();
     }
 }

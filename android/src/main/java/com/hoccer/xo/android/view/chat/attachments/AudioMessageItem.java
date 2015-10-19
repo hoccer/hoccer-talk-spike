@@ -42,6 +42,7 @@ public class AudioMessageItem extends MessageItem implements MediaPlayer.Listene
             View v = inflater.inflate(R.layout.content_audio, null);
             mAttachmentContentContainer.addView(v);
         }
+
         LinearLayout audioLayout = (LinearLayout) mAttachmentContentContainer.getChildAt(0);
         TextView captionTextView = (TextView) audioLayout.findViewById(R.id.tv_content_audio_caption);
         TextView nameTextView = (TextView) audioLayout.findViewById(R.id.tv_content_audio_name);
