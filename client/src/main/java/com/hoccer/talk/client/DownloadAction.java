@@ -103,6 +103,10 @@ public class DownloadAction implements TransferStateListener {
     }
 
     public void doDownloadingAction() {
+        if (!mDownloadAgent.getXoClient().isReady()) {
+            LOG.debug("Client not connected. Download not started.");
+            return;
+        }
         String downloadFilename = computeDownloadFile(mDownload);
         if (downloadFilename == null) {
             LOG.error("[downloadId: '" + mDownload.getClientDownloadId() + "'] could not determine startDownload filename");
