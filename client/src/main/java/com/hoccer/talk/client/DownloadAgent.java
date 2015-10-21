@@ -112,7 +112,8 @@ public class DownloadAgent extends TransferAgent {
     }
 
     private long nextDelay(TalkClientDownload download) {
-        long delay = 2 * (download.getTransferFailures() * download.getTransferFailures() + 1);
+        long delay = 1;
+        //long delay = 2 * (download.getTransferFailures() * download.getTransferFailures() + 1);
         LOG.debug("Scheduling Download " + download.getClientDownloadId() + " for retry with delay " + delay);
         return delay;
     }

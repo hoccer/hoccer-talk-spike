@@ -120,17 +120,19 @@ public class DownloadAction implements TransferStateListener {
             mHttpGet = new HttpGet(mDownload.getDownloadUrl());
 
             // determine the requested range
-            String range;
             if (mDownload.getContentLength() != -1) {
+                String range;
                 long last = mDownload.getContentLength() - 1;
                 range = "bytes=" + mDownload.getTransferProgress() + "-" + last;
+                if ((mDownload.getContentLength() - mDownload.getTransferProgress() == 0)){
+                    range = "bytes=" + last + "-" + last;
+                }
                 LOG.debug("[downloadId: '" + mDownload.getClientDownloadId() + "'] GET " + "requesting range '" + range + "'");
                 mHttpGet.addHeader("Range", range);
             }
 
             mDownloadAgent.onDownloadStarted(mDownload);
             HttpResponse response = mDownloadAgent.getHttpClient().execute(mHttpGet);
-
             StatusLine status = response.getStatusLine();
             int sc = status.getStatusCode();
             if (sc != HttpStatus.SC_OK && sc != HttpStatus.SC_PARTIAL_CONTENT) {
@@ -177,7 +179,9 @@ public class DownloadAction implements TransferStateListener {
                     mDownload.switchState(DETECTING);
                 }
             } else {
-                checkTransferFailure(mDownload.getTransferFailures() + 1, "Download not completed: " + mDownload.getTransferProgress() + " / " + mDownload.getContentLength() + ", retrying...", mDownload);
+                if (mDownload.getState()!=PAUSED) {
+                    checkTransferFailure(mDownload.getTransferFailures() + 1, "Download not completed: " + mDownload.getTransferProgress() + " / " + mDownload.getContentLength() + ", retrying...", mDownload);
+                }
             }
         } catch (Exception e) {
             LOG.error("Download error", e);
@@ -398,11 +402,10 @@ public class DownloadAction implements TransferStateListener {
             IOUtils.closeQuietly(randomAccessFile);
             IOUtils.closeQuietly(inputStream);
         }
-
     }
 
     private void checkTransferFailure(int failures, String failureDescription, TalkClientDownload download) {
-        LOG.error(download.getClientDownloadId() + " " + failureDescription);
+        LOG.error(download.getClientDownloadId() + " " + failureDescription+" Count:"+failures);
         download.setTransferFailures(failures);
         if (failures <= MAX_FAILURES) {
             download.switchState(RETRYING);

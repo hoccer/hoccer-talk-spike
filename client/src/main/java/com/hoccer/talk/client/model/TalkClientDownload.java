@@ -206,6 +206,7 @@ public class TalkClientDownload extends XoTransfer {
     private void setState(State newState) {
         this.state = newState;
 
+        // ConcurrentModificationException sometimes
         for (TransferStateListener listener : mTransferListeners) {
             listener.onStateChanged(this);
         }
