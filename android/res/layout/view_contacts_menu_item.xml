@@ -7,10 +7,12 @@
         android:layout_height="match_parent"
         style="@android:style/Widget.ActionButton">
 
-    <ImageView
+    <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            style="?android:attr/borderlessButtonStyle"
             android:src="@drawable/ic_action_contacts"
+            android:contentDescription="@string/menu_contacts"
             android:layout_gravity="center_vertical"/>
 
     <com.hoccer.xo.android.view.NotificationBadgeTextView
