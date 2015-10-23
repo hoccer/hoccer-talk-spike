@@ -155,39 +155,50 @@ public class DownloadAction implements TransferStateListener {
 
             copyData(randomAccessFile, randomAccessFile.getFD(), inputStream);
 
-            if (!checkTransferComplete()){
-                if (mDownload.getState() != PAUSED) {
-                    checkTransferFailure(mDownload.getTransferFailures() + 1, "Download not completed: " + mDownload.getTransferProgress() + " / " + mDownload.getContentLength() + ", retrying...", mDownload);
-                }
+            if (!checkTransferComplete(mDownload) && (mDownload.getState() != PAUSED) ) {
+                checkTransferFailure(mDownload.getTransferFailures() + 1, "Download not completed: " + mDownload.getTransferProgress() + " / " + mDownload.getContentLength() + ", retrying...", mDownload);
             }
+        } catch(SocketTimeoutException socketTimeout) {
+            LOG.error("ReadTimeout. Pausing Download.", socketTimeout);
+            mDownload.switchState(PAUSED);
+        } catch (InterruptedIOException ioe) {
+            LOG.error("InterruptedIOException", ioe);
         } catch (Exception e) {
             LOG.error("Download error", e);
             checkTransferFailure(mDownload.getTransferFailures() + 1, "startDownload exception!", mDownload);
         }
     }
 
-    private boolean checkTransferComplete() {
-        if (mDownload.getTransferProgress() == mDownload.getContentLength()) {
-            if (mDownload.getDecryptionKey() != null) {
-                mDownload.switchState(DECRYPTING);
+    private void addContentRangeHeader(HttpRequestBase request, TalkClientDownload download) {
+        if (download.getContentLength() != -1) {
+            long last = download.getContentLength() - 1;
+            String range = "bytes=" + download.getTransferProgress() + "-" + last;
+            LOG.debug("[downloadId: '" + download.getClientDownloadId() + "'] GET " + "requesting range '" + range + "'");
+            request.addHeader("Range", range);
+        }
+    }
+
+    private boolean checkTransferComplete(TalkClientDownload download) {
+        if (download.getTransferProgress() == download.getContentLength()) {
+            if (download.getDecryptionKey() != null) {
+                download.switchState(DECRYPTING);
             } else {
-                mDownload.setFilePath(computeDownloadFile(mDownload));
-                mDownload.switchState(DETECTING);
+                download.setFilePath(computeDownloadFile(download));
+                download.switchState(DETECTING);
             }
             return true;
         }
         return false;
     }
 
-
-    private long getContentLenghtFromResponse(HttpResponse response) {
+    private long getContentLengthFromResponse(HttpResponse response) {
         Header contentLengthHeader = response.getFirstHeader("Content-Length");
+        // A little dangerous?
         long contentLengthValue = mDownload.getContentLength();
         if (contentLengthHeader != null) {
             String contentLengthString = contentLengthHeader.getValue();
             contentLengthValue = Integer.valueOf(contentLengthString);
         }
-
         return contentLengthValue;
     }
 
