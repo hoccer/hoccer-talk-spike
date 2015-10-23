@@ -109,20 +109,20 @@ public class DownloadAction implements TransferStateListener {
             return;
         }
 
+        if (checkTransferComplete()){
+            LOG.debug("Download already complete");
+            return;
+        }
+
         LOG.debug("performDownloadRequest(downloadId: '" + mDownload.getClientDownloadId() + "', filename: '" + downloadFilename + "')");
-        RandomAccessFile randomAccessFile;
-        FileDescriptor fileDescriptor;
+
         try {
             mHttpGet = new HttpGet(mDownload.getDownloadUrl());
 
             // determine the requested range
             if (mDownload.getContentLength() != -1) {
-                String range;
                 long last = mDownload.getContentLength() - 1;
-                range = "bytes=" + mDownload.getTransferProgress() + "-" + last;
-                if ((mDownload.getContentLength() - mDownload.getTransferProgress() == 0)){
-                    range = "bytes=" + last + "-" + last;
-                }
+                String range = "bytes=" + mDownload.getTransferProgress() + "-" + last;
                 LOG.debug("[downloadId: '" + mDownload.getClientDownloadId() + "'] GET " + "requesting range '" + range + "'");
                 mHttpGet.addHeader("Range", range);
             }
@@ -152,30 +152,21 @@ public class DownloadAction implements TransferStateListener {
                 return;
             }
 
-            HttpEntity entity = response.getEntity();
-            InputStream inputStream = entity.getContent();
+            InputStream inputStream = response.getEntity().getContent();
             File file = new File(downloadFilename);
             LOG.debug("[downloadId: '" + mDownload.getClientDownloadId() + "'] GET " + "destination: '" + file + "'");
 
             file.createNewFile();
-            randomAccessFile = new RandomAccessFile(file, "rw");
-            fileDescriptor = randomAccessFile.getFD();
+            RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
             randomAccessFile.setLength(mDownload.getContentLength());
             LOG.debug("[downloadId: '" + mDownload.getClientDownloadId() + "'] GET " + "will retrieve '" + bytesToGo + "' bytes");
 
             randomAccessFile.seek(bytesStart);
 
-            copyData(randomAccessFile, fileDescriptor, inputStream);
+            copyData(randomAccessFile, randomAccessFile.getFD(), inputStream);
 
-            if (mDownload.getTransferProgress() == mDownload.getContentLength()) {
-                if (mDownload.getDecryptionKey() != null) {
-                    mDownload.switchState(DECRYPTING);
-                } else {
-                    mDownload.setFilePath(downloadFilename);
-                    mDownload.switchState(DETECTING);
-                }
-            } else {
-                if (mDownload.getState()!=PAUSED) {
+            if (!checkTransferComplete()){
+                if (mDownload.getState() != PAUSED) {
                     checkTransferFailure(mDownload.getTransferFailures() + 1, "Download not completed: " + mDownload.getTransferProgress() + " / " + mDownload.getContentLength() + ", retrying...", mDownload);
                 }
             }
@@ -184,6 +175,20 @@ public class DownloadAction implements TransferStateListener {
             checkTransferFailure(mDownload.getTransferFailures() + 1, "startDownload exception!", mDownload);
         }
     }
+
+    private boolean checkTransferComplete() {
+        if (mDownload.getTransferProgress() == mDownload.getContentLength()) {
+            if (mDownload.getDecryptionKey() != null) {
+                mDownload.switchState(DECRYPTING);
+            } else {
+                mDownload.setFilePath(computeDownloadFile(mDownload));
+                mDownload.switchState(DETECTING);
+            }
+            return true;
+        }
+        return false;
+    }
+
 
     private long getContentLenghtFromResponse(HttpResponse response) {
         Header contentLengthHeader = response.getFirstHeader("Content-Length");
