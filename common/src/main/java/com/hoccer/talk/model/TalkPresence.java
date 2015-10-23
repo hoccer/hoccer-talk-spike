@@ -179,38 +179,42 @@ public class TalkPresence {
     }
 
     @JsonIgnore
-    public void updateWith(TalkPresence p) {
-        this.setClientId(p.getClientId());
-        this.setClientName(p.getClientName());
-        this.setClientStatus(p.getClientStatus());
-        this.setTimestamp(p.getTimestamp());
-        this.setAvatarUrl(p.getAvatarUrl());
-        this.setKeyId(p.getKeyId());
-        this.setConnectionStatus(p.getConnectionStatus());
+    public void updateWith(TalkPresence presence) {
+        this.setClientId(presence.getClientId());
+        this.setClientName(presence.getClientName());
+        this.setClientStatus(presence.getClientStatus());
+        this.setTimestamp(presence.getTimestamp());
+        this.setAvatarUrl(presence.getAvatarUrl());
+        this.setKeyId(presence.getKeyId());
+        this.setConnectionStatus(presence.getConnectionStatus());
     }
 
     @JsonIgnore
-    public void updateWith(TalkPresence p, Set<String> fields) {
-        if (fields == null || fields.contains(TalkPresence.FIELD_CLIENT_ID)) {
-            this.setClientId(p.getClientId());
-        }
-        if (fields == null || fields.contains(TalkPresence.FIELD_CLIENT_NAME)) {
-            this.setClientName(p.getClientName());
-        }
-        if (fields == null || fields.contains(TalkPresence.FIELD_CLIENT_STATUS)) {
-            this.setClientStatus(p.getClientStatus());
-        }
-        if (fields == null || fields.contains(TalkPresence.FIELD_TIMESTAMP)) {
-            this.setTimestamp(p.getTimestamp());
-        }
-        if (fields == null || fields.contains(TalkPresence.FIELD_AVATAR_URL)) {
-            this.setAvatarUrl(p.getAvatarUrl());
-        }
-        if (fields == null || fields.contains(TalkPresence.FIELD_KEY_ID)) {
-            this.setKeyId(p.getKeyId());
-        }
-        if (fields == null || fields.contains(TalkPresence.FIELD_CONNECTION_STATUS)) {
-            this.setConnectionStatus(p.getConnectionStatus());
+    public void updateWith(TalkPresence presence, Set<String> fields) {
+        if (fields == null) {
+            updateWith(presence);
+        } else {
+            if (fields.contains(TalkPresence.FIELD_CLIENT_ID)) {
+                this.setClientId(presence.getClientId());
+            }
+            if (fields.contains(TalkPresence.FIELD_CLIENT_NAME)) {
+                this.setClientName(presence.getClientName());
+            }
+            if (fields.contains(TalkPresence.FIELD_CLIENT_STATUS)) {
+                this.setClientStatus(presence.getClientStatus());
+            }
+            if (fields.contains(TalkPresence.FIELD_TIMESTAMP)) {
+                this.setTimestamp(presence.getTimestamp());
+            }
+            if (fields.contains(TalkPresence.FIELD_AVATAR_URL)) {
+                this.setAvatarUrl(presence.getAvatarUrl());
+            }
+            if (fields.contains(TalkPresence.FIELD_KEY_ID)) {
+                this.setKeyId(presence.getKeyId());
+            }
+            if (fields.contains(TalkPresence.FIELD_CONNECTION_STATUS)) {
+                this.setConnectionStatus(presence.getConnectionStatus());
+            }
         }
     }
 

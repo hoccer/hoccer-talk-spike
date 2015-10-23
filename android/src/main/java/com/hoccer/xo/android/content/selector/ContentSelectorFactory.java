@@ -15,7 +15,7 @@ public class ContentSelectorFactory {
         } else if (ContentUtils.isMimeTypeContact(mimeType)) {
             return new ContactSelector(context);
         } else {
-            throw new Exception("Content is not supported.");
+            return new FileSelector(context);
         }
     }
 }

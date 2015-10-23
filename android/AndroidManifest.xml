@@ -3,7 +3,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.artcom.hoccer"
 
-          android:versionCode="391"
+          android:versionCode="402"
           android:versionName="${project.version}">
 
     <!-- We run on 4.0 (14) and up, we use features from up to 4.2 (17) -->
@@ -164,10 +164,7 @@
                 <action android:name="android.intent.action.SEND"/>
                 <action android:name="android.intent.action.SEND_MULTIPLE"/>
                 <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="image/*"/>
-                <data android:mimeType="video/*"/>
-                <data android:mimeType="audio/*"/>
-                <data android:mimeType="text/plain"/>
+                <data android:mimeType="*/*"/>
             </intent-filter>
         </activity>
 

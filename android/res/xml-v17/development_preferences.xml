@@ -22,6 +22,7 @@
                 <extra android:name="URL" android:value="@string/link_faq"></extra>
             </intent>
         </Preference>
+
         <Preference
                 android:title="@string/menu_tutorial"
                 android:key="preference_tutorial">
@@ -40,9 +41,9 @@
                 android:title="@string/change_password"
                 android:key="@string/preference_key_change_passcode">
         </Preference>
-        <CheckBoxPreference android:title="@string/activate"
-                          android:key="@string/preference_key_activate_passcode"
-                          android:defaultValue="false"/>
+        <SwitchPreference android:title="@string/activate"
+                            android:key="@string/preference_key_activate_passcode"
+                            android:defaultValue="false"/>
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -130,7 +131,6 @@
 
     </PreferenceCategory>
 
-
     <PreferenceCategory
             android:title="@string/pref_credentials">
         <Preference
@@ -172,16 +172,6 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-            android:title="@string/pref_support">
-
-        <CheckBoxPreference
-                android:key="preference_report_crashes"
-                android:title="@string/pref_report_crashes"
-                android:summary="@string/pref_report_crashes_summary"
-                android:defaultValue="true"/>
-    </PreferenceCategory>
-
-    <PreferenceCategory
             android:title="@string/pref_legal_information">
         <Preference
                 android:title="@string/menu_licenses"
@@ -192,6 +182,14 @@
                 <extra android:name="xo_legal_imprint_display_mode" android:value="LICENSES"></extra>
             </intent>
         </Preference>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="Development">
+
+        <Preference
+                android:key="preference_database_dump"
+                android:title="Dump SQLite Database"/>
     </PreferenceCategory>
 
 </PreferenceScreen>

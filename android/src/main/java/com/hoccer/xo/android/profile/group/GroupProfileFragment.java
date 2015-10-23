@@ -52,8 +52,6 @@ public class GroupProfileFragment extends ProfileFragment
 
     private static final Logger LOG = Logger.getLogger(GroupProfileFragment.class);
 
-    public static final int SELECT_CONTACT_REQUEST = 1;
-
     private boolean mBackPressed;
     public static final String ARG_START_IN_ACTION_MODE = "ARG_START_IN_ACTION_MODE";
     private MenuItem mFriendsRequestMenuItem;
@@ -146,7 +144,6 @@ public class GroupProfileFragment extends ProfileFragment
     @Override
     public void onResume() {
         super.onResume();
-
         XoApplication.get().getClient().registerContactListener(this);
 
         mMode = Mode.PROFILE;
@@ -529,13 +526,13 @@ public class GroupProfileFragment extends ProfileFragment
     private void manageGroupMembers() {
         Intent intent = new Intent(getActivity(), GroupContactSelectionResultActivity.class);
         intent.putIntegerArrayListExtra(ContactSelectionFragment.EXTRA_SELECTED_CONTACT_IDS, transformToContactIds(mGroupMemberAdapter.getContacts()));
-        startActivityForResult(intent, SELECT_CONTACT_REQUEST);
+        startActivityForResult(intent, REQUEST_SELECT_CONTACT);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == Activity.RESULT_OK && requestCode == SELECT_CONTACT_REQUEST) {
+        if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_SELECT_CONTACT) {
             List<Integer> selectedContactIds = data.getIntegerArrayListExtra(ContactSelectionFragment.EXTRA_SELECTED_CONTACT_IDS);
             try {
                 updateMemberships(selectedContactIds);

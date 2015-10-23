@@ -41,9 +41,9 @@
                 android:title="@string/change_password"
                 android:key="@string/preference_key_change_passcode">
         </Preference>
-        <SwitchPreference android:title="@string/activate"
-                          android:key="@string/preference_key_activate_passcode"
-                          android:defaultValue="false"/>
+        <CheckBoxPreference android:title="@string/activate"
+                            android:key="@string/preference_key_activate_passcode"
+                            android:defaultValue="false"/>
     </PreferenceCategory>
 
     <PreferenceCategory

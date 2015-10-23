@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Environment;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hoccer.talk.client.IXoClientHost;
+import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.model.TalkPresence;
@@ -189,6 +190,7 @@ public class XoApplication extends Application {
         mClient.registerStateListener(new SrpChangeListener(this));
 
         if (isFirstConnectionAfterCrashOrUpdate()) {
+            sLog.debug("First connection after crash or update. Full sync triggered.");
             mClient.setFullSyncRequired(true);
             mCrashMonitor.saveCrashState(false);
         }

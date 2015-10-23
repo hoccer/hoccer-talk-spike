@@ -137,6 +137,10 @@ public class TalkClientMessage {
         this.direction = TYPE_OUTGOING;
     }
 
+    public boolean hasAttachment() {
+        return attachmentDownload != null || attachmentUpload != null;
+    }
+
     public TalkClientUpload getAttachmentUpload() {
         return attachmentUpload;
     }

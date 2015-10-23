@@ -11,9 +11,9 @@
     </string-array>
 
     <string-array name="worldwide_tutorial_options">
-        <item>sofort verlassen</item>
-        <item>noch 1 Stunde</item>
-        <item>noch 6 Stunden</item>
-        <item>noch 24 Stunden</item>
+        <item>Nein, sofort verlassen</item>
+        <item>Ja, für 1 Stunde</item>
+        <item>Ja, für 6 Stunden</item>
+        <item>Ja, für 24 Stunden</item>
     </string-array>
 </resources>

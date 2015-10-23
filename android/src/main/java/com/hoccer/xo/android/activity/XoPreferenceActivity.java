@@ -14,7 +14,6 @@ import android.view.*;
 import android.widget.ListAdapter;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.WorldwideController;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
@@ -62,12 +61,14 @@ public class XoPreferenceActivity extends PreferenceActivity
         } else {
             addPreferencesFromResource(R.xml.preferences);
         }
+
         getListView().setBackgroundColor(Color.WHITE);
 
         final BackupPreference createBackupPreference = (BackupPreference) findPreference(getString(R.string.preference_key_create_backup));
         final BackupPreference restoreBackupPreference = (BackupPreference) findPreference(getString(R.string.preference_key_restore_backup));
 
-        SwitchPreference activatePasswordPreference = (SwitchPreference) findPreference(getString(R.string.preference_key_activate_passcode));
+        Preference activatePasswordPreference = (Preference) findPreference(getString(R.string.preference_key_activate_passcode));
+
         activatePasswordPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -82,7 +83,7 @@ public class XoPreferenceActivity extends PreferenceActivity
                         startPasswordPromptActivityForResult(REQUEST_DEACTIVATE_PASSWORD);
                     }
                 }
-
+                // Don't change preference here. Will be done in the called activities.
                 return false;
             }
         });

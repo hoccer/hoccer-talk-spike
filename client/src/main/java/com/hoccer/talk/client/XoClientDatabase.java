@@ -421,8 +421,21 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return messages;
     }
 
-    public long getNearbyGroupMessageCount() throws SQLException {
-        return getAllNearbyGroupMessages().size();
+    public long getHistoryGroupMessageCount(String groupType) throws SQLException {
+        QueryBuilder<TalkClientMessage, ?> clientMessages = mClientMessages.queryBuilder();
+        clientMessages.where()
+                .eq("deleted", false);
+
+        QueryBuilder<TalkClientContact, ?> clientContacts = mClientContacts.queryBuilder();
+        clientContacts.where()
+                .eq("deleted", false);
+
+        QueryBuilder<TalkGroupPresence, ?> groupPresences = mGroupPresences.queryBuilder();
+        groupPresences.where()
+                .eq("groupType", groupType);
+
+        return clientMessages.join(
+                clientContacts.join(groupPresences)).countOf();
     }
 
     public List<TalkClientMessage> getAllNearbyGroupMessages() throws SQLException {
@@ -458,10 +471,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
             orderedMessages.addAll(findMessagesByContactId(c.getClientContactId(), nearbyMessages.size(), 0));
         }
         return orderedMessages;
-    }
-
-    public long getWorldwideGroupMessageCount() throws SQLException {
-        return getAllWorldwideGroupMessages().size();
     }
 
     public List<TalkClientMessage> getAllWorldwideGroupMessages() throws SQLException {
@@ -1005,6 +1014,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         DeleteBuilder<TalkGroupMembership, Long> deleteBuilder = mGroupMemberships.deleteBuilder();
         deleteBuilder.delete();
     }
+
 
     private void deleteClientUpload(TalkClientUpload upload) throws SQLException {
         int deletedRowsCount = mClientUploads.delete(upload);

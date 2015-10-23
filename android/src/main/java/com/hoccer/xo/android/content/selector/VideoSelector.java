@@ -46,14 +46,14 @@ public class VideoSelector implements IContentSelector {
 
     @Override
     public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) throws Exception {
-        String mimeType = UriUtils.getMimeType(context, intent.getData());
-        if (!ContentUtils.isMimeTypeVideo(mimeType)) {
-            throw new Exception("Mime type is not 'video/*'");
-        }
-
-        String filePath = UriUtils.getFilePathByUri(context, intent.getData(), MediaStore.Video.Media.DATA);
+        String filePath = UriUtils.getFilePathByUri(context, intent.getData());
         if (filePath == null || !new File(filePath).exists()) {
             throw new FileNotFoundException("File not found for " + intent.getData());
+        }
+
+        String mimeType = UriUtils.getMimeType(context, UriUtils.getAbsoluteFileUri(filePath));
+        if (!ContentUtils.isMimeTypeVideo(mimeType)) {
+            throw new Exception("Mime type is not 'video/*'");
         }
 
         Uri mediaStoreUri = UriUtils.getContentUriByDataPath(context, MediaStore.Video.Media.getContentUri("external"), filePath);

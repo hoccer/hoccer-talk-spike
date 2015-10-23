@@ -18,11 +18,10 @@ import com.hoccer.xo.android.nearby.NearbyEnvironmentUpdater;
 import com.hoccer.xo.android.service.NotificationId;
 import org.apache.log4j.Logger;
 
-public class NearbyController implements BackgroundManager.Listener {
+public enum NearbyController implements BackgroundManager.Listener {
+    INSTANCE;
 
     private static final Logger LOG = Logger.getLogger(NearbyController.class);
-
-    private static NearbyController sInstance;
 
     private boolean mNearbyEnabled;
     private Runnable mNearbyTimeout;
@@ -30,13 +29,6 @@ public class NearbyController implements BackgroundManager.Listener {
 
     private final NotificationManager mNotificationManager;
     private final NearbyEnvironmentUpdater mNearbyEnvironmentUpdater;
-
-    public static NearbyController get() {
-        if (sInstance == null) {
-            sInstance = new NearbyController();
-        }
-        return sInstance;
-    }
 
     private NearbyController() {
         mNearbyEnvironmentUpdater = new NearbyEnvironmentUpdater(XoApplication.get(), XoApplication.get().getClient());

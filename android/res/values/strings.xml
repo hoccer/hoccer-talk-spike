@@ -162,14 +162,14 @@
     <string name="unseen_messages_notification_text">\u0020new messages</string>
 
     <!-- Content -->
-    <string name="content_images">Image</string>
+    <string name="content_image">Image</string>
     <string name="content_multi_images">Multiple images</string>
     <string name="content_video">Video</string>
     <string name="content_capture">Take photo</string>
-    <string name="content_music">Further media</string>
+    <string name="content_audio">Audio</string>
     <string name="content_contact">Contact</string>
     <string name="content_location">Location</string>
-    <string name="content_data">Data</string>
+    <string name="content_file">File</string>
     <string name="content_clipboard">Clipboard</string>
 
     <!-- FullscreenPlayer -->
@@ -309,13 +309,14 @@
     <string name="up_down_unlimited_option">unlimited</string>
     <string name="up_down_manual_option">manual transfer</string>
     <string name="my_profile_title">My profile</string>
-    <string name="contact_item_received_attachment">Received %1$s attachment</string>
-    <string name="contact_item_sent_attachment">Sent %1$s attachment</string>
+    <string name="contact_item_received_attachment">%1$s received</string>
+    <string name="contact_item_sent_attachment">%1$s sent</string>
     <string name="error_avatar_selection">The image you have selected is not suitable as avatar.</string>
     <string name="error_attachment_selection">The file you have selected cannot be used as an attachment.</string>
     <string name="sms_invitation_text">Hey! I\'m now using the free app ${app.name} for secure chatting. Download it now and add me as a contact:\n%1$s%2$s\n%3$s</string>
     <string name="email_invitation_subject">Join me at ${app.name}!</string>
-    <string name="email_invitation_text">Hey!&lt;br&gt;I\'m now using the free app ${app.name} for secure chatting. Download it now and add me as contact:&lt;br&gt;&lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;&lt;br&gt;&lt;br&gt;%3$s</string>
+    <string name="email_invitation_text">Hey!I\'m now using the free app ${app.name} for secure chatting. Download it now and add me as contact:\n%1$s%2$s\n%3$s</string>
+
     <string name="dialog_export_credentials_title">Export credentials</string>
     <string name="export_credentials_success">Successfully saved your credentials.</string>
     <string name="export_credentials_failure">Error while saving your credentials.</string>
@@ -352,6 +353,7 @@
     <string name="nearby_saved">Nearby saved</string>
     <string name="worldwide_saved">Worldwide saved</string>
     <string name="error_send_message_blocked">The contact is blocked. Message will not be sent.</string>
+    <string name="error_client_not_nearby_or_ww">Message can not be sent: Relationship with this contact does no longer exist. Please send an invitation to the contact via the user\'s profile view.</string>
     <string name="invite_several_entries">Has several entries</string>
 
     <string name="about_advert_text">${app.name} \n- your secure multimedia messenger\n\nSecurity, data protection and the protection of privacy are of extreme importance to us. ${app.name} sets new standards in mobile data transmission and puts mobile privacy to a whole new level, due to latest encryption and transmission technologies. ${app.name} provides an easy and unlimited exchange of data between smartphones and tablets, without constraining users to register and enter confidential data.\n\nShare hugs \u0026 kisses</string>
@@ -467,7 +469,7 @@
     <string name="toast_unmute_chat">Contact is unmuted</string>
     <string name="blocked">Blocked</string>
     <string name="auto_download_attachments">Auto-download attachments</string>
-    <string name="worldwide_tutorial_message">In Worldwide mode you can chat with random users worldwide who have also activated Worldwide mode. Please take a look at the available settings for Worldwide. How long do you want to keep Worldwide activated and therefore be visible for others after leaving the Worldwide view?</string>
+    <string name="worldwide_tutorial_message">Chat with up to ten random users in Worldwide mode. Please have a look at the available worldwide settings. Do you want to remain visible for other worldwide users after leaving Worldwide?</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>

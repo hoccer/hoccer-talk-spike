@@ -15,18 +15,18 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-public class WorldwideGroupHistoryChatItem extends ChatItem implements SearchAdapter.Searchable {
+public class NearbyGroupHistoryChatListItem extends ChatListItem implements SearchAdapter.Searchable {
 
-    private static final Logger LOG = Logger.getLogger(NearbyGroupHistoryChatItem.class);
+    private static final Logger LOG = Logger.getLogger(NearbyGroupHistoryChatListItem.class);
 
     @Nullable
-    private List<TalkClientMessage> mMessages;
+    private List<TalkClientMessage> mNearbyMessages;
 
     @Nullable
     private Date mLastMessageTimeStamp;
     private String mLastMessageText = "";
 
-    public WorldwideGroupHistoryChatItem(Context context) {
+    public NearbyGroupHistoryChatListItem(Context context) {
         super(context);
         update();
     }
@@ -34,18 +34,18 @@ public class WorldwideGroupHistoryChatItem extends ChatItem implements SearchAda
     @Override
     public void update() {
         try {
-            mMessages = XoApplication.get().getClient().getDatabase().getAllWorldwideGroupMessages();
+            mNearbyMessages = XoApplication.get().getClient().getDatabase().getAllNearbyGroupMessages();
             mUnseenMessageCount = 0;
-            for (TalkClientMessage worldwideMessage : mMessages) {
-                if (worldwideMessage.isIncoming() && !worldwideMessage.isSeen()) {
+            for (TalkClientMessage nearbyMessage : mNearbyMessages) {
+                if (nearbyMessage.isIncoming() && !nearbyMessage.isSeen()) {
                     mUnseenMessageCount++;
                 }
             }
         } catch (SQLException e) {
-            LOG.error("Error while retrieving all worldwide group messages: ", e);
+            LOG.error("Error while retrieving all nearby group messages: ", e);
         }
-        if (mMessages != null && !mMessages.isEmpty()) {
-            TalkClientMessage message = mMessages.get(mMessages.size() - 1);
+        if (mNearbyMessages != null && !mNearbyMessages.isEmpty()) {
+            TalkClientMessage message = mNearbyMessages.get(mNearbyMessages.size() - 1);
             if (message != null) {
                 mLastMessageTimeStamp = message.getTimestamp();
                 mLastMessageText = message.getText();
@@ -65,12 +65,12 @@ public class WorldwideGroupHistoryChatItem extends ChatItem implements SearchAda
         TextView lastMessageTimeView = (TextView) view.findViewById(R.id.contact_time);
         TextView unseenView = (TextView) view.findViewById(R.id.contact_unseen_messages);
 
-        nameView.setText(R.string.worldwide_saved);
+        nameView.setText(R.string.nearby_saved);
         setLastMessageTime(lastMessageTimeView);
         lastMessageTextView.setText(mLastMessageText);
         setUnseenMessages(unseenView);
 
-        mAvatarView.setAvatarImage(R.drawable.avatar_world);
+        mAvatarView.setAvatarImage(R.drawable.avatar_location);
         mAvatarView.setClickable(false);
 
         return view;

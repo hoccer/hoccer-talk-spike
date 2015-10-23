@@ -28,9 +28,10 @@ import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.BackgroundManager;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.content.MultiImageSelector;
+import com.hoccer.xo.android.content.selector.MultiImageSelector;
 import com.hoccer.xo.android.content.selector.ClipboardSelector;
 import com.hoccer.xo.android.content.selector.IContentSelector;
+import com.hoccer.xo.android.dialog.ActivityNotFoundDialog;
 import com.hoccer.xo.android.dialog.ContentSelectionDialogFragment;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionGestureListener;
@@ -49,7 +50,8 @@ import java.util.EnumMap;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
-import static com.hoccer.xo.android.dialog.ContentSelectionDialogFragment.DIALOG_TAG;
+import static com.hoccer.xo.android.dialog.ContentSelectionDialogFragment.ACTIVITY_NOT_FOUND_DIALOG_TAG;
+import static com.hoccer.xo.android.dialog.ContentSelectionDialogFragment.ATTACHMENT_SELECTION_DIALOG_TAG;
 
 public class CompositionFragment extends Fragment implements MotionGestureListener, ContentSelectionDialogFragment.OnAttachmentSelectedListener {
 
@@ -73,9 +75,9 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
         AUDIO,
         CONTACT,
         LOCATION,
-        DATA,
+        FILE,
         MULTIPLE,
-        ERROR;
+        ERROR
     }
 
     private TextFieldWatcher mTextFieldWatcher;
@@ -164,7 +166,7 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
         mAttachmentTypeViews.put(AttachmentSelectionType.AUDIO, view.findViewById(R.id.iv_attachment_audio));
         mAttachmentTypeViews.put(AttachmentSelectionType.CONTACT, view.findViewById(R.id.iv_attachment_contact));
         mAttachmentTypeViews.put(AttachmentSelectionType.LOCATION, view.findViewById(R.id.iv_attachment_location));
-        mAttachmentTypeViews.put(AttachmentSelectionType.DATA, view.findViewById(R.id.iv_attachment_data));
+        mAttachmentTypeViews.put(AttachmentSelectionType.FILE, view.findViewById(R.id.iv_attachment_data));
         mAttachmentTypeViews.put(AttachmentSelectionType.MULTIPLE, view.findViewById(R.id.iv_attachment_multiple));
         mAttachmentTypeViews.put(AttachmentSelectionType.ERROR, view.findViewById(R.id.iv_attachment_error));
     }
@@ -246,7 +248,7 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
         } catch (IOException e) {
             LOG.error(e.getMessage());
         }
-        edit.commit();
+        edit.apply();
     }
 
     @Override
@@ -297,9 +299,22 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
         try {
             startActivityForResult(intent, REQUEST_SELECT_ATTACHMENT);
         } catch (ActivityNotFoundException e) {
-            Toast.makeText(getActivity(), R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
-            LOG.error(e.getMessage());
+            if (Intent.ACTION_GET_CONTENT.equals(intent.getAction())) {
+                showActivityNotFoundDialog(intent.getAction());
+            } else {
+                Toast.makeText(getActivity(), R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
+                LOG.error(e.getMessage());
+            }
         }
+    }
+
+    private void showActivityNotFoundDialog(String action) {
+        Bundle bundle = new Bundle();
+        bundle.putString(ActivityNotFoundDialog.ACTION_KEY, action);
+
+        DialogFragment dialog = new ActivityNotFoundDialog();
+        dialog.setArguments(bundle);
+        dialog.show(getActivity().getSupportFragmentManager(), ACTIVITY_NOT_FOUND_DIALOG_TAG);
     }
 
     @Override
@@ -336,8 +351,8 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
                 updateAttachmentButtonImage(AttachmentSelectionType.CONTACT);
             } else if (ContentMediaType.LOCATION.equals(mediaType)) {
                 updateAttachmentButtonImage(AttachmentSelectionType.LOCATION);
-            } else if (ContentMediaType.DATA.equals(mediaType)) {
-                updateAttachmentButtonImage(AttachmentSelectionType.DATA);
+            } else if (ContentMediaType.FILE.equals(mediaType)) {
+                updateAttachmentButtonImage(AttachmentSelectionType.FILE);
             } else if (ContentMediaType.AUDIO.equals(mediaType)) {
                 updateAttachmentButtonImage(AttachmentSelectionType.AUDIO);
             } else {
@@ -396,6 +411,11 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
         if (mContact.isClientBlocked()) {
             Toast.makeText(getActivity(), R.string.error_send_message_blocked, Toast.LENGTH_LONG).show();
             clearComposedMessage();
+            return;
+        }
+
+        if (!(mContact.isInEnvironment() || mContact.isClientFriend() || mContact.isGroup())){
+            Toast.makeText(getActivity(), R.string.error_client_not_nearby_or_ww, Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -478,13 +498,17 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         deleteCachedFiles(uploads);
+                        clearAttachment();
                     }
                 });
     }
 
-    private static void deleteCachedFiles(List<TalkClientUpload> uploads) {
+    private void deleteCachedFiles(List<TalkClientUpload> uploads) {
         for (TalkClientUpload upload : uploads) {
-            FileUtils.deleteQuietly(new File(upload.getTempCompressedFilePath()));
+            String path = upload.getTempCompressedFilePath();
+            if (path != null) {
+                FileUtils.deleteQuietly(new File(path));
+            }
         }
     }
 
@@ -559,7 +583,7 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
     private void showSelectAttachmentDialog() {
         DialogFragment dialogFragment = new ContentSelectionDialogFragment();
         dialogFragment.setTargetFragment(this, -1);
-        dialogFragment.show(getActivity().getSupportFragmentManager(), DIALOG_TAG);
+        dialogFragment.show(getActivity().getSupportFragmentManager(), ATTACHMENT_SELECTION_DIALOG_TAG);
     }
 
     private void showEditAttachmentDialog() {

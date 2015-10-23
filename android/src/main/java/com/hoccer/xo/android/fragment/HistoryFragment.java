@@ -29,8 +29,6 @@ public class HistoryFragment extends XoChatListFragment {
     private String mHistoryId = null;
     private HistoryMessagesAdapter mAdapter;
 
-
-
     private final DataSetObserver mDataSetObserver = new DataSetObserver() {
         @Override
         public void onChanged() {
