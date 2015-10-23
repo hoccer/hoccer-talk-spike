@@ -96,6 +96,11 @@ public class DownloadAction implements TransferStateListener {
     }
 
     public void doDownloadingAction() {
+        if (checkTransferComplete(mDownload)){
+            LOG.debug("Download already complete");
+            return;
+        }
+
         if (!mDownloadAgent.getXoClient().isReady()) {
             LOG.debug("Client not connected. Download not started.");
             return;
@@ -106,23 +111,11 @@ public class DownloadAction implements TransferStateListener {
             return;
         }
 
-        if (checkTransferComplete()){
-            LOG.debug("Download already complete");
-            return;
-        }
-
         LOG.debug("performDownloadRequest(downloadId: '" + mDownload.getClientDownloadId() + "', filename: '" + downloadFilename + "')");
 
         try {
             mHttpGet = new HttpGet(mDownload.getDownloadUrl());
-
-            // determine the requested range
-            if (mDownload.getContentLength() != -1) {
-                long last = mDownload.getContentLength() - 1;
-                String range = "bytes=" + mDownload.getTransferProgress() + "-" + last;
-                LOG.debug("[downloadId: '" + mDownload.getClientDownloadId() + "'] GET " + "requesting range '" + range + "'");
-                mHttpGet.addHeader("Range", range);
-            }
+            addContentRangeHeader(mHttpGet, mDownload);
 
             mDownloadAgent.onDownloadStarted(mDownload);
             HttpResponse response = mDownloadAgent.getHttpClient().execute(mHttpGet);
@@ -137,7 +130,7 @@ public class DownloadAction implements TransferStateListener {
                 return;
             }
 
-            long bytesToGo = getContentLenghtFromResponse(response);
+            long bytesToGo = getContentLengthFromResponse(response);
 
             String contentRangeString = response.getFirstHeader("Content-Range").getValue();
             ByteRange contentRange = ByteRange.parseContentRange(contentRangeString);
