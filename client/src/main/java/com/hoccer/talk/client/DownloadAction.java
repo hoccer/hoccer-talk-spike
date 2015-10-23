@@ -8,12 +8,10 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.*;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.log4j.Logger;
-import org.apache.tika.detect.DefaultDetector;
-import org.apache.tika.detect.Detector;
-import org.apache.tika.mime.MimeTypes;
-
 import java.io.*;
+import java.net.SocketTimeoutException;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.sql.SQLException;
@@ -26,7 +24,6 @@ public class DownloadAction implements TransferStateListener {
     private static final Logger LOG = Logger.getLogger(DownloadAction.class);
 
     public static final int MAX_FAILURES = 16;
-    private static final Detector MIME_DETECTOR = new DefaultDetector(MimeTypes.getDefaultMimeTypes());
 
     private final DownloadAgent mDownloadAgent;
     private TalkClientDownload mDownload;
@@ -353,7 +350,6 @@ public class DownloadAction implements TransferStateListener {
             mFuture.cancel(true);
         }
         mDownloadAgent.scheduleDownloadTask(mDownload);
-
         mDownloadAgent.onDownloadStateChanged(mDownload);
     }
 
