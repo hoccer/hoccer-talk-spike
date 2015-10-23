@@ -5,16 +5,12 @@ import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.crypto.AESCryptor;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.*;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.log4j.Logger;
 import org.apache.tika.detect.DefaultDetector;
 import org.apache.tika.detect.Detector;
-import org.apache.tika.metadata.Metadata;
-import org.apache.tika.mime.MediaType;
-import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypes;
 
 import java.io.*;
