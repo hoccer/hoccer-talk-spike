@@ -56,6 +56,7 @@ public class DownloadAction implements TransferStateListener {
                 doDownloadingAction();
                 break;
             case PAUSED:
+            case PAUSED_BY_UPLOAD:
                 mActive = false;
                 doPausedAction();
                 break;
@@ -160,8 +161,9 @@ public class DownloadAction implements TransferStateListener {
             }
         } catch(SocketTimeoutException socketTimeout) {
             LOG.error("ReadTimeout. Pausing Download.", socketTimeout);
-            mDownload.switchState(PAUSED);
+            mDownload.switchState(PAUSED_BY_UPLOAD);
         } catch (InterruptedIOException ioe) {
+            mDownloadAgent.resetClient();
             LOG.error("InterruptedIOException", ioe);
         } catch (Exception e) {
             LOG.error("Download error", e);
@@ -249,6 +251,10 @@ public class DownloadAction implements TransferStateListener {
 
             mDownload.setFilePath(destinationFile);
             mDownload.switchState(DETECTING);
+        } catch (IOException ioe){
+            LOG.error("decryption error", ioe);
+            mDownload.switchState(PAUSED);
+            checkTransferFailure(mDownload.getTransferFailures() + 1, "IOFailure during decryption", mDownload);
         } catch (Exception e) {
             LOG.error("decryption error", e);
             checkTransferFailure(mDownload.getTransferFailures() + 1, "failure during decryption", mDownload);

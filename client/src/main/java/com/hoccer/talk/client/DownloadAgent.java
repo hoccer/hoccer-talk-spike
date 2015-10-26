@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.hoccer.talk.client.model.TalkClientDownload.State.ON_HOLD;
 import static com.hoccer.talk.client.model.TalkClientDownload.State.PAUSED;
+import static com.hoccer.talk.client.model.TalkClientDownload.State.PAUSED_BY_UPLOAD;
 
 public class DownloadAgent extends TransferAgent {
 
@@ -28,7 +29,11 @@ public class DownloadAgent extends TransferAgent {
             holdDownload(download);
         } else {
             DownloadAction downloadAction = getOrCreateDownloadAction(download);
-            if (downloadAction.getDownload().getState() != PAUSED && downloadAction.getDownload().getState() != ON_HOLD && !downloadAction.isActive()) {
+            if (downloadAction.getDownload().getState() != PAUSED
+                    && downloadAction.getDownload().getState() != ON_HOLD
+                    && !downloadAction.isActive()
+                    && downloadAction.getDownload().getState() != PAUSED_BY_UPLOAD)
+            {
                 startDownloadTask(download);
             }
         }
@@ -120,6 +125,10 @@ public class DownloadAgent extends TransferAgent {
 
     public void pauseDownload(TalkClientDownload download) {
         download.switchState(PAUSED);
+    }
+
+    public void pauseDownloadByUpload(TalkClientDownload download) {
+        download.switchState(PAUSED_BY_UPLOAD);
     }
 
     public void onDownloadStarted(TalkClientDownload download) {
