@@ -1821,7 +1821,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
         @Override
         public void incomingDeliveryUpdated(TalkDelivery d) {
-            LOG.debug("server: incomingDeliveryUpdate()");
+            LOG.debug("server: incomingDeliveryUpdated()");
             updateIncomingDelivery(d);
         }
 
@@ -2271,6 +2271,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     if (nextState != null) {
                         mDatabase.saveDelivery(delivery);
                     }
+
                 } catch (Exception e) {
                     LOG.error("Error while sending attachment delivery confirmation: ", e);
                 }
@@ -2338,20 +2339,29 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
         try {
             clientMessage.updateIncoming(delivery);
-            TalkClientDownload download = clientMessage.getAttachmentDownload();
             mDatabase.updateDelivery(clientMessage.getDelivery());
-
-            if (download != null) {
-                if (download.isAttachment()) {
-                    mDownloadAgent.startDownload(download);
-                }
-            }
-
+            updateDownloadState(clientMessage);
             for (IXoMessageListener listener : mMessageListeners) {
                 listener.onMessageUpdated(clientMessage);
             }
         } catch (SQLException e) {
             LOG.error("sql error", e);
+        }
+    }
+
+    private void updateDownloadState(TalkClientMessage message) {
+        TalkClientDownload download = message.getAttachmentDownload();
+        TalkDelivery delivery = message.getDelivery();
+        if (download != null) {
+            // Ugly that it is called always
+            if (download.isAttachment()) {
+                mDownloadAgent.startDownload(download);
+            }
+            //TODO Restart when UPLOADING or only when UPLOADED?
+            if ((delivery.getAttachmentState().equals(TalkDelivery.ATTACHMENT_STATE_UPLOADED) || delivery.getAttachmentState().equals(TalkDelivery.ATTACHMENT_STATE_UPLOADING)
+                    && (download.getState() == TalkClientDownload.State.PAUSED_BY_UPLOAD))) {
+                mDownloadAgent.forceStartDownload(download);
+            }
         }
     }
 
@@ -2468,11 +2478,10 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 public void run() {
                     LOG.debug("rejecting " + delivery.getMessageId());
                     TalkDelivery result = mServerRpc.inDeliveryReject(delivery.getMessageId(), finalReason);
-                    XoClient.this.updateIncomingDelivery(result);
+                    updateIncomingDelivery(result);
                 }
             });
         }
-
 
         sendDownloadAttachmentDeliveryConfirmation(delivery);
     }
