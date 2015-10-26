@@ -35,7 +35,7 @@ public class TalkClientDownload extends XoTransfer {
         DOWNLOADING {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(PAUSED, RETRYING, DECRYPTING, DETECTING, FAILED);
+                return EnumSet.of(PAUSED, RETRYING, DECRYPTING, DETECTING, FAILED, PAUSED_BY_UPLOAD);
             }
         },
         PAUSED {
@@ -44,10 +44,16 @@ public class TalkClientDownload extends XoTransfer {
                 return EnumSet.of(DOWNLOADING);
             }
         },
+        PAUSED_BY_UPLOAD {
+            @Override
+            public Set<State> possibleFollowUps() {
+                return EnumSet.of(DOWNLOADING);
+            }
+        },
         RETRYING {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(DOWNLOADING, PAUSED);
+                return EnumSet.of(DOWNLOADING, PAUSED, PAUSED_BY_UPLOAD);
             }
         },
         DECRYPTING {
@@ -270,6 +276,7 @@ public class TalkClientDownload extends XoTransfer {
             case RETRYING:
                 return ContentState.DOWNLOAD_DOWNLOADING;
             case PAUSED:
+            case PAUSED_BY_UPLOAD:
                 return ContentState.DOWNLOAD_PAUSED;
             case DECRYPTING:
                 return ContentState.DOWNLOAD_DECRYPTING;
@@ -281,6 +288,7 @@ public class TalkClientDownload extends XoTransfer {
                 return ContentState.DOWNLOAD_COMPLETE;
             case ON_HOLD:
                 return ContentState.DOWNLOAD_ON_HOLD;
+
             default:
                 throw new RuntimeException("Unknown download state '" + state + "'");
         }
