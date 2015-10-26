@@ -28,7 +28,7 @@ public abstract class TransferAgent {
 
     protected ScheduledExecutorService mExecutorService;
 
-    protected final HttpClient mHttpClient;
+    protected HttpClient mHttpClient;
     protected final XoClient mClient;
 
     protected List<TransferListener> mListeners = new ArrayList<TransferListener>();
@@ -68,6 +68,10 @@ public abstract class TransferAgent {
 
     public HttpClient getHttpClient() {
         return mHttpClient;
+    }
+
+    public void resetClient(){
+        mHttpClient = createHttpClient();
     }
 
     public XoClient getXoClient() {
