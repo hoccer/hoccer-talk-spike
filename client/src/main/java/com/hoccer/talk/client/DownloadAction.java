@@ -156,11 +156,11 @@ public class DownloadAction implements TransferStateListener {
 
             copyData(randomAccessFile, randomAccessFile.getFD(), inputStream);
 
-            if (!checkTransferComplete(mDownload) && (mDownload.getState() != PAUSED) ) {
+            if (!checkTransferComplete(mDownload) && (mDownload.getState() != PAUSED) && (mDownload.getState() != PAUSED_BY_UPLOAD) ) {
                 checkTransferFailure(mDownload.getTransferFailures() + 1, "Download not completed: " + mDownload.getTransferProgress() + " / " + mDownload.getContentLength() + ", retrying...", mDownload);
             }
-        } catch(SocketTimeoutException socketTimeout) {
-            LOG.error("ReadTimeout. Pausing Download.", socketTimeout);
+        } catch(SocketTimeoutException socketTimeoutException) {
+            LOG.error("ReadTimeout. "+mDownload.getTransferFailures()+" Pausing Download.", socketTimeoutException);
             mDownload.switchState(PAUSED_BY_UPLOAD);
         } catch (InterruptedIOException ioe) {
             mDownloadAgent.resetClient();

@@ -31,8 +31,8 @@ public class DownloadAgent extends TransferAgent {
             DownloadAction downloadAction = getOrCreateDownloadAction(download);
             if (downloadAction.getDownload().getState() != PAUSED
                     && downloadAction.getDownload().getState() != ON_HOLD
-                    && !downloadAction.isActive()
-                    && downloadAction.getDownload().getState() != PAUSED_BY_UPLOAD)
+                    && downloadAction.getDownload().getState() != PAUSED_BY_UPLOAD
+                    && !downloadAction.isActive())
             {
                 startDownloadTask(download);
             }
@@ -125,10 +125,6 @@ public class DownloadAgent extends TransferAgent {
 
     public void pauseDownload(TalkClientDownload download) {
         download.switchState(PAUSED);
-    }
-
-    public void pauseDownloadByUpload(TalkClientDownload download) {
-        download.switchState(PAUSED_BY_UPLOAD);
     }
 
     public void onDownloadStarted(TalkClientDownload download) {
