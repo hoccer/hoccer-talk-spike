@@ -329,11 +329,21 @@ public class UploadAction implements TransferStateListener {
     }
 
     public void doPausedAction() {
+        //When upload pausing fails, is null
+        while (mHttpPut==null){
+            // LOG.debug("WAIT FOR NULL");
+        }
         if (mHttpPut != null) {
             mHttpPut.abort();
             mHttpPut = null;
             LOG.debug("aborted current Upload request. Upload can still resume.");
         }
+        if (mFuture != null){
+            mFuture.cancel(true);
+            LOG.debug("ABORT "+mFuture.isCancelled());
+
+        }
+
         mUploadAgent.onUploadStateChanged(mUpload);
     }
 
