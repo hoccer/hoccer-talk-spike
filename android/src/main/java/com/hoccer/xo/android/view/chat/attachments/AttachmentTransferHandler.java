@@ -88,24 +88,14 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
                     if (mTransfer instanceof TalkClientUpload) {
                         LOG.debug("Will resume upload for " + ((TalkClientUpload) mTransfer).getUploadUrl());
                         final TalkClientUpload upload = (TalkClientUpload) mTransfer;
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                XoApplication.get().getClient().getUploadAgent().resumeUpload(upload);
-                            }
-                        }).start();
+                        XoApplication.get().getClient().getUploadAgent().startUpload(upload);
                     }
                     break;
                 case CANCEL_UPLOAD:
                     if (mTransfer instanceof TalkClientUpload) {
                         LOG.debug("Will pause upload for " + ((TalkClientUpload) mTransfer).getUploadUrl());
                         final TalkClientUpload upload = (TalkClientUpload) mTransfer;
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                XoApplication.get().getClient().getUploadAgent().pauseUpload(upload);
-                            }
-                        }).start();
+                        XoApplication.get().getClient().getUploadAgent().pauseUpload(upload);
                     }
             }
             mTransferControlView.post(new Runnable() {
