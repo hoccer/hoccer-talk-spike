@@ -70,7 +70,7 @@ public class UploadAction implements TransferStateListener {
         }
     }
 
-    public void saveToDatabase(TalkClientUpload upload) {
+    private void saveToDatabase(TalkClientUpload upload) {
         try {
             LOG.debug("save TalkClientUpload (" + upload.getClientUploadId() + ") to database");
             mUploadAgent.getXoClient().getDatabase().saveClientUpload(upload);
@@ -79,7 +79,7 @@ public class UploadAction implements TransferStateListener {
         }
     }
 
-    public void doRegisteringAction() {
+    private void doRegisteringAction() {
         LOG.info("performRegistration(), state: ‘" + mUpload.getState() + "'");
         if (mUpload.getFileId() != null) {
             LOG.debug("we already have a fileId. no need to register.");
@@ -110,7 +110,7 @@ public class UploadAction implements TransferStateListener {
         }
     }
 
-    public void doResumeCheckAction() {
+    private void doResumeCheckAction() {
         LOG.info("[uploadId: '" + mUpload.getClientUploadId() + "'] performing check request");
 
         HttpPut checkRequest = new HttpPut(mUpload.getUploadUrl());
@@ -157,7 +157,7 @@ public class UploadAction implements TransferStateListener {
         }
     }
 
-    public boolean checkCompletion(Header checkRangeHeader, TalkClientUpload upload) {
+    private boolean checkCompletion(Header checkRangeHeader, TalkClientUpload upload) {
         long last = upload.getUploadLength() - 1;
         int confirmedProgress = 0;
 
@@ -197,7 +197,7 @@ public class UploadAction implements TransferStateListener {
         return false;
     }
 
-    public void doUploadingAction() {
+    private void doUploadingAction() {
         LOG.info("[uploadId: '" + mUpload.getClientUploadId() + "'] performing upload request");
         long bytesToGo = mUpload.getUploadLength() - mUpload.getProgress();
         LOG.debug("'[uploadId: '" + mUpload.getClientUploadId() + "'] bytes to go " + bytesToGo);
@@ -315,7 +315,7 @@ public class UploadAction implements TransferStateListener {
         return false;
     }
 
-    public String computeRelativeUploadFilePath(String filePath) {
+    private String computeRelativeUploadFilePath(String filePath) {
         String externalStorageDirectory = mUploadAgent.getXoClient().getExternalStorageDirectory();
         if (filePath.startsWith(externalStorageDirectory)) {
             return filePath.substring(externalStorageDirectory.length() + 1);
@@ -324,7 +324,7 @@ public class UploadAction implements TransferStateListener {
         }
     }
 
-    public void doPausedAction() {
+    private void doPausedAction() {
 
         if (mHttpPut != null) {
             new Thread(new Runnable() {
@@ -340,7 +340,7 @@ public class UploadAction implements TransferStateListener {
         mUploadAgent.onUploadStateChanged(mUpload);
     }
 
-    public void doCompleteAction() {
+    private void doCompleteAction() {
         deleteTemporaryFile(mUpload.getEncryptedFile());
         deleteCachedFile(mUpload.getTempCompressedFilePath());
         if (mFuture != null) {
@@ -349,7 +349,7 @@ public class UploadAction implements TransferStateListener {
         mUploadAgent.onUploadFinished(mUpload);
     }
 
-    public void doFailedAction() {
+    private void doFailedAction() {
         deleteTemporaryFile(mUpload.getEncryptedFile());
         deleteCachedFile(mUpload.getTempCompressedFilePath());
         if (mFuture != null) {
