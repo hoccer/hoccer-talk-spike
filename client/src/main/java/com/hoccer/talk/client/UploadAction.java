@@ -43,10 +43,6 @@ public class UploadAction implements TransferStateListener {
         mUpload.switchState(REGISTERING);
     }
 
-    public void start() {
-        mUpload.switchState(UPLOADING);
-    }
-
     @Override
     public void onStateChanged(XoTransfer transfer) {
         mUpload = (TalkClientUpload) transfer;
