@@ -115,27 +115,29 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
             case DOWNLOAD_ON_HOLD:
                 mTransferAction = TransferAction.REQUEST_DOWNLOAD;
                 break;
-            case DOWNLOAD_DETECTING:
-                break;
+
             case DOWNLOAD_DECRYPTING:
             case DOWNLOAD_DOWNLOADING:
                 mTransferAction = TransferAction.CANCEL_DOWNLOAD;
                 break;
+
             case DOWNLOAD_COMPLETE:
-                break;
+            case DOWNLOAD_DETECTING:
             case DOWNLOAD_FAILED:
                 break;
+
             case UPLOAD_NEW:
             case UPLOAD_PAUSED:
             case UPLOAD_FAILED:
                 mTransferAction = TransferAction.REQUEST_UPLOAD;
                 break;
-            case UPLOAD_REGISTERING:
-                break;
+
             case UPLOAD_ENCRYPTING:
             case UPLOAD_UPLOADING:
                 mTransferAction = TransferAction.CANCEL_UPLOAD;
                 break;
+
+            case UPLOAD_REGISTERING:
             case UPLOAD_COMPLETE:
                 break;
             default:
