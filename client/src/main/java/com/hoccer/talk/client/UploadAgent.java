@@ -2,11 +2,13 @@ package com.hoccer.talk.client;
 
 import com.hoccer.talk.client.model.TalkClientUpload;
 import org.apache.log4j.Logger;
+import sun.rmi.runtime.Log;
 
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import static com.hoccer.talk.client.model.TalkClientUpload.State.*;
 
@@ -31,10 +33,11 @@ public class UploadAgent extends TransferAgent {
         Future future = mExecutorService.submit(new Runnable() {
             @Override
             public void run() {
-                uploadAction.start();
+                upload.switchState(UPLOADING);
             }
         });
         uploadAction.setFuture(future);
+
     }
 
     private UploadAction getOrCreateUploadAction(TalkClientUpload upload) {
@@ -44,22 +47,10 @@ public class UploadAgent extends TransferAgent {
         return mUploadActions.get(upload.getClientUploadId());
     }
 
-    public void resumeUpload(final TalkClientUpload upload) {
-        if (mUploadActions.containsKey(upload.getClientUploadId())) {
-            upload.switchState(UPLOADING);
-        } else {
-            startUpload(upload);
-        }
-    }
-
     public void pauseUpload(TalkClientUpload upload) {
         upload.switchState(PAUSED);
     }
 
-    public void cancelUpload(TalkClientUpload upload) {
-        upload.switchState(PAUSED);
-        mUploadActions.remove(upload.getClientUploadId());
-    }
 
     public void onUploadStarted(TalkClientUpload upload) {
         for (TransferListener listener : mListeners) {
@@ -122,7 +113,7 @@ public class UploadAgent extends TransferAgent {
 
             if (upload.getState() == UPLOADING) {
                 upload.switchState(PAUSED);
-                resumeUpload(upload);
+                startUpload(upload);
             }
         }
     }
