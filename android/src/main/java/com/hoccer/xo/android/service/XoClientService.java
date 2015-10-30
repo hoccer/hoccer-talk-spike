@@ -23,6 +23,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.XoAndroidClient;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ChatsActivity;
@@ -197,8 +198,9 @@ public class XoClientService extends Service {
             }
             if (intent.hasExtra(TalkPushService.EXTRA_WAKE_CLIENT)) {
                 mClient.connect();
-                mClient.scheduleDisconnectTimeout();
-
+                if (mClient.getPresence().equals(TalkPresence.STATUS_BACKGROUND)){
+                    mClient.scheduleDisconnectTimeout();
+                }
             }
             if (intent.hasExtra(TalkPushService.EXTRA_GCM_REGISTERED)) {
                 doUpdateGcm(true);

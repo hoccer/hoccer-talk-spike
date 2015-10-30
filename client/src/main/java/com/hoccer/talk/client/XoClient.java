@@ -638,6 +638,11 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         }
     }
 
+
+    public TalkPresence getPresence(){
+        return mSelfContact.getClientPresence();
+    }
+
     /*
      * If upload is null no avatar is set.
      */
