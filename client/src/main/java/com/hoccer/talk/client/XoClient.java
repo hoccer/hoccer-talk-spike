@@ -1530,11 +1530,12 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         return new Date(0);
     }
 
-    private void scheduleDisconnectTimeout() {
+    public void scheduleDisconnectTimeout() {
         LOG.debug("scheduleDisconnectTimeout()");
         cancelDisconnectTimeout();
 
-        int timeout = mClientConfiguration.getBackgroundDisconnectTimeoutSeconds();
+        int timeout = 5;//mClientConfiguration.getBackgroundDisconnectTimeoutSeconds();
+
         mDisconnectTimeoutFuture = mExecutor.schedule(new Runnable() {
             @Override
             public void run() {

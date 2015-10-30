@@ -197,6 +197,8 @@ public class XoClientService extends Service {
             }
             if (intent.hasExtra(TalkPushService.EXTRA_WAKE_CLIENT)) {
                 mClient.connect();
+                mClient.scheduleDisconnectTimeout();
+
             }
             if (intent.hasExtra(TalkPushService.EXTRA_GCM_REGISTERED)) {
                 doUpdateGcm(true);
