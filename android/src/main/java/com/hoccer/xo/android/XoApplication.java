@@ -184,7 +184,6 @@ public class XoApplication extends Application {
         mClient.setRelativeAttachmentDirectory(sConfiguration.getAttachmentsDirectory());
         mClient.setEncryptedDownloadDirectory(getEncryptedDownloadDirectory().toString());
         mClient.setExternalStorageDirectory(sExternalStorage.getAbsolutePath());
-        mClient.setPresenceStatus(TalkPresence.STATUS_BACKGROUND);
 
         // add srp secret change listener
         mClient.registerStateListener(new SrpChangeListener(this));
@@ -201,10 +200,7 @@ public class XoApplication extends Application {
         sStartupTasks = new StartupTasks(this);
         sStartupTasks.executeRegisteredTasks();
 
-        mClient.connect();
-
-        Intent xoClientServiceIntent = new Intent(this, XoClientService.class);
-        startService(xoClientServiceIntent);
+        sLog.debug("XoApplication onCreate()");
     }
 
     private boolean isFirstConnectionAfterCrashOrUpdate() {

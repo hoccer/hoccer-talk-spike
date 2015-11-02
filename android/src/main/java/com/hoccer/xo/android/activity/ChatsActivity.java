@@ -17,6 +17,7 @@ import com.hoccer.xo.android.fragment.ChatListFragment;
 import com.hoccer.xo.android.fragment.NearbyChatListFragment;
 import com.hoccer.xo.android.fragment.WorldwideChatListFragment;
 import com.hoccer.xo.android.passwordprotection.PasswordProtection;
+import com.hoccer.xo.android.service.XoClientService;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.ContactsMenuItemActionProvider;
 import org.apache.log4j.Logger;
@@ -60,6 +61,12 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Intent xoClientServiceIntent = new Intent(this, XoClientService.class);
+        xoClientServiceIntent.putExtra(XoClientService.EXTRA_CONNECT, true);
+        startService(xoClientServiceIntent);
+
+        XoApplication.get().getClient().connect();
 
         mContactsMenuItemActionProvider = new ContactsMenuItemActionProvider(this);
 
