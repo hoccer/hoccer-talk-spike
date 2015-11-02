@@ -165,7 +165,7 @@
     <string name="deleted_contact_name">Gelöschter Kontakt</string>
 
     <!-- Attachment type selection dialog -->
-    <string name="selectattachment_title">Anhang auswählen</string>
+    <string name="select_attachment">Anhang auswählen</string>
 
     <!-- Contact deletion dialog -->
     <string name="dialog_delete_contact_title">Kontakt wirklich löschen?</string>
