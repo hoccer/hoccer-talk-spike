@@ -470,7 +470,7 @@
     <string name="blocked">Blocked</string>
     <string name="auto_download_attachments">Auto-download attachments</string>
     <string name="worldwide_tutorial_message">Chat with up to ten random users in Worldwide mode. Please have a look at the available worldwide settings. Do you want to remain visible for other worldwide users after leaving Worldwide?</string>
-    <string name="button_sendmessage">Send message</string>
+    <string name="send_message">Send message</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>
