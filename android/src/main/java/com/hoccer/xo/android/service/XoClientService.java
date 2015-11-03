@@ -2,15 +2,12 @@ package com.hoccer.xo.android.service;
 
 import android.app.*;
 import android.content.*;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.media.MediaScannerConnection;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
@@ -59,7 +56,9 @@ public class XoClientService extends Service {
 
     private static final int LED_LIGHTCOLOR = 0xFF4DBFAC;
     private static final int LED_OFFTIME = 1000;
-    private static final int LED_ONTIME  = 1000;
+    private static final int LED_ONTIME = 1000;
+
+    public static final String EXTRA_CONNECT = "com.hoccer.xo.CONNECT";
 
     private static final int DEFAULT_IMAGE_UPLOAD_MAX_PIXEL_COUNT = -1;
     private static final int DEFAULT_IMAGE_UPLOAD_ENCODING_QUALITY = 100;
@@ -113,6 +112,8 @@ public class XoClientService extends Service {
 
     private PowerManager.WakeLock mWakeLock;
 
+    private boolean mConnectInBackground;
+
     @Override
     public void onCreate() {
         LOG.debug("onCreate()");
@@ -156,7 +157,6 @@ public class XoClientService extends Service {
 
         mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         registerConnectivityReceiver();
-        handleConnectivityChange(mConnectivityManager.getActiveNetworkInfo());
 
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -189,14 +189,21 @@ public class XoClientService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        mConnectInBackground = false;
+
         LOG.debug("onStartCommand(" + ((intent == null) ? "null" : intent.toString()) + ")");
         if (intent != null) {
             if (intent.hasExtra(TalkPushService.EXTRA_SHOW_GENERIC_PUSH_MESSAGE)) {
                 String message = intent.getStringExtra(TalkPushService.EXTRA_SHOW_GENERIC_PUSH_MESSAGE);
                 createPushMessageNotification(message);
             }
+            if (intent.hasExtra(EXTRA_CONNECT)) {
+                mConnectInBackground = false;
+                handleConnectivityChange(mConnectivityManager.getActiveNetworkInfo());
+            }
             if (intent.hasExtra(TalkPushService.EXTRA_WAKE_CLIENT)) {
-                mClient.connect();
+                mConnectInBackground = true;
+                handleConnectivityChange(mConnectivityManager.getActiveNetworkInfo());
             }
             if (intent.hasExtra(TalkPushService.EXTRA_GCM_REGISTERED)) {
                 doUpdateGcm(true);
@@ -355,8 +362,12 @@ public class XoClientService extends Service {
                     + " state " + activeNetwork.getState().name());
 
             if (activeNetwork.isConnected()) {
-                if (!mClient.isTimedOut()) {
-                    mClient.connect();
+                if (mConnectInBackground) {
+                    mClient.connectInBackground();
+                } else {
+                    if (!mClient.isTimedOut()) {
+                        mClient.connect();
+                    }
                 }
             } else {
                 mClient.disconnect();
@@ -539,7 +550,7 @@ public class XoClientService extends Service {
         mNotificationManager.notify(NotificationId.PUSH_MESSAGE, notification);
     }
 
-    private NotificationCompat.Builder createNotificationBuilder(Context context){
+    private NotificationCompat.Builder createNotificationBuilder(Context context) {
         NotificationCompat.Builder nb = new NotificationCompat.Builder(context);
         nb.setSmallIcon(R.drawable.ic_notification_message);
         nb.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher));
