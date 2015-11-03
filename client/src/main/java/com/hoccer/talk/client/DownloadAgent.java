@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.hoccer.talk.client.model.TalkClientDownload.State.ON_HOLD;
 import static com.hoccer.talk.client.model.TalkClientDownload.State.PAUSED;
-import static com.hoccer.talk.client.model.TalkClientDownload.State.PAUSED_BY_UPLOAD;
+import static com.hoccer.talk.client.model.TalkClientDownload.State.WAITING_FOR_DATA;
 
 public class DownloadAgent extends TransferAgent {
 
@@ -31,9 +31,8 @@ public class DownloadAgent extends TransferAgent {
             DownloadAction downloadAction = getOrCreateDownloadAction(download);
             if (downloadAction.getDownload().getState() != PAUSED
                     && downloadAction.getDownload().getState() != ON_HOLD
-                    && downloadAction.getDownload().getState() != PAUSED_BY_UPLOAD
-                    && !downloadAction.isActive())
-            {
+                    && downloadAction.getDownload().getState() != WAITING_FOR_DATA
+                    && !downloadAction.isActive()) {
                 startDownloadTask(download);
             }
         }
@@ -48,10 +47,7 @@ public class DownloadAgent extends TransferAgent {
     }
 
     private boolean isManualDownload(TalkClientDownload download) {
-        if (manualDownloadsActivated() || exceedsTransferLimit(download)) {
-            return true;
-        }
-        return isManualWorldwideDownload(download);
+        return manualDownloadsActivated() || exceedsTransferLimit(download) || isManualWorldwideDownload(download);
     }
 
     private boolean isManualWorldwideDownload(TalkClientDownload download) {
@@ -117,8 +113,7 @@ public class DownloadAgent extends TransferAgent {
     }
 
     private long nextDelay(TalkClientDownload download) {
-        long delay = 1;
-        //long delay = 2 * (download.getTransferFailures() * download.getTransferFailures() + 1);
+        long delay = 2 * (download.getTransferFailures() * download.getTransferFailures() + 1);
         LOG.debug("Scheduling Download " + download.getClientDownloadId() + " for retry with delay " + delay);
         return delay;
     }
