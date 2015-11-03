@@ -62,9 +62,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Intent xoClientServiceIntent = new Intent(this, XoClientService.class);
-        xoClientServiceIntent.putExtra(XoClientService.EXTRA_CONNECT, true);
-        startService(xoClientServiceIntent);
+        startXoClientService();
 
         XoApplication.get().getClient().connect();
 
@@ -77,6 +75,12 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         PasswordProtection.get();
 
         FeaturePromoter.cleanupForSelectWorldwidePageOnFirstStart(this);
+    }
+
+    private void startXoClientService() {
+        Intent intent = new Intent(this, XoClientService.class);
+        intent.putExtra(XoClientService.EXTRA_CONNECT, true);
+        startService(intent);
     }
 
     @Override
