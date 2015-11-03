@@ -11,13 +11,14 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.log4j.Logger;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @DatabaseTable(tableName = "clientDownload")
 public class TalkClientDownload extends XoTransfer {
 
     private final static Logger LOG = Logger.getLogger(TalkClientDownload.class);
 
-    private List<TransferStateListener> mTransferListeners = new ArrayList<TransferStateListener>();
+    private CopyOnWriteArrayList<TransferStateListener> mTransferListeners = new CopyOnWriteArrayList<TransferStateListener>();
 
     public enum State implements IXoTransferState {
         INITIALIZING {
