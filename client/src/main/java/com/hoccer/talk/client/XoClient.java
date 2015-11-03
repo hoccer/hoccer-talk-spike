@@ -2353,13 +2353,11 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         TalkClientDownload download = message.getAttachmentDownload();
         TalkDelivery delivery = message.getDelivery();
         if (download != null) {
-            // Ugly that it is called always
             if (download.isAttachment()) {
                 mDownloadAgent.startDownload(download);
             }
-            //TODO Restart when UPLOADING or only when UPLOADED?
-            if ((delivery.getAttachmentState().equals(TalkDelivery.ATTACHMENT_STATE_UPLOADED) || delivery.getAttachmentState().equals(TalkDelivery.ATTACHMENT_STATE_UPLOADING)
-                    && (download.getState() == TalkClientDownload.State.PAUSED_BY_UPLOAD))) {
+            if ((delivery.getAttachmentState().equals(TalkDelivery.ATTACHMENT_STATE_UPLOADED) || delivery.getAttachmentState().equals(TalkDelivery.ATTACHMENT_STATE_UPLOADING))
+                    && download.getState() == TalkClientDownload.State.WAITING_FOR_DATA) {
                 mDownloadAgent.forceStartDownload(download);
             }
         }
