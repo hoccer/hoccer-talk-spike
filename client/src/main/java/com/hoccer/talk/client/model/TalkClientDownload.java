@@ -161,7 +161,7 @@ public class TalkClientDownload extends XoTransfer {
         this.aspectRatio = 1.0;
         this.downloadProgress = 0;
         this.contentLength = -1;
-        mTransferListeners = new ArrayList<TransferStateListener>();
+        mTransferListeners = new CopyOnWriteArrayList<TransferStateListener>();
     }
 
     public void initializeAsAvatar(String url, String id, Date timestamp) {
@@ -213,7 +213,6 @@ public class TalkClientDownload extends XoTransfer {
     private void setState(State newState) {
         this.state = newState;
 
-        // ConcurrentModificationException sometimes
         for (TransferStateListener listener : mTransferListeners) {
             listener.onStateChanged(this);
         }
