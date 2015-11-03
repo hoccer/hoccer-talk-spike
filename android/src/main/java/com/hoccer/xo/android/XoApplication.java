@@ -200,7 +200,6 @@ public class XoApplication extends Application {
         sStartupTasks = new StartupTasks(this);
         sStartupTasks.executeRegisteredTasks();
 
-        sLog.debug("XoApplication onCreate()");
     }
 
     private boolean isFirstConnectionAfterCrashOrUpdate() {
