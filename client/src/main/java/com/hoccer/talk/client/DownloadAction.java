@@ -97,8 +97,9 @@ public class DownloadAction implements TransferStateListener {
     }
 
     public void doDownloadingAction() {
-        if (checkTransferComplete(mDownload)){
+        if (isDataTransferFinished(mDownload)) {
             LOG.debug("Download already complete");
+            switchStateToDetectingOrDecrypting();
             return;
         }
 
@@ -106,6 +107,7 @@ public class DownloadAction implements TransferStateListener {
             LOG.debug("Client not connected. Download not started.");
             return;
         }
+
         String downloadFilename = computeDownloadFile(mDownload);
         if (downloadFilename == null) {
             LOG.error("[downloadId: '" + mDownload.getClientDownloadId() + "'] could not determine startDownload filename");
@@ -122,6 +124,7 @@ public class DownloadAction implements TransferStateListener {
             HttpResponse response = mDownloadAgent.getHttpClient().execute(mHttpGet);
             StatusLine status = response.getStatusLine();
             int sc = status.getStatusCode();
+            LOG.debug("Http status code (" + sc + ")");
             if (sc != HttpStatus.SC_OK && sc != HttpStatus.SC_PARTIAL_CONTENT) {
                 closeResponse(response);
                 LOG.debug("Http status code (" + sc + ") is not OK (" + HttpStatus.SC_OK + ") or partial content (" +
@@ -156,18 +159,28 @@ public class DownloadAction implements TransferStateListener {
 
             copyData(randomAccessFile, randomAccessFile.getFD(), inputStream);
 
-            if (!checkTransferComplete(mDownload) && (mDownload.getState() != PAUSED) && (mDownload.getState() != PAUSED_BY_UPLOAD) ) {
-                checkTransferFailure(mDownload.getTransferFailures() + 1, "Download not completed: " + mDownload.getTransferProgress() + " / " + mDownload.getContentLength() + ", retrying...", mDownload);
+            if (isDataTransferFinished(mDownload)) {
+                switchStateToDetectingOrDecrypting();
+            } else if (mDownload.getState() != PAUSED && mDownload.getState() != WAITING_FOR_DATA) {
+                checkTransferFailure(mDownload.getTransferFailures() + 1, "Download not completed: " + mDownload.getTransferProgress() + " / " + mDownload.getContentLength() + " (" + (mDownload.getContentLength() - mDownload.getTransferProgress()) + "), retrying...", mDownload);
             }
-        } catch(SocketTimeoutException socketTimeoutException) {
-            LOG.error("ReadTimeout. "+mDownload.getTransferFailures()+" Pausing Download.", socketTimeoutException);
-            mDownload.switchState(PAUSED_BY_UPLOAD);
-        } catch (InterruptedIOException ioe) {
+        } catch (SocketTimeoutException e) {
+            LOG.error("ReadTimeout. " + mDownload.getTransferFailures() + " Pausing Download.", e);
+            mDownload.switchState(WAITING_FOR_DATA);
+        } catch (InterruptedIOException e) {
             mDownloadAgent.resetClient();
-            LOG.error("InterruptedIOException", ioe);
+            LOG.error("InterruptedIOException", e);
         } catch (Exception e) {
             LOG.error("Download error", e);
             checkTransferFailure(mDownload.getTransferFailures() + 1, "startDownload exception!", mDownload);
+        }
+    }
+
+    private void switchStateToDetectingOrDecrypting() {
+        if (mDownload.isAvatar()) {
+            mDownload.switchState(DETECTING);
+        } else {
+            mDownload.switchState(DECRYPTING);
         }
     }
 
@@ -180,17 +193,8 @@ public class DownloadAction implements TransferStateListener {
         }
     }
 
-    private boolean checkTransferComplete(TalkClientDownload download) {
-        if (download.getTransferProgress() == download.getContentLength()) {
-            if (download.getDecryptionKey() != null) {
-                download.switchState(DECRYPTING);
-            } else {
-                download.setFilePath(computeDownloadFile(download));
-                download.switchState(DETECTING);
-            }
-            return true;
-        }
-        return false;
+    private boolean isDataTransferFinished(TalkClientDownload download) {
+        return download.getTransferProgress() == download.getContentLength();
     }
 
     private long getContentLengthFromResponse(HttpResponse response) {
@@ -251,10 +255,6 @@ public class DownloadAction implements TransferStateListener {
 
             mDownload.setFilePath(destinationFile);
             mDownload.switchState(DETECTING);
-        } catch (IOException ioe){
-            LOG.error("decryption error", ioe);
-            mDownload.switchState(PAUSED);
-            checkTransferFailure(mDownload.getTransferFailures() + 1, "IOFailure during decryption", mDownload);
         } catch (Exception e) {
             LOG.error("decryption error", e);
             checkTransferFailure(mDownload.getTransferFailures() + 1, "failure during decryption", mDownload);
@@ -412,7 +412,7 @@ public class DownloadAction implements TransferStateListener {
     }
 
     private void checkTransferFailure(int failures, String failureDescription, TalkClientDownload download) {
-        LOG.error(download.getClientDownloadId() + " " + failureDescription+" Count:"+failures);
+        LOG.error(download.getClientDownloadId() + " " + failureDescription + " Count:" + failures);
         download.setTransferFailures(failures);
         if (failures <= MAX_FAILURES) {
             download.switchState(RETRYING);
