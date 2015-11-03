@@ -128,8 +128,4 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
         return mSharedPreferences.getBoolean("preference_key_worldwide_enable_automatic_download", false);
     }
 
-    public int getPushAwakeDisconnectTimeoutSeconds() {
-        return 30;
-    }
-
 }
