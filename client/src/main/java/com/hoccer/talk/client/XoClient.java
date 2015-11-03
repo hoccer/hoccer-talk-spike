@@ -52,7 +52,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         REGISTERING,
         LOGIN,
         SYNCING,
-        BACKGROUND_CONNECTING,
         READY
     }
 
@@ -497,7 +496,8 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         LOG.debug("connectInBackground()");
         if (mState == State.DISCONNECTED) {
             mConnectInBackground = true;
-            switchState(State.BACKGROUND_CONNECTING, "connecting client");
+            cancelDisconnectTimeout();
+            switchState(State.CONNECTING, "connecting client");
         }
     }
 
@@ -1072,10 +1072,8 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 cancelDisconnect();
             }
 
-            if (mState == State.BACKGROUND_CONNECTING) {
-                scheduleConnect();
-            } else if (mState == State.CONNECTING) {
-                scheduleConnect();
+            if (mState == State.CONNECTING) {
+               scheduleConnect();
             } else {
                 cancelConnect();
             }
@@ -1093,12 +1091,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             }
 
             if (mState == State.SYNCING) {
-                if (!mConnectInBackground) {
-                    scheduleSync();
-                } else {
-                    switchState(State.READY, "ready after login");
-                    disconnectAfterTimeout(30);
-                }
+                scheduleSync();
             } else {
                 cancelSync();
             }
@@ -1113,6 +1106,9 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                         LOG.info("Delivering potentially unsent messages.");
                         requestSendAllPendingMessages();
                         resumeAllPendingTransfers();
+                        if (mConnectInBackground) {
+                            disconnectAfterTimeout(30);
+                        }
                     }
                 });
             }
