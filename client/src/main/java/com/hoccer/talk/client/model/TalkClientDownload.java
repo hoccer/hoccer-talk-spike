@@ -36,7 +36,7 @@ public class TalkClientDownload extends XoTransfer {
         DOWNLOADING {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(PAUSED, RETRYING, DECRYPTING, DETECTING, FAILED, PAUSED_BY_UPLOAD);
+                return EnumSet.of(PAUSED, RETRYING, DECRYPTING, DETECTING, FAILED, WAITING_FOR_DATA);
             }
         },
         PAUSED {
@@ -45,7 +45,7 @@ public class TalkClientDownload extends XoTransfer {
                 return EnumSet.of(DOWNLOADING);
             }
         },
-        PAUSED_BY_UPLOAD {
+        WAITING_FOR_DATA {
             @Override
             public Set<State> possibleFollowUps() {
                 return EnumSet.of(DOWNLOADING);
@@ -54,7 +54,7 @@ public class TalkClientDownload extends XoTransfer {
         RETRYING {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(DOWNLOADING, PAUSED, PAUSED_BY_UPLOAD);
+                return EnumSet.of(DOWNLOADING, PAUSED, WAITING_FOR_DATA);
             }
         },
         DECRYPTING {
@@ -276,7 +276,7 @@ public class TalkClientDownload extends XoTransfer {
             case RETRYING:
                 return ContentState.DOWNLOAD_DOWNLOADING;
             case PAUSED:
-            case PAUSED_BY_UPLOAD:
+            case WAITING_FOR_DATA:
                 return ContentState.DOWNLOAD_PAUSED;
             case DECRYPTING:
                 return ContentState.DOWNLOAD_DECRYPTING;
