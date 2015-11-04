@@ -56,8 +56,11 @@ public class DownloadAction implements TransferStateListener {
                 doDownloadingAction();
                 break;
             case PAUSED:
-            case WAITING_FOR_DATA:
                 mActive = false;
+                doPausedAction();
+                break;
+            case WAITING_FOR_DATA:
+                mActive = true;
                 doPausedAction();
                 break;
             case RETRYING:

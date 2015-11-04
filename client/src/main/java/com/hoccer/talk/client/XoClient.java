@@ -1551,14 +1551,22 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         mDisconnectTimeoutFuture = mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                mDisconnectTimeoutFuture = null;
-                switchState(State.DISCONNECTED, "disconnect timeout");
-                mIsTimedOut = true;
+                if (isTransferInProgress()) {
+                    disconnectAfterTimeout(10);
+                } else {
+                    mDisconnectTimeoutFuture = null;
+                    switchState(State.DISCONNECTED, "disconnect timeout");
+                    mIsTimedOut = true;
+                }
             }
         }, timeout, TimeUnit.SECONDS);
     }
 
-    private void cancelDisconnectTimeout() {
+    private boolean isTransferInProgress() {
+        return mDownloadAgent.isInProgress() || mUploadAgent.isInProgress();
+    }
+
+    public void cancelDisconnectTimeout() {
         mIsTimedOut = false;
         if (mDisconnectTimeoutFuture != null) {
             mDisconnectTimeoutFuture.cancel(false);

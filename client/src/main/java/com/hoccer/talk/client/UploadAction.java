@@ -25,6 +25,7 @@ public class UploadAction implements TransferStateListener {
     private static final Logger LOG = Logger.getLogger(UploadAction.class);
 
     private final UploadAgent mUploadAgent;
+
     private TalkClientUpload mUpload;
     private HttpPut mHttpPut;
     private Future mFuture;
@@ -376,5 +377,9 @@ public class UploadAction implements TransferStateListener {
     @Override
     public void onProgress(int progress) {
 
+    }
+
+    public TalkClientUpload getUpload() {
+        return mUpload;
     }
 }

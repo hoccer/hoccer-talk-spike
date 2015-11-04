@@ -1,6 +1,7 @@
 package com.hoccer.talk.client;
 
 import com.hoccer.talk.client.model.TalkClientDownload;
+import com.sun.org.apache.bcel.internal.generic.NEW;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -9,9 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import static com.hoccer.talk.client.model.TalkClientDownload.State.ON_HOLD;
-import static com.hoccer.talk.client.model.TalkClientDownload.State.PAUSED;
-import static com.hoccer.talk.client.model.TalkClientDownload.State.WAITING_FOR_DATA;
+import static com.hoccer.talk.client.model.TalkClientDownload.State.*;
 
 public class DownloadAgent extends TransferAgent {
 
@@ -159,5 +158,14 @@ public class DownloadAgent extends TransferAgent {
                 forceStartDownload(download);
             }
         }
+    }
+
+    public boolean isInProgress() {
+        for (Integer key : mDownloadActions.keySet()) {
+            if (mDownloadActions.get(key).isActive() || (mDownloadActions.get(key).getDownload().getState() == NEW)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
