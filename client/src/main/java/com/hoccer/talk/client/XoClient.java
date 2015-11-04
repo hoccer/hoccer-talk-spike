@@ -634,12 +634,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     mSelfContact.updatePresence(presence);
                     mDatabase.savePresence(presence);
 
-                    if (TalkPresence.STATUS_ONLINE.equals(newStatus)) {
-                        cancelDisconnectTimeout();
-                    } else if (TalkPresence.STATUS_BACKGROUND.equals(newStatus)) {
-                        disconnectAfterTimeout(mClientConfiguration.getBackgroundDisconnectTimeoutSeconds());
-                    }
-
                     notifyOnClientPresenceChanged(mSelfContact);
 
                     if (isLoggedIn()) {
@@ -653,7 +647,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             LOG.error("error in setPresenceStatus", e);
         }
     }
-
 
     /*
      * If upload is null no avatar is set.
