@@ -34,10 +34,18 @@ public class BackgroundConnectionHandler implements BackgroundManager.Listener, 
 
     @Override
     public void onBecameForeground(Activity activity) {
+        releaseWakeLock();
+
         mClient.setPresenceStatus(TalkPresence.STATUS_ONLINE);
 
         if (mClient.isDisconnected()) {
             connectClientIfNetworkAvailable();
+        }
+    }
+
+    private void releaseWakeLock() {
+        if (mWakeLock != null && mWakeLock.isHeld()) {
+            mWakeLock.release();
         }
     }
 
@@ -50,9 +58,7 @@ public class BackgroundConnectionHandler implements BackgroundManager.Listener, 
 
     @Override
     public void onBecameBackground(Activity activity) {
-        if (!mPowerManager.isScreenOn()) {
-            acquireWakeLockToCompleteDisconnect();
-        }
+        acquireWakeLockToCompleteDisconnect();
         mClient.setPresenceStatus(TalkPresence.STATUS_BACKGROUND);
     }
 
@@ -63,8 +69,8 @@ public class BackgroundConnectionHandler implements BackgroundManager.Listener, 
 
     @Override
     public void onClientStateChange(XoClient client) {
-        if (client.isDisconnected() && mWakeLock != null && mWakeLock.isHeld()) {
-            mWakeLock.release();
+        if (client.isDisconnected()) {
+            releaseWakeLock();
         }
     }
 }
