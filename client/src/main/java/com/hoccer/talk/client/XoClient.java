@@ -1103,6 +1103,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                         requestSendAllPendingMessages();
                         resumeAllPendingTransfers();
                         if (mConnectInBackground) {
+                            LOG.info("Trigger disconnect in 30 seconds..");
                             disconnectAfterTimeout(30);
                         }
                     }

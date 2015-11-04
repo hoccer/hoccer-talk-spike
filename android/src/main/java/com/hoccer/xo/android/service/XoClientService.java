@@ -1,6 +1,9 @@
 package com.hoccer.xo.android.service;
 
-import android.app.*;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.Service;
 import android.content.*;
 import android.graphics.BitmapFactory;
 import android.media.MediaScannerConnection;
@@ -111,6 +114,7 @@ public class XoClientService extends Service {
     private ClientIdReceiver m_clientIdReceiver;
 
     private PowerManager.WakeLock mWakeLock;
+    private PowerManager mPowerManager;
 
     private boolean mConnectInBackground;
 
@@ -118,6 +122,8 @@ public class XoClientService extends Service {
     public void onCreate() {
         LOG.debug("onCreate()");
         super.onCreate();
+
+        mPowerManager = (PowerManager) XoApplication.get().getSystemService(Context.POWER_SERVICE);
 
         mExecutor = XoApplication.get().getExecutor();
         mClient = XoApplication.get().getClient();
@@ -363,6 +369,7 @@ public class XoClientService extends Service {
 
             if (activeNetwork.isConnected()) {
                 if (mConnectInBackground) {
+                    acquireWakeLockToCompleteDisconnect();
                     mClient.connectInBackground();
                 } else {
                     if (!mClient.isTimedOut()) {
@@ -379,6 +386,11 @@ public class XoClientService extends Service {
             // reset transfer limits on network type change.
             configureAutoTransfers();
         }
+    }
+
+    private void acquireWakeLockToCompleteDisconnect() {
+        mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Background disconnect");
+        mWakeLock.acquire();
     }
 
     private void updateUnseenMessageNotification(boolean doAlarm) {
@@ -584,6 +596,9 @@ public class XoClientService extends Service {
                         doUpdateGcm(TalkPushService.GCM_ALWAYS_UPDATE);
                     }
                 });
+            } else if (client.isDisconnected() && mWakeLock != null && mWakeLock.isHeld()) {
+                mWakeLock.release();
+                LOG.debug("Released wake lock");
             }
         }
 
