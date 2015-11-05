@@ -1552,6 +1552,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             @Override
             public void run() {
                 if (isTransferInProgress()) {
+                    LOG.debug("Transfer in progress. Postpone disconnect for 10 seconds.");
                     disconnectAfterTimeout(10);
                 } else {
                     mDisconnectTimeoutFuture = null;
