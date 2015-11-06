@@ -204,7 +204,6 @@ public class XoClientService extends Service {
                 createPushMessageNotification(message);
             }
             if (intent.hasExtra(EXTRA_CONNECT)) {
-                mConnectInBackground = false;
                 handleConnectivityChange(mConnectivityManager.getActiveNetworkInfo());
             }
             if (intent.hasExtra(TalkPushService.EXTRA_WAKE_CLIENT)) {

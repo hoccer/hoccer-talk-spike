@@ -503,9 +503,9 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
     public void connect() {
         LOG.debug("connect()");
+        mConnectInBackground = false;
+        cancelDisconnectTimeout();
         if (mState == State.READY) {
-            mConnectInBackground = false;
-            cancelDisconnectTimeout();
             switchState(State.SYNCING, "already connected, starting sync");
         }
         if (mState == State.DISCONNECTED) {
@@ -635,9 +635,11 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     mDatabase.savePresence(presence);
 
                     if (TalkPresence.STATUS_ONLINE.equals(newStatus)) {
+                        mConnectInBackground = false;
                         cancelDisconnectTimeout();
                     } else if (TalkPresence.STATUS_BACKGROUND.equals(newStatus)) {
-                        disconnectAfterTimeout(mClientConfiguration.getBackgroundDisconnectTimeoutSeconds());
+                        disconnectAfterTimeout(15);
+//                        disconnectAfterTimeout(mClientConfiguration.getBackgroundDisconnectTimeoutSeconds());
                     }
 
                     notifyOnClientPresenceChanged(mSelfContact);
@@ -1104,7 +1106,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                         resumeAllPendingTransfers();
                         if (mConnectInBackground) {
                             LOG.info("Trigger disconnect in 30 seconds..");
-                            disconnectAfterTimeout(30);
+                            disconnectAfterTimeout(10);
                         }
                     }
                 });
@@ -1566,6 +1568,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     private void cancelDisconnectTimeout() {
+        LOG.debug("Cancel disconnect");
         mIsTimedOut = false;
         if (mDisconnectTimeoutFuture != null) {
             mDisconnectTimeoutFuture.cancel(false);
