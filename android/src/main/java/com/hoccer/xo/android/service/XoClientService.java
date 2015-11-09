@@ -380,11 +380,13 @@ public class XoClientService extends Service {
     }
 
     private void acquireWakeLockToCompleteDisconnect() {
+        LOG.debug("Acquire wakelock.");
+
         if (mWakeLock != null && !mWakeLock.isHeld()) {
             mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Background disconnect");
             mWakeLock.acquire();
         } else {
-            LOG.error("Wakelock still held.");
+            LOG.error("Wakelock still held while creating a new one.");
         }
     }
 
