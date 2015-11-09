@@ -194,7 +194,6 @@ public class XoClientService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        mConnectInBackground = false;
 
         LOG.debug("onStartCommand(" + ((intent == null) ? "null" : intent.toString()) + ")");
         if (intent != null) {
@@ -381,8 +380,12 @@ public class XoClientService extends Service {
     }
 
     private void acquireWakeLockToCompleteDisconnect() {
-        mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Background disconnect");
-        mWakeLock.acquire();
+        if (mWakeLock != null && !mWakeLock.isHeld()) {
+            mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Background disconnect");
+            mWakeLock.acquire();
+        } else {
+            LOG.error("Wakelock still held.");
+        }
     }
 
     private void updateUnseenMessageNotification(boolean doAlarm) {
