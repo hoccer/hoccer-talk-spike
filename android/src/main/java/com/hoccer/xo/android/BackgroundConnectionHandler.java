@@ -49,7 +49,7 @@ public class BackgroundConnectionHandler implements BackgroundManager.Listener, 
         }
     }
 
-    public void connectClientIfNetworkAvailable() {
+    private void connectClientIfNetworkAvailable() {
         ConnectivityManager connectivityManager = (ConnectivityManager) XoApplication.get().getSystemService(Context.CONNECTIVITY_SERVICE);
         if (connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected()) {
             mClient.connect();
