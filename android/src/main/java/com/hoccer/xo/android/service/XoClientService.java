@@ -23,6 +23,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.xo.android.BackgroundManager;
 import com.hoccer.xo.android.XoAndroidClient;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ChatsActivity;
@@ -116,8 +117,6 @@ public class XoClientService extends Service {
     private PowerManager.WakeLock mWakeLock;
     private PowerManager mPowerManager;
 
-    private boolean mConnectInBackground;
-
     @Override
     public void onCreate() {
         LOG.debug("onCreate()");
@@ -203,11 +202,7 @@ public class XoClientService extends Service {
                 String message = intent.getStringExtra(TalkPushService.EXTRA_SHOW_GENERIC_PUSH_MESSAGE);
                 createPushMessageNotification(message);
             }
-            if (intent.hasExtra(EXTRA_CONNECT)) {
-                handleConnectivityChange(mConnectivityManager.getActiveNetworkInfo());
-            }
-            if (intent.hasExtra(TalkPushService.EXTRA_WAKE_CLIENT)) {
-                mConnectInBackground = true;
+            if (intent.hasExtra(EXTRA_CONNECT) || intent.hasExtra(TalkPushService.EXTRA_WAKE_CLIENT)) {
                 handleConnectivityChange(mConnectivityManager.getActiveNetworkInfo());
             }
             if (intent.hasExtra(TalkPushService.EXTRA_GCM_REGISTERED)) {
@@ -367,13 +362,11 @@ public class XoClientService extends Service {
                     + " state " + activeNetwork.getState().name());
 
             if (activeNetwork.isConnected()) {
-                if (mConnectInBackground) {
+                if (BackgroundManager.get().isInBackground()) {
                     acquireWakeLockToCompleteDisconnect();
                     mClient.connectInBackground();
-                } else {
-                    if (!mClient.isTimedOut()) {
-                        mClient.connect();
-                    }
+                } else if (!mClient.isTimedOut()) {
+                    mClient.connect();
                 }
             } else {
                 mClient.disconnect();
