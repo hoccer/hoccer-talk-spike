@@ -497,19 +497,19 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         if (mState == State.DISCONNECTED) {
             mConnectInBackground = true;
             cancelDisconnectTimeout();
-            switchState(State.CONNECTING, "connecting client");
+            switchState(State.CONNECTING, "connecting client in background");
         }
     }
 
     public void connect() {
         LOG.debug("connect()");
+        cancelDisconnectTimeout();
         if (mState == State.READY) {
-            mConnectInBackground = false;
-            cancelDisconnectTimeout();
             switchState(State.SYNCING, "already connected, starting sync");
-        }
-        if (mState == State.DISCONNECTED) {
+        } else if (mState == State.DISCONNECTED) {
             switchState(State.CONNECTING, "connecting client");
+        } else {
+            LOG.error("XOClient is in state "+mState+" while connecting.");
         }
     }
 
@@ -1545,7 +1545,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     public void disconnectAfterTimeout(int timeout) {
-        LOG.debug("disconnectAfterTimeout()");
+        LOG.debug("disconnectAfterTimeout("+timeout+")");
         cancelDisconnectTimeout();
 
         mDisconnectTimeoutFuture = mExecutor.schedule(new Runnable() {
@@ -1572,6 +1572,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         if (mDisconnectTimeoutFuture != null) {
             mDisconnectTimeoutFuture.cancel(false);
             mDisconnectTimeoutFuture = null;
+            LOG.debug("cancelDisconnectTimeout()");
         }
     }
 
