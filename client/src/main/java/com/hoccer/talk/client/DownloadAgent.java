@@ -9,9 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import static com.hoccer.talk.client.model.TalkClientDownload.State.ON_HOLD;
-import static com.hoccer.talk.client.model.TalkClientDownload.State.PAUSED;
-import static com.hoccer.talk.client.model.TalkClientDownload.State.WAITING_FOR_DATA;
+import static com.hoccer.talk.client.model.TalkClientDownload.State.*;
 
 public class DownloadAgent extends TransferAgent {
 
@@ -159,5 +157,15 @@ public class DownloadAgent extends TransferAgent {
                 forceStartDownload(download);
             }
         }
+    }
+
+    @Override
+    public boolean isInProgress() {
+        for (DownloadAction downloadAction: mDownloadActions.values()) {
+            if (downloadAction.isActive() || (downloadAction.getDownload().getState() == NEW)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

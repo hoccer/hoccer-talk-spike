@@ -634,12 +634,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     mSelfContact.updatePresence(presence);
                     mDatabase.savePresence(presence);
 
-                    if (TalkPresence.STATUS_ONLINE.equals(newStatus)) {
-                        cancelDisconnectTimeout();
-                    } else if (TalkPresence.STATUS_BACKGROUND.equals(newStatus)) {
-                        disconnectAfterTimeout(mClientConfiguration.getBackgroundDisconnectTimeoutSeconds());
-                    }
-
                     notifyOnClientPresenceChanged(mSelfContact);
 
                     if (isLoggedIn()) {
@@ -653,7 +647,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             LOG.error("error in setPresenceStatus", e);
         }
     }
-
 
     /*
      * If upload is null no avatar is set.
@@ -1558,14 +1551,23 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         mDisconnectTimeoutFuture = mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                mDisconnectTimeoutFuture = null;
-                switchState(State.DISCONNECTED, "disconnect timeout");
-                mIsTimedOut = true;
+                if (isTransferInProgress()) {
+                    LOG.debug("Transfer in progress. Postpone disconnect for 10 seconds.");
+                    disconnectAfterTimeout(10);
+                } else {
+                    mDisconnectTimeoutFuture = null;
+                    switchState(State.DISCONNECTED, "disconnect timeout");
+                    mIsTimedOut = true;
+                }
             }
         }, timeout, TimeUnit.SECONDS);
     }
 
-    private void cancelDisconnectTimeout() {
+    private boolean isTransferInProgress() {
+        return mDownloadAgent.isInProgress() || mUploadAgent.isInProgress();
+    }
+
+    public void cancelDisconnectTimeout() {
         mIsTimedOut = false;
         if (mDisconnectTimeoutFuture != null) {
             mDisconnectTimeoutFuture.cancel(false);
