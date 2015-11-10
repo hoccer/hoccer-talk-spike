@@ -73,7 +73,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
         handleIntent(getIntent());
 
-        //TODO could that be done in XoClientService to have it available always and to avoid another similiar wakelock there?
         BackgroundConnectionHandler.get();
 
         PasswordProtection.get();
