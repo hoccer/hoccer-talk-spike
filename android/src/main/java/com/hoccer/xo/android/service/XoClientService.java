@@ -565,10 +565,21 @@ public class XoClientService extends Service {
     }
 
     private class ConnectivityReceiver extends BroadcastReceiver {
+        private boolean firstConnect = true;
+
         @Override
         public void onReceive(Context context, Intent intent) {
             LOG.debug("onConnectivityChange()");
-            handleConnectivityChange(mConnectivityManager.getActiveNetworkInfo());
+
+            NetworkInfo activeNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
+            if (activeNetworkInfo != null) {
+                if (firstConnect) {
+                    handleConnectivityChange(activeNetworkInfo);
+                    firstConnect = false;
+                }
+            } else {
+                firstConnect = true;
+            }
         }
     }
 
