@@ -1,7 +1,6 @@
 package com.hoccer.talk.client;
 
 import com.hoccer.talk.client.model.TalkClientDownload;
-import com.sun.org.apache.bcel.internal.generic.NEW;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
