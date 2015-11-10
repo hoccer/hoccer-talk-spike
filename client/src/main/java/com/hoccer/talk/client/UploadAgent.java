@@ -127,6 +127,7 @@ public class UploadAgent extends TransferAgent {
         }
     }
 
+    @Override
     public boolean isInProgress() {
         for (Integer key : mUploadActions.keySet()) {
             TalkClientUpload.State state = mUploadActions.get(key).getUpload().getState();

@@ -77,4 +77,6 @@ public abstract class TransferAgent {
     public XoClient getXoClient() {
         return mClient;
     }
+
+    public abstract boolean isInProgress();
 }

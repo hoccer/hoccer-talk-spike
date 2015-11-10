@@ -159,6 +159,7 @@ public class DownloadAgent extends TransferAgent {
         }
     }
 
+    @Override
     public boolean isInProgress() {
         for (Integer key : mDownloadActions.keySet()) {
             if (mDownloadActions.get(key).isActive() || (mDownloadActions.get(key).getDownload().getState() == NEW)) {
