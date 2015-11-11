@@ -324,7 +324,7 @@ public class MessageItem implements AttachmentTransferListener {
         Date accepted = message.getDelivery().getTimeAccepted();
         String ac = accepted != null ? SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(accepted) : "NULL";
         Date sent = message.getMessage().getTimeSent();
-        String s = sent != null ?SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(sent) : "NULL";
+        String s = sent != null ? SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(sent) : "NULL";
 
         if (timeStamp != null) {
             long timeStampDay = getTimeAtStartOfDay(timeStamp);

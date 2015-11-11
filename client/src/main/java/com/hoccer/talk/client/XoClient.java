@@ -1663,7 +1663,8 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         final TalkClientMessage clientMessage = new TalkClientMessage();
         final TalkMessage message = new TalkMessage();
         final TalkDelivery delivery = new TalkDelivery(true);
-
+        delivery.setTimeAccepted(estimatedServerTime());
+        message.setTimeSent(estimatedServerTime());
         final String messageTag = message.generateMessageTag();
         message.setSenderId(mSelfContact.getClientId());
         delivery.setMessageTag(messageTag);
