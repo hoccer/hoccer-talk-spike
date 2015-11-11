@@ -497,19 +497,20 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         if (mState == State.DISCONNECTED) {
             mConnectInBackground = true;
             cancelDisconnectTimeout();
-            switchState(State.CONNECTING, "connecting client");
+            switchState(State.CONNECTING, "connecting client in background");
         }
     }
 
     public void connect() {
         LOG.debug("connect()");
+        cancelDisconnectTimeout();
+        mConnectInBackground = false;
         if (mState == State.READY) {
-            mConnectInBackground = false;
-            cancelDisconnectTimeout();
             switchState(State.SYNCING, "already connected, starting sync");
-        }
-        if (mState == State.DISCONNECTED) {
+        } else if (mState == State.DISCONNECTED) {
             switchState(State.CONNECTING, "connecting client");
+        } else {
+            LOG.error("XOClient is in state "+mState+" while connecting.");
         }
     }
 
@@ -634,12 +635,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     mSelfContact.updatePresence(presence);
                     mDatabase.savePresence(presence);
 
-                    if (TalkPresence.STATUS_ONLINE.equals(newStatus)) {
-                        cancelDisconnectTimeout();
-                    } else if (TalkPresence.STATUS_BACKGROUND.equals(newStatus)) {
-                        disconnectAfterTimeout(mClientConfiguration.getBackgroundDisconnectTimeoutSeconds());
-                    }
-
                     notifyOnClientPresenceChanged(mSelfContact);
 
                     if (isLoggedIn()) {
@@ -653,7 +648,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             LOG.error("error in setPresenceStatus", e);
         }
     }
-
 
     /*
      * If upload is null no avatar is set.
@@ -1552,24 +1546,34 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     public void disconnectAfterTimeout(int timeout) {
-        LOG.debug("disconnectAfterTimeout()");
+        LOG.debug("disconnectAfterTimeout("+timeout+")");
         cancelDisconnectTimeout();
 
         mDisconnectTimeoutFuture = mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                mDisconnectTimeoutFuture = null;
-                switchState(State.DISCONNECTED, "disconnect timeout");
-                mIsTimedOut = true;
+                if (isTransferInProgress()) {
+                    LOG.debug("Transfer in progress. Postpone disconnect for 10 seconds.");
+                    disconnectAfterTimeout(10);
+                } else {
+                    mDisconnectTimeoutFuture = null;
+                    switchState(State.DISCONNECTED, "disconnect timeout");
+                    mIsTimedOut = true;
+                }
             }
         }, timeout, TimeUnit.SECONDS);
     }
 
-    private void cancelDisconnectTimeout() {
+    private boolean isTransferInProgress() {
+        return mDownloadAgent.isInProgress() || mUploadAgent.isInProgress();
+    }
+
+    public void cancelDisconnectTimeout() {
         mIsTimedOut = false;
         if (mDisconnectTimeoutFuture != null) {
             mDisconnectTimeoutFuture.cancel(false);
             mDisconnectTimeoutFuture = null;
+            LOG.debug("cancelDisconnectTimeout()");
         }
     }
 

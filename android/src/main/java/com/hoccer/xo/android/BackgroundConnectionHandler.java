@@ -37,6 +37,7 @@ public class BackgroundConnectionHandler implements BackgroundManager.Listener, 
         releaseWakeLock();
 
         mClient.setPresenceStatus(TalkPresence.STATUS_ONLINE);
+        mClient.cancelDisconnectTimeout();
 
         if (mClient.isDisconnected()) {
             connectClientIfNetworkAvailable();
@@ -49,7 +50,7 @@ public class BackgroundConnectionHandler implements BackgroundManager.Listener, 
         }
     }
 
-    public void connectClientIfNetworkAvailable() {
+    private void connectClientIfNetworkAvailable() {
         ConnectivityManager connectivityManager = (ConnectivityManager) XoApplication.get().getSystemService(Context.CONNECTIVITY_SERVICE);
         if (connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected()) {
             mClient.connect();
@@ -60,6 +61,7 @@ public class BackgroundConnectionHandler implements BackgroundManager.Listener, 
     public void onBecameBackground(Activity activity) {
         acquireWakeLockToCompleteDisconnect();
         mClient.setPresenceStatus(TalkPresence.STATUS_BACKGROUND);
+        mClient.disconnectAfterTimeout(XoApplication.getConfiguration().getBackgroundDisconnectTimeoutSeconds());
     }
 
     private void acquireWakeLockToCompleteDisconnect() {
