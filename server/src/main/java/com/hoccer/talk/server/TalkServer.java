@@ -474,6 +474,31 @@ public class TalkServer {
         }
     }
 
+    private void addConnection(TalkRpcConnection connection) {
+        synchronized (mConnections) {
+            mConnections.add(connection);
+        }
+    }
+    private void removeConnection(TalkRpcConnection connection) {
+        synchronized (mConnections) {
+            if (hasConnection(connection)) {
+                mConnections.remove(connection);
+            } else {
+                LOG.error("Could not remove connection with id "+connection.getConnectionId());
+            }
+        }
+    }
+    public boolean hasConnection(TalkRpcConnection connection) {
+        synchronized (mConnections) {
+            return mConnections.contains(connection);
+        }
+    }
+    public int numberOfConnections() {
+        synchronized (mConnections) {
+            return mConnections.size();
+        }
+    }
+
     /**
      * Notify the server of a successful login
      *
@@ -493,7 +518,7 @@ public class TalkServer {
             addClientConnection(clientId, connection);
             mConnectionsLoggedIn.incrementAndGet();
             LOG.info("[connectionId: '" + connection.getConnectionId() + "'] logged in" +
-                    ", open: " + mConnectionsOpen.get() + ", inMap: " + mConnections.size() +
+                    ", open: " + mConnectionsOpen.get() + ", inMap: " + numberOfConnections() +
                     ", loggedIn: " + mConnectionsLoggedIn.get() + ", inMapByCID: " + numberOfClientConnections() + ", ready: " + mConnectionsReady.get());
         }
     }
@@ -509,7 +534,7 @@ public class TalkServer {
             mUpdateAgent.requestPresenceUpdate(client.getClientId(), null);
             mConnectionsReady.incrementAndGet();
             LOG.info("[connectionId: '" + connection.getConnectionId() + "'] ready" +
-                    ", open: " + mConnectionsOpen.get() + ", inMap: " + mConnections.size() +
+                    ", open: " + mConnectionsOpen.get() + ", inMap: " + numberOfConnections() +
                     ", loggedIn: " + mConnectionsLoggedIn.get() + ", inMapByCID: " + numberOfClientConnections() + ", ready: " + mConnectionsReady.get());
         }
     }
@@ -523,9 +548,9 @@ public class TalkServer {
         synchronized (connection) {
             mConnectionsTotal.incrementAndGet();
             mConnectionsOpen.incrementAndGet();
-            mConnections.add(connection);
+            addConnection(connection);
             LOG.info("[connectionId: '" + connection.getConnectionId() + "'] opened" +
-                    ", open: " + mConnectionsOpen.get() + ", inMap: " + mConnections.size() +
+                    ", open: " + mConnectionsOpen.get() + ", inMap: " + numberOfConnections() +
                     ", loggedIn: " + mConnectionsLoggedIn.get() + ", inMapByCID: " + numberOfClientConnections() + ", ready: " + mConnectionsReady.get());
         }
     }
@@ -541,16 +566,16 @@ public class TalkServer {
     public void connectionClosed(TalkRpcConnection connection) {
         synchronized (connection) {
 
-            if (mConnections.contains(connection)) {
+            if (hasConnection(connection)) {
 
                 LOG.debug("[connectionId: '" + connection.getConnectionId() + "'] connection closed (start)" +
-                        ", open: " + mConnectionsOpen.get() + ", inMap: " + mConnections.size() +
+                        ", open: " + mConnectionsOpen.get() + ", inMap: " + numberOfConnections() +
                         ", loggedIn: " + mConnectionsLoggedIn.get() + ", inMapByCID: " + numberOfClientConnections() + ", ready: " + mConnectionsReady.get());
                 mConnectionsOpen.decrementAndGet();
                 if (connection.wasReady()) {
                     mConnectionsReady.decrementAndGet();
                     LOG.debug("[connectionId: '" + connection.getConnectionId() + "'] closed (was ready connection)" +
-                            ", open: " + mConnectionsOpen.get() + ", inMap: " + mConnections.size() +
+                            ", open: " + mConnectionsOpen.get() + ", inMap: " +numberOfConnections() +
                             ", loggedIn: " + mConnectionsLoggedIn.get() + ", inMapByCID: " + numberOfClientConnections() + ", ready: " + mConnectionsReady.get());
                 } else {
                     if (LOG.isDebugEnabled()) {
@@ -574,13 +599,13 @@ public class TalkServer {
                     }
                 }
                 // remove connection from list
-                mConnections.remove(connection);
+                removeConnection(connection);
                 // remove connection from table
                 LOG.debug("[connectionId: '" + connection.getConnectionId() + "'] closed (removed from map)" +
-                        ", open: " + mConnectionsOpen.get() + ", inMap: " + mConnections.size() + ", loggedIn: " + mConnectionsLoggedIn.get() + ", ready: " + mConnectionsReady.get());
+                        ", open: " + mConnectionsOpen.get() + ", inMap: " + numberOfConnections() + ", loggedIn: " + mConnectionsLoggedIn.get() + ", ready: " + mConnectionsReady.get());
             } else {
                 LOG.warn("[connectionId: '" + connection.getConnectionId() + "'] connection closed not in set" +
-                        ", open: " + mConnectionsOpen.get() + ", inMap: " + mConnections.size() +
+                        ", open: " + mConnectionsOpen.get() + ", inMap: " + numberOfConnections() +
                         ", loggedIn: " + mConnectionsLoggedIn.get() + ", inMapByCID: " + numberOfClientConnections() + ", ready: " + mConnectionsReady.get());
             }
 
@@ -592,7 +617,7 @@ public class TalkServer {
                     removeClientConnection(clientId);
                     mConnectionsLoggedIn.decrementAndGet();
                     LOG.debug("[connectionId: '" + connection.getConnectionId() + "'] closed (was logged in, removed from mapByCID)" +
-                            ", open: " + mConnectionsOpen.get() + ", inMap: " + mConnections.size() +
+                            ", open: " + mConnectionsOpen.get() + ", inMap: " + numberOfConnections() +
                             ", loggedIn: " + mConnectionsLoggedIn.get() + ", inMapByCID: " + numberOfClientConnections() + ", ready: " + mConnectionsReady.get());
                     // update presence for connection status change
                     mUpdateAgent.requestPresenceUpdate(clientId, CONNECTION_STATUS_UPDATE_FIELDS);
@@ -601,7 +626,7 @@ public class TalkServer {
                     mDeliveryAgent.requestDelivery(clientId, false);
                 } else {
                     LOG.warn("[connectionId: '" + connection.getConnectionId() + "'] not in mapByCID, hasClientConnection:" + hasClientConnection +
-                            ", open: " + mConnectionsOpen.get() + ", inMap: " + mConnections.size() +
+                            ", open: " + mConnectionsOpen.get() + ", inMap: " + numberOfConnections() +
                             ", loggedIn: " + mConnectionsLoggedIn.get() + ", inMapByCID: " + numberOfClientConnections() + ", ready: " + mConnectionsReady.get());
                 }
             } else {
@@ -609,7 +634,7 @@ public class TalkServer {
             }
             connection.doLogout();
             LOG.info("[connectionId: '" + connection.getConnectionId() + "'] finally closed" +
-                    ", still open: " + mConnectionsOpen.get() + ", inMap: " + mConnections.size() +
+                    ", still open: " + mConnectionsOpen.get() + ", inMap: " + numberOfConnections() +
                     ", loggedIn: " + mConnectionsLoggedIn.get() + ", inMapByCID: " + numberOfClientConnections() + ", ready: " + mConnectionsReady.get());
         }
     }
@@ -679,14 +704,16 @@ public class TalkServer {
     }
 
     public Vector<TalkRpcConnection> getReadyConnections() {
-        Vector<TalkRpcConnection> readyClientConnections = new Vector<TalkRpcConnection>();
-        Iterator<TalkRpcConnection> iterator = mConnections.iterator();
-        while (iterator.hasNext()) {
-            TalkRpcConnection connection = iterator.next();
-            if (connection.getClient() != null && connection.getClient().isReady()) {
-                readyClientConnections.add(connection);
+        synchronized (mConnections) {
+            Vector<TalkRpcConnection> readyClientConnections = new Vector<TalkRpcConnection>();
+            Iterator<TalkRpcConnection> iterator = mConnections.iterator();
+            while (iterator.hasNext()) {
+                TalkRpcConnection connection = iterator.next();
+                if (connection.getClient() != null && connection.getClient().isReady()) {
+                    readyClientConnections.add(connection);
+                }
             }
+            return readyClientConnections;
         }
-        return readyClientConnections;
     }
 }
