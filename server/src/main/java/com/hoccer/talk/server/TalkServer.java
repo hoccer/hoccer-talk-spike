@@ -548,7 +548,7 @@ public class TalkServer {
             if (clientId != null) {
                 boolean hasKey = mConnectionsByClientId.containsKey(clientId);
                 boolean hasValue = mConnectionsByClientId.containsValue(connection);
-                if (hasKey && hasValue) {
+                if (hasKey /* && hasValue */) {
                     // remove connection from table
                     mConnectionsByClientId.remove(clientId);
                     mConnectionsLoggedIn.decrementAndGet();
