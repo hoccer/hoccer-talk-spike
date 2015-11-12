@@ -114,10 +114,10 @@ public class TalkServer {
     /**
      * All connections (every connected websocket)
      */
-    //Vector<TalkRpcConnection> mConnections =
-    //        new Vector<TalkRpcConnection>();
-    Set<TalkRpcConnection> mConnections =
-            new HashSet<TalkRpcConnection>();
+    Vector<TalkRpcConnection> mConnections =
+            new Vector<TalkRpcConnection>();
+    //Set<TalkRpcConnection> mConnections =
+    //        new HashSet<TalkRpcConnection>();
 
     /**
      * All logged-in connections by client ID
@@ -466,7 +466,7 @@ public class TalkServer {
             connection.getServerHandler().releaseEnvironment(TalkEnvironment.TYPE_WORLDWIDE);  // after logon, release possibly left over environments
             mConnectionsByClientId.put(clientId, connection);
             mConnectionsLoggedIn.incrementAndGet();
-            LOG.debug("[connectionId: '" + connection.getConnectionId() + "'] logged in"+
+            LOG.info("[connectionId: '" + connection.getConnectionId() + "'] logged in"+
                     ", open: "+mConnectionsOpen.get()+", inMap: "+mConnections.size()+
                     ", loggedIn: "+mConnectionsLoggedIn.get()+", inMapByCID: "+mConnectionsByClientId.size()+", ready: "+mConnectionsReady.get());
         }
@@ -482,7 +482,7 @@ public class TalkServer {
         synchronized (connection) {
             mUpdateAgent.requestPresenceUpdate(client.getClientId(), null);
             mConnectionsReady.incrementAndGet();
-            LOG.debug("[connectionId: '" + connection.getConnectionId() + "'] ready" +
+            LOG.info("[connectionId: '" + connection.getConnectionId() + "'] ready" +
                     ", open: " + mConnectionsOpen.get() + ", inMap: " + mConnections.size() +
                     ", loggedIn: " + mConnectionsLoggedIn.get() + ", inMapByCID: " + mConnectionsByClientId.size() + ", ready: " + mConnectionsReady.get());
         }
@@ -498,7 +498,7 @@ public class TalkServer {
             mConnectionsTotal.incrementAndGet();
             mConnectionsOpen.incrementAndGet();
             mConnections.add(connection);
-            LOG.debug("[connectionId: '" + connection.getConnectionId() + "'] opened"+
+            LOG.info("[connectionId: '" + connection.getConnectionId() + "'] opened"+
                     ", open: "+mConnectionsOpen.get()+", inMap: "+mConnections.size()+
                     ", loggedIn: "+mConnectionsLoggedIn.get()+", inMapByCID: "+mConnectionsByClientId.size()+", ready: "+mConnectionsReady.get());
         }
@@ -527,11 +527,25 @@ public class TalkServer {
                             ", open: " + mConnectionsOpen.get() + ", inMap: " + mConnections.size() +
                             ", loggedIn: " + mConnectionsLoggedIn.get() + ", inMapByCID: " + mConnectionsByClientId.size() + ", ready: " + mConnectionsReady.get());
                 } else {
-                    LOG.debug("[connectionId: '" + connection.getConnectionId() + "'] closed (was not ready)" +
-                            ", reason: " + connection.getClient() == null ?
-                            "null client" : connection.getClient().getTimeReady() == null ? "null timeReady" :
-                            connection.getClient().getTimeLastLogin() == null ? "null timeLastLogin" :
-                                    "timeReady=" + connection.getClient().getTimeReady() + " not greater than timeLastLogin=" + connection.getClient().getTimeLastLogin());
+                    if (LOG.isDebugEnabled()) {
+                        String reason;
+                        TalkClient client = connection.getClient();
+                        if (client == null) {
+                            reason = "null client";
+                        } else {
+                            if (client.getTimeReady() == null) {
+                                reason = "null timeReady";
+                            } else {
+                                if (client.getTimeLastLogin() == null) {
+                                    reason = "null timeLastLogin";
+                                } else {
+                                    reason = "timeReady=" + client.getTimeReady() + " not greater than timeLastLogin=" + client.getTimeLastLogin();
+                                }
+                            }
+                        }
+                        LOG.debug("[connectionId: '" + connection.getConnectionId() + "'] closed (was not ready)" +
+                                ", reason: " + reason);
+                    }
                 }
                 // remove connection from list
                 mConnections.remove(connection);
@@ -573,6 +587,9 @@ public class TalkServer {
                 LOG.warn("[connectionId: '" + connection.getConnectionId() + "'] connectionClosed, but websocket still connected, disconnecting");
                 connection.disconnect();
             }
+            LOG.info("[connectionId: '" + connection.getConnectionId() + "'] finally closed" +
+                    ", still open: " + mConnectionsOpen.get() + ", inMap: " + mConnections.size() +
+                    ", loggedIn: " + mConnectionsLoggedIn.get() + ", inMapByCID: " + mConnectionsByClientId.size() + ", ready: " + mConnectionsReady.get());
         }
     }
 
