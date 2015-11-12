@@ -319,9 +319,16 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
         // check if we aren't logged in already
         if (mConnection.isLoggedIn()) {
-            LOG.error("srpPhase1: Can not authenticate while logged in, disconnecting: clientId="+mConnection.getClientId());
-            mConnection.disconnectAfterRequest();
-            throw new RuntimeException("Can not authenticate while logged in");
+            if (clientId == null || !mConnection.getClientId().equals(clientId)) {
+                LOG.error("srpPhase1: Bad authentication request while logged in, account clientId=" + mConnection.getClientId()
+                        + ", incoming clientId="+clientId
+                        + " [connectionId: '" + mConnection.getConnectionId() + "']");
+                throw new RuntimeException("Bad client id while authenticating while logged in");
+            }  else {
+                LOG.error("srpPhase1: Can not authenticate while logged in, disconnecting: clientId=" + mConnection.getClientId() + " [connectionId: '" + mConnection.getConnectionId() + "']");
+                mConnection.disconnectAfterRequest();
+                throw new RuntimeException("Can not authenticate while logged in");
+            }
         }
         try {
 
@@ -329,7 +336,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
             if (mSrpServer == null) {
                 mSrpServer = new SRP6VerifyingServer();
             } else {
-                LOG.error("srpPhase1: Can only attempt SRP once per connection, disconnecting: clientId="+mConnection.getClientId());
+                LOG.error("srpPhase1: Can only attempt SRP once per connection, disconnecting: clientId="+clientId+" [connectionId: '" + mConnection.getConnectionId() + "']");
                 mConnection.disconnectAfterRequest();
                 throw new RuntimeException("Can only attempt SRP once per connection");
             }

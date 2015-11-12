@@ -137,6 +137,13 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     }
 
     /**
+     * Indicate if the connection had called ready
+     */
+    public boolean wasReady() {
+        return mTalkClient != null && mTalkClient.isReady();
+    }
+
+    /**
      * Indicate if the client was logged in before the connection was closed
      */
     public boolean wasLoggedIn() {
@@ -295,23 +302,27 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
         //    or when strange things happen due to timing issues like spontaneous disconnection
         //    or bugs that cause this function to be called at the wrong time.
         synchronized (this) {
-            if (isLoggedIn() && mTalkClient != null) {
-                LOG.info("[connectionId: '" + getConnectionId() + "'] signalled Ready: " + mTalkClient.getClientId());
+            if (isLoggedIn()) {
+                if (!isReady()) {
+                    LOG.info("[connectionId: '" + getConnectionId() + "'] signalled Ready: " + mTalkClient.getClientId());
 
-                // mark connection as logged in
-                ITalkServerDatabase database = mServer.getDatabase();
-                mTalkClient.setTimeReady(new Date());
-                mTalkClient.setLastPushMessage(null);
-                database.saveClient(mTalkClient);
+                    // mark connection as logged in
+                    ITalkServerDatabase database = mServer.getDatabase();
+                    mTalkClient.setTimeReady(new Date());
+                    mTalkClient.setLastPushMessage(null);
+                    database.saveClient(mTalkClient);
 
-                // notify server abount ready state
-                mServer.readyClient(mTalkClient, this);
+                    // notify server abount ready state
+                    mServer.readyClient(mTalkClient, this);
 
-                // attempt to deliver anything we might have
-                mServer.getDeliveryAgent().requestDelivery(mTalkClient.getClientId(), true);
+                    // attempt to deliver anything we might have
+                    mServer.getDeliveryAgent().requestDelivery(mTalkClient.getClientId(), true);
 
-                // request a ping in a few seconds
-                mServer.getPingAgent().requestPing(mTalkClient.getClientId());
+                    // request a ping in a few seconds
+                    mServer.getPingAgent().requestPing(mTalkClient.getClientId());
+                } else {
+                    LOG.warn("[connectionId: '" + getConnectionId() + "'] client signalled ready again, ignoring");
+                }
             } else {
                 LOG.warn("[connectionId: '" + getConnectionId() + "'] client signalled ready but is actually NOT ready!");
             }
@@ -351,6 +362,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
 
         Timer.Context timerContext = mServer.getStatistics().signalRequestStart(connection, request);
         requestTimers.put(getIdFromRequest(request), timerContext);
+        mServer.getStatistics().signalRequest();
 
         mServer.getUpdateAgent().setRequestContext();
         mServer.getDeliveryAgent().setRequestContext();
@@ -377,7 +389,8 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
 
     @Override
     public void onPostHandleNotification(JsonRpcConnection connection, ObjectNode notification) {
-
+        mServer.getStatistics().signalResponse();
+        mServer.getStatistics().signalNotificationReceived();
     }
 
     @Override
@@ -387,7 +400,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
 
     @Override
     public void onPostHandleResponse(JsonRpcConnection connection, ObjectNode response) {
-
+        mServer.getStatistics().signalResponse();
     }
 
     public void disconnectAfterRequest() {
