@@ -114,8 +114,10 @@ public class TalkServer {
     /**
      * All connections (every connected websocket)
      */
-    Vector<TalkRpcConnection> mConnections =
-            new Vector<TalkRpcConnection>();
+    //Vector<TalkRpcConnection> mConnections =
+    //        new Vector<TalkRpcConnection>();
+    Set<TalkRpcConnection> mConnections =
+            new HashSet<TalkRpcConnection>();
 
     /**
      * All logged-in connections by client ID
@@ -125,6 +127,8 @@ public class TalkServer {
 
     AtomicInteger mConnectionsTotal = new AtomicInteger();
     AtomicInteger mConnectionsOpen = new AtomicInteger();
+    AtomicInteger mConnectionsReady = new AtomicInteger();
+    AtomicInteger mConnectionsLoggedIn = new AtomicInteger();
 
     Map<String,String> mIdLocks;
 
@@ -243,8 +247,10 @@ public class TalkServer {
         mFilecacheClient = new FilecacheClient(this.getConfiguration());
 
         // For instrumenting metrics via JMX
+        /*
         mJmxReporter = JmxReporter.forRegistry(mMetricsRegistry).build();
         mJmxReporter.start();
+        */
     }
 
     public NonReentrantLock idLockNonReentrant(String id) {
@@ -449,15 +455,21 @@ public class TalkServer {
      * @param connection the client is on
      */
     public void identifyClient(TalkClient client, TalkRpcConnection connection) {
-        String clientId = client.getClientId();
-        TalkRpcConnection oldConnection = mConnectionsByClientId.get(clientId);
-        if (oldConnection != null) {
-            // TODO: LOG this - maybe even on warn level!
-            oldConnection.disconnect();
+        synchronized (connection) {
+            String clientId = client.getClientId();
+            TalkRpcConnection oldConnection = mConnectionsByClientId.get(clientId);
+            if (oldConnection != null) {
+                LOG.warn("identifyClient: old connection with id " + oldConnection.getConnectionId() + " exists for client " + clientId + ", disconnecting old connection, new connection id" + connection.getConnectionId());
+                oldConnection.disconnect();
+            }
+            connection.getServerHandler().destroyEnvironment(TalkEnvironment.TYPE_NEARBY);  // after logon, destroy possibly left over environments
+            connection.getServerHandler().releaseEnvironment(TalkEnvironment.TYPE_WORLDWIDE);  // after logon, release possibly left over environments
+            mConnectionsByClientId.put(clientId, connection);
+            mConnectionsLoggedIn.incrementAndGet();
+            LOG.debug("[connectionId: '" + connection.getConnectionId() + "'] logged in"+
+                    ", open: "+mConnectionsOpen.get()+", inMap: "+mConnections.size()+
+                    ", loggedIn: "+mConnectionsLoggedIn.get()+", inMapByCID: "+mConnectionsByClientId.size()+", ready: "+mConnectionsReady.get());
         }
-        connection.getServerHandler().destroyEnvironment(TalkEnvironment.TYPE_NEARBY);  // after logon, destroy possibly left over environments
-        connection.getServerHandler().releaseEnvironment(TalkEnvironment.TYPE_WORLDWIDE);  // after logon, release possibly left over environments
-        mConnectionsByClientId.put(clientId, connection);
     }
 
     /**
@@ -467,7 +479,13 @@ public class TalkServer {
      * @param connection the client is on
      */
     public void readyClient(TalkClient client, TalkRpcConnection connection) {
-        mUpdateAgent.requestPresenceUpdate(client.getClientId(), null);
+        synchronized (connection) {
+            mUpdateAgent.requestPresenceUpdate(client.getClientId(), null);
+            mConnectionsReady.incrementAndGet();
+            LOG.debug("[connectionId: '" + connection.getConnectionId() + "'] ready" +
+                    ", open: " + mConnectionsOpen.get() + ", inMap: " + mConnections.size() +
+                    ", loggedIn: " + mConnectionsLoggedIn.get() + ", inMapByCID: " + mConnectionsByClientId.size() + ", ready: " + mConnectionsReady.get());
+        }
     }
 
     /**
@@ -476,9 +494,14 @@ public class TalkServer {
      * @param connection to be registered
      */
     public void connectionOpened(TalkRpcConnection connection) {
-        mConnectionsTotal.incrementAndGet();
-        mConnectionsOpen.incrementAndGet();
-        mConnections.add(connection);
+        synchronized (connection) {
+            mConnectionsTotal.incrementAndGet();
+            mConnectionsOpen.incrementAndGet();
+            mConnections.add(connection);
+            LOG.debug("[connectionId: '" + connection.getConnectionId() + "'] opened"+
+                    ", open: "+mConnectionsOpen.get()+", inMap: "+mConnections.size()+
+                    ", loggedIn: "+mConnectionsLoggedIn.get()+", inMapByCID: "+mConnectionsByClientId.size()+", ready: "+mConnectionsReady.get());
+        }
     }
 
     public static final String[] CONNECTION_STATUS_UPDATE_FIELDS_ARRAY = new String[] { TalkPresence.FIELD_CLIENT_ID, TalkPresence.FIELD_CONNECTION_STATUS };
@@ -490,23 +513,66 @@ public class TalkServer {
      * @param connection to be removed
      */
     public void connectionClosed(TalkRpcConnection connection) {
-        mConnectionsOpen.decrementAndGet();
-        // remove connection from list
-        mConnections.remove(connection);
-        // remove connection from table
-        String clientId = connection.getClientId();
-        if (clientId != null) {
-            // remove connection from table
-            mConnectionsByClientId.remove(clientId);
-            // update presence for connection status change
-            mUpdateAgent.requestPresenceUpdate(clientId, CONNECTION_STATUS_UPDATE_FIELDS);
-            connection.getServerHandler().destroyEnvironment(TalkEnvironment.TYPE_NEARBY);
-            connection.getServerHandler().releaseEnvironment(TalkEnvironment.TYPE_WORLDWIDE);
-            mDeliveryAgent.requestDelivery(clientId, false);
-        }
-        // disconnect if we still are
-        if (connection.isConnected()) {
-            connection.disconnect();
+        synchronized (connection) {
+
+            if (mConnections.contains(connection)) {
+
+                LOG.debug("[connectionId: '" + connection.getConnectionId() + "'] connection closed (start)" +
+                        ", open: " + mConnectionsOpen.get() + ", inMap: " + mConnections.size() +
+                        ", loggedIn: " + mConnectionsLoggedIn.get() + ", inMapByCID: " + mConnectionsByClientId.size() + ", ready: " + mConnectionsReady.get());
+                mConnectionsOpen.decrementAndGet();
+                if (connection.wasReady()) {
+                    mConnectionsReady.decrementAndGet();
+                    LOG.debug("[connectionId: '" + connection.getConnectionId() + "'] closed (was ready connection)" +
+                            ", open: " + mConnectionsOpen.get() + ", inMap: " + mConnections.size() +
+                            ", loggedIn: " + mConnectionsLoggedIn.get() + ", inMapByCID: " + mConnectionsByClientId.size() + ", ready: " + mConnectionsReady.get());
+                } else {
+                    LOG.debug("[connectionId: '" + connection.getConnectionId() + "'] closed (was not ready)" +
+                            ", reason: " + connection.getClient() == null ?
+                            "null client" : connection.getClient().getTimeReady() == null ? "null timeReady" :
+                            connection.getClient().getTimeLastLogin() == null ? "null timeLastLogin" :
+                                    "timeReady=" + connection.getClient().getTimeReady() + " not greater than timeLastLogin=" + connection.getClient().getTimeLastLogin());
+                }
+                // remove connection from list
+                mConnections.remove(connection);
+                // remove connection from table
+                LOG.debug("[connectionId: '" + connection.getConnectionId() + "'] closed (removed from map)" +
+                        ", open: " + mConnectionsOpen.get() + ", inMap: " + mConnections.size() + ", loggedIn: " + mConnectionsLoggedIn.get() + ", ready: " + mConnectionsReady.get());
+            } else {
+                LOG.warn("[connectionId: '" + connection.getConnectionId() + "'] connection closed not in set" +
+                        ", open: " + mConnectionsOpen.get() + ", inMap: " + mConnections.size() +
+                        ", loggedIn: " + mConnectionsLoggedIn.get() + ", inMapByCID: " + mConnectionsByClientId.size() + ", ready: " + mConnectionsReady.get());
+            }
+
+            String clientId = connection.getClientId();
+            if (clientId != null) {
+                boolean hasKey = mConnectionsByClientId.containsKey(clientId);
+                boolean hasValue = mConnectionsByClientId.containsValue(connection);
+                if (hasKey && hasValue) {
+                    // remove connection from table
+                    mConnectionsByClientId.remove(clientId);
+                    mConnectionsLoggedIn.decrementAndGet();
+                    LOG.debug("[connectionId: '" + connection.getConnectionId() + "'] closed (was logged in, removed from mapByCID)" +
+                            ", open: " + mConnectionsOpen.get() + ", inMap: " + mConnections.size() +
+                            ", loggedIn: " + mConnectionsLoggedIn.get() + ", inMapByCID: " + mConnectionsByClientId.size() + ", ready: " + mConnectionsReady.get());
+                    // update presence for connection status change
+                    mUpdateAgent.requestPresenceUpdate(clientId, CONNECTION_STATUS_UPDATE_FIELDS);
+                    connection.getServerHandler().destroyEnvironment(TalkEnvironment.TYPE_NEARBY);
+                    connection.getServerHandler().releaseEnvironment(TalkEnvironment.TYPE_WORLDWIDE);
+                    mDeliveryAgent.requestDelivery(clientId, false);
+                } else {
+                    LOG.warn("[connectionId: '" + connection.getConnectionId() + "'] not in mapByCID, hasKey:" + hasKey + ", hasValue:"+hasValue+
+                            ", open: " + mConnectionsOpen.get() + ", inMap: " + mConnections.size() +
+                            ", loggedIn: " + mConnectionsLoggedIn.get() + ", inMapByCID: " + mConnectionsByClientId.size() + ", ready: " + mConnectionsReady.get());
+                }
+            } else {
+                LOG.debug("[connectionId: '" + connection.getConnectionId() + "'] closed (was not logged in)");
+            }
+            // disconnect if we still are
+            if (connection.isConnected()) {
+                LOG.warn("[connectionId: '" + connection.getConnectionId() + "'] connectionClosed, but websocket still connected, disconnecting");
+                connection.disconnect();
+            }
         }
     }
 
@@ -540,11 +606,30 @@ public class TalkServer {
                     }
                 }
         );
+        mMetricsRegistry.register(MetricRegistry.name(TalkServer.class, "connectionsLoggedIn"),
+                new Gauge<Integer>() {
+                    @Override
+                    public Integer getValue() {
+                        return mConnectionsLoggedIn.intValue();
+                    }
+                }
+        );
+        mMetricsRegistry.register(MetricRegistry.name(TalkServer.class, "connectionsReady"),
+                new Gauge<Integer>() {
+                    @Override
+                    public Integer getValue() {
+                        return mConnectionsReady.intValue();
+                    }
+                }
+        );
+
         // For instrumenting JMX via Metrics
+        /*
         mMetricsRegistry.register(MetricRegistry.name("jvm", "gc"), new GarbageCollectorMetricSet());
         mMetricsRegistry.register(MetricRegistry.name("jvm", "memory"), new MemoryUsageGaugeSet());
         mMetricsRegistry.register(MetricRegistry.name("jvm", "thread-states"), new ThreadStatesGaugeSet());
         mMetricsRegistry.register(MetricRegistry.name("jvm", "fd", "usage"), new FileDescriptorRatioGauge());
+        */
     }
 
     private void initializeHealthChecks() {

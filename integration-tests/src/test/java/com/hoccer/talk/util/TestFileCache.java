@@ -28,7 +28,7 @@ public class TestFileCache {
         // create jetty instance
         s = new Server();
         s.setThreadPool(new QueuedThreadPool(configuration.getServerThreads()));
-        CacheMain.setupServer(s, db);
+        CacheMain.setupServer(s, db, configuration);
         // loop until we find a free port
         int port = 3010;
         while (true) {

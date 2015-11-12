@@ -27,7 +27,7 @@ public class TalkServerHandler extends HandlerCollection {
         ServletContextHandler metricsContextHandler = new ServletContextHandler();
 
         metricsContextHandler.setContextPath("/metrics");
-        metricsContextHandler.setInitParameter("show-jvm-metrics", "true");
+        //metricsContextHandler.setInitParameter("show-jvm-metrics", "true");
 
         metricsContextHandler.addEventListener(new MyMetricsServletContextListener(talkServer.getMetrics()));
         metricsContextHandler.addServlet(MetricsServlet.class, "/registry");
