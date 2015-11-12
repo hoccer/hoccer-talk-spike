@@ -236,14 +236,13 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
         mServer.connectionClosed(this);
     }
 
-    /**
-     * Disconnect the underlying connection and finish up
-     */
-    public void disconnect() {
-        LOG.info("[connectionId: '" + getConnectionId() + "'] disconnecting");
+    // must be called only by server
+    public void doLogout() {
+        LOG.info("[connectionId: '" + getConnectionId() + "'] logging out");
         synchronized (this) {
             if (mTalkClient != null && (mTalkClient.isReady() || mTalkClient.isConnected())) {
                 // set client to not ready
+                LOG.debug("[connectionId: '" + getConnectionId() + "'] setting client to not ready");
                 ITalkServerDatabase database = mServer.getDatabase();
                 TalkClient client = database.findClientById(mTalkClient.getClientId());
                 if (client != null) {
@@ -253,10 +252,20 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
                 }
             }
 
+            LOG.debug("[connectionId: '" + getConnectionId() + "'] setting client to null and disconnect JsonRpc/websocket connection");
             mTalkClient = null;
-            mConnection.disconnect();
-        }
-        LOG.info("[connectionId: '" + getConnectionId() + "'] disconnected");
+            disconnect();
+         }
+        LOG.info("[connectionId: '" + getConnectionId() + "'] logged out");
+    }
+
+    /**
+     * Disconnect the underlying connection and finish up
+     */
+    public void disconnect() {
+        LOG.warn("[connectionId: '" + getConnectionId() + "'] disconnect()");
+        boolean wasConnected = mConnection.disconnect();
+        LOG.warn("[connectionId: '" + getConnectionId() + "'] disconnect() returned wasConnected="+wasConnected);
     }
 
     /**
