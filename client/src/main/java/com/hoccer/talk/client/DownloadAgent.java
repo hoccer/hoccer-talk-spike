@@ -9,8 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import static com.hoccer.talk.client.model.TalkClientDownload.State.ON_HOLD;
-import static com.hoccer.talk.client.model.TalkClientDownload.State.PAUSED;
+import static com.hoccer.talk.client.model.TalkClientDownload.State.*;
 
 public class DownloadAgent extends TransferAgent {
 
@@ -28,7 +27,10 @@ public class DownloadAgent extends TransferAgent {
             holdDownload(download);
         } else {
             DownloadAction downloadAction = getOrCreateDownloadAction(download);
-            if (downloadAction.getDownload().getState() != PAUSED && downloadAction.getDownload().getState() != ON_HOLD && !downloadAction.isActive()) {
+            if (downloadAction.getDownload().getState() != PAUSED
+                    && downloadAction.getDownload().getState() != ON_HOLD
+                    && downloadAction.getDownload().getState() != WAITING_FOR_DATA
+                    && !downloadAction.isActive()) {
                 startDownloadTask(download);
             }
         }
@@ -43,10 +45,7 @@ public class DownloadAgent extends TransferAgent {
     }
 
     private boolean isManualDownload(TalkClientDownload download) {
-        if (manualDownloadsActivated() || exceedsTransferLimit(download)) {
-            return true;
-        }
-        return isManualWorldwideDownload(download);
+        return manualDownloadsActivated() || exceedsTransferLimit(download) || isManualWorldwideDownload(download);
     }
 
     private boolean isManualWorldwideDownload(TalkClientDownload download) {
@@ -158,5 +157,15 @@ public class DownloadAgent extends TransferAgent {
                 forceStartDownload(download);
             }
         }
+    }
+
+    @Override
+    public boolean isInProgress() {
+        for (DownloadAction downloadAction: mDownloadActions.values()) {
+            if (downloadAction.isActive() || (downloadAction.getDownload().getState() == NEW)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

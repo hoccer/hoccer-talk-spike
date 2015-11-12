@@ -5,19 +5,13 @@ import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.crypto.AESCryptor;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.*;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.log4j.Logger;
-import org.apache.tika.detect.DefaultDetector;
-import org.apache.tika.detect.Detector;
-import org.apache.tika.metadata.Metadata;
-import org.apache.tika.mime.MediaType;
-import org.apache.tika.mime.MimeType;
-import org.apache.tika.mime.MimeTypes;
-
 import java.io.*;
+import java.net.SocketTimeoutException;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.sql.SQLException;
@@ -30,7 +24,6 @@ public class DownloadAction implements TransferStateListener {
     private static final Logger LOG = Logger.getLogger(DownloadAction.class);
 
     public static final int MAX_FAILURES = 16;
-    private static final Detector MIME_DETECTOR = new DefaultDetector(MimeTypes.getDefaultMimeTypes());
 
     private final DownloadAgent mDownloadAgent;
     private TalkClientDownload mDownload;
@@ -63,6 +56,7 @@ public class DownloadAction implements TransferStateListener {
                 doDownloadingAction();
                 break;
             case PAUSED:
+            case WAITING_FOR_DATA:
                 mActive = false;
                 doPausedAction();
                 break;
@@ -103,6 +97,17 @@ public class DownloadAction implements TransferStateListener {
     }
 
     public void doDownloadingAction() {
+        if (isDataTransferFinished(mDownload)) {
+            LOG.debug("Download already complete");
+            switchStateToDetectingOrDecrypting();
+            return;
+        }
+
+        if (!mDownloadAgent.getXoClient().isReady()) {
+            LOG.debug("Client not connected. Download not started.");
+            return;
+        }
+
         String downloadFilename = computeDownloadFile(mDownload);
         if (downloadFilename == null) {
             LOG.error("[downloadId: '" + mDownload.getClientDownloadId() + "'] could not determine startDownload filename");
@@ -110,25 +115,16 @@ public class DownloadAction implements TransferStateListener {
         }
 
         LOG.debug("performDownloadRequest(downloadId: '" + mDownload.getClientDownloadId() + "', filename: '" + downloadFilename + "')");
-        RandomAccessFile randomAccessFile;
-        FileDescriptor fileDescriptor;
+
         try {
             mHttpGet = new HttpGet(mDownload.getDownloadUrl());
-
-            // determine the requested range
-            String range;
-            if (mDownload.getContentLength() != -1) {
-                long last = mDownload.getContentLength() - 1;
-                range = "bytes=" + mDownload.getTransferProgress() + "-" + last;
-                LOG.debug("[downloadId: '" + mDownload.getClientDownloadId() + "'] GET " + "requesting range '" + range + "'");
-                mHttpGet.addHeader("Range", range);
-            }
+            addContentRangeHeader(mHttpGet, mDownload);
 
             mDownloadAgent.onDownloadStarted(mDownload);
             HttpResponse response = mDownloadAgent.getHttpClient().execute(mHttpGet);
-
             StatusLine status = response.getStatusLine();
             int sc = status.getStatusCode();
+            LOG.debug("Http status code (" + sc + ")");
             if (sc != HttpStatus.SC_OK && sc != HttpStatus.SC_PARTIAL_CONTENT) {
                 closeResponse(response);
                 LOG.debug("Http status code (" + sc + ") is not OK (" + HttpStatus.SC_OK + ") or partial content (" +
@@ -138,7 +134,7 @@ public class DownloadAction implements TransferStateListener {
                 return;
             }
 
-            long bytesToGo = getContentLenghtFromResponse(response);
+            long bytesToGo = getContentLengthFromResponse(response);
 
             String contentRangeString = response.getFirstHeader("Content-Range").getValue();
             ByteRange contentRange = ByteRange.parseContentRange(contentRangeString);
@@ -150,45 +146,65 @@ public class DownloadAction implements TransferStateListener {
                 return;
             }
 
-            HttpEntity entity = response.getEntity();
-            InputStream inputStream = entity.getContent();
+            InputStream inputStream = response.getEntity().getContent();
             File file = new File(downloadFilename);
             LOG.debug("[downloadId: '" + mDownload.getClientDownloadId() + "'] GET " + "destination: '" + file + "'");
 
             file.createNewFile();
-            randomAccessFile = new RandomAccessFile(file, "rw");
-            fileDescriptor = randomAccessFile.getFD();
+            RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
             randomAccessFile.setLength(mDownload.getContentLength());
             LOG.debug("[downloadId: '" + mDownload.getClientDownloadId() + "'] GET " + "will retrieve '" + bytesToGo + "' bytes");
 
             randomAccessFile.seek(bytesStart);
 
-            copyData(randomAccessFile, fileDescriptor, inputStream);
+            copyData(randomAccessFile, randomAccessFile.getFD(), inputStream);
 
-            if (mDownload.getTransferProgress() == mDownload.getContentLength()) {
-                if (mDownload.getDecryptionKey() != null) {
-                    mDownload.switchState(DECRYPTING);
-                } else {
-                    mDownload.setFilePath(downloadFilename);
-                    mDownload.switchState(DETECTING);
-                }
-            } else {
-                checkTransferFailure(mDownload.getTransferFailures() + 1, "Download not completed: " + mDownload.getTransferProgress() + " / " + mDownload.getContentLength() + ", retrying...", mDownload);
+            if (isDataTransferFinished(mDownload)) {
+                switchStateToDetectingOrDecrypting();
+            } else if (mDownload.getState() != PAUSED && mDownload.getState() != WAITING_FOR_DATA) {
+                checkTransferFailure(mDownload.getTransferFailures() + 1, "Download not completed: " + mDownload.getTransferProgress() + " / " + mDownload.getContentLength() + " (" + (mDownload.getContentLength() - mDownload.getTransferProgress()) + "), retrying...", mDownload);
             }
+        } catch (SocketTimeoutException e) {
+            LOG.error("ReadTimeout. " + mDownload.getTransferFailures() + " Pausing Download.", e);
+            mDownload.switchState(WAITING_FOR_DATA);
+        } catch (InterruptedIOException e) {
+            mDownloadAgent.resetClient();
+            LOG.error("InterruptedIOException", e);
         } catch (Exception e) {
             LOG.error("Download error", e);
             checkTransferFailure(mDownload.getTransferFailures() + 1, "startDownload exception!", mDownload);
         }
     }
 
-    private long getContentLenghtFromResponse(HttpResponse response) {
+    private void switchStateToDetectingOrDecrypting() {
+        if (mDownload.isAvatar()) {
+            mDownload.switchState(DETECTING);
+        } else {
+            mDownload.switchState(DECRYPTING);
+        }
+    }
+
+    private void addContentRangeHeader(HttpRequestBase request, TalkClientDownload download) {
+        if (download.getContentLength() != -1) {
+            long last = download.getContentLength() - 1;
+            String range = "bytes=" + download.getTransferProgress() + "-" + last;
+            LOG.debug("[downloadId: '" + download.getClientDownloadId() + "'] GET " + "requesting range '" + range + "'");
+            request.addHeader("Range", range);
+        }
+    }
+
+    private boolean isDataTransferFinished(TalkClientDownload download) {
+        return download.getTransferProgress() == download.getContentLength();
+    }
+
+    private long getContentLengthFromResponse(HttpResponse response) {
         Header contentLengthHeader = response.getFirstHeader("Content-Length");
+        // A little dangerous?
         long contentLengthValue = mDownload.getContentLength();
         if (contentLengthHeader != null) {
             String contentLengthString = contentLengthHeader.getValue();
             contentLengthValue = Integer.valueOf(contentLengthString);
         }
-
         return contentLengthValue;
     }
 
@@ -344,7 +360,6 @@ public class DownloadAction implements TransferStateListener {
             mFuture.cancel(true);
         }
         mDownloadAgent.scheduleDownloadTask(mDownload);
-
         mDownloadAgent.onDownloadStateChanged(mDownload);
     }
 
@@ -394,11 +409,10 @@ public class DownloadAction implements TransferStateListener {
             IOUtils.closeQuietly(randomAccessFile);
             IOUtils.closeQuietly(inputStream);
         }
-
     }
 
     private void checkTransferFailure(int failures, String failureDescription, TalkClientDownload download) {
-        LOG.error(download.getClientDownloadId() + " " + failureDescription);
+        LOG.error(download.getClientDownloadId() + " " + failureDescription + " Count:" + failures);
         download.setTransferFailures(failures);
         if (failures <= MAX_FAILURES) {
             download.switchState(RETRYING);

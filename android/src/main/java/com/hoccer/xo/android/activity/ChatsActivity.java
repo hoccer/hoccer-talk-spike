@@ -1,11 +1,14 @@
 package com.hoccer.xo.android.activity;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
@@ -17,6 +20,7 @@ import com.hoccer.xo.android.fragment.ChatListFragment;
 import com.hoccer.xo.android.fragment.NearbyChatListFragment;
 import com.hoccer.xo.android.fragment.WorldwideChatListFragment;
 import com.hoccer.xo.android.passwordprotection.PasswordProtection;
+import com.hoccer.xo.android.service.XoClientService;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.ContactsMenuItemActionProvider;
 import org.apache.log4j.Logger;
@@ -61,6 +65,10 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        startXoClientService();
+
+        XoApplication.get().getClient().connect();
+
         mContactsMenuItemActionProvider = new ContactsMenuItemActionProvider(this);
 
         handleIntent(getIntent());
@@ -70,6 +78,30 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         PasswordProtection.get();
 
         FeaturePromoter.cleanupForSelectWorldwidePageOnFirstStart(this);
+
+        showGooglePlayServicesErrorDialog();
+    }
+
+    private void startXoClientService() {
+        Intent intent = new Intent(this, XoClientService.class);
+        intent.putExtra(XoClientService.EXTRA_CONNECT, true);
+        startService(intent);
+    }
+
+    public int showGooglePlayServicesErrorDialog() {
+        int result = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        LOG.debug("showGooglePlayServicesErrorDialog:" + result);
+
+        if (result != ConnectionResult.SUCCESS) {
+            String errorString = GooglePlayServicesUtil.getErrorString(result);
+            LOG.debug("Play Services error string:" + errorString);
+
+            Dialog googlePlayServicesErrorDialog = GooglePlayServicesUtil.getErrorDialog(result, this, 0);
+            if (googlePlayServicesErrorDialog != null) {
+                googlePlayServicesErrorDialog.show();
+            }
+        }
+        return result;
     }
 
     @Override

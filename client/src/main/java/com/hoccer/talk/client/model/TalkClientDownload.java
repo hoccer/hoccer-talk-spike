@@ -11,13 +11,14 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.log4j.Logger;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @DatabaseTable(tableName = "clientDownload")
 public class TalkClientDownload extends XoTransfer {
 
     private final static Logger LOG = Logger.getLogger(TalkClientDownload.class);
 
-    private List<TransferStateListener> mTransferListeners = new ArrayList<TransferStateListener>();
+    private CopyOnWriteArrayList<TransferStateListener> mTransferListeners = new CopyOnWriteArrayList<TransferStateListener>();
 
     public enum State implements IXoTransferState {
         INITIALIZING {
@@ -35,7 +36,7 @@ public class TalkClientDownload extends XoTransfer {
         DOWNLOADING {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(PAUSED, RETRYING, DECRYPTING, DETECTING, FAILED);
+                return EnumSet.of(PAUSED, RETRYING, DECRYPTING, DETECTING, FAILED, WAITING_FOR_DATA);
             }
         },
         PAUSED {
@@ -44,10 +45,16 @@ public class TalkClientDownload extends XoTransfer {
                 return EnumSet.of(DOWNLOADING);
             }
         },
+        WAITING_FOR_DATA {
+            @Override
+            public Set<State> possibleFollowUps() {
+                return EnumSet.of(DOWNLOADING);
+            }
+        },
         RETRYING {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(DOWNLOADING, PAUSED);
+                return EnumSet.of(DOWNLOADING, PAUSED, WAITING_FOR_DATA);
             }
         },
         DECRYPTING {
@@ -154,7 +161,7 @@ public class TalkClientDownload extends XoTransfer {
         this.aspectRatio = 1.0;
         this.downloadProgress = 0;
         this.contentLength = -1;
-        mTransferListeners = new ArrayList<TransferStateListener>();
+        mTransferListeners = new CopyOnWriteArrayList<TransferStateListener>();
     }
 
     public void initializeAsAvatar(String url, String id, Date timestamp) {
@@ -269,6 +276,7 @@ public class TalkClientDownload extends XoTransfer {
             case RETRYING:
                 return ContentState.DOWNLOAD_DOWNLOADING;
             case PAUSED:
+            case WAITING_FOR_DATA:
                 return ContentState.DOWNLOAD_PAUSED;
             case DECRYPTING:
                 return ContentState.DOWNLOAD_DECRYPTING;
@@ -280,6 +288,7 @@ public class TalkClientDownload extends XoTransfer {
                 return ContentState.DOWNLOAD_COMPLETE;
             case ON_HOLD:
                 return ContentState.DOWNLOAD_ON_HOLD;
+
             default:
                 throw new RuntimeException("Unknown download state '" + state + "'");
         }

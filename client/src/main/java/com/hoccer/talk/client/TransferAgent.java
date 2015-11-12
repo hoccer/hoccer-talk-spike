@@ -28,7 +28,7 @@ public abstract class TransferAgent {
 
     protected ScheduledExecutorService mExecutorService;
 
-    protected final HttpClient mHttpClient;
+    protected HttpClient mHttpClient;
     protected final XoClient mClient;
 
     protected List<TransferListener> mListeners = new ArrayList<TransferListener>();
@@ -54,7 +54,7 @@ public abstract class TransferAgent {
         httpParams.setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
         HttpConnectionParams.setTcpNoDelay(httpParams, true);
         HttpConnectionParams.setConnectionTimeout(httpParams, 3000);
-        HttpConnectionParams.setSoTimeout(httpParams, 5000);
+        HttpConnectionParams.setSoTimeout(httpParams, 10000);
         return new HttpClientWithKeyStore(httpParams);
     }
 
@@ -70,7 +70,13 @@ public abstract class TransferAgent {
         return mHttpClient;
     }
 
+    public void resetClient(){
+        mHttpClient = createHttpClient();
+    }
+
     public XoClient getXoClient() {
         return mClient;
     }
+
+    public abstract boolean isInProgress();
 }
