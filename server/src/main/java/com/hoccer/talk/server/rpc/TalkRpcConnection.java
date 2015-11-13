@@ -249,6 +249,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
                     client.setTimeReady(null);
                     client.setTimeLastDisconnect(new Date());
                     database.saveClient(client);
+                    LOG.info("[connectionId: '" + getConnectionId() + "'] stored logout for client "+client.getClientId());
                 }
             }
 

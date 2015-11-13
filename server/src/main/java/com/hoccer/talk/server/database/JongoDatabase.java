@@ -42,6 +42,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     private Jongo mJongo;
 
     private final List<MongoCollection> mCollections;
+    private final Map<String, MongoCollection> mCollectionsByName = new HashMap<String, MongoCollection>();
 
     private MongoCollection mClients;
     private MongoCollection mMessages;
@@ -67,6 +68,10 @@ public class JongoDatabase implements ITalkServerDatabase {
         mCollections = new ArrayList<MongoCollection>();
         mMongo = mongodb;
         initialize(configuration.getJongoDb());
+    }
+
+    public Object getRawCollection(String name) {
+        return mCollectionsByName.get(name);
     }
 
     private Mongo createMongoClient(TalkServerConfiguration configuration) {
