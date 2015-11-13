@@ -631,6 +631,7 @@ public class TalkServer {
                 }
             } else {
                 LOG.debug("[connectionId: '" + connection.getConnectionId() + "'] closed (was not logged in)");
+                return;
             }
             connection.doLogout();
             LOG.info("[connectionId: '" + connection.getConnectionId() + "'] finally closed" +

@@ -254,7 +254,9 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
 
             LOG.debug("[connectionId: '" + getConnectionId() + "'] setting client to null and disconnect JsonRpc/websocket connection");
             mTalkClient = null;
-            disconnect();
+            if (isConnected()) {
+                disconnect();
+            }
          }
         LOG.info("[connectionId: '" + getConnectionId() + "'] logged out");
     }
