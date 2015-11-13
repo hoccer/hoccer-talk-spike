@@ -132,6 +132,14 @@ public class TalkServer {
 
     Map<String,String> mIdLocks;
 
+    boolean mReady = false;
+    public void setReady() {
+        mReady = true;
+    }
+    public boolean isReady() {
+        return mReady;
+    }
+
     public class NonReentrantLock{
 
         private boolean mIsLocked;
@@ -510,8 +518,14 @@ public class TalkServer {
             String clientId = client.getClientId();
             TalkRpcConnection oldConnection = getClientConnection(clientId);
             if (oldConnection != null) {
-                LOG.warn("identifyClient: old connection with id " + oldConnection.getConnectionId() + " exists for client " + clientId + ", disconnecting old connection, new connection id" + connection.getConnectionId());
+                LOG.info("identifyClient: old connection with id " + oldConnection.getConnectionId() + " exists for client " + clientId + ", disconnecting old connection, new connection id " + connection.getConnectionId());
                 oldConnection.disconnect();
+                TalkRpcConnection oldConnection2 = getClientConnection(clientId);
+                if (oldConnection2 != null) {
+                    LOG.error("identifyClient: old connection with id " + oldConnection2.getConnectionId() + " still exists after disconnect, client " + clientId + ", disconnecting old connection, new connection id " + connection.getConnectionId());
+                } else {
+                    LOG.info("identifyClient: disconnected old connection with id " + oldConnection.getConnectionId() + " for client " + clientId + ", disconnecting old connection, new connection id " + connection.getConnectionId());
+                }
             }
             connection.getServerHandler().destroyEnvironment(TalkEnvironment.TYPE_NEARBY);  // after logon, destroy possibly left over environments
             connection.getServerHandler().releaseEnvironment(TalkEnvironment.TYPE_WORLDWIDE);  // after logon, release possibly left over environments

@@ -199,6 +199,7 @@ public class JongoDatabase implements ITalkServerDatabase {
      private MongoCollection getCollection(String name) {
         MongoCollection res = mJongo.getCollection(name).withWriteConcern(WriteConcern.JOURNALED);
         mCollections.add(res);
+        mCollectionsByName.put(name, res);
         return res;
     }
 
