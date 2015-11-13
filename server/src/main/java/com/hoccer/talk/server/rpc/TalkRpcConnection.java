@@ -265,9 +265,9 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      * Disconnect the underlying connection and finish up
      */
     public void disconnect() {
-        LOG.warn("[connectionId: '" + getConnectionId() + "'] disconnect()");
+        LOG.debug("[connectionId: '" + getConnectionId() + "'] disconnect()");
         boolean wasConnected = mConnection.disconnect();
-        LOG.warn("[connectionId: '" + getConnectionId() + "'] disconnect() returned wasConnected="+wasConnected);
+        LOG.info("[connectionId: '" + getConnectionId() + "'] disconnect() returned wasConnected="+wasConnected);
     }
 
     /**
