@@ -121,6 +121,14 @@
 
     </PreferenceCategory>
 
+
+    <PreferenceCategory
+            android:title="@string/pref_category_polling">
+        <SwitchPreference
+                android:key="preference_key_enable_polling"
+                android:title="@string/enable_polling"/>
+    </PreferenceCategory>
+
     <PreferenceCategory
             android:title="@string/pref_privacy_title">
 
