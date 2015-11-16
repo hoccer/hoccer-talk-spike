@@ -22,6 +22,7 @@ import com.hoccer.xo.android.passwordprotection.PasswordProtection;
 import com.hoccer.xo.android.passwordprotection.activity.PasswordChangeActivity;
 import com.hoccer.xo.android.passwordprotection.activity.PasswordPromptActivity;
 import com.hoccer.xo.android.passwordprotection.activity.PasswordSetActivity;
+import com.hoccer.xo.android.polling.PollingBroadcastReceiver;
 import com.hoccer.xo.android.view.chat.attachments.TransferControlView;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -89,6 +90,20 @@ public class XoPreferenceActivity extends PreferenceActivity
         });
 
         mBackupController = new BackupController(this, createBackupPreference, restoreBackupPreference);
+
+        Preference enablePollingPreference = (Preference) findPreference(getString(R.string.preference_key_enable_polling));
+        enablePollingPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                if ((Boolean)newValue){
+                    PollingBroadcastReceiver.startPolling(XoApplication.get());
+                } else {
+                    PollingBroadcastReceiver.stopPolling(XoApplication.get());
+                }
+                return true;
+            }
+        });
+
     }
 
     private boolean isPasswordSet() {
