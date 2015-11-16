@@ -20,12 +20,14 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
     private final SharedPreferences mSharedPreferences;
     private final Properties mProperties;
     private final String mAppName;
+    private final Context mContext;
 
     public XoAndroidClientConfiguration(Context context) {
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 
         mProperties = new Properties();
         mAppName = context.getString(R.string.app_name);
+        mContext = context;
 
         try {
             InputStream inputStream = context.getAssets().open("configuration.properties");
@@ -74,6 +76,10 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
             return Boolean.parseBoolean(mProperties.getProperty("hoccer.android.enable.crash.reporting"));
         }
         return mSharedPreferences.getBoolean("preference_report_crashes", true);
+    }
+
+    public boolean isPollingEnabled() {
+        return mSharedPreferences.getBoolean(mContext.getString(R.string.preference_key_enable_polling), false);
     }
 
     public String getBackupDirectory() {
