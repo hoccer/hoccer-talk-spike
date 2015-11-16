@@ -306,6 +306,16 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+                android:name="com.hoccer.xo.android.polling.PollingBroadcastReceiver"
+                android:enabled="true"
+                android:exported="true"
+                android:label="PollingBroadcastReceiver">
+
+        </receiver>
+
+
+
         <service android:name="com.hoccer.xo.android.backup.BackupAndRestoreService" android:exported="false"/>
 
     </application>
