@@ -7,4 +7,7 @@
     <string name="preference_key_worldwide_timetolive">preference_key_worldwide_timetolive</string>
     <string name="preference_key_worldwide_enable_notifications">preference_key_worldwide_enable_notifications</string>
     <string name="preference_key_worldwide_enable_automatic_download">preference_key_worldwide_enable_automatic_download</string>
+    <string name="preference_key_enable_polling">preference_key_enable_polling</string>
+    <string name="preference_key_polling_interval">preference_key_polling_interval</string>
+
 </resources>
