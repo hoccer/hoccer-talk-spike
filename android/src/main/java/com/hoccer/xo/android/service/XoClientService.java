@@ -349,7 +349,7 @@ public class XoClientService extends Service {
         }
     }
 
-    private void handleConnectivityChange(NetworkInfo activeNetwork) {
+    private synchronized void handleConnectivityChange(NetworkInfo activeNetwork) {
         if (activeNetwork == null) {
             LOG.debug("connectivity change: no connectivity");
             mClient.disconnect();
