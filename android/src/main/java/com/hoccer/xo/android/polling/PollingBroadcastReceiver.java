@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.android.push.TalkPushService;
 import com.hoccer.xo.android.BackgroundManager;
@@ -22,15 +23,21 @@ public class PollingBroadcastReceiver extends BroadcastReceiver {
     private static XoApplication xoApplication;
     private static Intent intent;
 
-    public static void startPolling(XoApplication xoApplication){
+    public static void startPolling(XoApplication xoApplication) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(xoApplication);
+        String intervalString = preferences.getString(xoApplication.getString(R.string.preference_key_polling_interval), "900000");
+        int interval = Integer.parseInt(intervalString);
+        startPolling(xoApplication, interval);
+    }
+
+    public static void startPolling(XoApplication xoApplication, int interval){
         PollingBroadcastReceiver.xoApplication = xoApplication;
         if (intent == null) {
             intent = new Intent(xoApplication.getApplicationContext(), PollingBroadcastReceiver.class);
         }
         stopPolling(xoApplication);
-        SharedPreferences preferences = xoApplication.getApplicationContext().getSharedPreferences("sharedPreferences", Context.MODE_PRIVATE);
-        int interval = preferences.getInt(xoApplication.getApplicationContext().getString(R.string.preference_key_polling_interval),15*60*1000);
-        LOG.debug("Start polling with interval "+interval);
+
+        LOG.debug("Start polling with interval " + interval);
         AlarmManager alarmManager = (AlarmManager) xoApplication.getApplicationContext().getSystemService(Context.ALARM_SERVICE);
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), interval, PendingIntent.getBroadcast(xoApplication.getApplicationContext(), 0, intent, 0));
     }
