@@ -91,7 +91,7 @@ public class XoPreferenceActivity extends PreferenceActivity
 
         mBackupController = new BackupController(this, createBackupPreference, restoreBackupPreference);
 
-        Preference enablePollingPreference = (Preference) findPreference(getString(R.string.preference_key_enable_polling));
+        final Preference enablePollingPreference = findPreference(getString(R.string.preference_key_enable_polling));
         enablePollingPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -103,7 +103,22 @@ public class XoPreferenceActivity extends PreferenceActivity
                 return true;
             }
         });
-
+        final Preference setPollingIntervalPreference = findPreference(getString(R.string.preference_key_polling_interval));
+        setPollingIntervalPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                if (mDefaultSharedPreferences.getBoolean(getString(R.string.preference_key_enable_polling), false)){
+                    try {
+                        Integer newInterval = Integer.parseInt((String) newValue);
+                        PollingBroadcastReceiver.startPolling(XoApplication.get(), newInterval);
+                    } catch (Exception e){
+                        LOG.error("Setting new polling interval went wrong.",e);
+                        return false;
+                    }
+                }
+                return true;
+            }
+        });
     }
 
     private boolean isPasswordSet() {
