@@ -473,6 +473,7 @@
     <string name="send_message">Send message</string>
     <string name="pref_category_polling">Polling</string>
     <string name="enable_polling">Activated</string>
+    <string name="pref_title_polling_interval">Polling interval</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>
