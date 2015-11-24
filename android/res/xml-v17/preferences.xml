@@ -131,7 +131,7 @@
                 android:entries="@array/preference_polling_interval_name"
                 android:entryValues="@array/preference_polling_interval_values"
                 android:defaultValue="900000"/>
-        />
+
     </PreferenceCategory>
 
     <PreferenceCategory
