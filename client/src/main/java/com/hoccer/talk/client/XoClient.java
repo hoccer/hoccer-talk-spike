@@ -1512,9 +1512,11 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                             if (groupContact.getGroupMembership().isInvolved() && hasMembersOrMessages(groupContact)) {
                                 groupContact.getGroupPresence().setKept(true);
                             }
-                            groupPresence.setState(TalkGroupPresence.STATE_DELETED);
-                            mDatabase.saveGroupPresence(groupPresence);
                         }
+
+                        groupPresence.setState(TalkGroupPresence.STATE_DELETED);
+                        mDatabase.saveGroupPresence(groupPresence);
+
                         // update group member state
                         List<TalkGroupMembership> memberships = mDatabase.findMembershipsInGroup(groupContact.getGroupId());
                         for (TalkGroupMembership membership : memberships) {
