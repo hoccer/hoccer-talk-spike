@@ -504,9 +504,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     public void connect() {
         LOG.debug("connect()");
         cancelDisconnectTimeout();
-        if (mState == State.READY && mConnectInBackground) {
-            switchState(State.SYNCING, "already connected, starting sync");
-        } else if (mState == State.DISCONNECTED) {
+        if (mState == State.DISCONNECTED) {
             switchState(State.CONNECTING, "connecting client");
         } else {
             LOG.error("XOClient is in state "+mState+" while connecting.");
