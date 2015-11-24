@@ -635,7 +635,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     if (TalkPresence.STATUS_ONLINE.equals(newStatus)) {
                         cancelDisconnectTimeout();
                     } else if (TalkPresence.STATUS_BACKGROUND.equals(newStatus)) {
-                        disconnectAfterTimeout(30);//mClientConfiguration.getBackgroundDisconnectTimeoutSeconds());
+                        disconnectAfterTimeout(mClientConfiguration.getBackgroundDisconnectTimeoutSeconds());
                     }
 
                     notifyOnClientPresenceChanged(mSelfContact);
