@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.android.push.TalkPushService;
-import com.hoccer.xo.android.BackgroundManager;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.service.XoClientService;
 import org.apache.log4j.Logger;
@@ -17,6 +16,7 @@ import org.apache.log4j.Logger;
 /**
  * Created by andreasr on 16.11.15.
  */
+
 public class PollingBroadcastReceiver extends BroadcastReceiver {
 
     private static final Logger LOG = Logger.getLogger(PollingBroadcastReceiver.class);
@@ -37,7 +37,7 @@ public class PollingBroadcastReceiver extends BroadcastReceiver {
         }
         stopPolling(xoApplication);
 
-        LOG.debug("Start polling with interval " + interval);
+        LOG.debug("Start polling with interval " + interval/(1000*60)+"min");
         AlarmManager alarmManager = (AlarmManager) xoApplication.getApplicationContext().getSystemService(Context.ALARM_SERVICE);
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), interval, PendingIntent.getBroadcast(xoApplication.getApplicationContext(), 0, intent, 0));
     }
@@ -54,14 +54,11 @@ public class PollingBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        LOG.debug("Polling server "+xoApplication.getClient().getState());
         if (xoApplication.getClient().isDisconnected()) {
-            LOG.debug("Sending Wakeup");
+            LOG.debug("Sending wakeup to start syncing");
             Intent serviceIntent = new Intent(context, XoClientService.class);
-            serviceIntent.putExtra(TalkPushService.EXTRA_WAKE_CLIENT, "Polling server");
+            serviceIntent.putExtra(TalkPushService.EXTRA_WAKE_CLIENT, "Polling talkserver");
             context.startService(serviceIntent);
-        } else {
-            LOG.debug("App is connected. No polling.");
         }
     }
 }
