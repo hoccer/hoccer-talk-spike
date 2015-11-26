@@ -504,7 +504,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     public void connect() {
         LOG.debug("connect()");
         cancelDisconnectTimeout();
-        mConnectInBackground = false;
         if (mState == State.DISCONNECTED) {
             switchState(State.CONNECTING, "connecting client");
         } else {
@@ -1631,7 +1630,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             }
 
             if (mState != State.CONNECTING) {
-                //Both things are the same?
+                //Does basically the same?
                 switchState(State.CONNECTING, "reconnect after connection closed");
             } else {
                scheduleConnect();
