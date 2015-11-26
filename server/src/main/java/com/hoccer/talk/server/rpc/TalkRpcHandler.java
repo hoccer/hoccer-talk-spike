@@ -2475,8 +2475,20 @@ public class TalkRpcHandler implements ITalkRpcServer {
             for (TalkMessage message : messages) {
                 if (clientId.equals(message.getSenderId())) {
                     synchronized (mServer.idLock(message.getMessageId())) {
-                        message.setAttachmentUploadStarted(new Date());
-                        mDatabase.saveMessage(message);
+                        boolean messageChanged = false;
+                        if (message.getAttachmentUploadStarted() == null &&
+                                (TalkDelivery.ATTACHMENT_STATE_UPLOADING.equals(nextState) || TalkDelivery.ATTACHMENT_STATE_UPLOADED.equals(nextState) )) {
+                            message.setAttachmentUploadStarted(new Date());
+                            messageChanged = true;
+                        }
+                        if (message.getAttachmentUploadFinished() == null &&
+                                (TalkDelivery.ATTACHMENT_STATE_UPLOADED.equals(nextState) )) {
+                            message.setAttachmentUploadFinished(new Date());
+                            messageChanged = true;
+                        }
+                        if (messageChanged) {
+                            mDatabase.saveMessage(message);
+                        }
                         List<TalkDelivery> deliveries = mDatabase.findDeliveriesForMessage(message.getMessageId());
 
                         // update all concerned deliveries

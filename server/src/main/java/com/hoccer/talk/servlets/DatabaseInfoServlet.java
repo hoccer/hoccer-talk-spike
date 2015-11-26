@@ -122,13 +122,11 @@ public class DatabaseInfoServlet extends HttpServlet {
         w.write("Deliveries Total         : " + deliveries.count()+ "\n");
         List<String> deliveryStates = deliveries.distinct("state").as(String.class);
         for (String deliveryState : deliveryStates) {
-            //w.write("Deliveries in state '"+deliveryState+"' : " + deliveries.count("{ state: # }", deliveryState)+ "\n");
             w.write("Deliveries in state "+String.format("%-28s" , deliveryState)+" : " + deliveries.count("{ state: # }", deliveryState)+ "\n");
         }
         w.write("\n");
         List<String> attachmentDeliveryStates = deliveries.distinct("attachmentState").as(String.class);
         for (String attachmentDeliveryState : attachmentDeliveryStates) {
-            //w.write("Deliveries in attachment state '"+attachmentDeliveryState+"' : " + deliveries.count("{ attachmentState: # }", attachmentDeliveryState)+ "\n");
             w.write("Deliveries in attachment state "+String.format("%-28s" , attachmentDeliveryState)+" : " + deliveries.count("{ attachmentState: # }", attachmentDeliveryState)+ "\n");
         }
         w.write("\n");
