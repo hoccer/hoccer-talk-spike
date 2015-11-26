@@ -109,7 +109,7 @@ public class UploadAgent extends TransferAgent {
         for (TalkClientUpload upload : mClient.getDatabase().findAllPendingUploads()) {
             getOrCreateUploadAction(upload);
 
-            if (upload.getState() == NEW) {
+            if (upload.getState() == TalkClientUpload.State.NEW) {
                 register(upload);
                 startUpload(upload);
             }
@@ -125,5 +125,16 @@ public class UploadAgent extends TransferAgent {
                 resumeUpload(upload);
             }
         }
+    }
+
+    @Override
+    public boolean isInProgress() {
+        for (UploadAction uploadAction: mUploadActions.values()) {
+            TalkClientUpload.State state = uploadAction.getUpload().getState();
+            if (state == NEW || state == REGISTERING || state == UPLOADING) {
+                return true;
+            }
+        }
+        return false;
     }
 }
