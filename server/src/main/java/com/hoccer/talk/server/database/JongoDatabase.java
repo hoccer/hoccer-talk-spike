@@ -125,14 +125,19 @@ public class JongoDatabase implements ITalkServerDatabase {
         mRelationships.ensureIndex("{otherClientId:1, state:1}") ;
         mRelationships.ensureIndex("{clientId:1, lastChanged:1}") ;
         mRelationships.ensureIndex("{state:1, lastChanged:1}") ;
+        mRelationships.ensureIndex("{notificationPreference:1}");
 
         mPresences.ensureIndex("{clientId:1}");
+        mPresences.ensureIndex("{connectionStatus:1}");
+        mPresences.ensureIndex("{apnsToken:1}");
+        mPresences.ensureIndex("{gcmRegistration:1}");
 
         mKeys.ensureIndex("{clientId:1}");
 
         mGroupPresences.ensureIndex("{groupId:1}");
         mGroupPresences.ensureIndex("{state:1}");
         mGroupPresences.ensureIndex("{state:1, lastChanged:1}");
+        mGroupPresences.ensureIndex("{groupType:1}");
 
         mGroupMemberships.ensureIndex("{groupId:1, clientId:1}");
         mGroupMemberships.ensureIndex("{clientId:1}");
@@ -141,11 +146,17 @@ public class JongoDatabase implements ITalkServerDatabase {
         mGroupMemberships.ensureIndex("{clientId:1, state:1}");
         mGroupMemberships.ensureIndex("{clientId:1, state:1, role:1}");
         mGroupMemberships.ensureIndex("{state:1, lastChanged:1}");
+        mGroupMemberships.ensureIndex("{state:1, role:1}");
+        mGroupMemberships.ensureIndex("{role:1}");
+        mGroupMemberships.ensureIndex("{notificationPreference:1}");
 
         mMessages.ensureIndex("{messageId:1, senderId:1}");
         mMessages.ensureIndex("{messageId:1}");
         mMessages.ensureIndex("{senderId:1}");
         mMessages.ensureIndex("{attachmentFileId:1}");
+        mMessages.ensureIndex("{attachment:1}");
+        mMessages.ensureIndex("{attachmentUploadStarted:1}");
+        mMessages.ensureIndex("{attachmentUploadFinished:1}");
 
         mDeliveries.ensureIndex("{messageId:1, senderId:1, receiverId:1}");
         mDeliveries.ensureIndex("{messageId:1}");
@@ -158,6 +169,7 @@ public class JongoDatabase implements ITalkServerDatabase {
         mDeliveries.ensureIndex("{receiverId:1, groupId:1, state:1}");
         mDeliveries.ensureIndex("{receiverId:1, state:1, attachmentState:1}");
         mDeliveries.ensureIndex("{state:1}");
+        mDeliveries.ensureIndex("{attachmentState:1}");
         mDeliveries.ensureIndex("{state:1, attachmentState:1}");
         mDeliveries.ensureIndex("{timeAccepted:1}");
 
@@ -166,9 +178,17 @@ public class JongoDatabase implements ITalkServerDatabase {
         mEnvironments.ensureIndex("{clientId: 1}");
         mEnvironments.ensureIndex("{groupId: 1, clientId: 1}");
         mEnvironments.ensureIndex("{type: 1, clientId: 1}");
+        mEnvironments.ensureIndex("{type: 1}");
 
-        mClientHostInfos.ensureIndex("{clientId: 1}");
+        mClientHostInfos.ensureIndex("{clientId:1}");
         mClientHostInfos.ensureIndex("{clientLanguage: 1, clientName:1}");
+        mClientHostInfos.ensureIndex("{systemName:1}");
+        mClientHostInfos.ensureIndex("{serverTime:1}");
+        mClientHostInfos.ensureIndex("{systemName: 1, serverTime:1}");
+        mClientHostInfos.ensureIndex("{clientName:1}");
+        mClientHostInfos.ensureIndex("{clientVersion:1}");
+        mClientHostInfos.ensureIndex("{systemLanguage:1}");
+
         LOG.info("Ensuring database indices done for database " + dbName);
 
         cleanupDatabaseStateOnStartup();
