@@ -44,6 +44,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
     private static final Logger LOG = Logger.getLogger(XoClient.class);
+    private boolean mConnectInBackground = false;
 
     public enum State {
         DISCONNECTED,
@@ -148,9 +149,9 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         // fetch executor and db immediately
         mExecutor = host.getBackgroundExecutor();
 
-        mNotifyQueue  = new ArrayBlockingQueue<Runnable>(150);
+        mNotifyQueue = new ArrayBlockingQueue<Runnable>(150);
         // Don't like the 100 threads of mExecutor. Slows down things. Therefore, I create another one.
-        mNotifyExecutor = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(),Runtime.getRuntime().availableProcessors(),1,TimeUnit.SECONDS, mNotifyQueue);
+        mNotifyExecutor = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(), Runtime.getRuntime().availableProcessors(), 1, TimeUnit.SECONDS, mNotifyQueue);
 
         // create and initialize the database
         mDatabase = new XoClientDatabase(mClientHost.getDatabaseBackend());
@@ -491,10 +492,22 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         }
     }
 
+    public void connectInBackground() {
+        LOG.debug("connectInBackground()");
+        if (mState == State.DISCONNECTED) {
+            mConnectInBackground = true;
+            cancelDisconnectTimeout();
+            switchState(State.CONNECTING, "connecting client in background");
+        }
+    }
+
     public void connect() {
         LOG.debug("connect()");
+        cancelDisconnectTimeout();
         if (mState == State.DISCONNECTED) {
             switchState(State.CONNECTING, "connecting client");
+        } else {
+            LOG.error("XOClient is in state "+mState+" while connecting.");
         }
     }
 
@@ -610,6 +623,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     public void setPresenceStatus(String newStatus) {
+        LOG.debug("setPresenceStatus(" + newStatus + ")");
         try {
             TalkPresence presence = mSelfContact.getClientPresence();
             if (presence != null && presence.getClientId() != null) {
@@ -617,12 +631,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     presence.setConnectionStatus(newStatus);
                     mSelfContact.updatePresence(presence);
                     mDatabase.savePresence(presence);
-
-                    if (TalkPresence.STATUS_ONLINE.equals(newStatus)) {
-                        cancelDisconnectTimeout();
-                    } else if (TalkPresence.STATUS_BACKGROUND.equals(newStatus)) {
-                        scheduleDisconnectTimeout();
-                    }
 
                     notifyOnClientPresenceChanged(mSelfContact);
 
@@ -1052,7 +1060,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             }
 
             if (mState == State.CONNECTING) {
-                scheduleConnect();
+               scheduleConnect();
             } else {
                 cancelConnect();
             }
@@ -1085,6 +1093,11 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                         LOG.info("Delivering potentially unsent messages.");
                         requestSendAllPendingMessages();
                         resumeAllPendingTransfers();
+                        if (mConnectInBackground) {
+                            mConnectInBackground = false;
+                            LOG.info("Trigger disconnect in 30 seconds..");
+                            disconnectAfterTimeout(30);
+                        }
                     }
                 });
             }
@@ -1432,8 +1445,8 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         return new Date(0);
     }
 
-    public void syncGroupMemberships(TalkClientContact groupContact){
-        if (groupContact.isGroup()){
+    public void syncGroupMemberships(TalkClientContact groupContact) {
+        if (groupContact.isGroup()) {
             List<TalkClientContact> contact = new ArrayList<TalkClientContact>();
             contact.add(groupContact);
             try {
@@ -1442,11 +1455,11 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 e.printStackTrace();
             }
         } else {
-            LOG.warn("Trying to sync groupMemberships of a contact that isn't a group: "+groupContact.getName());
+            LOG.warn("Trying to sync groupMemberships of a contact that isn't a group: " + groupContact.getName());
         }
     }
 
-    private void syncGroupMemberships() throws SQLException{
+    private void syncGroupMemberships() throws SQLException {
         syncGroupMemberships(mDatabase.findAllGroupContacts());
     }
 
@@ -1484,10 +1497,11 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                         updateGroupMembership(membership);
                     }
 
-                // No member
                 } else {
+                    // No member
+
                     TalkGroupPresence groupPresence = groupContact.getGroupPresence();
-                    if (groupPresence != null){
+                    if (groupPresence != null) {
 
                         if (groupPresence.isTypeNearby()) {
                             destroyNearbyGroup(groupContact);
@@ -1530,26 +1544,35 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         return new Date(0);
     }
 
-    private void scheduleDisconnectTimeout() {
-        LOG.debug("scheduleDisconnectTimeout()");
+    public void disconnectAfterTimeout(int timeout) {
+        LOG.debug("disconnectAfterTimeout("+timeout+")");
         cancelDisconnectTimeout();
 
-        int timeout = mClientConfiguration.getBackgroundDisconnectTimeoutSeconds();
         mDisconnectTimeoutFuture = mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                mDisconnectTimeoutFuture = null;
-                switchState(State.DISCONNECTED, "disconnect timeout");
-                mIsTimedOut = true;
+                if (isTransferInProgress()) {
+                    LOG.debug("Transfer in progress. Postpone disconnect for 10 seconds.");
+                    disconnectAfterTimeout(10);
+                } else {
+                    mDisconnectTimeoutFuture = null;
+                    switchState(State.DISCONNECTED, "disconnect timeout");
+                    mIsTimedOut = true;
+                }
             }
         }, timeout, TimeUnit.SECONDS);
     }
 
-    private void cancelDisconnectTimeout() {
+    private boolean isTransferInProgress() {
+        return mDownloadAgent.isInProgress() || mUploadAgent.isInProgress();
+    }
+
+    public void cancelDisconnectTimeout() {
         mIsTimedOut = false;
         if (mDisconnectTimeoutFuture != null) {
             mDisconnectTimeoutFuture.cancel(false);
             mDisconnectTimeoutFuture = null;
+            LOG.debug("cancelDisconnectTimeout()");
         }
     }
 
@@ -1607,9 +1630,10 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             }
 
             if (mState != State.CONNECTING) {
+                //Does basically the same?
                 switchState(State.CONNECTING, "reconnect after connection closed");
             } else {
-                scheduleConnect();
+               scheduleConnect();
             }
         }
     }
@@ -3141,7 +3165,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 }
             }
 
-            LOG.debug("sync: updateGroupMembership 1: " + (System.currentTimeMillis() - startMillis)+"ms");
+            LOG.debug("sync: updateGroupMembership 1: " + (System.currentTimeMillis() - startMillis) + "ms");
 
             clientContact = mDatabase.findContactByClientId(newMembership.getClientId(), false);
             if (clientContact == null) {
@@ -3155,7 +3179,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 }
             }
             // TAKES PRETTY LONG UNTIL HERE
-            LOG.debug("sync: updateGroupMembership 2: " + (System.currentTimeMillis() - startMillis)+"ms");
+            LOG.debug("sync: updateGroupMembership 2: " + (System.currentTimeMillis() - startMillis) + "ms");
 
         } catch (SQLException e) {
             LOG.error("SQL error", e);
@@ -3193,7 +3217,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
             mDatabase.saveGroupMembership(dbMembership);
 
-            LOG.debug("sync: updateGroupMembership 3: " + (System.currentTimeMillis() - startMillis)+"ms");
+            LOG.debug("sync: updateGroupMembership 3: " + (System.currentTimeMillis() - startMillis) + "ms");
 
             // if this concerns our own membership
             if (clientContact.isSelf()) {
@@ -3226,10 +3250,10 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 mDatabase.saveContact(clientContact);
             }
 
-            LOG.debug("sync: updateGroupMembership 4a: " + (System.currentTimeMillis() - startMillis)+"ms");
+            LOG.debug("sync: updateGroupMembership 4a: " + (System.currentTimeMillis() - startMillis) + "ms");
             // ca. 25%
             updateGroupKeptState(oldMembership, newMembership, groupContact, clientContact);
-            LOG.debug("sync: updateGroupMembership 4b: " + (System.currentTimeMillis() - startMillis)+"ms");
+            LOG.debug("sync: updateGroupMembership 4b: " + (System.currentTimeMillis() - startMillis) + "ms");
 
         } catch (SQLException e) {
             LOG.error("sql error", e);

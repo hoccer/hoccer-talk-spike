@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jongo.Jongo;
 import org.jongo.MongoCollection;
+import org.jongo.Update;
 
 import java.net.UnknownHostException;
 import java.util.*;
@@ -41,6 +42,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     private Jongo mJongo;
 
     private final List<MongoCollection> mCollections;
+    private final Map<String, MongoCollection> mCollectionsByName = new HashMap<String, MongoCollection>();
 
     private MongoCollection mClients;
     private MongoCollection mMessages;
@@ -54,6 +56,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     private MongoCollection mEnvironments;
     private MongoCollection mClientHostInfos;
     private MongoCollection mMigrations;
+    private MongoCollection mStatistics;
 
     public JongoDatabase(TalkServerConfiguration configuration) {
         mCollections = new ArrayList<MongoCollection>();
@@ -65,6 +68,10 @@ public class JongoDatabase implements ITalkServerDatabase {
         mCollections = new ArrayList<MongoCollection>();
         mMongo = mongodb;
         initialize(configuration.getJongoDb());
+    }
+
+    public Object getRawCollection(String name) {
+        return mCollectionsByName.get(name);
     }
 
     private Mongo createMongoClient(TalkServerConfiguration configuration) {
@@ -102,6 +109,7 @@ public class JongoDatabase implements ITalkServerDatabase {
         mClientHostInfos = getCollection("clientHostInfo");
         mMigrations = getCollection("migrations");
 
+        LOG.info("Ensuring database indices for database " + dbName);
         mClients.ensureIndex("{clientId:1}");
         mClients.ensureIndex("{apnsToken:1}");
         mClients.ensureIndex("{timeRegistered:1}"); // for external statistics gathering
@@ -161,12 +169,37 @@ public class JongoDatabase implements ITalkServerDatabase {
 
         mClientHostInfos.ensureIndex("{clientId: 1}");
         mClientHostInfos.ensureIndex("{clientLanguage: 1, clientName:1}");
+        LOG.info("Ensuring database indices done for database " + dbName);
 
+        cleanupDatabaseStateOnStartup();
+
+    }
+
+    void cleanupDatabaseStateOnStartup() {
+        LOG.info("Cleanup database state on startup:");
+
+        // after restart, everyone is offline
+        long notOffline = mPresences.count("{connectionStatus : {$ne: 'offline'}}");
+        LOG.info("-- cleanupDatabaseState: Presences not set to offline: "+notOffline);
+        long online = mPresences.count("{connectionStatus : 'online'}");
+        LOG.info("---- cleanupDatabaseState: Presences online:"+online);
+        long background = mPresences.count("{connectionStatus : 'background'}");
+        LOG.info("---- cleanupDatabaseState: Presences background: "+background);
+        long typing = mPresences.count("{connectionStatus : 'typing'}");
+        LOG.info("---- cleanupDatabaseState: Presences typing: "+typing);
+
+        Date cleanupDate = new Date();
+        Update update = mPresences.update("{connectionStatus : {$ne: 'offline'}}");
+        WriteResult result = update.multi().with("{ $set: {connectionStatus:'offline'} }, { $set: {timestamp:#} }", cleanupDate);
+        LOG.info("-- cleanupDatabaseState: Updated " + result.getN() + " presences to state 'offline' and timestamp " + cleanupDate);
+
+        LOG.info("Cleanup database state on startup done.");
     }
 
      private MongoCollection getCollection(String name) {
         MongoCollection res = mJongo.getCollection(name).withWriteConcern(WriteConcern.JOURNALED);
         mCollections.add(res);
+        mCollectionsByName.put(name, res);
         return res;
     }
 

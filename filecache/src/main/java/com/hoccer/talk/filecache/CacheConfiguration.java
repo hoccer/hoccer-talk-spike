@@ -33,6 +33,7 @@ public class CacheConfiguration {
     private int mStorageFileExpiryTime = 365 * 24 * 3600; // 1 year (in seconds)
     private int mTransferFileExpiryTime = 3 * 7 * 24 * 3600; // 3 weeks (in seconds)
 
+    private int mDownloadTimeout = 120; // in seconds- after this time downloads will timeout when no new data has arrived
 
     public int getStorageFileExpiryTime() {
         return mStorageFileExpiryTime;
@@ -130,11 +131,23 @@ public class CacheConfiguration {
         this.mOrmlitePassword = ormlitePassword;
     }
 
+    public int getDownloadTimeout() {
+        return mDownloadTimeout;
+    }
+
+    public void setDownloadTimeout(int mDownloadTimeout) {
+        this.mDownloadTimeout = mDownloadTimeout;
+    }
+
     public void configureFromProperties(Properties properties) {
         // Server
         String serverThreads = properties.getProperty(PROPERTY_PREFIX + ".server.threads", Integer.toString(mServerThreads));
         if(serverThreads != null) {
             mServerThreads = Integer.parseInt(serverThreads);
+        }
+        String downloadTimeout = properties.getProperty(PROPERTY_PREFIX + ".download.timeout", Integer.toString(mDownloadTimeout));
+        if(downloadTimeout != null) {
+            mDownloadTimeout = Integer.parseInt(downloadTimeout);
         }
         // Listen params
         mListenAddress = properties.getProperty(PROPERTY_PREFIX + ".listen.address", mListenAddress);
@@ -167,8 +180,9 @@ public class CacheConfiguration {
                         MessageFormat.format("\n   * listen address:                        ''{0}''", mListenAddress) +
                         MessageFormat.format("\n   * listen port:                           ''{0}''", Long.toString(mListenPort)) +
                         MessageFormat.format("\n   * threads:                               ''{0}''", mServerThreads) +
+                        MessageFormat.format("\n   * download timeout (in s):               ''{0}''", mDownloadTimeout) +
                         "\n - Remote JMX Configuration:" +
-                        MessageFormat.format("\n   * jmx port:                             {0}", Long.toString(getJMXListenPort())) +
+                        MessageFormat.format("\n   * jmx port:                              ''{0}''", Long.toString(getJMXListenPort())) +
                         "\n - Database Configuration:" +
                         MessageFormat.format("\n   * database backend:                      ''{0}''", mDatabaseBackend) +
                         MessageFormat.format("\n   * ormlite url:                           ''{0}''", mOrmliteUrl) +

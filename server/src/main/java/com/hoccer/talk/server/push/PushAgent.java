@@ -1,6 +1,7 @@
 package com.hoccer.talk.server.push;
 
 import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.android.gcm.server.Sender;
 import com.hoccer.talk.model.TalkClient;
@@ -17,6 +18,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 /**
  * Agent for push notifications
@@ -46,6 +49,10 @@ public class PushAgent {
     private final AtomicInteger mPushDelayed = new AtomicInteger();
     private final AtomicInteger mPushIncapable = new AtomicInteger();
     private final AtomicInteger mPushBatched = new AtomicInteger();
+    private final Meter pushRequestsMeter;
+    private final Meter pushDelayedMeter;
+    private final Meter pushIncapableMeter;
+    private final Meter pushBatchedMeter;
 
     public PushAgent(TalkServer server) {
         mExecutor = Executors.newScheduledThreadPool(
@@ -67,6 +74,10 @@ public class PushAgent {
         }
 
         initializeMetrics(mServer.getMetrics());
+        pushRequestsMeter = mServer.getMetrics().meter(name(PushAgent.class, "pushRequestsMeter"));
+        pushDelayedMeter = mServer.getMetrics().meter(name(PushAgent.class, "pushDelayedMeter"));
+        pushIncapableMeter = mServer.getMetrics().meter(name(PushAgent.class, "pushIncapableMeter"));
+        pushBatchedMeter = mServer.getMetrics().meter(name(PushAgent.class, "pushBatchedMeter"));
     }
 
     private void initializeMetrics(MetricRegistry metrics) {
@@ -121,10 +132,12 @@ public class PushAgent {
         long now = System.currentTimeMillis();
 
         mPushRequests.incrementAndGet();
+        pushRequestsMeter.mark();
 
         // bail if no push
         if (!client.isPushCapable()) {
             mPushIncapable.incrementAndGet();
+            pushIncapableMeter.mark();
             return;
         }
 
@@ -138,6 +151,7 @@ public class PushAgent {
         int limit = mConfig.getPushRateLimit();
         if (delta < limit) {
             mPushDelayed.incrementAndGet();
+            pushDelayedMeter.mark();
             delay = Math.max(0, limit - delta);
         }
 
@@ -151,6 +165,7 @@ public class PushAgent {
             if (mOutstanding.containsKey(clientId)) {
                 // request has been batched
                 mPushBatched.incrementAndGet();
+                pushBatchedMeter.mark();
             } else {
                 // schedule the request
                 final PushRequest request = new PushRequest(this, clientId, mDatabase.findClientHostInfoForClient(client.getClientId()));

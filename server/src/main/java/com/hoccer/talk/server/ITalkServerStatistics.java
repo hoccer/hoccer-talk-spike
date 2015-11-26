@@ -30,6 +30,11 @@ public interface ITalkServerStatistics {
 
     void signalMessageAcknowledgedSucceeded();
 
+    void signalRequest();
+    void signalResponse();
+    //void signalNotificationSent();
+    void signalNotificationReceived();
+
     com.codahale.metrics.Timer.Context signalRequestStart(JsonRpcConnection connection, ObjectNode request);
 
     void signalRequestStop(JsonRpcConnection connection, ObjectNode request, Timer.Context timerContext);

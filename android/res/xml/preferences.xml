@@ -97,7 +97,7 @@
                 android:title="@string/pref_download_limit"
                 android:entries="@array/transfer_limits"
                 android:entryValues="@array/transfer_limits_values"
-                android:defaultValue="-1"/>
+                android:defaultValue="-2"/>
 
     </PreferenceCategory>
 
