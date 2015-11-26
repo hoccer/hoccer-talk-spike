@@ -88,11 +88,11 @@ public class TalkMessage {
     @DatabaseField
     String system;
 
-    /** date of attachment upload starte */
+    /** date of attachment upload started */
     @JsonIgnore @DatabaseField
     Date attachmentUploadStarted;
 
-    /** date of attachment upload starte */
+    /** date of attachment upload finished */
     @JsonIgnore @DatabaseField
     Date attachmentUploadFinished;
 
