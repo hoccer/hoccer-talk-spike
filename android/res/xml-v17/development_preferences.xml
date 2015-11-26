@@ -125,6 +125,7 @@
     <PreferenceCategory
             android:title="@string/pref_category_polling">
         <SwitchPreference
+                android:summary="@string/polling_summary"
                 android:key="preference_key_enable_polling"
                 android:title="@string/enable_polling"/>
         <ListPreference
