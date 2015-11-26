@@ -47,8 +47,16 @@ public class CleaningAgent {
     private static final long NO_RELATIONSHIP_LIFE_TIME = 2 * MONTHS;
     private static final long DELETED_CLIENT_LIFE_TIME = 2 * MONTHS;
     private static final long UNUSED_CLIENT_LIFE_TIME = 6 * MONTHS;
+
     private static final long DELETED_GROUP_MEMBER_LIFE_TIME = 2 * MONTHS;
     private static final long DELETED_GROUP_PRESENCE_LIFE_TIME = 2 * MONTHS;
+
+    private static final long DELETED_NEARBY_GROUP_MEMBER_LIFE_TIME = 4 * DAYS;
+    private static final long DELETED_NEARBY_GROUP_PRESENCE_LIFE_TIME = 4 * DAYS;
+
+    private static final long DELETED_WORLDWIDE_GROUP_MEMBER_LIFE_TIME = 4 * DAYS;
+    private static final long DELETED_WORLDWIDE_GROUP_PRESENCE_LIFE_TIME = 4 * DAYS;
+
     private static final long UNFINISHED_DELIVERY_LIFE_TIME = 3 * MONTHS;
 
 
@@ -100,6 +108,7 @@ public class CleaningAgent {
                     doCleanAllDeliveries();
                     doCleanAllClients();
                     doCleanGroups();
+                    doCleanSpecialGroups();
                     doCleanRelationships();
                     mServer.cleanAllLocks();
                     firstRunDone = true;
@@ -394,6 +403,33 @@ public class CleaningAgent {
 
         LOG.info("doCleanGroups: deleted "+deleted+" group members");
         // TODO: clean dangling nearby and worldwide groups and memberships without environments (there shouldn't be any,but we should check)
+    }
+
+    private void doCleanSpecialGroups(String groupType, long deletedGroupPresenceLifeTime, String[] roles, long deletedGroupMemberLifeTime) {
+        Date oldGroupDate = new Date(new Date().getTime() - deletedGroupPresenceLifeTime);
+        LOG.info("doCleanSpecialGroups: cleaning expired groups with type "+groupType+" deleted before "+ oldGroupDate);
+
+        int deleted = mDatabase.deleteGroupPresencesWithStateAndTypeChangedBefore(TalkGroupPresence.STATE_DELETED, groupType, oldGroupDate);
+        LOG.info("doCleanSpecialGroups: deleted "+deleted+" group presences with type "+groupType);
+
+        Date oldGroupMemberDate = new Date(new Date().getTime() - deletedGroupMemberLifeTime);
+
+        LOG.info("doCleanSpecialGroups: cleaning expired group memberships with roles "+ roles +" deleted before "+ oldGroupMemberDate);
+
+        deleted = mDatabase.deleteGroupMembershipsWithStatesAndRolesChangedBefore(
+                new String[]{TalkGroupMembership.STATE_GROUP_REMOVED, TalkGroupMembership.STATE_NONE},
+                roles,
+                oldGroupMemberDate);
+
+        LOG.info("doCleanSpecialGroups: deleted "+deleted+" group members with roles "+ roles);
+    }
+
+    private void doCleanSpecialGroups() {
+        doCleanSpecialGroups(TalkGroupPresence.GROUP_TYPE_NEARBY, DELETED_NEARBY_GROUP_PRESENCE_LIFE_TIME,
+                new String[]{TalkGroupMembership.ROLE_NEARBY_MEMBER},DELETED_NEARBY_GROUP_MEMBER_LIFE_TIME);
+
+        doCleanSpecialGroups(TalkGroupPresence.GROUP_TYPE_WORLDWIDE, DELETED_WORLDWIDE_GROUP_PRESENCE_LIFE_TIME,
+                new String[]{TalkGroupMembership.ROLE_WORLDWIDE_MEMBER},DELETED_WORLDWIDE_GROUP_MEMBER_LIFE_TIME);
     }
 
     private void doCleanRelationships() {

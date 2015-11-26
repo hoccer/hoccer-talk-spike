@@ -148,11 +148,15 @@ public interface ITalkServerDatabase {
 
     public int deleteGroupMembershipsWithStatesChangedBefore(String[] states, Date lastChanged);
 
+    public int deleteGroupMembershipsWithStatesAndRolesChangedBefore(String[] states, String[] roles, Date lastChanged);
+
     public List<TalkGroupPresence> findGroupPresencesWithState(String state);
 
     public List<TalkGroupPresence> findGroupPresencesWithStateChangedBefore(String state, Date changedDate);
 
     public int deleteGroupPresencesWithStateChangedBefore(String state, Date changedDate);
+
+    public int deleteGroupPresencesWithStateAndTypeChangedBefore(String state, String groupType, Date changedDate);
 
     public void saveGroupPresence(TalkGroupPresence groupPresence);
 
