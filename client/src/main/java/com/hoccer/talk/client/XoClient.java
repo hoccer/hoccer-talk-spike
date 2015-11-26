@@ -1631,7 +1631,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             }
 
             if (mState != State.CONNECTING) {
-                //WTF?!
+                //Both things are the same?
                 switchState(State.CONNECTING, "reconnect after connection closed");
             } else {
                scheduleConnect();
