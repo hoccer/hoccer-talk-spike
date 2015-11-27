@@ -76,6 +76,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     private Long mLastPingLatency;
     private Date mLastPingOccured;
 
+    private Date mCreationTime;
     private Date mLastRequestStarted;
     private Date mLastRequestFinished;
 
@@ -97,6 +98,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      * @param connection that we should handle
      */
     public TalkRpcConnection(TalkServer server, JsonRpcConnection connection, HttpServletRequest request) {
+        mCreationTime = new Date();
         mServer = server;
         mConnection = connection;
         mInitialRequest = request;
@@ -490,5 +492,9 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
 
     public String getLastRequestName() {
         return mLastRequestName;
+    }
+
+    public Date getCreationTime() {
+        return mCreationTime;
     }
 }

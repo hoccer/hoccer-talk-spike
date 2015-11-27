@@ -141,8 +141,9 @@ public class ConnectionInfoServlet extends HttpServlet {
                 lastRequestStatus = "no requests yet";
             }
 
-            w.write(String.format("[%6d] %-15s %-10s ping %6d ms" , connection.getConnectionId(), status, presenceStatus, connection.getLastPingLatency())
-                    +", ("+ lastRequestStatus +"), "+ clientInfo+" ["+Thread.currentThread().getName()+"]"+"\n");
+            long age = (new Date().getTime() - connection.getCreationTime().getTime())/1000;
+            w.write(String.format("[%6d]%6d s %15s %-10s ping %6d ms" , connection.getConnectionId(), age, status, presenceStatus, connection.getLastPingLatency())
+                    +", ("+ lastRequestStatus +"), "+ clientInfo+" ["+clientId+"]"+"\n");
 
         }
 
