@@ -53,7 +53,7 @@ public class ConnectionInfoServlet extends HttpServlet {
         Date now = new Date();
         w.write("Connection Info "+now+"\n\n");
 
-        MongoCollection presences = getCollection("presence");
+        //MongoCollection presences = getCollection("presence");
 
         List<TalkPresence> activePresences = db.findPresencesWithStates(TalkPresence.ACTIVE_STATES);
 
@@ -80,12 +80,12 @@ public class ConnectionInfoServlet extends HttpServlet {
         w.write("\n");
 
         Vector<TalkRpcConnection> connections =  server.getConnectionsClone();
-        w.write("Open connections list size: " + connections.size()+ "\n");
-        w.write("Open Connections counter  : " + server.getConnectionsOpen()+ "\n");
-        w.write("Logged in map size        :" + server.numberOfClientConnections()+ "\n");
-        w.write("Logged in counter         :" + server.getConnectionsLoggedIn()+ "\n");
-        w.write("Ready counter             :" + server.getConnectionsReady()+ "\n");
-        w.write("Total counter             :" + server.getConnectionsTotal()+ "\n");
+        w.write("Open connections list size : " + connections.size()+ "\n");
+        w.write("Open Connections counter   : " + server.getConnectionsOpen()+ "\n");
+        w.write("Logged in map size         : " + server.numberOfClientConnections()+ "\n");
+        w.write("Logged in counter          : " + server.getConnectionsLoggedIn()+ "\n");
+        w.write("Ready counter              : " + server.getConnectionsReady()+ "\n");
+        w.write("Total counter              : " + server.getConnectionsTotal()+ "\n");
         w.write("\n");
 
         for (TalkRpcConnection connection : connections) {
@@ -141,8 +141,7 @@ public class ConnectionInfoServlet extends HttpServlet {
                 lastRequestStatus = "no requests yet";
             }
 
-
-            w.write(String.format("[%-8d] %-15s %-10s ping %6d ms" , connection.getConnectionId(), status, presenceStatus, connection.getLastPingLatency())
+            w.write(String.format("[%6d] %-15s %-10s ping %6d ms" , connection.getConnectionId(), status, presenceStatus, connection.getLastPingLatency())
                     +", ("+ lastRequestStatus +"), "+ clientInfo+" ["+Thread.currentThread().getName()+"]"+"\n");
 
         }
