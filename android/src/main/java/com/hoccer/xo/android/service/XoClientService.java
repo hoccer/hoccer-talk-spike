@@ -29,6 +29,7 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ChatsActivity;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.UriUtils;
+import net.hockeyapp.android.ExceptionHandler;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
@@ -258,9 +259,7 @@ public class XoClientService extends Service {
     }
 
     private void doVerifyGcm() {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("doVerifyGcm()");
-        }
+        LOG.debug("doVerifyGcm()");
 
         // check our manifest for GCM compatibility
         boolean manifestAllowsGcm = false;
@@ -268,6 +267,7 @@ public class XoClientService extends Service {
             GCMRegistrar.checkManifest(this);
             manifestAllowsGcm = true;
         } catch (IllegalStateException ex) {
+            ExceptionHandler.saveException(new Exception("TST"),null);
             LOG.warn("GCM unavailable due to manifest problems", ex);
         }
 

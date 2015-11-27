@@ -141,6 +141,7 @@ public final class GCMRegistrar {
             packageManager.getPermissionInfo(permissionName,
                     PackageManager.GET_PERMISSIONS);
         } catch (NameNotFoundException e) {
+
             throw new IllegalStateException(
                     "Application does not define permission " + permissionName);
         }

@@ -193,7 +193,6 @@ public class XoApplication extends Application {
             mClient.setFullSyncRequired(true);
             mCrashMonitor.saveCrashState(false);
         }
-
         // create sound pool instance
         sSoundPool = new SoundPool(this);
 

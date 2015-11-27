@@ -23,6 +23,9 @@ import com.hoccer.xo.android.passwordprotection.PasswordProtection;
 import com.hoccer.xo.android.service.XoClientService;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.ContactsMenuItemActionProvider;
+import net.hockeyapp.android.CrashManager;
+import net.hockeyapp.android.CrashManagerListener;
+import net.hockeyapp.android.Strings;
 import org.apache.log4j.Logger;
 
 public class ChatsActivity extends ComposableActivity implements IXoStateListener, IXoPairingListener {
@@ -80,6 +83,41 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         FeaturePromoter.cleanupForSelectWorldwidePageOnFirstStart(this);
 
         showGooglePlayServicesErrorDialog();
+
+        checkForCrashesIfEnabled();
+
+    }
+
+    private void checkForCrashesIfEnabled() {
+       // if (getConfiguration().isCrashReportingEnabled()) {
+            CrashManager.register(this, getConfiguration().getHockeyAppId(), new CrashManagerListener() {
+                @Override
+                public void onCrashesNotSent() {
+                    LOG.error("Crashes not sent.");
+                }
+
+                @Override
+                public void onCrashesSent() {
+                    LOG.error("Crashes  sent.");
+                }
+
+                @Override
+                public String getStringForResource(int resourceID) {
+                    switch (resourceID) {
+                        case Strings.CRASH_DIALOG_TITLE_ID:
+                            return getString(R.string.dialog_report_crash_title);
+                        case Strings.CRASH_DIALOG_MESSAGE_ID:
+                            return getString(R.string.dialog_report_crash_message);
+                        case Strings.CRASH_DIALOG_NEGATIVE_BUTTON_ID:
+                            return getString(R.string.dialog_report_crash_negative);
+                        case Strings.CRASH_DIALOG_POSITIVE_BUTTON_ID:
+                            return getString(R.string.dialog_report_crash_positive);
+                        default:
+                            return super.getStringForResource(resourceID);
+                    }
+                }
+            });
+        //}
     }
 
     private void startXoClientService() {
@@ -103,6 +141,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         }
         return result;
     }
+
 
     @Override
     protected void onResume() {
