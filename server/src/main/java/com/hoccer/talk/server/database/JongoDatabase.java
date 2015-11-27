@@ -691,6 +691,16 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public List<TalkPresence> findPresencesWithStates(String[] states) {
+        Iterator<TalkPresence> it = mPresences
+                .find("{connectionStatus: { $in: # }}", Arrays.asList(states))
+                .as(TalkPresence.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
+    }
+
+    @Override
     public void savePresence(TalkPresence presence) {
         mPresences.save(presence);
     }

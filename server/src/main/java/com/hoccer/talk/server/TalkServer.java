@@ -116,8 +116,6 @@ public class TalkServer {
      */
     Vector<TalkRpcConnection> mConnections =
             new Vector<TalkRpcConnection>();
-    //Set<TalkRpcConnection> mConnections =
-    //        new HashSet<TalkRpcConnection>();
 
     /**
      * All logged-in connections by client ID
@@ -129,6 +127,22 @@ public class TalkServer {
     AtomicInteger mConnectionsOpen = new AtomicInteger();
     AtomicInteger mConnectionsReady = new AtomicInteger();
     AtomicInteger mConnectionsLoggedIn = new AtomicInteger();
+
+    public int getConnectionsTotal() {
+        return mConnectionsTotal.get();
+    }
+
+    public int getConnectionsOpen() {
+        return mConnectionsOpen.get();
+    }
+
+    public int getConnectionsReady() {
+        return mConnectionsReady.get();
+    }
+
+    public int getConnectionsLoggedIn() {
+        return mConnectionsLoggedIn.get();
+    }
 
     Map<String,String> mIdLocks;
 
@@ -729,6 +743,12 @@ public class TalkServer {
                 }
             }
             return readyClientConnections;
+        }
+    }
+
+    public Vector<TalkRpcConnection> getConnectionsClone() {
+        synchronized (mConnections) {
+            return new Vector<TalkRpcConnection>(mConnections);
         }
     }
 }

@@ -3,6 +3,7 @@ package com.hoccer.talk.server.rpc;
 import better.jsonrpc.core.JsonRpcConnection;
 import better.jsonrpc.util.ProtocolUtils;
 import com.codahale.metrics.Timer;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hoccer.talk.model.TalkClient;
 import com.hoccer.talk.rpc.ITalkRpcClient;
@@ -74,6 +75,12 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
 
     private Long mLastPingLatency;
     private Date mLastPingOccured;
+
+    private Date mLastRequestStarted;
+    private Date mLastRequestFinished;
+
+    private int mRequestHandled = 0;
+    private String mLastRequestName;
 
     // Penalty is measured in milliseconds for the purpose of selecting suitable connections for a task.
     // If a client fails at this task the connection is penalized so it less likely to be considered for this task.
@@ -206,6 +213,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     public String getUnregisteredClientId() {
         return mUnregisteredClientId;
     }
+
 
     /**
      * @return true if in support mode
@@ -375,6 +383,11 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
         Timer.Context timerContext = mServer.getStatistics().signalRequestStart(connection, request);
         requestTimers.put(getIdFromRequest(request), timerContext);
         mServer.getStatistics().signalRequest();
+        mLastRequestStarted = new Date();
+        mLastRequestName = request.textValue();
+
+        JsonNode methodNode = request.get("method");
+        mLastRequestName = (methodNode != null && !methodNode.isNull()) ? methodNode.asText() : null;
 
         mServer.getUpdateAgent().setRequestContext();
         mServer.getDeliveryAgent().setRequestContext();
@@ -389,6 +402,8 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
         Object jsonRpcId = getIdFromRequest(request);
         mServer.getStatistics().signalRequestStop(connection, request, requestTimers.get(jsonRpcId));
         requestTimers.remove(jsonRpcId);
+        mLastRequestFinished = new Date();
+        ++mRequestHandled;
 
         mServer.getUpdateAgent().clearRequestContext();
         mServer.getDeliveryAgent().clearRequestContext();
@@ -459,5 +474,21 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
 
     public void resetPriorityPenalty(long priority) {
         mCurrentPriorityPenalty = priority;
+    }
+
+    public Date getLastRequestStarted() {
+        return mLastRequestStarted;
+    }
+
+    public Date getLastRequestFinished() {
+        return mLastRequestFinished;
+    }
+
+    public int getRequestHandled() {
+        return mRequestHandled;
+    }
+
+    public String getLastRequestName() {
+        return mLastRequestName;
     }
 }

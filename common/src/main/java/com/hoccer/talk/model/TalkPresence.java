@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -15,6 +16,23 @@ public class TalkPresence {
     public final static String STATUS_BACKGROUND = "background";
     public final static String STATUS_ONLINE = "online";
     public final static String STATUS_TYPING = "typing";
+
+    public static final String[] ACTIVE_STATES = {
+            STATUS_BACKGROUND,
+            STATUS_ONLINE,
+            STATUS_TYPING
+    };
+    public static final Set<String> ACTIVE_STATES_SET = new HashSet<String>(Arrays.asList(ACTIVE_STATES));
+
+    public static final String[] VALID_STATES = {
+            STATUS_OFFLINE,
+            STATUS_BACKGROUND,
+            STATUS_ONLINE,
+            STATUS_TYPING
+    };
+    public static final Set<String> VALID_STATES_SET = new HashSet<String>(Arrays.asList(VALID_STATES));
+
+
 
     public final static String FIELD_CLIENT_ID = "clientId";
     public final static String FIELD_CLIENT_NAME = "clientName";

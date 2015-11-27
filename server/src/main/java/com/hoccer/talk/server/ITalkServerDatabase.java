@@ -104,6 +104,8 @@ public interface ITalkServerDatabase {
 
     public List<TalkPresence> findPresencesChangedAfter(String clientId, Date lastKnown);
 
+    public List<TalkPresence> findPresencesWithStates(String[] states);
+
     public TalkKey findKey(String clientId, String keyId);
 
     public List<TalkKey> findKeys(String clientId);
