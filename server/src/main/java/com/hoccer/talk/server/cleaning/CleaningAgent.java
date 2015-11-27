@@ -157,10 +157,9 @@ public class CleaningAgent {
 
         if (!mDatabase.isDeletedClient(clientId)) {
             TalkClient client = mDatabase.findClientById(clientId);
-            LOG.debug("client last time login '" + client.getTimeLastLogin());
-
 
             if (client != null) {
+                LOG.debug("client last time login '" + client.getTimeLastLogin());
                 Date lastLogin = client.getTimeLastLogin();
                 if (lastLogin == null) {
                     lastLogin = new Date(0);
