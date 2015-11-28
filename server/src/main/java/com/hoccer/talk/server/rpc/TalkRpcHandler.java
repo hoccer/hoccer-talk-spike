@@ -1658,9 +1658,10 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     private TalkDelivery outDeliveryAcknowledge(String messageId, String recipientId, String acknowledgeState, String acknowledgedState) {
         requireIdentification(true);
-        logCall("deliveryAcknowledge '"+acknowledgeState+"' (messageId: '" + messageId + "', recipientId: '" + recipientId + "')");
+        logCall("outDeliveryAcknowledge '"+acknowledgeState+"' (messageId: '" + messageId + "', recipientId: '" + recipientId + "')");
         synchronized (mServer.idLock(messageId)) {
             TalkDelivery delivery = findDelivery(messageId, recipientId);
+            TalkDelivery result = new TalkDelivery();
             if (delivery != null) {
                 String state = delivery.getState();
                 if (acknowledgeState.equals(state) || acknowledgedState.equals(state)) {
@@ -1668,13 +1669,13 @@ public class TalkRpcHandler implements ITalkRpcServer {
                     setDeliveryState(delivery, acknowledgedState , false, true);
                     mStatistics.signalMessageAcknowledgedSucceeded();
                 }  else {
-                    LOG.error("deliveryAcknowledge '"+acknowledgeState+"' received for delivery not in state 'delivered' (state =" + delivery.getState() + ") : message id '" + messageId + "' recipientId '" + recipientId + "'");
+                    LOG.error("outDeliveryAcknowledge '"+acknowledgeState+"' received for delivery not in state 'delivered' (state =" + delivery.getState() + ") : message id '" + messageId + "' recipientId '" + recipientId + "'");
                 }
+                result.updateWith(delivery, TalkDelivery.REQUIRED_OUT_UPDATE_FIELDS_SET);
             }  else {
-                LOG.error("deliveryAcknowledge '"+acknowledgeState+"' : no delivery found for message with id '" + messageId + "' for recipient with id '" + recipientId + "'");
+                LOG.error("outDeliveryAcknowledge '"+acknowledgeState+"' : no delivery found for message with id '" + messageId + "' for recipient with id '" + recipientId + "'");
+                throw new RuntimeException("outDeliveryAcknowledge '"+acknowledgeState+"' : no delivery found for message with id '" + messageId + "' for recipient with id '" + recipientId + "'");
             }
-            TalkDelivery result = new TalkDelivery();
-            result.updateWith(delivery, TalkDelivery.REQUIRED_OUT_UPDATE_FIELDS_SET);
             return result;
         }
     }
