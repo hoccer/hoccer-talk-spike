@@ -396,7 +396,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
             } catch (RuntimeException e) {
                 mStatistics.signalClientLoginSRP1Failed();
                 String clientId2 = mSrpClient != null ? mSrpClient.getClientId() : "unknown";
-                LOG.error("srpPhase1: Failed: '"+e.getMessage()+"' clientId=" + clientId2 + " with [connectionId: '" + mConnection.getConnectionId() + "']");
+                LOG.error("srpPhase1: Failed: '" + e.getMessage() + "' clientId=" + clientId2 + " with [connectionId: '" + mConnection.getConnectionId() + "']");
                 throw e;
             }
         }
@@ -3171,7 +3171,11 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 } else {
                     LOG.debug("releaseEnvironmentForClient: keeping expired environment with type " + myEnvironment.getType() + ", ttl " + myEnvironment.getTimeToLive() + " for client " + clientId + " because it has " + deliveryCount + " undelivered deliveries");
                     TalkGroupMembership membership = database.findGroupMembershipForClient(myEnvironment.getGroupId(),myEnvironment.getClientId());
-                    checkAndSuspendGroupMembershipIfNecessary(server, myEnvironment, membership);
+                    if (membership != null) {
+                        checkAndSuspendGroupMembershipIfNecessary(server, myEnvironment, membership);
+                    } else {
+                        LOG.debug("releaseEnvironmentForClient: no membership found for environment " + myEnvironment.getType() + ", ttl " + myEnvironment.getTimeToLive() + " for client " + clientId + " with " + deliveryCount + " undelivered deliveries");
+                    }
                 }
             } else {
                 if (myEnvironment.getTimeReleased() == null) {
