@@ -250,25 +250,39 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     public void doLogout() {
         LOG.info("[connectionId: '" + getConnectionId() + "'] logging out");
         synchronized (this) {
-            if (mTalkClient != null && (mTalkClient.isReady() || mTalkClient.isConnected())) {
-                // set client to not ready
-                LOG.debug("[connectionId: '" + getConnectionId() + "'] setting client to not ready");
-                ITalkServerDatabase database = mServer.getDatabase();
-                TalkClient client = database.findClientById(mTalkClient.getClientId());
-                if (client != null) {
-                    client.setTimeReady(null);
-                    client.setTimeLastDisconnect(new Date());
-                    database.saveClient(client);
-                    LOG.info("[connectionId: '" + getConnectionId() + "'] stored logout for client "+client.getClientId());
+            if (mTalkClient != null) {
+                if (mTalkClient.isReady() || mTalkClient.isConnected()) {
+                    // set client to not ready
+                    LOG.debug("[connectionId: '" + getConnectionId() + "'] setting client to not ready");
+                    ITalkServerDatabase database = mServer.getDatabase();
+                    TalkClient client = database.findClientById(mTalkClient.getClientId());
+                    if (client != null) {
+                        client.setTimeReady(null);
+                        client.setTimeLastDisconnect(new Date());
+                        database.saveClient(client);
+                        LOG.info("[connectionId: '" + getConnectionId() + "'] stored logout for client "+client.getClientId());
+                    }
+                }
+                String clientId = mTalkClient.getClientId();
+                if (clientId != null) {
+                    if (mServer.hasClientConnection(clientId)) {
+                        LOG.warn("[connectionId: '" + getConnectionId() + "'] not zeroing mTalkClient because connection still in map on logout for client "+clientId);
+                    } else {
+                        LOG.info("[connectionId: '" + getConnectionId() + "'] zeroing connection mTalkClient for client "+clientId);
+                        mTalkClient = null;
+                    }
+                } else {
+                    LOG.warn("[connectionId: '" + getConnectionId() + "'] zeroing connections mTalkClient (no clientId)");
+                    mTalkClient = null;
                 }
             }
 
-            LOG.debug("[connectionId: '" + getConnectionId() + "'] setting client to null and disconnect JsonRpc/websocket connection");
-            mTalkClient = null;
+            LOG.debug("[connectionId: '" + getConnectionId() + "'] disconnect JsonRpc/websocket connection");
+
             if (isConnected()) {
                 disconnect();
             }
-         }
+        }
         LOG.info("[connectionId: '" + getConnectionId() + "'] logged out");
     }
 
