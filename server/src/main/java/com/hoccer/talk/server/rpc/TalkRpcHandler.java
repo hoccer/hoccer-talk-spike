@@ -2692,7 +2692,8 @@ public class TalkRpcHandler implements ITalkRpcServer {
                         destroyEnvironment(server, environment);
                     }
                 } else {
-                    LOG.warn("expireEnvironments: no membership for environment for client "+environment.getClientId()+" group "+environment.getGroupId());
+                    LOG.warn("expireEnvironments: no membership for expired environment for client "+environment.getClientId()+" group "+environment.getGroupId());
+                    destroyEnvironment(server, environment);
                 }
             } else {
                 LOG.debug("expireEnvironments: not expired environment " + environment.getClientId() + " group " + environment.getGroupId() + ", released=" + environment.getTimeReleased() + ",conn=" + server.getClientConnection(environment.getClientId()));
