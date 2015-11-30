@@ -1,6 +1,7 @@
 package com.hoccer.xo.android.content;
 
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -21,6 +22,8 @@ public class MediaMetaData {
     public static final int ALTERNATIVE_METADATA_KEY_ALBUM = 25;
     public static final int ALTERNATIVE_METADATA_KEY_ARTIST = 26;
     public static final int ALTERNATIVE_METADATA_KEY_TITLE = 31;
+
+    final int THUMBNAIL_WIDTH = 400;
 
     private final String mFilePath;
     private String mTitle = "";
@@ -161,7 +164,22 @@ public class MediaMetaData {
                         retriever.setDataSource(mFilePath);
                         byte[] artworkRaw = retriever.getEmbeddedPicture();
                         if (artworkRaw != null) {
-                            artwork = new BitmapDrawable(resources, BitmapFactory.decodeByteArray(artworkRaw, 0, artworkRaw.length));
+                            BitmapFactory.Options options = new BitmapFactory.Options();
+                            options.inJustDecodeBounds = true;
+                            BitmapFactory.decodeByteArray(artworkRaw, 0, artworkRaw.length, options);
+
+                            int scale = 1;
+                            if (options.outWidth > THUMBNAIL_WIDTH) {
+                                scale = Math.round((float) options.outWidth / (float) THUMBNAIL_WIDTH);;
+                            }
+
+                            BitmapFactory.Options outOptions = new BitmapFactory.Options();
+                            outOptions.inSampleSize = scale;
+                            outOptions.inPurgeable = true;
+                            outOptions.inInputShareable = true;
+
+                            Bitmap bitmap = BitmapFactory.decodeByteArray(artworkRaw, 0, artworkRaw.length, outOptions);
+                            artwork = new BitmapDrawable(resources, bitmap);
                         } else {
                             LOG.warn("Could not read artwork for file: " + mFilePath);
                         }
