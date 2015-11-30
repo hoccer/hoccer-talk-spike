@@ -48,8 +48,7 @@ public final class GCMRegistrar {
      * flag until it is considered expired.
      */
     // NOTE: cannot use TimeUnit.DAYS because it's not available on API Level 8
-    public static final long DEFAULT_ON_SERVER_LIFESPAN_MS =
-            1000 * 3600 * 24 * 7;
+    public static final long DEFAULT_ON_SERVER_LIFESPAN_MS = 1000 * 3600 * 24 * 7;
 
     private static final String TAG = "GCMRegistrar";
     private static final String BACKOFF_MS = "backoff_ms";

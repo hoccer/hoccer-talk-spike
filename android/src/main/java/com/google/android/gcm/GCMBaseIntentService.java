@@ -169,8 +169,7 @@ public abstract class GCMBaseIntentService extends IntentService {
      * @param context application's context.
      * @param registrationId the registration id returned by the GCM service.
      */
-    protected abstract void onRegistered(Context context,
-            String registrationId);
+    protected abstract void onRegistered(Context context, String registrationId);
 
     /**
      * Called after a device has been unregistered.
@@ -191,41 +190,30 @@ public abstract class GCMBaseIntentService extends IntentService {
                 handleRegistration(context, intent);
             } else if (action.equals(INTENT_FROM_GCM_MESSAGE)) {
                 // checks for special messages
-                String messageType =
-                        intent.getStringExtra(EXTRA_SPECIAL_MESSAGE);
+                String messageType = intent.getStringExtra(EXTRA_SPECIAL_MESSAGE);
                 if (messageType != null) {
                     if (messageType.equals(VALUE_DELETED_MESSAGES)) {
-                        String sTotal =
-                                intent.getStringExtra(EXTRA_TOTAL_DELETED);
+                        String sTotal = intent.getStringExtra(EXTRA_TOTAL_DELETED);
                         if (sTotal != null) {
                             try {
                                 int total = Integer.parseInt(sTotal);
-                                mLogger.log(Log.VERBOSE,
-                                        "Received notification for %d deleted"
-                                        + "messages", total);
+                                mLogger.log(Log.VERBOSE, "Received notification for %d deleted messages", total);
                                 onDeletedMessages(context, total);
                             } catch (NumberFormatException e) {
-                                mLogger.log(Log.ERROR, "GCM returned invalid "
-                                        + "number of deleted messages (%d)",
-                                        sTotal);
+                                mLogger.log(Log.ERROR, "GCM returned invalid number of deleted messages (%d)", sTotal);
                             }
                         }
                     } else {
                         // application is not using the latest GCM library
-                        mLogger.log(Log.ERROR,
-                                "Received unknown special message: %s",
-                                messageType);
+                        mLogger.log(Log.ERROR, "Received unknown special message: %s", messageType);
                     }
                 } else {
                     onMessage(context, intent);
                 }
             } else if (action.equals(INTENT_FROM_GCM_LIBRARY_RETRY)) {
                 String packageOnIntent = intent.getPackage();
-                if (packageOnIntent == null || !packageOnIntent.equals(
-                        getApplicationContext().getPackageName())) {
-                    mLogger.log(Log.ERROR,
-                            "Ignoring retry intent from another package (%s)",
-                            packageOnIntent);
+                if (packageOnIntent == null || !packageOnIntent.equals(getApplicationContext().getPackageName())) {
+                    mLogger.log(Log.ERROR, "Ignoring retry intent from another package (%s)", packageOnIntent);
                     return;
                 }
                 // retry last call
@@ -283,12 +271,12 @@ public abstract class GCMBaseIntentService extends IntentService {
         String registrationId = intent.getStringExtra(EXTRA_REGISTRATION_ID);
         String error = intent.getStringExtra(EXTRA_ERROR);
         String unregistered = intent.getStringExtra(EXTRA_UNREGISTERED);
-        mLogger.log(Log.DEBUG, "handleRegistration: registrationId = %s, "
-                + "error = %s, unregistered = %s",
+        mLogger.log(Log.DEBUG, "handleRegistration: registrationId = %s, error = %s, unregistered = %s",
                 registrationId, error, unregistered);
 
         // registration succeeded
         if (registrationId != null) {
+            registrationId = "flknsdkjvh";
             GCMRegistrar.resetBackoff(context);
             GCMRegistrar.setRegistrationId(context, registrationId);
             onRegistered(context, registrationId);
@@ -299,8 +287,7 @@ public abstract class GCMBaseIntentService extends IntentService {
         if (unregistered != null) {
             // Remember we are unregistered
             GCMRegistrar.resetBackoff(context);
-            String oldRegistrationId =
-                    GCMRegistrar.clearRegistrationId(context);
+            String oldRegistrationId = GCMRegistrar.clearRegistrationId(context);
             onUnregistered(context, oldRegistrationId);
             return;
         }
@@ -311,24 +298,16 @@ public abstract class GCMBaseIntentService extends IntentService {
             boolean retry = onRecoverableError(context, error);
             if (retry) {
                 int backoffTimeMs = GCMRegistrar.getBackoff(context);
-                int nextAttempt = backoffTimeMs / 2 +
-                        sRandom.nextInt(backoffTimeMs);
-                mLogger.log(Log.DEBUG,
-                        "Scheduling registration retry, backoff = %d (%d)",
-                        nextAttempt, backoffTimeMs);
-                Intent retryIntent =
-                        new Intent(INTENT_FROM_GCM_LIBRARY_RETRY);
+                int nextAttempt = backoffTimeMs / 2 + sRandom.nextInt(backoffTimeMs);
+                mLogger.log(Log.DEBUG, "Scheduling registration retry, backoff = %d (%d)", nextAttempt, backoffTimeMs);
+                Intent retryIntent =  new Intent(INTENT_FROM_GCM_LIBRARY_RETRY);
                 retryIntent.setPackage(context.getPackageName());
-                PendingIntent retryPendingIntent = PendingIntent
-                        .getBroadcast(context, 0, retryIntent, 0);
-                AlarmManager am = (AlarmManager)
-                        context.getSystemService(Context.ALARM_SERVICE);
-                am.set(AlarmManager.ELAPSED_REALTIME,
-                        SystemClock.elapsedRealtime() + nextAttempt,
-                        retryPendingIntent);
+                PendingIntent retryPendingIntent = PendingIntent.getBroadcast(context, 0, retryIntent, 0);
+                AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                am.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + nextAttempt, retryPendingIntent);
                 // Next retry should wait longer.
                 if (backoffTimeMs < MAX_BACKOFF_MS) {
-                  GCMRegistrar.setBackoff(context, backoffTimeMs * 2);
+                    GCMRegistrar.setBackoff(context, backoffTimeMs * 2);
                 }
             } else {
                 mLogger.log(Log.VERBOSE, "Not retrying failed operation");
