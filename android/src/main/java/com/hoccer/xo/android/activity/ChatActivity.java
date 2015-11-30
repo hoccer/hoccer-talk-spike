@@ -19,10 +19,7 @@ import com.hoccer.xo.android.fragment.ChatFragment;
 import com.hoccer.xo.android.fragment.HistoryFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.attachments.TransferControlView;
-import net.hockeyapp.android.CrashManager;
-import net.hockeyapp.android.CrashManagerListener;
 import net.hockeyapp.android.ExceptionHandler;
-import net.hockeyapp.android.Strings;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -169,8 +166,6 @@ public class ChatActivity extends ComposableActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        ExceptionHandler.savesoException(new Exception("TESTEST"),null);
-        throw new NullPointerException("TST");
     }
 
     private void initKeyboardCallback() {
