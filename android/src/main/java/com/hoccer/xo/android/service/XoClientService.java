@@ -278,6 +278,9 @@ public class XoClientService extends Service {
         }
     }
 
+    public static void saveGCMException(Throwable throwable){
+        LOG.error("Saving GCM Exception "+throwable);
+        ExceptionHandler.saveException(throwable, null);
     }
 
     private void doRegisterGcm(boolean forced) {
