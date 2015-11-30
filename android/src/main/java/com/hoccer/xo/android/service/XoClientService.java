@@ -582,8 +582,12 @@ public class XoClientService extends Service {
                 mExecutor.execute(new Runnable() {
                     @Override
                     public void run() {
-                        doRegisterGcm(TalkPushService.GCM_ALWAYS_REGISTER);
-                        doUpdateGcm(TalkPushService.GCM_ALWAYS_UPDATE);
+                        try {
+                            doRegisterGcm(TalkPushService.GCM_ALWAYS_REGISTER);
+                            doUpdateGcm(TalkPushService.GCM_ALWAYS_UPDATE);
+                        } catch (Exception ex){
+                            saveGCMException(ex);
+                        }
                     }
                 });
             } else if (client.isDisconnected() && mWakeLock != null && mWakeLock.isHeld()) {
