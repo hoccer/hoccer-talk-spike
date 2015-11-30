@@ -58,12 +58,14 @@ public class TalkPushService extends GCMBaseIntentService {
 
     @Override
     protected void onError(Context context, String errorId) {
-        LOG.info("onError(" + errorId + ")");
+        XoClientService.saveGCMException(new Exception("TalkPushService.onError("+errorId+")"));
+        LOG.error("onError(" + errorId + ")");
     }
 
     @Override
     protected boolean onRecoverableError(Context context, String errorId) {
         LOG.info("onRecoverableError(" + errorId + ")");
+        XoClientService.saveGCMException(new Exception("TalkPushService.onRecoverableError("+errorId+")"));
         return super.onRecoverableError(context, errorId);
     }
 
