@@ -25,6 +25,7 @@ import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.ContactsMenuItemActionProvider;
 import net.hockeyapp.android.CrashManager;
 import net.hockeyapp.android.CrashManagerListener;
+import net.hockeyapp.android.ExceptionHandler;
 import net.hockeyapp.android.Strings;
 import org.apache.log4j.Logger;
 
@@ -89,18 +90,8 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     }
 
     private void checkForCrashesIfEnabled() {
-       // if (getConfiguration().isCrashReportingEnabled()) {
+        if (getConfiguration().isCrashReportingEnabled()) {
             CrashManager.register(this, getConfiguration().getHockeyAppId(), new CrashManagerListener() {
-                @Override
-                public void onCrashesNotSent() {
-                    LOG.error("Crashes not sent.");
-                }
-
-                @Override
-                public void onCrashesSent() {
-                    LOG.error("Crashes  sent.");
-                }
-
                 @Override
                 public String getStringForResource(int resourceID) {
                     switch (resourceID) {
@@ -117,7 +108,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
                     }
                 }
             });
-        //}
+        }
     }
 
     private void startXoClientService() {
