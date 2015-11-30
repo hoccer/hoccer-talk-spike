@@ -276,7 +276,6 @@ public abstract class GCMBaseIntentService extends IntentService {
 
         // registration succeeded
         if (registrationId != null) {
-            registrationId = "flknsdkjvh";
             GCMRegistrar.resetBackoff(context);
             GCMRegistrar.setRegistrationId(context, registrationId);
             onRegistered(context, registrationId);
