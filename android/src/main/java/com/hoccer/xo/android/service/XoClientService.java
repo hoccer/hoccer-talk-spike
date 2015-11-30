@@ -29,7 +29,10 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ChatsActivity;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.UriUtils;
+import net.hockeyapp.android.CrashManager;
+import net.hockeyapp.android.CrashManagerListener;
 import net.hockeyapp.android.ExceptionHandler;
+import net.hockeyapp.android.Strings;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
@@ -260,35 +263,21 @@ public class XoClientService extends Service {
 
     private void doVerifyGcm() {
         LOG.debug("doVerifyGcm()");
-
-        // check our manifest for GCM compatibility
-        boolean manifestAllowsGcm = false;
         try {
+            mGcmSupported = false;
             GCMRegistrar.checkManifest(this);
-            manifestAllowsGcm = true;
-        } catch (IllegalStateException ex) {
-            ExceptionHandler.saveException(new Exception("TST"),null);
-            LOG.warn("GCM unavailable due to manifest problems", ex);
-        }
-
-        // check GCM device support
-        boolean deviceSupportsGcm = false;
-        if (manifestAllowsGcm) {
-            try {
-                GCMRegistrar.checkDevice(this);
-                deviceSupportsGcm = true;
-            } catch (UnsupportedOperationException ex) {
-                LOG.warn("GCM not supported by device", ex);
-            }
-        }
-
-        // make the final decision
-        mGcmSupported = deviceSupportsGcm && manifestAllowsGcm;
-        if (mGcmSupported) {
+            GCMRegistrar.checkDevice(this);
+            mGcmSupported = true;
             LOG.info("GCM is supported");
-        } else {
-            LOG.warn("GCM not supported");
+        } catch (IllegalStateException ex) {
+            saveGCMException(ex);
+            LOG.warn("GCM unavailable due to manifest problems", ex);
+        } catch (UnsupportedOperationException ex) {
+            saveGCMException(ex);
+            LOG.warn("GCM not supported by device", ex);
         }
+    }
+
     }
 
     private void doRegisterGcm(boolean forced) {
