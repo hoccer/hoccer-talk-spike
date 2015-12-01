@@ -62,7 +62,7 @@ public class XoAndroidClientHost implements IXoClientHost {
 
     @Override
     public Thread.UncaughtExceptionHandler getUncaughtExceptionHandler() {
-        return CrashMonitor.get(mContext);
+        return CrashMonitor.get();
     }
 
     @Override

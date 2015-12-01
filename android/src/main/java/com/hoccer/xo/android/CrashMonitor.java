@@ -12,17 +12,24 @@ public class CrashMonitor implements Thread.UncaughtExceptionHandler {
 
     private static CrashMonitor INSTANCE;
     private final Context mContext;
+    private boolean mCrashedBefore = false;
 
     private Thread.UncaughtExceptionHandler mPreviousHandler;
 
-    private CrashMonitor(Context context) {
-        mContext = context;
+    private CrashMonitor()  {
+
+        if (XoApplication.get() == null){
+            throw new IllegalStateException("Must be instantiated after XoApplication.");
+        }
+        mContext = XoApplication.get();
         mPreviousHandler = Thread.getDefaultUncaughtExceptionHandler();
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        mCrashedBefore = sharedPreferences.getBoolean("crash", false);;
     }
 
-    public static CrashMonitor get(Context context) {
+    public static CrashMonitor get() {
         if (INSTANCE == null) {
-            INSTANCE = new CrashMonitor(context);
+            INSTANCE = new CrashMonitor();
         }
         return INSTANCE;
     }
@@ -35,8 +42,7 @@ public class CrashMonitor implements Thread.UncaughtExceptionHandler {
     }
 
     public boolean isCrashedBefore() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        return sharedPreferences.getBoolean("crash", false);
+        return mCrashedBefore;
     }
 
     @Override
