@@ -640,6 +640,10 @@ public class TalkServer {
             String clientId = connection.getClientId();
             if (clientId != null) {
                 boolean hasClientConnection = hasClientConnection(clientId);
+                if (hasClientConnection != connection.isLoggedInFlag()) {
+                    LOG.warn("[connectionId: '" + connection.getConnectionId() + "'] hasClientConnection/loggedInFlag mismatch, hasClientConnection="
+                            + hasClientConnection + ", isLoggedInFlag=" +connection.isLoggedInFlag());
+                }
                 if (hasClientConnection) {
                     // remove connection from table
                     removeClientConnection(clientId);
@@ -751,4 +755,11 @@ public class TalkServer {
             return new Vector<TalkRpcConnection>(mConnections);
         }
     }
+    public Hashtable<String, TalkRpcConnection> getConnectionsByIdClone() {
+        synchronized (mConnectionsByClientId) {
+            return new Hashtable<String, TalkRpcConnection>(mConnectionsByClientId);
+        }
+    }
 }
+
+

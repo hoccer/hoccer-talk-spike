@@ -26,6 +26,7 @@ import java.util.*;
 public class ConnectionInfoServlet extends HttpServlet {
 
     private ITalkServerDatabase db;
+    private TalkServer server;
 
     private MongoCollection getCollection(String name) {
         return (MongoCollection)db.getRawCollection(name);
@@ -35,7 +36,7 @@ public class ConnectionInfoServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        TalkServer server = (TalkServer)getServletContext().getAttribute("server");
+        server = (TalkServer)getServletContext().getAttribute("server");
 
         db = server.getDatabase();
 
@@ -80,6 +81,8 @@ public class ConnectionInfoServlet extends HttpServlet {
         w.write("\n");
 
         Vector<TalkRpcConnection> connections =  server.getConnectionsClone();
+        Hashtable<String, TalkRpcConnection> connectionsById = server.getConnectionsByIdClone();
+
         w.write("Open connections list size : " + connections.size()+ "\n");
         w.write("Open Connections counter   : " + server.getConnectionsOpen()+ "\n");
         w.write("Logged in map size         : " + server.numberOfClientConnections()+ "\n");
@@ -89,6 +92,29 @@ public class ConnectionInfoServlet extends HttpServlet {
         w.write("\n");
 
         for (TalkRpcConnection connection : connections) {
+            printConnection(w, connection, now, all);
+        }
+        w.write("\n");
+
+
+        w.write("Connections in table but not in list:\n");
+
+        for (String clientId : connectionsById.keySet()) {
+            TalkRpcConnection connection = connectionsById.get(clientId);
+            if (connection == null) {
+                w.write("#FATAL: No connection found for client Id " + clientId+"\n"); // should never happen
+            } else {
+                if (!connections.contains(connection)) {
+                    printConnection(w, connection, now, all);
+                }
+            }
+        }
+        w.write("\n");
+
+        w.close();
+    }
+    void printConnection(OutputStreamWriter w, TalkRpcConnection connection, Date now, Map<String, TalkPresence> all) throws ServletException, IOException {
+        synchronized (connection) {
             String status;
             if (connection.isReady()) {
                 status = "ready";
@@ -105,6 +131,8 @@ public class ConnectionInfoServlet extends HttpServlet {
             } else {
                 status = "not-connected";
             }
+            status = status + (connection.isShuttingDown() ? " closing" : "");
+            status = status + (connection.isLoggedInFlag() ? " LIF" : "");
 
             String clientId = connection.getClientId();
             TalkPresence presence = null;
@@ -130,26 +158,21 @@ public class ConnectionInfoServlet extends HttpServlet {
             if (lastStarted != null) {
                 if (lastFinished != null) {
                     if (lastFinished.after(lastStarted)) {
-                        lastRequestStatus = lastRequest + " took " + (lastFinished.getTime()-lastStarted.getTime()) + " ms "+ (now.getTime() - lastStarted.getTime()) + " ms ago";
+                        lastRequestStatus = lastRequest + " took " + (lastFinished.getTime() - lastStarted.getTime()) + " ms " + (now.getTime() - lastStarted.getTime()) + " ms ago";
                     } else {
-                        lastRequestStatus = lastRequest + "  started "+ (now.getTime() - lastStarted.getTime()) + " ms ago, previous request finished " + (now.getTime() - lastStarted.getTime()) + " ms ago";
+                        lastRequestStatus = lastRequest + "  started " + (now.getTime() - lastStarted.getTime()) + " ms ago, previous request finished " + (now.getTime() - lastStarted.getTime()) + " ms ago";
                     }
                 } else {
-                    lastRequestStatus = lastRequest + "  started "+ (now.getTime() - lastStarted.getTime()) + " ms ago, no previous request finished ";
+                    lastRequestStatus = lastRequest + "  started " + (now.getTime() - lastStarted.getTime()) + " ms ago, no previous request finished ";
                 }
-            }  else {
+            } else {
                 lastRequestStatus = "no requests yet";
             }
-
             long age = (new Date().getTime() - connection.getCreationTime().getTime())/1000;
             w.write(String.format("[%6d]%6d s %15s %-10s ping %6d ms" , connection.getConnectionId(), age, status, presenceStatus, connection.getLastPingLatency())
                     +", ("+ lastRequestStatus +"), "+ clientInfo+" ["+clientId+"]"+"\n");
-
         }
-
-        w.close();
     }
-
     public static Map sortByValue(Map unsortedMap) {
         Map sortedMap = new TreeMap(new ValueComparator(unsortedMap));
         sortedMap.putAll(unsortedMap);

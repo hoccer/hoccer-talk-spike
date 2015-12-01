@@ -88,6 +88,9 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     private long mCurrentPriorityPenalty = 0L;
     //private boolean mNagWhenOffline = false;
 
+    private boolean loggedInFlag = false;
+    private boolean shuttingDown =false;
+
     public Object deliveryLock = new Object();
     public Object keyRequestLock = new Object();
 
@@ -232,6 +235,9 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     @Override
     public void onOpen(JsonRpcConnection connection) {
         LOG.info("[connectionId: '" + connection.getConnectionId() + "'] connection opened by " + getRemoteAddress());
+        if (shuttingDown) {
+            LOG.error("[connectionId: '" + connection.getConnectionId() + "'] opening after shutdown");
+        }
         mServer.connectionOpened(this);
     }
 
@@ -243,6 +249,10 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     @Override
     public void onClose(JsonRpcConnection connection) {
         LOG.info("[connectionId: '" + connection.getConnectionId() + "'] connection closed");
+        if (shuttingDown) {
+            LOG.warn("[connectionId: '" + connection.getConnectionId() + "'] shutting down second time");
+        }
+        shuttingDown = true;
         mServer.connectionClosed(this);
     }
 
@@ -314,6 +324,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
             // update login time
             mTalkClient.setTimeLastLogin(new Date());
             database.saveClient(mTalkClient);
+            loggedInFlag = true;
 
             // tell the client if it doesn't have push
             if (!mTalkClient.isPushCapable()) {
@@ -510,5 +521,13 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
 
     public Date getCreationTime() {
         return mCreationTime;
+    }
+
+    public boolean isShuttingDown() {
+        return shuttingDown;
+    }
+
+    public boolean isLoggedInFlag() {
+        return loggedInFlag;
     }
 }
