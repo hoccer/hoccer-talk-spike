@@ -91,14 +91,15 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     private void checkForCrashesIfEnabled() {
         if (getConfiguration().isCrashReportingEnabled()) {
+
             CrashManager.register(this, getConfiguration().getHockeyAppId(), new CrashManagerListener() {
                 @Override
                 public String getStringForResource(int resourceID) {
                     switch (resourceID) {
                         case Strings.CRASH_DIALOG_TITLE_ID:
-                            return getString(R.string.dialog_report_crash_title);
+                            return CrashMonitor.get().isCrashedBefore() ? getString(R.string.dialog_report_crash_title) :  getString(R.string.dialog_report_errors_title);
                         case Strings.CRASH_DIALOG_MESSAGE_ID:
-                            return getString(R.string.dialog_report_crash_message);
+                            return CrashMonitor.get().isCrashedBefore() ? getString(R.string.dialog_report_crash_message) :  getString(R.string.dialog_report_errors_message);
                         case Strings.CRASH_DIALOG_NEGATIVE_BUTTON_ID:
                             return getString(R.string.dialog_report_crash_negative);
                         case Strings.CRASH_DIALOG_POSITIVE_BUTTON_ID:
@@ -123,8 +124,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
         if (result != ConnectionResult.SUCCESS) {
             String errorString = GooglePlayServicesUtil.getErrorString(result);
-            LOG.debug("Play Services error string:" + errorString);
-
             Dialog googlePlayServicesErrorDialog = GooglePlayServicesUtil.getErrorDialog(result, this, 0);
             if (googlePlayServicesErrorDialog != null) {
                 googlePlayServicesErrorDialog.show();
