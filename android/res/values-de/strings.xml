@@ -291,6 +291,8 @@
     <string name="dialog_report_crash_message">Es wurde eine Aufzeichnung des letzten Crashs gefunden. Bitte schicke diesen Bericht an ${app.name}, damit wir den Fehler schnellst möglich beheben können.</string>
     <string name="dialog_report_crash_negative">Abbrechen</string>
     <string name="dialog_report_crash_positive">Senden</string>
+    <string name="dialog_report_errors_title">Fehler-Informationen</string>
+    <string name="dialog_report_errors_message">Beim letzten App-Start sind Fehler aufgetreten. Bitte schicke diesen Bericht an ${app.name}, damit wir diese schnellst möglich beheben können.</string>
     <string name="pref_please_wait">Bitte warten…</string>
     <string name="up_down_unlimited_option">unbegrenzt</string>
     <string name="up_down_manual_option">manuell</string>
