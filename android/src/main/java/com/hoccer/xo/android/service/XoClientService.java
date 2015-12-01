@@ -308,8 +308,7 @@ public class XoClientService extends Service {
                 // perform the registration call
                 mClient.registerGcm(this.getPackageName(), GCMRegistrar.getRegistrationId(this));
                 // set the registration timeout (XXX move elsewhere)
-                GCMRegistrar.setRegisterOnServerLifespan(
-                        this, TalkPushService.GCM_REGISTRATION_EXPIRATION * 1000);
+                GCMRegistrar.setRegisterOnServerLifespan(this, TalkPushService.GCM_REGISTRATION_EXPIRATION * 1000);
                 // tell the registrar that we did this successfully
                 GCMRegistrar.setRegisteredOnServer(this, true);
             } else {
@@ -328,8 +327,7 @@ public class XoClientService extends Service {
         LOG.debug("registerConnectivityReceiver()");
         if (mConnectivityReceiver == null) {
             mConnectivityReceiver = new ConnectivityReceiver();
-            registerReceiver(mConnectivityReceiver,
-                    new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+            registerReceiver(mConnectivityReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         }
     }
 

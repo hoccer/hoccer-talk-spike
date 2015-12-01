@@ -50,10 +50,8 @@ public abstract class GCMBaseIntentService extends IntentService {
     @Deprecated
     public static final String TAG = "GCMBaseIntentService";
 
-    private final GCMLogger mLogger = new GCMLogger("GCMBaseIntentService",
-            "[" + getClass().getName() + "]: ", getClass());
+    private final GCMLogger mLogger = new GCMLogger("GCMBaseIntentService","[" + getClass().getName() + "]: ", getClass());
 
-    // wakelock
     private static final String WAKELOCK_KEY = "GCM_LIB";
     private static PowerManager.WakeLock sWakeLock;
 
@@ -62,13 +60,11 @@ public abstract class GCMBaseIntentService extends IntentService {
 
     private final String[] mSenderIds;
 
-    // instance counter
     private static int sCounter;
 
     private static final Random sRandom = new Random();
 
-    private static final int MAX_BACKOFF_MS =
-        (int) TimeUnit.SECONDS.toMillis(3600); // 1 hour
+    private static final int MAX_BACKOFF_MS = (int) TimeUnit.SECONDS.toMillis(3600); // 1 hour
 
     /**
      * Constructor that does not set a sender id, useful when the sender id
@@ -255,10 +251,8 @@ public abstract class GCMBaseIntentService extends IntentService {
         synchronized (LOCK) {
             if (sWakeLock == null) {
                 // This is called from BroadcastReceiver, there is no init.
-                PowerManager pm = (PowerManager)
-                        context.getSystemService(Context.POWER_SERVICE);
-                sWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                        WAKELOCK_KEY);
+                PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+                sWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_KEY);
             }
         }
         sWakeLock.acquire();
@@ -309,6 +303,7 @@ public abstract class GCMBaseIntentService extends IntentService {
                     GCMRegistrar.setBackoff(context, backoffTimeMs * 2);
                 }
             } else {
+                //Never happens since onRecoverableError always returns true!
                 mLogger.log(Log.VERBOSE, "Not retrying failed operation");
             }
         } else {

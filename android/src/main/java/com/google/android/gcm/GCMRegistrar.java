@@ -413,8 +413,7 @@ public final class GCMRegistrar {
         setRegisteredOnServer(context, flag, expirationTime);
     }
 
-    private static void setRegisteredOnServer(Context context, Boolean flag,
-            long expirationTime) {
+    private static void setRegisteredOnServer(Context context, Boolean flag, long expirationTime) {
         final SharedPreferences prefs = getGCMPreferences(context);
         Editor editor = prefs.edit();
         if (flag != null) {

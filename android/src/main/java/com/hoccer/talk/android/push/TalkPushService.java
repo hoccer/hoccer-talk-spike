@@ -58,8 +58,8 @@ public class TalkPushService extends GCMBaseIntentService {
 
     @Override
     protected void onError(Context context, String errorId) {
-        XoClientService.saveGCMException(new Exception("TalkPushService.onError("+errorId+")"));
         LOG.error("onError(" + errorId + ")");
+        XoClientService.saveGCMException(new Exception("TalkPushService.onError("+errorId+")"));
     }
 
     @Override
