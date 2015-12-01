@@ -286,156 +286,176 @@ public class TalkRpcHandler implements ITalkRpcServer {
     @Override
     public String srpChangeVerifier(String verifier, String salt) {
         logCall("srpChangeVerifier(verifier: '" + verifier + "', salt: '" + salt + "')");
+        synchronized (mConnection) {
 
-        if (!mConnection.isLoggedIn()) {
-            throw new RuntimeException("Must be logged in to change verifier");
+            if (!mConnection.isLoggedIn()) {
+                throw new RuntimeException("Must be logged in to change verifier");
+            }
+
+            String clientId = mConnection.getClientId();
+
+            if (clientId == null) {
+                throw new RuntimeException("You need to generate an id before registering");
+            }
+
+            // TODO: check verifier and salt for viability
+
+            TalkClient client = mConnection.getClient();
+            client.setSrpSalt(salt);
+            client.setSrpVerifier(verifier);
+
+            try {
+                mDatabase.saveClient(client);
+                //mStatistics.signalClientRegisteredSucceeded();
+            } catch (RuntimeException e) {
+                //mStatistics.signalClientRegisteredFailed();
+                throw e;
+            }
+            return clientId;
         }
-
-        String clientId = mConnection.getClientId();
-
-        if (clientId == null) {
-            throw new RuntimeException("You need to generate an id before registering");
-        }
-
-        // TODO: check verifier and salt for viability
-
-        TalkClient client = mConnection.getClient();
-        client.setSrpSalt(salt);
-        client.setSrpVerifier(verifier);
-
-        try {
-            mDatabase.saveClient(client);
-            //mStatistics.signalClientRegisteredSucceeded();
-        } catch (RuntimeException e) {
-            //mStatistics.signalClientRegisteredFailed();
-            throw e;
-        }
-        return clientId;
     }
 
     @Override
     public String srpPhase1(String clientId, String A) {
         logCall("srpPhase1(clientId: '" + clientId + "', '" + A + "')");
-
-        // check if we aren't logged in already
-        if (mConnection.isLoggedIn()) {
-            LOG.error("srpPhase1: Can not authenticate while logged in, disconnecting: clientId="+mConnection.getClientId());
-            mConnection.disconnectAfterRequest();
-            throw new RuntimeException("Can not authenticate while logged in");
-        }
-        try {
-
-            // create SRP state
-            if (mSrpServer == null) {
-                mSrpServer = new SRP6VerifyingServer();
-            } else {
-                LOG.error("srpPhase1: Can only attempt SRP once per connection, disconnecting: clientId="+mConnection.getClientId());
-                mConnection.disconnectAfterRequest();
-                throw new RuntimeException("Can only attempt SRP once per connection");
-            }
-
-            // get client object
-            mSrpClient = mDatabase.findClientById(clientId);
-            if (mSrpClient == null) {
-                if (mDatabase.findDeletedClientById(clientId) != null) {
-                    throw new RuntimeException("Client deleted");  // must not change this string, is checked on client side
-                } else {
-                    throw new RuntimeException("No such client");  // must not change this string, is checked on client side
+        synchronized (mConnection) {
+            LOG.info("srpPhase1: starting login for client " + clientId + " with [connectionId: '" + mConnection.getConnectionId() + "']");
+            try {
+                // check if we aren't logged in already
+                if (mConnection.isLoggedIn()) {
+                    if (clientId == null || !mConnection.getClientId().equals(clientId)) {
+                        LOG.error("srpPhase1: Bad authentication request while logged in, account clientId=" + mConnection.getClientId()
+                                + ", incoming clientId=" + clientId
+                                + " [connectionId: '" + mConnection.getConnectionId() + "']");
+                        throw new RuntimeException("Bad client id while authenticating while logged in");
+                    } else {
+                        LOG.error("srpPhase1: Can not authenticate while logged in, disconnecting: clientId=" + mConnection.getClientId() + " [connectionId: '" + mConnection.getConnectionId() + "']");
+                        mConnection.disconnectAfterRequest();
+                        throw new RuntimeException("Can not authenticate while logged in");
+                    }
                 }
+                TalkRpcConnection otherConnection = mServer.getClientConnection(clientId);
+                if (otherConnection != null) {
+                    LOG.warn("srpPhase1: Client already/still logged in on other [connectionId: '" + otherConnection.getConnectionId() + "'], clientId=" + clientId + " [connectionId: '" + mConnection.getConnectionId() + "']");
+                    //mConnection.disconnectAfterRequest();
+                    //throw new RuntimeException("Can not authenticate while logged in with other connection");
+                }
+
+                // create SRP state
+                if (mSrpServer == null) {
+                    mSrpServer = new SRP6VerifyingServer();
+                } else {
+                    LOG.error("srpPhase1: Can only attempt SRP once per connection, disconnecting: clientId=" + clientId + " [connectionId: '" + mConnection.getConnectionId() + "']");
+                    mConnection.disconnectAfterRequest();
+                    throw new RuntimeException("Can only attempt SRP once per connection");
+                }
+
+                // get client object
+                mSrpClient = mDatabase.findClientById(clientId);
+                if (mSrpClient == null) {
+                    if (mDatabase.findDeletedClientById(clientId) != null) {
+                        throw new RuntimeException("Client deleted");  // must not change this string, is checked on client side
+                    } else {
+                        throw new RuntimeException("No such client");  // must not change this string, is checked on client side
+                    }
+                }
+
+                // verify SRP registration
+                if (mSrpClient.getSrpVerifier() == null || mSrpClient.getSrpSalt() == null) {
+                    throw new RuntimeException("Not registered");   // must not change this string, is checked on client side
+                }
+
+                // parse the salt from DB
+                byte[] salt;
+                try {
+                    salt = (byte[]) HEX.decode(mSrpClient.getSrpSalt());
+                } catch (DecoderException e) {
+                    throw new RuntimeException("Bad salt", e);
+                }
+
+                // initialize SRP state
+                mSrpServer.initVerifiable(
+                        SRP_PARAMETERS.N, SRP_PARAMETERS.g,
+                        new BigInteger(mSrpClient.getSrpVerifier(), 16),
+                        clientId.getBytes(),
+                        salt,
+                        SRP_DIGEST, SRP_RANDOM
+                );
+
+                // generate server credentials
+                BigInteger credentials = mSrpServer.generateServerCredentials();
+
+                // computer secret / verify client credentials
+                try {
+                    mSrpServer.calculateSecret(new BigInteger(A, 16));
+                } catch (CryptoException e) {
+                    throw new RuntimeException("Authentication failed", e);
+                }
+                mStatistics.signalClientLoginSRP1Succeeded();
+                LOG.info("srpPhase1: done Srp1 for client " + clientId + " with [connectionId: '" + mConnection.getConnectionId() + "']");
+                // return our credentials for the client
+                return credentials.toString(16);
+            } catch (RuntimeException e) {
+                mStatistics.signalClientLoginSRP1Failed();
+                throw e;
             }
-
-            // verify SRP registration
-            if (mSrpClient.getSrpVerifier() == null || mSrpClient.getSrpSalt() == null) {
-                throw new RuntimeException("Not registered");   // must not change this string, is checked on client side
-            }
-
-            // parse the salt from DB
-            byte[] salt;
-            try {
-                salt = (byte[]) HEX.decode(mSrpClient.getSrpSalt());
-            } catch (DecoderException e) {
-                throw new RuntimeException("Bad salt", e);
-            }
-
-            // initialize SRP state
-            mSrpServer.initVerifiable(
-                    SRP_PARAMETERS.N, SRP_PARAMETERS.g,
-                    new BigInteger(mSrpClient.getSrpVerifier(), 16),
-                    clientId.getBytes(),
-                    salt,
-                    SRP_DIGEST, SRP_RANDOM
-            );
-
-            // generate server credentials
-            BigInteger credentials = mSrpServer.generateServerCredentials();
-
-            // computer secret / verify client credentials
-            try {
-                mSrpServer.calculateSecret(new BigInteger(A, 16));
-            } catch (CryptoException e) {
-                throw new RuntimeException("Authentication failed", e);
-            }
-            mStatistics.signalClientLoginSRP1Succeeded();
-            // return our credentials for the client
-            return credentials.toString(16);
-        } catch (RuntimeException e) {
-            mStatistics.signalClientLoginSRP1Failed();
-            throw e;
         }
-
     }
 
     @Override
     public String srpPhase2(String M1) {
         logCall("srpPhase2('" + M1 + "')");
+        synchronized (mConnection) {
+            LOG.info("srpPhase2: continuing login for client " + mSrpClient.getClientId() + " with [connectionId: '" + mConnection.getConnectionId() + "']");
 
-        // check if we aren't logged in already
-        if (mConnection.isLoggedIn()) {
-            LOG.error("srpPhase2: Can't authenticate while logged in, disconnecting: clientId="+mConnection.getClientId());
-            mConnection.disconnectAfterRequest();
-            throw new RuntimeException("Can't authenticate while logged in");
-        }
-
-        try {
-            // verify we are in a good state to do phase2
-            if (mSrpServer == null) {
-                throw new RuntimeException("Need to perform phase 1 first");
-            }
-            if (mSrpClient == null) {
-                throw new RuntimeException("Internal error in SRP phase 2");
-            }
-
-            // parse the string given by the client
-            byte[] M1b;
             try {
-                M1b = (byte[]) HEX.decode(M1);
-            } catch (DecoderException e) {
-                throw new RuntimeException(e);
+                // check if we aren't logged in already
+                if (mConnection.isLoggedIn()) {
+                    LOG.error("srpPhase2: Can't authenticate while logged in, disconnecting: clientId=" + mSrpClient.getClientId() + " with [connectionId: '" + mConnection.getConnectionId() + "']");
+                    mConnection.disconnectAfterRequest();
+                    throw new RuntimeException("Can't authenticate while logged in");
+                }
+
+                // verify we are in a good state to do phase2
+                if (mSrpServer == null) {
+                    throw new RuntimeException("Need to perform phase 1 first");
+                }
+                if (mSrpClient == null) {
+                    throw new RuntimeException("Internal error in SRP phase 2");
+                }
+
+                // parse the string given by the client
+                byte[] M1b;
+                try {
+                    M1b = (byte[]) HEX.decode(M1);
+                } catch (DecoderException e) {
+                    throw new RuntimeException(e);
+                }
+
+                // perform the verification
+                byte[] M2;
+                try {
+                    M2 = mSrpServer.verifyClient(M1b);
+                } catch (CryptoException e) {
+                    throw new RuntimeException("Verification failed", e);
+                }
+
+                // we are now logged in
+                mConnection.identifyClient(mSrpClient.getClientId());
+                mStatistics.signalClientLoginSRP2Succeeded();
+                // clear SRP state
+                mSrpClient = null;
+                mSrpServer = null;
+
+                // return server evidence for client to check
+                //        return Hex.encodeHexString(M2);
+                return new String(Hex.encodeHex(M2));
+            } catch (RuntimeException e) {
+                mStatistics.signalClientLoginSRP2Failed();
+                mConnection.disconnectAfterRequest();
+                throw e;
             }
-
-            // perform the verification
-            byte[] M2;
-            try {
-                M2 = mSrpServer.verifyClient(M1b);
-            } catch (CryptoException e) {
-                throw new RuntimeException("Verification failed", e);
-            }
-
-            // we are now logged in
-            mConnection.identifyClient(mSrpClient.getClientId());
-            mStatistics.signalClientLoginSRP2Succeeded();
-            // clear SRP state
-            mSrpClient = null;
-            mSrpServer = null;
-
-            // return server evidence for client to check
-            //        return Hex.encodeHexString(M2);
-            return new String(Hex.encodeHex(M2));
-        } catch (RuntimeException e) {
-            mStatistics.signalClientLoginSRP2Failed();
-            throw e;
         }
-
     }
 
     @Override
@@ -2460,8 +2480,20 @@ public class TalkRpcHandler implements ITalkRpcServer {
             for (TalkMessage message : messages) {
                 if (clientId.equals(message.getSenderId())) {
                     synchronized (mServer.idLock(message.getMessageId())) {
-                        message.setAttachmentUploadStarted(new Date());
-                        mDatabase.saveMessage(message);
+                        boolean messageChanged = false;
+                        if (message.getAttachmentUploadStarted() == null &&
+                                (TalkDelivery.ATTACHMENT_STATE_UPLOADING.equals(nextState) || TalkDelivery.ATTACHMENT_STATE_UPLOADED.equals(nextState) )) {
+                            message.setAttachmentUploadStarted(new Date());
+                            messageChanged = true;
+                        }
+                        if (message.getAttachmentUploadFinished() == null &&
+                                (TalkDelivery.ATTACHMENT_STATE_UPLOADED.equals(nextState) )) {
+                            message.setAttachmentUploadFinished(new Date());
+                            messageChanged = true;
+                        }
+                        if (messageChanged) {
+                            mDatabase.saveMessage(message);
+                        }
                         List<TalkDelivery> deliveries = mDatabase.findDeliveriesForMessage(message.getMessageId());
 
                         // update all concerned deliveries

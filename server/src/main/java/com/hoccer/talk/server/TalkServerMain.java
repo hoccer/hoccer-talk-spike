@@ -91,6 +91,7 @@ public class TalkServerMain {
             LOG.info("Starting server");
             webServer.start();
             managementServer.start();
+            talkServer.setReady();
             webServer.join();
             managementServer.join();
             LOG.info("Server has quit");

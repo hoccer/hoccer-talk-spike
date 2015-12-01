@@ -572,14 +572,7 @@ public class XoClientService extends Service {
             LOG.debug("onConnectivityChange()");
 
             NetworkInfo activeNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
-            if (activeNetworkInfo != null) {
-                if (firstConnect) {
-                    handleConnectivityChange(activeNetworkInfo);
-                    firstConnect = false;
-                }
-            } else {
-                firstConnect = true;
-            }
+            handleConnectivityChange(activeNetworkInfo);
         }
     }
 

@@ -5,9 +5,7 @@ import com.codahale.metrics.health.HealthCheckRegistry;
 import com.codahale.metrics.servlets.HealthCheckServlet;
 import com.codahale.metrics.servlets.MetricsServlet;
 import com.hoccer.talk.server.rpc.TalkRpcConnectionHandler;
-import com.hoccer.talk.servlets.CertificateInfoServlet;
-import com.hoccer.talk.servlets.InvitationServlet;
-import com.hoccer.talk.servlets.ServerInfoServlet;
+import com.hoccer.talk.servlets.*;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.handler.ResourceHandler;
@@ -27,7 +25,7 @@ public class TalkServerHandler extends HandlerCollection {
         ServletContextHandler metricsContextHandler = new ServletContextHandler();
 
         metricsContextHandler.setContextPath("/metrics");
-        metricsContextHandler.setInitParameter("show-jvm-metrics", "true");
+        //metricsContextHandler.setInitParameter("show-jvm-metrics", "true");
 
         metricsContextHandler.addEventListener(new MyMetricsServletContextListener(talkServer.getMetrics()));
         metricsContextHandler.addServlet(MetricsServlet.class, "/registry");
@@ -44,6 +42,8 @@ public class TalkServerHandler extends HandlerCollection {
         serverInfoContextHandler.setContextPath("/server");
         serverInfoContextHandler.setAttribute("server", talkServer);
         serverInfoContextHandler.addServlet(ServerInfoServlet.class, "/info");
+        serverInfoContextHandler.addServlet(DatabaseInfoServlet.class, "/dbinfo");
+        serverInfoContextHandler.addServlet(ConnectionInfoServlet.class, "/connections");
         serverInfoContextHandler.addServlet(CertificateInfoServlet.class, "/certificates");
 
         return serverInfoContextHandler;

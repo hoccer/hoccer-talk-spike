@@ -16,6 +16,8 @@ import java.util.List;
  */
 public interface ITalkServerDatabase {
 
+    public Object getRawCollection(String name);
+
     public List<TalkClient> findAllClients();
 
     public TalkClient findClientById(String clientId);
@@ -102,6 +104,8 @@ public interface ITalkServerDatabase {
 
     public List<TalkPresence> findPresencesChangedAfter(String clientId, Date lastKnown);
 
+    public List<TalkPresence> findPresencesWithStates(String[] states);
+
     public TalkKey findKey(String clientId, String keyId);
 
     public List<TalkKey> findKeys(String clientId);
@@ -146,11 +150,15 @@ public interface ITalkServerDatabase {
 
     public int deleteGroupMembershipsWithStatesChangedBefore(String[] states, Date lastChanged);
 
+    public int deleteGroupMembershipsWithStatesAndRolesChangedBefore(String[] states, String[] roles, Date lastChanged);
+
     public List<TalkGroupPresence> findGroupPresencesWithState(String state);
 
     public List<TalkGroupPresence> findGroupPresencesWithStateChangedBefore(String state, Date changedDate);
 
     public int deleteGroupPresencesWithStateChangedBefore(String state, Date changedDate);
+
+    public int deleteGroupPresencesWithStateAndTypeChangedBefore(String state, String groupType, Date changedDate);
 
     public void saveGroupPresence(TalkGroupPresence groupPresence);
 

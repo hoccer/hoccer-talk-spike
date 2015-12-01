@@ -298,6 +298,7 @@ public class DeliveryRequest {
         if (client.isPushCapable()) {
             mServer.getPushAgent().submitRequest(client);
         } else {
+            mServer.getPushAgent().submitRequest(client); // try push anyway to get push incapable stats
             LOG.warn("push unconfigured for " + mClientId);
         }
     }
