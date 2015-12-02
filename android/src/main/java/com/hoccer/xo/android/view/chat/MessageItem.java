@@ -16,6 +16,7 @@ import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -319,12 +320,17 @@ public class MessageItem implements AttachmentTransferListener {
     private static String getMessageTimestamp(TalkClientMessage message) {
         StringBuilder result = new StringBuilder();
         Date timeStamp = message.getTimestamp();
-        String ts = timeStamp != null ? SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(timeStamp) : "NULL";
+        String ts = timeStamp != null ? SimpleDateFormat.getTimeInstance(SimpleDateFormat.MEDIUM).format(timeStamp) : "NULL";
 
         Date accepted = message.getDelivery().getTimeAccepted();
-        String ac = accepted != null ? SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(accepted) : "NULL";
+        String ac = accepted != null ? SimpleDateFormat.getTimeInstance(SimpleDateFormat.MEDIUM).format(accepted) : "NULL";
+
+        Date acceptedLocal = XoApplication.get().getClient().serverTimeToLocalTime(accepted);
+        String acLocal = SimpleDateFormat.getTimeInstance(SimpleDateFormat.MEDIUM).format(acceptedLocal);
+
+
         Date sent = message.getMessage().getTimeSent();
-        String s = sent != null ? SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(sent) : "NULL";
+        String s = sent != null ? SimpleDateFormat.getTimeInstance(SimpleDateFormat.MEDIUM).format(sent) : "NULL";
 
         if (timeStamp != null) {
             long timeStampDay = getTimeAtStartOfDay(timeStamp);
@@ -341,8 +347,9 @@ public class MessageItem implements AttachmentTransferListener {
             result.append(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(timeStamp));
         }
 
+
         result = new StringBuilder();
-        result.append("T:"+ts+" A:"+ac+" S:"+s);
+        result.append("T:"+ts+" A:"+ac+" S:"+s+" ACL:"+acLocal);
 
 
         return result.toString();

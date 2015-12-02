@@ -293,11 +293,11 @@ public class ChatMessagesAdapter extends MessagesAdapter implements IXoMessageLi
         Collections.sort(mMessageItems, new Comparator<MessageItem>() {
             @Override
             public int compare(MessageItem o1, MessageItem o2) {
-                if (o1.getMessage().getMessage().getTimeSent()!=null && o2.getMessage().getMessage().getTimeSent()!=null) {
-                    return o1.getMessage().getMessage().getTimeSent().getTime() < o2.getMessage().getMessage().getTimeSent().getTime() ? -1 : 1;
-                } else {
+               // if (o1.getMessage().getMessage().getTimeSent()!=null && o2.getMessage().getMessage().getTimeSent()!=null) {
+               //     return o1.getMessage().getMessage().getTimeSent().getTime() < o2.getMessage().getMessage().getTimeSent().getTime() ? -1 : 1;
+               // } else {
                     return o1.getMessage().getDelivery().getTimeAccepted().getTime() < o2.getMessage().getDelivery().getTimeAccepted().getTime() ? -1 : 1;
-                }
+               // }
             }
         });
     }
