@@ -4,6 +4,7 @@ import com.google.appengine.api.blobstore.ByteRange;
 import com.google.appengine.api.blobstore.RangeFormatException;
 import com.hoccer.talk.filecache.model.CacheFile;
 import com.hoccer.talk.filecache.transfer.CacheDownload;
+import com.hoccer.talk.filecache.transfer.CacheTransfer;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContext;
@@ -50,7 +51,8 @@ public class DownloadServlet extends HttpServlet {
         // abort if we don't have one
         if(file == null) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, "File does not exist");
-            LOG.info("GET " + req.getPathInfo() + " " + resp.getStatus() + " file not found");
+            LOG.info("GET " + req.getPathInfo() + " " + resp.getStatus() + " file not found, agent="
+                    + CacheTransfer.getUserAgent(req)+" from "+CacheTransfer.getRemoteAddr(req));
             return;
         }
 
@@ -58,12 +60,15 @@ public class DownloadServlet extends HttpServlet {
         ByteRange range = beginGet(file, req, resp);
         // abort if there was an error
         if(range == null) {
-            LOG.info("GET " + req.getPathInfo() + " " + resp.getStatus() + " invalid range");
+            LOG.info("GET " + req.getPathInfo() + " " + resp.getStatus() + " invalid range, agent="
+                    + CacheTransfer.getUserAgent(req)+" from "+CacheTransfer.getRemoteAddr(req));
             return;
         }
 
+        int downloadTimeout = getCacheCacheConfiguration().getDownloadTimeout();
+
         // create a transfer object
-        CacheDownload download = new CacheDownload(file, range, req, resp);
+        CacheDownload download = new CacheDownload(file, range, req, resp, downloadTimeout);
 
         // finish response headers
         finishGet(file, req, resp, range);
@@ -72,11 +77,11 @@ public class DownloadServlet extends HttpServlet {
 
         // perform the download itself
         try {
-            LOG.info("GET " + req.getPathInfo() + " --- download started");
+            LOG.info("GET " + req.getPathInfo() + " --- download started, agent "+download.getUserAgent()+" from "+download.getRemoteAddr());
             download.perform();
-            LOG.info("GET " + req.getPathInfo() + " --- download finished");
+            LOG.info("GET " + req.getPathInfo() + " --- download finished, agent "+download.getUserAgent()+" from "+download.getRemoteAddr()+", duration "+download.getTotalDuration());
         } catch (InterruptedException e) {
-            LOG.error("GET " + req.getPathInfo() + " --- download interrupted", e);
+            LOG.error("GET " + req.getPathInfo() + " --- download interrupted, agent "+download.getUserAgent()+" from "+download.getRemoteAddr(), e);
         }
     }
 
@@ -172,6 +177,12 @@ public class DownloadServlet extends HttpServlet {
         ServletContext ctx = getServletContext();
         CacheBackend backend = (CacheBackend)ctx.getAttribute("backend");
         return backend;
+    }
+
+    protected CacheConfiguration getCacheCacheConfiguration() {
+        ServletContext ctx = getServletContext();
+        CacheConfiguration config = (CacheConfiguration)ctx.getAttribute("config");
+        return config;
     }
 
 }

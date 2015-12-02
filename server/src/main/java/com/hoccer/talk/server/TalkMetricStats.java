@@ -24,6 +24,10 @@ public class TalkMetricStats implements ITalkServerStatistics {
     private final Meter messageAcceptedSucceededMeter;
     private final Meter messageConfirmedSucceededMeter;
     private final Meter messageAcknowledgedSucceededMeter;
+    private final Meter requestMeter;
+    private final Meter responseMeter;
+    //private final Meter notificationSentMeter;   // we can do that only in JsonRpcClient, but it has no access to metrics yet
+    private final Meter notificationReceivedMeter;
 
     //Timers
     private final Timer mRequestTimer;
@@ -41,6 +45,10 @@ public class TalkMetricStats implements ITalkServerStatistics {
         messageAcceptedSucceededMeter = metrics.meter(name(TalkServer.class, "message-accepts-succeeded-meter"));
         messageConfirmedSucceededMeter = metrics.meter(name(TalkServer.class, "message-confirmations-succeeded-meter"));
         messageAcknowledgedSucceededMeter = metrics.meter(name(TalkServer.class, "message-acknowledgements-succeeded-meter"));
+        requestMeter = metrics.meter(name(TalkServer.class, "request-meter"));
+        responseMeter = metrics.meter(name(TalkServer.class, "response-meter"));
+        //notificationSentMeter = metrics.meter(name(TalkServer.class, "notification-sent-meter"));
+        notificationReceivedMeter = metrics.meter(name(TalkServer.class, "notification-received-meter"));
 
         // Timers
         mRequestTimer = mMetricsRegistry.timer("requests");
@@ -89,6 +97,26 @@ public class TalkMetricStats implements ITalkServerStatistics {
     @Override
     public void signalMessageAcknowledgedSucceeded() {
         messageAcknowledgedSucceededMeter.mark();
+    }
+
+    @Override
+    public void signalRequest() {
+        requestMeter.mark();
+    }
+
+    @Override
+    public void signalResponse() {
+        responseMeter.mark();
+    }
+    /*
+    @Override
+    public void signalNotificationSent() {
+        notificationSentMeter.mark();
+    }
+    */
+    @Override
+    public void signalNotificationReceived() {
+        notificationReceivedMeter.mark();
     }
 
     @Override

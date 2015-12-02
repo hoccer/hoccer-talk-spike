@@ -84,7 +84,7 @@ public class TalkPushService extends GCMBaseIntentService {
     }
 
     private void startServiceWithIntent(String extra, String extraValue) {
-        Intent serviceIntent = new Intent(getApplicationContext(), XoClientService.class);
+        Intent serviceIntent = new Intent(this, XoClientService.class);
         serviceIntent.putExtra(extra, extraValue);
         startService(serviceIntent);
     }

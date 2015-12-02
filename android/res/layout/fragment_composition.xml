@@ -31,6 +31,7 @@
                     android:src="@drawable/ic_attachment"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:contentDescription="@string/select_attachment"
                     android:scaleType="centerInside"/>
 
             <ImageView
@@ -132,6 +133,7 @@
                 style="?android:attr/borderlessButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"/>
+                android:layout_gravity="center_vertical"
+                android:contentDescription="@string/send_message"/>
     </LinearLayout>
 </LinearLayout>

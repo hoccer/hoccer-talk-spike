@@ -52,16 +52,19 @@ public class StatusServlet extends HttpServlet {
                     + "\n");
 
             w.write("  State " + f.getStateString()
-                    + " limit " + f.getLimit()
+                    + " limit " + f.getLimit() + "("+ f.getLimit()*100.0/f.getContentLength()+"%)"
                     + "\n");
+            w.write("  Created " + f.getCreationTime() + "\n");
             w.write("  Expires " + f.getExpiryTime() + "\n");
+            w.write("  Account " + f.getAccountId() + "\n");
 
             CacheUpload upload = f.getUpload();
             if (upload != null) {
                 w.write("  Upload"
                         + " from " + upload.getRemoteAddr()
+                        + " duration " + upload.getDuration() / 1000.0 +" secs"
                         + " rate " + Math.round(upload.getRate()) / 1000.0 + " kB/s"
-                        + " agent " + upload.getUserAgent()
+                        + " agent '" + upload.getUserAgent() + "'"
                         + "\n");
             }
 
@@ -69,8 +72,10 @@ public class StatusServlet extends HttpServlet {
             for (CacheDownload d : downloads) {
                 w.write("  Download"
                         + " from " + d.getRemoteAddr()
+                        + " duration " + d.getDuration() / 1000.0 +" secs"
                         + " rate " + Math.round(d.getRate()) / 1000.0 + " kB/s"
-                        + " agent " + d.getUserAgent()
+                        + " agent '" + d.getUserAgent()  + "'"
+                        + " thread '" + d.getThread().getName() + "', id "+d.getThread().getId() + ", state "+d.getThread().getState()
                         + "\n");
             }
         }

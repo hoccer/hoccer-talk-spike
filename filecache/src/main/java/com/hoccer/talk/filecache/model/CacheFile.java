@@ -18,6 +18,7 @@ import java.util.GregorianCalendar;
 import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -260,6 +261,7 @@ public class CacheFile {
     }
 
     public void expire() {
+        LOG.debug("expire: fileId=" + mFileId);
         mStateLock.lock();
         try {
             switchState(STATE_EXPIRED, "expiry time reached");
@@ -270,6 +272,7 @@ public class CacheFile {
     }
 
     public void uploadStarts(CacheUpload upload) {
+        LOG.debug("uploadStarts: fileId=" + mFileId);
         mStateLock.lock();
         try {
             if(mState == STATE_NEW) {
@@ -290,6 +293,7 @@ public class CacheFile {
     }
 
     public void uploadAborted(CacheUpload upload) {
+        LOG.debug("uploadAborted: fileId=" + mFileId);
         mStateLock.lock();
         try {
             mUpload = null;
@@ -301,6 +305,7 @@ public class CacheFile {
     }
 
     public void uploadFinished(CacheUpload upload) {
+        LOG.debug("uploadFinished: fileId=" + mFileId);
         mStateLock.lock();
         try {
             mUpload = null;
@@ -312,6 +317,7 @@ public class CacheFile {
     }
 
     public void downloadStarts(CacheDownload download) {
+        LOG.debug("downloadStarts: fileId=" + mFileId);
         mStateLock.lock();
         try {
             mDownloads.add(download);
@@ -326,6 +332,7 @@ public class CacheFile {
     }
 
     public void downloadAborted(CacheDownload download) {
+        LOG.debug("downloadAborted: fileId=" + mFileId);
         mStateLock.lock();
         try {
             mDownloads.remove(download);
@@ -337,6 +344,7 @@ public class CacheFile {
     }
 
     public void downloadFinished(CacheDownload download) {
+        LOG.debug("downloadFinished: fileId=" + mFileId);
         mStateLock.lock();
         try {
             mDownloads.remove(download);
@@ -387,7 +395,7 @@ public class CacheFile {
         }
     }
 
-    public boolean waitForData(int wantedPosition) throws InterruptedException {
+    public boolean waitForData(int wantedPosition, long timeout) throws InterruptedException {
         LOG.debug("waitForData wantedPosition="+wantedPosition);
         LOG.debug("file with id '" + mFileId + "' has state: " + stateNames[mState] + " limit="+mLimit);
 
@@ -416,9 +424,17 @@ public class CacheFile {
                 return false;
             }
 
-            LOG.debug("waitForData - wait for state change");
+            LOG.debug("waitForData - wait "+timeout+" seconds for state change, now state="+stateNames[mState]);
+
             // wait for state change
-            mStateChanged.await();
+            boolean timeoutOccurred = !mStateChanged.await(timeout, TimeUnit.SECONDS);
+
+            LOG.debug("waitForData - awake (timeout="+timeoutOccurred+") from wait for state change, now state=" + stateNames[mState]);
+
+            if (timeoutOccurred) {
+                LOG.info("Download timeout ("+timeout+" secs.) in state " + stateNames[mState] + " for file id "+getFileId());
+                return false;
+            }
 
             // cases where progress may have
             // been made while waiting

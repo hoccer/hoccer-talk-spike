@@ -99,7 +99,7 @@ public class ContentSelectionDialogFragment extends DialogFragment {
 
     private Dialog createSelectionDialog(final List<Map<String, Object>> options, SimpleAdapter adapter) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(R.string.selectattachment_title);
+        builder.setTitle(R.string.select_attachment);
         builder.setCancelable(true);
         builder.setNegativeButton(R.string.common_cancel, new DialogInterface.OnClickListener() {
             @Override

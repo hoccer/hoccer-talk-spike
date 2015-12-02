@@ -16,6 +16,8 @@ import java.util.List;
  */
 public interface ITalkServerDatabase {
 
+    public Object getRawCollection(String name);
+
     public List<TalkClient> findAllClients();
 
     public TalkClient findClientById(String clientId);

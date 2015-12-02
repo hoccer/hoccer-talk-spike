@@ -34,14 +34,23 @@ public class BackgroundConnectionHandler implements BackgroundManager.Listener, 
 
     @Override
     public void onBecameForeground(Activity activity) {
+        releaseWakeLock();
+
         mClient.setPresenceStatus(TalkPresence.STATUS_ONLINE);
+        mClient.cancelDisconnectTimeout();
 
         if (mClient.isDisconnected()) {
             connectClientIfNetworkAvailable();
         }
     }
 
-    public void connectClientIfNetworkAvailable() {
+    private void releaseWakeLock() {
+        if (mWakeLock != null && mWakeLock.isHeld()) {
+            mWakeLock.release();
+        }
+    }
+
+    private void connectClientIfNetworkAvailable() {
         ConnectivityManager connectivityManager = (ConnectivityManager) XoApplication.get().getSystemService(Context.CONNECTIVITY_SERVICE);
         if (connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected()) {
             mClient.connect();
@@ -50,10 +59,9 @@ public class BackgroundConnectionHandler implements BackgroundManager.Listener, 
 
     @Override
     public void onBecameBackground(Activity activity) {
-        if (!mPowerManager.isScreenOn()) {
-            acquireWakeLockToCompleteDisconnect();
-        }
+        acquireWakeLockToCompleteDisconnect();
         mClient.setPresenceStatus(TalkPresence.STATUS_BACKGROUND);
+        mClient.disconnectAfterTimeout(XoApplication.getConfiguration().getBackgroundDisconnectTimeoutSeconds());
     }
 
     private void acquireWakeLockToCompleteDisconnect() {
@@ -63,8 +71,8 @@ public class BackgroundConnectionHandler implements BackgroundManager.Listener, 
 
     @Override
     public void onClientStateChange(XoClient client) {
-        if (client.isDisconnected() && mWakeLock != null && mWakeLock.isHeld()) {
-            mWakeLock.release();
+        if (client.isDisconnected()) {
+            releaseWakeLock();
         }
     }
 }
