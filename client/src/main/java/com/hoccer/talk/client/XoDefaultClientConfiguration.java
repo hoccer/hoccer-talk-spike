@@ -58,6 +58,16 @@ public abstract class XoDefaultClientConfiguration implements IXoClientConfigura
     }
 
     @Override
+    public int getPostponeDisconnectTimeoutSeconds() {
+        return 10;
+    }
+
+    @Override
+    public int getBackgroundWakeDisconnectTimeoutSeconds() {
+        return 10;
+    }
+
+    @Override
     public boolean getKeepAliveEnabled() {
         return false;
     }
