@@ -164,22 +164,7 @@ public class MediaMetaData {
                         retriever.setDataSource(mFilePath);
                         byte[] artworkRaw = retriever.getEmbeddedPicture();
                         if (artworkRaw != null) {
-                            BitmapFactory.Options options = new BitmapFactory.Options();
-                            options.inJustDecodeBounds = true;
-                            BitmapFactory.decodeByteArray(artworkRaw, 0, artworkRaw.length, options);
-
-                            int scale = 1;
-                            if (options.outWidth > THUMBNAIL_WIDTH) {
-                                scale = Math.round((float) options.outWidth / (float) THUMBNAIL_WIDTH);;
-                            }
-
-                            BitmapFactory.Options outOptions = new BitmapFactory.Options();
-                            outOptions.inSampleSize = scale;
-                            outOptions.inPurgeable = true;
-                            outOptions.inInputShareable = true;
-
-                            Bitmap bitmap = BitmapFactory.decodeByteArray(artworkRaw, 0, artworkRaw.length, outOptions);
-                            artwork = new BitmapDrawable(resources, bitmap);
+                            artwork = createBitmapDrawable(artworkRaw, THUMBNAIL_WIDTH, resources);
                         } else {
                             LOG.warn("Could not read artwork for file: " + mFilePath);
                         }
@@ -206,6 +191,25 @@ public class MediaMetaData {
                 }
             }.execute();
         }
+    }
+
+    private Drawable createBitmapDrawable(byte[] artworkRaw, int width, Resources resources) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeByteArray(artworkRaw, 0, artworkRaw.length, options);
+
+        int scale = 1;
+        if (options.outWidth > THUMBNAIL_WIDTH) {
+            scale = Math.round((float) options.outWidth / (float) width);;
+        }
+
+        BitmapFactory.Options outOptions = new BitmapFactory.Options();
+        outOptions.inSampleSize = scale;
+        outOptions.inPurgeable = true;
+        outOptions.inInputShareable = true;
+
+        Bitmap bitmap = BitmapFactory.decodeByteArray(artworkRaw, 0, artworkRaw.length, outOptions);
+        return new BitmapDrawable(resources, bitmap);
     }
 
     public void unregisterArtworkRetrievalListener(ArtworkRetrieverListener listener) {
