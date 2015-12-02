@@ -1096,7 +1096,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                         if (mConnectInBackground) {
                             mConnectInBackground = false;
                             LOG.info("Trigger disconnect in 30 seconds..");
-                            disconnectAfterTimeout(30);
+                            disconnectAfterTimeout(mClientConfiguration.getBackgroundWakeDisconnectTimeoutSeconds());
                         }
                     }
                 });
@@ -1553,7 +1553,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             public void run() {
                 if (isTransferInProgress()) {
                     LOG.debug("Transfer in progress. Postpone disconnect for 10 seconds.");
-                    disconnectAfterTimeout(10);
+                    disconnectAfterTimeout(mClientConfiguration.getPostponeDisconnectTimeoutSeconds());
                 } else {
                     mDisconnectTimeoutFuture = null;
                     switchState(State.DISCONNECTED, "disconnect timeout");
