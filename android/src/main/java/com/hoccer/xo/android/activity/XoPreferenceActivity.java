@@ -22,6 +22,7 @@ import com.hoccer.xo.android.passwordprotection.PasswordProtection;
 import com.hoccer.xo.android.passwordprotection.activity.PasswordChangeActivity;
 import com.hoccer.xo.android.passwordprotection.activity.PasswordPromptActivity;
 import com.hoccer.xo.android.passwordprotection.activity.PasswordSetActivity;
+import com.hoccer.xo.android.polling.Polling;
 import com.hoccer.xo.android.polling.PollingBroadcastReceiver;
 import com.hoccer.xo.android.view.chat.attachments.TransferControlView;
 import org.apache.commons.io.FileUtils;
@@ -90,35 +91,6 @@ public class XoPreferenceActivity extends PreferenceActivity
         });
 
         mBackupController = new BackupController(this, createBackupPreference, restoreBackupPreference);
-
-        final Preference enablePollingPreference = findPreference(getString(R.string.preference_key_enable_polling));
-        enablePollingPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                if ((Boolean)newValue){
-                    PollingBroadcastReceiver.startPolling(XoApplication.get());
-                } else {
-                    PollingBroadcastReceiver.stopPolling(XoApplication.get());
-                }
-                return true;
-            }
-        });
-        final Preference setPollingIntervalPreference = findPreference(getString(R.string.preference_key_polling_interval));
-        setPollingIntervalPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                if (mDefaultSharedPreferences.getBoolean(getString(R.string.preference_key_enable_polling), false)){
-                    try {
-                        Integer newInterval = Integer.parseInt((String) newValue);
-                        PollingBroadcastReceiver.startPolling(XoApplication.get(), newInterval);
-                    } catch (Exception e){
-                        LOG.error("Setting new polling interval went wrong.",e);
-                        return false;
-                    }
-                }
-                return true;
-            }
-        });
     }
 
     private boolean isPasswordSet() {
@@ -271,6 +243,10 @@ public class XoPreferenceActivity extends PreferenceActivity
             regenerateKeys();
         } else if (getString(R.string.preference_key_worldwide_timetolive).equals(key) || getString(R.string.preference_key_worldwide_enable_notifications).equals(key)) {
             updateWorldwideEnvironmentParameters();
+        } else if (getString(R.string.preference_key_enable_polling).equals(key)) {
+            Polling.update(this);
+        } else if (getString(R.string.preference_key_polling_interval).equals(key)) {
+            Polling.update(this);
         }
     }
 

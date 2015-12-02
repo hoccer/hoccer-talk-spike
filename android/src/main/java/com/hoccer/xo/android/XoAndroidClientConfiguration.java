@@ -78,10 +78,6 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
         return mSharedPreferences.getBoolean("preference_report_crashes", true);
     }
 
-    public boolean isPollingEnabled() {
-        return mSharedPreferences.getBoolean(mContext.getString(R.string.preference_key_enable_polling), false);
-    }
-
     public String getBackupDirectory() {
         return getAttachmentsDirectory() + File.separator + "Backups";
     }

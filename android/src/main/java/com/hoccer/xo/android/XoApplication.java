@@ -12,6 +12,7 @@ import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.credentialtransfer.SrpChangeListener;
+import com.hoccer.xo.android.polling.Polling;
 import com.hoccer.xo.android.polling.PollingBroadcastReceiver;
 import com.hoccer.xo.android.service.XoClientService;
 import com.hoccer.xo.android.task.StartupTasks;
@@ -201,11 +202,7 @@ public class XoApplication extends Application {
         sStartupTasks = new StartupTasks(this);
         sStartupTasks.executeRegisteredTasks();
 
-        if (sConfiguration.isPollingEnabled()) {
-            PollingBroadcastReceiver.startPolling(this);
-        } else {
-            PollingBroadcastReceiver.stopPolling(this);
-        }
+        Polling.update(this);
     }
 
     private boolean isFirstConnectionAfterCrashOrUpdate() {
