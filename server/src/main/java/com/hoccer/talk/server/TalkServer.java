@@ -652,7 +652,7 @@ public class TalkServer {
                 boolean hasClientConnection = hasClientConnection(clientId);
                 if (hasClientConnection != connection.isLoggedInFlag()) {
                     LOG.warn("[connectionId: '" + connection.getConnectionId() + "'] hasClientConnection/loggedInFlag mismatch, hasClientConnection="
-                            + hasClientConnection + ", isLoggedInFlag=" +connection.isLoggedInFlag());
+                            + hasClientConnection + ", isLoggedInFlag=" + connection.isLoggedInFlag());
                 }
                 if (hasClientConnection) {
                     // remove connection from table
@@ -757,6 +757,23 @@ public class TalkServer {
                 }
             }
             return readyClientConnections;
+        }
+    }
+
+    public Vector<TalkRpcConnection> getPingConnections() {
+        synchronized (mConnections) {
+            Vector<TalkRpcConnection> pingClientConnections = new Vector<TalkRpcConnection>();
+            Iterator<TalkRpcConnection> iterator = mConnections.iterator();
+            while (iterator.hasNext()) {
+                TalkRpcConnection connection = iterator.next();
+                if (connection.getClient() != null && connection.getClient().isReady()) {
+                    Date intervalDate = new Date(new Date().getTime()-getConfiguration().getPingClientInterval()*1000);
+                    if (connection.getLastPingOccured() == null || connection.getLastPingOccured().before(intervalDate)) {
+                        pingClientConnections.add(connection);
+                    }
+                }
+            }
+            return pingClientConnections;
         }
     }
 

@@ -13,6 +13,7 @@ import com.hoccer.talk.util.NamedThreadFactory;
 import org.apache.log4j.Logger;
 
 import java.util.Date;
+import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -67,10 +68,10 @@ public class PingAgent {
             public void run() {
                 try {
                     pingReadyClients();
-                    schedulePingAllReadyClients();
                 } catch (Throwable t) {
                     LOG.error("caught and swallowed exception escaping runnable", t);
                 }
+                schedulePingAllReadyClients();
             }
         }, mConfig.getPingInterval(), TimeUnit.SECONDS);
     }
@@ -131,35 +132,35 @@ public class PingAgent {
         }
         TalkRpcConnection conn = mServer.getClientConnection(clientId);
         if (conn != null) {
-            Date intervalDate = new Date(new Date().getTime()-mConfig.getPingClientInterval()*1000);
-            if (conn.getLastPingOccured() == null || conn.getLastPingOccured().before(intervalDate)) {
+            LOG.info("pinging client: '" + conn.getConnectionId() + "' (clientId: '" + clientId + "')");
 
-                ITalkRpcClient rpc = conn.getClientRpc();
-                mPingAttempts.incrementAndGet();
-                Timer.Context timer = mPingLatency.time();
-                try {
-                    rpc.ping();
-                    long elapsed = (timer.stop() / 1000000);
-                    conn.setLastPingOccured(new Date());
-                    conn.setLastPingLatency(elapsed);
-                    LOG.debug("ping on " + clientId + " took " + elapsed + " msecs");
-                    mPingSuccesses.incrementAndGet();
-                } catch (JsonRpcClientDisconnect e) {
-                    LOG.info("ping on " + clientId + " disconnect");
-                    mPingFailures.incrementAndGet();
-                } catch (JsonRpcClientTimeout e) {
-                    LOG.info("ping on " + clientId + " timeout");
-                    mPingFailures.incrementAndGet();
-                } catch (Throwable t) {
-                    LOG.error("exception in ping on " + clientId, t);
-                    mPingFailures.incrementAndGet();
-                }
+            ITalkRpcClient rpc = conn.getClientRpc();
+            mPingAttempts.incrementAndGet();
+            Timer.Context timer = mPingLatency.time();
+            try {
+                rpc.ping();
+                long elapsed = (timer.stop() / 1000000);
+                conn.setLastPingOccured(new Date());
+                conn.setLastPingLatency(elapsed);
+                LOG.info("ping on " + clientId + " took " + elapsed + " msecs, [id:"+conn.getConnectionId()+"]");
+                mPingSuccesses.incrementAndGet();
+            } catch (JsonRpcClientDisconnect e) {
+                LOG.info("ping on " + clientId + " disconnect [id:"+conn.getConnectionId()+"]");
+                mPingFailures.incrementAndGet();
+            } catch (JsonRpcClientTimeout e) {
+                LOG.info("ping on " + clientId + " timeout [id:"+conn.getConnectionId()+"]");
+                mPingFailures.incrementAndGet();
+            } catch (Throwable t) {
+                LOG.error("exception in ping on " + clientId+" [id:"+conn.getConnectionId()+"] ", t);
+                mPingFailures.incrementAndGet();
             }
         }
     }
 
     private void pingReadyClients() {
-        for (TalkRpcConnection connection : mServer.getReadyConnections()) {
+        Vector<TalkRpcConnection> pingConnections = mServer.getPingConnections();
+        LOG.info("pingReadyClients checking for ping on " + pingConnections.size() + " pingable connections");
+        for (TalkRpcConnection connection : pingConnections) {
             String clientId = connection.getClientId();
             if (clientId != null) {
                 LOG.trace("pinging ready client: '" + connection.getConnectionId() + "' (clientId: '" + clientId + "')");
