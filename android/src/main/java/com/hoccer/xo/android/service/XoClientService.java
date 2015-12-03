@@ -162,7 +162,7 @@ public class XoClientService extends Service {
         loadPreference(mPreferences, sPreferenceImageUploadQualityKey);
         configureAutoTransfers();
 
-        doVerifyGcm();
+        mGcmSupported = isGcmSupported();
 
         mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         registerConnectivityReceiver();
@@ -261,20 +261,15 @@ public class XoClientService extends Service {
         }
     }
 
-    private void doVerifyGcm() {
-        LOG.debug("doVerifyGcm()");
+    private boolean isGcmSupported() {
         try {
-            mGcmSupported = false;
             GCMRegistrar.checkManifest(this);
             GCMRegistrar.checkDevice(this);
-            mGcmSupported = true;
-            LOG.info("GCM is supported");
-        } catch (IllegalStateException ex) {
-            saveGCMException(ex);
-            LOG.warn("GCM unavailable due to manifest problems", ex);
-        } catch (UnsupportedOperationException ex) {
-            saveGCMException(ex);
+            return true;
+        } catch (Exception ex) {
+            ExceptionHandler.saveException(ex, null);
             LOG.warn("GCM not supported by device", ex);
+            return false;
         }
     }
 
