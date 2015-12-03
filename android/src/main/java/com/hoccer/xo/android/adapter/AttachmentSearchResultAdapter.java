@@ -16,6 +16,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.content.MediaMetaData;
+import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.util.UriUtils;
 
 import java.util.ArrayList;
@@ -99,8 +100,10 @@ public class AttachmentSearchResultAdapter extends BaseAdapter {
         View artworkContainer = attachmentView.findViewById(R.id.fl_artwork);
         artworkContainer.setVisibility(View.VISIBLE);
 
+        int thumbnailWidth = DisplayUtils.getDisplaySize(context).x / 4;
+
         final ImageView artworkView = (ImageView) attachmentView.findViewById(R.id.iv_artwork);
-        metaData.getArtwork(context.getResources(), new MediaMetaData.ArtworkRetrieverListener() {
+        metaData.getResizedArtwork(context.getResources(), new MediaMetaData.ArtworkRetrieverListener() {
             @Override
             public void onArtworkRetrieveFinished(final Drawable artwork) {
                 new Handler(context.getMainLooper()).post(new Runnable() {
@@ -111,7 +114,7 @@ public class AttachmentSearchResultAdapter extends BaseAdapter {
                 });
 
             }
-        });
+        }, thumbnailWidth);
 
         return attachmentView;
     }
