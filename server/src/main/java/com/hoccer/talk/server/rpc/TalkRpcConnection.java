@@ -561,4 +561,28 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     public boolean isLoggedInFlag() {
         return loggedInFlag;
     }
+    public String getLastClientRequestName() {
+        if (mConnection.isClient()) {
+            return mConnection.getClient().getLastMethodName();
+        }
+        return null;
+    }
+    public Date getLastClientRequestDate() {
+        if (mConnection.isClient()) {
+            return mConnection.getClient().getLastRequestDate();
+        }
+        return null;
+    }
+    public boolean isClientResponsive() {
+        if (mConnection.isClient()) {
+            return mConnection.getClient().isResponsive();
+        }
+        return false;
+    }
+    public long getLastClientResponseTime() {
+        if (mConnection.isClient()) {
+            return mConnection.getClient().getLastResponseTime();
+        }
+        return 0;
+    }
 }

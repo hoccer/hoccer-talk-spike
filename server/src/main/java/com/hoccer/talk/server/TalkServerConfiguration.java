@@ -272,10 +272,13 @@ public class TalkServerConfiguration {
                 10), // ScheduledThreadPoolExecutor, number is also maximum Number of threads used
         PING_PERFORM_AT_INTERVAL(PROPERTY_PREFIX + ".ping.performAtInterval",
                 PropertyTypes.BOOLEAN,
-                false),
+                true),
         PING_INTERVAL(PROPERTY_PREFIX + ".ping.interval",
                 PropertyTypes.INTEGER,
-                300), // in seconds (every 5 minutes)
+                60 * 1), // in seconds (every 1 minute)
+        PING_CLIENT_INTERVAL(PROPERTY_PREFIX + ".ping.clientInterval",
+                PropertyTypes.INTEGER,
+                60 * 10), // in seconds (every 10 minutes)
 
         // RPC HANDLER
         TOKEN_LIFETIME_MIN(PROPERTY_PREFIX + ".token.lifeTimeMin",
@@ -448,6 +451,7 @@ public class TalkServerConfiguration {
         builder.append(MessageFormat.format("\n   * UpdateAgent   Threads Poolsize:       {0}", this.getUpdateAgentThreadPoolSize()));
         builder.append(                     "\n - Ping:");
         builder.append(MessageFormat.format("\n   * Ping interval (in s):                 {0}", this.getPingInterval()));
+        builder.append(MessageFormat.format("\n   * ping each client at interval:         {0}", this.getPingClientInterval()));
         builder.append(MessageFormat.format("\n   * perform ping at intervals:            {0}", this.getPerformPingAtInterval()));
 
         builder.append(                     "\n - RPC-Handler-Token:");
@@ -727,6 +731,9 @@ public class TalkServerConfiguration {
 
     public int getPingInterval() {
         return (Integer) ConfigurableProperties.PING_INTERVAL.value;
+    }
+    public int getPingClientInterval() {
+        return (Integer) ConfigurableProperties.PING_CLIENT_INTERVAL.value;
     }
 
     public int getTokenLifeTimeMin() {

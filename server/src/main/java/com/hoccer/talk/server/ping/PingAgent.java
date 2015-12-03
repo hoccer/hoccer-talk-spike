@@ -126,35 +126,45 @@ public class PingAgent {
     }
 
     private void performPing(String clientId) {
+        if (clientId == null) {
+            return;
+        }
         TalkRpcConnection conn = mServer.getClientConnection(clientId);
         if (conn != null) {
-            ITalkRpcClient rpc = conn.getClientRpc();
-            mPingAttempts.incrementAndGet();
-            Timer.Context timer = mPingLatency.time();
-            try {
-                rpc.ping();
-                long elapsed = (timer.stop() / 1000000);
-                conn.setLastPingOccured(new Date());
-                conn.setLastPingLatency(elapsed);
-                LOG.debug("ping on " + clientId + " took " + elapsed + " msecs");
-                mPingSuccesses.incrementAndGet();
-            } catch (JsonRpcClientDisconnect e) {
-                LOG.debug("ping on " + clientId + " disconnect");
-                mPingFailures.incrementAndGet();
-            } catch (JsonRpcClientTimeout e) {
-                LOG.debug("ping on " + clientId + " timeout");
-                mPingFailures.incrementAndGet();
-            } catch (Throwable t) {
-                LOG.error("exception in ping on " + clientId, t);
-                mPingFailures.incrementAndGet();
+            Date intervalDate = new Date(new Date().getTime()-mConfig.getPingClientInterval()*1000);
+            if (conn.getLastPingOccured() == null || conn.getLastPingOccured().before(intervalDate)) {
+
+                ITalkRpcClient rpc = conn.getClientRpc();
+                mPingAttempts.incrementAndGet();
+                Timer.Context timer = mPingLatency.time();
+                try {
+                    rpc.ping();
+                    long elapsed = (timer.stop() / 1000000);
+                    conn.setLastPingOccured(new Date());
+                    conn.setLastPingLatency(elapsed);
+                    LOG.debug("ping on " + clientId + " took " + elapsed + " msecs");
+                    mPingSuccesses.incrementAndGet();
+                } catch (JsonRpcClientDisconnect e) {
+                    LOG.info("ping on " + clientId + " disconnect");
+                    mPingFailures.incrementAndGet();
+                } catch (JsonRpcClientTimeout e) {
+                    LOG.info("ping on " + clientId + " timeout");
+                    mPingFailures.incrementAndGet();
+                } catch (Throwable t) {
+                    LOG.error("exception in ping on " + clientId, t);
+                    mPingFailures.incrementAndGet();
+                }
             }
         }
     }
 
     private void pingReadyClients() {
         for (TalkRpcConnection connection : mServer.getReadyConnections()) {
-            LOG.trace("pinging ready client: '" + connection.getConnectionId() + "' (clientId: '" + connection.getClientId() + "')");
-            performPing(connection.getClientId());
+            String clientId = connection.getClientId();
+            if (clientId != null) {
+                LOG.trace("pinging ready client: '" + connection.getConnectionId() + "' (clientId: '" + clientId + "')");
+                performPing(clientId);
+            }
         }
     }
 }

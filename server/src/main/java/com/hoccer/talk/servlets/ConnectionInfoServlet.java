@@ -1,6 +1,7 @@
 package com.hoccer.talk.servlets;
 
 import com.hoccer.talk.model.TalkClientHostInfo;
+import com.hoccer.talk.model.TalkEnvironment;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServer;
@@ -79,13 +80,25 @@ public class ConnectionInfoServlet extends HttpServlet {
                     return;
                 }
                 Map<String, TalkPresence> all = new HashMap<String, TalkPresence>();
+                Map<String, TalkEnvironment> worldwide = new HashMap<String, TalkEnvironment>();
+                Map<String, TalkEnvironment> nearby = new HashMap<String, TalkEnvironment>();
                 if (connection.isLoggedInFlag()) {
-                    TalkPresence presence = db.findPresenceForClient(connection.getClientId());
+                    String clientId = connection.getClientId();
+                    TalkPresence presence = db.findPresenceForClient(clientId);
                     if (presence != null) {
                         all.put(presence.getClientId(), presence);
+                        TalkEnvironment wwe = db.findEnvironmentByClientId(TalkEnvironment.TYPE_WORLDWIDE, clientId);
+                        if (wwe != null) {
+                            worldwide.put(clientId, wwe);
+                        }
+                        TalkEnvironment nbe = db.findEnvironmentByClientId(TalkEnvironment.TYPE_NEARBY, clientId);
+                        if (nbe != null) {
+                            nearby.put(clientId, nbe);
+                        }
                     }
                 }
-                printConnection(w, connection, now, all);
+
+                printConnection(w, connection, now, all, worldwide, nearby);
 
                 w.write("\n");
 
@@ -102,12 +115,7 @@ public class ConnectionInfoServlet extends HttpServlet {
             }
         }
 
-
-
-
         w.write("Connection Info "+now+"\n\n");
-
-        //MongoCollection presences = getCollection("presence");
 
         List<TalkPresence> activePresences = db.findPresencesWithStates(TalkPresence.ACTIVE_STATES);
 
@@ -127,10 +135,30 @@ public class ConnectionInfoServlet extends HttpServlet {
             all.put(presence.getClientId(), presence);
         }
 
+        Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+        w.write("Threads: " + threadSet.size()+ "\n");
+        w.write("\n");
+
         w.write("Presences not offline : " + activePresences.size()+ "\n");
         w.write("Presences online      : " + online.size() + "\n");
         w.write("Presences background  : " + background.size() + "\n");
         w.write("Presences typing      : " + typing.size()+ "\n");
+        w.write("\n");
+
+        Map<String, TalkEnvironment> worldwide = new HashMap<String, TalkEnvironment>();
+
+        List<TalkEnvironment> worldwideList = db.findEnvironmentsByType(TalkEnvironment.TYPE_WORLDWIDE);
+        for (TalkEnvironment environment : worldwideList) {
+            worldwide.put(environment.getClientId(), environment);
+        }
+
+        Map<String, TalkEnvironment> nearby = new HashMap<String, TalkEnvironment>();
+        List<TalkEnvironment> nearbyList = db.findEnvironmentsByType(TalkEnvironment.TYPE_NEARBY);
+        for (TalkEnvironment environment : nearbyList) {
+            nearby.put(environment.getClientId(), environment);
+        }
+        w.write("Worldwide : " + worldwide.size()+ "\n");
+        w.write("Nearby    : " + nearby.size() + "\n");
         w.write("\n");
 
         Vector<TalkRpcConnection> connections =  server.getConnectionsClone();
@@ -145,7 +173,7 @@ public class ConnectionInfoServlet extends HttpServlet {
         w.write("\n");
 
         for (TalkRpcConnection connection : connections) {
-            printConnection(w, connection, now, all);
+            printConnection(w, connection, now, all, worldwide, nearby);
         }
         w.write("\n");
 
@@ -158,15 +186,25 @@ public class ConnectionInfoServlet extends HttpServlet {
                 w.write("#FATAL: No connection found for client Id " + clientId+"\n"); // should never happen
             } else {
                 if (!connections.contains(connection)) {
-                    printConnection(w, connection, now, all);
+                    printConnection(w, connection, now, all, worldwide, nearby);
                 }
             }
         }
         w.write("\n");
 
+        w.write("Threads:\n");
+        for (Thread t : threadSet) {
+            w.write(""+t+"\n");
+        }
+        w.write("\n");
+
+
         w.close();
     }
-    void printConnection(OutputStreamWriter w, TalkRpcConnection connection, Date now, Map<String, TalkPresence> all) throws ServletException, IOException {
+    void printConnection(OutputStreamWriter w, TalkRpcConnection connection, Date now,
+                         Map<String, TalkPresence> all, Map<String, TalkEnvironment> worldwide,
+                         Map<String, TalkEnvironment> nearby) throws ServletException, IOException
+    {
         synchronized (connection) {
             String status;
             if (connection.isReady()) {
@@ -187,13 +225,29 @@ public class ConnectionInfoServlet extends HttpServlet {
             status = status + (connection.isShuttingDown() ? " closing" : "");
             status = status + (connection.isLoggedInFlag() ? " LIF" : "");
 
+            boolean hasWorldwideEnvironment = false;
+            boolean hasWorldwideEnvironmentWithTTL = false;
+            boolean hasWorldwideEnvironmentExpired = false;
+            boolean hasNearbyEnvironment = false;
+
             String clientId = connection.getClientId();
             TalkPresence presence = null;
             TalkClientHostInfo hostInfo = null;
             if (clientId != null) {
                 presence = all.get(clientId);
                 hostInfo = db.findClientHostInfoForClient(clientId);
+                TalkEnvironment worldwideEnvironment = worldwide.get(clientId);
+                if (worldwideEnvironment != null) {
+                    hasWorldwideEnvironment = true;
+                    hasWorldwideEnvironmentWithTTL = worldwideEnvironment.willLiveAfterRelease();
+                    hasWorldwideEnvironmentExpired = worldwideEnvironment.hasExpired();
+                }
+                hasNearbyEnvironment = nearby.containsKey(clientId);
             }
+            status = status + (hasNearbyEnvironment ? " N" : "");
+            status = status + (hasWorldwideEnvironment ? " W" : "");
+            status = status + (hasWorldwideEnvironmentWithTTL ? " T" : "");
+            status = status + (hasWorldwideEnvironmentExpired ? " E" : "");
 
             String presenceStatus = "unknown";
             if (presence != null) {
@@ -211,19 +265,35 @@ public class ConnectionInfoServlet extends HttpServlet {
             if (lastStarted != null) {
                 if (lastFinished != null) {
                     if (lastFinished.after(lastStarted)) {
-                        lastRequestStatus = lastRequest + " took " + (lastFinished.getTime() - lastStarted.getTime()) + " ms " + (now.getTime() - lastStarted.getTime()) + " ms ago";
+                        lastRequestStatus = "<-"+lastRequest + " took " + (lastFinished.getTime() - lastStarted.getTime()) + " ms " + (now.getTime() - lastStarted.getTime())/1000 + " s ago";
                     } else {
-                        lastRequestStatus = lastRequest + "  started " + (now.getTime() - lastStarted.getTime()) + " ms ago, previous request finished " + (now.getTime() - lastStarted.getTime()) + " ms ago";
+                        lastRequestStatus = "<-"+lastRequest + "  started " + (now.getTime() - lastStarted.getTime()) + " ms ago, previous request finished " + (now.getTime() - lastStarted.getTime()) + " ms ago";
                     }
                 } else {
-                    lastRequestStatus = lastRequest + "  started " + (now.getTime() - lastStarted.getTime()) + " ms ago, no previous request finished ";
+                    lastRequestStatus = "<-"+lastRequest + "  started " + (now.getTime() - lastStarted.getTime()) + " ms ago, no previous request finished ";
                 }
             } else {
                 lastRequestStatus = "no requests yet";
             }
+            String lastClientRequest = connection.getLastClientRequestName();
+            Date lastClientRequestDate = connection.getLastClientRequestDate();
+            long lastClientRequestDateAgo = 0;
+            if (lastClientRequestDate != null) {
+                lastClientRequestDateAgo = (now.getTime() - lastClientRequestDate.getTime())/1000;
+            } else {
+                lastClientRequestDateAgo = 0;
+            }
+
+            boolean isClientResponsive = connection.isClientResponsive();
+            String clientStatus;
+            if (lastClientRequest != null) {
+                clientStatus = String.format(", ->%s took %s ms %d s ago", lastClientRequest, connection.getLastClientResponseTime(), lastClientRequestDateAgo) + (isClientResponsive ? "" : ",stalled");
+            } else {
+                clientStatus = "";
+            }
             long age = (new Date().getTime() - connection.getCreationTime().getTime())/1000;
-            w.write(String.format("[%6d]%6d s %15s %-10s ping %6d ms" , connection.getConnectionId(), age, status, presenceStatus, connection.getLastPingLatency())
-                    +" "+connection.getRemoteAddress()+", ("+ lastRequestStatus +"), "+ clientInfo+" ["+clientId+"]"+"\n");
+            w.write(String.format("[%d] %d s %s %s" , connection.getConnectionId(), age, status, presenceStatus)
+                    +" "+connection.getRemoteAddress()+", ("+ lastRequestStatus + clientStatus+"), "+ clientInfo+" ["+clientId+"]"+"\n");
         }
     }
     public static Map sortByValue(Map unsortedMap) {
