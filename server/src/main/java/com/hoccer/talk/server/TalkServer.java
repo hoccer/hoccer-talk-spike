@@ -521,6 +521,16 @@ public class TalkServer {
         }
     }
 
+    public TalkRpcConnection findConnectionById(int id) {
+        synchronized (mConnections) {
+            for (TalkRpcConnection connection : mConnections) {
+                if (connection.getConnectionId() == id) {
+                    return connection;
+                }
+            }
+            return null;
+        }
+    }
     /**
      * Notify the server of a successful login
      *

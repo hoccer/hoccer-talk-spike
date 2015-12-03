@@ -14,7 +14,9 @@ import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Map;
 
 //import org.jetbrains.annotations.Nullable;
 
@@ -46,6 +48,9 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      * HTTP request that created this WS connection
      */
     private final HttpServletRequest mInitialRequest;
+    private final Map<String,String> mInitialRequestHeaders;
+    private final String mRemoteAddress;
+    private final String mUserAgent;
 
     /**
      * RPC interface to client
@@ -105,11 +110,32 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
         mServer = server;
         mConnection = connection;
         mInitialRequest = request;
+
+        Enumeration headerNames = request.getHeaderNames();
+        mInitialRequestHeaders = new HashMap<String,String>();
+        while(headerNames.hasMoreElements()) {
+            String headerName = (String)headerNames.nextElement();
+            mInitialRequestHeaders.put(headerName, request.getHeader(headerName));
+        }
+        String remoteAddress = request.getHeader("X-Forwarded-For");
+        if (remoteAddress == null) {
+            mRemoteAddress =  request.getRemoteAddr();
+        } else {
+            mRemoteAddress = remoteAddress;
+        }
+        String userAgent = request.getHeader("User-Agent");
+        if (userAgent == null) {
+            mUserAgent = "unknown";
+        } else {
+            mUserAgent = userAgent;
+        }
+
         // create a json-rpc proxy for client notifications and rpc calls
         mClientRpc = connection.makeProxy(ITalkRpcClient.class);
         // register ourselves for connection events
         mConnection.addListener(this);
         mConnection.addConnectionEventListener(this);
+
     }
 
     /**
@@ -198,11 +224,16 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
         return (ITalkRpcServer)mConnection.getServerHandler();
 
     }
-    /**
-     * Returns the remote network address of the client
-     */
     public String getRemoteAddress() {
-        return mInitialRequest.getRemoteAddr();
+        return mRemoteAddress;
+    }
+
+    public String getUserAgent() {
+        return mUserAgent;
+    }
+
+    public Map<String,String> getInitialRequestHeaders() {
+        return mInitialRequestHeaders;
     }
 
     /**

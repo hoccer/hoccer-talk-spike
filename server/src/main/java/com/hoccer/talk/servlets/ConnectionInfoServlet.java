@@ -15,6 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.*;
 
 /**
@@ -30,6 +32,16 @@ public class ConnectionInfoServlet extends HttpServlet {
 
     private MongoCollection getCollection(String name) {
         return (MongoCollection)db.getRawCollection(name);
+    }
+
+    public static Map<String, String> splitQuery(String query) throws UnsupportedEncodingException {
+        Map<String, String> query_pairs = new LinkedHashMap<String, String>();
+        String[] pairs = query.split("&");
+        for (String pair : pairs) {
+            int idx = pair.indexOf("=");
+            query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"), URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+        }
+        return query_pairs;
     }
 
     @Override
@@ -52,6 +64,47 @@ public class ConnectionInfoServlet extends HttpServlet {
         }
 
         Date now = new Date();
+
+        String query = req.getQueryString();
+        if (query != null && query.length()>0) {
+            Map<String, String> params = splitQuery(query);
+            String idString = params.get("id");
+            if (idString != null) {
+                int id = Integer.parseInt(idString);
+                w.write("Info for connection "+id+" at "+now+"\n\n");
+                TalkRpcConnection connection = server.findConnectionById(id);
+                if (connection == null) {
+                    w.write("Connection with "+id+" not found.\n");
+                    w.close();
+                    return;
+                }
+                Map<String, TalkPresence> all = new HashMap<String, TalkPresence>();
+                if (connection.isLoggedInFlag()) {
+                    TalkPresence presence = db.findPresenceForClient(connection.getClientId());
+                    if (presence != null) {
+                        all.put(presence.getClientId(), presence);
+                    }
+                }
+                printConnection(w, connection, now, all);
+
+                w.write("\n");
+
+                w.write("Http Headers for user agent: "+connection.getUserAgent()+":\n\n");
+
+                Map<String,String> headers = connection.getInitialRequestHeaders();
+                for (String key : headers.keySet()) {
+                    w.write("" + key + " : " + headers.get(key));
+                    w.write("\n");
+                }
+                w.write("\n");
+                w.close();
+                return;
+            }
+        }
+
+
+
+
         w.write("Connection Info "+now+"\n\n");
 
         //MongoCollection presences = getCollection("presence");
@@ -170,7 +223,7 @@ public class ConnectionInfoServlet extends HttpServlet {
             }
             long age = (new Date().getTime() - connection.getCreationTime().getTime())/1000;
             w.write(String.format("[%6d]%6d s %15s %-10s ping %6d ms" , connection.getConnectionId(), age, status, presenceStatus, connection.getLastPingLatency())
-                    +", ("+ lastRequestStatus +"), "+ clientInfo+" ["+clientId+"]"+"\n");
+                    +" "+connection.getRemoteAddress()+", ("+ lastRequestStatus +"), "+ clientInfo+" ["+clientId+"]"+"\n");
         }
     }
     public static Map sortByValue(Map unsortedMap) {
