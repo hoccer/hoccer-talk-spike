@@ -75,7 +75,7 @@ public class XoApplication extends Application {
         super.onCreate();
 
         sInstance = this;
-        mCrashMonitor = CrashMonitor.get();
+        mCrashMonitor = CrashMonitor.get(this);
 
         // initialize storage roots (do so early for log files)
         sExternalStorage = Environment.getExternalStorageDirectory();

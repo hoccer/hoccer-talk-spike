@@ -97,9 +97,9 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
                 public String getStringForResource(int resourceID) {
                     switch (resourceID) {
                         case Strings.CRASH_DIALOG_TITLE_ID:
-                            return CrashMonitor.get().isCrashedBefore() ? getString(R.string.dialog_report_crash_title) :  getString(R.string.dialog_report_errors_title);
+                            return CrashMonitor.get(ChatsActivity.this).isCrashedBefore() ? getString(R.string.dialog_report_crash_title) : getString(R.string.dialog_report_errors_title);
                         case Strings.CRASH_DIALOG_MESSAGE_ID:
-                            return CrashMonitor.get().isCrashedBefore() ? getString(R.string.dialog_report_crash_message) :  getString(R.string.dialog_report_errors_message);
+                            return CrashMonitor.get(ChatsActivity.this).isCrashedBefore() ? getString(R.string.dialog_report_crash_message) : getString(R.string.dialog_report_errors_message);
                         case Strings.CRASH_DIALOG_NEGATIVE_BUTTON_ID:
                             return getString(R.string.dialog_report_crash_negative);
                         case Strings.CRASH_DIALOG_POSITIVE_BUTTON_ID:

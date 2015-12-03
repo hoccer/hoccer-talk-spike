@@ -19,6 +19,7 @@ import com.hoccer.xo.android.fragment.ChatFragment;
 import com.hoccer.xo.android.fragment.HistoryFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.attachments.TransferControlView;
+import net.hockeyapp.android.CrashManager;
 import net.hockeyapp.android.ExceptionHandler;
 import org.apache.log4j.Logger;
 
