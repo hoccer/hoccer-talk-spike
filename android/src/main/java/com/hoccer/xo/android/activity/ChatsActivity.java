@@ -25,7 +25,6 @@ import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.ContactsMenuItemActionProvider;
 import net.hockeyapp.android.CrashManager;
 import net.hockeyapp.android.CrashManagerListener;
-import net.hockeyapp.android.ExceptionHandler;
 import net.hockeyapp.android.Strings;
 import org.apache.log4j.Logger;
 
@@ -40,6 +39,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private ContactsMenuItemActionProvider mContactsMenuItemActionProvider;
     private ViewPagerActivityComponent mViewPagerActivityComponent;
     private WorldwideChatListFragment mWorldwideChatListFragment;
+    private CrashManagerListener mCrashManagerListener;
 
     @Override
     protected ActivityComponent[] createComponents() {
@@ -69,6 +69,8 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        registerCrashManager();
+
         startXoClientService();
 
         XoApplication.get().getClient().connect();
@@ -84,15 +86,11 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         FeaturePromoter.cleanupForSelectWorldwidePageOnFirstStart(this);
 
         showGooglePlayServicesErrorDialog();
-
-        checkForCrashesIfEnabled();
-
     }
 
-    private void checkForCrashesIfEnabled() {
+    private void registerCrashManager() {
         if (getConfiguration().isCrashReportingEnabled()) {
-
-            CrashManager.register(this, getConfiguration().getHockeyAppId(), new CrashManagerListener() {
+            mCrashManagerListener = new CrashManagerListener() {
                 @Override
                 public String getStringForResource(int resourceID) {
                     switch (resourceID) {
@@ -108,7 +106,9 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
                             return super.getStringForResource(resourceID);
                     }
                 }
-            });
+            };
+
+            CrashManager.initialize(this, getConfiguration().getHockeyAppId(), mCrashManagerListener);
         }
     }
 
@@ -123,7 +123,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         LOG.debug("showGooglePlayServicesErrorDialog:" + result);
 
         if (result != ConnectionResult.SUCCESS) {
-            String errorString = GooglePlayServicesUtil.getErrorString(result);
             Dialog googlePlayServicesErrorDialog = GooglePlayServicesUtil.getErrorDialog(result, this, 0);
             if (googlePlayServicesErrorDialog != null) {
                 googlePlayServicesErrorDialog.show();
@@ -136,6 +135,9 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     @Override
     protected void onResume() {
         super.onResume();
+
+        CrashManager.execute(ChatsActivity.this, mCrashManagerListener);
+
         showProfileIfClientIsNotRegistered();
         registerListeners();
         mContactsMenuItemActionProvider.updateNotificationBadge();
