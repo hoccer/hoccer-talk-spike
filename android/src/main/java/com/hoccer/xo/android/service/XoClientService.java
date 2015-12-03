@@ -273,11 +273,6 @@ public class XoClientService extends Service {
         }
     }
 
-    public static void saveGCMException(Throwable throwable){
-        LOG.error("Saving GCM Exception "+throwable);
-        ExceptionHandler.saveException(throwable, null);
-    }
-
     private void doRegisterGcm(boolean forced) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("doRegisterGcm(" + (forced ? "forced" : "") + ")");
@@ -579,7 +574,7 @@ public class XoClientService extends Service {
                             doRegisterGcm(TalkPushService.GCM_ALWAYS_REGISTER);
                             doUpdateGcm(TalkPushService.GCM_ALWAYS_UPDATE);
                         } catch (Exception ex){
-                            saveGCMException(ex);
+                            ExceptionHandler.saveException(ex, null);
                         }
                     }
                 });

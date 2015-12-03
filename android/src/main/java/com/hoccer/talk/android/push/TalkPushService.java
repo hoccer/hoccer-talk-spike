@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import com.google.android.gcm.GCMBaseIntentService;
 import com.hoccer.xo.android.service.XoClientService;
+import net.hockeyapp.android.ExceptionHandler;
 import org.apache.log4j.Logger;
 
 /**
@@ -59,13 +60,13 @@ public class TalkPushService extends GCMBaseIntentService {
     @Override
     protected void onError(Context context, String errorId) {
         LOG.error("onError(" + errorId + ")");
-        XoClientService.saveGCMException(new Exception("TalkPushService.onError("+errorId+")"));
+        ExceptionHandler.saveException(new Exception("TalkPushService.onError("+errorId+")"), null);
     }
 
     @Override
     protected boolean onRecoverableError(Context context, String errorId) {
         LOG.info("onRecoverableError(" + errorId + ")");
-        XoClientService.saveGCMException(new Exception("TalkPushService.onRecoverableError("+errorId+")"));
+        ExceptionHandler.saveException(new Exception("TalkPushService.onRecoverableError("+errorId+")"), null);
         return super.onRecoverableError(context, errorId);
     }
 
