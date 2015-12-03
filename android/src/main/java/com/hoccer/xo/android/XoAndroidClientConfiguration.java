@@ -20,12 +20,14 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
     private final SharedPreferences mSharedPreferences;
     private final Properties mProperties;
     private final String mAppName;
+    private final Context mContext;
 
     public XoAndroidClientConfiguration(Context context) {
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 
         mProperties = new Properties();
         mAppName = context.getString(R.string.app_name);
+        mContext = context;
 
         try {
             InputStream inputStream = context.getAssets().open("configuration.properties");

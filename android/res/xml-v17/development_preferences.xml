@@ -121,6 +121,22 @@
 
     </PreferenceCategory>
 
+
+    <PreferenceCategory
+            android:title="@string/pref_category_polling">
+        <SwitchPreference
+                android:summary="@string/polling_summary"
+                android:key="preference_key_enable_polling"
+                android:title="@string/enable_polling"/>
+        <ListPreference
+            android:title="@string/pref_title_polling_interval"
+            android:key="@string/preference_key_polling_interval"
+            android:entries="@array/preference_polling_interval_name"
+            android:entryValues="@array/preference_polling_interval_values"
+            android:defaultValue="900000"/>
+
+    </PreferenceCategory>
+
     <PreferenceCategory
             android:title="@string/pref_privacy_title">
 
