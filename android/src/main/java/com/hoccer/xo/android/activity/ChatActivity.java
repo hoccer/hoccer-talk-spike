@@ -20,8 +20,7 @@ import com.hoccer.xo.android.fragment.HistoryFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.attachments.TransferControlView;
 import net.hockeyapp.android.CrashManager;
-import net.hockeyapp.android.CrashManagerListener;
-import net.hockeyapp.android.Strings;
+import net.hockeyapp.android.ExceptionHandler;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -63,7 +62,6 @@ public class ChatActivity extends ComposableActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        checkForCrashesIfEnabled();
         checkKeys();
 
         if (getIntent() == null) {
@@ -165,27 +163,6 @@ public class ChatActivity extends ComposableActivity {
         t.start();
     }
 
-    private void checkForCrashesIfEnabled() {
-        if (getConfiguration().isCrashReportingEnabled()) {
-            CrashManager.register(this, getConfiguration().getHockeyAppId(), new CrashManagerListener() {
-                @Override
-                public String getStringForResource(int resourceID) {
-                    switch (resourceID) {
-                        case Strings.CRASH_DIALOG_TITLE_ID:
-                            return getString(R.string.dialog_report_crash_title);
-                        case Strings.CRASH_DIALOG_MESSAGE_ID:
-                            return getString(R.string.dialog_report_crash_message);
-                        case Strings.CRASH_DIALOG_NEGATIVE_BUTTON_ID:
-                            return getString(R.string.dialog_report_crash_negative);
-                        case Strings.CRASH_DIALOG_POSITIVE_BUTTON_ID:
-                            return getString(R.string.dialog_report_crash_positive);
-                        default:
-                            return super.getStringForResource(resourceID);
-                    }
-                }
-            });
-        }
-    }
 
     @Override
     protected void onResume() {

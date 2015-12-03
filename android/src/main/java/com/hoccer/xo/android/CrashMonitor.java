@@ -11,32 +11,34 @@ public class CrashMonitor implements Thread.UncaughtExceptionHandler {
     private static final Logger LOG = Logger.getLogger(CrashMonitor.class);
 
     private static CrashMonitor INSTANCE;
-    private final Context mContext;
+    private final Context mApplicationContext;
+    private boolean mCrashedBefore = false;
 
     private Thread.UncaughtExceptionHandler mPreviousHandler;
 
-    private CrashMonitor(Context context) {
-        mContext = context;
+    private CrashMonitor(Context applicationContext)  {
+        mApplicationContext = applicationContext;
         mPreviousHandler = Thread.getDefaultUncaughtExceptionHandler();
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mApplicationContext);
+        mCrashedBefore = sharedPreferences.getBoolean("crash", false);;
     }
 
     public static CrashMonitor get(Context context) {
         if (INSTANCE == null) {
-            INSTANCE = new CrashMonitor(context);
+            INSTANCE = new CrashMonitor(context.getApplicationContext());
         }
         return INSTANCE;
     }
 
     public void saveCrashState(boolean crashed) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mApplicationContext);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean("crash", crashed);
         editor.apply();
     }
 
     public boolean isCrashedBefore() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        return sharedPreferences.getBoolean("crash", false);
+        return mCrashedBefore;
     }
 
     @Override
