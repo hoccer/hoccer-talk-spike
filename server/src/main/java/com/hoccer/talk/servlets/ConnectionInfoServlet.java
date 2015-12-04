@@ -135,8 +135,8 @@ public class ConnectionInfoServlet extends HttpServlet {
             all.put(presence.getClientId(), presence);
         }
 
-        Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
-        w.write("Threads: " + threadSet.size()+ "\n");
+        Map<Thread, StackTraceElement[]> threadMap = Thread.getAllStackTraces();
+        w.write("Threads: " + threadMap.size()+ "\n");
         w.write("\n");
 
         w.write("Presences not offline : " + activePresences.size()+ "\n");
@@ -192,15 +192,56 @@ public class ConnectionInfoServlet extends HttpServlet {
         }
         w.write("\n");
 
+        Map<Thread, StackTraceElement[]> sortedThreads = sortByName(threadMap);
+
         w.write("Threads:\n");
-        for (Thread t : threadSet) {
-            w.write(""+t+"\n");
+        for (Thread t : sortedThreads.keySet()) {
+            w.write(""+t+", State "+threadStateName(t.getState())+"\n");
+            for (StackTraceElement st : sortedThreads.get(t)) {
+                w.write("    "+st.toString()+"\n");
+            }
+            w.write("\n");
         }
         w.write("\n");
 
-
         w.close();
     }
+
+    public static String threadStateName(Thread.State state) {
+        switch (state) {
+            case NEW:
+                return "NEW";
+            case RUNNABLE:
+                return "RUNNABLE";
+            case BLOCKED:
+                return "BLOCKED";
+            case WAITING:
+                return "WAITING";
+            case TIMED_WAITING:
+                return "TIMED_WAITING";
+            case TERMINATED:
+                return "TERMINATED";
+            default:
+                return "ILLEGAL_STATE";
+        }
+    }
+    public static Map sortByName(Map unsortedMap) {
+        Map sortedMap = new TreeMap(new StringValueComparator(unsortedMap));
+        sortedMap.putAll(unsortedMap);
+        return sortedMap;
+    }
+
+    static class StringValueComparator implements Comparator {
+        Map map;
+        public StringValueComparator(Map map) {
+            this.map = map;
+        }
+
+        public int compare(Object keyA, Object keyB) {
+            return keyA.toString().compareTo(keyB.toString());
+        }
+    }
+
     void printConnection(OutputStreamWriter w, TalkRpcConnection connection, Date now,
                          Map<String, TalkPresence> all, Map<String, TalkEnvironment> worldwide,
                          Map<String, TalkEnvironment> nearby) throws ServletException, IOException
