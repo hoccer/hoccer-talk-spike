@@ -319,7 +319,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
     public String srpPhase1(String clientId, String A) {
         logCall("srpPhase1(clientId: '" + clientId + "', '" + A + "')");
         synchronized (mConnection) {
-            LOG.info("srpPhase1: starting login for client " + clientId + " with [connectionId: '" + mConnection.getConnectionId() + "']");
+            LOG.info("srpPhase1: starting login for client " + clientId + " with [connectionId: '" + mConnection.getConnectionId() + "'] from "+mConnection.getRemoteAddress());
             try {
                 // check if we aren't logged in already
                 if (mConnection.isLoggedIn()) {
@@ -335,7 +335,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 }
                 TalkRpcConnection otherConnection = mServer.getClientConnection(clientId);
                 if (otherConnection != null) {
-                    LOG.warn("srpPhase1: Client already/still logged in on other [connectionId: '" + otherConnection.getConnectionId() + "'], clientId=" + clientId + " [connectionId: '" + mConnection.getConnectionId() + "']");
+                    LOG.warn("srpPhase1: Client already/still logged in on other [connectionId: '" + otherConnection.getConnectionId() + "'], clientId=" + clientId + " [connectionId: '" + mConnection.getConnectionId() + "'] from "+mConnection.getRemoteAddress());
                     //mConnection.disconnectAfterRequest();
                     //throw new RuntimeException("Can not authenticate while logged in with other connection");
                 }

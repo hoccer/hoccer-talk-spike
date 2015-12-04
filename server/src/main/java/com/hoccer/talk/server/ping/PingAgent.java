@@ -132,7 +132,7 @@ public class PingAgent {
         }
         TalkRpcConnection conn = mServer.getClientConnection(clientId);
         if (conn != null) {
-            Date intervalDate = new Date(new Date().getTime()-10*1000);
+            Date intervalDate = new Date(new Date().getTime()-10*1000); // do not ping if already pinged in the last 10 sec.
             if (conn.getLastPingOccured() == null || conn.getLastPingOccured().before(intervalDate)) {
                 LOG.info("pinging client: '" + conn.getConnectionId() + "' (clientId: '" + clientId + "')");
 
@@ -168,8 +168,14 @@ public class PingAgent {
         for (TalkRpcConnection connection : pingConnections) {
             String clientId = connection.getClientId();
             if (clientId != null) {
-                LOG.trace("pinging ready client: '" + connection.getConnectionId() + "' (clientId: '" + clientId + "')");
-                performPing(clientId);
+                Date idleTimeoutDate = new Date(new Date().getTime() - mConfig.getPingIdleTimeoutInterval()*1000);
+                if (connection.getLastRequestFinished() != null && connection.getLastRequestFinished().before(idleTimeoutDate)) {
+                    LOG.info("disconnecting idle client: '" + connection.getConnectionId() + "' (clientId: '" + clientId + "')");
+                    connection.disconnect();
+                } else {
+                    LOG.trace("pinging ready client: '" + connection.getConnectionId() + "' (clientId: '" + clientId + "')");
+                    requestPing(clientId);
+                }
             }
         }
     }
