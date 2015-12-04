@@ -68,6 +68,7 @@ public class PingAgent {
             public void run() {
                 try {
                     pingReadyClients();
+                    disconnectStaleClients();
                 } catch (Throwable t) {
                     LOG.error("caught and swallowed exception escaping runnable", t);
                 }
@@ -176,6 +177,17 @@ public class PingAgent {
                     LOG.trace("pinging ready client: '" + connection.getConnectionId() + "' (clientId: '" + clientId + "')");
                     requestPing(clientId);
                 }
+            }
+        }
+    }
+    private void disconnectStaleClients() {
+        Vector<TalkRpcConnection> staleConnections = mServer.getStaleConnections();
+        LOG.info("disconnectStaleClients checking " + staleConnections.size() + " connections");
+        for (TalkRpcConnection connection : staleConnections) {
+            String clientId = connection.getClientId();
+            if (clientId == null && !connection.isLoggedInFlag()) {
+                LOG.info("disconnecting stale connection: '" + connection.getConnectionId() + "'");
+                connection.disconnect();
             }
         }
     }

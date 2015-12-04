@@ -760,6 +760,24 @@ public class TalkServer {
         }
     }
 
+    // get all connection that have not been logged in
+    public Vector<TalkRpcConnection> getStaleConnections() {
+        synchronized (mConnections) {
+            Vector<TalkRpcConnection> staleConnections = new Vector<TalkRpcConnection>();
+            Iterator<TalkRpcConnection> iterator = mConnections.iterator();
+            while (iterator.hasNext()) {
+                TalkRpcConnection connection = iterator.next();
+                if (connection.getClient() == null && !connection.isLoggedInFlag()) {
+                    Date intervalDate = new Date(new Date().getTime()-getConfiguration().getLoginTimeoutInterval()*1000);
+                    if (connection.getCreationTime().before(intervalDate)) {
+                        staleConnections.add(connection);
+                    }
+                }
+            }
+            return staleConnections;
+        }
+    }
+
     public Vector<TalkRpcConnection> getPingConnections() {
         synchronized (mConnections) {
             Vector<TalkRpcConnection> pingClientConnections = new Vector<TalkRpcConnection>();

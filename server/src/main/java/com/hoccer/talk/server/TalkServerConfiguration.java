@@ -282,6 +282,11 @@ public class TalkServerConfiguration {
         PING_IDLE_TIMEOUT_INTERVAL(PROPERTY_PREFIX + ".ping.idleTimeoutInterval",
                 PropertyTypes.INTEGER,
                 60 * 30), // after 30 minutes
+        LOGIN_TIMEOUT_INTERVAL(PROPERTY_PREFIX + ".ping.loginTimeoutInterval",
+                PropertyTypes.INTEGER,
+                60 * 2), // after 2 minutes a connection must be logged on or is closed
+
+
         /*
         PING_INTERVAL(PROPERTY_PREFIX + ".ping.interval",
                 PropertyTypes.INTEGER,
@@ -467,6 +472,7 @@ public class TalkServerConfiguration {
         builder.append(MessageFormat.format("\n   * ping each client at interval (in s):  {0}", this.getPingClientInterval()));
         builder.append(MessageFormat.format("\n   * perform ping at intervals:            {0}", this.getPerformPingAtInterval()));
         builder.append(MessageFormat.format("\n   * disconnect at ping after idle (in s) :{0}", this.getPingIdleTimeoutInterval()));
+        builder.append(MessageFormat.format("\n   * disconnect if not logged in   (in s) :{0}", this.getLoginTimeoutInterval()));
         builder.append(                     "\n - RPC-Handler-Token:");
         builder.append(MessageFormat.format("\n   * Min. Token Lifetime (in s):           {0}", this.getTokenLifeTimeMin()));
         builder.append(MessageFormat.format("\n   * Max. Token Lifetime (in s):           {0}", this.getTokenLifeTimeMax()));
@@ -750,6 +756,9 @@ public class TalkServerConfiguration {
     }
     public int getPingIdleTimeoutInterval() {
         return (Integer) ConfigurableProperties.PING_IDLE_TIMEOUT_INTERVAL.value;
+    }
+    public int getLoginTimeoutInterval() {
+        return (Integer) ConfigurableProperties.LOGIN_TIMEOUT_INTERVAL.value;
     }
     public int getTokenLifeTimeMin() {
         return (Integer) ConfigurableProperties.TOKEN_LIFETIME_MIN.value;
