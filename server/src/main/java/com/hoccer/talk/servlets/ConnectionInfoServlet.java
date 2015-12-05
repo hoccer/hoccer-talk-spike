@@ -1,5 +1,6 @@
 package com.hoccer.talk.servlets;
 
+import com.hoccer.talk.model.TalkClient;
 import com.hoccer.talk.model.TalkClientHostInfo;
 import com.hoccer.talk.model.TalkEnvironment;
 import com.hoccer.talk.model.TalkPresence;
@@ -290,9 +291,11 @@ public class ConnectionInfoServlet extends HttpServlet {
             status = status + (hasWorldwideEnvironmentWithTTL ? " T" : "");
             status = status + (hasWorldwideEnvironmentExpired ? " E" : "");
 
+            String nickName = "-";
             String presenceStatus = "unknown";
             if (presence != null) {
                 presenceStatus = presence.getConnectionStatus();
+                nickName = presence.getClientName();
             }
 
             String clientInfo = "no info";
@@ -332,9 +335,24 @@ public class ConnectionInfoServlet extends HttpServlet {
             } else {
                 clientStatus = "";
             }
+            TalkClient client = connection.getClient();
+            String pushStatus = "No push";
+            if (client != null) {
+                if (client.isApnsCapable()) {
+                    pushStatus = "APNS";
+                } else if (client.isGcmCapable()) {
+                    pushStatus = "GCM";
+                }
+
+                if (client.getTimeLastPush() != null) {
+                    long pushAgo = (new Date().getTime() - client.getTimeLastPush().getTime()) / 1000;
+                    pushStatus = pushStatus + " " + pushAgo + " s ago";
+                }
+            }
+
             long age = (new Date().getTime() - connection.getCreationTime().getTime())/1000;
             w.write(String.format("[%d] %d s %s %s" , connection.getConnectionId(), age, status, presenceStatus)
-                    +" "+connection.getRemoteAddress()+", ("+ lastRequestStatus + clientStatus+"), "+ clientInfo+" ["+clientId+"]"+"\n");
+                    +" "+connection.getRemoteAddress()+" '"+nickName+"'("+pushStatus+","+ lastRequestStatus + clientStatus+"), "+ clientInfo+ " ["+clientId+"]"+"\n");
         }
     }
     public static Map sortByValue(Map unsortedMap) {
