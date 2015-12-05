@@ -474,11 +474,13 @@ public class TalkServer {
     private void addClientConnection(String clientId, TalkRpcConnection connection) {
         synchronized (mConnectionsByClientId) {
             mConnectionsByClientId.put(clientId, connection);
+            connection.setConnectionMapKey(clientId);
         }
     }
     private void removeClientConnection(String clientId) {
         synchronized (mConnectionsByClientId) {
             if (hasClientConnection(clientId)) {
+                mConnectionsByClientId.get(clientId).setConnectionMapKey(null);
                 mConnectionsByClientId.remove(clientId);
              } else {
                 LOG.error("Could not remove connection for clientId "+clientId+", not found");
@@ -638,18 +640,25 @@ public class TalkServer {
                 }
                 // remove connection from list
                 removeConnection(connection);
-                // remove connection from table
-                LOG.debug("[connectionId: '" + connection.getConnectionId() + "'] closed (removed from map)" +
+                LOG.debug("[connectionId: '" + connection.getConnectionId() + "'] closed (removed from list)" +
                         ", open: " + mConnectionsOpen.get() + ", inMap: " + numberOfConnections() + ", loggedIn: " + mConnectionsLoggedIn.get() + ", ready: " + mConnectionsReady.get());
             } else {
-                LOG.warn("[connectionId: '" + connection.getConnectionId() + "'] connection closed not in set" +
+                LOG.warn("[connectionId: '" + connection.getConnectionId() + "'] connection closed not in list" +
                         ", open: " + mConnectionsOpen.get() + ", inMap: " + numberOfConnections() +
                         ", loggedIn: " + mConnectionsLoggedIn.get() + ", inMapByCID: " + numberOfClientConnections() + ", ready: " + mConnectionsReady.get());
             }
 
-            String clientId = connection.getClientId();
+            String clientId;
+            if (connection.isDeleted()) {
+                clientId = connection.getConnectionMapKey();
+                LOG.debug("[connectionId: '" + connection.getConnectionId() + "'] isDeleted, map key = " +  clientId);
+            } else {
+                clientId = connection.getClientId();
+                LOG.debug("[connectionId: '" + connection.getConnectionId() + "'] map key = " +  clientId);
+            }
             if (clientId != null) {
                 boolean hasClientConnection = hasClientConnection(clientId);
+                LOG.debug("[connectionId: '" + connection.getConnectionId() + "'] hasClientConnection = " +  hasClientConnection);
                 if (hasClientConnection != connection.isLoggedInFlag()) {
                     LOG.warn("[connectionId: '" + connection.getConnectionId() + "'] hasClientConnection/loggedInFlag mismatch, hasClientConnection="
                             + hasClientConnection + ", isLoggedInFlag=" + connection.isLoggedInFlag());

@@ -470,6 +470,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         client.setSrpVerifier("");
         client.setReasonDeleted(reason);
         mDatabase.markClientDeleted(client);
+        mConnection.setDeleted(true);
 
         // handle deletion after we returned rpc call status to client
         mServer.getUpdateAgent().requestAccountDeletion(clientId);

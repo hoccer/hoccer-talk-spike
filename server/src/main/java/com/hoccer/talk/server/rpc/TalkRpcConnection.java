@@ -87,6 +87,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
 
     private int mRequestHandled = 0;
     private String mLastRequestName;
+    private String mConnectionMapKey = null;
 
     // Penalty is measured in milliseconds for the purpose of selecting suitable connections for a task.
     // If a client fails at this task the connection is penalized so it less likely to be considered for this task.
@@ -95,6 +96,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
 
     private boolean loggedInFlag = false;
     private boolean shuttingDown =false;
+    private boolean deleted =false;
 
     public Object deliveryLock = new Object();
     public Object keyRequestLock = new Object();
@@ -556,6 +558,22 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
 
     public boolean isShuttingDown() {
         return shuttingDown;
+    }
+
+    public String getConnectionMapKey() {
+        return mConnectionMapKey;
+    }
+
+    public void setConnectionMapKey(String connectionMapKey) {
+        this.mConnectionMapKey = connectionMapKey;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     public boolean isLoggedInFlag() {
