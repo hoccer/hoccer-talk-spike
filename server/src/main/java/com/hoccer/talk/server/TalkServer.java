@@ -674,7 +674,9 @@ public class TalkServer {
                     mUpdateAgent.requestPresenceUpdate(clientId, CONNECTION_STATUS_UPDATE_FIELDS);
                     connection.getServerHandler().destroyEnvironment(TalkEnvironment.TYPE_NEARBY);
                     connection.getServerHandler().releaseEnvironment(TalkEnvironment.TYPE_WORLDWIDE);
-                    mDeliveryAgent.requestDelivery(clientId, false);
+                    if (!connection.isDeleted()) {
+                        mDeliveryAgent.requestDelivery(clientId, false);
+                    }
                 } else {
                     LOG.warn("[connectionId: '" + connection.getConnectionId() + "'] not in mapByCID, hasClientConnection:" + hasClientConnection +
                             ", open: " + mConnectionsOpen.get() + ", inMap: " + numberOfConnections() +

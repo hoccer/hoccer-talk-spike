@@ -3097,7 +3097,12 @@ public class TalkRpcHandler implements ITalkRpcServer {
     @Override
     public void destroyEnvironment(String type) {
         requirePastIdentification();
-        String clientId =  mConnection.getClientId();
+        String clientId;
+        if (mConnection.isDeleted()) {
+            clientId =  mConnection.getConnectionMapKey();
+        }  else {
+            clientId =  mConnection.getClientId();
+        }
         logCall("destroyEnvironment(clientId: '" + clientId + "')");
 
         if (clientId == null) {
