@@ -470,7 +470,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         client.setSrpVerifier("");
         client.setReasonDeleted(reason);
         mDatabase.markClientDeleted(client);
-        mConnection.setDeleted(true);
+        mConnection.setDeleted(true, clientId);
 
         // handle deletion after we returned rpc call status to client
         mServer.getUpdateAgent().requestAccountDeletion(clientId);
@@ -3097,12 +3097,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
     @Override
     public void destroyEnvironment(String type) {
         requirePastIdentification();
-        String clientId;
-        if (mConnection.isDeleted()) {
-            clientId =  mConnection.getConnectionMapKey();
-        }  else {
-            clientId =  mConnection.getClientId();
-        }
+        String clientId =  mConnection.getClientId();
         logCall("destroyEnvironment(clientId: '" + clientId + "')");
 
         if (clientId == null) {

@@ -97,6 +97,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     private boolean loggedInFlag = false;
     private boolean shuttingDown =false;
     private boolean deleted =false;
+    private String mOriginalClientId;
 
     public Object deliveryLock = new Object();
     public Object keyRequestLock = new Object();
@@ -206,6 +207,9 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      */
 //    @Nullable
     public String getClientId() {
+        if (mOriginalClientId != null) {
+            return mOriginalClientId;
+        }
         if (mTalkClient != null) {
             return mTalkClient.getClientId();
         }
@@ -572,8 +576,9 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
         return deleted;
     }
 
-    public void setDeleted(boolean deleted) {
+    public void setDeleted(boolean deleted, String originalClientId) {
         this.deleted = deleted;
+        this.mOriginalClientId = originalClientId;
     }
 
     public boolean isLoggedInFlag() {
