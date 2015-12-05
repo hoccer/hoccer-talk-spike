@@ -711,13 +711,13 @@ public class TalkRpcHandler implements ITalkRpcServer {
         requireIdentification(true);
         logCall("updateKey()");
         if (verifyKey(key.getKeyId())) {
-            LOG.info("updateKey for client "+mConnection.getClientId()+" ok with same valid keyid "+key.getKeyId());
+            LOG.info("updateKey for client " + mConnection.getClientId() + " ok with same valid keyid " + key.getKeyId());
             return;
         }
         if (key.getKeyId().equals(key.calcKeyId())) {
             key.setClientId(mConnection.getClientId());
             key.setTimestamp(new Date());
-            LOG.info("updateKey for client "+mConnection.getClientId()+" ok with new valid keyid "+key.getKeyId());
+            LOG.info("updateKey for client " + mConnection.getClientId() + " ok with new valid keyid " + key.getKeyId());
             mDatabase.saveKey(key);
         } else {
             throw new RuntimeException("updateKey: keyid "+key.getKey()+" is not the id of "+key.getKey());
@@ -2381,6 +2381,9 @@ public class TalkRpcHandler implements ITalkRpcServer {
     }
 
     private String processFileDownloadMessage(String fileId, String nextState) {
+        if (fileId == null) {
+            throw new RuntimeException("illegal parameter: fileId is null");
+        }
         final String clientId = mConnection.getClientId();
         logCall("processFileDownloadMessage(fileId: '" + fileId + "') for client "+clientId + ", nextState='"+nextState+"'");
 
@@ -2482,6 +2485,10 @@ public class TalkRpcHandler implements ITalkRpcServer {
     }
 
     private String processFileUploadMessage(String fileId, String nextState, String receiverId) {
+        if (fileId == null) {
+            throw new RuntimeException("illegal parameter: fileId is null");
+        }
+
         final String clientId = mConnection.getClientId();
 
         List<TalkMessage> messages = mDatabase.findMessagesWithAttachmentFileId(fileId);
@@ -3232,9 +3239,9 @@ public class TalkRpcHandler implements ITalkRpcServer {
         releaseEnvironmentForClient(mServer,clientId,type, new Long(timeToLive), notificationPreference);
     }
 
-
+    /*
     @Override
-    public Boolean[] isMemberInGroups(String[] groupIds) {
+    public Boolean[] isMemberInGroupsSlow(String[] groupIds) {
         requireIdentification(true);
         ArrayList<Boolean> result = new ArrayList<Boolean>();
         logCall("isMemberInGroups(groupIds: '" + Arrays.toString(groupIds) + "'");
@@ -3244,6 +3251,34 @@ public class TalkRpcHandler implements ITalkRpcServer {
             TalkGroupMembership membership = mDatabase.findGroupMembershipForClient(groupId, clientId);
             // calling client is treated as member even if suspended
             if (membership != null && (membership.isInvited() || membership.isMember() || membership.isSuspended())) {
+                result.add(true);
+            } else {
+                result.add(false);
+            }
+        }
+
+        return result.toArray(new Boolean[result.size()]);
+    }
+    */
+
+    @Override
+    public Boolean[] isMemberInGroups(String[] groupIds) {
+        requireIdentification(true);
+        ArrayList<Boolean> result = new ArrayList<Boolean>();
+        logCall("isMemberInGroups(groupIds: '" + Arrays.toString(groupIds) + "'");
+        String clientId = mConnection.getClientId();
+
+        List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsForClient(clientId);
+        Set<String> groupSet = new HashSet<String>();
+        for (TalkGroupMembership membership: memberships) {
+            // calling client is treated as member even if suspended
+            if (membership != null && (membership.isInvited() || membership.isMember() || membership.isSuspended())) {
+                groupSet.add(membership.getGroupId());
+            }
+        }
+
+        for (String groupId : groupIds) {
+            if (groupSet.contains(groupId)) {
                 result.add(true);
             } else {
                 result.add(false);
