@@ -1300,11 +1300,11 @@ public class TalkRpcHandler implements ITalkRpcServer {
             throw new RuntimeException("Invalid state '" + state + "'");
         }
         TalkClient otherClient = mDatabase.findClientById(otherClientId);
-        if (otherClient == null) {
+        TalkRelationship relationship = mDatabase.findRelationshipBetween(thisClientId, otherClientId);
+        if (otherClient == null && relationship == null) {
             throw new RuntimeException("Invalid client to relate to - does not exist!");
         }
 
-        TalkRelationship relationship = mDatabase.findRelationshipBetween(thisClientId, otherClientId);
         if (relationship == null) {
             relationship = new TalkRelationship();
         }
