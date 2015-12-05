@@ -170,7 +170,7 @@ public class JsonRpcServer {
                 realThrown = ((InvocationTargetException) realThrown).getTargetException();
             }
             if (LOG.isInfoEnabled()) {
-                LOG.warn("Error in JSON-RPC call", realThrown);
+                LOG.warn("Error in JSON-RPC call connectionId:" + connection.getConnectionId() + ", Exception:", realThrown);
             }
         }
 

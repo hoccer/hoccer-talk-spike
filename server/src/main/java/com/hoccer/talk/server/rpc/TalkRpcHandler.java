@@ -395,8 +395,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 return credentials.toString(16);
             } catch (RuntimeException e) {
                 mStatistics.signalClientLoginSRP1Failed();
-                String clientId2 = mSrpClient != null ? mSrpClient.getClientId() : "unknown";
-                LOG.error("srpPhase1: Failed: '" + e.getMessage() + "' clientId=" + clientId2 + " with [connectionId: '" + mConnection.getConnectionId() + "']");
+                LOG.error("srpPhase1: Failed: '" + e.getMessage() + "' clientId = " + clientId + " with [connectionId: '" + mConnection.getConnectionId() + "']");
                 throw e;
             }
         }
@@ -712,11 +711,13 @@ public class TalkRpcHandler implements ITalkRpcServer {
         requireIdentification(true);
         logCall("updateKey()");
         if (verifyKey(key.getKeyId())) {
+            LOG.info("updateKey for client "+mConnection.getClientId()+" ok with same valid keyid "+key.getKeyId());
             return;
         }
         if (key.getKeyId().equals(key.calcKeyId())) {
             key.setClientId(mConnection.getClientId());
             key.setTimestamp(new Date());
+            LOG.info("updateKey for client "+mConnection.getClientId()+" ok with new valid keyid "+key.getKeyId());
             mDatabase.saveKey(key);
         } else {
             throw new RuntimeException("updateKey: keyid "+key.getKey()+" is not the id of "+key.getKey());
@@ -753,6 +754,9 @@ public class TalkRpcHandler implements ITalkRpcServer {
         //TalkRelationship otherRelationship = mDatabase.findRelationshipBetween(clientId, mConnection.getClientId());
         if ((relationship != null && relationship.isRelated()) /*|| (otherRelationship != null && otherRelationship.isRelated())*/) {
             key = mDatabase.findKey(clientId, keyId);
+            if (key == null) {
+                throw new RuntimeException("No key for clientId " + clientId + " with keyId " + keyId + " found");
+            }
         } else {
             List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsForClient(mConnection.getClientId());
             for (TalkGroupMembership membership : memberships) {
@@ -760,6 +764,9 @@ public class TalkRpcHandler implements ITalkRpcServer {
                     TalkGroupMembership otherMembership = mDatabase.findGroupMembershipForClient(membership.getGroupId(), clientId);
                     if (otherMembership != null && (otherMembership.isJoined() || otherMembership.isInvited() || otherMembership.isSuspended())) {
                         key = mDatabase.findKey(clientId, keyId);
+                        if (key == null) {
+                            throw new RuntimeException("No key for clientId " + clientId + " with keyId " + keyId + " found (2)");
+                        }
                         break;
                     }
                 }
@@ -770,6 +777,9 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 for (TalkDelivery delivery : deliveries) {
                     if (clientId.equals(delivery.getSenderId())) {
                         key = mDatabase.findKey(clientId, keyId);
+                        if (key == null) {
+                            throw new RuntimeException("No key for clientId " + clientId + " with keyId " + keyId + " found (3)");
+                        }
                         break;
                     }
                 }
@@ -781,14 +791,17 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 for (TalkDelivery delivery : attachmentDeliveries) {
                     if (clientId.equals(delivery.getSenderId())) {
                         key = mDatabase.findKey(clientId, keyId);
-                        return key;
+                        if (key == null) {
+                            throw new RuntimeException("No key for clientId " + clientId + " with keyId " + keyId + " found");
+                        }
+                        break;
                     }
                 }
             }
         }
 
         if (key == null) {
-            throw new RuntimeException("Given client is not your friend, has invited you or key does not exist");
+            throw new RuntimeException("No relationship exist with client "+clientId+" allowing to retrieve key");
         }
 
         return key;
