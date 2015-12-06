@@ -55,6 +55,7 @@ public interface ITalkServerDatabase {
     public List<TalkDelivery> findDeliveriesInStates(String[] states);
 
     public List<TalkDelivery> findDeliveriesInStatesAndAttachmentStates(String[] states, String[] attachmentStates);
+    public long countDeliveriesInStatesAndAttachmentStates(String[] deliveryStates, String[] attachmentStates);
 
     public List<TalkDelivery> findDeliveriesForClient(String receiverId);
 

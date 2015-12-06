@@ -378,6 +378,11 @@ public class JongoDatabase implements ITalkServerDatabase {
         return IteratorUtils.toList(it);
     }
 
+    @Override
+    public long countDeliveriesInStatesAndAttachmentStates(String[] deliveryStates, String[] attachmentStates) {
+        return  mDeliveries.count("{state: { $in: # }, attachmentState: {$in: # } }", Arrays.asList(deliveryStates), Arrays.asList(attachmentStates));
+    }
+
 
     @Override
     @NotNull

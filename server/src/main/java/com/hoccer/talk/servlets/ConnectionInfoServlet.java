@@ -146,31 +146,73 @@ public class ConnectionInfoServlet extends HttpServlet {
         w.write("Presences typing      : " + typing.size()+ "\n");
         w.write("\n");
 
-        Map<String, TalkEnvironment> worldwide = new HashMap<String, TalkEnvironment>();
+        Vector<TalkRpcConnection> connections =  server.getConnectionsClone();
+        Hashtable<String, TalkRpcConnection> connectionsById = server.getConnectionsByIdClone();
 
+        long unconnectedUnreleasedEnvironmentsWorldwide = 0;
+        long unconnectedUnreleasedEnvironmentsWorldwideNoTTL = 0;
+        Map<String, TalkEnvironment> worldwide = new HashMap<String, TalkEnvironment>();
         List<TalkEnvironment> worldwideList = db.findEnvironmentsByType(TalkEnvironment.TYPE_WORLDWIDE);
         for (TalkEnvironment environment : worldwideList) {
             worldwide.put(environment.getClientId(), environment);
+            if (connectionsById.get(environment.getClientId()) == null) {
+                if (environment.getTimeReleased() == null) {
+                    unconnectedUnreleasedEnvironmentsWorldwide++;
+                    if (!environment.willLiveAfterRelease()) {
+                        unconnectedUnreleasedEnvironmentsWorldwideNoTTL++;
+                    }
+                }
+            }
         }
 
+        long unconnectedEnvironmentsNearby = 0;
         Map<String, TalkEnvironment> nearby = new HashMap<String, TalkEnvironment>();
         List<TalkEnvironment> nearbyList = db.findEnvironmentsByType(TalkEnvironment.TYPE_NEARBY);
         for (TalkEnvironment environment : nearbyList) {
             nearby.put(environment.getClientId(), environment);
+            if (connectionsById.get(environment.getClientId()) == null) {
+                unconnectedEnvironmentsNearby++;
+            }
         }
-        w.write("Worldwide : " + worldwide.size()+ "\n");
-        w.write("Nearby    : " + nearby.size() + "\n");
+        w.write("Environments:\n");
+        w.write("Worldwide total                         : " + worldwide.size()+ "\n");
+        w.write("Worldwide unconnected unreleased        : " + unconnectedUnreleasedEnvironmentsWorldwide+ "\n");
+        w.write("Worldwide unconnected unreleased no ttl : " + unconnectedUnreleasedEnvironmentsWorldwideNoTTL+ "\n");
+        w.write("Nearby total                            : " + nearby.size() + "\n");
+        w.write("Nearby unconnected                      : " + unconnectedEnvironmentsNearby + "\n");
         w.write("\n");
 
-        Vector<TalkRpcConnection> connections =  server.getConnectionsClone();
-        Hashtable<String, TalkRpcConnection> connectionsById = server.getConnectionsByIdClone();
+
+        long worldwideConnections = 0;
+        long worldwideConnectionsTTL = 0;
+        long worldwideConnectionsExpired = 0;
+        long nearbyConnections = 0;
+
+        for (TalkRpcConnection connection : connections) {
+            String clientId = connection.getClientId();
+            if (clientId != null) {
+                TalkEnvironment worldwideEnvironment = worldwide.get(clientId);
+                if (worldwideEnvironment != null) {
+                    worldwideConnections += 1;
+                    worldwideConnectionsTTL += worldwideEnvironment.willLiveAfterRelease() ? 1 : 0;
+                    worldwideConnectionsExpired += worldwideEnvironment.hasExpired() ? 1 : 0;
+                }
+                nearbyConnections += nearby.containsKey(clientId) ? 1 : 0;
+            }
+        }
 
         w.write("Open connections list size : " + connections.size()+ "\n");
         w.write("Open Connections counter   : " + server.getConnectionsOpen()+ "\n");
         w.write("Logged in map size         : " + server.numberOfClientConnections()+ "\n");
         w.write("Logged in counter          : " + server.getConnectionsLoggedIn()+ "\n");
         w.write("Ready counter              : " + server.getConnectionsReady()+ "\n");
-        w.write("Total counter              : " + server.getConnectionsTotal()+ "\n");
+        w.write("Total served counter       : " + server.getConnectionsTotal()+ "\n");
+        w.write("\n");
+        w.write("Connections with Environments:\n");
+        w.write("Worldwide                  : " + worldwideConnections+ "\n");
+        w.write("Worldwide with TTL         : " + worldwideConnectionsTTL+ "\n");
+        w.write("Worldwide expired          : " + worldwideConnectionsExpired+ "\n");
+        w.write("Nearby                     : " + nearbyConnections + "\n");
         w.write("\n");
 
         for (TalkRpcConnection connection : connections) {
