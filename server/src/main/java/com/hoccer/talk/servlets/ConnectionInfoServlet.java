@@ -251,7 +251,7 @@ public class ConnectionInfoServlet extends HttpServlet {
                     Double[] geoPosition = environment.getGeoLocation();
                     double latitude = 0;
                     double longitude = 0;
-                    if (geoPosition.length == 2) {
+                    if (geoPosition != null && geoPosition.length == 2) {
                         latitude = geoPosition[TalkEnvironment.LATITUDE_INDEX];
                         longitude = geoPosition[TalkEnvironment.LONGITUDE_INDEX];
                         latitudeSum += latitude;
@@ -297,7 +297,7 @@ public class ConnectionInfoServlet extends HttpServlet {
                     Double[] geoPosition = environment.getGeoLocation();
                     double latitude = 0;
                     double longitude = 0;
-                    if (geoPosition.length == 2) {
+                    if (geoPosition != null && geoPosition.length == 2) {
                         latitude = geoPosition[TalkEnvironment.LATITUDE_INDEX];
                         longitude = geoPosition[TalkEnvironment.LONGITUDE_INDEX];
                         latitudeSum += latitude;
@@ -337,6 +337,7 @@ public class ConnectionInfoServlet extends HttpServlet {
             w.write(""+t+", State "+threadStateName(t.getState())+"\n");
             for (StackTraceElement st : sortedThreads.get(t)) {
                 w.write("    "+st.toString()+"\n");
+                break; // remove to see full traces
             }
             w.write("\n");
         }
