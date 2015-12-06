@@ -28,6 +28,9 @@ public class TalkEnvironment {
     public final static String TYPE_NEARBY = "nearby";            // a nearby grouping environment
     public final static String TYPE_WORLDWIDE = "worldwide";      // a worldwide grouping environment
 
+    public final static int LONGITUDE_INDEX = 0;
+    public final static int LATITUDE_INDEX = 1;
+
     private String _id;
 
     // id of the sending client

@@ -138,6 +138,7 @@ public class JongoDatabase implements ITalkServerDatabase {
         mGroupPresences.ensureIndex("{state:1}");
         mGroupPresences.ensureIndex("{state:1, lastChanged:1}");
         mGroupPresences.ensureIndex("{groupType:1}");
+        mGroupPresences.ensureIndex("{state:1, groupType:1}");
 
         mGroupMemberships.ensureIndex("{groupId:1, clientId:1}");
         mGroupMemberships.ensureIndex("{clientId:1}");
@@ -910,7 +911,15 @@ public class JongoDatabase implements ITalkServerDatabase {
 
         return IteratorUtils.toList(it);
     }
+    @Override
+    public List<TalkGroupPresence> findGroupPresencesWithTypeAndState(String groupType, String state) {
+        Iterator<TalkGroupPresence> it = mGroupPresences
+                .find("{state: # , groupType: # }", state, groupType)
+                .as(TalkGroupPresence.class)
+                .iterator();
 
+        return IteratorUtils.toList(it);
+    }
     @Override
     public List<TalkGroupPresence> findGroupPresencesWithStateChangedBefore(String state, Date changedDate) {
         Iterator<TalkGroupPresence> it = mGroupPresences

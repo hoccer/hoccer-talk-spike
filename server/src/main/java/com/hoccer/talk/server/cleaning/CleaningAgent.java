@@ -65,6 +65,9 @@ public class CleaningAgent {
 
     private static final long UNFINISHED_DELIVERY_LIFE_TIME = 3 * MONTHS;
 
+    private static final long NEARBY_ENVIRONMENT_OFFLINE_LIFETIME = 3 * MINUTES;
+    private static final long WORLDWIDE_ENVIRONMENT_DANGLING_GROUP_LIFETIME = 48 * HOURS;
+
     private boolean firstRunDone = false;
     private boolean firstEnvironmentRunDone = false;
 
@@ -134,7 +137,8 @@ public class CleaningAgent {
             @Override
             public void run() {
                 try {
-                    TalkRpcHandler.expireEnvironments(mServer);
+                    TalkRpcHandler.expireEnvironments(mServer, WORLDWIDE_ENVIRONMENT_DANGLING_GROUP_LIFETIME);
+                    TalkRpcHandler.cleanupNearbyEnvironments(mServer, NEARBY_ENVIRONMENT_OFFLINE_LIFETIME);
                     firstEnvironmentRunDone = true;
                 } catch (Throwable t) {
                     LOG.error("caught and swallowed exception escaping runnable", t);

@@ -155,6 +155,8 @@ public interface ITalkServerDatabase {
 
     public List<TalkGroupPresence> findGroupPresencesWithState(String state);
 
+    public List<TalkGroupPresence> findGroupPresencesWithTypeAndState(String groupType, String state);
+
     public List<TalkGroupPresence> findGroupPresencesWithStateChangedBefore(String state, Date changedDate);
 
     public int deleteGroupPresencesWithStateChangedBefore(String state, Date changedDate);

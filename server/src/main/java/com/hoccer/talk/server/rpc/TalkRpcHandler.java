@@ -2693,8 +2693,76 @@ public class TalkRpcHandler implements ITalkRpcServer {
         return membership.isSuspended();
     }
 
+    public static void cleanupNearbyEnvironments(TalkServer server, long olderThanMillis) {
+        ITalkServerDatabase database = server.getDatabase();
+        List<TalkEnvironment> environments = database.findEnvironmentsByType(TalkEnvironment.TYPE_NEARBY);
+        LOG.info("cleanupNearbyEnvironments: checking " + environments.size() + " nearby environments");
 
-    public static void expireEnvironments(TalkServer server) {
+        long destroyed = 0;
+        Date limit = new Date(new Date().getTime() - olderThanMillis);
+        for (TalkEnvironment environment : environments) {
+            if (server.getClientConnection(environment.getClientId()) == null) {
+                // client not connected
+                if (environment.getTimeReceived() != null && environment.getTimeReceived().before(limit)) {
+                    LOG.warn("cleanupNearbyEnvironments: destroying environment for client " + environment.getClientId() + " group " + environment.getGroupId());
+                    destroyEnvironment(server, environment);
+                }
+            }
+        }
+        LOG.info("cleanupNearbyEnvironments: destroyed " + destroyed + " nearby environments");
+
+        // Clean left over nearby groups without environment
+        // This might not be required for normal operations and could be moved
+        // to the cleaning agent if it causes performance problems
+        List<TalkGroupMembership> myMemberships =
+                database.findGroupMembershipsWithStatesAndRoles(
+                        new String[]{TalkGroupMembership.STATE_JOINED},
+                        new String[]{TalkGroupMembership.ROLE_NEARBY_MEMBER});
+
+        LOG.info("cleanupNearbyEnvironments: found " + myMemberships.size() + " nearby group memberships");
+
+        for (TalkGroupMembership membership : myMemberships) {
+            if (membership.getClientId() == null || membership.getGroupId() == null) {
+                LOG.warn("cleanupNearbyEnvironments: removing group membership with null group or client " + membership.getClientId() + ", group " + membership.getGroupId());
+                database.deleteGroupMembership(membership);
+            } else {
+                TalkEnvironment myEnvironment = database.findEnvironmentByClientIdForGroup(membership.getClientId(), membership.getGroupId());
+                if (myEnvironment == null) {
+                    LOG.warn("cleanupNearbyEnvironments: removing group membership without environment for client " + membership.getClientId() + ", group " + membership.getGroupId());
+                    removeGroupMembership(server, membership, new Date());
+                }
+            }
+        }
+
+        List<TalkGroupPresence> nearbyGroups = database.findGroupPresencesWithTypeAndState(TalkGroupPresence.GROUP_TYPE_NEARBY, TalkGroupPresence.STATE_EXISTS);
+        LOG.info("cleanupNearbyEnvironments: checking " + nearbyGroups.size() + " existing nearby groups");
+        for (TalkGroupPresence groupPresence : nearbyGroups) {
+            if (groupPresence.getLastChanged().before(limit)) {  // ignore new groups
+
+                List<TalkEnvironment> environments2 = database.findEnvironmentsForGroup(groupPresence.getGroupId());
+                if (environments2.size() == 0) {
+                    // nearby group without environment
+
+                    Date now = new Date();
+                    List<TalkGroupMembership> memberships = database.findGroupMembershipsByIdWithStates(groupPresence.getGroupId(),
+                            new String[]{TalkGroupMembership.STATE_JOINED});
+                    for (TalkGroupMembership membership:memberships) {
+                        LOG.warn("cleanupNearbyEnvironments: removing group membership without environment, groupId = " +
+                                groupPresence.getGroupId()+" clientId = "+ membership.getClientId());
+                        removeGroupMembership(server, membership, now);
+                    }
+                    // group has no members any more, delete it too
+                    LOG.warn("cleanupNearbyEnvironments: setting group state to deleted of nearby group without members and environment, groupId = " + groupPresence.getGroupId());
+                    groupPresence.setState(TalkGroupPresence.STATE_DELETED);
+                    changedGroupPresence(server, groupPresence, now);
+                }
+            }
+        }
+        LOG.info("cleanupNearbyEnvironments: done");
+    }
+
+
+    public static void expireEnvironments(TalkServer server, long removeDanglingGroupsOlderThanMillis) {
 
         ITalkServerDatabase database = server.getDatabase();
         List<TalkEnvironment> environments = database.findEnvironmentsByType(TalkEnvironment.TYPE_WORLDWIDE);
@@ -2745,6 +2813,32 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 if (myEnvironment == null) {
                     LOG.warn("releaseEnvironment: removing group membership without environment for client " + membership.getClientId() + ", group " + membership.getGroupId());
                     removeGroupMembership(server, membership, new Date());
+                }
+            }
+        }
+
+        List<TalkGroupPresence> nearbyGroups = database.findGroupPresencesWithTypeAndState(TalkGroupPresence.GROUP_TYPE_WORLDWIDE, TalkGroupPresence.STATE_EXISTS);
+        LOG.info("expireEnvironments: checking " + nearbyGroups.size() + " existing worldwide groups");
+        Date limit = new Date(new Date().getTime() - removeDanglingGroupsOlderThanMillis);
+        for (TalkGroupPresence groupPresence : nearbyGroups) {
+            if (groupPresence.getLastChanged().before(limit)) {  // ignore new groups
+
+                List<TalkEnvironment> environments2 = database.findEnvironmentsForGroup(groupPresence.getGroupId());
+                if (environments2.size() == 0) {
+                    // nearby group without environment
+
+                    Date now = new Date();
+                    List<TalkGroupMembership> memberships = database.findGroupMembershipsByIdWithStates(groupPresence.getGroupId(),
+                            new String[]{TalkGroupMembership.STATE_JOINED});
+                    for (TalkGroupMembership membership:memberships) {
+                        LOG.warn("expireEnvironments: removing worldwide group membership without environment, groupId = " +
+                                groupPresence.getGroupId()+" clientId = "+ membership.getClientId());
+                        removeGroupMembership(server, membership, now);
+                    }
+                    // group has no members any more, delete it too
+                    LOG.warn("expireEnvironments: setting group state to deleted of worldwide group without members and environment, groupId = " + groupPresence.getGroupId());
+                    groupPresence.setState(TalkGroupPresence.STATE_DELETED);
+                    changedGroupPresence(server, groupPresence, now);
                 }
             }
         }

@@ -1,9 +1,6 @@
 package com.hoccer.talk.servlets;
 
-import com.hoccer.talk.model.TalkClient;
-import com.hoccer.talk.model.TalkClientHostInfo;
-import com.hoccer.talk.model.TalkEnvironment;
-import com.hoccer.talk.model.TalkPresence;
+import com.hoccer.talk.model.*;
 import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServer;
 import com.hoccer.talk.server.rpc.TalkRpcConnection;
@@ -235,6 +232,104 @@ public class ConnectionInfoServlet extends HttpServlet {
         }
         w.write("\n");
 
+        // nearby groups
+        List<TalkGroupPresence> nearbyGroups = db.findGroupPresencesWithTypeAndState(TalkGroupPresence.GROUP_TYPE_NEARBY, TalkGroupPresence.STATE_EXISTS);
+        w.write("Nearby groups ("+nearbyGroups.size()+"):\n");
+        for (TalkGroupPresence groupPresence : nearbyGroups) {
+            List<TalkGroupMembership> memberships = db.findGroupMembershipsByIdWithStates(groupPresence.getGroupId(),
+                    new String[]{TalkGroupMembership.STATE_JOINED});
+            w.write("Nearby group with groupId:"+groupPresence.getGroupId()+" name: "+
+                    groupPresence.getGroupName()+" has "+memberships.size()+" members, keyid: "+groupPresence.getSharedKeyId()+"\n");
+            double latitudeSum = 0;
+            double longitudeSum = 0;
+            Vector<Double[]> coords = new Vector<Double[]>();
+            for (TalkGroupMembership membership : memberships) {
+                TalkPresence presence = db.findPresenceForClient(membership.getClientId());
+                TalkEnvironment environment = nearby.get(membership.getClientId());
+                if (environment != null) {
+                    long receivedAgo = new Date().getTime() - environment.getTimeReceived().getTime();
+                    Double[] geoPosition = environment.getGeoLocation();
+                    double latitude = 0;
+                    double longitude = 0;
+                    if (geoPosition.length == 2) {
+                        latitude = geoPosition[TalkEnvironment.LATITUDE_INDEX];
+                        longitude = geoPosition[TalkEnvironment.LONGITUDE_INDEX];
+                        latitudeSum += latitude;
+                        longitudeSum += longitude;
+                        coords.add(geoPosition);
+                    }
+                    w.write("    clientId " + membership.getClientId() + " keyid "+membership.getSharedKeyId()+" nick '" + presence.getClientName() +
+                            "' received " + receivedAgo/1000 + "s ago, long/lat:" + longitude+","+latitude+
+                            " acc: "+environment.getAccuracy()+" BSSIDS:"+Arrays.toString(environment.getBssids())+ " \n");
+                } else {
+                    w.write("    Member clientId " + membership.getClientId() + "\n");
+                }
+            }
+            if (coords.size() > 0) {
+                double latitudeCenter = latitudeSum / coords.size();
+                double longitudeCenter = longitudeSum / coords.size();
+                w.write("  center long/lat:" + longitudeCenter + "," + latitudeCenter + ", distances of each member from center in m:");
+                for (int i = 0; i < coords.size(); ++i) {
+                    w.write(" " + distFrom(latitudeCenter, longitudeCenter, coords.get(i)[TalkEnvironment.LATITUDE_INDEX], coords.get(i)[TalkEnvironment.LONGITUDE_INDEX]));
+                }
+            }
+            w.write("\n");
+            w.write("\n");
+        }
+        w.write("\n");
+
+        // worldwide groups
+        List<TalkGroupPresence> worldwideGroups = db.findGroupPresencesWithTypeAndState(TalkGroupPresence.GROUP_TYPE_WORLDWIDE, TalkGroupPresence.STATE_EXISTS);
+        w.write("Worldwide groups ("+worldwideGroups.size()+"):\n");
+        for (TalkGroupPresence groupPresence : worldwideGroups) {
+            List<TalkGroupMembership> memberships = db.findGroupMembershipsByIdWithStates(groupPresence.getGroupId(),
+                    new String[]{TalkGroupMembership.STATE_JOINED});
+            w.write("Worldwide group with groupId:"+groupPresence.getGroupId()+" name: "+
+                    groupPresence.getGroupName()+" has "+memberships.size()+" members, keyid: "+groupPresence.getSharedKeyId()+"\n");
+            double latitudeSum = 0;
+            double longitudeSum = 0;
+            Vector<Double[]> coords = new Vector<Double[]>();
+            for (TalkGroupMembership membership : memberships) {
+                TalkPresence presence = db.findPresenceForClient(membership.getClientId());
+                TalkEnvironment environment = worldwide.get(membership.getClientId());
+                if (environment != null) {
+                    long receivedAgo = new Date().getTime() - environment.getTimeReceived().getTime();
+                    Double[] geoPosition = environment.getGeoLocation();
+                    double latitude = 0;
+                    double longitude = 0;
+                    if (geoPosition.length == 2) {
+                        latitude = geoPosition[TalkEnvironment.LATITUDE_INDEX];
+                        longitude = geoPosition[TalkEnvironment.LONGITUDE_INDEX];
+                        latitudeSum += latitude;
+                        longitudeSum += longitude;
+                        coords.add(geoPosition);
+                    }
+                    String status = "";
+                    if (environment.getTimeReleased() != null) {
+                        status = "released ";
+                    }
+                    if (environment.hasExpired()) {
+                        status += "expired ";
+                    }
+                    w.write("    clientId " + membership.getClientId() + " keyid "+membership.getSharedKeyId()+" nick '" + presence.getClientName() +
+                            "' received " + receivedAgo/1000 + "s ago, ttl "+environment.getTimeToLive()+" ms "+status+ "long/lat:" + longitude+","+latitude+
+                            " acc: "+environment.getAccuracy()+" BSSIDS:"+Arrays.toString(environment.getBssids())+ " \n");
+                } else {
+                    w.write("    Member clientId " + membership.getClientId() + "\n");
+                }
+            }
+            if (coords.size() > 0) {
+                double latitudeCenter = latitudeSum / coords.size();
+                double longitudeCenter = longitudeSum / coords.size();
+                w.write("  center long/lat:" + longitudeCenter + "," + latitudeCenter + ", distances of each member from center in m:");
+                for (int i = 0; i < coords.size(); ++i) {
+                    w.write(" " + distFrom(latitudeCenter, longitudeCenter, coords.get(i)[TalkEnvironment.LATITUDE_INDEX], coords.get(i)[TalkEnvironment.LONGITUDE_INDEX]));
+                }
+            }
+            w.write("\n");
+            w.write("\n");
+        }
+        w.write("\n");
         Map<Thread, StackTraceElement[]> sortedThreads = sortByName(threadMap);
 
         w.write("Threads:\n");
@@ -248,6 +343,18 @@ public class ConnectionInfoServlet extends HttpServlet {
         w.write("\n");
 
         w.close();
+    }
+    public static double distFrom(double lat1, double lng1, double lat2, double lng2) {
+        double earthRadius = 6371000; //meters
+        double dLat = Math.toRadians(lat2-lat1);
+        double dLng = Math.toRadians(lng2-lng1);
+        double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                        Math.sin(dLng/2) * Math.sin(dLng/2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        double dist = earthRadius * c;
+
+        return dist;
     }
 
     public static String threadStateName(Thread.State state) {
