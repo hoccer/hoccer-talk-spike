@@ -212,6 +212,8 @@ public class ConnectionInfoServlet extends HttpServlet {
         w.write("Nearby                     : " + nearbyConnections + "\n");
         w.write("\n");
 
+        w.write("[connection id] created login-time/ready-time status presence remote-addr 'nickname' (pushInfo, lastIncomingRequest, lastOutgoingRequest) clientInfo [clientId]\n");
+
         for (TalkRpcConnection connection : connections) {
             printConnection(w, connection, now, all, worldwide, nearby);
         }
@@ -238,8 +240,9 @@ public class ConnectionInfoServlet extends HttpServlet {
         for (TalkGroupPresence groupPresence : nearbyGroups) {
             List<TalkGroupMembership> memberships = db.findGroupMembershipsByIdWithStates(groupPresence.getGroupId(),
                     new String[]{TalkGroupMembership.STATE_JOINED});
+            long createdAgo = new Date().getTime() - groupPresence.getLastChanged().getTime();
             w.write("Nearby group with groupId:"+groupPresence.getGroupId()+" name: "+
-                    groupPresence.getGroupName()+" has "+memberships.size()+" members, keyid: "+groupPresence.getSharedKeyId()+"\n");
+                    groupPresence.getGroupName()+" has "+memberships.size()+" members, keyid: "+groupPresence.getSharedKeyId()+", lastChanged "+createdAgo/1000+" s ago\n");
             double latitudeSum = 0;
             double longitudeSum = 0;
             Vector<Double[]> coords = new Vector<Double[]>();
@@ -284,8 +287,9 @@ public class ConnectionInfoServlet extends HttpServlet {
         for (TalkGroupPresence groupPresence : worldwideGroups) {
             List<TalkGroupMembership> memberships = db.findGroupMembershipsByIdWithStates(groupPresence.getGroupId(),
                     new String[]{TalkGroupMembership.STATE_JOINED});
+            long createdAgo = new Date().getTime() - groupPresence.getLastChanged().getTime();
             w.write("Worldwide group with groupId:"+groupPresence.getGroupId()+" name: "+
-                    groupPresence.getGroupName()+" has "+memberships.size()+" members, keyid: "+groupPresence.getSharedKeyId()+"\n");
+                    groupPresence.getGroupName()+" has "+memberships.size()+" members, keyid: "+groupPresence.getSharedKeyId()+", lastChanged "+createdAgo/1000+" s ago\n");
             double latitudeSum = 0;
             double longitudeSum = 0;
             Vector<Double[]> coords = new Vector<Double[]>();
@@ -415,7 +419,7 @@ public class ConnectionInfoServlet extends HttpServlet {
                 status = "not-connected";
             }
             status = status + (connection.isShuttingDown() ? " closing" : "");
-            status = status + (connection.isLoggedInFlag() ? " LIF" : "");
+            //status = status + (connection.isLoggedInFlag() ? " LIF" : "");
 
             boolean hasWorldwideEnvironment = false;
             boolean hasWorldwideEnvironmentWithTTL = false;
@@ -436,10 +440,10 @@ public class ConnectionInfoServlet extends HttpServlet {
                 }
                 hasNearbyEnvironment = nearby.containsKey(clientId);
             }
-            status = status + (hasNearbyEnvironment ? " N" : "");
-            status = status + (hasWorldwideEnvironment ? " W" : "");
-            status = status + (hasWorldwideEnvironmentWithTTL ? " T" : "");
-            status = status + (hasWorldwideEnvironmentExpired ? " E" : "");
+            status = status + (hasNearbyEnvironment ? " Nearby" : "");
+            status = status + (hasWorldwideEnvironment ? " Worldwide" : "");
+            status = status + (hasWorldwideEnvironmentWithTTL ? "-TTL" : "");
+            status = status + (hasWorldwideEnvironmentExpired ? "-expired" : "");
 
             String nickName = "-";
             String presenceStatus = "unknown";
@@ -459,12 +463,12 @@ public class ConnectionInfoServlet extends HttpServlet {
             if (lastStarted != null) {
                 if (lastFinished != null) {
                     if (lastFinished.after(lastStarted)) {
-                        lastRequestStatus = "<-"+lastRequest + " took " + (lastFinished.getTime() - lastStarted.getTime()) + " ms " + (now.getTime() - lastStarted.getTime())/1000 + " s ago";
+                        lastRequestStatus = "<-"+lastRequest + " (" + (lastFinished.getTime() - lastStarted.getTime()) + "ms " + (now.getTime() - lastStarted.getTime())/1000 + "s ago)";
                     } else {
-                        lastRequestStatus = "<-"+lastRequest + "  started " + (now.getTime() - lastStarted.getTime()) + " ms ago, previous request finished " + (now.getTime() - lastStarted.getTime()) + " ms ago";
+                        lastRequestStatus = "<-"+lastRequest + "  started " + (now.getTime() - lastStarted.getTime()) + "ms ago, previous request finished " + (now.getTime() - lastStarted.getTime()) + "ms ago";
                     }
                 } else {
-                    lastRequestStatus = "<-"+lastRequest + "  started " + (now.getTime() - lastStarted.getTime()) + " ms ago, no previous request finished ";
+                    lastRequestStatus = "<-"+lastRequest + "  started " + (now.getTime() - lastStarted.getTime()) + "ms ago, no previous request finished ";
                 }
             } else {
                 lastRequestStatus = "no requests yet";
@@ -481,10 +485,12 @@ public class ConnectionInfoServlet extends HttpServlet {
             boolean isClientResponsive = connection.isClientResponsive();
             String clientStatus;
             if (lastClientRequest != null) {
-                clientStatus = String.format(", ->%s took %s ms %d s ago", lastClientRequest, connection.getLastClientResponseTime(), lastClientRequestDateAgo) + (isClientResponsive ? "" : ",stalled");
+                clientStatus = String.format(", ->%s (%sms %ds ago)", lastClientRequest, connection.getLastClientResponseTime(), lastClientRequestDateAgo) + (isClientResponsive ? "" : ",stalled");
             } else {
                 clientStatus = "";
             }
+            long loginTook = 0;
+            long readyTook = 0;
             TalkClient client = connection.getClient();
             String pushStatus = "No push";
             if (client != null) {
@@ -498,10 +504,15 @@ public class ConnectionInfoServlet extends HttpServlet {
                     long pushAgo = (new Date().getTime() - client.getTimeLastPush().getTime()) / 1000;
                     pushStatus = pushStatus + " " + pushAgo + " s ago";
                 }
+                if (connection.isLoggedIn()) {
+                    loginTook = client.getTimeLastLogin().getTime() - connection.getCreationTime().getTime();
+                }
+                if (connection.isReady()) {
+                    readyTook = client.getTimeReady().getTime() - client.getTimeLastLogin().getTime();
+                }
             }
-
             long age = (new Date().getTime() - connection.getCreationTime().getTime())/1000;
-            w.write(String.format("[%d] %d s %s %s" , connection.getConnectionId(), age, status, presenceStatus)
+            w.write(String.format("[%d] %ds %dms/%dms %s %s" , connection.getConnectionId(), age, loginTook, readyTook, status, presenceStatus)
                     +" "+connection.getRemoteAddress()+" '"+nickName+"'("+pushStatus+","+ lastRequestStatus + clientStatus+"), "+ clientInfo+ " ["+clientId+"]"+"\n");
         }
     }
