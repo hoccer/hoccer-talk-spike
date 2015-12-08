@@ -121,6 +121,7 @@ public class JsonRpcClient {
 	 */
 	public JsonRpcClient() {
 		this.mIdGenerator = new AtomicInteger(0);
+        resetTimersAndCounters();
 	}
 
     /**
