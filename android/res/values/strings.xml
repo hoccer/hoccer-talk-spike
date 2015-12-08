@@ -305,6 +305,9 @@
     <string name="dialog_report_crash_message">Crash information available. We kindly ask you to send this information to ${app.name} developers and help us improving our service.</string>
     <string name="dialog_report_crash_negative">Dismiss</string>
     <string name="dialog_report_crash_positive">Send</string>
+    <string name="dialog_report_errors_title">Error data</string>
+    <string name="dialog_report_errors_message">Error information available. We kindly ask you to send this information to ${app.name} developers and help us improving our service.</string>
+
     <string name="pref_please_wait">Please wait…</string>
     <string name="up_down_unlimited_option">unlimited</string>
     <string name="up_down_manual_option">manual transfer</string>
@@ -471,6 +474,10 @@
     <string name="auto_download_attachments">Auto-download attachments</string>
     <string name="worldwide_tutorial_message">Chat with up to ten random users in Worldwide mode. Please have a look at the available worldwide settings. Do you want to remain visible for other worldwide users after leaving Worldwide?</string>
     <string name="send_message">Send message</string>
+    <string name="pref_category_polling">Polling</string>
+    <string name="enable_polling">Activated</string>
+    <string name="pref_title_polling_interval">Polling interval</string>
+    <string name="polling_summary">Poll server directly for new messages.</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>

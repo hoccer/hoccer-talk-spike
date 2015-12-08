@@ -22,6 +22,8 @@ import com.hoccer.xo.android.passwordprotection.PasswordProtection;
 import com.hoccer.xo.android.passwordprotection.activity.PasswordChangeActivity;
 import com.hoccer.xo.android.passwordprotection.activity.PasswordPromptActivity;
 import com.hoccer.xo.android.passwordprotection.activity.PasswordSetActivity;
+import com.hoccer.xo.android.polling.Polling;
+import com.hoccer.xo.android.polling.PollingBroadcastReceiver;
 import com.hoccer.xo.android.view.chat.attachments.TransferControlView;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -241,6 +243,10 @@ public class XoPreferenceActivity extends PreferenceActivity
             regenerateKeys();
         } else if (getString(R.string.preference_key_worldwide_timetolive).equals(key) || getString(R.string.preference_key_worldwide_enable_notifications).equals(key)) {
             updateWorldwideEnvironmentParameters();
+        } else if (getString(R.string.preference_key_enable_polling).equals(key)) {
+            Polling.update(this);
+        } else if (getString(R.string.preference_key_polling_interval).equals(key)) {
+            Polling.update(this);
         }
     }
 

@@ -134,41 +134,35 @@ public final class GCMConstants {
      * server that can be retried later. The application should use exponential
      * back off and retry.
      */
-    public static final String ERROR_SERVICE_NOT_AVAILABLE =
-            "SERVICE_NOT_AVAILABLE";
+    public static final String ERROR_SERVICE_NOT_AVAILABLE =  "SERVICE_NOT_AVAILABLE";
 
     /**
      * There is no Google account on the phone. The application should ask the
      * user to open the account manager and add a Google account.
      */
-    public static final String ERROR_ACCOUNT_MISSING =
-            "ACCOUNT_MISSING";
+    public static final String ERROR_ACCOUNT_MISSING = "ACCOUNT_MISSING";
 
     /**
      * Bad password. The application should ask the user to enter his/her
      * password, and let user retry manually later. Fix on the device side.
      */
-    public static final String ERROR_AUTHENTICATION_FAILED =
-            "AUTHENTICATION_FAILED";
+    public static final String ERROR_AUTHENTICATION_FAILED = "AUTHENTICATION_FAILED";
 
     /**
      * The request sent by the phone does not contain the expected parameters.
      * This phone doesn't currently support GCM.
      */
-    public static final String ERROR_INVALID_PARAMETERS =
-            "INVALID_PARAMETERS";
+    public static final String ERROR_INVALID_PARAMETERS = "INVALID_PARAMETERS";
     /**
      * The sender account is not recognized. Fix on the device side.
      */
-    public static final String ERROR_INVALID_SENDER =
-            "INVALID_SENDER";
+    public static final String ERROR_INVALID_SENDER = "INVALID_SENDER";
 
     /**
      * Incorrect phone registration with Google. This phone doesn't currently
      * support GCM.
      */
-    public static final String ERROR_PHONE_REGISTRATION_ERROR =
-            "PHONE_REGISTRATION_ERROR";
+    public static final String ERROR_PHONE_REGISTRATION_ERROR = "PHONE_REGISTRATION_ERROR";
 
     private GCMConstants() {
         throw new UnsupportedOperationException();

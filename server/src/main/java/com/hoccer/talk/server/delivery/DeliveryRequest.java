@@ -43,6 +43,10 @@ public class DeliveryRequest {
     private boolean performIncoming(List<TalkDelivery> inDeliveries, ITalkRpcClient rpc, TalkRpcConnection connection) {
         boolean currentlyConnected = true;
         Date lastLogin = connection.getClient().getTimeLastLogin();
+        if (lastLogin == null) {
+            LOG.error("performIncoming: clientId: '" + mClientId + "has no last login time, assuming now");
+            lastLogin = new Date();
+        }
         for (TalkDelivery delivery : inDeliveries) {
             // we lost the connection somehow
             if (!currentlyConnected) {
@@ -69,13 +73,14 @@ public class DeliveryRequest {
                     if (latestDelivery == null) {
                         throw new RuntimeException("delivery unexpectedly not found");
                     }
+                    latestDelivery.ensureDates();
 
                     // remove for production build
-                    if (!latestDelivery.equals(delivery)) {
-                        LOG.trace("latestDelivery (in) has changed");
-                        LOG.trace("delivery:"+delivery.toString());
-                        LOG.trace("latestDelivery:"+latestDelivery.toString());
-                    }
+//                    if (!latestDelivery.equals(delivery)) {
+//                        LOG.trace("latestDelivery (in) has changed");
+//                        LOG.trace("delivery:"+delivery.toString());
+//                        LOG.trace("latestDelivery:"+latestDelivery.toString());
+//                    }
                     boolean updatedInDuringThisLoginSession = latestDelivery.getTimeUpdatedIn().getTime() > lastLogin.getTime();
                     if (!mForceAll && (latestDelivery.getTimeUpdatedIn().getTime() > latestDelivery.getTimeChanged().getTime())
                             && updatedInDuringThisLoginSession) { // do not bail out here when last update has been in a previous login session

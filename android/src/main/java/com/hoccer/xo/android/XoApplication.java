@@ -1,18 +1,15 @@
 package com.hoccer.xo.android;
 
 import android.app.Application;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Environment;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hoccer.talk.client.IXoClientHost;
-import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.credentialtransfer.SrpChangeListener;
-import com.hoccer.xo.android.service.XoClientService;
+import com.hoccer.xo.android.polling.Polling;
 import com.hoccer.xo.android.task.StartupTasks;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -79,7 +76,6 @@ public class XoApplication extends Application {
         super.onCreate();
 
         sInstance = this;
-
         mCrashMonitor = CrashMonitor.get(this);
 
         // initialize storage roots (do so early for log files)
@@ -193,13 +189,13 @@ public class XoApplication extends Application {
             mClient.setFullSyncRequired(true);
             mCrashMonitor.saveCrashState(false);
         }
-
         // create sound pool instance
         sSoundPool = new SoundPool(this);
 
         sStartupTasks = new StartupTasks(this);
         sStartupTasks.executeRegisteredTasks();
 
+        Polling.update(this);
     }
 
     private boolean isFirstConnectionAfterCrashOrUpdate() {

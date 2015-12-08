@@ -55,6 +55,7 @@ public interface ITalkServerDatabase {
     public List<TalkDelivery> findDeliveriesInStates(String[] states);
 
     public List<TalkDelivery> findDeliveriesInStatesAndAttachmentStates(String[] states, String[] attachmentStates);
+    public long countDeliveriesInStatesAndAttachmentStates(String[] deliveryStates, String[] attachmentStates);
 
     public List<TalkDelivery> findDeliveriesForClient(String receiverId);
 
@@ -153,6 +154,8 @@ public interface ITalkServerDatabase {
     public int deleteGroupMembershipsWithStatesAndRolesChangedBefore(String[] states, String[] roles, Date lastChanged);
 
     public List<TalkGroupPresence> findGroupPresencesWithState(String state);
+
+    public List<TalkGroupPresence> findGroupPresencesWithTypeAndState(String groupType, String state);
 
     public List<TalkGroupPresence> findGroupPresencesWithStateChangedBefore(String state, Date changedDate);
 

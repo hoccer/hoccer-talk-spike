@@ -30,6 +30,9 @@ import com.hoccer.xo.android.activity.*;
 import com.hoccer.xo.android.fragment.DeviceContactsInvitationFragment;
 import com.hoccer.xo.android.profile.client.ClientProfileActivity;
 import com.hoccer.xo.android.profile.group.GroupProfileActivity;
+import net.hockeyapp.android.CrashManager;
+import net.hockeyapp.android.CrashManagerListener;
+import net.hockeyapp.android.Strings;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -308,6 +311,8 @@ public abstract class BaseActivity extends FragmentActivity {
             ((TextView) dialog.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
         }
     }
+
+
 
     protected abstract int getLayoutResource();
 

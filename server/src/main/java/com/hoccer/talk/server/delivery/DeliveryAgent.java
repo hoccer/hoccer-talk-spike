@@ -39,7 +39,7 @@ public class DeliveryAgent extends NotificationDeferrer {
                 try {
                     TalkClient client = mServer.getDatabase().findClientById(deliveryRequest.mClientId);
                     if (client == null) {
-                        throw new RuntimeException("requestDelivery: client +"+deliveryRequest.mClientId+" not found");
+                        throw new RuntimeException("requestDelivery: client "+deliveryRequest.mClientId+" not found");
                     }
                     if (client.isConnected() &&  !client.isReady()) {
                         LOG.debug("requestDelivery: client connected but not ready:'" + deliveryRequest.mClientId + ", not performing delivery");

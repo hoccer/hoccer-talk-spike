@@ -118,6 +118,19 @@
                 android:entries="@array/transfer_limits"
                 android:entryValues="@array/transfer_limits_values"
                 android:defaultValue="-1"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="@string/pref_category_polling">
+        <SwitchPreference
+                android:key="preference_key_enable_polling"
+                android:title="@string/enable_polling"/>
+        <ListPreference
+                android:title="@string/pref_title_polling_interval"
+                android:key="@string/preference_key_polling_interval"
+                android:entries="@array/preference_polling_interval_name"
+                android:entryValues="@array/preference_polling_interval_values"
+                android:defaultValue="900000"/>
 
     </PreferenceCategory>
 

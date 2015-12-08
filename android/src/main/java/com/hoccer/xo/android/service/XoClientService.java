@@ -29,6 +29,10 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ChatsActivity;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.UriUtils;
+import net.hockeyapp.android.CrashManager;
+import net.hockeyapp.android.CrashManagerListener;
+import net.hockeyapp.android.ExceptionHandler;
+import net.hockeyapp.android.Strings;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
@@ -158,7 +162,7 @@ public class XoClientService extends Service {
         loadPreference(mPreferences, sPreferenceImageUploadQualityKey);
         configureAutoTransfers();
 
-        doVerifyGcm();
+        mGcmSupported = isGcmSupported();
 
         mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         registerConnectivityReceiver();
@@ -257,37 +261,15 @@ public class XoClientService extends Service {
         }
     }
 
-    private void doVerifyGcm() {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("doVerifyGcm()");
-        }
-
-        // check our manifest for GCM compatibility
-        boolean manifestAllowsGcm = false;
+    private boolean isGcmSupported() {
         try {
             GCMRegistrar.checkManifest(this);
-            manifestAllowsGcm = true;
-        } catch (IllegalStateException ex) {
-            LOG.warn("GCM unavailable due to manifest problems", ex);
-        }
-
-        // check GCM device support
-        boolean deviceSupportsGcm = false;
-        if (manifestAllowsGcm) {
-            try {
-                GCMRegistrar.checkDevice(this);
-                deviceSupportsGcm = true;
-            } catch (UnsupportedOperationException ex) {
-                LOG.warn("GCM not supported by device", ex);
-            }
-        }
-
-        // make the final decision
-        mGcmSupported = deviceSupportsGcm && manifestAllowsGcm;
-        if (mGcmSupported) {
-            LOG.info("GCM is supported");
-        } else {
-            LOG.warn("GCM not supported");
+            GCMRegistrar.checkDevice(this);
+            return true;
+        } catch (Exception ex) {
+            ExceptionHandler.saveException(ex, null);
+            LOG.warn("GCM not supported by device", ex);
+            return false;
         }
     }
 
@@ -316,8 +298,7 @@ public class XoClientService extends Service {
                 // perform the registration call
                 mClient.registerGcm(this.getPackageName(), GCMRegistrar.getRegistrationId(this));
                 // set the registration timeout (XXX move elsewhere)
-                GCMRegistrar.setRegisterOnServerLifespan(
-                        this, TalkPushService.GCM_REGISTRATION_EXPIRATION * 1000);
+                GCMRegistrar.setRegisterOnServerLifespan(this, TalkPushService.GCM_REGISTRATION_EXPIRATION * 1000);
                 // tell the registrar that we did this successfully
                 GCMRegistrar.setRegisteredOnServer(this, true);
             } else {
@@ -336,8 +317,7 @@ public class XoClientService extends Service {
         LOG.debug("registerConnectivityReceiver()");
         if (mConnectivityReceiver == null) {
             mConnectivityReceiver = new ConnectivityReceiver();
-            registerReceiver(mConnectivityReceiver,
-                    new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+            registerReceiver(mConnectivityReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         }
     }
 
@@ -590,8 +570,12 @@ public class XoClientService extends Service {
                 mExecutor.execute(new Runnable() {
                     @Override
                     public void run() {
-                        doRegisterGcm(TalkPushService.GCM_ALWAYS_REGISTER);
-                        doUpdateGcm(TalkPushService.GCM_ALWAYS_UPDATE);
+                        try {
+                            doRegisterGcm(TalkPushService.GCM_ALWAYS_REGISTER);
+                            doUpdateGcm(TalkPushService.GCM_ALWAYS_UPDATE);
+                        } catch (Exception ex){
+                            ExceptionHandler.saveException(ex, null);
+                        }
                     }
                 });
             } else if (client.isDisconnected() && mWakeLock != null && mWakeLock.isHeld()) {

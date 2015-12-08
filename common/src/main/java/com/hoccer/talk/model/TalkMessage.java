@@ -88,6 +88,8 @@ public class TalkMessage {
     @DatabaseField
     String system;
 
+    // TODO: either make this properly work or remove it; right now these field are not stored
+    // in the server database
     /** date of attachment upload started */
     @JsonIgnore @DatabaseField
     Date attachmentUploadStarted;
