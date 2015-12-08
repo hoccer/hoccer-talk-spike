@@ -48,10 +48,10 @@ public class NearbyEnvironmentUpdater {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                if (mLocationManager.getAllProviders().contains(LocationManager.NETWORK_PROVIDER) && mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                if (mLocationManager.getAllProviders().contains(LocationManager.NETWORK_PROVIDER) && isNetworkProviderEnabled()) {
                     mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_UPDATE_TIME, MIN_UPDATE_MOVED, mNetworkLocationListener);
                 }
-                if (mLocationManager.getAllProviders().contains(LocationManager.GPS_PROVIDER) && mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                if (mLocationManager.getAllProviders().contains(LocationManager.GPS_PROVIDER) && isGpsProviderEnabled()) {
                     mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_UPDATE_TIME, MIN_UPDATE_MOVED, mGPSLocationListener);
                 }
             }
