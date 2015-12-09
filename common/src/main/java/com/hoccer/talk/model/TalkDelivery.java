@@ -5,6 +5,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import org.jetbrains.annotations.Nullable;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -847,6 +848,8 @@ public class TalkDelivery {
     }
 
     public void setTimeAccepted(Date timeAccepted) {
+
+        System.out.println("++++++++++++++++++++ "+ SimpleDateFormat.getTimeInstance().format(timeAccepted.getTime()));
         this.timeAccepted = timeAccepted;
     }
 

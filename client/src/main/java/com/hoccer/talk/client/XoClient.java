@@ -532,9 +532,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         return new Date(new Date().getTime() + mServerTimeDiff);
     }
 
-    public Date serverTimeToLocalTime(Date serverTime){
-        return new Date(serverTime.getTime() - mServerTimeDiff);
-    }
 
     public void hello() {
         try {
@@ -557,13 +554,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             TalkServerInfo talkServerInfo = mServerRpc.hello(clientInfo);
             if (talkServerInfo != null) {
                 // mServerTimeDiff is positive if server time is ahead of client time
-
-                SimpleDateFormat sdf = new SimpleDateFormat();
-                sdf.setTimeZone(new SimpleTimeZone(SimpleTimeZone.UTC_TIME, "UTC"));
-                Date yourUtcDate = sdf.parse(SimpleDateFormat.getDateTimeInstance().format(talkServerInfo.getServerTime()));
-
-//                this.mServerTimeDiff = talkServerInfo.getServerTime().getTime() - new Date().getTime();
-                this.mServerTimeDiff = yourUtcDate.getTime() - new Date().getTime();
+                this.mServerTimeDiff = talkServerInfo.getServerTime().getTime() - new Date().getTime();
 
                 LOG.info("Hello: client time differs from server time by " + this.mServerTimeDiff + " ms");
                 LOG.debug("Hello: Current server time: " + talkServerInfo.getServerTime());
@@ -574,8 +565,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             }
         } catch (JsonRpcClientException e) {
             LOG.error("Error while sending Hello: ", e);
-        } catch (ParseException e) {
-            e.printStackTrace();
         }
     }
 

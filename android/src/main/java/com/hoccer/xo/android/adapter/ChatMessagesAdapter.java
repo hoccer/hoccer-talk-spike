@@ -78,6 +78,8 @@ public class ChatMessagesAdapter extends MessagesAdapter implements IXoMessageLi
         } catch (SQLException e) {
             LOG.error("SQLException while loading message count: " + mContact.getClientId(), e);
         }
+        sortMessages();
+
     }
 
     /**
@@ -289,15 +291,27 @@ public class ChatMessagesAdapter extends MessagesAdapter implements IXoMessageLi
     }
 
     private void insertMessageItemAndSort(MessageItem messageItem) {
+
         mMessageItems.add(messageItem);
+        sortMessages();
+    }
+
+    private void sortMessages() {
         Collections.sort(mMessageItems, new Comparator<MessageItem>() {
             @Override
             public int compare(MessageItem o1, MessageItem o2) {
-               // if (o1.getMessage().getMessage().getTimeSent()!=null && o2.getMessage().getMessage().getTimeSent()!=null) {
-               //     return o1.getMessage().getMessage().getTimeSent().getTime() < o2.getMessage().getMessage().getTimeSent().getTime() ? -1 : 1;
-               // } else {
-                    return o1.getMessage().getDelivery().getTimeAccepted().getTime() < o2.getMessage().getDelivery().getTimeAccepted().getTime() ? -1 : 1;
-               // }
+                if (o1.getMessage().getDelivery().getTimeAccepted() == null){
+                    LOG.debug("+++++ o1 NULL");
+                    return 1;
+                }
+                if (o2.getMessage().getDelivery().getTimeAccepted() == null){
+                    LOG.debug("+++++ o2 NULL");
+                    return -1;
+                }
+                LOG.debug(o1.getMessage().getDelivery().getTimeAccepted().getTime());
+                LOG.debug(o2.getMessage().getDelivery().getTimeAccepted().getTime());
+
+                return o1.getMessage().getDelivery().getTimeAccepted().getTime() < o2.getMessage().getDelivery().getTimeAccepted().getTime() ? -1 : 1;
             }
         });
     }
@@ -321,6 +335,8 @@ public class ChatMessagesAdapter extends MessagesAdapter implements IXoMessageLi
     public void onMessageUpdated(final TalkClientMessage message) {
         LOG.debug("onMessageUpdated()");
         if (isMessageRelevant(message)) {
+//            sortMessages();
+
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {

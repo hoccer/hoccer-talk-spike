@@ -325,10 +325,6 @@ public class MessageItem implements AttachmentTransferListener {
         Date accepted = message.getDelivery().getTimeAccepted();
         String ac = accepted != null ? SimpleDateFormat.getTimeInstance(SimpleDateFormat.MEDIUM).format(accepted) : "NULL";
 
-        Date acceptedLocal = XoApplication.get().getClient().serverTimeToLocalTime(accepted);
-        String acLocal = SimpleDateFormat.getTimeInstance(SimpleDateFormat.MEDIUM).format(acceptedLocal);
-
-
         Date sent = message.getMessage().getTimeSent();
         String s = sent != null ? SimpleDateFormat.getTimeInstance(SimpleDateFormat.MEDIUM).format(sent) : "NULL";
 
@@ -349,7 +345,7 @@ public class MessageItem implements AttachmentTransferListener {
 
 
         result = new StringBuilder();
-        result.append("T:"+ts+" A:"+ac+" S:"+s+" ACL:"+acLocal);
+        result.append("T:"+ts+" A:"+ac+" S:"+s);
 
 
         return result.toString();
