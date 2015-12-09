@@ -723,7 +723,7 @@ public class TalkDelivery {
     @JsonIgnore
     public void ensureDates() {
         if (this.timeAccepted == null) {
-            this.timeAccepted = new Date();
+            //this.timeAccepted = new Date();
         }
         if (this.timeChanged == null) {
             this.timeChanged = new Date(0);
