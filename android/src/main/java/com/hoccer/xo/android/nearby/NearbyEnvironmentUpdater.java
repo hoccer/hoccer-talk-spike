@@ -19,6 +19,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static android.location.LocationManager.GPS_PROVIDER;
+import static android.location.LocationManager.NETWORK_PROVIDER;
+
 
 public class NearbyEnvironmentUpdater {
 
@@ -48,10 +51,15 @@ public class NearbyEnvironmentUpdater {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_UPDATE_TIME, MIN_UPDATE_MOVED, mGPSLocationListener);
-                mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_UPDATE_TIME, MIN_UPDATE_MOVED, mNetworkLocationListener);
+                if (isProviderEnabled(NETWORK_PROVIDER)) {
+                    mLocationManager.requestLocationUpdates(NETWORK_PROVIDER, MIN_UPDATE_TIME, MIN_UPDATE_MOVED, mNetworkLocationListener);
+                }
+                if (isProviderEnabled(GPS_PROVIDER)) {
+                    mLocationManager.requestLocationUpdates(GPS_PROVIDER, MIN_UPDATE_TIME, MIN_UPDATE_MOVED, mGPSLocationListener);
+                }
             }
         });
+
         sendEnvironmentUpdate();
     }
 
@@ -89,15 +97,13 @@ public class NearbyEnvironmentUpdater {
     }
 
     public boolean locationServicesEnabled() {
-        return isGpsProviderEnabled() || isNetworkProviderEnabled();
+        return isProviderEnabled(NETWORK_PROVIDER) || isProviderEnabled(GPS_PROVIDER);
     }
 
-    private boolean isGpsProviderEnabled() {
-        return mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-    }
-
-    private boolean isNetworkProviderEnabled() {
-        return mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+    private boolean isProviderEnabled(String provider) {
+        return mLocationManager.getAllProviders() != null
+                && mLocationManager.getAllProviders().contains(provider)
+                && mLocationManager.isProviderEnabled(provider);
     }
 
     private TalkEnvironment getEnvironment() {
@@ -109,11 +115,11 @@ public class NearbyEnvironmentUpdater {
 
         Location networkLocation = null;
         Location gpsLocation = null;
-        if (isNetworkProviderEnabled()) {
-            networkLocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        if (isProviderEnabled(NETWORK_PROVIDER)) {
+            networkLocation = mLocationManager.getLastKnownLocation(NETWORK_PROVIDER);
         }
-        if (isGpsProviderEnabled()) {
-            gpsLocation = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        if (isProviderEnabled(GPS_PROVIDER)) {
+            gpsLocation = mLocationManager.getLastKnownLocation(GPS_PROVIDER);
         }
 
         Location location;
