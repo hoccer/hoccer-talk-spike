@@ -303,10 +303,15 @@ public class ConnectionInfoServlet extends HttpServlet {
                     groupPresence.getGroupName()+" has "+memberships.size()+" members, keyid: "+groupPresence.getSharedKeyId()+", lastChanged "+createdAgo/1000+" s ago\n");
             double latitudeSum = 0;
             double longitudeSum = 0;
+            List<TalkEnvironment> environments = db.findEnvironmentsForGroup(groupPresence.getGroupId());
+            Map<String, TalkEnvironment> environmentsByClientId = new HashMap<String, TalkEnvironment>();
+            for (TalkEnvironment e : environments) {
+                environmentsByClientId.put(e.getClientId(), e);
+            }
             Vector<Double[]> coords = new Vector<Double[]>();
             for (TalkGroupMembership membership : memberships) {
                 TalkPresence presence = db.findPresenceForClient(membership.getClientId());
-                TalkEnvironment environment = worldwide.get(membership.getClientId());
+                TalkEnvironment environment = environmentsByClientId.get(membership.getClientId());
                 if (environment != null) {
                     long receivedAgo = new Date().getTime() - environment.getTimeReceived().getTime();
                     Double[] geoPosition = environment.getGeoLocation();
@@ -319,19 +324,21 @@ public class ConnectionInfoServlet extends HttpServlet {
                         longitudeSum += longitude;
                         coords.add(geoPosition);
                     }
-                    String status = "";
-                    if (environment.getTimeReleased() != null) {
-                        status = "released ";
-                    }
-                    if (environment.hasExpired()) {
-                        status += "expired ";
-                    }
+
                     w.write("    clientId " + membership.getClientId() + " keyid "+membership.getSharedKeyId()+" nick '" + presence.getClientName() +
-                            "' received " + receivedAgo/1000 + "s ago, ttl "+environment.getTimeToLive()+" ms "+status+ "long/lat:" + longitude+","+latitude+
+                            "' received " + receivedAgo/1000 + "s ago, ttl "+environment.getTimeToLive()+" ms "+envStatus(environment)+ "long/lat:" + longitude+","+latitude+
                             " acc: "+environment.getAccuracy()+" BSSIDS:"+Arrays.toString(environment.getBssids())+ " \n");
+                    environmentsByClientId.remove(membership.getClientId());
                 } else {
                     w.write("    Member clientId " + membership.getClientId() + "\n");
                 }
+            }
+            for (String cid : environmentsByClientId.keySet()) {
+                TalkEnvironment environment = environmentsByClientId.get(cid);
+                long receivedAgo = new Date().getTime() - environment.getTimeReceived().getTime();
+                w.write("   ? Not a member, but environment there: ["+cid+"], received " + receivedAgo/1000
+                        + "s ago, ttl "+environment.getTimeToLive()+" ms "+envStatus(environment)+ "long/lat:" + Arrays.toString(environment.getGeoLocation())+
+                " acc: "+environment.getAccuracy()+" BSSIDS:"+Arrays.toString(environment.getBssids())+ " \n");
             }
             if (coords.size() > 0) {
                 double latitudeCenter = latitudeSum / coords.size();
@@ -361,7 +368,20 @@ public class ConnectionInfoServlet extends HttpServlet {
         w.close();
     }
 
-    public void printPushInfo(ITalkServerDatabase db, OutputStreamWriter w, Map<String,PushRequest> pushRequests)  throws ServletException, IOException {
+    public static String envStatus(TalkEnvironment environment) {
+        String status = "";
+        if (environment.getTimeReleased() != null) {
+            status = "released ";
+        }
+        if (environment.hasExpired()) {
+            status += "expired ";
+        }
+        return status;
+    }
+
+    public void printPushInfo(ITalkServerDatabase db, OutputStreamWriter w, Map<String,PushRequest> unsortedPushRequests)  throws ServletException, IOException {
+        Map<String,PushRequest>  pushRequests = sortPushByDate(unsortedPushRequests);
+        Date now = new Date();
         for (String clientId : pushRequests.keySet()) {
             PushRequest request = pushRequests.get(clientId);
             TalkClientHostInfo hostInfo = db.findClientHostInfoForClient(clientId);
@@ -382,8 +402,31 @@ public class ConnectionInfoServlet extends HttpServlet {
                     }
                 }
             }
-            w.write("["+clientId+"] ("+ pushStatus + ") "+hostInfo.info());
+            long pushCreatedAgo = (new Date().getTime() - request.getCreatedTime().getTime()) / 1000;
+
+            w.write("["+clientId+"] created "+pushCreatedAgo+" ago ("+ pushStatus + ") "+hostInfo.info());
             w.write("\n");
+        }
+    }
+
+    public static Map sortPushByDate(Map unsortedMap) {
+        Map sortedMap = new TreeMap(new PushValueComparator(unsortedMap));
+        sortedMap.putAll(unsortedMap);
+        return sortedMap;
+    }
+
+    static class PushValueComparator implements Comparator {
+
+        Map map;
+
+        public PushValueComparator(Map map) {
+            this.map = map;
+        }
+
+        public int compare(Object keyA, Object keyB) {
+            PushRequest valueA = (PushRequest) map.get(keyA);
+            PushRequest valueB = (PushRequest) map.get(keyB);
+            return valueB.getCreatedTime().compareTo(valueA.getCreatedTime());
         }
     }
 

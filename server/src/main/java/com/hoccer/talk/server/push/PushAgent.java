@@ -323,14 +323,15 @@ public class PushAgent {
         }
     }
     public void expireMonitorTables() {
-        final long keepPushesFor = 1000 * 60 * 60;
+        final long keepAnsweredPushesFor = 1000 * 60 * 15;   // 15 minutes
+        final long keepUnansweredPushesFor = 1000 * 60 * 60;  // 60 minutes
         mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
                 synchronized (this) {
                     try {
                         LOG.info("expireMonitorTables: pushes not answered " + mNotAnswered.size() + ", pushes answered " + mAnswered.size());
-                        Date limit = new Date(new Date().getTime() - keepPushesFor);
+                        Date limit = new Date(new Date().getTime() - keepUnansweredPushesFor);
                         for (String clientId : mNotAnswered.keySet()) {
                             PushRequest request = mNotAnswered.get(clientId);
                             if (request != null) {
@@ -340,10 +341,11 @@ public class PushAgent {
                                 }
                             }
                         }
+                        Date limit2 = new Date(new Date().getTime() - keepAnsweredPushesFor);
                         for (String clientId : mAnswered.keySet()) {
                             PushRequest request = mAnswered.get(clientId);
                             if (request != null) {
-                                if (request.getCreatedTime().before(limit)) {
+                                if (request.getCreatedTime().before(limit2)) {
                                     mAnswered.remove(clientId);
                                     LOG.debug("expireMonitorTables: Expiring push monitor for client " + clientId + ", has answered push after " + (new Date().getTime() - request.getCreatedTime().getTime()) / 1000 + " s");
                                 }
