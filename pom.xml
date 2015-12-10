@@ -99,7 +99,7 @@
     <!-- Hoccer Release Versions -->
     <hoccer-talk-server.version>3.3.38</hoccer-talk-server.version>
     <hoccer-talk-filecache.version>1.0.6</hoccer-talk-filecache.version>
-    <hoccer-talk-android.version>3.2.9</hoccer-talk-android.version>
+    <hoccer-talk-android.version>3.2.10-SNAPSHOT</hoccer-talk-android.version>
   </properties>
 
   <distributionManagement>
