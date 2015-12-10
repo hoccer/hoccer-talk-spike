@@ -14,6 +14,7 @@ import com.notnoop.apns.PayloadBuilder;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -31,6 +32,12 @@ public class PushRequest {
 
     private final TalkServerConfiguration mConfig;
 
+    private final Date mCreatedTime = new Date();
+
+    public Date getCreatedTime() {
+        return mCreatedTime;
+    }
+
     public PushRequest(PushAgent agent, String clientId, TalkClientHostInfo clientHostInfo) {
         mAgent = agent;
         mConfig = mAgent.getConfiguration();
@@ -38,7 +45,19 @@ public class PushRequest {
         mClientHostInfo = clientHostInfo;
     }
 
-    public void perform() {
+    public String getClientId() {
+        return mClientId;
+    }
+
+    public TalkClient getClient() {
+        return mClient;
+    }
+
+    public TalkClientHostInfo getClientHostInfo() {
+        return mClientHostInfo;
+    }
+
+    public boolean perform() {
         LOG.debug("try perform push for client " + mClientId);
         // get up-to-date client object
         ITalkServerDatabase database = mAgent.getDatabase();
@@ -46,7 +65,7 @@ public class PushRequest {
 
         if (mClient == null) {
             LOG.warn("client " + mClientId + " does not exist");
-            return;
+            return false;
         }
 
         List<TalkDelivery> deliveries =
@@ -58,7 +77,7 @@ public class PushRequest {
 
         if (deliveringCount == 0) {
             LOG.debug("no messages to be delivered for " + mClientId);
-            return;
+            return false;
         }
 
         String messageInfo = "undelivered:"+deliveringCount;
@@ -66,27 +85,30 @@ public class PushRequest {
 
         if (messageInfo.equals(mClient.getLastPushMessage())) {
             LOG.debug("info has already been pushed, nothing new to push for client " + mClientId);
-            return;
+            return false;
         }
+
+        boolean didWakeupPush = false;
 
         // try to perform push
         if (mConfig.isGcmEnabled() && mClient.isGcmCapable()) {
-            performGcm();
+            didWakeupPush = performGcm();
         } else if (mConfig.isApnsEnabled() && mClient.isApnsCapable()) {
-            performApns(deliveringCount);
+            didWakeupPush = performApns(deliveringCount);
         } else {
             if (mClient.isPushCapable()) {
                 LOG.warn("PushRequest.perform: client " + mClient + " push not available");
             } else {
                 LOG.warn("PushRequest.perform: client " + mClientId + " has no registration");
             }
-            return;
+            return false;
         }
         mClient.setLastPushMessage(messageInfo);
         database.saveClient(mClient);
+        return didWakeupPush;
     }
 
-    private void performGcm() {
+    private boolean performGcm() {
         LOG.debug("GCM push for " + mClientId);
         Message message = new Message.Builder()
                 .collapseKey("com.hoccer.talk.wake")
@@ -101,15 +123,18 @@ public class PushRequest {
                     LOG.warn("GCM returned a canonical registration id - we should do something with it");
                 }
                 LOG.debug("GCM push successful, return message id " + res.getMessageId());
+                return true;
             } else {
                 LOG.error("GCM push returned error '" + res.getErrorCodeName() + "'");
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return false;
     }
 
-    private void performApns(int deliveringCount) {
+    // return true if push should wake up client
+    private boolean performApns(int deliveringCount) {
         String clientName = mConfig.getApnsDefaultClientName();
         PushAgent.APNS_SERVICE_TYPE type = PushAgent.APNS_SERVICE_TYPE.PRODUCTION;
 
@@ -136,6 +161,7 @@ public class PushRequest {
                 LOG.debug("APNS background push configured for clientName '" + clientName + "' and type '" + type + "'");
                 b.badge(messageCount);
                 b.forNewsstand();
+                backgroundPush = true;
             }  else {
                 // default message
                 if (messageCount > 1) {
@@ -149,8 +175,10 @@ public class PushRequest {
                 b.sound("default");
             }
             apnsService.push(mClient.getApnsToken(), b.build());
+            return backgroundPush;
         } else {
             LOG.error("APNS push skipped, no service configured for clientName '" + clientName + "' and type '" + type + "'");
         }
+        return false;
     }
 }

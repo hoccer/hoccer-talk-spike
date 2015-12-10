@@ -3,6 +3,7 @@ package com.hoccer.talk.servlets;
 import com.hoccer.talk.model.*;
 import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServer;
+import com.hoccer.talk.server.push.PushRequest;
 import com.hoccer.talk.server.rpc.TalkRpcConnection;
 import org.jongo.MongoCollection;
 
@@ -234,6 +235,16 @@ public class ConnectionInfoServlet extends HttpServlet {
         }
         w.write("\n");
 
+        w.write("Push Requests not yet answered:\n");
+        Map<String,PushRequest> notAnswered = new HashMap<String, PushRequest>(server.getPushAgent().getNotAnswered());
+        printPushInfo(db, w, notAnswered);
+        w.write("\n");
+
+        w.write("Push Requests answered:\n");
+        Map<String,PushRequest> answered = new HashMap<String, PushRequest>(server.getPushAgent().getAnswered());
+        printPushInfo(db, w, answered);
+        w.write("\n");
+
         // nearby groups
         List<TalkGroupPresence> nearbyGroups = db.findGroupPresencesWithTypeAndState(TalkGroupPresence.GROUP_TYPE_NEARBY, TalkGroupPresence.STATE_EXISTS);
         w.write("Nearby groups ("+nearbyGroups.size()+"):\n");
@@ -349,6 +360,33 @@ public class ConnectionInfoServlet extends HttpServlet {
 
         w.close();
     }
+
+    public void printPushInfo(ITalkServerDatabase db, OutputStreamWriter w, Map<String,PushRequest> pushRequests)  throws ServletException, IOException {
+        for (String clientId : pushRequests.keySet()) {
+            PushRequest request = pushRequests.get(clientId);
+            TalkClientHostInfo hostInfo = db.findClientHostInfoForClient(clientId);
+            TalkClient client = db.findClientById(clientId);
+            String pushStatus = "No push";
+            if (client != null) {
+                if (client.isApnsCapable()) {
+                    pushStatus = "APNS";
+                } else if (client.isGcmCapable()) {
+                    pushStatus = "GCM";
+                }
+
+                if (client.getTimeLastPush() != null) {
+                    long pushAgo = (new Date().getTime() - client.getTimeLastPush().getTime()) / 1000;
+                    pushStatus = pushStatus + " " + pushAgo + " s ago";
+                    if (client.getTimeLastLogin() != null && client.getTimeLastLogin().after(client.getTimeLastPush())) {
+                        pushStatus = pushStatus + ", logged in "+ (client.getTimeLastLogin().getTime()-client.getTimeLastPush().getTime())/1000+" s after push";
+                    }
+                }
+            }
+            w.write("["+clientId+"] ("+ pushStatus + ") "+hostInfo.info());
+            w.write("\n");
+        }
+    }
+
     public static double distFrom(double lat1, double lng1, double lat2, double lng2) {
         double earthRadius = 6371000; //meters
         double dLat = Math.toRadians(lat2-lat1);

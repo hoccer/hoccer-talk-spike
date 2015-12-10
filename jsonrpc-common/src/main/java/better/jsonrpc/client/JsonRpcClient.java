@@ -223,7 +223,7 @@ public class JsonRpcClient {
             if (!request.getConnection().disconnect()) {
                 // we are not disconnected
                 LOG.warn("Did not really disconnect, there was no connection");
-            };
+            }
         }
     }
 
