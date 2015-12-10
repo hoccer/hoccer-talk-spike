@@ -429,7 +429,7 @@ public class CleaningAgent {
         Date oldGroupDate = new Date(new Date().getTime() - groupPresenceLifeTime);
         LOG.info("doCleanSpecialGroups: cleaning groups with state "+groupState+" type "+groupType+" last changed before "+ oldGroupDate);
 
-        int deleted = mDatabase.deleteGroupPresencesWithStateAndTypeChangedBefore(TalkGroupPresence.STATE_DELETED, groupType, oldGroupDate);
+        int deleted = mDatabase.deleteGroupPresencesWithStateAndTypeChangedBefore(groupState, groupType, oldGroupDate);
         LOG.info("doCleanSpecialGroups: deleted "+deleted+" group presences with type "+groupType+" and state "+groupState);
 
         Date oldGroupMemberDate = new Date(new Date().getTime() - groupMemberLifeTime);

@@ -334,8 +334,9 @@ public class PushAgent {
                     try {
                         LOG.info("expireMonitorTables: pushes not answered " + mNotAnswered.size() + ", pushes answered " + mAnswered.size());
                         Date limit = new Date(new Date().getTime() - keepUnansweredPushesFor);
-                        for (String clientId : mNotAnswered.keySet()) {
-                            PushRequest request = mNotAnswered.get(clientId);
+                        Map<String, PushRequest> notAnswered = new HashMap<String, PushRequest>(mNotAnswered);
+                        for (String clientId : notAnswered.keySet()) {
+                            PushRequest request = notAnswered.get(clientId);
                             if (request != null) {
                                 if (request.getCreatedTime().before(limit)) {
                                     mNotAnswered.remove(clientId);
@@ -345,8 +346,9 @@ public class PushAgent {
                             }
                         }
                         Date limit2 = new Date(new Date().getTime() - keepAnsweredPushesFor);
-                        for (String clientId : mAnswered.keySet()) {
-                            PushRequest request = mAnswered.get(clientId);
+                        Map<String, PushRequest> answered = new HashMap<String, PushRequest>(mAnswered);
+                        for (String clientId : answered.keySet()) {
+                            PushRequest request = answered.get(clientId);
                             if (request != null) {
                                 if (request.getCreatedTime().before(limit2)) {
                                     mAnswered.remove(clientId);
