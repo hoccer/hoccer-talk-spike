@@ -235,13 +235,13 @@ public class ConnectionInfoServlet extends HttpServlet {
         }
         w.write("\n");
 
-        w.write("Push Requests not yet answered:\n");
         Map<String,PushRequest> notAnswered = new HashMap<String, PushRequest>(server.getPushAgent().getNotAnswered());
+        w.write("Push Requests not yet answered ("+notAnswered.size()+"):\n");
         printPushInfo(db, w, notAnswered);
         w.write("\n");
 
-        w.write("Push Requests answered:\n");
         Map<String,PushRequest> answered = new HashMap<String, PushRequest>(server.getPushAgent().getAnswered());
+        w.write("Push Requests answered ("+answered.size()+"):\n");
         printPushInfo(db, w, answered);
         w.write("\n");
 
@@ -426,7 +426,7 @@ public class ConnectionInfoServlet extends HttpServlet {
         public int compare(Object keyA, Object keyB) {
             PushRequest valueA = (PushRequest) map.get(keyA);
             PushRequest valueB = (PushRequest) map.get(keyB);
-            return valueB.getCreatedTime().compareTo(valueA.getCreatedTime());
+            return valueA.getCreatedTime().compareTo(valueB.getCreatedTime());
         }
     }
 
