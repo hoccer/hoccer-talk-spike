@@ -3,6 +3,7 @@ package com.hoccer.talk.server.rpc;
 import better.jsonrpc.core.JsonRpcConnection;
 import better.jsonrpc.util.ProtocolUtils;
 import com.codahale.metrics.Timer;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hoccer.talk.model.TalkClient;
 import com.hoccer.talk.rpc.ITalkRpcClient;
@@ -13,7 +14,9 @@ import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Map;
 
 //import org.jetbrains.annotations.Nullable;
 
@@ -45,6 +48,9 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      * HTTP request that created this WS connection
      */
     private final HttpServletRequest mInitialRequest;
+    private final Map<String,String> mInitialRequestHeaders;
+    private final String mRemoteAddress;
+    private final String mUserAgent;
 
     /**
      * RPC interface to client
@@ -75,10 +81,23 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     private Long mLastPingLatency;
     private Date mLastPingOccured;
 
+    private Date mCreationTime;
+    private Date mLastRequestStarted;
+    private Date mLastRequestFinished;
+
+    private int mRequestHandled = 0;
+    private String mLastRequestName;
+    private String mConnectionMapKey = null;
+
     // Penalty is measured in milliseconds for the purpose of selecting suitable connections for a task.
     // If a client fails at this task the connection is penalized so it less likely to be considered for this task.
     private long mCurrentPriorityPenalty = 0L;
     //private boolean mNagWhenOffline = false;
+
+    private boolean loggedInFlag = false;
+    private boolean shuttingDown =false;
+    private boolean deleted =false;
+    private String mOriginalClientId;
 
     public Object deliveryLock = new Object();
     public Object keyRequestLock = new Object();
@@ -90,14 +109,36 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      * @param connection that we should handle
      */
     public TalkRpcConnection(TalkServer server, JsonRpcConnection connection, HttpServletRequest request) {
+        mCreationTime = new Date();
         mServer = server;
         mConnection = connection;
         mInitialRequest = request;
+
+        Enumeration headerNames = request.getHeaderNames();
+        mInitialRequestHeaders = new HashMap<String,String>();
+        while(headerNames.hasMoreElements()) {
+            String headerName = (String)headerNames.nextElement();
+            mInitialRequestHeaders.put(headerName, request.getHeader(headerName));
+        }
+        String remoteAddress = request.getHeader("X-Forwarded-For");
+        if (remoteAddress == null) {
+            mRemoteAddress =  request.getRemoteAddr();
+        } else {
+            mRemoteAddress = remoteAddress;
+        }
+        String userAgent = request.getHeader("User-Agent");
+        if (userAgent == null) {
+            mUserAgent = "unknown";
+        } else {
+            mUserAgent = userAgent;
+        }
+
         // create a json-rpc proxy for client notifications and rpc calls
         mClientRpc = connection.makeProxy(ITalkRpcClient.class);
         // register ourselves for connection events
         mConnection.addListener(this);
         mConnection.addConnectionEventListener(this);
+
     }
 
     /**
@@ -166,6 +207,9 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      */
 //    @Nullable
     public String getClientId() {
+        if (mOriginalClientId != null) {
+            return mOriginalClientId;
+        }
         if (mTalkClient != null) {
             return mTalkClient.getClientId();
         }
@@ -186,11 +230,16 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
         return (ITalkRpcServer)mConnection.getServerHandler();
 
     }
-    /**
-     * Returns the remote network address of the client
-     */
     public String getRemoteAddress() {
-        return mInitialRequest.getRemoteAddr();
+        return mRemoteAddress;
+    }
+
+    public String getUserAgent() {
+        return mUserAgent;
+    }
+
+    public Map<String,String> getInitialRequestHeaders() {
+        return mInitialRequestHeaders;
     }
 
     /**
@@ -207,6 +256,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
         return mUnregisteredClientId;
     }
 
+
     /**
      * @return true if in support mode
      */
@@ -222,6 +272,9 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     @Override
     public void onOpen(JsonRpcConnection connection) {
         LOG.info("[connectionId: '" + connection.getConnectionId() + "'] connection opened by " + getRemoteAddress());
+        if (shuttingDown) {
+            LOG.error("[connectionId: '" + connection.getConnectionId() + "'] opening after shutdown");
+        }
         mServer.connectionOpened(this);
     }
 
@@ -233,6 +286,10 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     @Override
     public void onClose(JsonRpcConnection connection) {
         LOG.info("[connectionId: '" + connection.getConnectionId() + "'] connection closed");
+        if (shuttingDown) {
+            LOG.warn("[connectionId: '" + connection.getConnectionId() + "'] shutting down second time");
+        }
+        shuttingDown = true;
         mServer.connectionClosed(this);
     }
 
@@ -240,25 +297,39 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     public void doLogout() {
         LOG.info("[connectionId: '" + getConnectionId() + "'] logging out");
         synchronized (this) {
-            if (mTalkClient != null && (mTalkClient.isReady() || mTalkClient.isConnected())) {
-                // set client to not ready
-                LOG.debug("[connectionId: '" + getConnectionId() + "'] setting client to not ready");
-                ITalkServerDatabase database = mServer.getDatabase();
-                TalkClient client = database.findClientById(mTalkClient.getClientId());
-                if (client != null) {
-                    client.setTimeReady(null);
-                    client.setTimeLastDisconnect(new Date());
-                    database.saveClient(client);
-                    LOG.info("[connectionId: '" + getConnectionId() + "'] stored logout for client "+client.getClientId());
+            if (mTalkClient != null) {
+                if (mTalkClient.isReady() || mTalkClient.isConnected()) {
+                    // set client to not ready
+                    LOG.debug("[connectionId: '" + getConnectionId() + "'] setting client to not ready");
+                    ITalkServerDatabase database = mServer.getDatabase();
+                    TalkClient client = database.findClientById(mTalkClient.getClientId());
+                    if (client != null) {
+                        client.setTimeReady(null);
+                        client.setTimeLastDisconnect(new Date());
+                        database.saveClient(client);
+                        LOG.info("[connectionId: '" + getConnectionId() + "'] stored logout for client "+client.getClientId());
+                    }
+                }
+                String clientId = mTalkClient.getClientId();
+                if (clientId != null) {
+                    if (mServer.hasClientConnection(clientId)) {
+                        LOG.warn("[connectionId: '" + getConnectionId() + "'] not zeroing mTalkClient because connection still in map on logout for client "+clientId);
+                    } else {
+                        LOG.info("[connectionId: '" + getConnectionId() + "'] zeroing connection mTalkClient for client "+clientId);
+                        mTalkClient = null;
+                    }
+                } else {
+                    LOG.warn("[connectionId: '" + getConnectionId() + "'] zeroing connections mTalkClient (no clientId)");
+                    mTalkClient = null;
                 }
             }
 
-            LOG.debug("[connectionId: '" + getConnectionId() + "'] setting client to null and disconnect JsonRpc/websocket connection");
-            mTalkClient = null;
+            LOG.debug("[connectionId: '" + getConnectionId() + "'] disconnect JsonRpc/websocket connection");
+
             if (isConnected()) {
                 disconnect();
             }
-         }
+        }
         LOG.info("[connectionId: '" + getConnectionId() + "'] logged out");
     }
 
@@ -290,6 +361,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
             // update login time
             mTalkClient.setTimeLastLogin(new Date());
             database.saveClient(mTalkClient);
+            loggedInFlag = true;
 
             // tell the client if it doesn't have push
             if (!mTalkClient.isPushCapable()) {
@@ -375,6 +447,11 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
         Timer.Context timerContext = mServer.getStatistics().signalRequestStart(connection, request);
         requestTimers.put(getIdFromRequest(request), timerContext);
         mServer.getStatistics().signalRequest();
+        mLastRequestStarted = new Date();
+        mLastRequestName = request.textValue();
+
+        JsonNode methodNode = request.get("method");
+        mLastRequestName = (methodNode != null && !methodNode.isNull()) ? methodNode.asText() : null;
 
         mServer.getUpdateAgent().setRequestContext();
         mServer.getDeliveryAgent().setRequestContext();
@@ -389,6 +466,8 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
         Object jsonRpcId = getIdFromRequest(request);
         mServer.getStatistics().signalRequestStop(connection, request, requestTimers.get(jsonRpcId));
         requestTimers.remove(jsonRpcId);
+        mLastRequestFinished = new Date();
+        ++mRequestHandled;
 
         mServer.getUpdateAgent().clearRequestContext();
         mServer.getDeliveryAgent().clearRequestContext();
@@ -459,5 +538,74 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
 
     public void resetPriorityPenalty(long priority) {
         mCurrentPriorityPenalty = priority;
+    }
+
+    public Date getLastRequestStarted() {
+        return mLastRequestStarted;
+    }
+
+    public Date getLastRequestFinished() {
+        return mLastRequestFinished;
+    }
+
+    public int getRequestHandled() {
+        return mRequestHandled;
+    }
+
+    public String getLastRequestName() {
+        return mLastRequestName;
+    }
+
+    public Date getCreationTime() {
+        return mCreationTime;
+    }
+
+    public boolean isShuttingDown() {
+        return shuttingDown;
+    }
+
+    public String getConnectionMapKey() {
+        return mConnectionMapKey;
+    }
+
+    public void setConnectionMapKey(String connectionMapKey) {
+        this.mConnectionMapKey = connectionMapKey;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted, String originalClientId) {
+        this.deleted = deleted;
+        this.mOriginalClientId = originalClientId;
+    }
+
+    public boolean isLoggedInFlag() {
+        return loggedInFlag;
+    }
+    public String getLastClientRequestName() {
+        if (mConnection.isClient()) {
+            return mConnection.getClient().getLastMethodName();
+        }
+        return null;
+    }
+    public Date getLastClientRequestDate() {
+        if (mConnection.isClient()) {
+            return mConnection.getClient().getLastRequestDate();
+        }
+        return null;
+    }
+    public boolean isClientResponsive() {
+        if (mConnection.isClient()) {
+            return mConnection.getClient().isResponsive();
+        }
+        return false;
+    }
+    public long getLastClientResponseTime() {
+        if (mConnection.isClient()) {
+            return mConnection.getClient().getLastResponseTime();
+        }
+        return 0;
     }
 }

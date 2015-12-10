@@ -53,13 +53,13 @@ public class JsonRpcClient {
     private long mRequestTimeoutCountSinceLastSuccess = 0;
 
     // msecs since epoch when the last failure occurred
-    private long mLastRequestFailureOccurred = 0;
+    private Date mLastRequestFailureOccurred = null;
 
     // msecs since epoch when the last timeout occurred
-    private long mLastRequestTimeoutOccurred = 0;
+    private Date mLastRequestTimeoutOccurred = null;
 
     // msecs since epoch when the last response was received
-    private long mLastResponseOccurred = 0;
+    private Date mLastResponseOccurred = null;
 
     // msecs the last response took, -1 if timeout
     private long mLastResponseTime = 0;
@@ -83,18 +83,23 @@ public class JsonRpcClient {
     private Hashtable<String, JsonRpcClientRequest> mOutstandingRequests =
             new Hashtable<String, JsonRpcClientRequest>();
 
+    private Date mLastRequestDate = null;
+    private String mLastMethodName = null;
+
     private void resetTimersAndCounters() {
         mRequestSuccessCount = 0;
         mRequestFailureCount = 0;
         mRequestTimeoutCount = 0;
         mRequestTimeoutCountSinceLastSuccess = 0;
-        mLastRequestFailureOccurred = 0;
-        mLastRequestTimeoutOccurred = 0;
-        mLastResponseOccurred = 0;
+        mLastRequestFailureOccurred = new Date(0);
+        mLastRequestTimeoutOccurred = new Date(0);
+        mLastResponseOccurred = new Date(0);
         mLastResponseTime = 0;
         mLastFailureTime = 0;
         mAverageResponseTime = 0;
         mAverageFailureTime = 0;
+        mLastMethodName = null;
+        mLastRequestDate = new Date(0);
     }
 
     /** Listener for connection state changes */
@@ -116,6 +121,7 @@ public class JsonRpcClient {
 	 */
 	public JsonRpcClient() {
 		this.mIdGenerator = new AtomicInteger(0);
+        resetTimersAndCounters();
 	}
 
     /**
@@ -172,16 +178,33 @@ public class JsonRpcClient {
         return mLastResponseOccurred;
     }
 
-    public long getLastResponseTime() {
-        return mLastResponseTime;
-    }
+
 
     public double getAverageResponseTime() {
         return mAverageResponseTime;
     }
   */
+    public long getLastResponseTime() {
+        return mLastResponseTime;
+    }
+    public String getLastMethodName() {
+        return mLastMethodName;
+    }
+
+    public Date getLastRequestDate() {
+        return mLastRequestDate;
+    }
+
+    public Date getLastRequestFailureOccurred() {
+        return mLastRequestFailureOccurred;
+    }
+
+    public Date getLastRequestTimeoutOccurred() {
+        return mLastRequestTimeoutOccurred;
+    }
+
     private synchronized void responseReceived(JsonRpcClientRequest request) {
-        mLastResponseOccurred = request.getTimeFinished();
+        mLastResponseOccurred = new Date(request.getTimeFinished());
         mLastResponseTime = request.getTimeFinished() - request.getTimeStarted();
         mAverageResponseTime = 0.9 * mAverageResponseTime + 0.1 * mLastResponseTime;
         mRequestTimeoutCountSinceLastSuccess = 0;
@@ -197,10 +220,10 @@ public class JsonRpcClient {
     }
 
     private synchronized void responseFailed(JsonRpcClientRequest request) {
-        mLastRequestFailureOccurred = request.getTimeFailed();
+        mLastRequestFailureOccurred = new Date(request.getTimeFailed());
         mLastFailureTime = request.getTimeFailed() - request.getTimeStarted();
         if (request.timeoutOccured()) {
-            mLastRequestTimeoutOccurred = request.getTimeFailed();
+            mLastRequestTimeoutOccurred = new Date(request.getTimeFailed());
             mRequestTimeoutCount++;
             mRequestTimeoutCountSinceLastSuccess++;
         }
@@ -219,7 +242,7 @@ public class JsonRpcClient {
     }
 
     public synchronized boolean isResponsive() {
-        long lastSuccessAgo = System.currentTimeMillis() - mLastResponseOccurred;
+        long lastSuccessAgo = System.currentTimeMillis() - mLastResponseOccurred.getTime();
         if (mRequestTimeoutCountSinceLastSuccess > 3 &&  lastSuccessAgo > 60 * 1000/* || mRequestSuccessCount > 20*/) {
             LOG.warn("Client not responsive, request timeouts since last success:"+mRequestTimeoutCountSinceLastSuccess+", last success "+lastSuccessAgo/1000+" secs ago");
             return false;
@@ -258,6 +281,9 @@ public class JsonRpcClient {
         if (LOG.isDebugEnabled()) {
             LOG.debug("RPC-Request -> [" + connection.getConnectionId() + "] " + request.toString());
         }
+        JsonNode methodNode = request.get("method");
+        mLastMethodName = (methodNode != null && !methodNode.isNull()) ? methodNode.asText() : null;
+        mLastRequestDate = new Date();
         // send it
         connection.sendRequest(request);
     }
@@ -270,6 +296,10 @@ public class JsonRpcClient {
         if (LOG.isDebugEnabled()) {
             LOG.debug("RPC-Notification -> [" + connection.getConnectionId() + "] " + notification.toString());
         }
+        JsonNode methodNode = notification.get("method");
+        mLastMethodName = (methodNode != null && !methodNode.isNull()) ? methodNode.asText() : null;
+        mLastRequestDate = new Date();
+
         // send it
         connection.sendNotification(notification);
     }

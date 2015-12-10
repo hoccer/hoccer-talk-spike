@@ -1,5 +1,6 @@
 package com.hoccer.talk.servlets;
 
+import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServer;
 import org.jongo.MongoCollection;
@@ -122,14 +123,24 @@ public class DatabaseInfoServlet extends HttpServlet {
         w.write("Deliveries Total         : " + deliveries.count()+ "\n");
         List<String> deliveryStates = deliveries.distinct("state").as(String.class);
         for (String deliveryState : deliveryStates) {
-            //w.write("Deliveries in state '"+deliveryState+"' : " + deliveries.count("{ state: # }", deliveryState)+ "\n");
             w.write("Deliveries in state "+String.format("%-28s" , deliveryState)+" : " + deliveries.count("{ state: # }", deliveryState)+ "\n");
+        }
+        w.write("\n");
+        w.write("Deliveries without attachments:\n");
+        for (String deliveryState : deliveryStates) {
+            w.write("Deliveries w/o attachment in state "+String.format("%-28s" , deliveryState)+" : " + deliveries.count("{ state: #, attachmentState: 'none' }", deliveryState)+ "\n");
         }
         w.write("\n");
         List<String> attachmentDeliveryStates = deliveries.distinct("attachmentState").as(String.class);
         for (String attachmentDeliveryState : attachmentDeliveryStates) {
-            //w.write("Deliveries in attachment state '"+attachmentDeliveryState+"' : " + deliveries.count("{ attachmentState: # }", attachmentDeliveryState)+ "\n");
             w.write("Deliveries in attachment state "+String.format("%-28s" , attachmentDeliveryState)+" : " + deliveries.count("{ attachmentState: # }", attachmentDeliveryState)+ "\n");
+        }
+        w.write("\n");
+        w.write("Deliveries in final state w. attachments:\n");
+        for (String attachmentDeliveryState : attachmentDeliveryStates) {
+            String[] attachmentDeliveryStateArray = new String[]{attachmentDeliveryState};
+            w.write("Deliveries in final state and attachment state "+String.format("%-28s" , attachmentDeliveryState)+" : "
+                    + db.countDeliveriesInStatesAndAttachmentStates(TalkDelivery.FINAL_STATES, attachmentDeliveryStateArray) + "\n");
         }
         w.write("\n");
 

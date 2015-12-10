@@ -20,6 +20,7 @@ import com.hoccer.xo.android.MediaPlayer;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.content.audio.MediaPlaylistController;
+import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.ArtworkImageView;
 import org.apache.log4j.Logger;
@@ -173,11 +174,6 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
     }
 
     public void updateTrackData() {
-        // ensure that we are not listening to any previous artwork retrieval tasks
-        if (mCurrentMetaData != null) {
-            mCurrentMetaData.unregisterArtworkRetrievalListener(this);
-        }
-
         final String playlistIndex = Integer.toString(MediaPlayer.get().getCurrentIndex() + 1);
         final String playlistSize = Integer.toString(MediaPlayer.get().getMediaListSize());
         final int totalDuration = MediaPlayer.get().getTotalDuration();
@@ -194,7 +190,8 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
             artist = mCurrentMetaData.getArtist();
         }
 
-        mCurrentMetaData.getArtwork(getResources(), FullscreenPlayerFragment.this);
+        int width = DisplayUtils.getDisplaySize(getActivity()).x;
+        mCurrentMetaData.getResizedArtwork(getResources(), FullscreenPlayerFragment.this, width);
 
         getActivity().runOnUiThread(new Runnable() {
             @Override

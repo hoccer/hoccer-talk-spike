@@ -23,6 +23,10 @@ import com.hoccer.xo.android.passwordprotection.PasswordProtection;
 import com.hoccer.xo.android.service.XoClientService;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.ContactsMenuItemActionProvider;
+import net.hockeyapp.android.CrashManager;
+import net.hockeyapp.android.CrashManagerListener;
+import net.hockeyapp.android.ExceptionHandler;
+import net.hockeyapp.android.Strings;
 import org.apache.log4j.Logger;
 
 public class ChatsActivity extends ComposableActivity implements IXoStateListener, IXoPairingListener {
@@ -36,6 +40,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private ContactsMenuItemActionProvider mContactsMenuItemActionProvider;
     private ViewPagerActivityComponent mViewPagerActivityComponent;
     private WorldwideChatListFragment mWorldwideChatListFragment;
+    private CrashManagerListener mCrashManagerListener;
 
     @Override
     protected ActivityComponent[] createComponents() {
@@ -65,6 +70,8 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        registerCrashManager();
+
         startXoClientService();
 
         XoApplication.get().getClient().connect();
@@ -82,6 +89,30 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         showGooglePlayServicesErrorDialog();
     }
 
+    private void registerCrashManager() {
+        if (getConfiguration().isCrashReportingEnabled()) {
+            mCrashManagerListener = new CrashManagerListener() {
+                @Override
+                public String getStringForResource(int resourceID) {
+                    switch (resourceID) {
+                        case Strings.CRASH_DIALOG_TITLE_ID:
+                            return CrashMonitor.get(ChatsActivity.this).isCrashedBefore() ? getString(R.string.dialog_report_crash_title) : getString(R.string.dialog_report_errors_title);
+                        case Strings.CRASH_DIALOG_MESSAGE_ID:
+                            return CrashMonitor.get(ChatsActivity.this).isCrashedBefore() ? getString(R.string.dialog_report_crash_message) : getString(R.string.dialog_report_errors_message);
+                        case Strings.CRASH_DIALOG_NEGATIVE_BUTTON_ID:
+                            return getString(R.string.dialog_report_crash_negative);
+                        case Strings.CRASH_DIALOG_POSITIVE_BUTTON_ID:
+                            return getString(R.string.dialog_report_crash_positive);
+                        default:
+                            return super.getStringForResource(resourceID);
+                    }
+                }
+            };
+
+            CrashManager.initialize(this, getConfiguration().getHockeyAppId(), mCrashManagerListener);
+        }
+    }
+
     private void startXoClientService() {
         Intent intent = new Intent(this, XoClientService.class);
         intent.putExtra(XoClientService.EXTRA_CONNECT, true);
@@ -90,12 +121,9 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     public int showGooglePlayServicesErrorDialog() {
         int result = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-        LOG.debug("showGooglePlayServicesErrorDialog:" + result);
 
         if (result != ConnectionResult.SUCCESS) {
-            String errorString = GooglePlayServicesUtil.getErrorString(result);
-            LOG.debug("Play Services error string:" + errorString);
-
+            LOG.debug("showGooglePlayServicesErrorDialog:" + result);
             Dialog googlePlayServicesErrorDialog = GooglePlayServicesUtil.getErrorDialog(result, this, 0);
             if (googlePlayServicesErrorDialog != null) {
                 googlePlayServicesErrorDialog.show();
@@ -104,9 +132,13 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         return result;
     }
 
+
     @Override
     protected void onResume() {
         super.onResume();
+
+        CrashManager.execute(ChatsActivity.this, mCrashManagerListener);
+
         showProfileIfClientIsNotRegistered();
         registerListeners();
         mContactsMenuItemActionProvider.updateNotificationBadge();

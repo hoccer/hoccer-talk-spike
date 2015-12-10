@@ -71,6 +71,10 @@ public class TalkClientHostInfo {
         this.systemName        = clientInfo.getSystemName();
     }
 
+    public String info() {
+        return clientName+"-"+clientVersion+"/"+systemName+"-"+systemVersion+"-"+systemLanguage+"/"+deviceModel;
+    }
+
     public String getClientId() {
         return clientId;
     }

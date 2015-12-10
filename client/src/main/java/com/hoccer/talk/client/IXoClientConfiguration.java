@@ -16,6 +16,8 @@ public interface IXoClientConfiguration {
     public int getConnectTimeout();
     public int getBackgroundNearbyTimeoutSeconds();
     public int getBackgroundDisconnectTimeoutSeconds();
+    public int getPostponeDisconnectTimeoutSeconds();
+    public int getBackgroundWakeDisconnectTimeoutSeconds();
 
     public boolean getKeepAliveEnabled();
     public int getKeepAliveInterval();

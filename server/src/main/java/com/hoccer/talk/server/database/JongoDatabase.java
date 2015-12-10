@@ -125,14 +125,20 @@ public class JongoDatabase implements ITalkServerDatabase {
         mRelationships.ensureIndex("{otherClientId:1, state:1}") ;
         mRelationships.ensureIndex("{clientId:1, lastChanged:1}") ;
         mRelationships.ensureIndex("{state:1, lastChanged:1}") ;
+        mRelationships.ensureIndex("{notificationPreference:1}");
 
         mPresences.ensureIndex("{clientId:1}");
+        mPresences.ensureIndex("{connectionStatus:1}");
+        mPresences.ensureIndex("{apnsToken:1}");
+        mPresences.ensureIndex("{gcmRegistration:1}");
 
         mKeys.ensureIndex("{clientId:1}");
 
         mGroupPresences.ensureIndex("{groupId:1}");
         mGroupPresences.ensureIndex("{state:1}");
         mGroupPresences.ensureIndex("{state:1, lastChanged:1}");
+        mGroupPresences.ensureIndex("{groupType:1}");
+        mGroupPresences.ensureIndex("{state:1, groupType:1}");
 
         mGroupMemberships.ensureIndex("{groupId:1, clientId:1}");
         mGroupMemberships.ensureIndex("{clientId:1}");
@@ -141,11 +147,17 @@ public class JongoDatabase implements ITalkServerDatabase {
         mGroupMemberships.ensureIndex("{clientId:1, state:1}");
         mGroupMemberships.ensureIndex("{clientId:1, state:1, role:1}");
         mGroupMemberships.ensureIndex("{state:1, lastChanged:1}");
+        mGroupMemberships.ensureIndex("{state:1, role:1}");
+        mGroupMemberships.ensureIndex("{role:1}");
+        mGroupMemberships.ensureIndex("{notificationPreference:1}");
 
         mMessages.ensureIndex("{messageId:1, senderId:1}");
         mMessages.ensureIndex("{messageId:1}");
         mMessages.ensureIndex("{senderId:1}");
         mMessages.ensureIndex("{attachmentFileId:1}");
+        mMessages.ensureIndex("{attachment:1}");
+        mMessages.ensureIndex("{attachmentUploadStarted:1}");
+        mMessages.ensureIndex("{attachmentUploadFinished:1}");
 
         mDeliveries.ensureIndex("{messageId:1, senderId:1, receiverId:1}");
         mDeliveries.ensureIndex("{messageId:1}");
@@ -158,6 +170,7 @@ public class JongoDatabase implements ITalkServerDatabase {
         mDeliveries.ensureIndex("{receiverId:1, groupId:1, state:1}");
         mDeliveries.ensureIndex("{receiverId:1, state:1, attachmentState:1}");
         mDeliveries.ensureIndex("{state:1}");
+        mDeliveries.ensureIndex("{attachmentState:1}");
         mDeliveries.ensureIndex("{state:1, attachmentState:1}");
         mDeliveries.ensureIndex("{timeAccepted:1}");
 
@@ -166,9 +179,17 @@ public class JongoDatabase implements ITalkServerDatabase {
         mEnvironments.ensureIndex("{clientId: 1}");
         mEnvironments.ensureIndex("{groupId: 1, clientId: 1}");
         mEnvironments.ensureIndex("{type: 1, clientId: 1}");
+        mEnvironments.ensureIndex("{type: 1}");
 
-        mClientHostInfos.ensureIndex("{clientId: 1}");
+        mClientHostInfos.ensureIndex("{clientId:1}");
         mClientHostInfos.ensureIndex("{clientLanguage: 1, clientName:1}");
+        mClientHostInfos.ensureIndex("{systemName:1}");
+        mClientHostInfos.ensureIndex("{serverTime:1}");
+        mClientHostInfos.ensureIndex("{systemName: 1, serverTime:1}");
+        mClientHostInfos.ensureIndex("{clientName:1}");
+        mClientHostInfos.ensureIndex("{clientVersion:1}");
+        mClientHostInfos.ensureIndex("{systemLanguage:1}");
+
         LOG.info("Ensuring database indices done for database " + dbName);
 
         cleanupDatabaseStateOnStartup();
@@ -356,6 +377,11 @@ public class JongoDatabase implements ITalkServerDatabase {
                 .iterator();
 
         return IteratorUtils.toList(it);
+    }
+
+    @Override
+    public long countDeliveriesInStatesAndAttachmentStates(String[] deliveryStates, String[] attachmentStates) {
+        return  mDeliveries.count("{state: { $in: # }, attachmentState: {$in: # } }", Arrays.asList(deliveryStates), Arrays.asList(attachmentStates));
     }
 
 
@@ -671,6 +697,16 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public List<TalkPresence> findPresencesWithStates(String[] states) {
+        Iterator<TalkPresence> it = mPresences
+                .find("{connectionStatus: { $in: # }}", Arrays.asList(states))
+                .as(TalkPresence.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
+    }
+
+    @Override
     public void savePresence(TalkPresence presence) {
         mPresences.save(presence);
     }
@@ -875,11 +911,19 @@ public class JongoDatabase implements ITalkServerDatabase {
 
         return IteratorUtils.toList(it);
     }
+    @Override
+    public List<TalkGroupPresence> findGroupPresencesWithTypeAndState(String groupType, String state) {
+        Iterator<TalkGroupPresence> it = mGroupPresences
+                .find("{state: # , groupType: # }", state, groupType)
+                .as(TalkGroupPresence.class)
+                .iterator();
 
+        return IteratorUtils.toList(it);
+    }
     @Override
     public List<TalkGroupPresence> findGroupPresencesWithStateChangedBefore(String state, Date changedDate) {
         Iterator<TalkGroupPresence> it = mGroupPresences
-                .find("{state:#,lastChanged: {$lt:#}}", state, changedDate)
+                .find("{state:#, lastChanged: {$lt:#} }", state, changedDate)
                 .as(TalkGroupPresence.class)
                 .iterator();
 
@@ -888,7 +932,13 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     public int deleteGroupPresencesWithStateChangedBefore(String state, Date changedDate) {
-        WriteResult result = mGroupPresences.remove("{state:#,lastChanged: {$lt:#}}", state, changedDate);
+        WriteResult result = mGroupPresences.remove("{state:#, lastChanged: {$lt:#} }", state, changedDate);
+        return result.getN();
+    }
+
+    @Override
+    public int deleteGroupPresencesWithStateAndTypeChangedBefore(String state, String groupType, Date changedDate) {
+        WriteResult result = mGroupPresences.remove("{state:#, groupType:#, lastChanged: {$lt:#} }", state, groupType, changedDate);
         return result.getN();
     }
 
@@ -971,6 +1021,12 @@ public class JongoDatabase implements ITalkServerDatabase {
     @Override
     public int deleteGroupMembershipsWithStatesChangedBefore(String[] states, Date lastChanged) {
         WriteResult result = mGroupMemberships.remove("{state: { $in: # }, lastChanged: { $lt:# } }", Arrays.asList(states), lastChanged);
+        return result.getN();
+    }
+
+    @Override
+    public int deleteGroupMembershipsWithStatesAndRolesChangedBefore(String[] states, String[] roles, Date lastChanged) {
+        WriteResult result = mGroupMemberships.remove("{state: { $in: # }, role: { $in: # }, lastChanged: { $lt:# } }", Arrays.asList(states), Arrays.asList(roles), lastChanged);
         return result.getN();
     }
 

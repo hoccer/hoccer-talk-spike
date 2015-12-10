@@ -11,6 +11,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.xo.android.MediaPlayer;
 import com.hoccer.xo.android.content.MediaMetaData;
+import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.util.UriUtils;
 
 public class AudioAttachmentView extends LinearLayout implements View.OnClickListener, MediaMetaData.ArtworkRetrieverListener, MediaPlayer.Listener {
@@ -92,11 +93,6 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
     }
 
     private void updateAudioView() {
-        // ensure that we are not listening to any previous artwork retrieval tasks
-        if (mCurrentMetaData != null) {
-            mCurrentMetaData.unregisterArtworkRetrievalListener(this);
-        }
-
         mCurrentMetaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(mItem.getFilePath()).getPath());
         mTitleTextView.setText(mCurrentMetaData.getTitleOrFilename());
 
@@ -107,7 +103,8 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
             mArtistTextView.setText(artist);
         }
 
-        mCurrentMetaData.getArtwork(getResources(), this);
+        int thumbnailWidth = DisplayUtils.getDisplaySize(mContext).x / 4;
+        mCurrentMetaData.getResizedArtwork(getResources(), this, thumbnailWidth);
     }
 
     @Override

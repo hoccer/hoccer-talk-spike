@@ -5,10 +5,7 @@ import com.codahale.metrics.health.HealthCheckRegistry;
 import com.codahale.metrics.servlets.HealthCheckServlet;
 import com.codahale.metrics.servlets.MetricsServlet;
 import com.hoccer.talk.server.rpc.TalkRpcConnectionHandler;
-import com.hoccer.talk.servlets.CertificateInfoServlet;
-import com.hoccer.talk.servlets.DatabaseInfoServlet;
-import com.hoccer.talk.servlets.InvitationServlet;
-import com.hoccer.talk.servlets.ServerInfoServlet;
+import com.hoccer.talk.servlets.*;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.handler.ResourceHandler;
@@ -46,6 +43,7 @@ public class TalkServerHandler extends HandlerCollection {
         serverInfoContextHandler.setAttribute("server", talkServer);
         serverInfoContextHandler.addServlet(ServerInfoServlet.class, "/info");
         serverInfoContextHandler.addServlet(DatabaseInfoServlet.class, "/dbinfo");
+        serverInfoContextHandler.addServlet(ConnectionInfoServlet.class, "/connections");
         serverInfoContextHandler.addServlet(CertificateInfoServlet.class, "/certificates");
 
         return serverInfoContextHandler;
