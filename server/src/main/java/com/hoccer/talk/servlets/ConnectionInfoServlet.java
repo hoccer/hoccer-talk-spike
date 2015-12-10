@@ -297,7 +297,7 @@ public class ConnectionInfoServlet extends HttpServlet {
         w.write("Worldwide groups ("+worldwideGroups.size()+"):\n");
         for (TalkGroupPresence groupPresence : worldwideGroups) {
             List<TalkGroupMembership> memberships = db.findGroupMembershipsByIdWithStates(groupPresence.getGroupId(),
-                    new String[]{TalkGroupMembership.STATE_JOINED});
+                    new String[]{TalkGroupMembership.STATE_JOINED, TalkGroupMembership.STATE_SUSPENDED});
             long createdAgo = new Date().getTime() - groupPresence.getLastChanged().getTime();
             w.write("Worldwide group with groupId:"+groupPresence.getGroupId()+" name: "+
                     groupPresence.getGroupName()+" has "+memberships.size()+" members, keyid: "+groupPresence.getSharedKeyId()+", lastChanged "+createdAgo/1000+" s ago\n");
@@ -325,7 +325,7 @@ public class ConnectionInfoServlet extends HttpServlet {
                         coords.add(geoPosition);
                     }
 
-                    w.write("    clientId " + membership.getClientId() + " keyid "+membership.getSharedKeyId()+" nick '" + presence.getClientName() +
+                    w.write("    "+membership.getState()+" clientId " + membership.getClientId() + " keyid "+membership.getSharedKeyId()+" nick '" + presence.getClientName() +
                             "' received " + receivedAgo/1000 + "s ago, ttl "+environment.getTimeToLive()+" ms "+envStatus(environment)+ "long/lat:" + longitude+","+latitude+
                             " acc: "+environment.getAccuracy()+" BSSIDS:"+Arrays.toString(environment.getBssids())+ " \n");
                     environmentsByClientId.remove(membership.getClientId());
