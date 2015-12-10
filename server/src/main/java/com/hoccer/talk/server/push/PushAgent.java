@@ -329,6 +329,8 @@ public class PushAgent {
             @Override
             public void run() {
                 synchronized (this) {
+                    int expiredUnanswered = 0;
+                    int expiredAnswered = 0;
                     try {
                         LOG.info("expireMonitorTables: pushes not answered " + mNotAnswered.size() + ", pushes answered " + mAnswered.size());
                         Date limit = new Date(new Date().getTime() - keepUnansweredPushesFor);
@@ -338,6 +340,7 @@ public class PushAgent {
                                 if (request.getCreatedTime().before(limit)) {
                                     mNotAnswered.remove(clientId);
                                     LOG.info("expireMonitorTables: Expiring push monitor for client " + clientId + ", has not answered push after " + (new Date().getTime() - request.getCreatedTime().getTime()) / 1000 + " s");
+                                    ++expiredUnanswered;
                                 }
                             }
                         }
@@ -348,11 +351,13 @@ public class PushAgent {
                                 if (request.getCreatedTime().before(limit2)) {
                                     mAnswered.remove(clientId);
                                     LOG.debug("expireMonitorTables: Expiring push monitor for client " + clientId + ", has answered push after " + (new Date().getTime() - request.getCreatedTime().getTime()) / 1000 + " s");
+                                    ++expiredAnswered;
                                 }
                             }
                         }
+                        LOG.info("expireMonitorTables: expired pushes not answered " + expiredUnanswered + ", expired pushes answered " + expiredAnswered);
                     } catch (Throwable t) {
-                        LOG.error("caught and swallowed exception escaping runnable", t);
+                        LOG.error("expireMonitorTables: caught and swallowed exception escaping runnable", t);
                     }
                 }
             }

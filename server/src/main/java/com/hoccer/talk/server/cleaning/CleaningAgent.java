@@ -113,13 +113,12 @@ public class CleaningAgent {
             @Override
             public void run() {
                 try {
-                    mServer.cleanAllLocks();
-                    mServer.getPushAgent().expireMonitorTables();
                     doCleanAllDeliveries();
                     doCleanAllClients();
                     doCleanGroups();
                     doCleanSpecialGroups();
                     doCleanRelationships();
+                    mServer.cleanAllLocks();
                     firstRunDone = true;
                 } catch (Throwable t) {
                     LOG.error("caught and swallowed exception escaping runnable", t);
