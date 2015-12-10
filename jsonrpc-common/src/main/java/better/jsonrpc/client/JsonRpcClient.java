@@ -153,7 +153,7 @@ public class JsonRpcClient {
     public void setRequestTimeout(long mRequestTimeout) {
         this.mRequestTimeout = mRequestTimeout;
     }
- /*
+
     public long getRequestSuccessCount() {
         return mRequestSuccessCount;
     }
@@ -166,27 +166,18 @@ public class JsonRpcClient {
         return mRequestTimeoutCountSinceLastSuccess;
     }
 
-    public long getLastRequestFailureOccurred() {
-        return mLastRequestFailureOccurred;
-    }
-
-    public long getLastRequestTimeoutOccurred() {
-        return mLastRequestTimeoutOccurred;
-    }
-
-    public long getLastResponseOccurred() {
+    public Date getLastResponseOccurred() {
         return mLastResponseOccurred;
     }
-
-
 
     public double getAverageResponseTime() {
         return mAverageResponseTime;
     }
-  */
+
     public long getLastResponseTime() {
         return mLastResponseTime;
     }
+
     public String getLastMethodName() {
         return mLastMethodName;
     }
@@ -211,12 +202,7 @@ public class JsonRpcClient {
         mRequestSuccessCount++;
         LOG.debug("responseReceived: responseTime:"+mLastResponseTime+", averageResponseTime:"+String.format("%.2f",mAverageResponseTime)+
                 " ms , outstanding:"+mOutstandingRequests.size()+", successes:"+mRequestSuccessCount+", failures:"+mRequestFailureCount+", timeouts:" +mRequestTimeoutCount);
-        /*
-        if (!isResponsive()) {
-            LOG.warn("Client purposely not responsive, disconnecting");
-            request.getConnection().disconnect();
-        }
-        */
+
     }
 
     private synchronized void responseFailed(JsonRpcClientRequest request) {
