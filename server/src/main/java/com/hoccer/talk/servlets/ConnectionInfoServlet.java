@@ -3,6 +3,7 @@ package com.hoccer.talk.servlets;
 import com.hoccer.talk.model.*;
 import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServer;
+import com.hoccer.talk.server.push.PushAgent;
 import com.hoccer.talk.server.push.PushRequest;
 import com.hoccer.talk.server.rpc.TalkRpcConnection;
 import org.jongo.MongoCollection;
@@ -236,12 +237,12 @@ public class ConnectionInfoServlet extends HttpServlet {
         w.write("\n");
 
         Map<String,PushRequest> notAnswered = new HashMap<String, PushRequest>(server.getPushAgent().getNotAnswered());
-        w.write("Push Requests not yet answered ("+notAnswered.size()+"):\n");
+        w.write("Push Requests not yet answered in the last "+ PushAgent.keepUnansweredPushesFor/1000/60 + " minutes ("+notAnswered.size()+"):\n");
         printPushInfo(db, w, notAnswered);
         w.write("\n");
 
         Map<String,PushRequest> answered = new HashMap<String, PushRequest>(server.getPushAgent().getAnswered());
-        w.write("Push Requests answered ("+answered.size()+"):\n");
+        w.write("Push Requests answered in the last "+ PushAgent.keepAnsweredPushesFor/1000/60 + " minutes ("+answered.size()+"):\n");
         printPushInfo(db, w, answered);
         w.write("\n");
 
@@ -404,7 +405,7 @@ public class ConnectionInfoServlet extends HttpServlet {
             }
             long pushCreatedAgo = (new Date().getTime() - request.getCreatedTime().getTime()) / 1000;
 
-            w.write("["+clientId+"] created "+pushCreatedAgo+" ago ("+ pushStatus + ") "+hostInfo.info());
+            w.write("["+clientId+"] created "+pushCreatedAgo+" s ago ("+ pushStatus + ") "+hostInfo.info());
             w.write("\n");
         }
     }

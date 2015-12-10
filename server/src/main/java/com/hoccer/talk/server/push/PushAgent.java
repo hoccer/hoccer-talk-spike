@@ -40,6 +40,8 @@ public class PushAgent {
     public enum APNS_SERVICE_TYPE {
         PRODUCTION, SANDBOX
     }
+    public static final long keepAnsweredPushesFor = 1000 * 60 * 15;   // 15 minutes
+    public static final long keepUnansweredPushesFor = 1000 * 60 * 60;  // 60 minutes
 
     private final HashMap<ApnsPushProvider.Target, ApnsService> mApnsServices = new HashMap<ApnsPushProvider.Target, ApnsService>();
 
@@ -323,8 +325,6 @@ public class PushAgent {
         }
     }
     public void expireMonitorTables() {
-        final long keepAnsweredPushesFor = 1000 * 60 * 15;   // 15 minutes
-        final long keepUnansweredPushesFor = 1000 * 60 * 60;  // 60 minutes
         mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
