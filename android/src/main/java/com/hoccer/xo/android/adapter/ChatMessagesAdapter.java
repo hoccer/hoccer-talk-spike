@@ -335,7 +335,7 @@ public class ChatMessagesAdapter extends MessagesAdapter implements IXoMessageLi
     public void onMessageUpdated(final TalkClientMessage message) {
         LOG.debug("onMessageUpdated()");
         if (isMessageRelevant(message)) {
-//            sortMessages();
+            sortMessages();
 
             runOnUiThread(new Runnable() {
                 @Override

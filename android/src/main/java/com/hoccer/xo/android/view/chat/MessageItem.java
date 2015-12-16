@@ -344,8 +344,8 @@ public class MessageItem implements AttachmentTransferListener {
         }
 
 
-        result = new StringBuilder();
-        result.append("T:"+ts+" A:"+ac+" S:"+s);
+        //result = new StringBuilder();
+        //result.append("T:"+ts+" A:"+ac+" S:"+s);
 
 
         return result.toString();
