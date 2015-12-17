@@ -37,8 +37,7 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.security.*;
 import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;

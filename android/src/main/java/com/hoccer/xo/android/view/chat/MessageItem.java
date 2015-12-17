@@ -16,7 +16,6 @@ import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
