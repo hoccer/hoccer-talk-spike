@@ -300,16 +300,13 @@ public class ChatMessagesAdapter extends MessagesAdapter implements IXoMessageLi
         Collections.sort(mMessageItems, new Comparator<MessageItem>() {
             @Override
             public int compare(MessageItem o1, MessageItem o2) {
+                // timeAccepted == null means that message is has not been sent yet.
                 if (o1.getMessage().getDelivery().getTimeAccepted() == null){
-                    LOG.debug("+++++ o1 NULL");
                     return 1;
                 }
                 if (o2.getMessage().getDelivery().getTimeAccepted() == null){
-                    LOG.debug("+++++ o2 NULL");
                     return -1;
                 }
-                LOG.debug(o1.getMessage().getDelivery().getTimeAccepted().getTime());
-                LOG.debug(o2.getMessage().getDelivery().getTimeAccepted().getTime());
 
                 return o1.getMessage().getDelivery().getTimeAccepted().getTime() < o2.getMessage().getDelivery().getTimeAccepted().getTime() ? -1 : 1;
             }

@@ -722,9 +722,6 @@ public class TalkDelivery {
 
     @JsonIgnore
     public void ensureDates() {
-        if (this.timeAccepted == null) {
-            //this.timeAccepted = new Date();
-        }
         if (this.timeChanged == null) {
             this.timeChanged = new Date(0);
         }
@@ -848,8 +845,6 @@ public class TalkDelivery {
     }
 
     public void setTimeAccepted(Date timeAccepted) {
-
-        System.out.println("++++++++++++++++++++ "+ SimpleDateFormat.getTimeInstance().format(timeAccepted.getTime()));
         this.timeAccepted = timeAccepted;
     }
 

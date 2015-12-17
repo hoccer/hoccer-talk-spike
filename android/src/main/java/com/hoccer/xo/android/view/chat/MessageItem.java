@@ -320,13 +320,6 @@ public class MessageItem implements AttachmentTransferListener {
     private static String getMessageTimestamp(TalkClientMessage message) {
         StringBuilder result = new StringBuilder();
         Date timeStamp = message.getTimestamp();
-        String ts = timeStamp != null ? SimpleDateFormat.getTimeInstance(SimpleDateFormat.MEDIUM).format(timeStamp) : "NULL";
-
-        Date accepted = message.getDelivery().getTimeAccepted();
-        String ac = accepted != null ? SimpleDateFormat.getTimeInstance(SimpleDateFormat.MEDIUM).format(accepted) : "NULL";
-
-        Date sent = message.getMessage().getTimeSent();
-        String s = sent != null ? SimpleDateFormat.getTimeInstance(SimpleDateFormat.MEDIUM).format(sent) : "NULL";
 
         if (timeStamp != null) {
             long timeStampDay = getTimeAtStartOfDay(timeStamp);
@@ -342,11 +335,6 @@ public class MessageItem implements AttachmentTransferListener {
             result.append(' ');
             result.append(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(timeStamp));
         }
-
-
-        //result = new StringBuilder();
-        //result.append("T:"+ts+" A:"+ac+" S:"+s);
-
 
         return result.toString();
     }
