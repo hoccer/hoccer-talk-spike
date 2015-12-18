@@ -27,7 +27,6 @@ public class TalkDeliveryTest {
 
         final TalkDelivery myInitializedDelivery = new TalkDelivery(true);
         assertEquals(TalkDelivery.STATE_NEW, myInitializedDelivery.getState());
-        assertNotNull(myInitializedDelivery.getTimeAccepted());
         assertNotNull(myInitializedDelivery.getTimeChanged());
         assertNotNull(myInitializedDelivery.getTimeUpdatedIn());
         assertNotNull(myInitializedDelivery.getTimeUpdatedOut());
