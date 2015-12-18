@@ -291,7 +291,6 @@ public class ChatMessagesAdapter extends MessagesAdapter implements IXoMessageLi
     }
 
     private void insertMessageItemAndSort(MessageItem messageItem) {
-
         mMessageItems.add(messageItem);
         sortMessages();
     }
