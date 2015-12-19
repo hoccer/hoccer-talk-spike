@@ -450,7 +450,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
         requestTimers.put(getIdFromRequest(request), timerContext);
         mServer.getStatistics().signalRequest();
         mLastRequestStarted = new Date();
-        mLastRequestName = request.textValue();
+        //mLastRequestName = request.textValue();
 
         JsonNode methodNode = request.get("method");
         mLastRequestName = (methodNode != null && !methodNode.isNull()) ? methodNode.asText() : null;
@@ -466,7 +466,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
                 ((mTalkClient == null) ? "null" : mTalkClient.getClientId()) + "'");
 
         Object jsonRpcId = getIdFromRequest(request);
-        mServer.getStatistics().signalRequestStop(connection, request, requestTimers.get(jsonRpcId));
+        long elapsed = mServer.getStatistics().signalRequestStop(connection, request, requestTimers.get(jsonRpcId));
         requestTimers.remove(jsonRpcId);
         mLastRequestFinished = new Date();
         ++mRequestHandled;

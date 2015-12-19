@@ -95,6 +95,204 @@ public class JsonRpcServer {
         return mRemoteInterfaces;
     }
 
+    private Map<String, CallInfo> mCallInfoMap = new Hashtable<String, CallInfo>();
+
+    public static String methodName(ObjectNode request) {
+        JsonNode methodNode = request.get("method");
+        String requestName = (methodNode!=null&&!methodNode.isNull())?methodNode.asText():null;
+        return requestName;
+    }
+
+
+    public void updateCallInfo(int connectionId, long durationMillis, ObjectNode request, ObjectNode response) {
+        synchronized (this) {
+            String requestName = methodName(request);
+            if (requestName != null) {
+                CallInfo callInfo = mCallInfoMap.get(requestName);
+                if (callInfo == null) {
+                    callInfo = new CallInfo(requestName);
+                    mCallInfoMap.put(requestName, callInfo);
+                }
+                callInfo.update(connectionId, durationMillis, request, response);
+            } else {
+                LOG.warn("updateCallInfo: request has no method name");
+            }
+        }
+    }
+
+    public Map<String, CallInfo> getCallInfoMapClone() {
+        synchronized (this) {
+            return new HashMap<String, CallInfo>(mCallInfoMap);
+        }
+    }
+
+    public static class CallInfo {
+        CallInfo(String name) {
+            callName = name;
+            created = new Date();
+            lastUpdate = created;
+            minCallDuration = Integer.MAX_VALUE;
+        }
+        private final int RUNNING_AVERAGE_WINDOW_SIZE = 10;
+        private final String callName;
+        private long totalCalls;
+        private long totalDurationMillis;
+        private double rollingAverageCallsPerSec;
+        private double rollingAverageDuration;
+        private final Date created;
+        private Date lastUpdate;
+        private long callsInThisMillisecond;
+        private long maxCallDuration;
+        private long minCallDuration;
+        private int maxDurationConnection = 0;
+        private ObjectNode maxDurationRequestOrNotification;
+        private ObjectNode maxDurationResponse;
+        private Date maxDurationResponseDate = new Date(0);
+        private Date minDurationResponseDate = new Date(0);
+        private long errors;
+        private ObjectNode lastError;
+
+        static double approxRollingAverage (double avg, double new_sample, int N) {
+            avg -= avg / N;
+            avg += new_sample / N;
+            return avg;
+        }
+        double averageCallDuration() {
+            if (totalCalls > 0) {
+                return (double) totalDurationMillis / totalCalls;
+            } else {
+                return 0;
+            }
+        }
+
+        double averageCallsPerSecTotal() {
+            Date now = new Date();
+            double millisSinceCreation = now.getTime() - created.getTime();
+            return totalCalls / (millisSinceCreation / 1000.0);
+
+        }
+
+        static boolean isError(ObjectNode response) {
+            return response != null && response.get("error") != null;
+        }
+
+        void update(int connectionId, long durationMillis, ObjectNode request, ObjectNode response) {
+            synchronized (this) {
+                Date now = new Date();
+                if (lastUpdate.before(now)) {
+                    double millisSinceLastUpdate = now.getTime() - lastUpdate.getTime();
+                    double currentRate = (callsInThisMillisecond + 1) / (millisSinceLastUpdate / 1000.0);
+                    rollingAverageCallsPerSec = approxRollingAverage(rollingAverageCallsPerSec, currentRate, RUNNING_AVERAGE_WINDOW_SIZE);
+                    lastUpdate = now;
+                    callsInThisMillisecond = 0;
+                } else {
+                    callsInThisMillisecond++;
+                }
+                totalCalls++;
+                totalDurationMillis += durationMillis;
+                if (durationMillis > maxCallDuration) {
+                    maxDurationConnection = connectionId;
+                    maxDurationRequestOrNotification = request;
+                    maxDurationResponse = response;
+                    maxDurationResponseDate = lastUpdate;
+                    maxCallDuration = durationMillis;
+                }
+                if (durationMillis < minCallDuration) {
+                    minCallDuration = durationMillis;
+                    minDurationResponseDate = lastUpdate;
+                }
+                rollingAverageDuration = approxRollingAverage(rollingAverageDuration, durationMillis, RUNNING_AVERAGE_WINDOW_SIZE);
+                if (isError(response)) {
+                    ++errors;
+                    lastError = response;
+                }
+            }
+        }
+
+        public String info() {
+            synchronized (this) {
+                Date now = new Date();
+                long lastUpdateAgo = now.getTime() - lastUpdate.getTime();
+                long maxUpdateAgo = now.getTime() - maxDurationResponseDate.getTime();
+                long minUpdateAgo = now.getTime() - minDurationResponseDate.getTime();
+                return String.format("%-30s: ", callName) +
+                        String.format("total: %8d ", totalCalls) +
+                        String.format(" %9d ms", totalDurationMillis) +
+                        String.format(" %7.2f/s", averageCallsPerSecTotal()) +
+                        String.format(", now: %7.2f/s", getRollingAverageCallsPerSec()) +
+                        String.format(", duration: %6.1f ms", averageCallDuration()) +
+                        String.format(", now: %6.1f ms", rollingAverageDuration) +
+                        String.format(", min: %5d ms", minCallDuration) +
+                        String.format(" %8d ms ago", minUpdateAgo) +
+                        String.format(", max: %5d ms", maxCallDuration) +
+                        String.format(" %8d ms ago ", maxUpdateAgo)+
+                        String.format("on [%d]", maxDurationConnection) +
+                        String.format(", %d errors ", errors);
+            }
+        }
+        public String fullInfo() {
+            synchronized (this) {
+                return info() + ", <-" + maxDurationRequestOrNotification +"\n->"+maxDurationResponse + (errors != 0 ? "\n-> ERROR:"+lastError : "");
+            }
+        }
+
+        public String getCallName() {
+            return callName;
+        }
+
+        public long getTotalCalls() {
+            return totalCalls;
+        }
+
+        public long getTotalDurationMillis() {
+            return totalDurationMillis;
+        }
+
+        public double getRollingAverageCallsPerSec() {
+            return rollingAverageCallsPerSec;
+        }
+
+        public double getRollingAverageDuration() {
+            return rollingAverageDuration;
+        }
+
+        public Date getCreated() {
+            return created;
+        }
+
+        public Date getLastUpdate() {
+            return lastUpdate;
+        }
+
+        public long getCallsInThisMillisecond() {
+            return callsInThisMillisecond;
+        }
+
+        public long getMaxCallDuration() {
+            return maxCallDuration;
+        }
+
+        public long getMinCallDuration() {
+            return minCallDuration;
+        }
+
+        public int getMaxDurationConnection() {
+            return maxDurationConnection;
+        }
+
+        public ObjectNode getMaxDurationRequestOrNotification() {
+            return maxDurationRequestOrNotification;
+        }
+
+        public ObjectNode getMaxDurationResponse() {
+            return maxDurationResponse;
+        }
+
+        public Date getMaxDurationResponseDate() {
+            return maxDurationResponseDate;
+        }
+    }
+
     /**
      * Handles the given {@link ObjectNode}.
      *
@@ -111,6 +309,7 @@ public class JsonRpcServer {
                 LOG.debug("RPC-Notification <- [" + connection.getConnectionId() + "] " + node.toString());
             }
         }
+        Date start = new Date();
 
         // validate request
         if (!mBackwardsCompatible && !node.has("jsonrpc") || !node.has("method")) {
@@ -174,6 +373,9 @@ public class JsonRpcServer {
             }
         }
 
+        Date stop = new Date();
+        long duration = stop.getTime() - start.getTime();
+
         // build response if not a notification
         if (id != null) {
             ObjectNode response = null;
@@ -187,12 +389,15 @@ public class JsonRpcServer {
                         mapper, version, id,
                         error.getCode(), error.getMessage(), error.getData());
             }
+            updateCallInfo(connection.getConnectionId(), duration, node, response);
 
             if (LOG.isDebugEnabled()) {
                 LOG.debug("RPC-Response -> [" + connection.getConnectionId() + "] " + response.toString());
             }
 
             connection.sendResponse(response);
+        } else {
+            updateCallInfo(connection.getConnectionId(), duration, node, null);
         }
 
         // rethrow if applicable

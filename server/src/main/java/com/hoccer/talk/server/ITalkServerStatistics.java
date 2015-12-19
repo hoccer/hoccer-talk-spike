@@ -37,5 +37,5 @@ public interface ITalkServerStatistics {
 
     com.codahale.metrics.Timer.Context signalRequestStart(JsonRpcConnection connection, ObjectNode request);
 
-    void signalRequestStop(JsonRpcConnection connection, ObjectNode request, Timer.Context timerContext);
+    long signalRequestStop(JsonRpcConnection connection, ObjectNode request, Timer.Context timerContext);
 }
