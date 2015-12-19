@@ -164,6 +164,9 @@ public class JsonRpcServer {
             maxCallDuration = Integer.MIN_VALUE;
         }
         private final int RUNNING_AVERAGE_WINDOW_SIZE = 10;
+        private final int RUNNING_AVERAGE_CALLS_WINDOW_SIZE = 3;
+
+        private final int TIME_SLOT_MILLIS = 10000;
         private final String callName;
         private long totalCalls;
         private long totalDurationMillis;
@@ -181,6 +184,9 @@ public class JsonRpcServer {
         private Date minDurationResponseDate = new Date(0);
         private long errors;
         private ObjectNode lastError;
+        private long callsInTimeSlot;
+        private long callsInLastTimeSlot;
+        private long timeSlot;
 
         public void accumulate(CallInfo info) {
             totalCalls+=info.totalCalls;
@@ -189,9 +195,11 @@ public class JsonRpcServer {
             rollingAverageDuration+=info.rollingAverageDuration;
             if (info.maxCallDuration > maxCallDuration) {
                 maxCallDuration = info.maxCallDuration;
+                maxDurationResponseDate = info.maxDurationResponseDate;
             }
             if (info.minCallDuration < minCallDuration) {
                 minCallDuration=info.minCallDuration;
+                minDurationResponseDate=info.minDurationResponseDate;
             }
             if (info.created.before(created)) {
                 created = info.created;
@@ -205,6 +213,8 @@ public class JsonRpcServer {
             synchronized (this) {
                 Date now = new Date();
                 long lastUpdateAgo = now.getTime() - lastUpdate.getTime();
+                long maxUpdateAgo = now.getTime() - maxDurationResponseDate.getTime();
+                long minUpdateAgo = now.getTime() - minDurationResponseDate.getTime();
                 return String.format("%-30s: ", "TOTAL") +
                         String.format("calls: %8d ", totalCalls) +
                         String.format("/%4ds ago ", lastUpdateAgo/1000)+
@@ -214,9 +224,9 @@ public class JsonRpcServer {
                         String.format(", duration: %6.1fms", averageCallDuration()) +
                         String.format(", now: %6.1fms", rollingAverageDuration) +
                         String.format(", min: %5dms", minCallDuration) +
-                        String.format(" %6ds ago", 0) +
+                        String.format(" %6ds ago", minUpdateAgo/1000) +
                         String.format(", max: %5dms", maxCallDuration) +
-                        String.format(" %6ds ago ", 0) +
+                        String.format(" %6ds ago ", maxUpdateAgo/1000) +
                                       " [-]" +
                         String.format(", %d errors ", errors);
             }
@@ -246,18 +256,43 @@ public class JsonRpcServer {
             return response != null && response.get("error") != null;
         }
 
+        public void updateTimeSlot(Date now, boolean madeCall) {
+            synchronized (this) {
+                boolean updateAverage = false;
+                long currentTimeSlot = now.getTime() / TIME_SLOT_MILLIS;
+                if (currentTimeSlot == timeSlot) {
+                    if (madeCall) {
+                        callsInTimeSlot++;
+                        updateAverage = true;
+                    }
+                } else {
+                    updateAverage = true;
+                    if (currentTimeSlot == timeSlot + 1) {
+                        callsInLastTimeSlot = callsInTimeSlot;
+                    } else {
+                        callsInLastTimeSlot = 0;
+                        rollingAverageCallsPerSec = 0;
+                    }
+                    timeSlot = currentTimeSlot;
+                    if (madeCall) {
+                        callsInTimeSlot = 1;
+                    } else {
+                        callsInTimeSlot = 0;
+                    }
+                }
+                if (updateAverage) {
+                    double currentRate = (callsInLastTimeSlot) / (TIME_SLOT_MILLIS / 1000.0);
+                    rollingAverageCallsPerSec = approxRollingAverage(rollingAverageCallsPerSec, currentRate, RUNNING_AVERAGE_CALLS_WINDOW_SIZE);
+                }
+            }
+        }
+
         void update(int connectionId, long durationMillis, ObjectNode request, ObjectNode response) {
             synchronized (this) {
                 Date now = new Date();
-                if (lastUpdate.before(now)) {
-                    double millisSinceLastUpdate = now.getTime() - lastUpdate.getTime();
-                    double currentRate = (callsInThisMillisecond + 1) / (millisSinceLastUpdate / 1000.0);
-                    rollingAverageCallsPerSec = approxRollingAverage(rollingAverageCallsPerSec, currentRate, RUNNING_AVERAGE_WINDOW_SIZE);
-                    lastUpdate = now;
-                    callsInThisMillisecond = 0;
-                } else {
-                    callsInThisMillisecond++;
-                }
+                updateTimeSlot(now, true);
+                lastUpdate = now;
+
                 totalCalls++;
                 totalDurationMillis += durationMillis;
                 if (durationMillis > maxCallDuration) {
@@ -282,10 +317,15 @@ public class JsonRpcServer {
         public String info() {
             synchronized (this) {
                 Date now = new Date();
+                updateTimeSlot(now, false);
                 long lastUpdateAgo = now.getTime() - lastUpdate.getTime();
                 long maxUpdateAgo = now.getTime() - maxDurationResponseDate.getTime();
                 long minUpdateAgo = now.getTime() - minDurationResponseDate.getTime();
-                return String.format("%-30s: ", callName) +
+                String printCallName = callName;
+                if (callName.length() > 29) {
+                    printCallName = callName.substring(0,25)+"...";
+                }
+                return String.format("%-30s: ", printCallName) +
                         String.format("calls: %8d ", totalCalls) +
                         String.format("/%4ds ago ", lastUpdateAgo/1000)+
                         String.format(" %9dms", totalDurationMillis) +
