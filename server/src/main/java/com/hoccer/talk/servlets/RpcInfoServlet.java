@@ -83,27 +83,6 @@ public class RpcInfoServlet extends HttpServlet {
         }
     }
 
-    public static Map sortByCallTime(Map unsortedMap) {
-        Map sortedMap = new TreeMap(new CallTimeValueComparator(unsortedMap));
-        sortedMap.putAll(unsortedMap);
-        return sortedMap;
-    }
-
-    static class CallTimeValueComparator implements Comparator {
-
-        Map map;
-
-        public CallTimeValueComparator(Map map) {
-            this.map = map;
-        }
-
-        public int compare(Object keyA, Object keyB) {
-            JsonRpcServer.CallInfo valueA = (JsonRpcServer.CallInfo) map.get(keyA);
-            JsonRpcServer.CallInfo valueB = (JsonRpcServer.CallInfo) map.get(keyB);
-            return new Long(valueB.getTotalDurationMillis()).compareTo(new Long(valueA.getTotalDurationMillis()));
-        }
-    }
-
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -138,13 +117,27 @@ public class RpcInfoServlet extends HttpServlet {
 
         JsonRpcServer rpcServer = server.getRpcServer();
 
-        Map<String, JsonRpcServer.CallInfo> callInfoMap = rpcServer.getCallInfoMapClone();
-        Map<String, JsonRpcServer.CallInfo> sortedCallInfoMap = sortByCallTime(callInfoMap);
+        Map<String, JsonRpcServer.CallInfo> sortedCallInfoMap = rpcServer.getSortedCallInfoMapClone();
+        Map<String, JsonRpcServer.CallInfo> unsortedCallInfoMap = rpcServer.getCallInfoMapClone();
 
+        w.write("Sorted by total time spent ("+sortedCallInfoMap.size()+"):\n");
+        JsonRpcServer.CallInfo totalCallInfo = new JsonRpcServer.CallInfo("TOTAL");
         for (String callName : sortedCallInfoMap.keySet()) {
             JsonRpcServer.CallInfo callInfo = sortedCallInfoMap.get(callName);
+            totalCallInfo.accumulate(callInfo);
             w.write(callInfo.info()+"\n");
         }
+        w.write(totalCallInfo.totalInfo()+"\n");
+        w.write("\n");
+
+        JsonRpcServer.CallInfo totalCallInfo2 = new JsonRpcServer.CallInfo("TOTAL");
+        w.write("Unsorted ("+unsortedCallInfoMap.size()+"):\n");
+        for (String callName : unsortedCallInfoMap.keySet()) {
+            JsonRpcServer.CallInfo callInfo = unsortedCallInfoMap.get(callName);
+            totalCallInfo2.accumulate(callInfo);
+            w.write(callInfo.info()+"\n");
+        }
+        w.write(totalCallInfo2.totalInfo()+"\n");
         w.write("\n");
 
         w.write("RPC Call full Info at "+now+"\n\n");

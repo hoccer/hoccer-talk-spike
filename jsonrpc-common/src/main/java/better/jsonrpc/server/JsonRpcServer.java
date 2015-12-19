@@ -125,13 +125,43 @@ public class JsonRpcServer {
             return new HashMap<String, CallInfo>(mCallInfoMap);
         }
     }
+    public static Map sortByCallTime(Map unsortedMap) {
+        Map sortedMap = new TreeMap(new CallTimeValueComparator(unsortedMap));
+        sortedMap.putAll(unsortedMap);
+        return sortedMap;
+    }
+
+    static class CallTimeValueComparator implements Comparator {
+
+        Map map;
+
+        public CallTimeValueComparator(Map map) {
+            this.map = map;
+        }
+
+        public int compare(Object keyA, Object keyB) {
+            JsonRpcServer.CallInfo valueA = (JsonRpcServer.CallInfo) map.get(keyA);
+            JsonRpcServer.CallInfo valueB = (JsonRpcServer.CallInfo) map.get(keyB);
+            int comparisonResult = new Long(valueB.getTotalDurationMillis()).compareTo(new Long(valueA.getTotalDurationMillis()));
+            if (comparisonResult == 0) {
+                return valueA.getCallName().compareTo(valueB.getCallName());
+            }
+            return comparisonResult;
+        }
+    }
+    public Map<String, CallInfo> getSortedCallInfoMapClone() {
+        synchronized (this) {
+            return sortByCallTime(mCallInfoMap);
+        }
+    }
 
     public static class CallInfo {
-        CallInfo(String name) {
+        public CallInfo(String name) {
             callName = name;
             created = new Date();
             lastUpdate = created;
             minCallDuration = Integer.MAX_VALUE;
+            maxCallDuration = Integer.MIN_VALUE;
         }
         private final int RUNNING_AVERAGE_WINDOW_SIZE = 10;
         private final String callName;
@@ -139,7 +169,7 @@ public class JsonRpcServer {
         private long totalDurationMillis;
         private double rollingAverageCallsPerSec;
         private double rollingAverageDuration;
-        private final Date created;
+        private Date created;
         private Date lastUpdate;
         private long callsInThisMillisecond;
         private long maxCallDuration;
@@ -151,6 +181,46 @@ public class JsonRpcServer {
         private Date minDurationResponseDate = new Date(0);
         private long errors;
         private ObjectNode lastError;
+
+        public void accumulate(CallInfo info) {
+            totalCalls+=info.totalCalls;
+            totalDurationMillis+=info.totalDurationMillis;
+            rollingAverageCallsPerSec+=info.rollingAverageCallsPerSec;
+            rollingAverageDuration+=info.rollingAverageDuration;
+            if (info.maxCallDuration > maxCallDuration) {
+                maxCallDuration = info.maxCallDuration;
+            }
+            if (info.minCallDuration < minCallDuration) {
+                minCallDuration=info.minCallDuration;
+            }
+            if (info.created.before(created)) {
+                created = info.created;
+            }
+            if (info.lastUpdate.before(lastUpdate)) {
+                lastUpdate = info.lastUpdate;
+            }
+            errors+=info.errors;
+        }
+        public String totalInfo() {
+            synchronized (this) {
+                Date now = new Date();
+                long lastUpdateAgo = now.getTime() - lastUpdate.getTime();
+                return String.format("%-30s: ", "TOTAL") +
+                        String.format("calls: %8d ", totalCalls) +
+                        String.format("/%4ds ago ", lastUpdateAgo/1000)+
+                        String.format(" %9dms", totalDurationMillis) +
+                        String.format(" %7.2f/s", averageCallsPerSecTotal()) +
+                        String.format(", now: %7.2f/s", getRollingAverageCallsPerSec()) +
+                        String.format(", duration: %6.1fms", averageCallDuration()) +
+                        String.format(", now: %6.1fms", rollingAverageDuration) +
+                        String.format(", min: %5dms", minCallDuration) +
+                        String.format(" %6ds ago", 0) +
+                        String.format(", max: %5dms", maxCallDuration) +
+                        String.format(" %6ds ago ", 0) +
+                                      " [-]" +
+                        String.format(", %d errors ", errors);
+            }
+        }
 
         static double approxRollingAverage (double avg, double new_sample, int N) {
             avg -= avg / N;
@@ -216,17 +286,18 @@ public class JsonRpcServer {
                 long maxUpdateAgo = now.getTime() - maxDurationResponseDate.getTime();
                 long minUpdateAgo = now.getTime() - minDurationResponseDate.getTime();
                 return String.format("%-30s: ", callName) +
-                        String.format("total: %8d ", totalCalls) +
-                        String.format(" %9d ms", totalDurationMillis) +
+                        String.format("calls: %8d ", totalCalls) +
+                        String.format("/%4ds ago ", lastUpdateAgo/1000)+
+                        String.format(" %9dms", totalDurationMillis) +
                         String.format(" %7.2f/s", averageCallsPerSecTotal()) +
                         String.format(", now: %7.2f/s", getRollingAverageCallsPerSec()) +
-                        String.format(", duration: %6.1f ms", averageCallDuration()) +
-                        String.format(", now: %6.1f ms", rollingAverageDuration) +
-                        String.format(", min: %5d ms", minCallDuration) +
-                        String.format(" %8d ms ago", minUpdateAgo) +
-                        String.format(", max: %5d ms", maxCallDuration) +
-                        String.format(" %8d ms ago ", maxUpdateAgo)+
-                        String.format("on [%d]", maxDurationConnection) +
+                        String.format(", duration: %6.1fms", averageCallDuration()) +
+                        String.format(", now: %6.1fms", rollingAverageDuration) +
+                        String.format(", min: %5dms", minCallDuration) +
+                        String.format(" %6ds ago", minUpdateAgo/1000) +
+                        String.format(", max: %5dms", maxCallDuration) +
+                        String.format(" %6ds ago ", maxUpdateAgo/1000)+
+                        String.format(" [%d]", maxDurationConnection) +
                         String.format(", %d errors ", errors);
             }
         }
