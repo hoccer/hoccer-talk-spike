@@ -78,6 +78,8 @@ public class ChatMessagesAdapter extends MessagesAdapter implements IXoMessageLi
         } catch (SQLException e) {
             LOG.error("SQLException while loading message count: " + mContact.getClientId(), e);
         }
+        sortMessages();
+
     }
 
     /**
@@ -290,9 +292,21 @@ public class ChatMessagesAdapter extends MessagesAdapter implements IXoMessageLi
 
     private void insertMessageItemAndSort(MessageItem messageItem) {
         mMessageItems.add(messageItem);
+        sortMessages();
+    }
+
+    private void sortMessages() {
         Collections.sort(mMessageItems, new Comparator<MessageItem>() {
             @Override
             public int compare(MessageItem o1, MessageItem o2) {
+                // timeAccepted == null means that message is has not been sent yet.
+                if (o1.getMessage().getDelivery().getTimeAccepted() == null){
+                    return 1;
+                }
+                if (o2.getMessage().getDelivery().getTimeAccepted() == null){
+                    return -1;
+                }
+
                 return o1.getMessage().getDelivery().getTimeAccepted().getTime() < o2.getMessage().getDelivery().getTimeAccepted().getTime() ? -1 : 1;
             }
         });
@@ -317,6 +331,8 @@ public class ChatMessagesAdapter extends MessagesAdapter implements IXoMessageLi
     public void onMessageUpdated(final TalkClientMessage message) {
         LOG.debug("onMessageUpdated()");
         if (isMessageRelevant(message)) {
+            sortMessages();
+
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
