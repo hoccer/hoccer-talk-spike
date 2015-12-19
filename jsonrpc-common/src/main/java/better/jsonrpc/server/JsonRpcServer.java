@@ -187,6 +187,7 @@ public class JsonRpcServer {
         private long callsInTimeSlot;
         private long callsInLastTimeSlot;
         private long timeSlot;
+        private int accumulated;
 
         public void accumulate(CallInfo info) {
             totalCalls+=info.totalCalls;
@@ -208,9 +209,13 @@ public class JsonRpcServer {
                 lastUpdate = info.lastUpdate;
             }
             errors+=info.errors;
+            ++accumulated;
         }
         public String totalInfo() {
             synchronized (this) {
+                if (accumulated == 0) {
+                    return "No totals yet";
+                }
                 Date now = new Date();
                 long lastUpdateAgo = now.getTime() - lastUpdate.getTime();
                 long maxUpdateAgo = now.getTime() - maxDurationResponseDate.getTime();
@@ -223,7 +228,7 @@ public class JsonRpcServer {
                         String.format(" %7.2f/s", averageCallsPerSecTotal()) +
                         String.format(", now: %7.2f/s", getRollingAverageCallsPerSec()) +
                         String.format(", duration: %6.1fms", averageCallDuration()) +
-                        String.format(", now: %6.1fms", rollingAverageDuration) +
+                        String.format(", now: %6.1fms", rollingAverageDuration/accumulated) +
                         String.format(", min: %5dms", minCallDuration) +
                         String.format(" %6ds ago", minUpdateAgo/1000) +
                         String.format(", max: %5dms", maxCallDuration) +
