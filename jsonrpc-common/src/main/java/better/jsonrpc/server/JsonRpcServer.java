@@ -216,8 +216,9 @@ public class JsonRpcServer {
                 long maxUpdateAgo = now.getTime() - maxDurationResponseDate.getTime();
                 long minUpdateAgo = now.getTime() - minDurationResponseDate.getTime();
                 return String.format("%-30s: ", "TOTAL") +
-                        String.format("calls: %8d ", totalCalls) +
-                        String.format("/%4ds ago ", lastUpdateAgo/1000)+
+                        String.format("err:%7d /", errors) +
+                        String.format("%8d", totalCalls) +
+                        String.format(",%5ds ago ", lastUpdateAgo/1000)+
                         String.format(" %9dms", totalDurationMillis) +
                         String.format(" %7.2f/s", averageCallsPerSecTotal()) +
                         String.format(", now: %7.2f/s", getRollingAverageCallsPerSec()) +
@@ -227,8 +228,7 @@ public class JsonRpcServer {
                         String.format(" %6ds ago", minUpdateAgo/1000) +
                         String.format(", max: %5dms", maxCallDuration) +
                         String.format(" %6ds ago ", maxUpdateAgo/1000) +
-                                      " [-]" +
-                        String.format(", %d errors ", errors);
+                                      " [-]";
             }
         }
 
@@ -326,8 +326,9 @@ public class JsonRpcServer {
                     printCallName = callName.substring(0,25)+"...";
                 }
                 return String.format("%-30s: ", printCallName) +
-                        String.format("calls: %8d ", totalCalls) +
-                        String.format("/%4ds ago ", lastUpdateAgo/1000)+
+                        String.format("err:%7d /", errors) +
+                        String.format("%8d", totalCalls) +
+                        String.format(",%5ds ago ", lastUpdateAgo/1000)+
                         String.format(" %9dms", totalDurationMillis) +
                         String.format(" %7.2f/s", averageCallsPerSecTotal()) +
                         String.format(", now: %7.2f/s", getRollingAverageCallsPerSec()) +
@@ -337,8 +338,7 @@ public class JsonRpcServer {
                         String.format(" %6ds ago", minUpdateAgo/1000) +
                         String.format(", max: %5dms", maxCallDuration) +
                         String.format(" %6ds ago ", maxUpdateAgo/1000)+
-                        String.format(" [%d]", maxDurationConnection) +
-                        String.format(", %d errors ", errors);
+                        String.format(" [%d]", maxDurationConnection);
             }
         }
         public String fullInfo() {
