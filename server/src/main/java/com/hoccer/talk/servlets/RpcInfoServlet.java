@@ -113,7 +113,7 @@ public class RpcInfoServlet extends HttpServlet {
 
         Date now = new Date();
 
-        w.write("RPC Call Info at "+now+"\n\n");
+        w.write("RPC Info at "+now+"\n\n");
 
         JsonRpcServer rpcServer = server.getRpcServer();
 
@@ -128,16 +128,20 @@ public class RpcInfoServlet extends HttpServlet {
                 totalCallInfo.accumulate(callInfo);
                 w.write(callInfo.info() + "\n");
             } else {
-                w.write("ERROR: no callinfo for "+callName+"\n");
+                w.write("#ERROR: no callinfo for "+callName+"\n");
             }
         }
         w.write(totalCallInfo.totalInfo()+"\n");
         w.write("\n");
 
-        w.write("RPC Call full Info at "+now+"\n\n");
+        w.write("RPC full info at "+now+"\n\n");
         for (String callName : sortedCallInfoMap.keySet()) {
             JsonRpcServer.CallInfo callInfo = sortedCallInfoMap.get(callName);
-            w.write(callInfo.fullInfo()+"\n");
+            if (callInfo != null) {
+                w.write(callInfo.fullInfo() + "\n");
+            }  else {
+                w.write("#ERROR: (full Info) no CallInfo for "+callName+"\n");
+            }
             w.write("\n");
         }
 
