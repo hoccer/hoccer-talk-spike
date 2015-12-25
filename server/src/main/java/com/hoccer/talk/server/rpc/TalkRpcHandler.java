@@ -1346,6 +1346,21 @@ public class TalkRpcHandler implements ITalkRpcServer {
         if (clientId == null) {
             LOG.error("outDeliveryRequest null clientId on connection: '" + mConnection.getConnectionId() + "', address " + mConnection.getRemoteAddress());
         }
+        boolean attachmentError = false;
+        String attachmentErrorReason = "no error";
+
+        boolean hasAttachment = message.getAttachment() != null && message.getAttachment().length() > 0;
+        boolean hasAttachmentFileId = message.getAttachmentFileId() != null && message.getAttachmentFileId().length() > 0;
+
+        if (hasAttachment && !hasAttachmentFileId) {
+            attachmentError = true;
+            attachmentErrorReason = "message is missing attachment file id while having attachment";
+        }
+        if (hasAttachmentFileId && !hasAttachment) {
+            attachmentError = true;
+            attachmentErrorReason = "message is missing attachment while having attachment file id";
+        }
+
         // generate and assign message id
         String messageId = UUID.randomUUID().toString();
         message.setMessageId(messageId);
@@ -1362,15 +1377,43 @@ public class TalkRpcHandler implements ITalkRpcServer {
             delivery.ensureDates();
             delivery.setMessageId(message.getMessageId());
             delivery.setSenderId(clientId);
-            if (message.getAttachmentFileId() == null) {
-                delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NONE);
-            } else {
-                if (delivery.getAttachmentState() == null) {
-                    delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NEW);
+
+            boolean hasAttachmentState = delivery.getAttachmentState() != null && !TalkDelivery.ATTACHMENT_STATE_NONE.equals(delivery.getAttachmentState());
+
+            if (!attachmentError) {
+                if (hasAttachment && !hasAttachmentState) {
+                    attachmentError = true;
+                    attachmentErrorReason = "message has attachment but attachment state in delivery does not indicate that";
+                }
+                if (hasAttachmentState && !hasAttachment) {
+                    attachmentError = true;
+                    attachmentErrorReason = "attachment state in delivery indicates attachment but there is no attachment in this message";
                 }
             }
 
-            Vector<TalkDelivery> processedDeliveries  = processNewDelivery(message, delivery);
+            if (!attachmentError) {
+                if (message.getAttachmentFileId() == null) {
+                    delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NONE);
+                } else {
+                    if (delivery.getAttachmentState() == null) {
+                        delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NEW);
+                    }
+                }
+            }
+
+            Vector<TalkDelivery> processedDeliveries;
+            if (!attachmentError) {
+                processedDeliveries = processNewDelivery(message, delivery);
+            } else {
+                Date currentDate = new Date();
+                LOG.warn("processNewDelivery: delivery failed by server because of bad incoming attachment data: '"+attachmentErrorReason+"', sender "+clientId);
+                delivery.setState(TalkDelivery.STATE_FAILED);
+                delivery.setReason(attachmentErrorReason);
+                delivery.setTimeAccepted(currentDate);
+                delivery.setTimeChanged(currentDate);
+                processedDeliveries = new Vector<TalkDelivery>();
+                processedDeliveries.add(delivery);
+            }
 
             for (TalkDelivery processedDelivery : processedDeliveries) {
                 // delivery will be returned as result, so mark outgoing time
