@@ -1382,8 +1382,11 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
             if (!attachmentError) {
                 if (hasAttachment && !hasAttachmentState) {
-                    attachmentError = true;
-                    attachmentErrorReason = "message has attachment but attachment state in delivery does not indicate that";
+                    // TODO: The Android client does not properly set attachmentState on outgoing deliveries,
+                    // see https://github.com/hoccer/hoccer-talk-spike/issues/1092
+                    //attachmentError = true;
+                    //attachmentErrorReason = "message has attachment but attachment state in delivery does not indicate that";
+                    // TODO: remove fix below and uncomment the two lines above when client is fixed and update is forced
                 }
                 if (hasAttachmentState && !hasAttachment) {
                     attachmentError = true;
@@ -1395,6 +1398,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 if (message.getAttachmentFileId() == null) {
                     delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NONE);
                 } else {
+                    // TODO: remove this fix when clients will behave properly and the above error checking is fully enabled
                     if (delivery.getAttachmentState() == null) {
                         delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NEW);
                     }
