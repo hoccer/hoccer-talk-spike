@@ -1399,6 +1399,8 @@ public class TalkRpcHandler implements ITalkRpcServer {
                         delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NEW);
                     }
                 }
+            } else {
+                delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NONE);
             }
 
             Vector<TalkDelivery> processedDeliveries;
