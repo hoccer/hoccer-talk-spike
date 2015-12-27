@@ -72,14 +72,14 @@
                 android:title="@string/pref_image_size"
                 android:entries="@array/image_transfer_size_options"
                 android:entryValues="@array/image_transfer_size_options_values"
-                android:defaultValue="-1"/>
+                android:defaultValue="1000000"/>
 
         <ListPreference
                 android:key="preference_image_encoding_quality"
                 android:title="@string/pref_image_quality"
                 android:entries="@array/image_transfer_quality_options"
                 android:entryValues="@array/image_transfer_quality_options_values"
-                android:defaultValue="100"/>
+                android:defaultValue="50"/>
 
     </PreferenceCategory>
 

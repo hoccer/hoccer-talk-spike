@@ -68,8 +68,8 @@ public class XoClientService extends Service {
 
     public static final String EXTRA_CONNECT = "com.hoccer.xo.CONNECT";
 
-    private static final int DEFAULT_IMAGE_UPLOAD_MAX_PIXEL_COUNT = -1;
-    private static final int DEFAULT_IMAGE_UPLOAD_ENCODING_QUALITY = 100;
+    private static final int DEFAULT_IMAGE_UPLOAD_MAX_PIXEL_COUNT = 1000000;
+    private static final int DEFAULT_IMAGE_UPLOAD_ENCODING_QUALITY = 50;
 
     private static final String sPreferenceUploadLimitMobileKey = "preference_upload_limit_mobile";
     private static final String sPreferenceUploadLimitWifiKey = "preference_upload_limit_wifi";
