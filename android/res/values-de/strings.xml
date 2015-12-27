@@ -217,7 +217,8 @@
     <string name="profile_key_text">Schlüssel</string>
 
     <string name="transfer_state_initializing_download">Warte auf Download..</string>
-    <string name="transfer_state_initializing_upload">Starte Upload..</string>
+    <string name="transfer_state_initializing_upload">Warte auf Upload..</string>
+    <string name="transfer_state_initialized_upload">Upload wird gestartet..</string>
     <string name="transfer_state_encrypting">Verschlüsseln..</string>
     <string name="transfer_state_decrypting">Entschlüsseln..</string>
     <string name="transfer_state_downloading">Lade..</string>

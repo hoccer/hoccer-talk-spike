@@ -229,7 +229,8 @@
     <string name="profile_key_text">Key</string>
 
     <string name="transfer_state_initializing_download">Waiting for download..</string>
-    <string name="transfer_state_initializing_upload">Starting upload..</string>
+    <string name="transfer_state_initializing_upload">Waiting to upload..</string>
+    <string name="transfer_state_initialized_upload">Starting upload..</string>
     <string name="transfer_state_encrypting">Encrypting..</string>
     <string name="transfer_state_decrypting">Decrypting..</string>
     <string name="transfer_state_downloading">Downloading..</string>
