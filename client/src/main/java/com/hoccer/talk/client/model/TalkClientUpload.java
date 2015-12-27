@@ -29,13 +29,19 @@ public class TalkClientUpload extends XoTransfer implements IProgressListener {
         NEW {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(REGISTERING);
+                return EnumSet.of(REGISTERING, NEW);
             }
         },
         REGISTERING {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(PAUSED, NEW);
+                return EnumSet.of(REGISTERED, NEW);
+            }
+        },
+        REGISTERED {
+            @Override
+            public Set<State> possibleFollowUps() {
+                return EnumSet.of(PAUSED, UPLOADING, REGISTERED);
             }
         },
         UPLOADING {
@@ -171,7 +177,12 @@ public class TalkClientUpload extends XoTransfer implements IProgressListener {
         setState(newState);
     }
 
+    public boolean encryptionWasSetup() {
+        return  this.getEncryptionKey() != null && this.getEncryptionKey().length() > 0;
+    }
+
     private void setState(State state) {
+        LOG.debug("Switching to state "+state);
         this.state = state;
 
         if (!mTransferListeners.isEmpty() && mTransferListeners.get(0) instanceof UploadAction) {
@@ -229,6 +240,8 @@ public class TalkClientUpload extends XoTransfer implements IProgressListener {
                 return ContentState.UPLOAD_FAILED;
             case REGISTERING:
                 return ContentState.UPLOAD_REGISTERING;
+            case REGISTERED:
+                return ContentState.UPLOAD_REGISTERED;
             case UPLOADING:
                 return ContentState.UPLOAD_UPLOADING;
             case PAUSED:

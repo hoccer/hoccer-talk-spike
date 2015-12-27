@@ -110,17 +110,12 @@ public class UploadAgent extends TransferAgent {
             getOrCreateUploadAction(upload);
 
             if (upload.getState() == TalkClientUpload.State.NEW) {
-                register(upload);
-                startUpload(upload);
-            }
-
-            if (upload.getState() == REGISTERING) {
                 upload.switchState(NEW);
-                register(upload);
-                startUpload(upload);
-            }
-
-            if (upload.getState() == UPLOADING) {
+            } else if (upload.getState() == REGISTERING) {
+                upload.switchState(NEW);
+            } else if (upload.getState() == REGISTERED) {
+                upload.switchState(REGISTERED);
+            } else if (upload.getState() == UPLOADING) {
                 upload.switchState(PAUSED);
                 resumeUpload(upload);
             }

@@ -345,6 +345,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     public synchronized List<TalkClientMessage> findMessagesForDelivery() throws SQLException {
         List<TalkDelivery> newDeliveries = mDeliveries.queryForEq(TalkDelivery.FIELD_STATE, TalkDelivery.STATE_NEW);
+        LOG.debug("findMessagesForDelivery found "+newDeliveries.size()+" unsent deliveries");
 
         List<TalkClientMessage> messages = new ArrayList<TalkClientMessage>();
         try {
@@ -360,6 +361,8 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
                     if (!message.isInProgress()) {
                         messages.add(message);
+                    } else {
+                        LOG.debug("findMessagesForDelivery: not adding message because in progress, tag "+message.getMessageTag());
                     }
 
                 } else {
