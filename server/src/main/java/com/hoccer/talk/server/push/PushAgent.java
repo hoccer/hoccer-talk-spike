@@ -390,7 +390,7 @@ public class PushAgent {
                             if (request != null) {
                                 TalkClient client = request.getClient();
                                 int retryCount = client.getPushRetryCount();
-                                if (retryCount < 3) {
+                                if (retryCount < MAX_RETRIES) {
                                     long limitFactor = 1 << retryCount;
                                     long limitPeriod = limitFactor * MIN_RETRY_PERIOD_IN_SECONDS * 1000;
                                     Date limit = new Date(new Date().getTime() - limitPeriod);
