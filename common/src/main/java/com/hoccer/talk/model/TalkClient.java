@@ -34,6 +34,7 @@ public class TalkClient {
     public static final String FIELD_LAST_PUSH_MESSAGE    = "lastPushMessage";
     public static final String FIELD_PUSH_ALERT_MESSAGE   = "pushAlertMessage";
     public static final String FIELD_APNS_MODE            = "apnsMode";
+    public static final String FIELD_PUSH_RETRY_COUNT     = "pushRetryCount";
 
     public static final String APNS_MODE_DEFAULT          = "default";
     public static final String APNS_MODE_BACKGROUND       = "background";
@@ -72,6 +73,10 @@ public class TalkClient {
     /** APNS unread message count */
     @DatabaseField(columnName = FIELD_APNS_UNREAD_MESSAGES)
     int apnsUnreadMessages;
+
+    /** push retry count */
+    @DatabaseField(columnName = FIELD_PUSH_RETRY_COUNT)
+    int pushRetryCount;
 
     /** Time of registration */
     @DatabaseField(columnName = FIELD_TIME_REGISTERED, canBeNull = false)
@@ -288,5 +293,13 @@ public class TalkClient {
 
     public void setApnsMode(String apnsMode) {
         this.apnsMode = apnsMode;
+    }
+
+    public int getPushRetryCount() {
+        return pushRetryCount;
+    }
+
+    public void setPushRetryCount(int pushRetryCount) {
+        this.pushRetryCount = pushRetryCount;
     }
 }

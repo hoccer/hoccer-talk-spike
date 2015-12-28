@@ -301,9 +301,9 @@ public class DeliveryRequest {
         TalkClient client = mDatabase.findClientById(mClientId);
         // send push request
         if (client.isPushCapable()) {
-            mServer.getPushAgent().submitRequest(client);
+            mServer.getPushAgent().submitRequest(client, false);
         } else {
-            mServer.getPushAgent().submitRequest(client); // try push anyway to get push incapable stats
+            mServer.getPushAgent().submitRequest(client, false); // try push anyway to get push incapable stats
             LOG.warn("push unconfigured for " + mClientId);
         }
     }
