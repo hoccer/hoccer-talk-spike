@@ -29,21 +29,21 @@ public class XoVersion {
 
     public static void initialize(Context context) {
         LOG.debug("initializing git properties");
-        Properties git = new Properties();
-        InputStream is = context.getResources().openRawResource(R.raw.git_properties);
-        try {
-            git.load(is);
-            sGit = git;
-        } catch (IOException e) {
-            LOG.error("error loading git properties", e);
-        }
-        if (sGit != null) {
-            sBranch = sGit.getProperty("git.branch", UNINITIALIZED);
-            sBuildTime = sGit.getProperty("git.build.time", UNINITIALIZED);
-            sCommitId = sGit.getProperty("git.commit.id", UNINITIALIZED);
-            sCommitAbbrev = sGit.getProperty("git.commit.id.abbrev", UNINITIALIZED);
-            sCommitDescribe = sGit.getProperty("git.commit.id.describe", UNINITIALIZED);
-        }
+//        Properties git = new Properties();
+//        InputStream is = context.getResources().openRawResource(R.raw.git_properties);
+//        try {
+//            git.load(is);
+//            sGit = git;
+//        } catch (IOException e) {
+//            LOG.error("error loading git properties", e);
+//        }
+//        if (sGit != null) {
+//            sBranch = sGit.getProperty("git.branch", UNINITIALIZED);
+//            sBuildTime = sGit.getProperty("git.build.time", UNINITIALIZED);
+//            sCommitId = sGit.getProperty("git.commit.id", UNINITIALIZED);
+//            sCommitAbbrev = sGit.getProperty("git.commit.id.abbrev", UNINITIALIZED);
+//            sCommitDescribe = sGit.getProperty("git.commit.id.describe", UNINITIALIZED);
+//        }
     }
 
     public static String getBranch() {

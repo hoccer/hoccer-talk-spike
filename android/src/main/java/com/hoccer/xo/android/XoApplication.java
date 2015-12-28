@@ -120,11 +120,11 @@ public class XoApplication extends Application {
         sLog.info("external storage at " + sExternalStorage);
 
         // initialize version information
-        XoVersion.initialize(this);
-        sLog.info("application build time " + XoVersion.getBuildTime());
-        sLog.info("application branch " + XoVersion.getBranch());
-        sLog.info("application commit " + XoVersion.getCommitId());
-        sLog.info("application describe " + XoVersion.getCommitDescribe());
+//        XoVersion.initialize(this);
+//        sLog.info("application build time " + XoVersion.getBuildTime());
+//        sLog.info("application branch " + XoVersion.getBranch());
+//        sLog.info("application commit " + XoVersion.getCommitId());
+//        sLog.info("application describe " + XoVersion.getCommitDescribe());
 
         // configure ssl
         XoSsl.initialize(this);

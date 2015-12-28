@@ -1,0 +1,6 @@
+
+description = 'Better JSON-RPC WebSocket Transport (Jetty)'
+dependencies {
+  compile project(':better-jsonrpc-websocket')
+    compile group: 'org.eclipse.jetty', name: 'jetty-websocket', version:'8.1.13.v20130916'
+}

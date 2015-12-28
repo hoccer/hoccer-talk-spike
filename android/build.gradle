@@ -1,0 +1,144 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.3.1'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+plugins {
+    id "nebula.provided-base" version "2.2.2"
+    id "nebula.optional-base" version "2.2.2"
+}
+
+apply plugin: 'com.android.application'
+
+if (!hasProperty("label")) ext.label = "hoccer"
+if (!hasProperty("environment")) ext.environment = "development"
+
+Properties buildProperties = new Properties()
+buildProperties.load(new FileInputStream("$projectDir/label/${label}/environments/${environment}/build.properties"))
+Properties configProperties = new Properties()
+configProperties.load(new FileInputStream("$projectDir/label/${label}/environments/${environment}/assets/configuration.properties"))
+
+//processResources {
+//    from "$projectDir/label/${label}/environments/${environment}/res"
+//    expand(version: version, buildNumber: currentBuildNumber)
+//}
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "22.0.1"
+
+    useLibrary  'org.apache.http.legacy'
+
+    defaultConfig {
+        manifestPlaceholders = [
+                "hoccer.invitation.uri.scheme" : configProperties.getProperty("hoccer.invitation.uri.scheme"),
+                "app.name" : buildProperties.getProperty("app.name"),
+                "app.name.short" : buildProperties.getProperty("app.name.short"),
+                "apk.package.name" : buildProperties.getProperty("apk.package.name"),
+                "google.maps.api.key" : buildProperties.getProperty("google.maps.api.key")
+        ]
+        applicationId "com.artcom.hoccer"
+        minSdkVersion 14
+        targetSdkVersion 17
+        versionCode 413
+        versionName "3.2.10-SNAPSHOT"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            applicationIdSuffix ".debug"
+            debuggable true
+        }
+    }
+    lintOptions {
+        abortOnError false
+    }
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+    }
+
+    productFlavors {
+        hoccer {
+            applicationId "com.artcom.hoccer"
+        }
+    }
+}
+group = 'hoccer'
+version = '3.2.10-SNAPSHOT'
+
+description = "Hoccer Talk for Android"
+repositories {
+    maven { url "https://archiva.hoccer.com/repository/snapshots/" }
+    maven { url "https://archiva.hoccer.com/repository/hoccer/" }
+    maven { url "http://repo.maven.apache.org/maven2" }
+}
+
+dependencies {
+    compile (project(":hoccer-talk-client")) {
+        exclude group: 'log4j'
+    }
+    compile project(":drag-sort-listview")
+    // Local binary dependency
+    compile group: 'com.google.android.gms', name: 'google-play-services', version:'14.0.0'
+    compile group: 'com.google.android.gms', name: 'google-play-services', version:'14.0.0'
+    compile(group: 'com.googlecode.ez-vcard', name: 'ez-vcard', version:'0.8.3') {
+        exclude(module: 'jsoup')
+        exclude(module: 'freemarker')
+    }
+    compile group: 'com.nostra13.universalimageloader', name: 'universal-image-loader', version:'1.9.0'
+    compile group: 'com.squareup.picasso', name: 'picasso', version:'2.5.0'
+    compile group: 'com.j256.ormlite', name: 'ormlite-android', version:'4.43'
+
+    compile group: 'ufwa-common', name: 'log4j-android', version:'1.2.17-1'
+
+    compile group: 'commons-codec', name: 'commons-codec', version:'1.7'
+    compile group: 'com.android.support', name: 'support-v4', version:'19.0.1'
+    compile group: 'net.hockeyapp.android', name: 'HockeySDK', version:'3.0.1'
+    compile group: 'com.google.zxing', name: 'core', version:'3.0.1'
+    compile group: 'inter.nal.barcodescanner', name: 'zbar', version:'1.0'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version:'2.1.5'
+    compile group: 'net.lingala.zip4j', name: 'zip4j', version:'1.3.2'
+    testCompile group: 'junit', name: 'junit', version:'4.11'
+    testCompile group: 'com.h2database', name: 'h2', version:'1.4.179'
+    testCompile group: 'com.j256.ormlite', name: 'ormlite-jdbc', version:'4.43'
+    testCompile group: 'com.jayway.awaitility', name: 'awaitility', version:'1.6.3'
+//    compile(group: 'android', name: 'android', version:'4.4.2_r2') {
+//        /* This dependency was originally in the Maven provided scope, but the project was not of type war.
+//        This behavior is not yet supported by Gradle, so this dependency has been converted to a compile dependency.
+//        Please review and delete this closure when resolved. */
+//    }
+//    compile(group: 'log4j', name: 'log4j', version:'1.2.17') {
+//        /* This dependency was originally in the Maven provided scope, but the project was not of type war.
+//        This behavior is not yet supported by Gradle, so this dependency has been converted to a compile dependency.
+//        Please review and delete this closure when resolved. */
+//    }
+//    compile group: 'log4j', name: 'log4j', version: '1.2.17'
+    compile(group: 'org.apache.httpcomponents', name: 'httpclient', version:'4.0.3') {
+        /* This dependency was originally in the Maven provided scope, but the project was not of type war.
+        This behavior is not yet supported by Gradle, so this dependency has been converted to a compile dependency.
+        Please review and delete this closure when resolved. */
+    }
+}
+
+
+
+//
+//dependencies {
+//    provided 'org.apache.commons:commons-lang3:3.3.2'
+//    provided group: 'log4j', name: 'log4j', version: '1.2.17'
+//    compile 'org.apache.commons:commons-lang3:3.3.2', optional
+//    compile group: 'log4j', name: 'log4j', version: '1.2.17', optional
+//}
