@@ -49,6 +49,7 @@ android {
         targetSdkVersion 17
         versionCode 413
         versionName "3.2.10-SNAPSHOT"
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -58,6 +59,7 @@ android {
         debug {
             applicationIdSuffix ".debug"
             debuggable true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
     lintOptions {
@@ -84,6 +86,7 @@ repositories {
     maven { url "https://archiva.hoccer.com/repository/snapshots/" }
     maven { url "https://archiva.hoccer.com/repository/hoccer/" }
     maven { url "http://repo.maven.apache.org/maven2" }
+    jcenter()
 }
 
 dependencies {
@@ -91,9 +94,15 @@ dependencies {
         exclude group: 'log4j'
     }
     compile project(":drag-sort-listview")
+
+    //compile 'com.google.android.gms:play-services:8.4.0'
+    compile 'com.google.android.gms:play-services-gcm:8.4.0'
+    compile 'com.google.android.gms:play-services-maps:8.4.0'
+    compile 'com.android.support:multidex:1.0.0'
+
     // Local binary dependency
-    compile group: 'com.google.android.gms', name: 'google-play-services', version:'14.0.0'
-    compile group: 'com.google.android.gms', name: 'google-play-services', version:'14.0.0'
+    // compile group: 'com.google.android.gms', name: 'google-play-services', version:'14.0.0'
+    // compile group: 'com.google.android.gms', name: 'google-play-services', version:'14.0.0'
     compile(group: 'com.googlecode.ez-vcard', name: 'ez-vcard', version:'0.8.3') {
         exclude(module: 'jsoup')
         exclude(module: 'freemarker')

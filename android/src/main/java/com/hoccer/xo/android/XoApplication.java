@@ -1,9 +1,9 @@
 package com.hoccer.xo.android;
 
-import android.app.Application;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Environment;
+import android.support.multidex.MultiDexApplication;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hoccer.talk.client.IXoClientHost;
 import com.hoccer.talk.client.model.TalkClientDownload;
@@ -28,7 +28,7 @@ import java.util.concurrent.ScheduledExecutorService;
  * for such things as initializing the logger and setting up the
  * XO client itself. All global initialization should go here.
  */
-public class XoApplication extends Application {
+public class XoApplication extends MultiDexApplication {
 
     private static Logger sLog;
 
