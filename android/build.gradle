@@ -4,15 +4,9 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:1.3.1'
-
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
-}
-
-plugins {
-    id "nebula.provided-base" version "2.2.2"
-    id "nebula.optional-base" version "2.2.2"
 }
 
 apply plugin: 'com.android.application'
@@ -46,7 +40,7 @@ android {
         ]
         applicationId "com.artcom.hoccer"
         minSdkVersion 14
-        targetSdkVersion 17
+        targetSdkVersion 23
         versionCode 413
         versionName "3.2.10-SNAPSHOT"
         multiDexEnabled true
@@ -95,14 +89,11 @@ dependencies {
     }
     compile project(":drag-sort-listview")
 
-    //compile 'com.google.android.gms:play-services:8.4.0'
     compile 'com.google.android.gms:play-services-gcm:8.4.0'
     compile 'com.google.android.gms:play-services-maps:8.4.0'
-    compile 'com.android.support:multidex:1.0.0'
+    compile 'com.android.support:multidex:1.0.1'
+    compile 'com.android.support:support-v4:23.1.1'
 
-    // Local binary dependency
-    // compile group: 'com.google.android.gms', name: 'google-play-services', version:'14.0.0'
-    // compile group: 'com.google.android.gms', name: 'google-play-services', version:'14.0.0'
     compile(group: 'com.googlecode.ez-vcard', name: 'ez-vcard', version:'0.8.3') {
         exclude(module: 'jsoup')
         exclude(module: 'freemarker')
@@ -110,11 +101,8 @@ dependencies {
     compile group: 'com.nostra13.universalimageloader', name: 'universal-image-loader', version:'1.9.0'
     compile group: 'com.squareup.picasso', name: 'picasso', version:'2.5.0'
     compile group: 'com.j256.ormlite', name: 'ormlite-android', version:'4.43'
-
     compile group: 'ufwa-common', name: 'log4j-android', version:'1.2.17-1'
-
     compile group: 'commons-codec', name: 'commons-codec', version:'1.7'
-    compile group: 'com.android.support', name: 'support-v4', version:'19.0.1'
     compile group: 'net.hockeyapp.android', name: 'HockeySDK', version:'3.0.1'
     compile group: 'com.google.zxing', name: 'core', version:'3.0.1'
     compile group: 'inter.nal.barcodescanner', name: 'zbar', version:'1.0'
@@ -124,30 +112,9 @@ dependencies {
     testCompile group: 'com.h2database', name: 'h2', version:'1.4.179'
     testCompile group: 'com.j256.ormlite', name: 'ormlite-jdbc', version:'4.43'
     testCompile group: 'com.jayway.awaitility', name: 'awaitility', version:'1.6.3'
-//    compile(group: 'android', name: 'android', version:'4.4.2_r2') {
-//        /* This dependency was originally in the Maven provided scope, but the project was not of type war.
-//        This behavior is not yet supported by Gradle, so this dependency has been converted to a compile dependency.
-//        Please review and delete this closure when resolved. */
-//    }
-//    compile(group: 'log4j', name: 'log4j', version:'1.2.17') {
-//        /* This dependency was originally in the Maven provided scope, but the project was not of type war.
-//        This behavior is not yet supported by Gradle, so this dependency has been converted to a compile dependency.
-//        Please review and delete this closure when resolved. */
-//    }
-//    compile group: 'log4j', name: 'log4j', version: '1.2.17'
     compile(group: 'org.apache.httpcomponents', name: 'httpclient', version:'4.0.3') {
         /* This dependency was originally in the Maven provided scope, but the project was not of type war.
         This behavior is not yet supported by Gradle, so this dependency has been converted to a compile dependency.
         Please review and delete this closure when resolved. */
     }
 }
-
-
-
-//
-//dependencies {
-//    provided 'org.apache.commons:commons-lang3:3.3.2'
-//    provided group: 'log4j', name: 'log4j', version: '1.2.17'
-//    compile 'org.apache.commons:commons-lang3:3.3.2', optional
-//    compile group: 'log4j', name: 'log4j', version: '1.2.17', optional
-//}
