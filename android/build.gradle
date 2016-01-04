@@ -19,11 +19,6 @@ buildProperties.load(new FileInputStream("$projectDir/label/${label}/environment
 Properties configProperties = new Properties()
 configProperties.load(new FileInputStream("$projectDir/label/${label}/environments/${environment}/assets/configuration.properties"))
 
-//processResources {
-//    from "$projectDir/label/${label}/environments/${environment}/res"
-//    expand(version: version, buildNumber: currentBuildNumber)
-//}
-
 android {
     compileSdkVersion 23
     buildToolsVersion "22.0.1"
