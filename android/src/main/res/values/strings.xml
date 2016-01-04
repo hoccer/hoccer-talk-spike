@@ -22,7 +22,6 @@
     <string name="menu_profile">Profile</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_music_viewer">Media</string>
-    <string name="menu_about">About ${app.name}</string>
     <string name="menu_faq">FAQ</string>
     <string name="menu_tutorial">Tutorial</string>
     <string name="menu_reconnect">Reconnect</string>
@@ -300,13 +299,10 @@
     <string name="profile_compare_key_description">For extra security compare this fingerprint with the fingerprint seen by your friends in your contact card.</string>
     <string name="pref_support">Support</string>
     <string name="pref_report_crashes">Send crash reports</string>
-    <string name="pref_report_crashes_summary">Help us improve ${app.name} by sending your crash logs to the development team. Please find detailed information about crash reports in our FAQ.</string>
     <string name="dialog_report_crash_title">Crash data</string>
-    <string name="dialog_report_crash_message">Crash information available. We kindly ask you to send this information to ${app.name} developers and help us improving our service.</string>
     <string name="dialog_report_crash_negative">Dismiss</string>
     <string name="dialog_report_crash_positive">Send</string>
     <string name="dialog_report_errors_title">Error data</string>
-    <string name="dialog_report_errors_message">Error information available. We kindly ask you to send this information to ${app.name} developers and help us improving our service.</string>
 
     <string name="pref_please_wait">Please wait…</string>
     <string name="up_down_unlimited_option">unlimited</string>
@@ -316,9 +312,6 @@
     <string name="contact_item_sent_attachment">%1$s sent</string>
     <string name="error_avatar_selection">The image you have selected is not suitable as avatar.</string>
     <string name="error_attachment_selection">The file you have selected cannot be used as an attachment.</string>
-    <string name="sms_invitation_text">Hey! I\'m now using the free app ${app.name} for secure chatting. Download it now and add me as a contact:\n%1$s%2$s\n%3$s</string>
-    <string name="email_invitation_subject">Join me at ${app.name}!</string>
-    <string name="email_invitation_text">Hey!I\'m now using the free app ${app.name} for secure chatting. Download it now and add me as contact:\n%1$s%2$s\n%3$s</string>
 
     <string name="dialog_export_credentials_title">Export credentials</string>
     <string name="export_credentials_success">Successfully saved your credentials.</string>
@@ -346,7 +339,6 @@
     <string name="placeholder_groups_text"><![CDATA[<a href="http://faq.hoccer.com/tutorial-xo/#groups">Create groups</a>]]> to chat with many friends at once.</string>
     <string name="placeholder_nearby_text">Waiting for others <![CDATA[<a href="http://faq.hoccer.com/tutorial-xo/#nearby">nearby</a>]]>…</string>
     <string name="placeholder_worldwide_text">Waiting for others <![CDATA[<a href="http://faq.hoccer.com/tutorial-xo/#worldwide">worldwide</a>]]>…</string>
-    <string name="actionbar_default_title">${app.name.short}</string>
     <string name="content_audio_caption">Media</string>
     <string name="content_audio_by_contact_caption">Media from %1$s</string>
     <string name="profile_nickname_text">Nickname</string>
@@ -359,7 +351,6 @@
     <string name="error_client_not_nearby_or_ww">Message can not be sent: Relationship with this contact does no longer exist. Please send an invitation to the contact via the user\'s profile view.</string>
     <string name="invite_several_entries">Has several entries</string>
 
-    <string name="about_advert_text">${app.name} \n- your secure multimedia messenger\n\nSecurity, data protection and the protection of privacy are of extreme importance to us. ${app.name} sets new standards in mobile data transmission and puts mobile privacy to a whole new level, due to latest encryption and transmission technologies. ${app.name} provides an easy and unlimited exchange of data between smartphones and tablets, without constraining users to register and enter confidential data.\n\nShare hugs \u0026 kisses</string>
     <string name="about_version_description">Version %1$s (%2$d)</string>
 
     <string name="search_section_caption_contacts">Contacts</string>
@@ -433,9 +424,7 @@
     <string name="restore_failure_default_message">Oh noes, something went wrong importing the backup. Please try again.</string>
     <string name="restore_failure_insufficient_disk_space_message">There is not enough free storage to import the chosen backup. Please delete files from SD card and try again. You need %1$s free disk space.</string>
     <string name="restore_enter_password">Enter password</string>
-    <string name="restore_restart_hoccer">Please re-start ${app.name.short} to complete restoring your account. </string>
     <string name="restore_no_backups_found_title">No backups found</string>
-    <string name="restore_no_backups_found_message">Please copy a backup to\n%1$s\nto restore a former ${app.name.short} account.</string>
 
     <!-- Passcode Protection -->
     <string name="password_protection">Password protection</string>

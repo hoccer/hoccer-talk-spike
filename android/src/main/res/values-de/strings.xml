@@ -21,7 +21,6 @@
     <string name="menu_new_group">Gruppe erstellen</string>
     <string name="menu_profile">Profil</string>
     <string name="menu_settings">Einstellungen</string>
-    <string name="menu_about">Über ${app.name}</string>
     <string name="menu_music_viewer">Medien</string>
     <string name="menu_reconnect">Erneut verbinden</string>
     <string name="menu_clear_conversation">Chat löschen</string>
@@ -286,13 +285,10 @@
     <string name="profile_compare_key_description">Für ein Extra an Sicherheit, vergleiche diesen Fingerabdruck mit dem Fingerabdruck, den deine Freunde in deiner Kontaktkarte sehen.</string>
     <string name="pref_support">Technischer Support</string>
     <string name="pref_report_crashes">Abstürze melden</string>
-    <string name="pref_report_crashes_summary">Unterstütze ${app.name} bei der Weiterentwicklung indem du deine Abstürze meldest. Welche Informationen an ${app.name} geschickt werden, kannst du in den FAQ einsehen.</string>
     <string name="dialog_report_crash_title">Crash-Information</string>
-    <string name="dialog_report_crash_message">Es wurde eine Aufzeichnung des letzten Crashs gefunden. Bitte schicke diesen Bericht an ${app.name}, damit wir den Fehler schnellst möglich beheben können.</string>
     <string name="dialog_report_crash_negative">Abbrechen</string>
     <string name="dialog_report_crash_positive">Senden</string>
     <string name="dialog_report_errors_title">Fehler-Informationen</string>
-    <string name="dialog_report_errors_message">Bei der letzten Ausführung sind Fehler aufgetreten. Bitte schicke diesen Bericht an ${app.name}, damit wir diese schnellst möglich beheben können.</string>
     <string name="pref_please_wait">Bitte warten…</string>
     <string name="up_down_unlimited_option">unbegrenzt</string>
     <string name="up_down_manual_option">manuell</string>
@@ -301,9 +297,6 @@
     <string name="contact_item_sent_attachment">%1$s gesendet</string>
     <string name="error_avatar_selection">Du kannst dieses Bild nicht als Avatar verwenden.</string>
     <string name="error_attachment_selection">Du kannst diese Datei nicht als Anhang verwenden.</string>
-    <string name="sms_invitation_text">Hey! Ich nutze die Gratis-App ${app.name} zum sicheren Chatten! Jetzt herunterladen und mich als Kontakt hinzufügen: %1$s%2$s\n%3$s</string>
-    <string name="email_invitation_subject">Triff mich bei ${app.name}!</string>
-    <string name="email_invitation_text">Hey! Ich nutze jetzt die Gratis-App ${app.name} zum sicheren Chatten! Jetzt herunterladen und mich als Kontakt hinzufügen:\n%1$s%2$s\n%3$s</string>
 
     <string name="dialog_export_credentials_title">Zugangsdaten exportieren</string>
     <string name="export_credentials_success">Zugangsdaten erfolgreich exportiert.</string>
@@ -321,7 +314,6 @@
     <string name="placeholder_groups_text"><![CDATA[<a href="http://faq.hoccer.com/de/tutorial-xo/#gruppen">Lege Gruppen an</a>]]> um mit vielen Freunden gleichzeitig zu chatten.</string>
     <string name="placeholder_nearby_text">Warten auf Kontakte <![CDATA[<a href="http://faq.hoccer.com/de/tutorial-xo/#in-der-naehe">in der Nähe</a>]]>…</string>
     <string name="placeholder_worldwide_text">Warten auf Kontakte <![CDATA[<a href="http://faq.hoccer.com/de/tutorial-xo/#weltweit">weltweit</a>]]></string>
-    <string name="actionbar_default_title">${app.name.short}</string>
     <string name="content_audio_caption">Medien</string>
     <string name="content_audio_by_contact_caption">Medien von %1$s</string>
     <string name="profile_nickname_text">Anzeigename</string>
@@ -347,7 +339,6 @@
     <string name="search_section_caption_contacts">Kontakte</string>
     <string name="search_section_caption_audio_files">Audiodateien</string>
 
-    <string name="about_advert_text">${app.name} \n- dein sicherer Multimedia Messenger\n\nWir legen größten Wert auf Sicherheit, Datenschutz und Privatsphäre. Dank modernster Verschlüsselungs- und Übertragungstechnologien setzt ${app.name} neue Standards in der mobilen Datenübertragung und definiert Privatsphäre im mobilen Messaging Sektor neu. ${app.name} ermöglicht einen einfachen und unbegrenzten Datenaustausch zwischen Smartphones und Tablets ohne vorherige Eingabe von vertraulichen Nutzerdaten.\n\nShare hugs \u0026 kisses</string>
     <string name="about_version_description">Version %1$s (%2$d)</string>
 
     <!-- media types for "expecting ..." in message states -->
@@ -420,9 +411,7 @@
     <string name="restore_failure_default_message">Beim Wiederherstellen ist etwas schief gelaufen. Bitte versuche es erneut.</string>
     <string name="restore_failure_insufficient_disk_space_message">Nicht genügend Speicherplatz. Bitte Dateien von der SD Karte löschen und erneut versuchen. Du brauchst %1$s freien Speicherplatz.</string>
     <string name="restore_enter_password">Passwort eingeben</string>
-    <string name="restore_restart_hoccer">Bitte ${app.name.short} neu starten, um die Wiederherstellung zu beenden.</string>
     <string name="restore_no_backups_found_title">Kein Backup vorhanden</string>
-    <string name="restore_no_backups_found_message">Bitte bestehendes Backup nach\n%1$s\nkopieren um früheren ${app.name.short} Account wiederherstellen zu können.</string>
 
     <!-- Passcode Protection -->
     <string name="password_protection">Passwortschutz</string>
