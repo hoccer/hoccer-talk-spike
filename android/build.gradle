@@ -45,6 +45,16 @@ android {
         versionName "3.2.10-SNAPSHOT"
         multiDexEnabled true
     }
+
+    signingConfigs {
+        debug {
+            storeFile file("$projectDir/config/debug.keystore")
+            storePassword "android"
+            keyAlias "androiddebugkey"
+            keyPassword "android"
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -54,6 +64,7 @@ android {
             applicationIdSuffix ".debug"
             debuggable true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
         }
     }
     lintOptions {
