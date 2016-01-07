@@ -14,11 +14,6 @@ apply plugin: 'com.android.application'
 if (!hasProperty("label")) ext.label = "hoccer"
 if (!hasProperty("environment")) ext.environment = "development"
 
-Properties buildProperties = new Properties()
-buildProperties.load(new FileInputStream("$projectDir/label/${label}/environments/${environment}/build.properties"))
-Properties configProperties = new Properties()
-configProperties.load(new FileInputStream("$projectDir/label/${label}/environments/${environment}/assets/configuration.properties"))
-
 android {
     compileSdkVersion 23
     buildToolsVersion "22.0.1"
@@ -26,13 +21,7 @@ android {
     useLibrary  'org.apache.http.legacy'
 
     defaultConfig {
-        manifestPlaceholders = [
-                "hoccer.invitation.uri.scheme" : configProperties.getProperty("hoccer.invitation.uri.scheme"),
-                "app.name" : buildProperties.getProperty("app.name"),
-                "app.name.short" : buildProperties.getProperty("app.name.short"),
-                "apk.package.name" : buildProperties.getProperty("apk.package.name"),
-                "google.maps.api.key" : buildProperties.getProperty("google.maps.api.key")
-        ]
+
         applicationId "com.artcom.hoccer"
         minSdkVersion 14
         targetSdkVersion 22 // when updating 'targetSdkVersion' be aware of issues with the xzing library and Android 6.+
@@ -52,14 +41,37 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            Properties buildProperties = new Properties()
+            buildProperties.load(new FileInputStream("$projectDir/label/${label}/environments/production/build.properties"))
+            Properties configProperties = new Properties()
+            configProperties.load(new FileInputStream("$projectDir/label/${label}/environments/production/assets/configuration.properties"))
+            manifestPlaceholders = [
+                    "hoccer.invitation.uri.scheme" : configProperties.getProperty("hoccer.invitation.uri.scheme"),
+                    "app.name" : buildProperties.getProperty("app.name"),
+                    "app.name.short" : buildProperties.getProperty("app.name.short"),
+                    "apk.package.name" : buildProperties.getProperty("apk.package.name"),
+                    "google.maps.api.key" : buildProperties.getProperty("google.maps.api.key")
+            ]
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt') , 'proguard.cfg', 'proguard-release.cfg'
+            //signingConfig signingConfigs.debug
+            //debuggable true
             resValue "string", "package_name", "com.artcom.hoccer"
         }
         debug {
+            Properties buildProperties = new Properties()
+            buildProperties.load(new FileInputStream("$projectDir/label/${label}/environments/development/build.properties"))
+            Properties configProperties = new Properties()
+            configProperties.load(new FileInputStream("$projectDir/label/${label}/environments/development/assets/configuration.properties"))
+            manifestPlaceholders = [
+                    "hoccer.invitation.uri.scheme" : configProperties.getProperty("hoccer.invitation.uri.scheme"),
+                    "app.name" : buildProperties.getProperty("app.name"),
+                    "app.name.short" : buildProperties.getProperty("app.name.short"),
+                    "apk.package.name" : buildProperties.getProperty("apk.package.name"),
+                    "google.maps.api.key" : buildProperties.getProperty("google.maps.api.key")
+            ]
             applicationIdSuffix ".dev"
             debuggable true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.debug
             resValue "string", "package_name", "com.artcom.hoccer.debug"
         }
@@ -67,6 +79,7 @@ android {
     lintOptions {
         abortOnError false
     }
+
     packagingOptions {
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/LICENSE.txt'
