@@ -119,13 +119,6 @@ public class XoApplication extends MultiDexApplication {
         sLog.info("internal storage at " + sInternalStorage);
         sLog.info("external storage at " + sExternalStorage);
 
-        // initialize version information
-//        XoVersion.initialize(this);
-//        sLog.info("application build time " + XoVersion.getBuildTime());
-//        sLog.info("application branch " + XoVersion.getBranch());
-//        sLog.info("application commit " + XoVersion.getCommitId());
-//        sLog.info("application describe " + XoVersion.getCommitDescribe());
-
         // configure ssl
         XoSsl.initialize(this);
 
@@ -199,7 +192,7 @@ public class XoApplication extends MultiDexApplication {
     }
 
     private boolean isFirstConnectionAfterCrashOrUpdate() {
-        return XoVersion.isApplicationUpdated(this) || mCrashMonitor.isCrashedBefore();
+        return UpdateHelper.isApplicationUpdated(this) || mCrashMonitor.isCrashedBefore();
     }
 
     @Override
