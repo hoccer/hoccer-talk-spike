@@ -46,34 +46,55 @@ android {
             Properties configProperties = new Properties()
             configProperties.load(new FileInputStream("$projectDir/label/${label}/environments/production/assets/configuration.properties"))
             manifestPlaceholders = [
-                    "hoccer.invitation.uri.scheme" : configProperties.getProperty("hoccer.invitation.uri.scheme"),
-                    "app.name" : buildProperties.getProperty("app.name"),
-                    "app.name.short" : buildProperties.getProperty("app.name.short"),
-                    "apk.package.name" : buildProperties.getProperty("apk.package.name"),
-                    "google.maps.api.key" : buildProperties.getProperty("google.maps.api.key")
+                    "hoccer.invitation.uri.scheme": configProperties.getProperty("hoccer.invitation.uri.scheme"),
+                    "app.name"                    : buildProperties.getProperty("app.name"),
+                    "app.name.short"              : buildProperties.getProperty("app.name.short"),
+                    "apk.package.name"            : buildProperties.getProperty("apk.package.name"),
+                    "google.maps.api.key"         : buildProperties.getProperty("google.maps.api.key")
             ]
             minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt') , 'proguard.cfg', 'proguard-release.cfg'
-            //signingConfig signingConfigs.debug
-            //debuggable true
-            resValue "string", "package_name", "com.artcom.hoccer"
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard.cfg', 'proguard-release.cfg'
+            zipAlignEnabled false
+            debuggable false
+            resValue "string", "package_name", buildProperties.getProperty("apk.package.name")
         }
+
         debug {
             Properties buildProperties = new Properties()
             buildProperties.load(new FileInputStream("$projectDir/label/${label}/environments/development/build.properties"))
             Properties configProperties = new Properties()
             configProperties.load(new FileInputStream("$projectDir/label/${label}/environments/development/assets/configuration.properties"))
             manifestPlaceholders = [
-                    "hoccer.invitation.uri.scheme" : configProperties.getProperty("hoccer.invitation.uri.scheme"),
-                    "app.name" : buildProperties.getProperty("app.name"),
-                    "app.name.short" : buildProperties.getProperty("app.name.short"),
-                    "apk.package.name" : buildProperties.getProperty("apk.package.name"),
-                    "google.maps.api.key" : buildProperties.getProperty("google.maps.api.key")
+                    "hoccer.invitation.uri.scheme": configProperties.getProperty("hoccer.invitation.uri.scheme"),
+                    "app.name"                    : buildProperties.getProperty("app.name"),
+                    "app.name.short"              : buildProperties.getProperty("app.name.short"),
+                    "apk.package.name"            : buildProperties.getProperty("apk.package.name"),
+                    "google.maps.api.key"         : buildProperties.getProperty("google.maps.api.key")
             ]
             applicationIdSuffix ".dev"
             debuggable true
             signingConfig signingConfigs.debug
-            resValue "string", "package_name", "com.artcom.hoccer.debug"
+            resValue "string", "package_name", buildProperties.getProperty("apk.package.name")
+        }
+
+        review {
+            Properties buildProperties = new Properties()
+            buildProperties.load(new FileInputStream("$projectDir/label/${label}/environments/testing/build.properties"))
+            Properties configProperties = new Properties()
+            configProperties.load(new FileInputStream("$projectDir/label/${label}/environments/testing/assets/configuration.properties"))
+            manifestPlaceholders = [
+                    "hoccer.invitation.uri.scheme": configProperties.getProperty("hoccer.invitation.uri.scheme"),
+                    "app.name"                    : buildProperties.getProperty("app.name"),
+                    "app.name.short"              : buildProperties.getProperty("app.name.short"),
+                    "apk.package.name"            : buildProperties.getProperty("apk.package.name"),
+                    "google.maps.api.key"         : buildProperties.getProperty("google.maps.api.key")
+            ]
+            minifyEnabled true
+            applicationIdSuffix ".test"
+            debuggable true
+            signingConfig signingConfigs.debug
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard.cfg', 'proguard-release.cfg'
+            resValue "string", "package_name", buildProperties.getProperty("apk.package.name")
         }
     }
     lintOptions {
