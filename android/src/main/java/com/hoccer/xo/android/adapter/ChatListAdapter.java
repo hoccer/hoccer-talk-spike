@@ -34,7 +34,6 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
     private static final Comparator<ChatListItem> LATEST_ITEM_COMPARATOR = new Comparator<ChatListItem>() {
         @Override
         public int compare(ChatListItem chatListItem1, ChatListItem chatListItem2) {
-
             long value1 = Math.max(chatListItem1.getMessageTimeStamp(), chatListItem1.getContactCreationTimeStamp());
             long value2 = Math.max(chatListItem2.getMessageTimeStamp(), chatListItem2.getContactCreationTimeStamp());
 
