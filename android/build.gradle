@@ -153,9 +153,4 @@ dependencies {
     testCompile 'com.h2database:h2:1.4.179'
     testCompile 'com.j256.ormlite:ormlite-jdbc:4.43'
     testCompile 'com.jayway.awaitility:awaitility:1.6.3'
-    compile('org.apache.httpcomponents:httpclient:4.0.3') {
-        /* This dependency was originally in the Maven provided scope, but the project was not of type war.
-        This behavior is not yet supported by Gradle, so this dependency has been converted to a compile dependency.
-        Please review and delete this closure when resolved. */
-    }
 }
