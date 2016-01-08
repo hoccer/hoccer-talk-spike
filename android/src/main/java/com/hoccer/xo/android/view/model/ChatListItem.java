@@ -44,7 +44,7 @@ public abstract class ChatListItem {
 
             avatarView = (AvatarView) avatarStub.inflate();
             avatarView.setTag(layoutId);
-        } else if ((Integer) avatarView.getTag() != getAvatarLayout()) {
+        } else if (hasAvatarTypeChanged(avatarView)) {
             ViewGroup viewGroup = (ViewGroup) convertView.findViewById(R.id.avatar_container);
             viewGroup.removeView(avatarView);
 
@@ -56,6 +56,10 @@ public abstract class ChatListItem {
         }
 
         mAvatarView = avatarView;
+    }
+
+    private boolean hasAvatarTypeChanged(AvatarView avatarView) {
+        return (Integer) avatarView.getTag() != getAvatarLayout();
     }
 
     protected abstract int getAvatarLayout();

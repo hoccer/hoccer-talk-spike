@@ -13,4 +13,5 @@
     <dimen name="well_box_corner_radius">3dp</dimen>
     <dimen name="well_box_padding_default">20dp</dimen>
     <dimen name="chat_view_avatar_size">48dp</dimen>
+    <dimen name="chat_view_avatar_size_outer">56dp</dimen>
 </resources>

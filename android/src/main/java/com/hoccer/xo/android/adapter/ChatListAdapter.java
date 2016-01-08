@@ -87,7 +87,6 @@ public class ChatListAdapter extends BaseAdapter implements IXoContactListener, 
             mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-
                     mChatListItems.clear();
 
                     for (final TalkClientContact contact : filteredContacts) {
