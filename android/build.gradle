@@ -18,10 +18,9 @@ android {
     compileSdkVersion 23
     buildToolsVersion "22.0.1"
 
-    useLibrary  'org.apache.http.legacy'
+    useLibrary 'org.apache.http.legacy'
 
     defaultConfig {
-
         applicationId "com.artcom.hoccer"
         minSdkVersion 14
         targetSdkVersion 22 // when updating 'targetSdkVersion' be aware of issues with the xzing library and Android 6.+
@@ -112,7 +111,6 @@ android {
         hoccer {
             applicationId "com.artcom.hoccer"
         }
-
     }
 }
 group = 'hoccer'
