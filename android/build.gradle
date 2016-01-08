@@ -11,9 +11,6 @@ buildscript {
 
 apply plugin: 'com.android.application'
 
-if (!hasProperty("label")) ext.label = "hoccer"
-if (!hasProperty("environment")) ext.environment = "development"
-
 android {
     compileSdkVersion 23
     buildToolsVersion "22.0.1"
@@ -21,12 +18,113 @@ android {
     useLibrary 'org.apache.http.legacy'
 
     defaultConfig {
-        applicationId "com.artcom.hoccer"
         minSdkVersion 14
         targetSdkVersion 22 // when updating 'targetSdkVersion' be aware of issues with the xzing library and Android 6.+
         versionCode 413
         versionName "3.2.10-SNAPSHOT"
         multiDexEnabled true
+
+        manifestPlaceholders = [
+            "google.maps.api.key": "AIzaSyBpFzzIcVtJj0eUZSghPY8qg4cAnEV1ZgA"
+        ]
+    }
+
+    productFlavors {
+        hoccer {
+            applicationId "com.artcom.hoccer"
+            manifestPlaceholders = [
+                    "app.name"                    : "Hoccer",
+                    "app.name.short"              : "Hoccer",
+            ]
+            buildTypes {
+                release {
+                    manifestPlaceholders = [
+                            "hoccer.invitation.uri.scheme": "hcr",
+                    ]
+                    resValue "string", "package_name", "com.artcom.hoccer"
+                }
+                debug {
+                    manifestPlaceholders = [
+                            "hoccer.invitation.uri.scheme": "hcrd",
+                    ]
+                    resValue "string", "package_name", "com.artcom.hoccer.dev"
+                }
+                review {
+                    manifestPlaceholders = [
+                            "hoccer.invitation.uri.scheme": "hcrd",
+                    ]
+                    resValue "string", "package_name", "com.artcom.hoccer.test"
+                }
+            }
+        }
+        starmeo {
+            applicationId "com.starmeo.messenger"
+            manifestPlaceholders = [
+                    "app.name"                    : "Starmeo",
+                    "app.name.short"              : "Starmeo",
+            ]
+            buildTypes {
+                release {
+                    manifestPlaceholders = [
+                            "hoccer.invitation.uri.scheme": "starmeo",
+                    ]
+                    resValue "string", "package_name", "com.starmeo.messenger"
+                }
+                debug {
+                    manifestPlaceholders = [
+                            "hoccer.invitation.uri.scheme": "starmeod",
+                    ]
+                    resValue "string", "package_name", "com.starmeo.messenger.dev"
+                }
+            }
+        }
+        stroeer {
+            applicationId "com.stroeer.messenger"
+            manifestPlaceholders = [
+                    "app.name"                    : "Str\\u00f6er Messenger",
+                    "app.name.short"              : "Str\\u00f6er",
+            ]
+            buildTypes {
+                release {
+                    manifestPlaceholders = [
+                            "hoccer.invitation.uri.scheme": "strm",
+                    ]
+                    resValue "string", "package_name", "com.starmeo.messenger"
+                }
+                debug {
+                    manifestPlaceholders = [
+                            "hoccer.invitation.uri.scheme": "strmd",
+                    ]
+                    resValue "string", "package_name", "com.stroeer.messenger.dev"
+                }
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            zipAlignEnabled false
+            debuggable false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard.cfg', 'proguard-release.cfg'
+        }
+
+        debug {
+            applicationIdSuffix ".dev"
+            debuggable true
+            signingConfig signingConfigs.debug
+        }
+
+        review {
+            minifyEnabled true
+            applicationIdSuffix ".test"
+            debuggable true
+            signingConfig signingConfigs.debug
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard.cfg', 'proguard-release.cfg'
+        }
+    }
+    lintOptions {
+        abortOnError false
     }
 
     signingConfigs {
@@ -38,79 +136,11 @@ android {
         }
     }
 
-    buildTypes {
-        release {
-            Properties buildProperties = new Properties()
-            buildProperties.load(new FileInputStream("$projectDir/label/${label}/environments/production/build.properties"))
-            Properties configProperties = new Properties()
-            configProperties.load(new FileInputStream("$projectDir/label/${label}/environments/production/assets/configuration.properties"))
-            manifestPlaceholders = [
-                    "hoccer.invitation.uri.scheme": configProperties.getProperty("hoccer.invitation.uri.scheme"),
-                    "app.name"                    : buildProperties.getProperty("app.name"),
-                    "app.name.short"              : buildProperties.getProperty("app.name.short"),
-                    "apk.package.name"            : buildProperties.getProperty("apk.package.name"),
-                    "google.maps.api.key"         : buildProperties.getProperty("google.maps.api.key")
-            ]
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard.cfg', 'proguard-release.cfg'
-            zipAlignEnabled false
-            debuggable false
-            resValue "string", "package_name", buildProperties.getProperty("apk.package.name")
-        }
-
-        debug {
-            Properties buildProperties = new Properties()
-            buildProperties.load(new FileInputStream("$projectDir/label/${label}/environments/development/build.properties"))
-            Properties configProperties = new Properties()
-            configProperties.load(new FileInputStream("$projectDir/label/${label}/environments/development/assets/configuration.properties"))
-            manifestPlaceholders = [
-                    "hoccer.invitation.uri.scheme": configProperties.getProperty("hoccer.invitation.uri.scheme"),
-                    "app.name"                    : buildProperties.getProperty("app.name"),
-                    "app.name.short"              : buildProperties.getProperty("app.name.short"),
-                    "apk.package.name"            : buildProperties.getProperty("apk.package.name"),
-                    "google.maps.api.key"         : buildProperties.getProperty("google.maps.api.key")
-            ]
-            applicationIdSuffix ".dev"
-            debuggable true
-            signingConfig signingConfigs.debug
-            resValue "string", "package_name", buildProperties.getProperty("apk.package.name")
-        }
-
-        review {
-            Properties buildProperties = new Properties()
-            buildProperties.load(new FileInputStream("$projectDir/label/${label}/environments/testing/build.properties"))
-            Properties configProperties = new Properties()
-            configProperties.load(new FileInputStream("$projectDir/label/${label}/environments/testing/assets/configuration.properties"))
-            manifestPlaceholders = [
-                    "hoccer.invitation.uri.scheme": configProperties.getProperty("hoccer.invitation.uri.scheme"),
-                    "app.name"                    : buildProperties.getProperty("app.name"),
-                    "app.name.short"              : buildProperties.getProperty("app.name.short"),
-                    "apk.package.name"            : buildProperties.getProperty("apk.package.name"),
-                    "google.maps.api.key"         : buildProperties.getProperty("google.maps.api.key")
-            ]
-            minifyEnabled true
-            applicationIdSuffix ".test"
-            debuggable true
-            signingConfig signingConfigs.debug
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard.cfg', 'proguard-release.cfg'
-            resValue "string", "package_name", buildProperties.getProperty("apk.package.name")
-        }
-    }
-    lintOptions {
-        abortOnError false
-    }
-
     packagingOptions {
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE'
         exclude 'META-INF/NOTICE.txt'
-    }
-
-    productFlavors {
-        hoccer {
-            applicationId "com.artcom.hoccer"
-        }
     }
 }
 group = 'hoccer'
