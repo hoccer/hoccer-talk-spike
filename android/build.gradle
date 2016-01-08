@@ -182,3 +182,9 @@ dependencies {
     testCompile 'com.j256.ormlite:ormlite-jdbc:4.43'
     testCompile 'com.jayway.awaitility:awaitility:1.6.3'
 }
+
+android.variantFilter { variant ->
+    if(variant.buildType.name.endsWith('review') & !variant.getFlavors().get(0).name.equals('hoccer')) {
+        variant.setIgnore(true);
+    }
+}
