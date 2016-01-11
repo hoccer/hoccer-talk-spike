@@ -15,8 +15,8 @@ subprojects {
   repositories {
     mavenLocal()
     
-    maven { url "https://archiva.hoccer.com/repository/snapshots/" }
-    maven { url "https://archiva.hoccer.com/repository/hoccer/" }
+    maven { url "https://archiva.hoccer.de/repository/snapshots/" }
+    maven { url "https://archiva.hoccer.de/repository/hoccer/" }
     maven { url "http://repo.maven.apache.org/maven2" }
   }
 }
