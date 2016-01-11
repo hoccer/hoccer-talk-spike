@@ -13,9 +13,13 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "22.0.1"
+    buildToolsVersion "23.0.2"
 
     useLibrary 'org.apache.http.legacy'
+
+    dexOptions{
+        javaMaxHeapSize "4g"
+    }
 
     defaultConfig {
         minSdkVersion 14
@@ -57,7 +61,7 @@ android {
                 }
             }
         }
-        starmeo {
+        /*starmeo {
             applicationId "com.starmeo.messenger"
             manifestPlaceholders = [
                     "app.name"                    : "Starmeo",
@@ -89,7 +93,7 @@ android {
                     manifestPlaceholders = [
                             "hoccer.invitation.uri.scheme": "strm",
                     ]
-                    resValue "string", "package_name", "com.starmeo.messenger"
+                    resValue "string", "package_name", "com.stroeer.messenger"
                 }
                 debug {
                     manifestPlaceholders = [
@@ -98,7 +102,7 @@ android {
                     resValue "string", "package_name", "com.stroeer.messenger.dev"
                 }
             }
-        }
+        }*/
     }
 
     buildTypes {
