@@ -66,4 +66,8 @@
       <item>90</item>
       <item>100</item>
     </string-array>
+
+    <string name="default_upload_image_pixel_count" value="1000000"/>
+    <string name="default_upload_image_encoding_quality" value="50"/>
+
 </resources>
