@@ -183,6 +183,7 @@ dependencies {
     testCompile 'com.jayway.awaitility:awaitility:1.6.3'
 }
 
+// Ignore 'review' build type for flavors except 'hoccer'
 android.variantFilter { variant ->
     if(variant.buildType.name.endsWith('review') & !variant.getFlavors().get(0).name.equals('hoccer')) {
         variant.setIgnore(true);
