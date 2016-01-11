@@ -66,9 +66,6 @@
 
     <PreferenceCategory
             android:title="@string/pref_category_image_encoding">
-
-    <PreferenceCategory
-            android:title="@string/pref_category_image_encoding">
         <ListPreference
                 android:key="preference_image_encoding_size"
                 android:title="@string/pref_image_size"
