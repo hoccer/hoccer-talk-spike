@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Starmeo</string>
     <string name="sms_invitation_text">Hey! Ich nutze die Star-App Starmeo zum sicheren Chatten! Jetzt herunterladen und mich als Kontakt hinzufügen: %1$s%2$s\n%3$s</string>
     <string name="email_invitation_text">Hey!&lt;br&gt;Ich nutze jetzt die Star-App Starmeo zum sicheren Chatten! Jetzt herunterladen und mich als Kontakt hinzufügen:&lt;br&gt;&lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;&lt;br&gt;&lt;br&gt;%3$s</string>
-    
     <string name="menu_about">Über Starmeo</string>
     <string name="pref_report_crashes_summary">Unterstütze Starmeo bei der Weiterentwicklung indem du deine Abstürze meldest. Welche Informationen an Starmeo geschickt werden, kannst du in den FAQ einsehen.</string>
     <string name="dialog_report_crash_message">Es wurde eine Aufzeichnung des letzten Crashs gefunden. Bitte schicke diesen Bericht an Starmeo, damit wir den Fehler schnellst möglich beheben können.</string>

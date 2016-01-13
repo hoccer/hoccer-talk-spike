@@ -27,6 +27,7 @@ android {
         versionCode 413
         versionName "3.2.10-SNAPSHOT"
         multiDexEnabled true
+        applicationId "com.artcom.hoccer"
 
         manifestPlaceholders = [
             "google.maps.api.key": "AIzaSyBpFzzIcVtJj0eUZSghPY8qg4cAnEV1ZgA"
@@ -39,72 +40,27 @@ android {
             manifestPlaceholders = [
                     "app.name"                    : "Hoccer",
                     "app.name.short"              : "Hoccer",
+                    "hoccer.invitation.uri.scheme": "hcr"
             ]
-
-            buildTypes {
-                release {
-                    manifestPlaceholders = [
-                            "hoccer.invitation.uri.scheme": "hcr",
-                    ]
-                    resValue "string", "package_name", "com.artcom.hoccer"
-                }
-                debug {
-                    manifestPlaceholders = [
-                            "hoccer.invitation.uri.scheme": "hcrd",
-                    ]
-                    resValue "string", "package_name", "com.artcom.hoccer.dev"
-                }
-                review {
-                    manifestPlaceholders = [
-                            "hoccer.invitation.uri.scheme": "hcrd",
-                    ]
-                    resValue "string", "package_name", "com.artcom.hoccer.test"
-                }
-            }
         }
-        /*starmeo {
+
+        starmeo {
             applicationId "com.starmeo.messenger"
             manifestPlaceholders = [
                     "app.name"                    : "Starmeo",
                     "app.name.short"              : "Starmeo",
+                    "hoccer.invitation.uri.scheme": "starmeo"
             ]
-            buildTypes {
-                release {
-                    manifestPlaceholders = [
-                            "hoccer.invitation.uri.scheme": "starmeo",
-                    ]
-                    resValue "string", "package_name", "com.starmeo.messenger"
-                }
-                debug {
-                    manifestPlaceholders = [
-                            "hoccer.invitation.uri.scheme": "starmeod",
-                    ]
-                    resValue "string", "package_name", "com.starmeo.messenger.dev"
-                }
-            }
         }
+
         stroeer {
             applicationId "com.stroeer.messenger"
             manifestPlaceholders = [
                     "app.name"                    : "Str\\u00f6er Messenger",
                     "app.name.short"              : "Str\\u00f6er",
+                    "hoccer.invitation.uri.scheme": "strm"
             ]
-            buildTypes {
-                release {
-                    manifestPlaceholders = [
-                            "hoccer.invitation.uri.scheme": "strm",
-                    ]
-                    resValue "string", "package_name", "com.stroeer.messenger"
-                }
-                debug {
-                    manifestPlaceholders = [
-                            "hoccer.invitation.uri.scheme": "strmd",
-                    ]
-                    resValue "string", "package_name", "com.stroeer.messenger.dev"
-                }
-            }
-        }*/
-
+        }
     }
 
     buildTypes {
@@ -113,12 +69,18 @@ android {
             zipAlignEnabled false
             debuggable false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard.cfg', 'proguard-release.cfg'
+            manifestPlaceholders = [
+                    "hoccer.invitation.uri.suffix": ""
+            ]
         }
 
         debug {
             applicationIdSuffix ".dev"
             debuggable true
             signingConfig signingConfigs.debug
+            manifestPlaceholders = [
+                    "hoccer.invitation.uri.suffix": "d"
+            ]
         }
 
         review {
@@ -127,6 +89,9 @@ android {
             debuggable true
             signingConfig signingConfigs.debug
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard.cfg', 'proguard-release.cfg'
+            manifestPlaceholders = [
+                    "hoccer.invitation.uri.suffix": "d"
+            ]
         }
     }
     lintOptions {
