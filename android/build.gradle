@@ -27,7 +27,6 @@ android {
         versionCode 413
         versionName "3.2.10-SNAPSHOT"
         multiDexEnabled true
-        applicationId "com.artcom.hoccer"
 
         manifestPlaceholders = [
             "google.maps.api.key": "AIzaSyBpFzzIcVtJj0eUZSghPY8qg4cAnEV1ZgA"
