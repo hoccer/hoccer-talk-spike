@@ -43,7 +43,10 @@ public class PushAgent {
 
     private final HashMap<ApnsPushProvider.Target, ApnsService> mApnsServices = new HashMap<ApnsPushProvider.Target, ApnsService>();
 
-    private final Hashtable<String, PushRequest> mOutstanding;
+    private final Map<String, PushRequest> mOutstanding;
+
+    private final Map<String, PushRequest> mNotAnswered;
+    private final Map<String, PushRequest> mAnswered;
 
     private final AtomicInteger mPushRequests = new AtomicInteger();
     private final AtomicInteger mPushDelayed = new AtomicInteger();
@@ -63,6 +66,9 @@ public class PushAgent {
         mDatabase = mServer.getDatabase();
         mConfig = mServer.getConfiguration();
         mOutstanding = new Hashtable<String, PushRequest>();
+        mNotAnswered = new Hashtable<String, PushRequest>();
+        mAnswered = new Hashtable<String, PushRequest>();
+
         mPushProviders = new ArrayList<PushProvider>();
 
         if (mConfig.isGcmEnabled()) {
@@ -176,7 +182,9 @@ public class PushAgent {
                             // no longer outstanding
                             synchronized (mOutstanding) {
                                 // perform the request
-                                request.perform();
+                                if (request.perform()) {
+                                    remember(clientId, request);
+                                }
                                 mOutstanding.remove(clientId);
                             }
                         } catch (Throwable t) {
@@ -280,5 +288,81 @@ public class PushAgent {
                 }
             }
         }
+    }
+
+    public Map<String, PushRequest> getOutstanding() {
+        return mOutstanding;
+    }
+
+    public Map<String, PushRequest> getNotAnswered() {
+        return mNotAnswered;
+    }
+
+    public Map<String, PushRequest> getAnswered() {
+        return mAnswered;
+    }
+
+    public void remember(String clientId, PushRequest request) {
+        synchronized (this) {
+            PushRequest oldRequest = mNotAnswered.get(clientId);
+            if (oldRequest != null) {
+                LOG.info("remember: Client " + clientId + ", new push after old push not answered push after " + (new Date().getTime() - oldRequest.getCreatedTime().getTime()) / 1000 + " s");
+            }
+            mNotAnswered.put(clientId, request);
+        }
+    }
+
+    public void signalLogin(String clientId) {
+        synchronized (this) {
+            PushRequest request = mNotAnswered.get(clientId);
+            if (request != null) {
+                LOG.info("signalLogin: Client " + clientId + " answered push after " + (new Date().getTime() - request.getCreatedTime().getTime()) / 1000 + " s");
+                mNotAnswered.remove(clientId);
+                mAnswered.put(clientId, request);
+            }
+        }
+    }
+    public void expireMonitorTables() {
+        final long keepAnsweredPushesFor = 1000 * 60 * 15;   // 15 minutes
+        final long keepUnansweredPushesFor = 1000 * 60 * 60;  // 60 minutes
+        mExecutor.schedule(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (this) {
+                    int expiredUnanswered = 0;
+                    int expiredAnswered = 0;
+                    try {
+                        LOG.info("expireMonitorTables: pushes not answered " + mNotAnswered.size() + ", pushes answered " + mAnswered.size());
+                        Date limit = new Date(new Date().getTime() - keepUnansweredPushesFor);
+                        Map<String, PushRequest> notAnswered = new HashMap<String, PushRequest>(mNotAnswered);
+                        for (String clientId : notAnswered.keySet()) {
+                            PushRequest request = notAnswered.get(clientId);
+                            if (request != null) {
+                                if (request.getCreatedTime().before(limit)) {
+                                    mNotAnswered.remove(clientId);
+                                    LOG.info("expireMonitorTables: Expiring push monitor for client " + clientId + ", has not answered push after " + (new Date().getTime() - request.getCreatedTime().getTime()) / 1000 + " s");
+                                    ++expiredUnanswered;
+                                }
+                            }
+                        }
+                        Date limit2 = new Date(new Date().getTime() - keepAnsweredPushesFor);
+                        Map<String, PushRequest> answered = new HashMap<String, PushRequest>(mAnswered);
+                        for (String clientId : answered.keySet()) {
+                            PushRequest request = answered.get(clientId);
+                            if (request != null) {
+                                if (request.getCreatedTime().before(limit2)) {
+                                    mAnswered.remove(clientId);
+                                    LOG.debug("expireMonitorTables: Expiring push monitor for client " + clientId + ", has answered push after " + (new Date().getTime() - request.getCreatedTime().getTime()) / 1000 + " s");
+                                    ++expiredAnswered;
+                                }
+                            }
+                        }
+                        LOG.info("expireMonitorTables: expired pushes not answered " + expiredUnanswered + ", expired pushes answered " + expiredAnswered);
+                    } catch (Throwable t) {
+                        LOG.error("expireMonitorTables: caught and swallowed exception escaping runnable", t);
+                    }
+                }
+            }
+        }, 0, TimeUnit.MILLISECONDS);
     }
 }

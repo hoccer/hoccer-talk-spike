@@ -37,6 +37,7 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.security.*;
 import java.sql.SQLException;
+
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -128,7 +129,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
     int mRSAKeysize = 1024;
 
-    private long serverTimeDiff;
+    private long mServerTimeDiff;
 
     private boolean mIsTimedOut;
 
@@ -527,8 +528,9 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
     }
 
     public Date estimatedServerTime() {
-        return new Date(new Date().getTime() + this.serverTimeDiff);
+        return new Date(new Date().getTime() + mServerTimeDiff);
     }
+
 
     public void hello() {
         try {
@@ -550,9 +552,10 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             LOG.debug("Hello: Saying hello to the server.");
             TalkServerInfo talkServerInfo = mServerRpc.hello(clientInfo);
             if (talkServerInfo != null) {
-                // serverTimeDiff is positive if server time is ahead of client time
-                this.serverTimeDiff = talkServerInfo.getServerTime().getTime() - new Date().getTime();
-                LOG.info("Hello: client time differs from server time by " + this.serverTimeDiff + " ms");
+                // mServerTimeDiff is positive if server time is ahead of client time
+                this.mServerTimeDiff = talkServerInfo.getServerTime().getTime() - new Date().getTime();
+
+                LOG.info("Hello: client time differs from server time by " + this.mServerTimeDiff + " ms");
                 LOG.debug("Hello: Current server time: " + talkServerInfo.getServerTime());
                 LOG.debug("Hello: Server switched to supportMode: " + talkServerInfo.isSupportMode());
                 LOG.debug("Hello: Server version is '" + talkServerInfo.getVersion() + "'");
@@ -1665,7 +1668,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         final TalkClientMessage clientMessage = new TalkClientMessage();
         final TalkMessage message = new TalkMessage();
         final TalkDelivery delivery = new TalkDelivery(true);
-
         final String messageTag = message.generateMessageTag();
         message.setSenderId(mSelfContact.getClientId());
         delivery.setMessageTag(messageTag);

@@ -69,6 +69,7 @@ public class PingAgent {
                 try {
                     pingReadyClients();
                     disconnectStaleClients();
+                    mServer.getPushAgent().expireMonitorTables();
                 } catch (Throwable t) {
                     LOG.error("caught and swallowed exception escaping runnable", t);
                 }

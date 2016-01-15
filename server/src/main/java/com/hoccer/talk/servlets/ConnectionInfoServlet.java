@@ -3,6 +3,7 @@ package com.hoccer.talk.servlets;
 import com.hoccer.talk.model.*;
 import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServer;
+import com.hoccer.talk.server.push.PushRequest;
 import com.hoccer.talk.server.rpc.TalkRpcConnection;
 import org.jongo.MongoCollection;
 
@@ -234,6 +235,16 @@ public class ConnectionInfoServlet extends HttpServlet {
         }
         w.write("\n");
 
+        Map<String,PushRequest> notAnswered = new HashMap<String, PushRequest>(server.getPushAgent().getNotAnswered());
+        w.write("Push Requests not yet answered ("+notAnswered.size()+"):\n");
+        printPushInfo(db, w, notAnswered);
+        w.write("\n");
+
+        Map<String,PushRequest> answered = new HashMap<String, PushRequest>(server.getPushAgent().getAnswered());
+        w.write("Push Requests answered ("+answered.size()+"):\n");
+        printPushInfo(db, w, answered);
+        w.write("\n");
+
         // nearby groups
         List<TalkGroupPresence> nearbyGroups = db.findGroupPresencesWithTypeAndState(TalkGroupPresence.GROUP_TYPE_NEARBY, TalkGroupPresence.STATE_EXISTS);
         w.write("Nearby groups ("+nearbyGroups.size()+"):\n");
@@ -286,16 +297,21 @@ public class ConnectionInfoServlet extends HttpServlet {
         w.write("Worldwide groups ("+worldwideGroups.size()+"):\n");
         for (TalkGroupPresence groupPresence : worldwideGroups) {
             List<TalkGroupMembership> memberships = db.findGroupMembershipsByIdWithStates(groupPresence.getGroupId(),
-                    new String[]{TalkGroupMembership.STATE_JOINED});
+                    new String[]{TalkGroupMembership.STATE_JOINED, TalkGroupMembership.STATE_SUSPENDED});
             long createdAgo = new Date().getTime() - groupPresence.getLastChanged().getTime();
             w.write("Worldwide group with groupId:"+groupPresence.getGroupId()+" name: "+
                     groupPresence.getGroupName()+" has "+memberships.size()+" members, keyid: "+groupPresence.getSharedKeyId()+", lastChanged "+createdAgo/1000+" s ago\n");
             double latitudeSum = 0;
             double longitudeSum = 0;
+            List<TalkEnvironment> environments = db.findEnvironmentsForGroup(groupPresence.getGroupId());
+            Map<String, TalkEnvironment> environmentsByClientId = new HashMap<String, TalkEnvironment>();
+            for (TalkEnvironment e : environments) {
+                environmentsByClientId.put(e.getClientId(), e);
+            }
             Vector<Double[]> coords = new Vector<Double[]>();
             for (TalkGroupMembership membership : memberships) {
                 TalkPresence presence = db.findPresenceForClient(membership.getClientId());
-                TalkEnvironment environment = worldwide.get(membership.getClientId());
+                TalkEnvironment environment = environmentsByClientId.get(membership.getClientId());
                 if (environment != null) {
                     long receivedAgo = new Date().getTime() - environment.getTimeReceived().getTime();
                     Double[] geoPosition = environment.getGeoLocation();
@@ -308,19 +324,21 @@ public class ConnectionInfoServlet extends HttpServlet {
                         longitudeSum += longitude;
                         coords.add(geoPosition);
                     }
-                    String status = "";
-                    if (environment.getTimeReleased() != null) {
-                        status = "released ";
-                    }
-                    if (environment.hasExpired()) {
-                        status += "expired ";
-                    }
-                    w.write("    clientId " + membership.getClientId() + " keyid "+membership.getSharedKeyId()+" nick '" + presence.getClientName() +
-                            "' received " + receivedAgo/1000 + "s ago, ttl "+environment.getTimeToLive()+" ms "+status+ "long/lat:" + longitude+","+latitude+
+
+                    w.write("    "+membership.getState()+" clientId " + membership.getClientId() + " keyid "+membership.getSharedKeyId()+" nick '" + presence.getClientName() +
+                            "' received " + receivedAgo/1000 + "s ago, ttl "+environment.getTimeToLive()+" ms "+envStatus(environment)+ "long/lat:" + longitude+","+latitude+
                             " acc: "+environment.getAccuracy()+" BSSIDS:"+Arrays.toString(environment.getBssids())+ " \n");
+                    environmentsByClientId.remove(membership.getClientId());
                 } else {
                     w.write("    Member clientId " + membership.getClientId() + "\n");
                 }
+            }
+            for (String cid : environmentsByClientId.keySet()) {
+                TalkEnvironment environment = environmentsByClientId.get(cid);
+                long receivedAgo = new Date().getTime() - environment.getTimeReceived().getTime();
+                w.write("   ? Not a member, but environment there: ["+cid+"], received " + receivedAgo/1000
+                        + "s ago, ttl "+environment.getTimeToLive()+" ms "+envStatus(environment)+ "long/lat:" + Arrays.toString(environment.getGeoLocation())+
+                " acc: "+environment.getAccuracy()+" BSSIDS:"+Arrays.toString(environment.getBssids())+ " \n");
             }
             if (coords.size() > 0) {
                 double latitudeCenter = latitudeSum / coords.size();
@@ -349,6 +367,69 @@ public class ConnectionInfoServlet extends HttpServlet {
 
         w.close();
     }
+
+    public static String envStatus(TalkEnvironment environment) {
+        String status = "";
+        if (environment.getTimeReleased() != null) {
+            status = "released ";
+        }
+        if (environment.hasExpired()) {
+            status += "expired ";
+        }
+        return status;
+    }
+
+    public void printPushInfo(ITalkServerDatabase db, OutputStreamWriter w, Map<String,PushRequest> unsortedPushRequests)  throws ServletException, IOException {
+        Map<String,PushRequest>  pushRequests = sortPushByDate(unsortedPushRequests);
+        Date now = new Date();
+        for (String clientId : pushRequests.keySet()) {
+            PushRequest request = pushRequests.get(clientId);
+            TalkClientHostInfo hostInfo = db.findClientHostInfoForClient(clientId);
+            TalkClient client = db.findClientById(clientId);
+            String pushStatus = "No push";
+            if (client != null) {
+                if (client.isApnsCapable()) {
+                    pushStatus = "APNS";
+                } else if (client.isGcmCapable()) {
+                    pushStatus = "GCM";
+                }
+
+                if (client.getTimeLastPush() != null) {
+                    long pushAgo = (new Date().getTime() - client.getTimeLastPush().getTime()) / 1000;
+                    pushStatus = pushStatus + " " + pushAgo + " s ago";
+                    if (client.getTimeLastLogin() != null && client.getTimeLastLogin().after(client.getTimeLastPush())) {
+                        pushStatus = pushStatus + ", logged in "+ (client.getTimeLastLogin().getTime()-client.getTimeLastPush().getTime())/1000+" s after push";
+                    }
+                }
+            }
+            long pushCreatedAgo = (new Date().getTime() - request.getCreatedTime().getTime()) / 1000;
+
+            w.write("["+clientId+"] created "+pushCreatedAgo+" ago ("+ pushStatus + ") "+hostInfo.info());
+            w.write("\n");
+        }
+    }
+
+    public static Map sortPushByDate(Map unsortedMap) {
+        Map sortedMap = new TreeMap(new PushValueComparator(unsortedMap));
+        sortedMap.putAll(unsortedMap);
+        return sortedMap;
+    }
+
+    static class PushValueComparator implements Comparator {
+
+        Map map;
+
+        public PushValueComparator(Map map) {
+            this.map = map;
+        }
+
+        public int compare(Object keyA, Object keyB) {
+            PushRequest valueA = (PushRequest) map.get(keyA);
+            PushRequest valueB = (PushRequest) map.get(keyB);
+            return valueA.getCreatedTime().compareTo(valueB.getCreatedTime());
+        }
+    }
+
     public static double distFrom(double lat1, double lng1, double lat2, double lng2) {
         double earthRadius = 6371000; //meters
         double dLat = Math.toRadians(lat2-lat1);

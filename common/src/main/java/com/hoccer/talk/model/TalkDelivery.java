@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import org.jetbrains.annotations.Nullable;
-
 import java.util.*;
 
 /**
@@ -721,9 +720,6 @@ public class TalkDelivery {
 
     @JsonIgnore
     public void ensureDates() {
-        if (this.timeAccepted == null) {
-            this.timeAccepted = new Date();
-        }
         if (this.timeChanged == null) {
             this.timeChanged = new Date(0);
         }

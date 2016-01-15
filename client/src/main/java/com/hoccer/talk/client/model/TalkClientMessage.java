@@ -221,12 +221,10 @@ public class TalkClientMessage {
         this.message = message;
         if (this.delivery == null) {
             this.delivery = delivery;
+            this.timestamp = delivery.getTimeAccepted();
         } else {
             Set<String> fields = delivery.nonNullFields();
             this.delivery.updateWith(delivery, fields);
-            if (message.getTimeSent() != null) {
-                this.timestamp = message.getTimeSent();
-            }
         }
         direction = TYPE_INCOMING;
     }
@@ -253,10 +251,11 @@ public class TalkClientMessage {
             return;
         }
         if (delivery == null) {
-            this.delivery = delivery;
+            this.delivery = null;
         } else {
             Set<String> fields = delivery.nonNullFields();
             this.delivery.updateWith(delivery, fields);
+            this.timestamp = delivery.getTimeAccepted();
         }
         direction = TYPE_OUTGOING;
     }

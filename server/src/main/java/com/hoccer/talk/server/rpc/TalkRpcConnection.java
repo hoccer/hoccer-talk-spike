@@ -366,6 +366,8 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
             // tell the client if it doesn't have push
             if (!mTalkClient.isPushCapable()) {
                 mClientRpc.pushNotRegistered();
+            } else {
+                mServer.getPushAgent().signalLogin(clientId);
             }
 
             // display missed push message as an alert
