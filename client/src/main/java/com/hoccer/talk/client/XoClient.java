@@ -1908,12 +1908,17 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         final TalkMessage message = clientMessage.getMessage();
         final TalkDelivery delivery = clientMessage.getDelivery();
         LOG.debug("preparing delivery of message " + clientMessage.getClientMessageId());
-        try {
-            encryptMessage(clientMessage, delivery, message);
-        } catch (Exception e) {
-            LOG.error("error while encrypting message " + clientMessage.getClientMessageId(), e);
-            return;
+
+        if (message.getBody() == null ) {
+            try {
+                encryptMessage(clientMessage, delivery, message);
+            } catch (Exception e) {
+                LOG.error("error while encrypting message " + clientMessage.getClientMessageId(), e);
+                return;
+            }
         }
+
+        //if (clientMessage.getText().equals("TEST")) switchState(State.DISCONNECTED,"OFF");
 
         TalkDelivery[] deliveries = new TalkDelivery[1];
         deliveries[0] = clientMessage.getDelivery();
