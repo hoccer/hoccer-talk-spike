@@ -221,6 +221,9 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
                 mTransferStateView.setText(res.getString(R.string.transfer_state_downloading_failed));
                 break;
 
+            case UPLOAD_REGISTERING:
+                break;
+
             case UPLOAD_NEW:
                 mTransferControlView.prepareToUpload();
                 mTransferControlView.setVisibility(View.VISIBLE);
@@ -233,19 +236,6 @@ public class AttachmentTransferHandler implements View.OnClickListener, Transfer
                 mTransferControlView.spin();
                 mTransferStateView.setText(res.getString(R.string.transfer_state_encrypting));
                 break;
-
-            case UPLOAD_REGISTERING:
-                mTransferControlView.prepareToUpload();
-                mTransferControlView.setVisibility(View.VISIBLE);
-                mTransferStateView.setText(res.getString(R.string.transfer_state_initializing_upload));
-                break;
-
-            case UPLOAD_REGISTERED:
-                mTransferControlView.prepareToUpload();
-                mTransferControlView.setVisibility(View.VISIBLE);
-                mTransferStateView.setText(res.getString(R.string.transfer_state_initialized_upload));
-                break;
-
 
             case UPLOAD_PAUSED:
                 length = mTransfer.getTransferLength();
