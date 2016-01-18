@@ -66,33 +66,28 @@
 
     <PreferenceCategory
             android:title="@string/pref_category_image_encoding">
-
         <ListPreference
                 android:key="preference_image_encoding_size"
                 android:title="@string/pref_image_size"
                 android:entries="@array/image_transfer_size_options"
                 android:entryValues="@array/image_transfer_size_options_values"
-                android:defaultValue="-1"/>
-
+                android:defaultValue="@string/default_upload_image_pixel_count"/>
         <ListPreference
                 android:key="preference_image_encoding_quality"
                 android:title="@string/pref_image_quality"
                 android:entries="@array/image_transfer_quality_options"
                 android:entryValues="@array/image_transfer_quality_options_values"
-                android:defaultValue="100"/>
-
+                android:defaultValue="@string/default_upload_image_encoding_quality"/>
     </PreferenceCategory>
 
     <PreferenceCategory
             android:title="@string/pref_category_transfer_mobile">
-
         <ListPreference
                 android:key="preference_upload_limit_mobile"
                 android:title="@string/pref_upload_limit"
                 android:entries="@array/transfer_limits"
                 android:entryValues="@array/transfer_limits_values"
                 android:defaultValue="-1"/>
-
         <ListPreference
                 android:key="preference_download_limit_mobile"
                 android:title="@string/pref_download_limit"
@@ -104,14 +99,12 @@
 
     <PreferenceCategory
             android:title="@string/pref_category_transfer_wifi">
-
         <ListPreference
                 android:key="preference_upload_limit_wifi"
                 android:title="@string/pref_upload_limit"
                 android:entries="@array/transfer_limits"
                 android:entryValues="@array/transfer_limits_values"
                 android:defaultValue="-1"/>
-
         <ListPreference
                 android:key="preference_download_limit_wifi"
                 android:title="@string/pref_download_limit"
@@ -131,17 +124,14 @@
                 android:entries="@array/preference_polling_interval_name"
                 android:entryValues="@array/preference_polling_interval_values"
                 android:defaultValue="900000"/>
-
     </PreferenceCategory>
 
     <PreferenceCategory
             android:title="@string/pref_privacy_title">
-
         <CheckBoxPreference
                 android:key="preference_confirm_messages_seen"
                 android:title="@string/pref_confirm_messages_seen"
                 android:defaultValue="true"/>
-
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -173,7 +163,6 @@
 
     <PreferenceCategory
             android:title="@string/pref_encryption">
-
         <ListPreference
                 android:key="preference_keysize"
                 android:entries="@array/keysizes"
@@ -181,7 +170,6 @@
                 android:entryValues="@array/keysize_values"
                 android:title="@string/preference_keysize_title"
                 android:defaultValue="2048"/>
-
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -199,7 +187,6 @@
 
     <PreferenceCategory
             android:title="Development">
-
         <Preference
                 android:key="preference_database_dump"
                 android:title="Dump SQLite Database"/>

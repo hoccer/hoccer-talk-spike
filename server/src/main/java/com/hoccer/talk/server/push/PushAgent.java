@@ -135,8 +135,16 @@ public class PushAgent {
         }, 0, TimeUnit.MILLISECONDS);
     }
 
-    public void submitRequest(TalkClient client) {
-        LOG.debug("submitRequest for client: " + client.getClientId() + ", lastPushMessage=" + client.getLastPushMessage());
+    public void submitRequest(TalkClient client, boolean isRetry) {
+        LOG.debug("submitRequest for client: " + client.getClientId() + ", lastPushMessage=" + client.getLastPushMessage()+", isRetry="+isRetry);
+
+        if (isRetry) {
+            client.setPushRetryCount(client.getPushRetryCount()+1);
+            client.setLastPushMessage("");
+        } else {
+            client.setPushRetryCount(0);
+        }
+
         long now = System.currentTimeMillis();
 
         mPushRequests.incrementAndGet();
@@ -365,4 +373,45 @@ public class PushAgent {
             }
         }, 0, TimeUnit.MILLISECONDS);
     }
+    public void performPushRetries() {
+        mExecutor.schedule(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (this) {
+                    try {
+                        final int MAX_RETRIES = 3;
+                        final int MIN_RETRY_PERIOD_IN_SECONDS = 60;
+                        LOG.info("performPushRetries: pushes not answered " + mNotAnswered.size() + ", pushes answered " + mAnswered.size());
+                        Map<String, PushRequest> notAnswered = new HashMap<String, PushRequest>(mNotAnswered);
+                        int retriedPushes = 0;
+                        int retriesExhausted = 0;
+                        for (String clientId : notAnswered.keySet()) {
+                            PushRequest request = notAnswered.get(clientId);
+                            if (request != null) {
+                                TalkClient client = request.getClient();
+                                int retryCount = client.getPushRetryCount();
+                                if (retryCount < 3) {
+                                    long limitFactor = 1 << retryCount;
+                                    long limitPeriod = limitFactor * MIN_RETRY_PERIOD_IN_SECONDS * 1000;
+                                    Date limit = new Date(new Date().getTime() - limitPeriod);
+                                    if (request.getCreatedTime().before(limit)) {
+                                        submitRequest(client, true);
+                                        mNotAnswered.remove(clientId);
+                                        LOG.info("expireMonitorTables: Expiring push monitor for client " + clientId + ", has not answered push after " + (new Date().getTime() - request.getCreatedTime().getTime()) / 1000 + " s");
+                                        ++retriedPushes;
+                                    }
+                                } else {
+                                    retriesExhausted++;
+                                }
+                            }
+                        }
+                        LOG.info("performPushRetries: retrying "+retriedPushes+" of "+mNotAnswered.size()+" not answered pushes, retries exhausted="+retriesExhausted);
+                    } catch (Throwable t) {
+                        LOG.error("performPushRetries: caught and swallowed exception escaping runnable", t);
+                    }
+                }
+            }
+        }, 0, TimeUnit.MILLISECONDS);
+    }
+
 }
