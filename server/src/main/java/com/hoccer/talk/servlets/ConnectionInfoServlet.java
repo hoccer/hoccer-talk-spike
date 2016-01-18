@@ -443,6 +443,7 @@ public class ConnectionInfoServlet extends HttpServlet {
                 if (client.getTimeLastPush() != null) {
                     long pushAgo = (new Date().getTime() - client.getTimeLastPush().getTime()) / 1000;
                     pushStatus = pushStatus + " " + pushAgo + " s ago";
+                    pushStatus = pushStatus + " retry " + client.getPushRetryCount();
                     if (client.getTimeLastLogin() != null && client.getTimeLastLogin().after(client.getTimeLastPush())) {
                         pushStatus = pushStatus + ", logged in "+ (client.getTimeLastLogin().getTime()-client.getTimeLastPush().getTime())/1000+" s after push";
                     }

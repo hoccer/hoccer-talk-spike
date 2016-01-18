@@ -68,9 +68,6 @@ public class XoClientService extends Service {
 
     public static final String EXTRA_CONNECT = "com.hoccer.xo.CONNECT";
 
-    private static final int DEFAULT_IMAGE_UPLOAD_MAX_PIXEL_COUNT = -1;
-    private static final int DEFAULT_IMAGE_UPLOAD_ENCODING_QUALITY = 100;
-
     private static final String sPreferenceUploadLimitMobileKey = "preference_upload_limit_mobile";
     private static final String sPreferenceUploadLimitWifiKey = "preference_upload_limit_wifi";
     private static final String sPreferenceDownloadLimitMobileKey = "preference_download_limit_mobile";
@@ -250,12 +247,10 @@ public class XoClientService extends Service {
             } else if (key.equals(sPreferenceDownloadLimitWifiKey)) {
                 mClient.setDownloadLimit(Integer.parseInt(preferences.getString(key, Integer.toString(TransferAgent.UNLIMITED))));
             } else if (key.equals(sPreferenceImageUploadPixelCountKey)) {
-                String maxPixelCount = mPreferences.getString(sPreferenceImageUploadPixelCountKey,
-                        Integer.toString(DEFAULT_IMAGE_UPLOAD_MAX_PIXEL_COUNT));
+                String maxPixelCount = mPreferences.getString(sPreferenceImageUploadPixelCountKey, getResources().getString(R.string.default_upload_image_pixel_count));
                 mClient.setImageUploadMaxPixelCount(Integer.parseInt(maxPixelCount));
             } else if (key.equals(sPreferenceImageUploadQualityKey)) {
-                String imageQuality = mPreferences.getString(sPreferenceImageUploadQualityKey,
-                        Integer.toString(DEFAULT_IMAGE_UPLOAD_ENCODING_QUALITY));
+                String imageQuality = mPreferences.getString(sPreferenceImageUploadQualityKey, getResources().getString(R.string.default_upload_image_encoding_quality));
                 mClient.setImageUploadEncodingQuality(Integer.parseInt(imageQuality));
             }
         }
