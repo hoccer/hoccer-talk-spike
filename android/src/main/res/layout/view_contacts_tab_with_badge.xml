@@ -1,30 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:paddingBottom="10dp">
 
-  <TextView
-      android:id="@android:id/title"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="10dp"
-      android:paddingBottom="10dp"
-      android:layout_centerHorizontal="true"
-      style="@style/ActionBarTabText.Solid.AppBaseTheme"/>
+  <LinearLayout
+          android:orientation="horizontal"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content" android:layout_marginTop="10dp" android:layout_centerHorizontal="true"
+          android:gravity="center">
+    <TextView
+            android:id="@android:id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/ActionBarTabText.Solid.AppBaseTheme"
+            android:gravity="center"/>
 
-  <com.hoccer.xo.android.view.NotificationBadgeTextView
-      android:id="@+id/tv_contact_invite_notification_badge"
-      android:background="@drawable/shape_unconfirmed_invitations_badge_tab"
-      android:layout_alignTop="@android:id/title"
-      android:layout_alignRight="@android:id/title"
-      android:layout_marginRight="-34sp"
-      android:visibility="gone"
-      android:textSize="10sp"
-      android:layout_width="16sp"
-      android:layout_height="16sp"
-      android:textColor="@android:color/white"
-      android:gravity="center"/>
+    <com.hoccer.xo.android.view.NotificationBadgeTextView
+            android:id="@+id/tv_contact_invite_notification_badge"
+            android:visibility="gone"
+            android:textSize="10sp"
+            android:layout_width="16sp"
+            android:layout_height="16sp"
+            android:textColor="@android:color/white"
+
+            android:background="@drawable/shape_unconfirmed_invitations_badge_tab"
+            android:layout_marginLeft="5dp"
+            android:gravity="center"/>
+  </LinearLayout>
 
 </RelativeLayout>
