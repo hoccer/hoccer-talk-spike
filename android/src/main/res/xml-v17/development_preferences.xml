@@ -50,17 +50,25 @@
     <PreferenceCategory
             android:title="@string/worldwide_mode"
             android:key="@string/preference_key_worldwide_category">
-    <ListPreference
+        <SwitchPreference
+                android:key="@string/preference_key_enable_worldwide"
+                android:title="Enable"
+                android:defaultValue="true"/>
+
+        <ListPreference
+                android:tag="WW"
                 android:key="@string/preference_key_worldwide_timetolive"
                 android:title="@string/leave_after"
                 android:entries="@array/worldwide_timetolive"
                 android:entryValues="@array/worldwide_timetolive_values"
                 android:defaultValue="0"/>
         <SwitchPreference
+                android:tag="WW"
                 android:key="@string/preference_key_worldwide_enable_notifications"
                 android:title="@string/group_notifications"
                 android:defaultValue="true"/>
         <SwitchPreference
+                android:tag="WW"
                 android:key="@string/preference_key_worldwide_enable_automatic_download"
                 android:title="@string/auto_download_attachments"
                 android:defaultValue="false"/>

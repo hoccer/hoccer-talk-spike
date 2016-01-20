@@ -3,6 +3,7 @@ package com.hoccer.xo.android.activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -45,13 +46,19 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     @Override
     protected ActivityComponent[] createComponents() {
         MediaPlayerActivityComponent mediaPlayerActivityComponent = new MediaPlayerActivityComponent(this);
-
-        mWorldwideChatListFragment = new WorldwideChatListFragment();
-        mViewPagerActivityComponent = new ViewPagerActivityComponent(this,
-                R.id.pager,
-                new ChatListFragment(),
-                new NearbyChatListFragment(),
-                mWorldwideChatListFragment);
+        if (XoApplication.get().isWorldWideEnabled()){
+            mWorldwideChatListFragment = new WorldwideChatListFragment();
+            mViewPagerActivityComponent = new ViewPagerActivityComponent(this,
+                    R.id.pager,
+                    new ChatListFragment(),
+                    new NearbyChatListFragment(),
+                    mWorldwideChatListFragment);
+        } else {
+            mViewPagerActivityComponent = new ViewPagerActivityComponent(this,
+                    R.id.pager,
+                    new ChatListFragment(),
+                    new NearbyChatListFragment());
+        }
 
         return new ActivityComponent[]{mediaPlayerActivityComponent, mViewPagerActivityComponent};
     }

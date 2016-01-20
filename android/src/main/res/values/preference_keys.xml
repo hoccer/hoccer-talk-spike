@@ -11,4 +11,5 @@
     <string name="preference_key_polling_interval">preference_key_polling_interval</string>
     <string name="preference_key_worldwide_category">preference_key_worldwide_category</string>
     <string name="preference_key_preference_screen">preference_key_preference_screen</string>
+    <string name="preference_key_enable_worldwide">preference_key_enable_worldwide</string>
 </resources>

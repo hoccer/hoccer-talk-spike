@@ -13,7 +13,7 @@ import com.hoccer.xo.android.base.BaseActivity;
  */
 public abstract class ComposableActivity extends BaseActivity {
 
-    private final ActivityComponent[] mComponents;
+    private ActivityComponent[] mComponents;
 
     /*
      * Needs to be implemented in a derived class.
@@ -24,12 +24,13 @@ public abstract class ComposableActivity extends BaseActivity {
     protected ComposableActivity() {
         super();
 
-        mComponents = createComponents();
+      //  mComponents = createComponents();
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mComponents = createComponents();
 
         for (ActivityComponent component : mComponents) {
             component.onCreate(savedInstanceState);
