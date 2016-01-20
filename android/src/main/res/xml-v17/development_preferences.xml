@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:key="@string/preference_key_preference_screen">
 
     <PreferenceCategory
             android:title="@string/pref_about_information">
@@ -47,8 +48,9 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-            android:title="@string/worldwide_mode">
-        <ListPreference
+            android:title="@string/worldwide_mode"
+            android:key="@string/preference_key_worldwide_category">
+    <ListPreference
                 android:key="@string/preference_key_worldwide_timetolive"
                 android:title="@string/leave_after"
                 android:entries="@array/worldwide_timetolive"

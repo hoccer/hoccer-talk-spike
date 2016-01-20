@@ -50,6 +50,8 @@ public class XoPreferenceActivity extends PreferenceActivity
     private Dialog mWaitingDialog;
     private BackupController mBackupController;
     private SharedPreferences mDefaultSharedPreferences;
+    private Preference worldWidePreference;
+    private PreferenceScreen preferenceScreen;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +70,8 @@ public class XoPreferenceActivity extends PreferenceActivity
 
         final BackupPreference createBackupPreference = (BackupPreference) findPreference(getString(R.string.preference_key_create_backup));
         final BackupPreference restoreBackupPreference = (BackupPreference) findPreference(getString(R.string.preference_key_restore_backup));
+        worldWidePreference = findPreference(getString(R.string.preference_key_worldwide_category);
+        preferenceScreen = (PreferenceScreen) findPreference(getString(R.string.preference_key_preference_screen));
 
         Preference activatePasswordPreference = (Preference) findPreference(getString(R.string.preference_key_activate_passcode));
 
@@ -247,6 +251,14 @@ public class XoPreferenceActivity extends PreferenceActivity
             Polling.update(this);
         } else if (getString(R.string.preference_key_polling_interval).equals(key)) {
             Polling.update(this);
+        }
+    }
+
+    private void showWorldwideCategory(boolean show){
+        if (show) {
+            preferenceScreen.addPreference(worldWidePreference);
+        } else {
+            preferenceScreen.removePreference(worldWidePreference);
         }
     }
 
