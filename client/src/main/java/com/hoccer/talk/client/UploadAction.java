@@ -59,11 +59,6 @@ public class UploadAction implements TransferStateListener {
             case REGISTERING:
                 doRegisteringAction();
                 break;
-            case REGISTERED:
-                if (mUpload.getEncryptionKey() != null && mUpload.getEncryptionKey().length() > 0) {
-                    mUpload.switchState(UPLOADING);
-                }
-                break;
             case UPLOADING:
                 doResumeCheckAction();
                 doUploadingAction();
@@ -93,7 +88,7 @@ public class UploadAction implements TransferStateListener {
         LOG.info("performRegistration(), state: ‘" + mUpload.getState() + "'");
         if (mUpload.getFileId() != null) {
             LOG.debug("we already have a fileId. no need to register.");
-            mUpload.switchState(REGISTERED);
+            mUpload.switchState(PAUSED);
             return;
         }
 
@@ -113,7 +108,7 @@ public class UploadAction implements TransferStateListener {
             mUpload.setUploadUrl(handles.uploadUrl);
             mUpload.setDownloadUrl(handles.downloadUrl);
             LOG.info("[uploadId: '" + mUpload.getClientUploadId() + "'] registered as fileId: '" + handles.fileId + "'");
-            mUpload.switchState(REGISTERED);
+            mUpload.switchState(PAUSED);
         } catch (Exception e) {
             LOG.error("error registering", e);
             mUpload.switchState(REGISTERING);
@@ -222,7 +217,6 @@ public class UploadAction implements TransferStateListener {
             InputStream clearIs = new FileInputStream(mUpload.getTempCompressedFilePath() != null ? mUpload.getTempCompressedFilePath() : mUpload.getFilePath());
             InputStream encryptingInputStream;
             if (mUpload.isAttachment()) {
-                LOG.debug("decoding encryption key "+mUpload.getEncryptionKey()+" from upload"+mUpload);
                 byte[] key = Hex.decode(mUpload.getEncryptionKey());
                 encryptingInputStream = AESCryptor.encryptingInputStream(clearIs, key, AESCryptor.NULL_SALT);
             } else {

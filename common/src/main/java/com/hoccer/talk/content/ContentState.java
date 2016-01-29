@@ -13,7 +13,6 @@ public enum ContentState {
     /* content being uploaded in various states */
     UPLOAD_NEW,
     UPLOAD_REGISTERING,
-    UPLOAD_REGISTERED,
     UPLOAD_ENCRYPTING,
     UPLOAD_UPLOADING,
     UPLOAD_COMPLETE,

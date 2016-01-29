@@ -99,14 +99,14 @@
     <!-- Hoccer Release Versions -->
     <hoccer-talk-server.version>3.3.46</hoccer-talk-server.version>
     <hoccer-talk-filecache.version>1.0.6</hoccer-talk-filecache.version>
-    <hoccer-talk-android.version>3.2.10-SNAPSHOT</hoccer-talk-android.version>
+    <hoccer-talk-android.version>3.2.11-SNAPSHOT</hoccer-talk-android.version>
   </properties>
 
   <distributionManagement>
     <repository>
       <id>hoccer</id>
       <name>Archiva Managed Hoccer Repository</name>
-      <url>https://archiva.hoccer.com/repository/hoccer</url>
+      <url>https://archiva.hoccer.de/repository/hoccer</url>
     </repository>
   </distributionManagement>
 </project>

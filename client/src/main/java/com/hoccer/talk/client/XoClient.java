@@ -1899,11 +1899,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             final TalkClientUpload upload = clientMessage.getAttachmentUpload();
             if (upload != null) {
                 mUploadAgent.register(upload);
-                if (upload.getState() == TalkClientUpload.State.REGISTERING) {
-                    // upload not yet registered, we can not proceed with this message
-                    LOG.warn("Upload not yet registered, message not yet sent");
-                    continue;
-                }
             }
             performDelivery(clientMessage);
         }
@@ -1932,23 +1927,9 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 clientMessage.setProgressState(true);
                 mDatabase.saveClientMessage(clientMessage);
                 resultingDeliveries = mServerRpc.outDeliveryRequest(message, deliveries);
-                boolean atLeastOneDeliveryOk = false;
-                for (TalkDelivery result : resultingDeliveries) {
-                    if (!result.isFailure()) {
-                        atLeastOneDeliveryOk = true;
-                    }
-                }
-                if (atLeastOneDeliveryOk) {
-                    // at least one delivery has not failed
-                    TalkClientUpload upload = clientMessage.getAttachmentUpload();
-                    if (upload != null) {
-                        mUploadAgent.startUpload(upload);
-                    }
-                } else {
-                    // nothing can be delivered
-                    LOG.warn("server said message can not be delivered to anyone");
-                    clientMessage.setProgressState(false);
-                    mDatabase.saveClientMessage(clientMessage);
+                TalkClientUpload upload = clientMessage.getAttachmentUpload();
+                if (upload != null) {
+                    mUploadAgent.startUpload(upload);
                 }
             } catch (Exception e) {
                 LOG.error("error while performing delivery request for message " + clientMessage.getClientMessageId(), e);
@@ -2677,20 +2658,20 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
         if (message.getBody() != null) {
             LOG.error("message has already body");
-            throw new RuntimeException("message has already body");
+            return;
         }
 
         TalkClientContact receiver = clientMessage.getConversationContact();
         if (receiver == null) {
             LOG.error("no receiver");
-            throw new RuntimeException("no receiver");
+            return;
         }
 
         try {
             receiver = mDatabase.findContactById(receiver.getClientContactId());
         } catch (SQLException e) {
             LOG.error("SQL error", e);
-            throw new RuntimeException("SQL error", e);
+            return;
         }
 
         byte[] plainKey;
@@ -2717,7 +2698,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 delivery.setKeyCiphertext(new String(Base64.encodeBase64(encryptedKey)));
             } catch (GeneralSecurityException e) {
                 LOG.error("error encrypting", e);
-                throw new RuntimeException("error encrypting", e);
+                return;
             }
         } else if (receiver.isGroup()) {
             LOG.trace("using group key for encryption");
@@ -2725,7 +2706,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             String groupKey = receiver.getGroupKey();
             if (groupKey == null) {
                 LOG.warn("no group key");
-                throw new RuntimeException("no group key");
+                return;
             }
             plainKey = Base64.decodeBase64(groupKey.getBytes(Charset.forName("UTF-8")));
             // generate message-specific salt
@@ -2755,25 +2736,13 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
         TalkClientUpload upload = clientMessage.getAttachmentUpload();
         if (upload != null) {
             LOG.debug("generating attachment");
-            if (upload.getState() == TalkClientUpload.State.NEW ||
-                upload.getState() == TalkClientUpload.State.REGISTERING) {
-                throw new RuntimeException("attachment not ready for encryption");
-            }
-            if (upload.getFileId() == null) {
-                throw new RuntimeException("attachment has no file id");
-            }
-            if (upload.getDownloadUrl() == null) {
-                throw new RuntimeException("attachment has no download url");
-            }
 
-            LOG.debug("setting upload encryption kex:"+new String(Hex.encodeHex(plainKey))+" on upload:"+upload);
             upload.setEncryptionKey(new String(Hex.encodeHex(plainKey)));
 
             try {
                 mDatabase.saveClientUpload(upload);
             } catch (SQLException e) {
                 LOG.error("sql error", e);
-                throw new RuntimeException("sql error", e);
             }
 
             LOG.debug("attachment download url is '" + upload.getDownloadUrl() + "'");
@@ -2787,9 +2756,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             attachment.setHmac(upload.getContentHmac());
             attachment.setFileId(upload.getFileId());
             message.setAttachmentFileId(attachment.getFileId());
-            delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NEW);
-        } else {
-            delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NONE);
         }
 
         // encrypt body and attachment dtor
@@ -2807,26 +2773,15 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             }
         } catch (GeneralSecurityException e) {
             LOG.error("error encrypting", e);
-            throw new RuntimeException("error encrypting", e);
         } catch (UnsupportedEncodingException e) {
             LOG.error("error encrypting", e);
-            throw new RuntimeException("error encrypting", e);
         } catch (JsonProcessingException e) {
             LOG.error("error encrypting", e);
-            throw new RuntimeException("error encrypting", e);
         }
 
         message.setTimeSent(new Date());
         byte[] hmac = message.computeHMAC();
         message.setMessageTag(new String(Base64.encodeBase64(hmac)));
-
-        try {
-            mDatabase.saveMessage(message);
-            mDatabase.saveDelivery(delivery);
-        } catch (SQLException e) {
-            LOG.error("sql error", e);
-            throw new RuntimeException("sql error", e);
-        }
     }
 
     private void updateClientPresence(TalkPresence presence, Set<String> fields) {
