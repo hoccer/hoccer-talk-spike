@@ -35,6 +35,8 @@ public class TalkClient {
     public static final String FIELD_PUSH_ALERT_MESSAGE   = "pushAlertMessage";
     public static final String FIELD_APNS_MODE            = "apnsMode";
     public static final String FIELD_PUSH_RETRY_COUNT     = "pushRetryCount";
+    public static final String FIELD_RESCUE_CODE          = "rescueCode";
+    public static final String FIELD_RESCUE_CODE_FAILS    = "rescueCodeFails";
 
     public static final String APNS_MODE_DEFAULT          = "default";
     public static final String APNS_MODE_BACKGROUND       = "background";
@@ -117,6 +119,14 @@ public class TalkClient {
     /** Next push message to be displayed to the user when connected */
     @DatabaseField(columnName = FIELD_APNS_MODE, canBeNull = true)
     String apnsMode;
+
+    /** Next push message to be displayed to the user when connected */
+    @DatabaseField(columnName = FIELD_RESCUE_CODE, canBeNull = true)
+    String rescueCode;
+
+    /** Failed rescue counts */
+    @DatabaseField(columnName = FIELD_RESCUE_CODE_FAILS)
+    int rescueCodeFails;
 
     public TalkClient() {
     }
@@ -301,5 +311,21 @@ public class TalkClient {
 
     public void setPushRetryCount(int pushRetryCount) {
         this.pushRetryCount = pushRetryCount;
+    }
+
+    public String getRescueCode() {
+        return rescueCode;
+    }
+
+    public void setRescueCode(String rescueCode) {
+        this.rescueCode = rescueCode;
+    }
+
+    public int getRescueCodeFails() {
+        return rescueCodeFails;
+    }
+
+    public void setRescueCodeFails(int rescueCodeFails) {
+        this.rescueCodeFails = rescueCodeFails;
     }
 }

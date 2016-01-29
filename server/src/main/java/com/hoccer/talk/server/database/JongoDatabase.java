@@ -640,7 +640,7 @@ public class JongoDatabase implements ITalkServerDatabase {
                 LOG.trace("including "+relationship.getOtherClientId()+" because related");
                 clients.add(relationship.getOtherClientId());
                 if (relationship.getLastChanged() != null && relationship.getLastChanged().after(lastKnown)) {
-                    LOG.trace("must include "+relationship.getOtherClientId()+" because related");
+                    LOG.trace("must include "+relationship.getOtherClientId()+" because relationship has changed since lastKnown");
                     mustInclude.add(relationship.getOtherClientId());
                 }
             }

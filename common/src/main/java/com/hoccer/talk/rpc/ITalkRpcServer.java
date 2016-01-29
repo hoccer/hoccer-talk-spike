@@ -79,6 +79,15 @@ public interface ITalkRpcServer {
      * Change the SRP parameters for an existing logged in client
      */
     String srpChangeVerifier(String verifier, String salt);
+    /**
+     * Change the SRP parameters for an existing not logged in client
+     */
+    String srpRescue(String clientId, String verifier, String salt, String rescueCode);
+    /**
+     * set a rescue code when logged in
+     */
+    String srpSetRescueCode(String rescueCode);
+
 
         /**
          * Initiate SRP login

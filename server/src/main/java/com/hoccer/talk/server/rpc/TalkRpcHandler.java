@@ -316,6 +316,94 @@ public class TalkRpcHandler implements ITalkRpcServer {
     }
 
     @Override
+    public String srpSetRescueCode(String rescueCode) {
+        logCall("srpSetRescueCode(rescueCode: '" + rescueCode +"')");
+        synchronized (mConnection) {
+
+            if (!mConnection.isLoggedIn()) {
+                throw new RuntimeException("Must be logged in to change verifier");
+            }
+
+            String clientId = mConnection.getClientId();
+
+            if (clientId == null) {
+                throw new RuntimeException("You need to generate an id before registering");
+            }
+
+            // TODO: check verifier and salt for viability
+
+            TalkClient client = mConnection.getClient();
+            client.setRescueCode(rescueCode);
+            client.setRescueCodeFails(0);
+
+            try {
+                mDatabase.saveClient(client);
+            } catch (RuntimeException e) {
+                throw e;
+            }
+            return clientId;
+        }
+    }
+
+    @Override
+    public String srpRescue(String clientId, String verifier, String salt, String rescueCode) {
+        logCall("srpRescue(verifier: '" + verifier + "', salt: '" + salt + "')");
+        synchronized (mConnection) {
+
+            if (mConnection.isLoggedIn()) {
+                throw new RuntimeException("Must not be logged in to rescue verifier");
+            }
+            TalkClient client = mDatabase.findClientById(clientId);
+            if (client == null) {
+                if (mDatabase.findDeletedClientById(clientId) != null) {
+                    throw new RuntimeException("Client deleted");  // must not change this string, is checked on client side
+                } else {
+                    throw new RuntimeException("No such client");  // must not change this string, is checked on client side
+                }
+            }
+
+            // verify SRP registration
+            if (client.getSrpVerifier() == null || client.getSrpSalt() == null) {
+                throw new RuntimeException("Not registered");   // must not change this string, is checked on client side
+            }
+
+            if (client.getRescueCode() == null | client.getRescueCode().length() == 0) {
+                throw new RuntimeException("No rescue code");   // must not change this string, is checked on client side
+            }
+            if (!client.getRescueCode().equals(rescueCode)) {
+                client.setRescueCodeFails(client.getRescueCodeFails() + 1);
+                if (client.getRescueCodeFails() > 3) {
+                    client.setRescueCode(null);
+                    try {
+                        mDatabase.saveClient(client);
+                    } catch (RuntimeException e) {
+                        throw e;
+                    }
+                    throw new RuntimeException("Wrong rescue failed too often");   // must not change this string, is checked on client side
+                }
+                try {
+                    mDatabase.saveClient(client);
+                } catch (RuntimeException e) {
+                    throw e;
+                }
+                throw new RuntimeException("Wrong rescue code");   // must not change this string, is checked on client side
+            }
+
+            // TODO: check verifier and salt for viability
+            client.setSrpSalt(salt);
+            client.setSrpVerifier(verifier);
+
+            try {
+                mDatabase.saveClient(client);
+            } catch (RuntimeException e) {
+                throw e;
+            }
+            return clientId;
+        }
+    }
+
+
+    @Override
     public String srpPhase1(String clientId, String A) {
         logCall("srpPhase1(clientId: '" + clientId + "', '" + A + "')");
         synchronized (mConnection) {
