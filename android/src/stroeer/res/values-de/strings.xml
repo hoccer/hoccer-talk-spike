@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Ströer Messenger</string>
+    <string name="menu_about">Über Ströer Messenger</string>
+    <string name="pref_report_crashes_summary">Unterstütze Ströer Messenger bei der Weiterentwicklung indem du deine Abstürze meldest. Welche Informationen an Ströer Messenger geschickt werden, kannst du in den FAQ einsehen.</string>
+    <string name="dialog_report_crash_message">Es wurde eine Aufzeichnung des letzten Crashs gefunden. Bitte schicke diesen Bericht an Ströer Messenger, damit wir den Fehler schnellst möglich beheben können.</string>
+    <string name="dialog_report_errors_message">Bei der letzten Ausführung sind Fehler aufgetreten. Bitte schicke diesen Bericht an Ströer Messenger, damit wir diese schnellst möglich beheben können.</string>
+    <string name="sms_invitation_text">Hey! Ich nutze die Gratis-App Ströer Messenger zum sicheren Chatten! Jetzt herunterladen und mich als Kontakt hinzufügen: %1$s%2$s\n%3$s</string>
+    <string name="email_invitation_subject">Triff mich bei Ströer Messenger!</string>
+    <string name="email_invitation_text">Hey! Ich nutze jetzt die Gratis-App Ströer Messenger zum sicheren Chatten! Jetzt herunterladen und mich als Kontakt hinzufügen:\n%1$s%2$s\n%3$s</string>
+    <string name="actionbar_default_title">Ströer</string>
+    <string name="about_advert_text">Ströer Messenger \n- dein sicherer Multimedia Messenger\n\nWir legen größten Wert auf Sicherheit, Datenschutz und Privatsphäre. Dank modernster Verschlüsselungs- und Übertragungstechnologien setzt Ströer Messenger neue Standards in der mobilen Datenübertragung und definiert Privatsphäre im mobilen Messaging Sektor neu. Ströer Messenger ermöglicht einen einfachen und unbegrenzten Datenaustausch zwischen Smartphones und Tablets ohne vorherige Eingabe von vertraulichen Nutzerdaten.\n\nShare hugs \u0026 kisses</string>
+    <string name="restore_restart_hoccer">Bitte Ströer Messenger neu starten, um die Wiederherstellung zu beenden.</string>
+    <string name="restore_no_backups_found_message">Bitte bestehendes Backup nach\n%1$s\nkopieren um früheren Ströer Messenger Account wiederherstellen zu können.</string>
+</resources>

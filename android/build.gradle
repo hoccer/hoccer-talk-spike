@@ -1,0 +1,171 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.3.1'
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+
+    useLibrary 'org.apache.http.legacy'
+
+    dexOptions{
+        javaMaxHeapSize "4g"
+    }
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 22 // when updating 'targetSdkVersion' be aware of issues with the xzing library and Android 6.+
+        versionCode 416
+        versionName "3.2.11-SNAPSHOT"
+        multiDexEnabled true
+        resValue "string","google_app_id","1894273085"
+        manifestPlaceholders = [
+            "google.maps.api.key": "AIzaSyBpFzzIcVtJj0eUZSghPY8qg4cAnEV1ZgA"
+        ]
+    }
+
+    productFlavors {
+        hoccer {
+            applicationId "com.artcom.hoccer"
+            manifestPlaceholders = [
+                    "app.name"                    : "Hoccer",
+                    "app.name.short"              : "Hoccer",
+                    "hoccer.invitation.uri.scheme": "hcr"
+            ]
+        }
+
+        starmeo {
+            applicationId "com.starmeo.messenger"
+            manifestPlaceholders = [
+                    "app.name"                    : "Starmeo",
+                    "app.name.short"              : "Starmeo",
+                    "hoccer.invitation.uri.scheme": "starmeo"
+            ]
+        }
+
+        stroeer {
+            applicationId "com.stroeer.messenger"
+            manifestPlaceholders = [
+                    "app.name"                    : "Str\\u00f6er Messenger",
+                    "app.name.short"              : "Str\\u00f6er",
+                    "hoccer.invitation.uri.scheme": "strm"
+            ]
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            zipAlignEnabled false
+            debuggable false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard.cfg', 'proguard-release.cfg'
+            manifestPlaceholders = [
+                    "hoccer.invitation.uri.suffix": ""
+            ]
+        }
+
+        debug {
+            applicationIdSuffix ".dev"
+            debuggable true
+            signingConfig signingConfigs.debug
+            manifestPlaceholders = [
+                    "hoccer.invitation.uri.suffix": "d"
+            ]
+        }
+
+        review {
+            minifyEnabled true
+            applicationIdSuffix ".test"
+            debuggable true
+            signingConfig signingConfigs.debug
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard.cfg', 'proguard-release.cfg'
+            manifestPlaceholders = [
+                    "hoccer.invitation.uri.suffix": "d"
+            ]
+        }
+    }
+    lintOptions {
+        abortOnError false
+    }
+
+    signingConfigs {
+        debug {
+            storeFile file("$projectDir/config/debug.keystore")
+            storePassword "android"
+            keyAlias "androiddebugkey"
+            keyPassword "android"
+        }
+    }
+
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+    }
+}
+
+description = "Hoccer Talk for Android"
+repositories {
+    maven { url "https://archiva.hoccer.de/repository/snapshots/" }
+    maven { url "https://archiva.hoccer.de/repository/hoccer/" }
+    maven { url "http://repo.maven.apache.org/maven2" }
+    jcenter()
+}
+
+dependencies {
+    compile(project(':hoccer-talk-client')) {
+        exclude group: 'log4j'
+    }
+    compile project(':drag-sort-listview')
+    compile 'com.google.android.gms:play-services-gcm:8.4.0'
+    compile 'com.google.android.gms:play-services-maps:8.4.0'
+    compile 'com.android.support:multidex:1.0.1'
+    compile 'com.android.support:support-v4:23.1.1'
+    compile('com.googlecode.ez-vcard:ez-vcard:0.8.3') {
+        exclude(module: 'jsoup')
+        exclude(module: 'freemarker')
+    }
+    compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.0'
+    compile 'com.squareup.picasso:picasso:2.5.0'
+    compile 'com.j256.ormlite:ormlite-android:4.43'
+    compile 'ufwa-common:log4j-android:1.2.17-1'
+    compile 'commons-codec:commons-codec:1.7'
+    compile 'net.hockeyapp.android:HockeySDK:3.0.1'
+    compile 'com.google.zxing:core:3.2.1'
+    compile 'inter.nal.barcodescanner:zbar:1.0'
+    compile 'com.fasterxml.jackson.core:jackson-core:2.1.5'
+    compile 'net.lingala.zip4j:zip4j:1.3.2'
+    testCompile 'junit:junit:4.11'
+    testCompile 'com.h2database:h2:1.4.179'
+    testCompile 'com.j256.ormlite:ormlite-jdbc:4.43'
+    testCompile 'com.jayway.awaitility:awaitility:1.6.3'
+}
+
+// Ignore 'review' build type for flavors except 'hoccer'
+android.variantFilter { variant ->
+    if(variant.buildType.name.endsWith('review') & !variant.getFlavors().get(0).name.equals('hoccer')) {
+        variant.setIgnore(true);
+    }
+}
+
+android.applicationVariants.all { variant ->
+    variant.outputs.each { output ->
+        def newName
+        newName = output.outputFile.name
+        newName = newName.replace(parent.name,"")
+        newName = newName.replace("-android-","")
+        newName = newName.replace(".apk", "-${variant.versionName}.apk")
+
+        output.outputFile = new File(output.outputFile.parent, newName)
+    }
+}

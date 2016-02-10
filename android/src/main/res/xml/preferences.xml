@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+            android:title="@string/pref_about_information">
+        <Preference
+                android:title="@string/menu_about"
+                android:key="preference_about">
+            <intent android:targetClass="com.hoccer.xo.android.activity.LegalImprintActivity"
+                    android:targetPackage="@string/package_name"
+                    android:action="android.intent.action.VIEW">
+                <extra android:name="xo_legal_imprint_display_mode" android:value="ABOUT"></extra>
+            </intent>
+        </Preference>
+        <Preference
+                android:title="@string/menu_faq"
+                android:key="preference_faq">
+            <intent android:targetClass="com.hoccer.xo.android.activity.FaqTutorialActivity"
+                    android:targetPackage="@string/package_name"
+                    android:action="android.intent.action.VIEW">
+                <extra android:name="URL" android:value="@string/link_faq"></extra>
+            </intent>
+        </Preference>
+        <Preference
+                android:title="@string/menu_tutorial"
+                android:key="preference_tutorial">
+            <intent android:targetClass="com.hoccer.xo.android.activity.FaqTutorialActivity"
+                    android:targetPackage="@string/package_name"
+                    android:action="android.intent.action.VIEW">
+                <extra android:name="URL" android:value="@string/link_tutorial"></extra>
+            </intent>
+        </Preference>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="@string/password_protection">
+        <Preference
+                android:enabled="false"
+                android:title="@string/change_password"
+                android:key="@string/preference_key_change_passcode">
+        </Preference>
+        <CheckBoxPreference android:title="@string/activate"
+                          android:key="@string/preference_key_activate_passcode"
+                          android:defaultValue="false"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="@string/worldwide_mode">
+        <ListPreference
+                android:key="@string/preference_key_worldwide_timetolive"
+                android:title="@string/leave_after"
+                android:entries="@array/worldwide_timetolive"
+                android:entryValues="@array/worldwide_timetolive_values"
+                android:defaultValue="0"/>
+        <SwitchPreference
+                android:key="@string/preference_key_worldwide_enable_notifications"
+                android:title="@string/group_notifications"
+                android:defaultValue="true"/>
+        <SwitchPreference
+                android:key="@string/preference_key_worldwide_enable_automatic_download"
+                android:title="@string/auto_download_attachments"
+                android:defaultValue="false"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="@string/pref_category_image_encoding">
+        <ListPreference
+                android:key="preference_image_encoding_size"
+                android:title="@string/pref_image_size"
+                android:entries="@array/image_transfer_size_options"
+                android:entryValues="@array/image_transfer_size_options_values"
+                android:defaultValue="@string/default_upload_image_pixel_count"/>
+
+        <ListPreference
+                android:key="preference_image_encoding_quality"
+                android:title="@string/pref_image_quality"
+                android:entries="@array/image_transfer_quality_options"
+                android:entryValues="@array/image_transfer_quality_options_values"
+                android:defaultValue="@string/default_upload_image_encoding_quality"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="@string/pref_category_transfer_mobile">
+        <ListPreference
+                android:key="preference_upload_limit_mobile"
+                android:title="@string/pref_upload_limit"
+                android:entries="@array/transfer_limits"
+                android:entryValues="@array/transfer_limits_values"
+                android:defaultValue="-1"/>
+
+        <ListPreference
+                android:key="preference_download_limit_mobile"
+                android:title="@string/pref_download_limit"
+                android:entries="@array/transfer_limits"
+                android:entryValues="@array/transfer_limits_values"
+                android:defaultValue="-2"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="@string/pref_category_transfer_wifi">
+        <ListPreference
+                android:key="preference_upload_limit_wifi"
+                android:title="@string/pref_upload_limit"
+                android:entries="@array/transfer_limits"
+                android:entryValues="@array/transfer_limits_values"
+                android:defaultValue="-1"/>
+        <ListPreference
+                android:key="preference_download_limit_wifi"
+                android:title="@string/pref_download_limit"
+                android:entries="@array/transfer_limits"
+                android:entryValues="@array/transfer_limits_values"
+                android:defaultValue="-1"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="@string/pref_category_polling">
+        <SwitchPreference
+                android:key="preference_key_enable_polling"
+                android:title="@string/enable_polling"/>
+        <ListPreference
+                android:title="@string/pref_title_polling_interval"
+                android:key="@string/preference_key_polling_interval"
+                android:entries="@array/preference_polling_interval_name"
+                android:entryValues="@array/preference_polling_interval_values"
+                android:defaultValue="900000"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="@string/pref_privacy_title">
+        <CheckBoxPreference
+                android:key="preference_confirm_messages_seen"
+                android:title="@string/pref_confirm_messages_seen"
+                android:defaultValue="true"/>
+    </PreferenceCategory>
+
+
+    <PreferenceCategory
+            android:title="@string/pref_credentials">
+        <Preference
+                android:title="@string/pref_export_credentials"
+                android:key="preference_export">
+        </Preference>
+        <Preference
+                android:title="@string/pref_import_credentials"
+                android:key="preference_import">
+        </Preference>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:key="backup_category"
+            android:title="Backups">
+        <com.hoccer.xo.android.backup.BackupPreference
+                android:key="@string/preference_key_create_backup"
+                android:layout="@layout/preference_backup"
+                android:title="@string/backup_title"
+                inProgressText="@string/backup_in_progress_title"/>
+        <com.hoccer.xo.android.backup.BackupPreference
+                android:key="@string/preference_key_restore_backup"
+                android:layout="@layout/preference_backup"
+                android:title="@string/restore_title"
+                inProgressText="@string/restore_in_progress_title"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="@string/pref_encryption">
+        <ListPreference
+                android:key="preference_keysize"
+                android:entries="@array/keysizes"
+                android:summary="@string/preference_keysize_summary"
+                android:entryValues="@array/keysize_values"
+                android:title="@string/preference_keysize_title"
+                android:defaultValue="2048"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="@string/pref_support">
+        <CheckBoxPreference
+                android:key="preference_report_crashes"
+                android:title="@string/pref_report_crashes"
+                android:summary="@string/pref_report_crashes_summary"
+                android:defaultValue="true"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="@string/pref_legal_information">
+        <Preference
+                android:title="@string/menu_licenses"
+                android:key="preference_licenses">
+            <intent android:targetClass="com.hoccer.xo.android.activity.LegalImprintActivity"
+                    android:targetPackage="@string/package_name"
+                    android:action="android.intent.action.VIEW">
+                <extra android:name="xo_legal_imprint_display_mode" android:value="LICENSES"></extra>
+            </intent>
+        </Preference>
+    </PreferenceCategory>
+</PreferenceScreen>
