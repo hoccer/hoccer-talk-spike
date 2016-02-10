@@ -1918,8 +1918,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             }
         }
 
-        //if (clientMessage.getText().equals("TEST")) switchState(State.DISCONNECTED,"OFF");
-
         TalkDelivery[] deliveries = new TalkDelivery[1];
         deliveries[0] = clientMessage.getDelivery();
 
