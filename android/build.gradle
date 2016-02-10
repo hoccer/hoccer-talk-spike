@@ -27,10 +27,10 @@ android {
         versionCode 416
         versionName "3.2.11-SNAPSHOT"
         multiDexEnabled true
-        resValue "string","google_app_id","1894273085"
         manifestPlaceholders = [
             "google.maps.api.key": "AIzaSyBpFzzIcVtJj0eUZSghPY8qg4cAnEV1ZgA"
         ]
+        resValue "string", "google_app_id", "1894273085"
     }
 
     productFlavors {
