@@ -71,10 +71,6 @@ public class XoApplication extends MultiDexApplication {
         return sInstance;
     }
 
-    public boolean isWorldWideEnabled() {
-        return sConfiguration.isWorldwideEnabled();
-    }
-
     @Override
     public void onCreate() {
         super.onCreate();

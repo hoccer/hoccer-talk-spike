@@ -42,23 +42,15 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private ViewPagerActivityComponent mViewPagerActivityComponent;
     private WorldwideChatListFragment mWorldwideChatListFragment;
     private CrashManagerListener mCrashManagerListener;
+    private boolean worldWideIsShown;
 
     @Override
     protected ActivityComponent[] createComponents() {
         MediaPlayerActivityComponent mediaPlayerActivityComponent = new MediaPlayerActivityComponent(this);
-        if (XoApplication.get().isWorldWideEnabled()){
-            mWorldwideChatListFragment = new WorldwideChatListFragment();
-            mViewPagerActivityComponent = new ViewPagerActivityComponent(this,
-                    R.id.pager,
-                    new ChatListFragment(),
-                    new NearbyChatListFragment(),
-                    mWorldwideChatListFragment);
-        } else {
-            mViewPagerActivityComponent = new ViewPagerActivityComponent(this,
-                    R.id.pager,
-                    new ChatListFragment(),
-                    new NearbyChatListFragment());
-        }
+        mViewPagerActivityComponent = new ViewPagerActivityComponent(this,
+                R.id.pager,
+                new ChatListFragment(),
+                new NearbyChatListFragment());
 
         return new ActivityComponent[]{mediaPlayerActivityComponent, mViewPagerActivityComponent};
     }
@@ -149,6 +141,23 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         showProfileIfClientIsNotRegistered();
         registerListeners();
         mContactsMenuItemActionProvider.updateNotificationBadge();
+
+        if (XoApplication.getConfiguration().isWorldwideFeatureEnabled()) {
+            if (mWorldwideChatListFragment == null) {
+                mWorldwideChatListFragment = new WorldwideChatListFragment();
+             //   mViewPagerActivityComponent.add(mWorldwideChatListFragment);
+            }
+            if (!worldWideIsShown) {
+                mViewPagerActivityComponent.add(mWorldwideChatListFragment);
+                worldWideIsShown = true;
+            }
+        } else {
+            if (mWorldwideChatListFragment != null & worldWideIsShown) {
+                mViewPagerActivityComponent.remove(mWorldwideChatListFragment);
+                worldWideIsShown = false;
+               // mWorldwideChatListFragment = null;
+            }
+        }
     }
 
     @Override

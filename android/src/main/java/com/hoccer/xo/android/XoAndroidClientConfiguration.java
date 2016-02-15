@@ -102,7 +102,7 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
         return Boolean.parseBoolean(mProperties.getProperty("hoccer.android.log.to.sd", "false"));
     }
 
-    public boolean isWorldwideEnabled() {
+    public boolean isWorldwideFeatureEnabled() {
         return mSharedPreferences.getBoolean("preference_key_enable_worldwide", true);
     }
 
