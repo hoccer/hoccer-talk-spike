@@ -86,7 +86,11 @@ public abstract class AvatarView extends LinearLayout {
 
     public void setContact(TalkClientContact contact) {
         mContact = contact;
-        updateAvatar();
+        try {
+            updateAvatar();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     private void updateAvatar() {
@@ -155,7 +159,11 @@ public abstract class AvatarView extends LinearLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        updateAvatar();
+        try {
+            updateAvatar();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**
