@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
@@ -22,8 +23,11 @@ import com.hoccer.xo.android.view.AspectImageView;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
+import org.apache.log4j.Logger;
 
 public abstract class AvatarView extends LinearLayout {
+
+    private static final Logger LOG = Logger.getLogger(XoClient.class);
 
     private Uri mDefaultAvatarImageUri;
     private DisplayImageOptions mDefaultOptions;
@@ -89,7 +93,7 @@ public abstract class AvatarView extends LinearLayout {
         try {
             updateAvatar();
         } catch (Exception e){
-            e.printStackTrace();
+            LOG.error("Error updating avatar", e);
         }
     }
 
@@ -162,7 +166,7 @@ public abstract class AvatarView extends LinearLayout {
         try {
             updateAvatar();
         } catch (Exception e){
-            e.printStackTrace();
+            LOG.error("Error updating avatar", e);
         }
     }
 
