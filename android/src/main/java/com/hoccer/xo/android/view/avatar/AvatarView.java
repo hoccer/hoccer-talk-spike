@@ -103,9 +103,8 @@ public abstract class AvatarView extends LinearLayout {
             return;
         }
         XoTransfer avatar = mContact.getAvatar();
-        Uri avatarUri = avatar == null ? null : UriUtils.getAbsoluteFileUri(avatar.getFilePath());
 
-        if (avatarUri == null) {
+        if (avatar == null || avatar.getFilePath() == null) {
             if (mContact.isGroup()) {
                 if (mContact.getGroupPresence() != null && mContact.getGroupPresence().isTypeNearby()) {
                     setAvatarImage(R.drawable.avatar_location);
@@ -118,6 +117,7 @@ public abstract class AvatarView extends LinearLayout {
                 setAvatarImage(R.drawable.avatar_contact);
             }
         } else {
+            Uri avatarUri = UriUtils.getAbsoluteFileUri(avatar.getFilePath());
             setAvatarImage(avatarUri);
         }
 
