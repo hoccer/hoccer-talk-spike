@@ -3203,7 +3203,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     return;
                 }
             }
-            // TAKES PRETTY LONG UNTIL HERE
             LOG.debug("sync: updateGroupMembership 2: " + (System.currentTimeMillis() - startMillis) + "ms");
 
         } catch (SQLException e) {
