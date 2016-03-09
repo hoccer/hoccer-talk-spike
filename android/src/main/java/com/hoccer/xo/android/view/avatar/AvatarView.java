@@ -27,7 +27,7 @@ import org.apache.log4j.Logger;
 
 public abstract class AvatarView extends LinearLayout {
 
-    private static final Logger LOG = Logger.getLogger(XoClient.class);
+    private static final Logger LOG = Logger.getLogger(AvatarView.class);
 
     private Uri mDefaultAvatarImageUri;
     private DisplayImageOptions mDefaultOptions;
