@@ -3159,7 +3159,10 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             LOG.error("SQL Error when saving avatar download", e);
         }
         if (avatarDownload != null) {
-            mDownloadAgent.startDownloadTask(avatarDownload);
+            TalkClientDownload.State state = avatarDownload.getState();
+            if (state != TalkClientDownload.State.COMPLETE && state != TalkClientDownload.State.FAILED) {
+                mDownloadAgent.startDownloadTask(avatarDownload);
+            }
         }
     }
 
