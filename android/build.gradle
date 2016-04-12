@@ -25,7 +25,7 @@ android {
         minSdkVersion 14
         targetSdkVersion 22 // when updating 'targetSdkVersion' be aware of issues with the xzing library and Android 6.+
         versionCode 419
-        versionName "3.2.12"
+        versionName "3.2.11"
         multiDexEnabled true
         manifestPlaceholders = [
             "google.maps.api.key": "AIzaSyBpFzzIcVtJj0eUZSghPY8qg4cAnEV1ZgA"
