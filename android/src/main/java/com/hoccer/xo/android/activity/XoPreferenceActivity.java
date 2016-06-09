@@ -15,6 +15,7 @@ import android.widget.ListAdapter;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
 import com.hoccer.xo.android.WorldwideController;
+import com.hoccer.xo.android.XoAndroidClientConfiguration;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.backup.*;
@@ -68,10 +69,6 @@ public class XoPreferenceActivity extends PreferenceActivity
 
         final BackupPreference createBackupPreference = (BackupPreference) findPreference(getString(R.string.preference_key_create_backup));
         final BackupPreference restoreBackupPreference = (BackupPreference) findPreference(getString(R.string.preference_key_restore_backup));
-        worldWidePreferenceCategory = (PreferenceCategory) findPreference(getString(R.string.preference_key_worldwide_category));
-        if (!mDefaultSharedPreferences.getBoolean("preference_key_enable_worldwide", true)){
-            removeWorldwidePreferences();
-        }
 
         Preference activatePasswordPreference = findPreference(getString(R.string.preference_key_activate_passcode));
 
@@ -250,15 +247,11 @@ public class XoPreferenceActivity extends PreferenceActivity
         } else if (getString(R.string.preference_key_enable_polling).equals(key) || getString(R.string.preference_key_polling_interval).equals(key)) {
             Polling.update(this);
         } else if (getString(R.string.preference_key_enable_worldwide).equals(key)) {
-            //XoApplication.restartApplication();
-
+            boolean wwEnabled = ((XoAndroidClientConfiguration)(XoApplication.get().getClient().getConfiguration())).isWorldwideFeatureEnabled();
+            if ((!wwEnabled) && WorldwideController.INSTANCE.isWorldwideActive()) {
+                WorldwideController.INSTANCE.stopWorldWideNow();
+            }
         }
-    }
-
-    private void removeWorldwidePreferences(){
-            worldWidePreferenceCategory.removePreference(findPreference(getString(R.string.preference_key_worldwide_timetolive)));
-            worldWidePreferenceCategory.removePreference(findPreference(getString(R.string.preference_key_worldwide_enable_automatic_download)));
-            worldWidePreferenceCategory.removePreference(findPreference(getString(R.string.preference_key_worldwide_enable_notifications)));
     }
 
     private void updateWorldwideEnvironmentParameters() {
