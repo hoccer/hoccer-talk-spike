@@ -103,7 +103,7 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
     }
 
     public boolean isWorldwideFeatureEnabled() {
-        return mSharedPreferences.getBoolean("preference_key_enable_worldwide", true);
+        return mSharedPreferences.getBoolean("preference_key_enable_worldwide", false);
     }
 
     public boolean isLoggingToLogcatEnabled() {
