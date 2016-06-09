@@ -66,6 +66,14 @@ public enum WorldwideController {
         mEnvironmentReleased = true;
     }
 
+    public void stopWorldWideNow(){
+        if (mEnvironment != null) {
+            mEnvironment.setTimeToLive(0);
+            releaseWorldWide();
+            sendEnvironmentUpdate();
+        }
+    }
+
     public void updateWorldwideEnvironmentParameters() {
         if (!isWorldwideActive()) {
             return;
