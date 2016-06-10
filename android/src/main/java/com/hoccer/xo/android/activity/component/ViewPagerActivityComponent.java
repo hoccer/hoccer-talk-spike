@@ -88,8 +88,8 @@ public class ViewPagerActivityComponent extends ActivityComponent {
         mViewPager.getAdapter().notifyDataSetChanged();
     }
 
-    public int getTabCount(){
-        return getActivity().getActionBar().getTabCount();
+    public boolean contains(Fragment fragment){
+        return mFragments.contains(fragment);
     }
 
     private void removeTab(IPagerFragment fragment) {
