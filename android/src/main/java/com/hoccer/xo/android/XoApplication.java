@@ -192,7 +192,7 @@ public class XoApplication extends MultiDexApplication {
     }
 
     private boolean isFirstConnectionAfterCrashOrUpdate() {
-        return UpdateHelper.isApplicationUpdated(this) || mCrashMonitor.isCrashedBefore();
+        return UpdateHelper.getInstance(this).isApplicationUpdated() || UpdateHelper.getInstance(this).isFreshInstall() || mCrashMonitor.isCrashedBefore();
     }
 
     @Override
