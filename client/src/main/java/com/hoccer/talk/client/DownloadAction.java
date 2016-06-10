@@ -105,6 +105,7 @@ public class DownloadAction implements TransferStateListener {
 
         if (!mDownloadAgent.getXoClient().isReady()) {
             LOG.debug("Client not connected. Download not started.");
+            mDownload.switchState(RETRYING);
             return;
         }
 
