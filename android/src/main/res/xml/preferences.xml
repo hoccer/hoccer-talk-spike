@@ -40,24 +40,32 @@
                 android:title="@string/change_password"
                 android:key="@string/preference_key_change_passcode">
         </Preference>
-        <CheckBoxPreference android:title="@string/activate"
-                          android:key="@string/preference_key_activate_passcode"
-                          android:defaultValue="false"/>
+        <CheckBoxPreference
+                android:title="@string/activate"
+                android:key="@string/preference_key_activate_passcode"
+                android:defaultValue="false"/>
     </PreferenceCategory>
 
     <PreferenceCategory
-            android:title="@string/worldwide_mode">
+            android:title="@string/worldwide_mode"
+            android:key="@string/preference_key_worldwide_category">
+        <SwitchPreference
+                android:key="@string/preference_key_enable_worldwide"
+                android:title="@string/activate"/>
         <ListPreference
+                android:dependency="@string/preference_key_enable_worldwide"
                 android:key="@string/preference_key_worldwide_timetolive"
                 android:title="@string/leave_after"
                 android:entries="@array/worldwide_timetolive"
                 android:entryValues="@array/worldwide_timetolive_values"
                 android:defaultValue="0"/>
         <SwitchPreference
+                android:dependency="@string/preference_key_enable_worldwide"
                 android:key="@string/preference_key_worldwide_enable_notifications"
                 android:title="@string/group_notifications"
                 android:defaultValue="true"/>
         <SwitchPreference
+                android:dependency="@string/preference_key_enable_worldwide"
                 android:key="@string/preference_key_worldwide_enable_automatic_download"
                 android:title="@string/auto_download_attachments"
                 android:defaultValue="false"/>
