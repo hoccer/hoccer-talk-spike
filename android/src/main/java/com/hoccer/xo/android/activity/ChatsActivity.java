@@ -141,20 +141,15 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         showProfileIfClientIsNotRegistered();
         registerListeners();
         mContactsMenuItemActionProvider.updateNotificationBadge();
-
         if (XoApplication.getConfiguration().isWorldwideFeatureEnabled()) {
             if (mWorldwideChatListFragment == null) {
                 mWorldwideChatListFragment = new WorldwideChatListFragment();
             }
-            if (!worldWideIsShown) {
+            if (!mViewPagerActivityComponent.contains(mWorldwideChatListFragment)) {
                 mViewPagerActivityComponent.add(mWorldwideChatListFragment);
-                worldWideIsShown = true;
             }
-        } else {
-            if (mWorldwideChatListFragment != null & worldWideIsShown) {
+        } else if (mWorldwideChatListFragment != null && mViewPagerActivityComponent.contains(mWorldwideChatListFragment)) {
                 mViewPagerActivityComponent.remove(mWorldwideChatListFragment);
-                worldWideIsShown = false;
-            }
         }
     }
 
