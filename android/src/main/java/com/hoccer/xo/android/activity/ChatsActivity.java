@@ -145,7 +145,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         if (XoApplication.getConfiguration().isWorldwideFeatureEnabled()) {
             if (mWorldwideChatListFragment == null) {
                 mWorldwideChatListFragment = new WorldwideChatListFragment();
-             //   mViewPagerActivityComponent.add(mWorldwideChatListFragment);
             }
             if (!worldWideIsShown) {
                 mViewPagerActivityComponent.add(mWorldwideChatListFragment);
@@ -155,7 +154,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
             if (mWorldwideChatListFragment != null & worldWideIsShown) {
                 mViewPagerActivityComponent.remove(mWorldwideChatListFragment);
                 worldWideIsShown = false;
-               // mWorldwideChatListFragment = null;
             }
         }
     }

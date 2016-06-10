@@ -23,8 +23,6 @@ public abstract class ComposableActivity extends BaseActivity {
 
     protected ComposableActivity() {
         super();
-
-      //  mComponents = createComponents();
     }
 
     @Override
