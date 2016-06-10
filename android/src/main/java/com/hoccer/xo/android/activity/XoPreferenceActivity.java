@@ -247,8 +247,8 @@ public class XoPreferenceActivity extends PreferenceActivity
         } else if (getString(R.string.preference_key_enable_polling).equals(key) || getString(R.string.preference_key_polling_interval).equals(key)) {
             Polling.update(this);
         } else if (getString(R.string.preference_key_enable_worldwide).equals(key)) {
-            boolean wwEnabled = ((XoAndroidClientConfiguration)(XoApplication.get().getClient().getConfiguration())).isWorldwideFeatureEnabled();
-            if ((!wwEnabled) && WorldwideController.INSTANCE.isWorldwideActive()) {
+            boolean worldwideFeatureEnabled = ((XoAndroidClientConfiguration)(XoApplication.get().getClient().getConfiguration())).isWorldwideFeatureEnabled();
+            if ((!worldwideFeatureEnabled) && WorldwideController.INSTANCE.isWorldwideActive()) {
                 WorldwideController.INSTANCE.stopWorldWideNow();
             }
         }
