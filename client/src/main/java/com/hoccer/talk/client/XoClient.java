@@ -3159,7 +3159,10 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             LOG.error("SQL Error when saving avatar download", e);
         }
         if (avatarDownload != null) {
-            mDownloadAgent.startDownloadTask(avatarDownload);
+            TalkClientDownload.State state = avatarDownload.getState();
+            if (state != TalkClientDownload.State.COMPLETE && state != TalkClientDownload.State.FAILED) {
+                mDownloadAgent.startDownloadTask(avatarDownload);
+            }
         }
     }
 
@@ -3200,7 +3203,6 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     return;
                 }
             }
-            // TAKES PRETTY LONG UNTIL HERE
             LOG.debug("sync: updateGroupMembership 2: " + (System.currentTimeMillis() - startMillis) + "ms");
 
         } catch (SQLException e) {
