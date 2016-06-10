@@ -41,9 +41,10 @@
                 android:title="@string/change_password"
                 android:key="@string/preference_key_change_passcode">
         </Preference>
-        <CheckBoxPreference android:title="@string/activate"
-                            android:key="@string/preference_key_activate_passcode"
-                            android:defaultValue="false"/>
+        <CheckBoxPreference
+                android:title="@string/activate"
+                android:key="@string/preference_key_activate_passcode"
+                android:defaultValue="false"/>
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -51,7 +52,7 @@
             android:key="@string/preference_key_worldwide_category">
         <SwitchPreference
                 android:key="@string/preference_key_enable_worldwide"
-                android:title="@string/activate"/>
+                android:title="@string/show_worldwide"/>
         <ListPreference
                 android:dependency="@string/preference_key_enable_worldwide"
                 android:key="@string/preference_key_worldwide_timetolive"
