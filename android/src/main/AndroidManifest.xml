@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- NOTE: package name and ${placeholders} are replaced by gradle -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.artcom.hoccer">
+
+    <!-- We run on 4.0 (14) and up, we use features from up to 4.2 (17) -->
+    <uses-sdk
+            android:minSdkVersion="14"
+            android:targetSdkVersion="17"/>
+
+    <supports-screens
+            android:anyDensity="true"
+            android:largeScreens="true"
+            android:normalScreens="true"
+            android:resizeable="true"
+            android:smallScreens="true"
+            android:xlargeScreens="true"
+            />
+
+    <!-- We can use the camera for capture -->
+    <uses-feature
+            android:name="android.hardware.camera"
+            android:required="false"/>
+    <uses-feature
+            android:name="android.hardware.camera.autofocus"
+            android:required="false"/>
+    <!-- for Tablet devices without GSM like Nexus 7-->
+    <uses-feature
+            android:name="android.hardware.telephony"
+            android:required="false"/>
+    <!-- we also want to be listed for devices without GPS -->
+    <uses-feature
+            android:name="android.hardware.location.gps"
+            android:required="false"/>
+    <uses-feature
+            android:name="android.hardware.location"
+            android:required="false"/>
+    <!-- GMaps needs GLES2 -->
+    <uses-feature
+            android:glEsVersion="0x00020000"
+            android:required="true"/>
+
+    <!-- Obviously, we need internet access -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- We monitor connection status while we want to communicate -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <!-- We also use GCM -->
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
+    <!-- GCM requires a Google account. -->
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    <!-- GCM uses this -->
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <!-- Notification vibration -->
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <!-- For attachments, also used for logging -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <!-- We read contacts -->
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <!-- Our own GCM permission -->
+    <uses-permission android:name="${applicationId}.permission.C2D_MESSAGE"/>
+    <!-- Google Play Services / GMaps -->
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
+    <!-- GMaps / locations -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <!-- Wifi-Scanning for location grouping -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <!-- Camera is needed for QR-Code scanning -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+
+    <!-- Declare permission for controlling our own push package -->
+    <permission
+            android:name="${applicationId}.permission.C2D_MESSAGE"
+            android:protectionLevel="signature"/>
+
+    <application
+            android:name="com.hoccer.xo.android.XoApplication"
+            android:allowBackup="false"
+            android:icon="@drawable/ic_launcher"
+            android:logo="@drawable/ic_launcher"
+            android:label="${app.name}"
+            android:theme="@style/BaseTheme">
+
+        <!-- API key for Google Maps Android API v2 -->
+        <meta-data
+                android:name="com.google.android.maps.v2.API_KEY"
+                android:value="${google.maps.api.key}"/>
+
+        <activity
+                android:name="com.hoccer.xo.android.activity.ChatsActivity"
+                android:label="${app.name.short}"
+                android:configChanges="keyboardHidden|orientation|screenSize"
+                android:screenOrientation="portrait"
+                android:launchMode="singleTask"
+                android:windowSoftInputMode="adjustPan">
+
+            <!-- Show in launcher -->
+            <intent-filter android:label="${app.name}">
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="${hoccer.invitation.uri.scheme}${hoccer.invitation.uri.suffix}"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name="com.hoccer.xo.android.activity.ContactsActivity"
+                  android:label="@string/contacts_title"
+                  android:screenOrientation="portrait"
+                  android:parentActivityName="com.hoccer.xo.android.activity.ChatsActivity"
+                  android:windowSoftInputMode="adjustPan">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="com.hoccer.xo.android.activity.ChatsActivity"/>
+        </activity>
+
+        <activity
+                android:name="com.hoccer.xo.android.activity.ChatActivity"
+                android:label="${app.name.short}"
+                android:windowSoftInputMode="stateHidden"
+                android:exported="true"
+                android:configChanges="keyboardHidden|orientation|screenSize">
+        </activity>
+
+        <activity
+                android:name="com.hoccer.xo.android.activity.MediaBrowserActivity"
+                android:parentActivityName="com.hoccer.xo.android.activity.ChatsActivity"
+                android:screenOrientation="portrait"
+                android:windowSoftInputMode="stateHidden"
+                android:exported="true">
+
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="com.hoccer.xo.android.activity.ChatsActivity"/>
+        </activity>
+
+        <activity
+                android:name="com.hoccer.xo.android.activity.MediaCollectionSelectionActivity"
+                android:label="@string/collections"
+                android:screenOrientation="portrait">
+        </activity>
+
+        <activity
+                android:name="com.hoccer.xo.android.activity.ContactSelectionSharingActivity"
+                android:parentActivityName="com.hoccer.xo.android.activity.ChatsActivity"
+                android:label="@string/select_recipients"
+                android:launchMode="singleTask">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="com.hoccer.xo.android.activity.ChatsActivity"/>
+            <intent-filter android:label="${app.name}">
+                <action android:name="android.intent.action.SEND"/>
+                <action android:name="android.intent.action.SEND_MULTIPLE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="*/*"/>
+            </intent-filter>
+        </activity>
+
+        <activity
+                android:name="com.hoccer.xo.android.activity.ContactSelectionResultActivity"
+                android:label="@string/select_recipients">
+        </activity>
+
+        <activity
+                android:name="com.hoccer.xo.android.activity.GroupContactSelectionResultActivity"
+                android:label="@string/manage_group_members">
+        </activity>
+
+        <activity
+                android:name="com.hoccer.xo.android.activity.FullscreenPlayerActivity"
+                android:label="${app.name.short}"
+                android:screenOrientation="portrait"
+                android:parentActivityName="com.hoccer.xo.android.activity.MediaBrowserActivity"
+                android:windowSoftInputMode="stateHidden"
+                android:theme="@android:style/Theme.Black.NoTitleBar"
+                android:exported="true">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="com.hoccer.xo.android.activity.MediaBrowserActivity"/>
+        </activity>
+
+        <activity android:name="com.hoccer.xo.android.activity.NotificationBridgeActivity"/>
+
+        <activity
+                android:name="com.hoccer.xo.android.activity.RegistrationActivity"
+                android:label="${app.name.short}"
+                android:screenOrientation="portrait">
+        </activity>
+
+        <activity
+                android:name="com.hoccer.xo.android.profile.client.ClientProfileActivity"
+                android:label="${app.name.short}"
+                android:screenOrientation="portrait"
+                android:windowSoftInputMode="stateHidden">
+        </activity>
+
+        <activity
+                android:name="com.hoccer.xo.android.profile.group.GroupProfileActivity"
+                android:label="${app.name.short}"
+                android:screenOrientation="portrait"
+                android:windowSoftInputMode="stateHidden|adjustPan">
+        </activity>
+
+        <activity
+                android:name="com.hoccer.xo.android.activity.DeviceContactsInvitationActivity"
+                android:label="${app.name.short}">
+        </activity>
+
+        <activity
+                android:name="com.hoccer.xo.android.activity.XoPreferenceActivity"
+                android:label="${app.name.short}"
+                android:screenOrientation="portrait"
+                android:parentActivityName="com.hoccer.xo.android.activity.ChatsActivity">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="com.hoccer.xo.android.activity.ChatsActivity"/>
+        </activity>
+
+        <activity
+                android:name="com.hoccer.xo.android.activity.LegalImprintActivity"
+                android:label="${app.name.short}"
+                android:parentActivityName="com.hoccer.xo.android.activity.XoPreferenceActivity"
+                android:screenOrientation="portrait">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="com.hoccer.xo.android.activity.XoPreferenceActivity"/>
+        </activity>
+
+        <activity
+                android:name="com.hoccer.xo.android.activity.FaqTutorialActivity"
+                android:label="${app.name.short}"
+                android:parentActivityName="com.hoccer.xo.android.activity.XoPreferenceActivity"
+                android:screenOrientation="portrait">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="com.hoccer.xo.android.activity.XoPreferenceActivity"/>
+        </activity>
+
+        <activity
+                android:name="com.hoccer.xo.android.activity.MapsLocationActivity"
+                android:label="@string/selectlocation_title">
+        </activity>
+
+        <activity
+                android:name="com.hoccer.xo.android.activity.MultiImagePickerActivity"
+                android:label="@string/select_images_title">
+        </activity>
+
+        <activity
+                android:name="com.hoccer.xo.android.activity.QrCodeActivity"
+                android:label="${app.name.short}"
+                android:screenOrientation="portrait"
+                android:windowSoftInputMode="adjustResize">
+        </activity>
+
+        <activity android:name="com.hoccer.xo.android.passwordprotection.activity.PasswordPromptActivity"
+                  android:theme="@android:style/Theme.Holo.Light.NoActionBar"
+                  android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
+
+        <activity android:name="com.hoccer.xo.android.passwordprotection.activity.PasswordChangeActivity"
+                  android:label="@string/change_password"
+                  android:windowSoftInputMode="stateAlwaysVisible|adjustResize"/>
+
+        <activity android:name="com.hoccer.xo.android.passwordprotection.activity.PasswordSetActivity"
+                  android:label="@string/set_password"
+                  android:windowSoftInputMode="stateAlwaysVisible|adjustResize"/>
+
+        <service android:name="com.hoccer.xo.android.credentialtransfer.CredentialExportService"/>
+
+        <service android:name="com.hoccer.xo.android.credentialtransfer.DisconnectService"/>
+
+        <receiver
+                android:name="com.hoccer.xo.android.credentialtransfer.CredentialTransferReceiver">
+            <intent-filter>
+                <action android:name="com.hoccer.android.action.EXPORT_DATA"/>
+                <action android:name="com.hoccer.android.action.DISCONNECT"/>
+            </intent-filter>
+        </receiver>
+
+        <service android:name="com.hoccer.xo.android.service.XoClientService"/>
+
+        <service android:name="com.hoccer.talk.android.push.TalkPushService"/>
+
+        <receiver
+                android:name="com.hoccer.talk.android.push.TalkPushReceiver"
+                android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <!-- Receives the actual messages. -->
+                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+                <!-- Receives the registration id. -->
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION"/>
+                <!-- Restrict to our own push package -->
+                <category android:name="com.hoccer.talk.android"/>
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name="com.hoccer.xo.android.polling.PollingBroadcastReceiver" />
+
+        <service android:name="com.hoccer.xo.android.backup.BackupAndRestoreService" android:exported="false"/>
+
+    </application>
+
+</manifest>

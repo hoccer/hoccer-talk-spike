@@ -43,6 +43,7 @@ public class TalkServerHandler extends HandlerCollection {
         serverInfoContextHandler.setAttribute("server", talkServer);
         serverInfoContextHandler.addServlet(ServerInfoServlet.class, "/info");
         serverInfoContextHandler.addServlet(DatabaseInfoServlet.class, "/dbinfo");
+        serverInfoContextHandler.addServlet(RpcInfoServlet.class, "/rpcinfo");
         serverInfoContextHandler.addServlet(ConnectionInfoServlet.class, "/connections");
         serverInfoContextHandler.addServlet(CertificateInfoServlet.class, "/certificates");
 

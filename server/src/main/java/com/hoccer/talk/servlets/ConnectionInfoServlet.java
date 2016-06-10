@@ -3,10 +3,12 @@ package com.hoccer.talk.servlets;
 import com.hoccer.talk.model.*;
 import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServer;
+import com.hoccer.talk.server.push.PushAgent;
 import com.hoccer.talk.server.push.PushRequest;
 import com.hoccer.talk.server.rpc.TalkRpcConnection;
 import org.jongo.MongoCollection;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -44,9 +46,53 @@ public class ConnectionInfoServlet extends HttpServlet {
         return query_pairs;
     }
 
+    Hashtable validUsers = new Hashtable();
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        // ie this user has no password
+        //validUsers.put("james:","authorized");
+
+        validUsers.put("hoccer:hcrSrv$23Info","authorized");
+    }
+
+    // This method checks the user information sent in the Authorization
+    // header against the database of users maintained in the users Hashtable.
+    protected boolean allowUser(String auth) throws IOException {
+
+        if (auth == null) {
+            return false;  // no auth
+        }
+        if (!auth.toUpperCase().startsWith("BASIC ")) {
+            return false;  // we only do BASIC
+        }
+        // Get encoded user and password, comes after "BASIC "
+        String userpassEncoded = auth.substring(6);
+        // Decode it, using any base 64 decoder
+        sun.misc.BASE64Decoder dec = new sun.misc.BASE64Decoder();
+        String userpassDecoded = new String(dec.decodeBuffer(userpassEncoded));
+
+        // Check our user list to see if that user and password are "allowed"
+        if ("authorized".equals(validUsers.get(userpassDecoded))) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+
+        String auth = req.getHeader("Authorization");
+        // Do we allow that user?
+        if (!allowUser(auth)) {
+            // Not allowed, so report he's unauthorized
+            resp.setHeader("WWW-Authenticate", "BASIC realm=\"Hoccer Server Connection Info\"");
+            resp.sendError(resp.SC_UNAUTHORIZED);
+            return;
+        }
 
         server = (TalkServer)getServletContext().getAttribute("server");
 
@@ -236,12 +282,12 @@ public class ConnectionInfoServlet extends HttpServlet {
         w.write("\n");
 
         Map<String,PushRequest> notAnswered = new HashMap<String, PushRequest>(server.getPushAgent().getNotAnswered());
-        w.write("Push Requests not yet answered ("+notAnswered.size()+"):\n");
+        w.write("Push Requests not yet answered in the last "+ PushAgent.keepUnansweredPushesFor/1000/60 + " minutes ("+notAnswered.size()+"):\n");
         printPushInfo(db, w, notAnswered);
         w.write("\n");
 
         Map<String,PushRequest> answered = new HashMap<String, PushRequest>(server.getPushAgent().getAnswered());
-        w.write("Push Requests answered ("+answered.size()+"):\n");
+        w.write("Push Requests answered in the last "+ PushAgent.keepAnsweredPushesFor/1000/60 + " minutes ("+answered.size()+"):\n");
         printPushInfo(db, w, answered);
         w.write("\n");
 
@@ -397,6 +443,7 @@ public class ConnectionInfoServlet extends HttpServlet {
                 if (client.getTimeLastPush() != null) {
                     long pushAgo = (new Date().getTime() - client.getTimeLastPush().getTime()) / 1000;
                     pushStatus = pushStatus + " " + pushAgo + " s ago";
+                    pushStatus = pushStatus + " retry " + client.getPushRetryCount();
                     if (client.getTimeLastLogin() != null && client.getTimeLastLogin().after(client.getTimeLastPush())) {
                         pushStatus = pushStatus + ", logged in "+ (client.getTimeLastLogin().getTime()-client.getTimeLastPush().getTime())/1000+" s after push";
                     }
@@ -404,7 +451,7 @@ public class ConnectionInfoServlet extends HttpServlet {
             }
             long pushCreatedAgo = (new Date().getTime() - request.getCreatedTime().getTime()) / 1000;
 
-            w.write("["+clientId+"] created "+pushCreatedAgo+" ago ("+ pushStatus + ") "+hostInfo.info());
+            w.write("["+clientId+"] created "+pushCreatedAgo+" s ago ("+ pushStatus + ") "+hostInfo.info());
             w.write("\n");
         }
     }

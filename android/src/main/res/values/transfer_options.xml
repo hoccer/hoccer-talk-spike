@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="transfer_limits">
+        <item name="unlimited">@string/up_down_unlimited_option</item>
+        <item name="100">100 MB</item>
+        <item name="50">50 MB</item>
+        <item name="10">10 MB</item>
+        <item name="5">5 MB</item>
+        <item name="1">1 MB</item>
+        <item name="500">500 kB</item>
+        <item name="manual">@string/up_down_manual_option</item>
+    </string-array>
+
+    <string-array name="transfer_limits_values">
+        <item name="unlimited">-1</item>
+        <item name="100">104857600</item>
+        <item name="50">52428800</item>
+        <item name="10">10485760</item>
+        <item name="5">5242880</item>
+        <item name="1">1048576</item>
+        <item name="500">512000</item>
+        <item name="manual">-2</item>
+    </string-array>
+
+    <string-array name="image_transfer_size_options">
+      <item>thumb (0.01 MPixels)</item>
+      <item>low (0.06 MPixels)</item>
+      <item>medium (0.25 MPixels)</item>
+      <item>high (1 MPixel)</item>
+      <item>very high (4 MPixels)</item>
+      <item>full resolution</item>
+    </string-array>
+
+    <string-array name="image_transfer_size_options_values">
+      <item>10000</item>
+      <item>64000</item>
+      <item>250000</item>
+      <item>1000000</item>
+      <item>4000000</item>
+      <item>-1</item>
+    </string-array>
+
+    <string-array name="image_transfer_quality_options">
+      <item>1 (low)</item>
+      <item>2</item>
+      <item>3</item>
+      <item>4</item>
+      <item>5 (medium)</item>
+      <item>6</item>
+      <item>7</item>
+      <item>8</item>
+      <item>9</item>
+      <item>10 (original)</item>
+    </string-array>
+
+    <string-array name="image_transfer_quality_options_values">
+      <item>30</item>
+      <item>36</item>
+      <item>42</item>
+      <item>46</item>
+      <item>52</item>
+      <item>60</item>
+      <item>70</item>
+      <item>80</item>
+      <item>90</item>
+      <item>100</item>
+    </string-array>
+
+    <string name="default_upload_image_pixel_count">1000000</string>
+    <string name="default_upload_image_encoding_quality">52</string>
+
+</resources>

@@ -95,6 +95,320 @@ public class JsonRpcServer {
         return mRemoteInterfaces;
     }
 
+    private Map<String, CallInfo> mCallInfoMap = new Hashtable<String, CallInfo>();
+
+    public static String methodName(ObjectNode request) {
+        JsonNode methodNode = request.get("method");
+        String requestName = (methodNode!=null&&!methodNode.isNull())?methodNode.asText():null;
+        return requestName;
+    }
+
+
+    public void updateCallInfo(int connectionId, long durationMillis, ObjectNode request, ObjectNode response) {
+        synchronized (this) {
+            String requestName = methodName(request);
+            if (requestName != null) {
+                CallInfo callInfo = mCallInfoMap.get(requestName);
+                if (callInfo == null) {
+                    callInfo = new CallInfo(requestName);
+                    mCallInfoMap.put(requestName, callInfo);
+                }
+                callInfo.update(connectionId, durationMillis, request, response);
+            } else {
+                LOG.warn("updateCallInfo: request has no method name");
+            }
+        }
+    }
+
+    public Map<String, CallInfo> getCallInfoMapClone() {
+        synchronized (this) {
+            return new HashMap<String, CallInfo>(mCallInfoMap);
+        }
+    }
+    public static Map sortByCallTime(Map unsortedMap) {
+        Map sortedMap = new TreeMap(new CallTimeValueComparator(unsortedMap));
+        sortedMap.putAll(unsortedMap);
+        return sortedMap;
+    }
+
+    static class CallTimeValueComparator implements Comparator {
+
+        Map map;
+
+        public CallTimeValueComparator(Map map) {
+            this.map = map;
+        }
+
+        public int compare(Object keyA, Object keyB) {
+            JsonRpcServer.CallInfo valueA = (JsonRpcServer.CallInfo) map.get(keyA);
+            JsonRpcServer.CallInfo valueB = (JsonRpcServer.CallInfo) map.get(keyB);
+            int comparisonResult = new Long(valueB.getTotalDurationMillis()).compareTo(new Long(valueA.getTotalDurationMillis()));
+            if (comparisonResult == 0) {
+                return valueA.getCallName().compareTo(valueB.getCallName());
+            }
+            return comparisonResult;
+        }
+    }
+    public Map<String, CallInfo> getSortedCallInfoMapClone() {
+        synchronized (this) {
+            return sortByCallTime(mCallInfoMap);
+        }
+    }
+
+    public static class CallInfo {
+        public CallInfo(String name) {
+            callName = name;
+            created = new Date();
+            lastUpdate = created;
+            minCallDuration = Integer.MAX_VALUE;
+            maxCallDuration = Integer.MIN_VALUE;
+        }
+        private final int RUNNING_AVERAGE_WINDOW_SIZE = 10;
+        private final int RUNNING_AVERAGE_CALLS_WINDOW_SIZE = 3;
+
+        private final int TIME_SLOT_MILLIS = 10000;
+        private final String callName;
+        private long totalCalls;
+        private long totalDurationMillis;
+        private double rollingAverageCallsPerSec;
+        private double rollingAverageDuration;
+        private Date created;
+        private Date lastUpdate;
+        private long callsInThisMillisecond;
+        private long maxCallDuration;
+        private long minCallDuration;
+        private int maxDurationConnection = 0;
+        private ObjectNode maxDurationRequestOrNotification;
+        private ObjectNode maxDurationResponse;
+        private Date maxDurationResponseDate = new Date(0);
+        private Date minDurationResponseDate = new Date(0);
+        private long errors;
+        private ObjectNode lastError;
+        private long callsInTimeSlot;
+        private long callsInLastTimeSlot;
+        private long timeSlot;
+        private int accumulated;
+
+        public void accumulate(CallInfo info) {
+            totalCalls+=info.totalCalls;
+            totalDurationMillis+=info.totalDurationMillis;
+            rollingAverageCallsPerSec+=info.rollingAverageCallsPerSec;
+            rollingAverageDuration+=info.rollingAverageDuration;
+            if (info.maxCallDuration > maxCallDuration) {
+                maxCallDuration = info.maxCallDuration;
+                maxDurationResponseDate = info.maxDurationResponseDate;
+            }
+            if (info.minCallDuration < minCallDuration) {
+                minCallDuration=info.minCallDuration;
+                minDurationResponseDate=info.minDurationResponseDate;
+            }
+            if (info.created.before(created)) {
+                created = info.created;
+            }
+            if (info.lastUpdate.before(lastUpdate)) {
+                lastUpdate = info.lastUpdate;
+            }
+            errors+=info.errors;
+            ++accumulated;
+        }
+        public String totalInfo() {
+            synchronized (this) {
+                if (accumulated == 0) {
+                    return "No totals yet";
+                }
+                Date now = new Date();
+                long lastUpdateAgo = now.getTime() - lastUpdate.getTime();
+                long maxUpdateAgo = now.getTime() - maxDurationResponseDate.getTime();
+                long minUpdateAgo = now.getTime() - minDurationResponseDate.getTime();
+                return String.format("%-30s: ", "TOTAL") +
+                        String.format("err:%7d /", errors) +
+                        String.format("%8d", totalCalls) +
+                        String.format(",%5ds ago ", lastUpdateAgo/1000)+
+                        String.format(" %9dms", totalDurationMillis) +
+                        String.format(" %7.2f/s", averageCallsPerSecTotal()) +
+                        String.format(", now: %7.2f/s", getRollingAverageCallsPerSec()) +
+                        String.format(", duration: %6.1fms", averageCallDuration()) +
+                        String.format(", now: %6.1fms", rollingAverageDuration/accumulated) +
+                        String.format(", min: %5dms", minCallDuration) +
+                        String.format(" %6ds ago", minUpdateAgo/1000) +
+                        String.format(", max: %5dms", maxCallDuration) +
+                        String.format(" %6ds ago ", maxUpdateAgo/1000) +
+                                      " [-]";
+            }
+        }
+
+        static double approxRollingAverage (double avg, double new_sample, int N) {
+            avg -= avg / N;
+            avg += new_sample / N;
+            return avg;
+        }
+        double averageCallDuration() {
+            if (totalCalls > 0) {
+                return (double) totalDurationMillis / totalCalls;
+            } else {
+                return 0;
+            }
+        }
+
+        double averageCallsPerSecTotal() {
+            Date now = new Date();
+            double millisSinceCreation = now.getTime() - created.getTime();
+            return totalCalls / (millisSinceCreation / 1000.0);
+
+        }
+
+        static boolean isError(ObjectNode response) {
+            return response != null && response.get("error") != null;
+        }
+
+        public void updateTimeSlot(Date now, boolean madeCall) {
+            synchronized (this) {
+                boolean updateAverage = false;
+                long currentTimeSlot = now.getTime() / TIME_SLOT_MILLIS;
+                if (currentTimeSlot == timeSlot) {
+                    if (madeCall) {
+                        callsInTimeSlot++;
+                        updateAverage = true;
+                    }
+                } else {
+                    updateAverage = true;
+                    if (currentTimeSlot == timeSlot + 1) {
+                        callsInLastTimeSlot = callsInTimeSlot;
+                    } else {
+                        callsInLastTimeSlot = 0;
+                        rollingAverageCallsPerSec = 0;
+                    }
+                    timeSlot = currentTimeSlot;
+                    if (madeCall) {
+                        callsInTimeSlot = 1;
+                    } else {
+                        callsInTimeSlot = 0;
+                    }
+                }
+                if (updateAverage) {
+                    double currentRate = (callsInLastTimeSlot) / (TIME_SLOT_MILLIS / 1000.0);
+                    rollingAverageCallsPerSec = approxRollingAverage(rollingAverageCallsPerSec, currentRate, RUNNING_AVERAGE_CALLS_WINDOW_SIZE);
+                }
+            }
+        }
+
+        void update(int connectionId, long durationMillis, ObjectNode request, ObjectNode response) {
+            synchronized (this) {
+                Date now = new Date();
+                updateTimeSlot(now, true);
+                lastUpdate = now;
+
+                totalCalls++;
+                totalDurationMillis += durationMillis;
+                if (durationMillis > maxCallDuration) {
+                    maxDurationConnection = connectionId;
+                    maxDurationRequestOrNotification = request;
+                    maxDurationResponse = response;
+                    maxDurationResponseDate = lastUpdate;
+                    maxCallDuration = durationMillis;
+                }
+                if (durationMillis < minCallDuration) {
+                    minCallDuration = durationMillis;
+                    minDurationResponseDate = lastUpdate;
+                }
+                rollingAverageDuration = approxRollingAverage(rollingAverageDuration, durationMillis, RUNNING_AVERAGE_WINDOW_SIZE);
+                if (isError(response)) {
+                    ++errors;
+                    lastError = response;
+                }
+            }
+        }
+
+        public String info() {
+            synchronized (this) {
+                Date now = new Date();
+                updateTimeSlot(now, false);
+                long lastUpdateAgo = now.getTime() - lastUpdate.getTime();
+                long maxUpdateAgo = now.getTime() - maxDurationResponseDate.getTime();
+                long minUpdateAgo = now.getTime() - minDurationResponseDate.getTime();
+                String printCallName = callName;
+                if (callName.length() > 29) {
+                    printCallName = callName.substring(0,25)+"...";
+                }
+                return String.format("%-30s: ", printCallName) +
+                        String.format("err:%7d /", errors) +
+                        String.format("%8d", totalCalls) +
+                        String.format(",%5ds ago ", lastUpdateAgo/1000)+
+                        String.format(" %9dms", totalDurationMillis) +
+                        String.format(" %7.2f/s", averageCallsPerSecTotal()) +
+                        String.format(", now: %7.2f/s", getRollingAverageCallsPerSec()) +
+                        String.format(", duration: %6.1fms", averageCallDuration()) +
+                        String.format(", now: %6.1fms", rollingAverageDuration) +
+                        String.format(", min: %5dms", minCallDuration) +
+                        String.format(" %6ds ago", minUpdateAgo/1000) +
+                        String.format(", max: %5dms", maxCallDuration) +
+                        String.format(" %6ds ago ", maxUpdateAgo/1000)+
+                        String.format(" [%d]", maxDurationConnection);
+            }
+        }
+        public String fullInfo() {
+            synchronized (this) {
+                return info() + ", <-" + maxDurationRequestOrNotification +"\n->"+maxDurationResponse + (errors != 0 ? "\n-> ERROR:"+lastError : "");
+            }
+        }
+
+        public String getCallName() {
+            return callName;
+        }
+
+        public long getTotalCalls() {
+            return totalCalls;
+        }
+
+        public long getTotalDurationMillis() {
+            return totalDurationMillis;
+        }
+
+        public double getRollingAverageCallsPerSec() {
+            return rollingAverageCallsPerSec;
+        }
+
+        public double getRollingAverageDuration() {
+            return rollingAverageDuration;
+        }
+
+        public Date getCreated() {
+            return created;
+        }
+
+        public Date getLastUpdate() {
+            return lastUpdate;
+        }
+
+        public long getCallsInThisMillisecond() {
+            return callsInThisMillisecond;
+        }
+
+        public long getMaxCallDuration() {
+            return maxCallDuration;
+        }
+
+        public long getMinCallDuration() {
+            return minCallDuration;
+        }
+
+        public int getMaxDurationConnection() {
+            return maxDurationConnection;
+        }
+
+        public ObjectNode getMaxDurationRequestOrNotification() {
+            return maxDurationRequestOrNotification;
+        }
+
+        public ObjectNode getMaxDurationResponse() {
+            return maxDurationResponse;
+        }
+
+        public Date getMaxDurationResponseDate() {
+            return maxDurationResponseDate;
+        }
+    }
+
     /**
      * Handles the given {@link ObjectNode}.
      *
@@ -111,6 +425,7 @@ public class JsonRpcServer {
                 LOG.debug("RPC-Notification <- [" + connection.getConnectionId() + "] " + node.toString());
             }
         }
+        Date start = new Date();
 
         // validate request
         if (!mBackwardsCompatible && !node.has("jsonrpc") || !node.has("method")) {
@@ -174,6 +489,9 @@ public class JsonRpcServer {
             }
         }
 
+        Date stop = new Date();
+        long duration = stop.getTime() - start.getTime();
+
         // build response if not a notification
         if (id != null) {
             ObjectNode response = null;
@@ -187,12 +505,15 @@ public class JsonRpcServer {
                         mapper, version, id,
                         error.getCode(), error.getMessage(), error.getData());
             }
+            updateCallInfo(connection.getConnectionId(), duration, node, response);
 
             if (LOG.isDebugEnabled()) {
                 LOG.debug("RPC-Response -> [" + connection.getConnectionId() + "] " + response.toString());
             }
 
             connection.sendResponse(response);
+        } else {
+            updateCallInfo(connection.getConnectionId(), duration, node, null);
         }
 
         // rethrow if applicable

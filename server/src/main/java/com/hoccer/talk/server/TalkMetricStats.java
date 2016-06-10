@@ -125,12 +125,13 @@ public class TalkMetricStats implements ITalkServerStatistics {
     }
 
     @Override
-    public void signalRequestStop(JsonRpcConnection connection, ObjectNode request, Timer.Context timerContext) {
+    public long signalRequestStop(JsonRpcConnection connection, ObjectNode request, Timer.Context timerContext) {
         long elapsedNanos = timerContext.stop();
         long elapsedMillis = elapsedNanos / 1000000;
         if (elapsedMillis > 1000) {
             LOG.warn("Long request took "+ elapsedMillis +" ms, connectionId: "+connection.getConnectionId()+". request = "+request);
         }
+        return elapsedMillis;
     }
 
 }

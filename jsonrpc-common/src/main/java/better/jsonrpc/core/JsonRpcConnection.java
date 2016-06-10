@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
+import java.util.Date;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -44,7 +45,6 @@ public abstract class JsonRpcConnection {
     protected final int mConnectionId = sConnectionIdCounter.incrementAndGet();
 
     protected boolean mDisconnectAfterRequest = false;
-
 
     /**
      * Object mapper to be used for this connection

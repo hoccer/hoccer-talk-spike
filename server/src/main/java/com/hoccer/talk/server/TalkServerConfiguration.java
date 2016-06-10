@@ -287,16 +287,16 @@ public class TalkServerConfiguration {
                 60 * 2), // after 2 minutes a connection must be logged on or is closed
 
 
-        /*
+        /*   // short intervals for testing
         PING_INTERVAL(PROPERTY_PREFIX + ".ping.interval",
                 PropertyTypes.INTEGER,
-                30), // in seconds (every 1 minute)
+                30), // in seconds (every 30 secs)
         PING_CLIENT_INTERVAL(PROPERTY_PREFIX + ".ping.clientInterval",
                 PropertyTypes.INTEGER,
-                45), // in seconds (every 10 minutes)
+                45), // in seconds (every 45 secs)
         PING_IDLE_TIMEOUT_INTERVAL(PROPERTY_PREFIX + ".ping.idleTimeoutInterval",
                 PropertyTypes.INTEGER,
-                120), // after 30 minutes
+                120), // after 2 minutes
         */
         // RPC HANDLER
         TOKEN_LIFETIME_MIN(PROPERTY_PREFIX + ".token.lifeTimeMin",

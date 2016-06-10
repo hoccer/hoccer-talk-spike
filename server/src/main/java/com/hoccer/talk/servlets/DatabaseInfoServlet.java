@@ -5,6 +5,7 @@ import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServer;
 import org.jongo.MongoCollection;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -29,9 +30,53 @@ public class DatabaseInfoServlet extends HttpServlet {
         return (MongoCollection)db.getRawCollection(name);
     }
 
+    Hashtable validUsers = new Hashtable();
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        // ie this user has no password
+        //validUsers.put("james:","authorized");
+
+        validUsers.put("hoccer:hcrSrv$23Info","authorized");
+    }
+
+    // This method checks the user information sent in the Authorization
+    // header against the database of users maintained in the users Hashtable.
+    protected boolean allowUser(String auth) throws IOException {
+
+        if (auth == null) {
+            return false;  // no auth
+        }
+        if (!auth.toUpperCase().startsWith("BASIC ")) {
+            return false;  // we only do BASIC
+        }
+        // Get encoded user and password, comes after "BASIC "
+        String userpassEncoded = auth.substring(6);
+        // Decode it, using any base 64 decoder
+        sun.misc.BASE64Decoder dec = new sun.misc.BASE64Decoder();
+        String userpassDecoded = new String(dec.decodeBuffer(userpassEncoded));
+
+        // Check our user list to see if that user and password are "allowed"
+        if ("authorized".equals(validUsers.get(userpassDecoded))) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+
+        String auth = req.getHeader("Authorization");
+        // Do we allow that user?
+        if (!allowUser(auth)) {
+            // Not allowed, so report he's unauthorized
+            resp.setHeader("WWW-Authenticate", "BASIC realm=\"Hoccer Server Database Info\"");
+            resp.sendError(resp.SC_UNAUTHORIZED);
+            return;
+        }
 
         TalkServer server = (TalkServer)getServletContext().getAttribute("server");
 

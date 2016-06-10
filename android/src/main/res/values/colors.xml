@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#4dbfac</color>
+    <color name="secondary">#ffc8c8c8</color>
+    <color name="tertiary">#004ce5</color>
+
+    <color name="text_secondary">#8e8e93</color>
+
+    <color name="black_transparency_50_percent">#77000000</color>
+    <color name="black_transparency_60_percent">#66000000</color>
+    <color name="white_transparency_50_percent">#77ffffff</color>
+
+    <color name="background_default">#ffffff</color>
+    <color name="background_selected">@color/secondary</color>
+
+    <color name="message_incoming_background">@color/secondary</color>
+    <color name="message_incoming_text">#000000</color>
+    <color name="message_outgoing_background">@color/primary</color>
+    <color name="message_outgoing_text">#ffffff</color>
+    <color name="message_delivery_failed">#ff0000</color>
+
+    <color name="attachment_incoming">@color/tertiary</color>
+    <color name="attachment_outgoing">@color/black_transparency_50_percent</color>
+    <color name="attachment_transfer_control">@color/tertiary</color>
+
+    <color name="compose_message_no_state">#ffffff</color>
+    <color name="compose_message_bad_state">#ffe51f1b</color>
+    <color name="compose_message_text">#ffffff</color>
+
+    <color name="media_player_text_secondary">#aaaaaaaa</color>
+
+    <color name="separator">#ffbfbfbf</color>
+
+    <color name="text_hint">#7e8498</color>
+
+    <color name="tab">#ffffff</color>
+
+    <color name="tab_text">#000000</color>
+
+    <color name="content_horizontal_divider">#d1d6e4</color>
+
+    <color name="well_box">#f7f7f7</color>
+
+    <color name="last_message">@color/text_secondary</color>
+
+    <color name="presence_indicator_offline">#777777</color>
+
+    <color name="indicator_history">#AAAAAA</color>
+
+    <color name="connection_state_background">#2f2f2f</color>
+    <color name="connection_state_text">#8f8f8f</color>
+
+    <color name="notification_badge_background">#e52e2e</color>
+    <color name="notification_badge_text">@color/text_secondary</color>
+
+    <color name="common_signin_btn_dark_text_default">@android:color/white</color>
+    <color name="common_signin_btn_dark_text_pressed">@android:color/white</color>
+    <color name="common_signin_btn_dark_text_disabled">#FFAAAAAA</color>
+    <color name="common_signin_btn_dark_text_focused">@android:color/white</color>
+    <color name="common_signin_btn_light_text_default">#FF737373</color>
+    <color name="common_signin_btn_light_text_pressed">@android:color/white</color>
+    <color name="common_signin_btn_light_text_disabled">#FFAAAAAA</color>
+    <color name="common_signin_btn_light_text_focused">#FF737373</color>
+    <color name="common_signin_btn_default_background">#FFDD4B39</color>
+    <color name="common_action_bar_splitter">#d2d2d2</color>
+</resources>
