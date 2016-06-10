@@ -52,8 +52,7 @@
             android:key="@string/preference_key_worldwide_category">
         <SwitchPreference
                 android:key="@string/preference_key_enable_worldwide"
-                android:title="@string/activate"
-                android:defaultValue="false"/>
+                android:title="@string/activate"/>
         <ListPreference
                 android:dependency="@string/preference_key_enable_worldwide"
                 android:key="@string/preference_key_worldwide_timetolive"
