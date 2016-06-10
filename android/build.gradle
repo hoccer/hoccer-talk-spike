@@ -60,6 +60,15 @@ android {
                     "hoccer.invitation.uri.scheme": "strm"
             ]
         }
+
+        helios {
+            applicationId "com.helios.messenger"
+            manifestPlaceholders = [
+                    "app.name"                    : "Helios",
+                    "app.name.short"              : "Helios",
+                    "hoccer.invitation.uri.scheme": "heli"
+            ]
+        }
     }
 
     buildTypes {
