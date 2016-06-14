@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#AB0F00</color>
-    <color name="secondary">#A6C6C6</color>
-    <color name="tertiary">#005A10</color>
+    <color name="primary">#004014</color>
+    <color name="secondary">#ffe8b3</color>
+    <color name="tertiary">#C0C0C0</color>
+
+    <color name="tab">#ffe8b3</color>
 
     <color name="attachment_incoming">@color/tertiary</color>
     <color name="attachment_outgoing">@color/tertiary</color>
