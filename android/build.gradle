@@ -64,7 +64,7 @@ android {
         helios {
             applicationId "com.helios.messenger"
             manifestPlaceholders = [
-                    "app.name"                    : "Helios",
+                    "app.name"                    : "Helios Messenger",
                     "app.name.short"              : "Helios",
                     "hoccer.invitation.uri.scheme": "heli"
             ]
