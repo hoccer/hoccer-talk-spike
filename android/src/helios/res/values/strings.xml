@@ -13,9 +13,13 @@
     <string name="restore_restart_hoccer">Please re-start Helios Messenger to complete restoring your account. </string>
     <string name="restore_no_backups_found_message">Please copy a backup to\n%1$s\nto restore a former Helios Messenger account.</string>
 
-    <string name="placeholder_conversations_text"><![CDATA[<a href="http://faq.hoccer.com/tutorial-xo/#invite">Invite friends</a>]]> to chat with!</string>
-    <string name="placeholder_groups_text"><![CDATA[<a href="http://faq.hoccer.com/tutorial-xo/#groups">Create groups</a>]]> to chat with many friends at once.</string>
-    <string name="placeholder_nearby_text">Waiting for others <![CDATA[<a href="http://faq.hoccer.com/tutorial-xo/#nearby">nearby</a>]]>…</string>
-    <string name="placeholder_worldwide_text">Waiting for others <![CDATA[<a href="http://faq.hoccer.com/tutorial-xo/#worldwide">worldwide</a>]]>…</string>
+    <string name="placeholder_conversations_text"><![CDATA[<a href="http://faq.hoccer.com/helios/tutorial-xo/#invite">Invite friends</a>]]> to chat with!</string>
+    <string name="placeholder_groups_text"><![CDATA[<a href="http://faq.hoccer.com/helios/tutorial-xo/#groups">Create groups</a>]]> to chat with many friends at once.</string>
+    <string name="placeholder_nearby_text">Waiting for others <![CDATA[<a href="http://faq.hoccer.com/helios/tutorial-xo/#nearby">nearby</a>]]>…</string>
+    <string name="placeholder_worldwide_text">Waiting for others <![CDATA[<a href="http://faq.hoccer.com/helios/tutorial-xo/#worldwide">worldwide</a>]]>…</string>
+
+    <!-- Tutorial and FAQ links -->
+    <string name="link_tutorial">http://faq.hoccer.com/tutorial-xo/</string>
+    <string name="link_faq">http://faq.hoccer.com/</string>
 
 </resources>
