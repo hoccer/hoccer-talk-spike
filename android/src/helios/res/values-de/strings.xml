@@ -12,4 +12,14 @@
     <string name="about_advert_text">Helios Messenger \n- dein sicherer Multimedia Messenger\n\nWir legen größten Wert auf Sicherheit, Datenschutz und Privatsphäre. Dank modernster Verschlüsselungs- und Übertragungstechnologien setzt Helios Messenger neue Standards in der mobilen Datenübertragung und definiert Privatsphäre im mobilen Messaging Sektor neu. Helios Messenger ermöglicht einen einfachen und unbegrenzten Datenaustausch zwischen Smartphones und Tablets ohne vorherige Eingabe von vertraulichen Nutzerdaten.\n\nShare hugs \u0026 kisses</string>
     <string name="restore_restart_hoccer">Bitte Helios Messenger neu starten, um die Wiederherstellung zu beenden.</string>
     <string name="restore_no_backups_found_message">Bitte bestehendes Backup nach\n%1$s\nkopieren um früheren Helios Messenger Account wiederherstellen zu können.</string>
+
+    <string name="placeholder_conversations_text"><![CDATA[<a href="http://faq.hoccer.com/helios/de/tutorial-xo/#freunde-einladen">Lade deine Freunde</a>]]> zum Chatten ein!</string>
+    <string name="placeholder_groups_text"><![CDATA[<a href="http://faq.hoccer.com/helios/de/tutorial-xo/#gruppen">Lege Gruppen an</a>]]> um mit vielen Freunden gleichzeitig zu chatten.</string>
+    <string name="placeholder_nearby_text">Warten auf Kontakte <![CDATA[<a href="http://faq.hoccer.com/helios/de/tutorial-xo/#in-der-naehe">in der Nähe</a>]]>…</string>
+    <string name="placeholder_worldwide_text">Warten auf Kontakte <![CDATA[<a href="http://faq.hoccer.com/helios/de/tutorial-xo/#weltweit">weltweit</a>]]></string>
+
+    <!-- Tutorial and FAQ links -->
+    <string name="link_tutorial">http://faq.hoccer.com/helios/de/tutorial-xo/</string>
+    <string name="link_faq">http://faq.hoccer.com/helios/de/</string>
+
 </resources>
