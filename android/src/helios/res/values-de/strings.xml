@@ -5,9 +5,9 @@
     <string name="pref_report_crashes_summary">Unterstütze Helios Messenger bei der Weiterentwicklung indem du deine Abstürze meldest. Welche Informationen an Helios Messenger geschickt werden, kannst du in den FAQ einsehen.</string>
     <string name="dialog_report_crash_message">Es wurde eine Aufzeichnung des letzten Crashs gefunden. Bitte schicke diesen Bericht an Helios Messenger, damit wir den Fehler schnellst möglich beheben können.</string>
     <string name="dialog_report_errors_message">Bei der letzten Ausführung sind Fehler aufgetreten. Bitte schicke diesen Bericht an Helios Messenger, damit wir diese schnellst möglich beheben können.</string>
-    <string name="sms_invitation_text">Hey! Ich nutze die Gratis-App Helios Messenger zum sicheren Chatten! Jetzt herunterladen und mich als Kontakt hinzufügen: %1$s%2$s\n%3$s</string>
+    <string name="sms_invitation_text">Ich möchte mit Ihnen in der Helios Messaging App in Kontakt treten. Jetzt herunterladen und mich als Kontakt hinzufügen: %1$s%2$s\n%3$s</string>
     <string name="email_invitation_subject">Triff mich bei Helios Messenger!</string>
-    <string name="email_invitation_text">Hey! Ich nutze jetzt die Gratis-App Helios Messenger zum sicheren Chatten! Jetzt herunterladen und mich als Kontakt hinzufügen:\n%1$s%2$s\n%3$s</string>
+    <string name="email_invitation_text">Ich möchte mit Ihnen in der Helios Messaging App in Kontakt treten. Jetzt herunterladen und mich als Kontakt hinzufügen: \n%1$s%2$s\n%3$s</string>
     <string name="actionbar_default_title">Helios</string>
     <string name="about_advert_text">Helios Messenger \n- dein sicherer Multimedia Messenger\n\nWir legen größten Wert auf Sicherheit, Datenschutz und Privatsphäre. Dank modernster Verschlüsselungs- und Übertragungstechnologien setzt Helios Messenger neue Standards in der mobilen Datenübertragung und definiert Privatsphäre im mobilen Messaging Sektor neu. Helios Messenger ermöglicht einen einfachen und unbegrenzten Datenaustausch zwischen Smartphones und Tablets ohne vorherige Eingabe von vertraulichen Nutzerdaten.\n\nShare hugs \u0026 kisses</string>
     <string name="restore_restart_hoccer">Bitte Helios Messenger neu starten, um die Wiederherstellung zu beenden.</string>
