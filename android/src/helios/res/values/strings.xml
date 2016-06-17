@@ -19,7 +19,7 @@
     <string name="placeholder_worldwide_text">Waiting for others <![CDATA[<a href="http://faq.hoccer.com/helios/tutorial-xo/#worldwide">worldwide</a>]]>…</string>
 
     <!-- Tutorial and FAQ links -->
-    <string name="link_tutorial">http://faq.hoccer.com/tutorial-xo/</string>
-    <string name="link_faq">http://faq.hoccer.com/</string>
+    <string name="link_tutorial">http://faq.hoccer.com/helios/tutorial-xo/</string>
+    <string name="link_faq">http://faq.hoccer.com/helios/</string>
 
 </resources>
