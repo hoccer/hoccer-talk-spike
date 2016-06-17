@@ -1,1 +1,0 @@
-http://jgilfelt.github.io/android-actionbarstylegenerator/#name=AppBaseTheme&compat=appcompat&theme=light_dark&actionbarstyle=solid&texture=0&hairline=0&neutralPressed=1&backColor=3aaa35%2C100&secondaryColor=c2c2c2%2C100&tabColor=f9b000%2C100&tertiaryColor=c2c2c2%2C100&accentColor=f9b000%2C100&cabBackColor=94273d%2C100&cabHighlightColor=94273d%2C100
