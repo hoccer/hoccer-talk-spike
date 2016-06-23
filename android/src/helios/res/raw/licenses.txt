@@ -1,6 +1,6 @@
 
 Helios Messenger
-Copyright 2015 Helios Messenger Betriebs GmbH
+Copyright 2015 Hoccer Messenger Betriebs GmbH
 All rights reserved except as stated below.
 
 THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
