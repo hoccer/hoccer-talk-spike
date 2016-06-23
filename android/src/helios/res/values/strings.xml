@@ -9,7 +9,7 @@
     <string name="email_invitation_subject">Join me at HELIOS Messenger!</string>
     <string name="email_invitation_text">I am using HELIOS Messenger and would like to add you as contact. Download the app now and accept my friends request:\n%1$s%2$s\n%3$s</string>
     <string name="actionbar_default_title">HELIOS</string>
-    <string name="about_advert_text">HELIOS Messenger \n- your secure multimedia messenger\n\nSecurity, data protection and the protection of privacy are of extreme importance to us. HELIOS Messenger sets new standards in mobile data transmission and puts mobile privacy to a whole new level, due to latest encryption and transmission technologies. HELIOS Messenger provides an easy and unlimited exchange of data between smartphones and tablets, without constraining users to register and enter confidential data.\n\nShare hugs \u0026 kisses</string>
+    <string name="about_advert_text">Durch den HELIOS Messenger können Patienten des HELIOS Klinikums Schwelm sowie niedergelassene Ärzte sicher und schnell mit den behandelnden Klinikärzten in Kontakt treten.\nDer Service richtet sich an Patienten sowie an Haus- oder Fachärzte.\nDas HELIOS Klinikum Schwelm bietet so einen einzigartigen Kommunikationsservice unabhängig von Sprechzeiten und Örtlichkeiten an.\n\n<b>Vorteile:</b>\n\n• Schneller ärztlicher Kontakt ohne Ortwechsel bzw. Sprechzeiten\n\n• Persönliche Betreuung\n\n• Direkter Kontakt zum richtigen Ansprechpartner\n\n• Bequeme und sichere Handhabung</string>
     <string name="restore_restart_hoccer">Please re-start HELIOS Messenger to complete restoring your account. </string>
     <string name="restore_no_backups_found_message">Please copy a backup to\n%1$s\nto restore a former HELIOS Messenger account.</string>
 
