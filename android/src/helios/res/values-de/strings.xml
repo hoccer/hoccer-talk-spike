@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Helios Messenger</string>
-    <string name="menu_about">Über Helios Messenger</string>
-    <string name="pref_report_crashes_summary">Unterstütze Helios Messenger bei der Weiterentwicklung indem du deine Abstürze meldest. Welche Informationen an Helios Messenger geschickt werden, kannst du in den FAQ einsehen.</string>
-    <string name="dialog_report_crash_message">Es wurde eine Aufzeichnung des letzten Crashs gefunden. Bitte schicke diesen Bericht an Helios Messenger, damit wir den Fehler schnellst möglich beheben können.</string>
-    <string name="dialog_report_errors_message">Bei der letzten Ausführung sind Fehler aufgetreten. Bitte schicke diesen Bericht an Helios Messenger, damit wir diese schnellst möglich beheben können.</string>
-    <string name="sms_invitation_text">Ich möchte mit Ihnen in der Helios Messaging App in Kontakt treten. Jetzt herunterladen und mich als Kontakt hinzufügen: %1$s%2$s\n%3$s</string>
-    <string name="email_invitation_subject">Triff mich bei Helios Messenger!</string>
-    <string name="email_invitation_text">Ich möchte mit Ihnen in der Helios Messaging App in Kontakt treten. Jetzt herunterladen und mich als Kontakt hinzufügen: \n%1$s%2$s\n%3$s</string>
-    <string name="actionbar_default_title">Helios</string>
-    <string name="about_advert_text">Helios Messenger \n- dein sicherer Multimedia Messenger\n\nWir legen größten Wert auf Sicherheit, Datenschutz und Privatsphäre. Dank modernster Verschlüsselungs- und Übertragungstechnologien setzt Helios Messenger neue Standards in der mobilen Datenübertragung und definiert Privatsphäre im mobilen Messaging Sektor neu. Helios Messenger ermöglicht einen einfachen und unbegrenzten Datenaustausch zwischen Smartphones und Tablets ohne vorherige Eingabe von vertraulichen Nutzerdaten.\n\nShare hugs \u0026 kisses</string>
-    <string name="restore_restart_hoccer">Bitte Helios Messenger neu starten, um die Wiederherstellung zu beenden.</string>
-    <string name="restore_no_backups_found_message">Bitte bestehendes Backup nach\n%1$s\nkopieren um früheren Helios Messenger Account wiederherstellen zu können.</string>
+    <string name="app_name">HELIOS Messenger</string>
+    <string name="menu_about">Über HELIOS Messenger</string>
+    <string name="pref_report_crashes_summary">Unterstütze HELIOS Messenger bei der Weiterentwicklung indem du deine Abstürze meldest. Welche Informationen an HELIOS Messenger geschickt werden, kannst du in den FAQ einsehen.</string>
+    <string name="dialog_report_crash_message">Es wurde eine Aufzeichnung des letzten Crashs gefunden. Bitte schicke diesen Bericht an HELIOS Messenger, damit wir den Fehler schnellst möglich beheben können.</string>
+    <string name="dialog_report_errors_message">Bei der letzten Ausführung sind Fehler aufgetreten. Bitte schicke diesen Bericht an HELIOS Messenger, damit wir diese schnellst möglich beheben können.</string>
+    <string name="sms_invitation_text">Ich möchte mit Ihnen in der HELIOS Messaging App in Kontakt treten. Jetzt herunterladen und mich als Kontakt hinzufügen: %1$s%2$s\n%3$s</string>
+    <string name="email_invitation_subject">Triff mich bei HELIOS Messenger!</string>
+    <string name="email_invitation_text">Ich möchte mit Ihnen in der HELIOS Messaging App in Kontakt treten. Jetzt herunterladen und mich als Kontakt hinzufügen: \n%1$s%2$s\n%3$s</string>
+    <string name="actionbar_default_title">HELIOS</string>
+    <string name="about_advert_text">HELIOS Messenger \n- dein sicherer Multimedia Messenger\n\nWir legen größten Wert auf Sicherheit, Datenschutz und Privatsphäre. Dank modernster Verschlüsselungs- und Übertragungstechnologien setzt HELIOS Messenger neue Standards in der mobilen Datenübertragung und definiert Privatsphäre im mobilen Messaging Sektor neu. HELIOS Messenger ermöglicht einen einfachen und unbegrenzten Datenaustausch zwischen Smartphones und Tablets ohne vorherige Eingabe von vertraulichen Nutzerdaten.\n\nShare hugs \u0026 kisses</string>
+    <string name="restore_restart_hoccer">Bitte HELIOS Messenger neu starten, um die Wiederherstellung zu beenden.</string>
+    <string name="restore_no_backups_found_message">Bitte bestehendes Backup nach\n%1$s\nkopieren um früheren HELIOS Messenger Account wiederherstellen zu können.</string>
 
     <string name="placeholder_conversations_text"><![CDATA[<a href="http://faq.hoccer.com/helios/de/tutorial/#freunde-einladen">Lade deine Freunde</a>]]> zum Chatten ein!</string>
     <string name="placeholder_groups_text"><![CDATA[<a href="http://faq.hoccer.com/helios/de/tutorial/#gruppen">Lege Gruppen an</a>]]> um mit vielen Freunden gleichzeitig zu chatten.</string>
