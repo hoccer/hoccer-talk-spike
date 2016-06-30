@@ -3,6 +3,7 @@ package com.hoccer.xo.android.activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -41,17 +42,15 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private ViewPagerActivityComponent mViewPagerActivityComponent;
     private WorldwideChatListFragment mWorldwideChatListFragment;
     private CrashManagerListener mCrashManagerListener;
+    private boolean worldWideIsShown;
 
     @Override
     protected ActivityComponent[] createComponents() {
         MediaPlayerActivityComponent mediaPlayerActivityComponent = new MediaPlayerActivityComponent(this);
-
-        mWorldwideChatListFragment = new WorldwideChatListFragment();
         mViewPagerActivityComponent = new ViewPagerActivityComponent(this,
                 R.id.pager,
                 new ChatListFragment(),
-                new NearbyChatListFragment(),
-                mWorldwideChatListFragment);
+                new NearbyChatListFragment());
 
         return new ActivityComponent[]{mediaPlayerActivityComponent, mViewPagerActivityComponent};
     }
@@ -142,6 +141,16 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         showProfileIfClientIsNotRegistered();
         registerListeners();
         mContactsMenuItemActionProvider.updateNotificationBadge();
+        if (XoApplication.getConfiguration().isWorldwideFeatureEnabled()) {
+            if (mWorldwideChatListFragment == null) {
+                mWorldwideChatListFragment = new WorldwideChatListFragment();
+            }
+            if (!mViewPagerActivityComponent.contains(mWorldwideChatListFragment)) {
+                mViewPagerActivityComponent.add(mWorldwideChatListFragment);
+            }
+        } else if (mWorldwideChatListFragment != null && mViewPagerActivityComponent.contains(mWorldwideChatListFragment)) {
+                mViewPagerActivityComponent.remove(mWorldwideChatListFragment);
+        }
     }
 
     @Override

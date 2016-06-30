@@ -12,21 +12,50 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public class UpdateHelper {
-    public static boolean isApplicationUpdated(Context context) {
+
+    private boolean isUpdated;
+    private boolean isFreshInstall;
+
+    private static UpdateHelper instance;
+
+    public static UpdateHelper getInstance(Context context) {
+        if (instance == null) {
+            instance = new UpdateHelper(context);
+        }
+        return instance;
+    }
+
+    private UpdateHelper(Context context) {
+        checkForUpdate(context);
+    }
+
+    private boolean checkForUpdate(Context context) {
         try {
             PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-            int versionCode = packageInfo.versionCode;
-
             SharedPreferences preferences = context.getSharedPreferences("sharedPreferences", Context.MODE_PRIVATE);
             int oldVersionCode = preferences.getInt("versionCode", -1);
-            if (oldVersionCode == -1 || oldVersionCode < versionCode) {
+
+            int versionCode = packageInfo.versionCode;
+            if (oldVersionCode < versionCode) {
+                if (oldVersionCode == -1) {
+                    isFreshInstall = true;
+                } else {
+                    isUpdated = true;
+                }
                 preferences.edit().putInt("versionCode", versionCode).apply();
-                return true;
             }
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
 
         return false;
+    }
+
+    public boolean isApplicationUpdated() {
+        return isUpdated;
+    }
+
+    public boolean isFreshInstall() {
+        return isFreshInstall;
     }
 }
