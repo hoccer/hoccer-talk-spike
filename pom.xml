@@ -89,7 +89,7 @@
     <better-jsonrpc.version>0.0.1-SNAPSHOT</better-jsonrpc.version>
 
     <!-- Hoccer Release Versions -->
-    <hoccer-talk-server.version>3.3.46</hoccer-talk-server.version>
+    <hoccer-talk-server.version>3.3.47</hoccer-talk-server.version>
     <hoccer-talk-filecache.version>1.0.6</hoccer-talk-filecache.version>
   </properties>
 
