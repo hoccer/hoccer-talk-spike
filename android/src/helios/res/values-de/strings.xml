@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">HELIOS Messenger</string>
+    <string name="menu_about">Über HELIOS Messenger</string>
+    <string name="pref_report_crashes_summary">Unterstütze HELIOS Messenger bei der Weiterentwicklung indem du deine Abstürze meldest. Welche Informationen an HELIOS Messenger geschickt werden, kannst du in den FAQ einsehen.</string>
+    <string name="dialog_report_crash_message">Es wurde eine Aufzeichnung des letzten Crashs gefunden. Bitte schicke diesen Bericht an HELIOS Messenger, damit wir den Fehler schnellst möglich beheben können.</string>
+    <string name="dialog_report_errors_message">Bei der letzten Ausführung sind Fehler aufgetreten. Bitte schicke diesen Bericht an HELIOS Messenger, damit wir diese schnellst möglich beheben können.</string>
+    <string name="sms_invitation_text">Ich möchte mit Ihnen in der HELIOS Messaging App in Kontakt treten. Jetzt herunterladen und mich als Kontakt hinzufügen: %1$s%2$s\n%3$s</string>
+    <string name="email_invitation_subject">Triff mich bei HELIOS Messenger!</string>
+    <string name="email_invitation_text">Ich möchte mit Ihnen in der HELIOS Messaging App in Kontakt treten. Jetzt herunterladen und mich als Kontakt hinzufügen: \n%1$s%2$s\n%3$s</string>
+    <string name="actionbar_default_title">HELIOS</string>
+    <string name="about_advert_text">Durch den HELIOS Messenger können Patienten des HELIOS Klinikums Schwelm sowie niedergelassene Ärzte sicher und schnell mit den behandelnden Klinikärzten in Kontakt treten.\nDer Service richtet sich an Patienten sowie an Haus- oder Fachärzte.\nDas HELIOS Klinikum Schwelm bietet so einen einzigartigen Kommunikationsservice unabhängig von Sprechzeiten und Örtlichkeiten an.\n\n<b>Vorteile:</b>\n\n• Schneller ärztlicher Kontakt ohne Ortwechsel bzw. Sprechzeiten\n\n• Persönliche Betreuung\n\n• Direkter Kontakt zum richtigen Ansprechpartner\n\n• Bequeme und sichere Handhabung</string>
+    <string name="restore_restart_hoccer">Bitte HELIOS Messenger neu starten, um die Wiederherstellung zu beenden.</string>
+    <string name="restore_no_backups_found_message">Bitte bestehendes Backup nach\n%1$s\nkopieren um früheren HELIOS Messenger Account wiederherstellen zu können.</string>
+
+    <string name="placeholder_conversations_text"><![CDATA[<a href="http://faq.hoccer.com/helios/de/tutorial/#freunde-einladen">Lade deine Freunde</a>]]> zum Chatten ein!</string>
+    <string name="placeholder_groups_text"><![CDATA[<a href="http://faq.hoccer.com/helios/de/tutorial/#gruppen">Lege Gruppen an</a>]]> um mit vielen Freunden gleichzeitig zu chatten.</string>
+    <string name="placeholder_nearby_text">Warten auf Kontakte <![CDATA[<a href="http://faq.hoccer.com/helios/de/tutorial/#in-der-naehe">in der Nähe</a>]]>…</string>
+    <string name="placeholder_worldwide_text">Warten auf Kontakte <![CDATA[<a href="http://faq.hoccer.com/helios/de/tutorial/#weltweit">weltweit</a>]]></string>
+
+    <!-- Tutorial and FAQ links -->
+    <string name="link_tutorial">http://faq.hoccer.com/helios/de/tutorial/</string>
+    <string name="link_faq">http://faq.hoccer.com/helios/de/</string>
+
+</resources>
