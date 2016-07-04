@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">HELIOS Messenger</string>
+    <string name="menu_about">About HELIOS Messenger</string>
+    <string name="pref_report_crashes_summary">Help us improve HELIOS Messenger by sending your crash logs to the development team. Please find detailed information about crash reports in our FAQ.</string>
+    <string name="dialog_report_crash_message">Crash information available. We kindly ask you to send this information to HELIOS Messenger developers and help us improving our service.</string>
+    <string name="dialog_report_errors_message">Error information available. We kindly ask you to send this information to HELIOS Messenger developers and help us improving our service.</string>
+    <string name="sms_invitation_text">I am using HELIOS Messenger and would like to add you as contact. Download the app now and accept my friends request:\n%1$s%2$s\n%3$s</string>
+    <string name="email_invitation_subject">Join me at HELIOS Messenger!</string>
+    <string name="email_invitation_text">I am using HELIOS Messenger and would like to add you as contact. Download the app now and accept my friends request:\n%1$s%2$s\n%3$s</string>
+    <string name="actionbar_default_title">HELIOS</string>
+    <string name="about_advert_text">Durch den HELIOS Messenger können Patienten des HELIOS Klinikums Schwelm sowie niedergelassene Ärzte sicher und schnell mit den behandelnden Klinikärzten in Kontakt treten.\nDer Service richtet sich an Patienten sowie an Haus- oder Fachärzte.\nDas HELIOS Klinikum Schwelm bietet so einen einzigartigen Kommunikationsservice unabhängig von Sprechzeiten und Örtlichkeiten an.\n\n<b>Vorteile:</b>\n\n• Schneller ärztlicher Kontakt ohne Ortwechsel bzw. Sprechzeiten\n\n• Persönliche Betreuung\n\n• Direkter Kontakt zum richtigen Ansprechpartner\n\n• Bequeme und sichere Handhabung</string>
+    <string name="restore_restart_hoccer">Please re-start HELIOS Messenger to complete restoring your account. </string>
+    <string name="restore_no_backups_found_message">Please copy a backup to\n%1$s\nto restore a former HELIOS Messenger account.</string>
+
+    <string name="placeholder_conversations_text"><![CDATA[<a href="http://faq.hoccer.com/helios/tutorial/#invite">Invite friends</a>]]> to chat with!</string>
+    <string name="placeholder_groups_text"><![CDATA[<a href="http://faq.hoccer.com/helios/tutorial/#groups">Create groups</a>]]> to chat with many friends at once.</string>
+    <string name="placeholder_nearby_text">Waiting for others <![CDATA[<a href="http://faq.hoccer.com/helios/tutorial/#nearby">nearby</a>]]>…</string>
+    <string name="placeholder_worldwide_text">Waiting for others <![CDATA[<a href="http://faq.hoccer.com/helios/tutorial/#worldwide">worldwide</a>]]>…</string>
+
+    <!-- Tutorial and FAQ links -->
+    <string name="link_tutorial">http://faq.hoccer.com/helios/tutorial/</string>
+    <string name="link_faq">http://faq.hoccer.com/helios/</string>
+
+</resources>

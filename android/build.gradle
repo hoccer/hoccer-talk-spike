@@ -24,8 +24,8 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 22 // when updating 'targetSdkVersion' be aware of issues with the xzing library and Android 6.+
-        versionCode 425
-        versionName "3.2.13"
+        versionCode 426
+        versionName "3.2.14"
         multiDexEnabled true
         manifestPlaceholders = [
             "google.maps.api.key": "AIzaSyBpFzzIcVtJj0eUZSghPY8qg4cAnEV1ZgA"
@@ -58,6 +58,15 @@ android {
                     "app.name"                    : "Str\\u00f6er Messenger",
                     "app.name.short"              : "Str\\u00f6er",
                     "hoccer.invitation.uri.scheme": "strm"
+            ]
+        }
+
+        helios {
+            applicationId "com.helios.messenger"
+            manifestPlaceholders = [
+                    "app.name"                    : "HELIOS Messenger",
+                    "app.name.short"              : "HELIOS",
+                    "hoccer.invitation.uri.scheme": "heli"
             ]
         }
     }
@@ -153,7 +162,7 @@ dependencies {
 
 // Ignore 'review' build type for flavors except 'hoccer'
 android.variantFilter { variant ->
-    if(variant.buildType.name.endsWith('review') & !variant.getFlavors().get(0).name.equals('hoccer')) {
+    if(variant.buildType.name.endsWith('review') & !(variant.getFlavors().get(0).name.equals('hoccer') | variant.getFlavors().get(0).name.equals('helios'))) {
         variant.setIgnore(true);
     }
 }
