@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Hoccer</string>
+    <string name="menu_about">About Hoccer</string>
+    <string name="pref_report_crashes_summary">Help us improve Hoccer by sending your crash logs to the development team. Please find detailed information about crash reports in our FAQ.</string>
+    <string name="dialog_report_crash_message">Crash information available. We kindly ask you to send this information to Hoccer developers and help us improving our service.</string>
+    <string name="dialog_report_errors_message">Error information available. We kindly ask you to send this information to Hoccer developers and help us improving our service.</string>
+    <string name="sms_invitation_text">Hey! I\'m now using the free app Hoccer for secure chatting. Download it now and add me as a contact:\n%1$s%2$s\n%3$s</string>
+    <string name="email_invitation_subject">Join me at Hoccer!</string>
+    <string name="email_invitation_text">Hey!I\'m now using the free app Hoccer for secure chatting. Download it now and add me as contact:\n%1$s%2$s\n%3$s</string>
+    <string name="actionbar_default_title">Hoccer</string>
+    <string name="about_advert_text">Hoccer \n- your secure multimedia messenger\n\nSecurity, data protection and the protection of privacy are of extreme importance to us. Hoccer sets new standards in mobile data transmission and puts mobile privacy to a whole new level, due to latest encryption and transmission technologies. Hoccer provides an easy and unlimited exchange of data between smartphones and tablets, without constraining users to register and enter confidential data.\n\nShare hugs \u0026 kisses</string>
+    <string name="restore_restart_hoccer">Please re-start Hoccer to complete restoring your account. </string>
+    <string name="restore_no_backups_found_message">Please copy a backup to\n%1$s\nto restore a former Hoccer account.</string>
+</resources>

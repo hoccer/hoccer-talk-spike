@@ -1,0 +1,22 @@
+allprojects  {
+//  apply plugin: 'maven'
+
+  group = 'hoccer'
+version = '0.0.1-SNAPSHOT'
+}
+
+configure(allprojects - project(':hoccer-talk-android') - project(':drag-sort-listview')) {
+  apply plugin: 'java'
+  sourceCompatibility = 1.5
+  targetCompatibility = 1.5
+}
+
+subprojects {
+  repositories {
+    mavenLocal()
+    
+    maven { url "https://archiva.hoccer.de/repository/snapshots/" }
+    maven { url "https://archiva.hoccer.de/repository/hoccer/" }
+    maven { url "http://repo.maven.apache.org/maven2" }
+  }
+}

@@ -22,8 +22,11 @@ import com.hoccer.xo.android.view.AspectImageView;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
+import org.apache.log4j.Logger;
 
 public abstract class AvatarView extends LinearLayout {
+
+    private static final Logger LOG = Logger.getLogger(AvatarView.class);
 
     private Uri mDefaultAvatarImageUri;
     private DisplayImageOptions mDefaultOptions;
@@ -86,7 +89,11 @@ public abstract class AvatarView extends LinearLayout {
 
     public void setContact(TalkClientContact contact) {
         mContact = contact;
-        updateAvatar();
+        try {
+            updateAvatar();
+        } catch (Exception e){
+            LOG.error("Error updating avatar", e);
+        }
     }
 
     private void updateAvatar() {
@@ -95,9 +102,8 @@ public abstract class AvatarView extends LinearLayout {
             return;
         }
         XoTransfer avatar = mContact.getAvatar();
-        Uri avatarUri = avatar == null ? null : UriUtils.getAbsoluteFileUri(avatar.getFilePath());
 
-        if (avatarUri == null) {
+        if (avatar == null || avatar.getFilePath() == null) {
             if (mContact.isGroup()) {
                 if (mContact.getGroupPresence() != null && mContact.getGroupPresence().isTypeNearby()) {
                     setAvatarImage(R.drawable.avatar_location);
@@ -110,6 +116,7 @@ public abstract class AvatarView extends LinearLayout {
                 setAvatarImage(R.drawable.avatar_contact);
             }
         } else {
+            Uri avatarUri = UriUtils.getAbsoluteFileUri(avatar.getFilePath());
             setAvatarImage(avatarUri);
         }
 
@@ -155,7 +162,11 @@ public abstract class AvatarView extends LinearLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        updateAvatar();
+        try {
+            updateAvatar();
+        } catch (Exception e){
+            LOG.error("Error updating avatar", e);
+        }
     }
 
     /**

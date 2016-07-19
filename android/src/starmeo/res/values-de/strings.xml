@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Starmeo</string>
+    <string name="sms_invitation_text">Hey! Ich nutze die Star-App Starmeo zum sicheren Chatten! Jetzt herunterladen und mich als Kontakt hinzufügen: %1$s%2$s\n%3$s</string>
+    <string name="email_invitation_text">Hey!&lt;br&gt;Ich nutze jetzt die Star-App Starmeo zum sicheren Chatten! Jetzt herunterladen und mich als Kontakt hinzufügen:&lt;br&gt;&lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;&lt;br&gt;&lt;br&gt;%3$s</string>
+    <string name="menu_about">Über Starmeo</string>
+    <string name="pref_report_crashes_summary">Unterstütze Starmeo bei der Weiterentwicklung indem du deine Abstürze meldest. Welche Informationen an Starmeo geschickt werden, kannst du in den FAQ einsehen.</string>
+    <string name="dialog_report_crash_message">Es wurde eine Aufzeichnung des letzten Crashs gefunden. Bitte schicke diesen Bericht an Starmeo, damit wir den Fehler schnellst möglich beheben können.</string>
+    <string name="dialog_report_errors_message">Bei der letzten Ausführung sind Fehler aufgetreten. Bitte schicke diesen Bericht an Starmeo, damit wir diese schnellst möglich beheben können.</string>
+    <string name="email_invitation_subject">Triff mich bei Starmeo!</string>
+    <string name="actionbar_default_title">Starmeo</string>
+    <string name="about_advert_text">Starmeo \n- dein sicherer Multimedia Messenger\n\nWir legen größten Wert auf Sicherheit, Datenschutz und Privatsphäre. Dank modernster Verschlüsselungs- und Übertragungstechnologien setzt Starmeo neue Standards in der mobilen Datenübertragung und definiert Privatsphäre im mobilen Messaging Sektor neu. Starmeo ermöglicht einen einfachen und unbegrenzten Datenaustausch zwischen Smartphones und Tablets ohne vorherige Eingabe von vertraulichen Nutzerdaten.\n\nShare hugs \u0026 kisses</string>
+    <string name="restore_restart_hoccer">Bitte Starmeo neu starten, um die Wiederherstellung zu beenden.</string>
+    <string name="restore_no_backups_found_message">Bitte bestehendes Backup nach\n%1$s\nkopieren um früheren Starmeo Account wiederherstellen zu können.</string>
+</resources>

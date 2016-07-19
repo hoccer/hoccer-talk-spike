@@ -10,9 +10,7 @@ import android.support.v4.view.ViewPager;
 import android.view.View;
 import com.hoccer.xo.android.fragment.IPagerFragment;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Adds and manages an activity ViewPager.
@@ -47,6 +45,12 @@ public class ViewPagerActivityComponent extends ActivityComponent {
             public int getCount() {
                 return mFragments.size();
             }
+
+            @Override
+            public int getItemPosition(Object object) {
+                int position = mFragments.indexOf(object);
+                return position == -1 ? POSITION_NONE : position;
+            }
         });
         mViewPager.setOnPageChangeListener(new PageChangeListener());
 
@@ -54,26 +58,48 @@ public class ViewPagerActivityComponent extends ActivityComponent {
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
         for (Fragment fragment : mFragments) {
-            ActionBar.Tab tab = actionBar.newTab();
-
-            View tabView = ((IPagerFragment) fragment).getCustomTabView(getActivity());
-            if (tabView != null) {
-                tab.setCustomView(tabView);
-            } else {
-                tab.setText(((IPagerFragment) fragment).getTabName(getActivity().getResources()));
-            }
-            tab.setTabListener(new TabListener());
-            actionBar.addTab(tab);
+            addTab((IPagerFragment) fragment);
         }
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void add(Fragment fragment) {
+        addTab((IPagerFragment) fragment);
+        mFragments.add(fragment);
+        mViewPager.getAdapter().notifyDataSetChanged();
     }
 
-    public Fragment getSelectedFragment() {
-        return mFragments.get(mViewPager.getCurrentItem());
+    private void addTab(IPagerFragment fragment) {
+        ActionBar.Tab tab = getActivity().getActionBar().newTab();
+
+        View tabView = fragment.getCustomTabView(getActivity());
+        if (tabView != null) {
+            tab.setCustomView(tabView);
+        } else {
+            tab.setText(fragment.getTabName(getActivity().getResources()));
+        }
+        tab.setTag(fragment);
+        tab.setTabListener(new TabListener());
+        getActivity().getActionBar().addTab(tab);
+    }
+
+    public void remove(Fragment fragment) {
+        removeTab((IPagerFragment) fragment);
+        mFragments.remove(fragment);
+        mViewPager.getAdapter().notifyDataSetChanged();
+    }
+
+    public boolean contains(Fragment fragment){
+        return mFragments.contains(fragment);
+    }
+
+    private void removeTab(IPagerFragment fragment) {
+        ActionBar actionBar = getActivity().getActionBar();
+        for (int i = 0; i < actionBar.getTabCount(); i++){
+            if (actionBar.getTabAt(i).getTag() == fragment){
+                actionBar.removeTabAt(i);
+                break;
+            }
+        }
     }
 
     private class PageChangeListener implements ViewPager.OnPageChangeListener {
