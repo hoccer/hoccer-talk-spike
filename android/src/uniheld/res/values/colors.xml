@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#3aaa35</color>
+    <color name="secondary">#ffe8b3</color>
+    <color name="tertiary">#C0C0C0</color>
+
+    <color name="tab">#AAAAAA</color>
+
+    <color name="attachment_incoming">@color/tertiary</color>
+    <color name="attachment_outgoing">@color/tertiary</color>
+
+    <color name="message_incoming_text">#000000</color>
+    <color name="message_outgoing_text">#ffffff</color>
+</resources>
