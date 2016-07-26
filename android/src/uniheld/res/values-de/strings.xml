@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Uniheld</string>
-    <string name="menu_about">Über Uniheld</string>
-    <string name="pref_report_crashes_summary">Unterstütze Uniheld bei der Weiterentwicklung indem du deine Abstürze meldest. Welche Informationen an Uniheld geschickt werden, kannst du in den FAQ einsehen.</string>
-    <string name="dialog_report_crash_message">Es wurde eine Aufzeichnung des letzten Crashs gefunden. Bitte schicke diesen Bericht an Uniheld, damit wir den Fehler schnellst möglich beheben können.</string>
-    <string name="dialog_report_errors_message">Bei der letzten Ausführung sind Fehler aufgetreten. Bitte schicke diesen Bericht an Uniheld, damit wir diese schnellst möglich beheben können.</string>
-    <string name="sms_invitation_text">Ich möchte mit Ihnen in der Uniheld App in Kontakt treten. Jetzt herunterladen und mich als Kontakt hinzufügen: %1$s%2$s\n%3$s</string>
-    <string name="email_invitation_subject">Triff mich bei Uniheld!</string>
-    <string name="email_invitation_text">Ich möchte mit Ihnen in der Uniheld App in Kontakt treten. Jetzt herunterladen und mich als Kontakt hinzufügen: \n%1$s%2$s\n%3$s</string>
-    <string name="actionbar_default_title">Uniheld</string>
+    <string name="app_name">UNIHELD</string>
+    <string name="menu_about">Über UNIHELD</string>
+    <string name="pref_report_crashes_summary">Unterstütze UNIHELD bei der Weiterentwicklung indem du deine Abstürze meldest. Welche Informationen an UNIHELD geschickt werden, kannst du in den FAQ einsehen.</string>
+    <string name="dialog_report_crash_message">Es wurde eine Aufzeichnung des letzten Crashs gefunden. Bitte schicke diesen Bericht an UNIHELD, damit wir den Fehler schnellst möglich beheben können.</string>
+    <string name="dialog_report_errors_message">Bei der letzten Ausführung sind Fehler aufgetreten. Bitte schicke diesen Bericht an UNIHELD, damit wir diese schnellst möglich beheben können.</string>
+    <string name="sms_invitation_text">Ich möchte mit Ihnen in der UNIHELD App in Kontakt treten. Jetzt herunterladen und mich als Kontakt hinzufügen: %1$s%2$s\n%3$s</string>
+    <string name="email_invitation_subject">Triff mich bei UNIHELD!</string>
+    <string name="email_invitation_text">Ich möchte mit Ihnen in der UNIHELD App in Kontakt treten. Jetzt herunterladen und mich als Kontakt hinzufügen: \n%1$s%2$s\n%3$s</string>
+    <string name="actionbar_default_title">UNIHELD</string>
     <string name="about_advert_text"></string>
-    <string name="restore_restart_hoccer">Bitte Uniheld neu starten, um die Wiederherstellung zu beenden.</string>
-    <string name="restore_no_backups_found_message">Bitte bestehendes Backup nach\n%1$s\nkopieren um früheren Uniheld Account wiederherstellen zu können.</string>
+    <string name="restore_restart_hoccer">Bitte UNIHELD neu starten, um die Wiederherstellung zu beenden.</string>
+    <string name="restore_no_backups_found_message">Bitte bestehendes Backup nach\n%1$s\nkopieren um früheren UNIHELD Account wiederherstellen zu können.</string>
 
     <string name="placeholder_conversations_text"><![CDATA[<a href="http://faq.hoccer.com/uniheld/de/tutorial/#freunde-einladen">Lade deine Freunde</a>]]> zum Chatten ein!</string>
     <string name="placeholder_groups_text"><![CDATA[<a href="http://faq.hoccer.com/uniheld/de/tutorial/#gruppen">Lege Gruppen an</a>]]> um mit vielen Freunden gleichzeitig zu chatten.</string>

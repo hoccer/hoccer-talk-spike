@@ -72,8 +72,8 @@ android {
         uniheld {
             applicationId "com.uniheld.messenger"
             manifestPlaceholders = [
-                    "app.name"                    : "Uniheld",
-                    "app.name.short"              : "Uniheld",
+                    "app.name"                    : "UNIHELD",
+                    "app.name.short"              : "UNIHELD",
                     "hoccer.invitation.uri.scheme": "unhld"
             ]
         }
