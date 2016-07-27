@@ -19,6 +19,7 @@ import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.ChatsActivity;
+import com.hoccer.xo.android.activity.ChatsBaseActivity;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 
@@ -94,7 +95,7 @@ public class SelfClientProfileFragment extends ClientProfileFragment implements 
     private void exitApplication() {
         Intent intent = new Intent(getActivity(), ChatsActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra(ChatsActivity.INTENT_EXTRA_EXIT, true);
+        intent.putExtra(ChatsBaseActivity.INTENT_EXTRA_EXIT, true);
         startActivity(intent);
     }
 
