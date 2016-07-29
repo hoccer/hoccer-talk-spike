@@ -42,8 +42,7 @@ public class WebviewFragment extends PagerFragment {
 
     @Override
     public void onPageSelected() {
-
-        webView.loadUrl("https://www.gmx.de");
+        webView.loadUrl("https://faq.hoccer.com/");
     }
 
     @Override
@@ -62,7 +61,7 @@ public class WebviewFragment extends PagerFragment {
 
     @Override
     public String getTabName(Resources resources) {
-        return "WEBVIEW";
+        return "BENEFITS";
     }
 
     @Override
