@@ -37,7 +37,7 @@ public class WebviewFragment extends PagerFragment {
     private WebView webView;
 
     public WebviewFragment() {
-
+        super();
     }
 
     @Override
