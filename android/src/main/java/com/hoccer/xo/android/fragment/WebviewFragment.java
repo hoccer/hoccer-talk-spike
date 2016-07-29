@@ -42,7 +42,7 @@ public class WebviewFragment extends PagerFragment {
 
     @Override
     public void onPageSelected() {
-        webView.loadUrl("https://faq.hoccer.com/");
+        webView.loadUrl("http://faq.hoccer.com/");
     }
 
     @Override

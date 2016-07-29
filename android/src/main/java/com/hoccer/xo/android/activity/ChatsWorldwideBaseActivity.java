@@ -3,7 +3,7 @@ package com.hoccer.xo.android.activity;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.fragment.WorldwideChatListFragment;
 
-public class ChatsActivity extends ChatsBaseActivity {
+public class ChatsWorldwideBaseActivity extends ChatsBaseActivity {
 
     private WorldwideChatListFragment mWorldwideChatListFragment;
 
