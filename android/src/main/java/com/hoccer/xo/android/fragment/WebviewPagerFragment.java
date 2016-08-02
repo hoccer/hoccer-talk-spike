@@ -22,13 +22,14 @@ public class WebviewPagerFragment extends PagerFragment {
     private WebView webView;
 
     @Override
-    public void onPageSelected() {
-
+    public void onPageUnselected() {
     }
 
     @Override
-    public void onPageUnselected() {
+    public void onResume() {
+        super.onResume();
 
+        webView.loadUrl(getArguments().getString("url"));
     }
 
     @Override
