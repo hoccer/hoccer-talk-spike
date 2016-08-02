@@ -26,10 +26,8 @@ public class WebviewPagerFragment extends PagerFragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-
-        webView.loadUrl(getArguments().getString("url"));
+    public void onPageSelected() {
+        
     }
 
     @Override
