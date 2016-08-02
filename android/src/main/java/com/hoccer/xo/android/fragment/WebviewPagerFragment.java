@@ -1,11 +1,7 @@
 package com.hoccer.xo.android.fragment;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,35 +10,18 @@ import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.TextView;
-import android.widget.Toast;
-import com.artcom.hoccer.R;
-import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.xo.android.FeaturePromoter;
-import com.hoccer.xo.android.WorldwideController;
-import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.adapter.EnvironmentChatListAdapter;
-import com.hoccer.xo.android.base.BaseActivity;
 import com.hoccer.xo.android.base.PagerFragment;
-import com.hoccer.xo.android.base.PagerListFragment;
-import com.hoccer.xo.android.view.Placeholder;
 import org.apache.log4j.Logger;
 
-import static com.hoccer.talk.model.TalkEnvironment.TYPE_WORLDWIDE;
+public class WebviewPagerFragment extends PagerFragment {
 
-public class WebviewFragment extends PagerFragment {
-
-    protected static final Logger LOG = Logger.getLogger(WebviewFragment.class);
+    protected static final Logger LOG = Logger.getLogger(WebviewPagerFragment.class);
 
     private WebView webView;
 
-    public WebviewFragment() {
-        super();
-    }
-
     @Override
     public void onPageSelected() {
-        webView.loadUrl("http://faq.hoccer.com/");
+        webView.loadUrl(getArguments().getString("url"));
     }
 
     @Override
@@ -61,7 +40,7 @@ public class WebviewFragment extends PagerFragment {
 
     @Override
     public String getTabName(Resources resources) {
-        return "BENEFITS";
+        return getArguments().getString("tabName");
     }
 
     @Override
@@ -85,5 +64,13 @@ public class WebviewFragment extends PagerFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+    }
+
+    public void onBackPressed() {
+        webView.goBack();
+    }
+
+    public WebView getWebView() {
+        return webView;
     }
 }

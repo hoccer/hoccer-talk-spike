@@ -1,17 +1,37 @@
 package com.hoccer.xo.android.activity;
 
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import com.hoccer.xo.android.fragment.WebviewFragment;
+import android.support.v4.view.ViewPager;
+import com.artcom.hoccer.R;
+import com.hoccer.xo.android.activity.ChatsBaseActivity;
+import com.hoccer.xo.android.fragment.WebviewPagerFragment;
 
 public class ChatsActivity extends ChatsBaseActivity {
-    private Fragment mWebViewFragment;
+
+    private WebviewPagerFragment mWebViewFragment;
 
     @Override
     protected void onResume() {
         super.onResume();
         if (!mViewPagerActivityComponent.contains(mWebViewFragment)) {
-            mWebViewFragment = new WebviewFragment();
+            mWebViewFragment = new WebviewPagerFragment();
+
+            Bundle bundle = new Bundle();
+            bundle.putString("url", "http://www.gmx.de");
+            bundle.putString("tabName", "BENEFITS");
+            mWebViewFragment.setArguments(bundle);
+
             mViewPagerActivityComponent.add(mWebViewFragment);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mViewPagerActivityComponent.getCurrentFragment() == mWebViewFragment && mWebViewFragment.getWebView().canGoBack()) {
+            mWebViewFragment.onBackPressed();
+        } else {
+            super.onBackPressed();
         }
     }
 }
