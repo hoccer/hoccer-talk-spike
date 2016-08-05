@@ -27,7 +27,6 @@ public class WebviewPagerFragment extends PagerFragment {
 
     @Override
     public void onPageSelected() {
-        
     }
 
     @Override
@@ -70,7 +69,7 @@ public class WebviewPagerFragment extends PagerFragment {
 
         webView = (WebView) view.findViewById(R.id.webview);
         webView.getSettings().setJavaScriptEnabled(true);
-        webView.setWebViewClient(new WebViewClient(){
+        webView.setWebViewClient(new WebViewClient() {
 
             @Override
             public void onPageFinished(WebView view, String url) {

@@ -21,4 +21,10 @@
     <string name="link_tutorial">http://faq.hoccer.com/uniheld/tutorial/</string>
     <string name="link_faq">http://faq.hoccer.com/uniheld/</string>
 
+    <string name="menu_student_card">Student ID</string>
+    <string name="title_activity_student_card">Student ID</string>
+
+    <string name="action_take_picture">Capture Student ID</string>
+
+    <string name="student_card_description">Take a picture of your student card</string>
 </resources>

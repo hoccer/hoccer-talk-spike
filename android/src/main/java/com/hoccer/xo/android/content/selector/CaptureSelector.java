@@ -14,6 +14,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.talk.content.SelectedFile;
+import com.hoccer.xo.android.ExternalStorageNotMountedException;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.hoccer.xo.android.util.ImageUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -100,11 +101,5 @@ public class CaptureSelector implements IContentSelector {
         int imageHeight = options.outHeight;
         int imageWidth = options.outWidth;
         return ImageUtils.calculateAspectRatio(imageWidth, imageHeight, orientation);
-    }
-
-    public class ExternalStorageNotMountedException extends Throwable {
-        private ExternalStorageNotMountedException(String message) {
-            super(message);
-        }
     }
 }

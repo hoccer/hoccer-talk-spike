@@ -1,10 +1,9 @@
 package com.hoccer.xo.android.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
+import android.view.MenuItem;
 import com.artcom.hoccer.R;
-import com.hoccer.xo.android.activity.ChatsBaseActivity;
 import com.hoccer.xo.android.fragment.WebviewPagerFragment;
 
 public class ChatsActivity extends ChatsBaseActivity {
@@ -33,5 +32,22 @@ public class ChatsActivity extends ChatsBaseActivity {
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_take_picture:
+                showStudentCard();
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+        return true;
+    }
+
+    private void showStudentCard() {
+        startActivity(new Intent(this, StudentCardActivity.class));
     }
 }
