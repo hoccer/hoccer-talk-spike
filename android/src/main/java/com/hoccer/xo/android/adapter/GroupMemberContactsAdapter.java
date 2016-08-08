@@ -7,7 +7,7 @@ import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroupMembership;
-import com.hoccer.xo.android.base.BaseActivity;
+import com.hoccer.xo.android.base.FlavorBaseActivity;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,11 +28,11 @@ public class GroupMemberContactsAdapter extends ContactsAdapter {
     @Nullable
     private final String mGroupId;
 
-    public GroupMemberContactsAdapter(BaseActivity activity) {
+    public GroupMemberContactsAdapter(FlavorBaseActivity activity) {
         this(activity, null);
     }
 
-    public GroupMemberContactsAdapter(BaseActivity activity, @Nullable String groupId) {
+    public GroupMemberContactsAdapter(FlavorBaseActivity activity, @Nullable String groupId) {
         super(activity);
         mGroupId = groupId;
     }

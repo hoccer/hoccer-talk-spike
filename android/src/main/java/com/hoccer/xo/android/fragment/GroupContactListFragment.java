@@ -6,7 +6,7 @@ import android.view.View;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.base.BaseActivity;
+import com.hoccer.xo.android.base.FlavorBaseActivity;
 import com.hoccer.xo.android.profile.group.GroupProfileActivity;
 import com.hoccer.xo.android.adapter.ContactListAdapter;
 import com.hoccer.xo.android.adapter.GroupContactListAdapter;
@@ -30,7 +30,7 @@ public class GroupContactListFragment extends ContactListFragment {
         PLACEHOLDER.applyToView(view, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((BaseActivity) getActivity()).showNewGroup();
+                ((FlavorBaseActivity) getActivity()).showNewGroup();
             }
         });
     }

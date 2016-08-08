@@ -9,7 +9,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.xo.android.NearbyController;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.EnvironmentChatListAdapter;
-import com.hoccer.xo.android.base.BaseActivity;
+import com.hoccer.xo.android.base.FlavorBaseActivity;
 import com.hoccer.xo.android.view.Placeholder;
 
 import static com.hoccer.talk.model.TalkEnvironment.TYPE_NEARBY;
@@ -43,7 +43,7 @@ public class NearbyChatListFragment extends EnvironmentChatListFragment {
 
     private void createAdapter() {
         if (mListAdapter == null) {
-            mListAdapter = new EnvironmentChatListAdapter(TYPE_NEARBY, (BaseActivity) getActivity());
+            mListAdapter = new EnvironmentChatListAdapter(TYPE_NEARBY, (FlavorBaseActivity) getActivity());
             mListAdapter.registerListeners();
             setListAdapter(mListAdapter);
         }

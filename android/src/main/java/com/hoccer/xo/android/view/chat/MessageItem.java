@@ -24,7 +24,7 @@ import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.ContentState;
 import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.base.BaseActivity;
+import com.hoccer.xo.android.base.FlavorBaseActivity;
 import com.hoccer.xo.android.content.Clipboard;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.hoccer.xo.android.view.avatar.SimpleAvatarView;
@@ -361,7 +361,7 @@ public class MessageItem implements AttachmentTransferListener {
                 public void onClick(View v) {
                     if (!contact.isSelf()) {
                         // TODO: reevaluate - might not work
-                        ((BaseActivity) mContext).showContactProfile(contact);
+                        ((FlavorBaseActivity) mContext).showContactProfile(contact);
                     }
                 }
             });

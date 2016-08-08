@@ -11,7 +11,7 @@ import android.widget.RelativeLayout;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.DeviceContactsAdapter;
-import com.hoccer.xo.android.base.BaseActivity;
+import com.hoccer.xo.android.base.FlavorBaseActivity;
 import com.hoccer.xo.android.util.ContactOperations;
 import com.hoccer.xo.android.util.DeviceContact;
 import com.artcom.hoccer.R;
@@ -160,8 +160,8 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
         setMenuVisibility(enabled);
 
         // toggle activity options menu
-        if (getActivity() instanceof BaseActivity) {
-            ((BaseActivity)getActivity()).setOptionsMenuEnabled(enabled);
+        if (getActivity() instanceof FlavorBaseActivity) {
+            ((FlavorBaseActivity)getActivity()).setOptionsMenuEnabled(enabled);
         }
     }
 

@@ -26,7 +26,7 @@ import com.hoccer.xo.android.activity.GroupContactSelectionResultActivity;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupMemberContactsAdapter;
-import com.hoccer.xo.android.base.BaseActivity;
+import com.hoccer.xo.android.base.FlavorBaseActivity;
 import com.hoccer.xo.android.fragment.ContactSelectionFragment;
 import com.hoccer.xo.android.profile.ProfileFragment;
 import com.hoccer.xo.android.util.DisplayUtils;
@@ -149,7 +149,7 @@ public class GroupProfileFragment extends ProfileFragment
         mMode = Mode.PROFILE;
 
         if (mGroupMemberAdapter == null) {
-            mGroupMemberAdapter = new GroupMemberContactsAdapter((BaseActivity) getActivity(), mContact.getGroupId());
+            mGroupMemberAdapter = new GroupMemberContactsAdapter((FlavorBaseActivity) getActivity(), mContact.getGroupId());
             mGroupMemberAdapter.setFilter(mInvitedOrJoinedClientFilter);
             mGroupMemberAdapter.registerListeners();
             mGroupMemberAdapter.registerDataSetObserver(new DataSetObserver() {

@@ -37,9 +37,9 @@ import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 
-public abstract class CommonBaseActivity extends FragmentActivity {
+public abstract class BaseActivity extends FragmentActivity {
 
-    private static final Logger LOG = Logger.getLogger(BaseActivity.class);
+    private static final Logger LOG = Logger.getLogger(FlavorBaseActivity.class);
 
     boolean mUpEnabled;
 
@@ -292,7 +292,7 @@ public abstract class CommonBaseActivity extends FragmentActivity {
             final SpannableString interactiveMessage = new SpannableString(message);
             Linkify.addLinks(interactiveMessage, Linkify.ALL);
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(CommonBaseActivity.this);
+            AlertDialog.Builder builder = new AlertDialog.Builder(BaseActivity.this);
             if (title != null) {
                 builder.setTitle(title);
             }

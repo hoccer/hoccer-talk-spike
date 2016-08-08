@@ -13,7 +13,7 @@ import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.base.BaseActivity;
+import com.hoccer.xo.android.base.FlavorBaseActivity;
 import com.hoccer.xo.android.profile.client.ClientProfileActivity;
 import com.hoccer.xo.android.profile.group.GroupProfileActivity;
 import com.hoccer.xo.android.view.avatar.AvatarView;
@@ -45,9 +45,9 @@ public abstract class ContactsAdapter extends BaseAdapter implements IXoContactL
     protected final static int VIEW_TYPE_COUNT = 2;
 
     protected final XoClientDatabase mDatabase;
-    protected final BaseActivity mActivity;
+    protected final FlavorBaseActivity mActivity;
 
-    protected ContactsAdapter(BaseActivity activity) {
+    protected ContactsAdapter(FlavorBaseActivity activity) {
         mActivity = activity;
         mDatabase = XoApplication.get().getClient().getDatabase();
     }

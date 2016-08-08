@@ -20,7 +20,7 @@ import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
 import com.hoccer.talk.model.TalkEnvironment;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.base.BaseActivity;
+import com.hoccer.xo.android.base.FlavorBaseActivity;
 import com.hoccer.xo.android.view.avatar.AvatarView;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
@@ -44,14 +44,14 @@ public class EnvironmentChatListAdapter extends BaseAdapter implements IXoContac
 
     private final XoClientDatabase mDatabase;
     private final ScheduledExecutorService mExecutor;
-    private final BaseActivity mBaseActivity;
+    private final FlavorBaseActivity mBaseActivity;
     private ScheduledFuture<?> mNotifyFuture;
     private long mNotifyTimestamp;
 
     private List<TalkClientContact> mContacts = new ArrayList<TalkClientContact>();
     private TalkClientContact mCurrentEnvironmentGroup;
 
-    public EnvironmentChatListAdapter(String environmentType, BaseActivity activity) {
+    public EnvironmentChatListAdapter(String environmentType, FlavorBaseActivity activity) {
         super();
         mEnvironmentType = environmentType;
         mBaseActivity = activity;

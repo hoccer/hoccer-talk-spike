@@ -5,7 +5,7 @@ import android.view.MenuItem;
 import com.artcom.hoccer.R;
 import com.hoccer.xo.android.activity.StudentCardActivity;
 
-public abstract class BaseActivity extends CommonBaseActivity {
+public abstract class FlavorBaseActivity extends BaseActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

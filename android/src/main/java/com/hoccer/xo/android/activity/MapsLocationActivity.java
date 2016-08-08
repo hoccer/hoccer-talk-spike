@@ -18,7 +18,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.hoccer.xo.android.base.BaseActivity;
+import com.hoccer.xo.android.base.FlavorBaseActivity;
 import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -27,7 +27,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class MapsLocationActivity extends BaseActivity
+public class MapsLocationActivity extends FlavorBaseActivity
     implements GoogleMap.OnMyLocationButtonClickListener,
                GoogleMap.OnMapLongClickListener,
                GoogleMap.OnMyLocationChangeListener,
