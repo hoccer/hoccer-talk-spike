@@ -3,7 +3,6 @@ package com.hoccer.xo.android.activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -19,30 +18,30 @@ import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.activity.component.ViewPagerActivityComponent;
 import com.hoccer.xo.android.fragment.ChatListFragment;
 import com.hoccer.xo.android.fragment.NearbyChatListFragment;
-import com.hoccer.xo.android.fragment.WorldwideChatListFragment;
 import com.hoccer.xo.android.passwordprotection.PasswordProtection;
 import com.hoccer.xo.android.service.XoClientService;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.ContactsMenuItemActionProvider;
 import net.hockeyapp.android.CrashManager;
 import net.hockeyapp.android.CrashManagerListener;
-import net.hockeyapp.android.ExceptionHandler;
 import net.hockeyapp.android.Strings;
 import org.apache.log4j.Logger;
 
-public class ChatsActivity extends ComposableActivity implements IXoStateListener, IXoPairingListener {
+public abstract class ChatsBaseActivity extends ComposableActivity implements IXoStateListener, IXoPairingListener {
 
-    private static final Logger LOG = Logger.getLogger(ChatsActivity.class);
+    protected static final Logger LOG = Logger.getLogger(ChatsBaseActivity.class);
+
+    private CrashManagerListener mCrashManagerListener;
+
+    private ContactsMenuItemActionProvider mContactsMenuItemActionProvider;
+
+    protected ViewPagerActivityComponent mViewPagerActivityComponent;
+
+    private static final int REGISTER_REQUEST_CODE = 1;
 
     public static final String INTENT_EXTRA_EXIT = "exit";
-    public static final int REGISTER_REQUEST_CODE = 1;
 
     private String mPairingToken;
-    private ContactsMenuItemActionProvider mContactsMenuItemActionProvider;
-    private ViewPagerActivityComponent mViewPagerActivityComponent;
-    private WorldwideChatListFragment mWorldwideChatListFragment;
-    private CrashManagerListener mCrashManagerListener;
-    private boolean worldWideIsShown;
 
     @Override
     protected ActivityComponent[] createComponents() {
@@ -95,9 +94,9 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
                 public String getStringForResource(int resourceID) {
                     switch (resourceID) {
                         case Strings.CRASH_DIALOG_TITLE_ID:
-                            return CrashMonitor.get(ChatsActivity.this).isCrashedBefore() ? getString(R.string.dialog_report_crash_title) : getString(R.string.dialog_report_errors_title);
+                            return CrashMonitor.get(ChatsBaseActivity.this).isCrashedBefore() ? getString(R.string.dialog_report_crash_title) : getString(R.string.dialog_report_errors_title);
                         case Strings.CRASH_DIALOG_MESSAGE_ID:
-                            return CrashMonitor.get(ChatsActivity.this).isCrashedBefore() ? getString(R.string.dialog_report_crash_message) : getString(R.string.dialog_report_errors_message);
+                            return CrashMonitor.get(ChatsBaseActivity.this).isCrashedBefore() ? getString(R.string.dialog_report_crash_message) : getString(R.string.dialog_report_errors_message);
                         case Strings.CRASH_DIALOG_NEGATIVE_BUTTON_ID:
                             return getString(R.string.dialog_report_crash_negative);
                         case Strings.CRASH_DIALOG_POSITIVE_BUTTON_ID:
@@ -131,26 +130,15 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         return result;
     }
 
-
     @Override
     protected void onResume() {
         super.onResume();
 
-        CrashManager.execute(ChatsActivity.this, mCrashManagerListener);
+        CrashManager.execute(ChatsBaseActivity.this, mCrashManagerListener);
 
         showProfileIfClientIsNotRegistered();
         registerListeners();
         mContactsMenuItemActionProvider.updateNotificationBadge();
-        if (XoApplication.getConfiguration().isWorldwideFeatureEnabled()) {
-            if (mWorldwideChatListFragment == null) {
-                mWorldwideChatListFragment = new WorldwideChatListFragment();
-            }
-            if (!mViewPagerActivityComponent.contains(mWorldwideChatListFragment)) {
-                mViewPagerActivityComponent.add(mWorldwideChatListFragment);
-            }
-        } else if (mWorldwideChatListFragment != null && mViewPagerActivityComponent.contains(mWorldwideChatListFragment)) {
-                mViewPagerActivityComponent.remove(mWorldwideChatListFragment);
-        }
     }
 
     @Override
@@ -276,7 +264,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         XoApplication.get().getExecutor().execute(new Runnable() {
             @Override
             public void run() {
-                getClient().performTokenPairing(token, ChatsActivity.this);
+                getClient().performTokenPairing(token, ChatsBaseActivity.this);
             }
         });
     }
@@ -286,7 +274,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(ChatsActivity.this, R.string.toast_pairing_successful, Toast.LENGTH_LONG).show();
+                Toast.makeText(ChatsBaseActivity.this, R.string.toast_pairing_successful, Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -296,7 +284,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(ChatsActivity.this, R.string.toast_pairing_failed, Toast.LENGTH_LONG).show();
+                Toast.makeText(ChatsBaseActivity.this, R.string.toast_pairing_failed, Toast.LENGTH_LONG).show();
             }
         });
     }

@@ -22,7 +22,7 @@ import com.hoccer.xo.android.adapter.AttachmentListAdapter;
 import com.hoccer.xo.android.adapter.AttachmentSearchResultAdapter;
 import com.hoccer.xo.android.adapter.ContactSearchResultAdapter;
 import com.hoccer.xo.android.adapter.SectionedListAdapter;
-import com.hoccer.xo.android.base.BaseActivity;
+import com.hoccer.xo.android.base.FlavorBaseActivity;
 import com.hoccer.xo.android.content.MediaPlaylist;
 import com.hoccer.xo.android.content.SingleItemPlaylist;
 import com.hoccer.xo.android.content.UserPlaylist;
@@ -76,7 +76,7 @@ public class AttachmentListFragment extends SearchableListFragment {
         }
 
         mAttachmentAdapter = new AttachmentListAdapter(mContact, ContentMediaType.AUDIO);
-        mSearchContactsAdapter = new ContactSearchResultAdapter((BaseActivity) getActivity());
+        mSearchContactsAdapter = new ContactSearchResultAdapter((FlavorBaseActivity) getActivity());
 
         setHasOptionsMenu(true);
     }
@@ -102,7 +102,7 @@ public class AttachmentListFragment extends SearchableListFragment {
         super.onResume();
 
         if (mSearchContactsAdapter == null) {
-            mSearchContactsAdapter = new ContactSearchResultAdapter((BaseActivity) getActivity());
+            mSearchContactsAdapter = new ContactSearchResultAdapter((FlavorBaseActivity) getActivity());
             mSearchContactsAdapter.loadContacts();
         }
 

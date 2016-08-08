@@ -13,7 +13,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.base.BaseActivity;
+import com.hoccer.xo.android.base.FlavorBaseActivity;
 import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.util.UriUtils;
@@ -112,7 +112,7 @@ public class ImageMessageItem extends MessageItem {
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setDataAndType(imageUri, "image/*");
             try {
-                BaseActivity activity = (BaseActivity) mContext;
+                FlavorBaseActivity activity = (FlavorBaseActivity) mContext;
                 activity.startExternalActivity(intent);
             } catch (ClassCastException e) {
                 e.printStackTrace();

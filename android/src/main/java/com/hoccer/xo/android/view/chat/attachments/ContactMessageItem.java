@@ -11,7 +11,7 @@ import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.base.BaseActivity;
+import com.hoccer.xo.android.base.FlavorBaseActivity;
 import com.hoccer.xo.android.util.colorscheme.ColoredDrawable;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.MessageItem;
@@ -70,7 +70,7 @@ public class ContactMessageItem extends MessageItem {
                 LOG.debug("onClick(showButton)");
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setDataAndType(UriUtils.getAbsoluteFileUri(mAttachment.getFilePath()), "text/x-vcard");
-                BaseActivity activity = (BaseActivity) mContext;
+                FlavorBaseActivity activity = (FlavorBaseActivity) mContext;
                 activity.startExternalActivity(intent);
             }
         });

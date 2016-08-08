@@ -4,14 +4,14 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
-import com.hoccer.xo.android.base.BaseActivity;
+import com.hoccer.xo.android.base.FlavorBaseActivity;
 
 
 /**
  * Base class for activities composed of ActivityComponents
  * This class is part of the component based design pattern to favor composition over inheritance in some cases.
  */
-public abstract class ComposableActivity extends BaseActivity {
+public abstract class ComposableActivity extends FlavorBaseActivity {
 
     private ActivityComponent[] mComponents;
 

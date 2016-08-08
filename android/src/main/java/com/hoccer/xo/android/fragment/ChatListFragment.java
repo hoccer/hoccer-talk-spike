@@ -18,7 +18,7 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ChatActivity;
 import com.hoccer.xo.android.adapter.ChatListAdapter;
 import com.hoccer.xo.android.adapter.SearchAdapter;
-import com.hoccer.xo.android.base.BaseActivity;
+import com.hoccer.xo.android.base.FlavorBaseActivity;
 import com.hoccer.xo.android.base.SearchablePagerListFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.Placeholder;
@@ -65,7 +65,7 @@ public class ChatListFragment extends SearchablePagerListFragment {
         PLACEHOLDER.applyToView(view, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((BaseActivity) getActivity()).showPairing();
+                ((FlavorBaseActivity) getActivity()).showPairing();
             }
         });
 
@@ -198,7 +198,7 @@ public class ChatListFragment extends SearchablePagerListFragment {
             }
         };
 
-        return new ChatListAdapter((BaseActivity) getActivity(), filter);
+        return new ChatListAdapter((FlavorBaseActivity) getActivity(), filter);
     }
 
     private boolean isSuspendedGroupMember(TalkClientContact contact) {
@@ -221,7 +221,7 @@ public class ChatListFragment extends SearchablePagerListFragment {
         try {
             TalkClientContact contact = mDatabase.findContactById(contactId);
             if (contact != null) {
-                ((BaseActivity) getActivity()).showContactProfile(contact);
+                ((FlavorBaseActivity) getActivity()).showContactProfile(contact);
             }
         } catch (SQLException e) {
             LOG.error("SQL error while creating group ", e);

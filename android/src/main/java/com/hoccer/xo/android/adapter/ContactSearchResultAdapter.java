@@ -8,7 +8,7 @@ import android.view.View;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.xo.android.base.BaseActivity;
+import com.hoccer.xo.android.base.FlavorBaseActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ public class ContactSearchResultAdapter extends ContactsAdapter {
     private final List<TalkClientContact> mFoundContacts = new ArrayList<TalkClientContact>();
     private String mLastQuery = "";
 
-    public ContactSearchResultAdapter(BaseActivity activity) {
+    public ContactSearchResultAdapter(FlavorBaseActivity activity) {
         super(activity);
     }
 

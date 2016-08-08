@@ -35,7 +35,7 @@ public abstract class MessagesAdapter extends BaseAdapter {
 
     private static final long RATE_LIMIT_MSECS = 1000;
 
-    protected final BaseActivity mActivity;
+    protected final FlavorBaseActivity mActivity;
 
     protected final XoClientDatabase mDatabase;
 
@@ -53,7 +53,7 @@ public abstract class MessagesAdapter extends BaseAdapter {
     private boolean mNeedsReload;
     private long mNotifyTimestamp;
 
-    protected MessagesAdapter(BaseActivity activity) {
+    protected MessagesAdapter(FlavorBaseActivity activity) {
         mActivity = activity;
         mDatabase = mActivity.getDatabase();
         mInflater = mActivity.getLayoutInflater();

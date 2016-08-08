@@ -69,6 +69,20 @@ android {
                     "hoccer.invitation.uri.scheme": "heli"
             ]
         }
+        uniheld {
+            applicationId "com.uniheld.messenger"
+            manifestPlaceholders = [
+                    "app.name"                    : "UNIHELD",
+                    "app.name.short"              : "UNIHELD",
+                    "hoccer.invitation.uri.scheme": "unhld"
+            ]
+        }
+    }
+
+    sourceSets {
+        hoccer.java.srcDir 'src/common/java'
+        starmeo.java.srcDir 'src/common/java'
+        stroeer.java.srcDir 'src/common/java'
     }
 
     buildTypes {

@@ -1,0 +1,41 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:background="@color/background_default"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                tools:context="com.hoccer.xo.android.activity.StudentCardActivityFragment">
+
+    <ImageView
+            android:id="@+id/iv_student_card"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/student_card_description"/>
+
+    <RelativeLayout
+            android:id="@android:id/empty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_centerInParent="true">
+        <ImageView
+                android:id="@+id/iv_contacts_placeholder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@drawable/placeholder_student_card"
+                android:gravity="center"/>
+        <TextView
+                android:id="@+id/tv_contacts_placeholder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:layout_marginLeft="32dp"
+                android:layout_marginRight="32dp"
+                android:layout_below="@id/iv_contacts_placeholder"
+                android:textColor="@color/common_signin_btn_light_text_disabled"
+                android:textSize="8pt"
+                android:gravity="center_horizontal"
+                android:text="@string/placeholder_conversations_text"/>
+    </RelativeLayout>
+
+</RelativeLayout>

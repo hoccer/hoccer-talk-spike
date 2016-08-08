@@ -137,4 +137,8 @@ public class ViewPagerActivityComponent extends ActivityComponent {
         public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
         }
     }
+
+    public IPagerFragment getCurrentFragment() {
+        return mCurrentFragment;
+    }
 }

@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="com.hoccer.xo.android.activity.StudentCardActivity">
+    <item
+            android:id="@+id/action_show_student_card_faq"
+            android:title="Student Card FAQ"
+            android:icon="@drawable/ic_info_white_24dp"
+            android:orderInCategory="100"
+            android:showAsAction="ifRoom"/>
+    <item
+            android:id="@+id/action_take_picture"
+            android:title="@string/action_take_picture"
+            android:icon="@drawable/ic_photo_camera_white_24dp"
+            android:orderInCategory="200"
+            android:showAsAction="always"/>
+</menu>

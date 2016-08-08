@@ -14,7 +14,7 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.HistoryMessagesAdapter;
-import com.hoccer.xo.android.base.BaseActivity;
+import com.hoccer.xo.android.base.FlavorBaseActivity;
 import com.hoccer.xo.android.view.chat.MessageItem;
 import org.apache.log4j.Logger;
 
@@ -95,14 +95,14 @@ public class HistoryFragment extends XoChatListFragment {
             try {
                 TalkClientContact contact = XoApplication.get().getClient().getDatabase().findContactById(contactId);
                 mHistoryId = contact.isClient() ? contact.getClientId() : contact.getGroupId();
-                mAdapter = new HistoryMessagesAdapter(getListView(), (BaseActivity) getActivity(), contact);
+                mAdapter = new HistoryMessagesAdapter(getListView(), (FlavorBaseActivity) getActivity(), contact);
             } catch (SQLException e) {
                 LOG.error("Client contact with id '" + contactId + "' does not exist", e);
                 return;
             }
         } else if (getArguments() != null && getArguments().getString(ARG_GROUP_HISTORY) != null) {
             mHistoryId = getArguments().getString(ARG_GROUP_HISTORY);
-            mAdapter = new HistoryMessagesAdapter(getListView(), (BaseActivity) getActivity(), mHistoryId);
+            mAdapter = new HistoryMessagesAdapter(getListView(), (FlavorBaseActivity) getActivity(), mHistoryId);
         }
 
         mAdapter.onCreate();
