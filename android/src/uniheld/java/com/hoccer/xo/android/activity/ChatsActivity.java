@@ -25,7 +25,7 @@ public class ChatsActivity extends ChatsBaseActivity {
     @Override
     public void onBackPressed() {
         if (mViewPagerActivityComponent.getCurrentFragment() == mWebViewFragment && mWebViewFragment.getWebView().canGoBack()) {
-            mWebViewFragment.onBackPressed();
+            mWebViewFragment.getWebView().goBack();
         } else {
             super.onBackPressed();
         }

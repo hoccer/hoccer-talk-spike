@@ -87,15 +87,6 @@ public class WebviewPagerFragment extends PagerFragment {
         return view;
     }
 
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-    }
-
-    public void onBackPressed() {
-        webView.goBack();
-    }
-
     public WebView getWebView() {
         return webView;
     }
