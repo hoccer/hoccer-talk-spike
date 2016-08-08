@@ -5,7 +5,10 @@ import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.TaskStackBuilder;
-import android.content.*;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -30,14 +33,11 @@ import com.hoccer.xo.android.activity.*;
 import com.hoccer.xo.android.fragment.DeviceContactsInvitationFragment;
 import com.hoccer.xo.android.profile.client.ClientProfileActivity;
 import com.hoccer.xo.android.profile.group.GroupProfileActivity;
-import net.hockeyapp.android.CrashManager;
-import net.hockeyapp.android.CrashManagerListener;
-import net.hockeyapp.android.Strings;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 
-public abstract class BaseActivity extends FragmentActivity {
+public abstract class CommonBaseActivity extends FragmentActivity {
 
     private static final Logger LOG = Logger.getLogger(BaseActivity.class);
 
@@ -292,7 +292,7 @@ public abstract class BaseActivity extends FragmentActivity {
             final SpannableString interactiveMessage = new SpannableString(message);
             Linkify.addLinks(interactiveMessage, Linkify.ALL);
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(BaseActivity.this);
+            AlertDialog.Builder builder = new AlertDialog.Builder(CommonBaseActivity.this);
             if (title != null) {
                 builder.setTitle(title);
             }

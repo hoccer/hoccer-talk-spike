@@ -15,7 +15,7 @@
     <string name="placeholder_conversations_text"><![CDATA[<a href="http://faq.hoccer.com/uniheld/tutorial/#invite">Invite friends</a>]]> to chat with!</string>
     <string name="placeholder_groups_text"><![CDATA[<a href="http://faq.hoccer.com/uniheld/tutorial/#groups">Create groups</a>]]> to chat with many friends at once.</string>
     <string name="placeholder_nearby_text">Waiting for others <![CDATA[<a href="http://faq.hoccer.com/uniheld/tutorial/#nearby">nearby</a>]]>…</string>
-    <string name="placeholder_worldwide_text">Waiting for others <![CDATA[<a href="http://faq.hoccer.com/uniheld/tutorial/#worldwide">worldwide</a>]]>…</string>
+    <string name="placeholder_student_card_text">Take a picture of your <![CDATA[<a href="http://faq.hoccer.com/uniheld/tutorial/#studentcard">student card</a>]]>…</string>
 
     <!-- Tutorial and FAQ links -->
     <string name="link_tutorial">http://faq.hoccer.com/uniheld/tutorial/</string>
@@ -25,6 +25,7 @@
     <string name="title_activity_student_card">Student ID</string>
 
     <string name="action_take_picture">Capture Student ID</string>
+    <string name="action_student_card_faq">Student Card FAQ</string>
 
     <string name="student_card_description">Take a picture of your student card</string>
 </resources>

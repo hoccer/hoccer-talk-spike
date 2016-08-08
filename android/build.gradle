@@ -79,6 +79,12 @@ android {
         }
     }
 
+    sourceSets {
+        hoccer.java.srcDir 'src/common/java'
+        starmeo.java.srcDir 'src/common/java'
+        stroeer.java.srcDir 'src/common/java'
+    }
+
     buildTypes {
         release {
             minifyEnabled true

@@ -4,6 +4,7 @@ import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
 
@@ -22,11 +23,19 @@ public class Placeholder {
     }
 
     public void applyToView(View view, View.OnClickListener onClickListener) {
+        RelativeLayout relativeLayout = (RelativeLayout) view.findViewById(android.R.id.empty);
+        relativeLayout.setVisibility(View.VISIBLE);
+
         ImageView placeholderImage = (ImageView) view.findViewById(R.id.iv_contacts_placeholder);
         TextView placeholderText = (TextView) view.findViewById(R.id.tv_contacts_placeholder);
 
         setupPlaceholderImage(onClickListener, placeholderImage);
         setupPlaceholderText(view, placeholderText);
+    }
+
+    public void removeFromView(View view) {
+        RelativeLayout relativeLayout = (RelativeLayout) view.findViewById(android.R.id.empty);
+        relativeLayout.setVisibility(View.GONE);
     }
 
     private void setupPlaceholderText(View view, TextView placeholderText) {
