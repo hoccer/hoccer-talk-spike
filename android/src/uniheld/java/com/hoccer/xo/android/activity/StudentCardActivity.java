@@ -16,6 +16,8 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 
+import static com.hoccer.xo.android.activity.StudentCardActivityFragment.STUDENT_CARD_FILE_NAME;
+
 public class StudentCardActivity extends Activity {
 
     private static final Logger LOG = Logger.getLogger(StudentCardActivity.class);
@@ -75,7 +77,7 @@ public class StudentCardActivity extends Activity {
     private Uri createOutputMediaFileUri() throws ExternalStorageNotMountedException {
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state)) {
-            File file = new File(XoApplication.getAttachmentDirectory(), "student_card.jpg");
+            File file = new File(XoApplication.getAttachmentDirectory(), STUDENT_CARD_FILE_NAME);
             return Uri.fromFile(file);
         } else {
             throw new ExternalStorageNotMountedException("External storage is not mounted.");

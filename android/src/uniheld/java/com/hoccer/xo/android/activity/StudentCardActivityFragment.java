@@ -3,7 +3,6 @@ package com.hoccer.xo.android.activity;
 import android.app.Fragment;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.*;
 import android.widget.ImageView;
 import com.artcom.hoccer.R;
@@ -15,7 +14,7 @@ import java.io.File;
 public class StudentCardActivityFragment extends Fragment {
 
     private static final Placeholder PLACEHOLDER = new Placeholder(R.drawable.placeholder_student_card, R.string.placeholder_student_card_text);
-    public static final String STUDENT_CARD_FILE = "student_card.jpg";
+    public static final String STUDENT_CARD_FILE_NAME = "student_card.jpg";
 
     private ImageView mStudentCardImageView;
 
@@ -39,7 +38,7 @@ public class StudentCardActivityFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        File file = new File(XoApplication.getAttachmentDirectory(), STUDENT_CARD_FILE);
+        File file = new File(XoApplication.getAttachmentDirectory(), STUDENT_CARD_FILE_NAME);
 
         if (file.exists()) {
             PLACEHOLDER.removeFromView(getView());
