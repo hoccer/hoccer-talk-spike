@@ -13,10 +13,8 @@ public abstract class FlavorBaseActivity extends BaseActivity {
             case R.id.menu_show_student_card:
                 showStudentCard();
                 break;
-            default:
-                return super.onOptionsItemSelected(item);
         }
-        return true;
+        return super.onOptionsItemSelected(item);
     }
 
     private void showStudentCard() {
