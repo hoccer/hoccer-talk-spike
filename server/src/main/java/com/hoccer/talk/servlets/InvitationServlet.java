@@ -34,7 +34,6 @@ public class InvitationServlet extends HttpServlet {
         STARMEO,
         HELIOS,
         UNIHELD
-
     }
 
     private static final HashMap<String, Label> LABELS = new HashMap<String, Label>();
