@@ -31,8 +31,6 @@ public class WebviewPagerFragment extends PagerFragment {
     @Override
     public void onResume() {
         super.onResume();
-
-        webView.loadUrl(getArguments().getString("url"));
     }
 
     @Override
@@ -85,17 +83,18 @@ public class WebviewPagerFragment extends PagerFragment {
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                if(url.startsWith("mailto:")){
+                if (url.startsWith("mailto:")) {
                     startActivity(new Intent(Intent.ACTION_SENDTO, Uri.parse(url)));
                     return true;
-                }
-                else  if(url.startsWith("http:") || url.startsWith("https:")){
+                } else if (url.startsWith("http:") || url.startsWith("https:")) {
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
                     return true;
                 }
                 return super.shouldOverrideUrlLoading(view, url);
             }
         });
+
+        webView.loadUrl(getArguments().getString("url"));
 
         return view;
     }
