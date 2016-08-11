@@ -68,7 +68,6 @@ public class WebviewPagerFragment extends PagerFragment {
 
         webView = (WebView) view.findViewById(R.id.webview);
         webView.getSettings().setJavaScriptEnabled(true);
-        //webView.getSettings().setSupportMultipleWindows(true);
 
         webView.setWebViewClient(new WebViewClient() {
 
@@ -87,14 +86,11 @@ public class WebviewPagerFragment extends PagerFragment {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if(url.startsWith("mailto:")){
-                    Intent intent = new Intent(Intent.ACTION_SENDTO);
-                    intent.setData(Uri.parse(url));
-                    startActivity(intent);
-                    view.reload();
+                    startActivity(new Intent(Intent.ACTION_SENDTO, Uri.parse(url)));
                     return true;
-                } else  if(url.startsWith("http")){
-                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                    startActivity(browserIntent);
+                }
+                else  if(url.startsWith("http:") || url.startsWith("https:")){
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
                     return true;
                 }
                 return super.shouldOverrideUrlLoading(view, url);
