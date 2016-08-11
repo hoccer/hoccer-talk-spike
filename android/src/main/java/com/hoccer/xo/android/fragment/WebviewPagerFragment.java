@@ -68,20 +68,7 @@ public class WebviewPagerFragment extends PagerFragment {
 
         webView = (WebView) view.findViewById(R.id.webview);
         webView.getSettings().setJavaScriptEnabled(true);
-        webView.getSettings().setSupportMultipleWindows(true);
-
-        webView.setWebChromeClient(new WebChromeClient() {
-            @Override
-            public boolean onCreateWindow(WebView view, boolean dialog, boolean userGesture, android.os.Message resultMsg)
-            {
-                WebView.HitTestResult result = view.getHitTestResult();
-                String data = result.getExtra();
-                Context context = view.getContext();
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(data));
-                context.startActivity(browserIntent);
-                return false;
-            }
-        });
+        //webView.getSettings().setSupportMultipleWindows(true);
 
         webView.setWebViewClient(new WebViewClient() {
 
@@ -95,6 +82,22 @@ public class WebviewPagerFragment extends PagerFragment {
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                 super.onReceivedError(view, request, error);
                 LOG.error(error);
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                if(url.startsWith("mailto:")){
+                    Intent intent = new Intent(Intent.ACTION_SENDTO);
+                    intent.setData(Uri.parse(url));
+                    startActivity(intent);
+                    view.reload();
+                    return true;
+                } else  if(url.startsWith("http")){
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    startActivity(browserIntent);
+                    return true;
+                }
+                return super.shouldOverrideUrlLoading(view, url);
             }
         });
 
