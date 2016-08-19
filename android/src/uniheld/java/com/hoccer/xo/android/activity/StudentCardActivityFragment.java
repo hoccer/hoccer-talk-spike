@@ -1,12 +1,15 @@
 package com.hoccer.xo.android.activity;
 
 import android.app.Fragment;
+import android.content.res.Configuration;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.*;
 import android.widget.ImageView;
 import com.artcom.hoccer.R;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.view.Placeholder;
 
 import java.io.File;
@@ -17,6 +20,7 @@ public class StudentCardActivityFragment extends Fragment {
     public static final String STUDENT_CARD_FILE_NAME = "student_card.jpg";
 
     private ImageView mStudentCardImageView;
+    private Point mImageSize;
 
     public StudentCardActivityFragment() {
     }
@@ -54,7 +58,21 @@ public class StudentCardActivityFragment extends Fragment {
     }
 
     private void updatePicture(String filePath) {
+        mImageSize = ImageUtils.getImageSize(filePath);
         mStudentCardImageView.setImageURI(null);
         mStudentCardImageView.setImageURI(Uri.parse(filePath));
+        mStudentCardImageView.setRotation(0);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE && mImageSize.x < mImageSize.y) {
+            mStudentCardImageView.setRotation(270);
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT && mImageSize.x > mImageSize.y) {
+            mStudentCardImageView.setRotation(90);
+        } else {
+            mStudentCardImageView.setRotation(0);
+        }
     }
 }
