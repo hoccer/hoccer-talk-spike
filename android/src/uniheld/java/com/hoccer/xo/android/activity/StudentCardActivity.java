@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -21,6 +22,7 @@ import com.hoccer.xo.android.util.ImageUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
 
 import static com.hoccer.xo.android.activity.StudentCardActivityFragment.STUDENT_CARD_FILE_NAME;
 
@@ -109,7 +111,13 @@ public class StudentCardActivity extends Activity {
                 Bitmap bitmap = BitmapFactory.decodeFile(mFileUri.getPath(), options);
                 bitmap = ImageUtils.correctRotation(mFileUri.getPath(), bitmap, options.outWidth, options.outHeight);
 
-                ImageUtils.compressBitmapToFile(bitmap, new File(mFileUri.getPath()), 90, Bitmap.CompressFormat.JPEG);
+                try {
+                    ExifInterface exif = new ExifInterface(mFileUri.getPath());
+                    ImageUtils.compressBitmapToFile(bitmap, new File(mFileUri.getPath()), 90, Bitmap.CompressFormat.JPEG);
+                    ImageUtils.applyExifData(exif, mFileUri.getPath());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

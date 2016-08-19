@@ -67,7 +67,7 @@ public class StudentCardActivityFragment extends Fragment {
         mImageSize = ImageUtils.getImageSize(filePath);
         if (mImageSize.x > mImageSize.y) {
             float scaleFactor = (float)mImageSize.x / mImageSize.y;
-            mStudentCardImageView.setRotation(90);
+            mStudentCardImageView.setRotation(ImageUtils.retrieveOrientation(filePath) + 90);
             mStudentCardImageView.setScaleX(scaleFactor);
             mStudentCardImageView.setScaleY(scaleFactor);
         } else {

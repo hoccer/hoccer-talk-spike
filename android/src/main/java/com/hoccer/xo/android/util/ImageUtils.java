@@ -53,10 +53,18 @@ public class ImageUtils {
         int rotationAngle;
         rotationAngle = retrieveOrientation(filePath);
         LOG.info(rotationAngle);
-        if (rotationAngle > 0) {
+        if (rotationAngle == 90 || rotationAngle == 270) {
             Matrix matrix = new Matrix();
             matrix.setRotate(rotationAngle, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2);
-            return Bitmap.createBitmap(bitmap, 0, 0, outWidth, outHeight, matrix, true);
+            bitmap = Bitmap.createBitmap(bitmap, 0, 0, outWidth, outHeight, matrix, true);
+
+            try {
+                ExifInterface exif = new ExifInterface(filePath);
+                exif.setAttribute(ExifInterface.TAG_ORIENTATION, Integer.toString(ExifInterface.ORIENTATION_NORMAL));
+                exif.saveAttributes();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         return bitmap;
@@ -121,10 +129,10 @@ public class ImageUtils {
     public static int calculateInSampleSize(int originalWidth, int origianlHeight, int reqWidth, int reqHeight) {
         int inSampleSize = 1;
 
-        if (originalWidth > reqHeight || origianlHeight > reqWidth) {
+        if (origianlHeight > reqHeight || originalWidth > reqWidth) {
 
-            final int halfHeight = originalWidth / 2;
-            final int halfWidth = origianlHeight / 2;
+            final int halfHeight = origianlHeight / 2;
+            final int halfWidth = originalWidth / 2;
 
             // Calculate the largest inSampleSize value that is a power of 2 and keeps both
             // height and width larger than the requested height and width.
@@ -172,40 +180,37 @@ public class ImageUtils {
         return false;
     }
 
-    public static boolean copyExifData(String inPath, String outPath) {
-        boolean success = false;
-        try {
-            ExifInterface exifIn = new ExifInterface(inPath);
-            ExifInterface exifOut = new ExifInterface(outPath);
-            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_APERTURE);
-            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_DATETIME);
-            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_EXPOSURE_TIME);
-            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_FLASH);
-            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_FOCAL_LENGTH);
-            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_ALTITUDE);
-            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_ALTITUDE_REF);
-            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_DATESTAMP);
-            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_LATITUDE);
-            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_LATITUDE_REF);
-            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_LONGITUDE);
-            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_LONGITUDE_REF);
-            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_PROCESSING_METHOD);
-            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_TIMESTAMP);
-            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_IMAGE_LENGTH);
-            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_IMAGE_WIDTH);
-            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_ISO);
-            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_MAKE);
-            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_MODEL);
-            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_ORIENTATION);
-            copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_WHITE_BALANCE);
-            exifOut.saveAttributes();
-            success = true;
-        } catch (IOException e) {
-            LOG.error("Error loading Exif data", e);
-        }
-
-        return success;
+    public static void copyExifData(String inPath, String outPath) throws IOException {
+        ExifInterface exifIn = new ExifInterface(inPath);
+        applyExifData(exifIn, outPath);
     }
+
+    public static void applyExifData(ExifInterface exifInterface, String targetPath) throws IOException {
+        ExifInterface exifOut = new ExifInterface(targetPath);
+        copyExifAttribute(exifInterface, exifOut, ExifInterface.TAG_APERTURE);
+        copyExifAttribute(exifInterface, exifOut, ExifInterface.TAG_DATETIME);
+        copyExifAttribute(exifInterface, exifOut, ExifInterface.TAG_EXPOSURE_TIME);
+        copyExifAttribute(exifInterface, exifOut, ExifInterface.TAG_FLASH);
+        copyExifAttribute(exifInterface, exifOut, ExifInterface.TAG_FOCAL_LENGTH);
+        copyExifAttribute(exifInterface, exifOut, ExifInterface.TAG_GPS_ALTITUDE);
+        copyExifAttribute(exifInterface, exifOut, ExifInterface.TAG_GPS_ALTITUDE_REF);
+        copyExifAttribute(exifInterface, exifOut, ExifInterface.TAG_GPS_DATESTAMP);
+        copyExifAttribute(exifInterface, exifOut, ExifInterface.TAG_GPS_LATITUDE);
+        copyExifAttribute(exifInterface, exifOut, ExifInterface.TAG_GPS_LATITUDE_REF);
+        copyExifAttribute(exifInterface, exifOut, ExifInterface.TAG_GPS_LONGITUDE);
+        copyExifAttribute(exifInterface, exifOut, ExifInterface.TAG_GPS_LONGITUDE_REF);
+        copyExifAttribute(exifInterface, exifOut, ExifInterface.TAG_GPS_PROCESSING_METHOD);
+        copyExifAttribute(exifInterface, exifOut, ExifInterface.TAG_GPS_TIMESTAMP);
+        copyExifAttribute(exifInterface, exifOut, ExifInterface.TAG_IMAGE_LENGTH);
+        copyExifAttribute(exifInterface, exifOut, ExifInterface.TAG_IMAGE_WIDTH);
+        copyExifAttribute(exifInterface, exifOut, ExifInterface.TAG_ISO);
+        copyExifAttribute(exifInterface, exifOut, ExifInterface.TAG_MAKE);
+        copyExifAttribute(exifInterface, exifOut, ExifInterface.TAG_MODEL);
+        copyExifAttribute(exifInterface, exifOut, ExifInterface.TAG_ORIENTATION);
+        copyExifAttribute(exifInterface, exifOut, ExifInterface.TAG_WHITE_BALANCE);
+        exifOut.saveAttributes();
+    }
+
 
     private static void copyExifAttribute(ExifInterface in, ExifInterface out, String tag) {
         String value = in.getAttribute(tag);
