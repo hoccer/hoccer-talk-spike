@@ -2,6 +2,7 @@ package com.hoccer.xo.android.activity;
 
 import android.app.Fragment;
 import android.content.res.Configuration;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,10 +12,12 @@ import com.artcom.hoccer.R;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.view.Placeholder;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 
 public class StudentCardActivityFragment extends Fragment {
+    private static final Logger LOG = Logger.getLogger(StudentCardActivityFragment.class);
 
     private static final Placeholder PLACEHOLDER = new Placeholder(R.drawable.placeholder_student_card, R.string.placeholder_student_card_text);
     public static final String STUDENT_CARD_FILE_NAME = "student_card.jpg";
@@ -58,21 +61,22 @@ public class StudentCardActivityFragment extends Fragment {
     }
 
     private void updatePicture(String filePath) {
-        mImageSize = ImageUtils.getImageSize(filePath);
         mStudentCardImageView.setImageURI(null);
         mStudentCardImageView.setImageURI(Uri.parse(filePath));
-        mStudentCardImageView.setRotation(0);
-    }
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE && mImageSize.x < mImageSize.y) {
-            mStudentCardImageView.setRotation(270);
-        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT && mImageSize.x > mImageSize.y) {
+        mImageSize = ImageUtils.getImageSize(filePath);
+        if (mImageSize.x > mImageSize.y) {
+            float scaleFactor = (float)mImageSize.x / mImageSize.y;
             mStudentCardImageView.setRotation(90);
+            mStudentCardImageView.setScaleX(scaleFactor);
+            mStudentCardImageView.setScaleY(scaleFactor);
         } else {
             mStudentCardImageView.setRotation(0);
+            mStudentCardImageView.setScaleX(1);
+            mStudentCardImageView.setScaleY(1);
         }
+
+        LOG.info(mStudentCardImageView.getWidth());
+        LOG.info(mStudentCardImageView.getHeight());
     }
 }
