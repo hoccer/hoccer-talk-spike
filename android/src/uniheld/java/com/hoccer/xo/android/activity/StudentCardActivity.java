@@ -2,16 +2,22 @@ package com.hoccer.xo.android.activity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
 import com.hoccer.xo.android.ExternalStorageNotMountedException;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.util.DisplayUtils;
+import com.hoccer.xo.android.util.ImageUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -21,6 +27,7 @@ import static com.hoccer.xo.android.activity.StudentCardActivityFragment.STUDENT
 public class StudentCardActivity extends Activity {
 
     private static final Logger LOG = Logger.getLogger(StudentCardActivity.class);
+    private static final int CAPTURE_IMAGE_REQUEST_CODE = 0;
 
     private Uri mFileUri;
 
@@ -71,7 +78,7 @@ public class StudentCardActivity extends Activity {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, mFileUri);
 
-        startActivity(intent);
+        startActivityForResult(intent, CAPTURE_IMAGE_REQUEST_CODE);
     }
 
     private Uri createOutputMediaFileUri() throws ExternalStorageNotMountedException {
@@ -81,6 +88,29 @@ public class StudentCardActivity extends Activity {
             return Uri.fromFile(file);
         } else {
             throw new ExternalStorageNotMountedException("External storage is not mounted.");
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
+                BitmapFactory.Options options = new BitmapFactory.Options();
+
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(mFileUri.getPath(), options);
+                Point displaySize = DisplayUtils.getDisplaySize(this);
+                options.inSampleSize = ImageUtils.calculateInSampleSize(options.outWidth, options.outHeight, Math.max(displaySize.x, displaySize.y), Math.min(displaySize.x, displaySize.y));
+                LOG.info("options.outWidth: " + options.outWidth + ", options.outHeight: " + options.outHeight);
+                LOG.info(displaySize);
+
+                options.inJustDecodeBounds = false;
+                Bitmap bitmap = BitmapFactory.decodeFile(mFileUri.getPath(), options);
+                bitmap = ImageUtils.correctRotation(mFileUri.getPath(), bitmap, options.outWidth, options.outHeight);
+
+                ImageUtils.compressBitmapToFile(bitmap, new File(mFileUri.getPath()), 90, Bitmap.CompressFormat.JPEG);
+            }
         }
     }
 }

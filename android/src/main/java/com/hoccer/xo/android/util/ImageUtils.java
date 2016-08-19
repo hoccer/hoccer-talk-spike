@@ -3,6 +3,7 @@ package com.hoccer.xo.android.util;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.media.ExifInterface;
 import org.apache.log4j.Logger;
@@ -15,8 +16,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 public class ImageUtils {
-
-    public static final String MIME_TYPE_IMAGE_PREFIX = "image/";
 
     private static final Logger LOG = Logger.getLogger(ImageUtils.class);
 
@@ -48,6 +47,19 @@ public class ImageUtils {
         }
 
         return result;
+    }
+
+    public static Bitmap correctRotation(String filePath, Bitmap bitmap, int outWidth, int outHeight) {
+        int rotationAngle;
+        rotationAngle = retrieveOrientation(filePath);
+        LOG.info(rotationAngle);
+        if (rotationAngle > 0) {
+            Matrix matrix = new Matrix();
+            matrix.setRotate(rotationAngle, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2);
+            return Bitmap.createBitmap(bitmap, 0, 0, outWidth, outHeight, matrix, true);
+        }
+
+        return bitmap;
     }
 
     public static int retrieveOrientation(String filePath) {
@@ -106,8 +118,25 @@ public class ImageUtils {
         return result;
     }
 
-    public static Bitmap resizeImageToMaxPixelCount(File input, int maxPixelCount) {
+    public static int calculateInSampleSize(int originalWidth, int origianlHeight, int reqWidth, int reqHeight) {
+        int inSampleSize = 1;
 
+        if (originalWidth > reqHeight || origianlHeight > reqWidth) {
+
+            final int halfHeight = originalWidth / 2;
+            final int halfWidth = origianlHeight / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) > reqHeight && (halfWidth / inSampleSize) > reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
+    }
+
+    public static Bitmap resizeImageToMaxPixelCount(File input, int maxPixelCount) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(input.getAbsolutePath(), options);
