@@ -104,8 +104,6 @@ public class StudentCardActivity extends Activity {
                 BitmapFactory.decodeFile(mFileUri.getPath(), options);
                 Point displaySize = DisplayUtils.getDisplaySize(this);
                 options.inSampleSize = ImageUtils.calculateInSampleSize(options.outWidth, options.outHeight, Math.max(displaySize.x, displaySize.y), Math.min(displaySize.x, displaySize.y));
-                LOG.info("options.outWidth: " + options.outWidth + ", options.outHeight: " + options.outHeight);
-                LOG.info(displaySize);
 
                 options.inJustDecodeBounds = false;
                 Bitmap bitmap = BitmapFactory.decodeFile(mFileUri.getPath(), options);
