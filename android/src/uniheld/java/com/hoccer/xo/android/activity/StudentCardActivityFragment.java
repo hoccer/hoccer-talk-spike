@@ -23,7 +23,6 @@ public class StudentCardActivityFragment extends Fragment {
     public static final String STUDENT_CARD_FILE_NAME = "student_card.jpg";
 
     private ImageView mStudentCardImageView;
-    private Point mImageSize;
 
     public StudentCardActivityFragment() {
     }
@@ -64,9 +63,9 @@ public class StudentCardActivityFragment extends Fragment {
         mStudentCardImageView.setImageURI(null);
         mStudentCardImageView.setImageURI(Uri.parse(filePath));
 
-        mImageSize = ImageUtils.getImageSize(filePath);
-        if (mImageSize.x > mImageSize.y) {
-            float scaleFactor = (float)mImageSize.x / mImageSize.y;
+        Point imageSize = ImageUtils.getImageSize(filePath);
+        if (imageSize.x > imageSize.y) {
+            float scaleFactor = (float) imageSize.x / imageSize.y;
             mStudentCardImageView.setRotation(ImageUtils.retrieveOrientation(filePath) + 90);
             mStudentCardImageView.setScaleX(scaleFactor);
             mStudentCardImageView.setScaleY(scaleFactor);
