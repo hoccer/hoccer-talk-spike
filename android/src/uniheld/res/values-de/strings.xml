@@ -13,6 +13,9 @@
     <string name="restore_restart_hoccer">Bitte UNIHELD neu starten, um die Wiederherstellung zu beenden.</string>
     <string name="restore_no_backups_found_message">Bitte bestehendes Backup nach\n%1$s\nkopieren um früheren UNIHELD Account wiederherstellen zu können.</string>
 
+    <string name="chats_tab_name">SCHNACKEN</string>
+    <string name="benefits_tab_name">GÖNNUNG</string>
+
     <string name="placeholder_conversations_text"><![CDATA[<a href="http://faq.hoccer.com/uniheld/de/tutorial/#freunde-einladen">Lade deine Freunde</a>]]> zum Chatten ein!</string>
     <string name="placeholder_groups_text"><![CDATA[<a href="http://faq.hoccer.com/uniheld/de/tutorial/#gruppen">Lege Gruppen an</a>]]> um mit vielen Freunden gleichzeitig zu chatten.</string>
     <string name="placeholder_nearby_text">Warten auf Kontakte <![CDATA[<a href="http://faq.hoccer.com/uniheld/de/tutorial/#in-der-naehe">in der Nähe</a>]]>…</string>

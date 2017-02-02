@@ -1,6 +1,7 @@
 package com.hoccer.xo.android.activity;
 
 import android.os.Bundle;
+import com.artcom.hoccer.R;
 import com.hoccer.xo.android.fragment.WebviewPagerFragment;
 
 public class ChatsActivity extends ChatsBaseActivity {
@@ -14,8 +15,8 @@ public class ChatsActivity extends ChatsBaseActivity {
             mWebViewFragment = new WebviewPagerFragment();
 
             Bundle bundle = new Bundle();
-            bundle.putString("url", "http://www.gmx.de");
-            bundle.putString("tabName", "BENEFITS");
+            bundle.putString("url", "https://demo.mitarbeiterdeals.de/page/hoccer");
+            bundle.putString("tabName", getResources().getString(R.string.benefits_tab_name));
             mWebViewFragment.setArguments(bundle);
 
             mViewPagerActivityComponent.add(mWebViewFragment);
