@@ -1,16 +1,15 @@
 package com.hoccer.xo.android.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebResourceError;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import android.webkit.*;
 import com.artcom.hoccer.R;
 import com.hoccer.xo.android.base.PagerFragment;
 import org.apache.log4j.Logger;
@@ -32,8 +31,6 @@ public class WebviewPagerFragment extends PagerFragment {
     @Override
     public void onResume() {
         super.onResume();
-
-        webView.loadUrl(getArguments().getString("url"));
     }
 
     @Override
@@ -69,6 +66,7 @@ public class WebviewPagerFragment extends PagerFragment {
 
         webView = (WebView) view.findViewById(R.id.webview);
         webView.getSettings().setJavaScriptEnabled(true);
+
         webView.setWebViewClient(new WebViewClient() {
 
             @Override
@@ -82,7 +80,21 @@ public class WebviewPagerFragment extends PagerFragment {
                 super.onReceivedError(view, request, error);
                 LOG.error(error);
             }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                if (url.startsWith("mailto:")) {
+                    startActivity(new Intent(Intent.ACTION_SENDTO, Uri.parse(url)));
+                    return true;
+                } else if (url.startsWith("http:") || url.startsWith("https:")) {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                    return true;
+                }
+                return super.shouldOverrideUrlLoading(view, url);
+            }
         });
+
+        webView.loadUrl(getArguments().getString("url"));
 
         return view;
     }

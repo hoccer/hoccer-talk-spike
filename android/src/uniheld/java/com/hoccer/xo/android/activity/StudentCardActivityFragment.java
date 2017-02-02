@@ -1,17 +1,23 @@
 package com.hoccer.xo.android.activity;
 
 import android.app.Fragment;
+import android.content.res.Configuration;
+import android.graphics.Matrix;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.*;
 import android.widget.ImageView;
 import com.artcom.hoccer.R;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.view.Placeholder;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 
 public class StudentCardActivityFragment extends Fragment {
+    private static final Logger LOG = Logger.getLogger(StudentCardActivityFragment.class);
 
     private static final Placeholder PLACEHOLDER = new Placeholder(R.drawable.placeholder_student_card, R.string.placeholder_student_card_text);
     public static final String STUDENT_CARD_FILE_NAME = "student_card.jpg";
@@ -56,5 +62,20 @@ public class StudentCardActivityFragment extends Fragment {
     private void updatePicture(String filePath) {
         mStudentCardImageView.setImageURI(null);
         mStudentCardImageView.setImageURI(Uri.parse(filePath));
+
+        Point imageSize = ImageUtils.getImageSize(filePath);
+        if (imageSize.x > imageSize.y) {
+            float scaleFactor = (float) imageSize.x / imageSize.y;
+            mStudentCardImageView.setRotation(ImageUtils.retrieveOrientation(filePath) + 90);
+            mStudentCardImageView.setScaleX(scaleFactor);
+            mStudentCardImageView.setScaleY(scaleFactor);
+        } else {
+            mStudentCardImageView.setRotation(0);
+            mStudentCardImageView.setScaleX(1);
+            mStudentCardImageView.setScaleY(1);
+        }
+
+        LOG.info(mStudentCardImageView.getWidth());
+        LOG.info(mStudentCardImageView.getHeight());
     }
 }

@@ -14,7 +14,7 @@ public class ChatsActivity extends ChatsBaseActivity {
             mWebViewFragment = new WebviewPagerFragment();
 
             Bundle bundle = new Bundle();
-            bundle.putString("url", "http://www.gmx.de");
+            bundle.putString("url", "https://demo.mitarbeiterdeals.de/page/hoccer");
             bundle.putString("tabName", "BENEFITS");
             mWebViewFragment.setArguments(bundle);
 
