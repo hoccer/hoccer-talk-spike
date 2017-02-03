@@ -8,22 +8,23 @@
 
     <ImageView
             android:id="@+id/iv_student_card"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="@string/student_card_description"/>
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:contentDescription="@string/student_card_description" android:scaleType="centerCrop"/>
 
     <RelativeLayout
             android:id="@android:id/empty"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:visibility="gone"
             android:layout_centerInParent="true">
         <ImageView
                 android:id="@+id/iv_contacts_placeholder"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
                 android:src="@drawable/placeholder_student_card"
-                android:gravity="center"/>
+                android:gravity="center"
+                android:scaleType="centerCrop"/>
         <TextView
                 android:id="@+id/tv_contacts_placeholder"
                 android:layout_width="match_parent"
