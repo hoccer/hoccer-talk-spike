@@ -9,7 +9,7 @@
                 android:id="@+id/iv_about_image"
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
-                android:src="@drawable/about_uniheldw" android:cropToPadding="false" android:scaleType="centerCrop"
+                android:src="@drawable/about_uniheld" android:cropToPadding="false" android:scaleType="centerCrop"
                 android:adjustViewBounds="false"/>
 
 
