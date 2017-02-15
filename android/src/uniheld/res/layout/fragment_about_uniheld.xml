@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:background="@color/background_default"
+              android:background="@color/tab"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
 
         <ImageView
                 android:id="@+id/iv_about_image"
-                android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:src="@drawable/about_uniheld" android:cropToPadding="false" android:scaleType="centerCrop"
-                android:adjustViewBounds="false"/>
+                android:adjustViewBounds="false" android:layout_centerInParent="true"/>
 
 
 </RelativeLayout>
