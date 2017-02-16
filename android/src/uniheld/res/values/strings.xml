@@ -17,9 +17,13 @@
     <string name="placeholder_nearby_text">Waiting for others <![CDATA[<a href="http://faq.hoccer.com/uniheld/tutorial/#nearby">nearby</a>]]>…</string>
     <string name="placeholder_student_card_text">Take a picture of your <![CDATA[<a href="http://faq.hoccer.com/uniheld/tutorial/#studentcard">student card</a>]]>…</string>
 
+    <string name="chats_tab_name">CHATS</string>
+    <string name="benefits_tab_name">BENEFITS</string>
+    
     <!-- Tutorial and FAQ links -->
     <string name="link_tutorial">http://faq.hoccer.com/uniheld/tutorial/</string>
     <string name="link_faq">http://faq.hoccer.com/uniheld/</string>
+    <string name="link_benefits">"https://uniheld.campusbenefits.de/"</string>
 
     <string name="menu_student_card">Student ID</string>
     <string name="title_activity_student_card">Student ID</string>
@@ -28,6 +32,6 @@
     <string name="action_student_card_faq">Student Card FAQ</string>
 
     <string name="student_card_description">Take a picture of your student card</string>
-    <string name="url_benefits">"https://uniheld.campusbenefits.de/"</string>
+
 
 </resources>

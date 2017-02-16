@@ -15,8 +15,8 @@ public class ChatsActivity extends ChatsBaseActivity {
             mWebViewFragment = new WebviewPagerFragment();
 
             Bundle bundle = new Bundle();
-            bundle.putString("url", getString(R.string.url_benefits));
-            bundle.putString("tabName", "BENEFITS");
+            bundle.putString("url", getString(R.string.link_benefits));
+            bundle.putString("tabName", getResources().getString(R.string.benefits_tab_name));
             mWebViewFragment.setArguments(bundle);
 
             mViewPagerActivityComponent.add(mWebViewFragment);
