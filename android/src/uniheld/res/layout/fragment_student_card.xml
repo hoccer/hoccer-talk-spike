@@ -32,7 +32,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:src="@drawable/placeholder_student_card"
-                android:gravity="center"/>
+                android:gravity="center"
+                android:scaleType="centerCrop"/>
         <TextView
                 android:id="@+id/tv_contacts_placeholder"
                 android:layout_width="match_parent"
