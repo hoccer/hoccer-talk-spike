@@ -10,7 +10,7 @@
             android:id="@+id/iv_student_card"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:contentDescription="@string/student_card_description"/>
+            android:contentDescription="@string/student_card_description" android:scaleType="centerCrop"/>
 
     <ImageView
             android:id="@+id/iv_student_id_watermark"
