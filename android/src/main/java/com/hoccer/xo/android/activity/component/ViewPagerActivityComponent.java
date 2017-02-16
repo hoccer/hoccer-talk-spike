@@ -141,4 +141,11 @@ public class ViewPagerActivityComponent extends ActivityComponent {
     public IPagerFragment getCurrentFragment() {
         return mCurrentFragment;
     }
+
+    public void setCurrentFragment(IPagerFragment fragment){
+        if (mFragments.contains(fragment)) {
+            int pos = ((ArrayList)mFragments).indexOf(fragment);
+            mViewPager.setCurrentItem(pos);
+        }
+    }
 }

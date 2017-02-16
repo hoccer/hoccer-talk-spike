@@ -20,6 +20,7 @@ public class ChatsActivity extends ChatsBaseActivity {
             mWebViewFragment.setArguments(bundle);
 
             mViewPagerActivityComponent.add(mWebViewFragment);
+            mViewPagerActivityComponent.setCurrentFragment(mWebViewFragment);
         }
     }
 
