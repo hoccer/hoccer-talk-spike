@@ -23,6 +23,7 @@ public class StudentCardActivityFragment extends Fragment {
     public static final String STUDENT_CARD_FILE_NAME = "student_card.jpg";
 
     private ImageView mStudentCardImageView;
+    private View mStudentCardWatermarkView;
 
     public StudentCardActivityFragment() {
     }
@@ -36,8 +37,8 @@ public class StudentCardActivityFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         mStudentCardImageView = (ImageView) view.findViewById(R.id.iv_student_card);
+        mStudentCardWatermarkView = view.findViewById(R.id.iv_student_id_watermark);
     }
 
     @Override
@@ -48,8 +49,10 @@ public class StudentCardActivityFragment extends Fragment {
 
         if (file.exists()) {
             PLACEHOLDER.removeFromView(getView());
+            mStudentCardWatermarkView.setVisibility(View.VISIBLE);
             updatePicture(file.getPath());
         } else {
+            mStudentCardWatermarkView.setVisibility(View.GONE);
             PLACEHOLDER.applyToView(getView(), new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
