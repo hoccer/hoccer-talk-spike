@@ -10,7 +10,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -96,27 +95,17 @@ public class StudentCardActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK) {
-            if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
-                BitmapFactory.Options options = new BitmapFactory.Options();
+        if (resultCode == RESULT_OK && requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
+            BitmapFactory.Options options = new BitmapFactory.Options();
 
-                options.inJustDecodeBounds = true;
-                BitmapFactory.decodeFile(mFileUri.getPath(), options);
-                Point displaySize = DisplayUtils.getDisplaySize(this);
-                options.inSampleSize = ImageUtils.calculateInSampleSize(options.outWidth, options.outHeight, Math.max(displaySize.x, displaySize.y), Math.min(displaySize.x, displaySize.y));
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(mFileUri.getPath(), options);
+            Point displaySize = DisplayUtils.getDisplaySize(this);
+            options.inSampleSize = ImageUtils.calculateInSampleSize(options.outWidth, options.outHeight, Math.max(displaySize.x, displaySize.y), Math.min(displaySize.x, displaySize.y));
 
-                options.inJustDecodeBounds = false;
-                Bitmap bitmap = BitmapFactory.decodeFile(mFileUri.getPath(), options);
-                bitmap = ImageUtils.correctRotation(mFileUri.getPath(), bitmap, options.outWidth, options.outHeight);
-
-                try {
-                    ExifInterface exif = new ExifInterface(mFileUri.getPath());
-                    ImageUtils.compressBitmapToFile(bitmap, new File(mFileUri.getPath()), 90, Bitmap.CompressFormat.JPEG);
-                    ImageUtils.applyExifData(exif, mFileUri.getPath());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+            options.inJustDecodeBounds = false;
+            Bitmap bitmap = ImageUtils.correctRotationAndResize(mFileUri.getPath(), options.outWidth, options.outHeight);
+            ImageUtils.compressBitmapToFile(bitmap, new File(mFileUri.getPath()), 90, Bitmap.CompressFormat.JPEG);
         }
     }
 }

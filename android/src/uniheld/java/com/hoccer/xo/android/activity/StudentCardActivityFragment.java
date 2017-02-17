@@ -65,20 +65,5 @@ public class StudentCardActivityFragment extends Fragment {
     private void updatePicture(String filePath) {
         mStudentCardImageView.setImageURI(null);
         mStudentCardImageView.setImageURI(Uri.parse(filePath));
-
-        Point imageSize = ImageUtils.getImageSize(filePath);
-        if (imageSize.x > imageSize.y) {
-            float scaleFactor = (float) imageSize.x / imageSize.y;
-            mStudentCardImageView.setRotation(ImageUtils.retrieveOrientation(filePath) + 90);
-            mStudentCardImageView.setScaleX(scaleFactor);
-            mStudentCardImageView.setScaleY(scaleFactor);
-        } else {
-            mStudentCardImageView.setRotation(0);
-            mStudentCardImageView.setScaleX(1);
-            mStudentCardImageView.setScaleY(1);
-        }
-
-        LOG.info(mStudentCardImageView.getWidth());
-        LOG.info(mStudentCardImageView.getHeight());
     }
 }

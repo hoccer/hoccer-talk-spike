@@ -49,22 +49,35 @@ public class ImageUtils {
         return result;
     }
 
-    public static Bitmap correctRotation(String filePath, Bitmap bitmap, int outWidth, int outHeight) {
-        int rotationAngle;
-        rotationAngle = retrieveOrientation(filePath);
-        LOG.info(rotationAngle);
-        if (rotationAngle == 90 || rotationAngle == 270) {
-            Matrix matrix = new Matrix();
-            matrix.setRotate(rotationAngle, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2);
-            bitmap = Bitmap.createBitmap(bitmap, 0, 0, outWidth, outHeight, matrix, true);
+    public static Bitmap correctRotationAndResize(String filePath, int outWidth, int outHeight) {
+        int sourceRotationAngle = retrieveOrientation(filePath);
 
-            try {
-                ExifInterface exif = new ExifInterface(filePath);
-                exif.setAttribute(ExifInterface.TAG_ORIENTATION, Integer.toString(ExifInterface.ORIENTATION_NORMAL));
-                exif.saveAttributes();
-            } catch (IOException e) {
-                e.printStackTrace();
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = false;
+        Bitmap bitmap = BitmapFactory.decodeFile(filePath, options);
+
+        Matrix matrix = new Matrix();
+
+        if (bitmap.getWidth() > bitmap.getHeight()){
+            int targetAngle = 0;
+            switch (sourceRotationAngle){
+                case 0:
+                case 90: targetAngle = 90;
+                    break;
+                case 180:
+                case 270: targetAngle = 270;
             }
+            matrix.setRotate(targetAngle, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2);
+        }
+
+        bitmap = Bitmap.createBitmap(bitmap, 0, 0, outWidth, outHeight, matrix, true);
+
+        try {
+            ExifInterface exif = new ExifInterface(filePath);
+            exif.setAttribute(ExifInterface.TAG_ORIENTATION, Integer.toString(ExifInterface.ORIENTATION_NORMAL));
+            exif.saveAttributes();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         return bitmap;
@@ -210,7 +223,6 @@ public class ImageUtils {
         copyExifAttribute(exifInterface, exifOut, ExifInterface.TAG_WHITE_BALANCE);
         exifOut.saveAttributes();
     }
-
 
     private static void copyExifAttribute(ExifInterface in, ExifInterface out, String tag) {
         String value = in.getAttribute(tag);
