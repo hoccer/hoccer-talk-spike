@@ -53,6 +53,7 @@ public class XoAndroidClient extends XoClient {
     public void deleteAccountAndLocalDatabase(Context context) {
         super.deleteAccount();
         context.deleteDatabase(AndroidTalkDatabase.DATABASE_NAME_DEFAULT);
+        DeleteAccountHandler.onDeleteAccount();
     }
 
 }
