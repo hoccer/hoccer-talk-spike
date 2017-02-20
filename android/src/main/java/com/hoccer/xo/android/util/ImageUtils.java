@@ -49,13 +49,17 @@ public class ImageUtils {
         return result;
     }
 
-    public static Bitmap correctRotationAndResize(String filePath, int outWidth, int outHeight) {
+    public static Bitmap correctRotationAndResize(String filePath, int width, int height) {
         int sourceRotationAngle = retrieveOrientation(filePath);
 
         BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = false;
-        Bitmap bitmap = BitmapFactory.decodeFile(filePath, options);
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(filePath, options);
 
+        options.inSampleSize = ImageUtils.calculateInSampleSize(options.outWidth, options.outHeight, Math.max(width, height), Math.min(width, height));
+        options.inJustDecodeBounds = false;
+
+        Bitmap bitmap = BitmapFactory.decodeFile(filePath, options);
         Matrix matrix = new Matrix();
 
         if (bitmap.getWidth() > bitmap.getHeight()){
@@ -70,7 +74,7 @@ public class ImageUtils {
             matrix.setRotate(targetAngle, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2);
         }
 
-        bitmap = Bitmap.createBitmap(bitmap, 0, 0, outWidth, outHeight, matrix, true);
+        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 
         try {
             ExifInterface exif = new ExifInterface(filePath);
