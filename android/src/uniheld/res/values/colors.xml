@@ -2,7 +2,7 @@
 <resources>
     <color name="primary">#38C723</color>
     <color name="secondary">#AAAAAA</color>
-    <color name="tertiary">#FFFFFF</color>
+    <color name="tertiary">#205000</color>
 
     <color name="tab">#FFFFFF</color>
     <color name="tab_text">#000000</color>
@@ -15,5 +15,7 @@
 
     <color name="message_incoming_background">@color/secondary</color>
     <color name="message_outgoing_background">@color/primary</color>
+
+    <color name="attachment_transfer_control">#000000</color>
 
 </resources>
