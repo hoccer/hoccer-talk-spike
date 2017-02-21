@@ -66,7 +66,7 @@ public class StudentCardActivity extends Activity {
 
     private void showStudentCardFaq() {
         Intent intent = new Intent(this, FaqTutorialActivity.class);
-        intent.putExtra("URL", getString(R.string.link_faq));
+        intent.putExtra("URL", getString(R.string.link_faq_id));
         startActivity(intent);
     }
 
