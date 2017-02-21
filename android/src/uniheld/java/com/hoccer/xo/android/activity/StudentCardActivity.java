@@ -21,7 +21,6 @@ import com.hoccer.xo.android.util.ImageUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
-import java.io.IOException;
 
 import static com.hoccer.xo.android.activity.StudentCardActivityFragment.STUDENT_CARD_FILE_NAME;
 
@@ -101,11 +100,9 @@ public class StudentCardActivity extends Activity {
             options.inJustDecodeBounds = true;
             BitmapFactory.decodeFile(mFileUri.getPath(), options);
             Point displaySize = DisplayUtils.getDisplaySize(this);
-            options.inSampleSize = ImageUtils.calculateInSampleSize(options.outWidth, options.outHeight, Math.max(displaySize.x, displaySize.y), Math.min(displaySize.x, displaySize.y));
-
-            options.inJustDecodeBounds = false;
-            Bitmap bitmap = ImageUtils.correctRotationAndResize(mFileUri.getPath(), options.outWidth, options.outHeight);
+            Bitmap bitmap = ImageUtils.correctRotationAndResize(mFileUri.getPath(), displaySize.x , displaySize.y);
             ImageUtils.compressBitmapToFile(bitmap, new File(mFileUri.getPath()), 90, Bitmap.CompressFormat.JPEG);
+
         }
     }
 }

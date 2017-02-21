@@ -49,16 +49,19 @@ public class ImageUtils {
         return result;
     }
 
-    public static Bitmap correctRotationAndResize(String filePath, int outWidth, int outHeight) {
+    public static Bitmap correctRotationAndResize(String filePath, int width, int height) {
         int sourceRotationAngle = retrieveOrientation(filePath);
 
         BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(filePath, options);
+
+        options.inSampleSize = ImageUtils.calculateInSampleSize(Math.max(options.outWidth, options.outHeight), Math.min(options.outWidth, options.outHeight), Math.max(width, height), Math.min(width,height));
         options.inJustDecodeBounds = false;
         Bitmap bitmap = BitmapFactory.decodeFile(filePath, options);
-
         Matrix matrix = new Matrix();
 
-        if (bitmap.getWidth() > bitmap.getHeight()){
+        if (bitmap.getWidth() >= bitmap.getHeight()){
             int targetAngle = 0;
             switch (sourceRotationAngle){
                 case 0:
@@ -69,8 +72,7 @@ public class ImageUtils {
             }
             matrix.setRotate(targetAngle, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2);
         }
-
-        bitmap = Bitmap.createBitmap(bitmap, 0, 0, outWidth, outHeight, matrix, true);
+        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 
         try {
             ExifInterface exif = new ExifInterface(filePath);
@@ -139,12 +141,12 @@ public class ImageUtils {
         return result;
     }
 
-    public static int calculateInSampleSize(int originalWidth, int origianlHeight, int reqWidth, int reqHeight) {
+    public static int calculateInSampleSize(int originalWidth, int originalHeight, int reqWidth, int reqHeight) {
         int inSampleSize = 1;
 
-        if (origianlHeight > reqHeight || originalWidth > reqWidth) {
+        if (originalHeight > reqHeight || originalWidth > reqWidth) {
 
-            final int halfHeight = origianlHeight / 2;
+            final int halfHeight = originalHeight / 2;
             final int halfWidth = originalWidth / 2;
 
             // Calculate the largest inSampleSize value that is a power of 2 and keeps both
