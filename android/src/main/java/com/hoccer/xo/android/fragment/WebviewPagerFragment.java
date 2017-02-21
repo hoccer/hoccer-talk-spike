@@ -83,6 +83,10 @@ public class WebviewPagerFragment extends PagerFragment {
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                if (url.startsWith(getString(R.string.link_benefits))){
+                    return false;
+                }
+
                 if (url.startsWith("mailto:")) {
                     startActivity(new Intent(Intent.ACTION_SENDTO, Uri.parse(url)));
                     return true;
