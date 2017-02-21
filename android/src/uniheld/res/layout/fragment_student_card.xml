@@ -29,6 +29,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/common_signin_btn_light_text_disabled"
+                android:textColorLink="@color/primary"
                 android:textSize="8pt"
                 android:gravity="center_horizontal"
                 android:text="@string/placeholder_conversations_text"
