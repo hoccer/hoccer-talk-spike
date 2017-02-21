@@ -16,4 +16,6 @@
     <color name="message_incoming_background">@color/secondary</color>
     <color name="message_outgoing_background">@color/primary</color>
 
+    <color name="attachment_transfer_control">#000000</color>
+
 </resources>
