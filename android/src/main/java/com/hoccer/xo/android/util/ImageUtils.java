@@ -57,12 +57,12 @@ public class ImageUtils {
         BitmapFactory.decodeFile(filePath, options);
 
         options.inSampleSize = ImageUtils.calculateInSampleSize(options.outWidth, options.outHeight, Math.max(width, height), Math.min(width, height));
-        options.inJustDecodeBounds = false;
 
+        options.inJustDecodeBounds = false;
         Bitmap bitmap = BitmapFactory.decodeFile(filePath, options);
         Matrix matrix = new Matrix();
 
-        if (bitmap.getWidth() > bitmap.getHeight()){
+        if (bitmap.getWidth() >= bitmap.getHeight()){
             int targetAngle = 0;
             switch (sourceRotationAngle){
                 case 0:

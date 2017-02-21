@@ -99,13 +99,10 @@ public class StudentCardActivity extends Activity {
 
             options.inJustDecodeBounds = true;
             BitmapFactory.decodeFile(mFileUri.getPath(), options);
-            if (options.outHeight != options.outWidth) {
-                Point displaySize = DisplayUtils.getDisplaySize(this);
-                Bitmap bitmap = ImageUtils.correctRotationAndResize(mFileUri.getPath(), displaySize.x , displaySize.y);
-                ImageUtils.compressBitmapToFile(bitmap, new File(mFileUri.getPath()), 90, Bitmap.CompressFormat.JPEG);
-            } else {
-                Toast.makeText(this, "Image size must not be square", Toast.LENGTH_LONG).show();
-            }
+            Point displaySize = DisplayUtils.getDisplaySize(this);
+            Bitmap bitmap = ImageUtils.correctRotationAndResize(mFileUri.getPath(), displaySize.x , displaySize.y);
+            ImageUtils.compressBitmapToFile(bitmap, new File(mFileUri.getPath()), 90, Bitmap.CompressFormat.JPEG);
+
         }
     }
 }
