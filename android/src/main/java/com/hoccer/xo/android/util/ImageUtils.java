@@ -56,8 +56,7 @@ public class ImageUtils {
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(filePath, options);
 
-        options.inSampleSize = ImageUtils.calculateInSampleSize(options.outWidth, options.outHeight, Math.max(width, height), Math.min(width, height));
-
+        options.inSampleSize = ImageUtils.calculateInSampleSize(Math.max(options.outWidth, options.outHeight), Math.min(options.outWidth, options.outHeight), Math.max(width, height), Math.min(width,height));
         options.inJustDecodeBounds = false;
         Bitmap bitmap = BitmapFactory.decodeFile(filePath, options);
         Matrix matrix = new Matrix();
@@ -73,7 +72,6 @@ public class ImageUtils {
             }
             matrix.setRotate(targetAngle, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2);
         }
-
         bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 
         try {
@@ -143,12 +141,12 @@ public class ImageUtils {
         return result;
     }
 
-    public static int calculateInSampleSize(int originalWidth, int origianlHeight, int reqWidth, int reqHeight) {
+    public static int calculateInSampleSize(int originalWidth, int originalHeight, int reqWidth, int reqHeight) {
         int inSampleSize = 1;
 
-        if (origianlHeight > reqHeight || originalWidth > reqWidth) {
+        if (originalHeight > reqHeight || originalWidth > reqWidth) {
 
-            final int halfHeight = origianlHeight / 2;
+            final int halfHeight = originalHeight / 2;
             final int halfWidth = originalWidth / 2;
 
             // Calculate the largest inSampleSize value that is a power of 2 and keeps both
