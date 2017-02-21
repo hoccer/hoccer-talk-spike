@@ -1,6 +1,6 @@
 
-HELIOS Messenger
-Copyright 2015 Hoccer Messenger Betriebs GmbH
+UNIHELD
+Copyright 2017 Hoccer Messenger Betriebs GmbH
 All rights reserved except as stated below.
 
 THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -12,11 +12,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -------------------------------------------------------------------------------
 
-HELIOS Messenger has been built using Open Source and Free Software.
+UNIHELD has been built using Open Source and Free Software.
 
 We thank all parties for their generous and excellent contributions to
 the cause of Free and Open software, without which it would have been
-close to impossible to create HELIOS Messenger.
+close to impossible to create UNIHELD.
 
 This file contains the license terms and attributions for all our dependencies
 as required by their respective licenses.
@@ -281,7 +281,7 @@ Copyright 2012 Carl Bauer
 
 -------------------------------------------------------------------------------
 
-HELIOS Messenger contains Ez-Vcard, a Vcard library.
+UNIHELD contains Ez-Vcard, a Vcard library.
 
 It is licensed under the following BSD license:
 
@@ -312,7 +312,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 -------------------------------------------------------------------------------
 
-HELIOS Messenger containts ORMlite, a database mapper.
+UNIHELD containts ORMlite, a database mapper.
 
 It is licensed under the following minimalist license:
 
@@ -332,7 +332,7 @@ The author may be contacted via http://ormlite.com/.
 
 -------------------------------------------------------------------------------
 
-HELIOS Messenger contains Bouncy Castle, a cryptography library.
+UNIHELD contains Bouncy Castle, a cryptography library.
 
 It is licensed under the following MIT license:
 
@@ -358,7 +358,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -------------------------------------------------------------------------------
 
-HELIOS Messenger uses ZBar to read QR codes from video streams.
+UNIHELD uses ZBar to read QR codes from video streams.
 
 Copyright 2007-2010 (c) Jeff Brown - All Rights Reserved.
 
@@ -825,7 +825,7 @@ DAMAGES.
 
 -------------------------------------------------------------------------------
 
-HELIOS Messenger uses Java-WebSocket for communication.
+UNIHELD uses Java-WebSocket for communication.
 
 Copyright (c) 2010-2012 Nathan Rajlich
 
