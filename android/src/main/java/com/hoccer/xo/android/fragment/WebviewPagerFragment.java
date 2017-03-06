@@ -5,16 +5,25 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.*;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.IXoStateListener;
+import com.hoccer.talk.client.XoClient;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.PagerFragment;
+import com.hoccer.xo.android.view.Placeholder;
 import org.apache.log4j.Logger;
 
-public class WebviewPagerFragment extends PagerFragment {
+
+public class WebviewPagerFragment extends PagerFragment implements IXoStateListener {
+
+    private static final Placeholder PLACEHOLDER = new Placeholder(R.drawable.placeholder_student_card, R.string.placeholder_student_card_text);
+    private final Handler handler = new Handler();
 
     protected static final Logger LOG = Logger.getLogger(WebviewPagerFragment.class);
 
@@ -31,6 +40,15 @@ public class WebviewPagerFragment extends PagerFragment {
     @Override
     public void onResume() {
         super.onResume();
+        if (XoApplication.get().getClient().isDisconnected()) {
+            PLACEHOLDER.applyToView(getView(), new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                }
+            });
+        } else {
+            PLACEHOLDER.removeFromView(getView());
+        }
     }
 
     @Override
@@ -96,10 +114,41 @@ public class WebviewPagerFragment extends PagerFragment {
 
         webView.loadUrl(getArguments().getString("url"));
 
+        XoApplication.get().getClient().registerStateListener(this);
+
         return view;
     }
 
     public WebView getWebView() {
         return webView;
     }
+
+    @Override
+    public void onClientStateChange(XoClient client) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                updateConnectionStateView();
+            }
+        });
+    }
+
+    private void updateConnectionStateView() {
+        XoClient.State connectionState = XoApplication.get().getClient().getState();
+
+        switch (connectionState) {
+            case DISCONNECTED:
+                PLACEHOLDER.applyToView(getView(), new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                    }
+                });
+                break;
+            case CONNECTING:
+                webView.reload();
+                PLACEHOLDER.removeFromView(getView());
+                break;
+        }
+    }
+
 }
