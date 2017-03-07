@@ -31,6 +31,7 @@ public class WebviewPagerFragment extends PagerFragment implements IXoStateListe
 
     private WebView webView;
     private ProgressBar progressBar;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     @Override
     public void onPageUnselected() {
@@ -69,7 +70,7 @@ public class WebviewPagerFragment extends PagerFragment implements IXoStateListe
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_webview, container, false);
 
-        final SwipeRefreshLayout swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeContainer);
+        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeContainer);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -84,7 +85,7 @@ public class WebviewPagerFragment extends PagerFragment implements IXoStateListe
             @Override
             public void onProgressChanged(WebView view, int newProgress) {
                 super.onProgressChanged(view, newProgress);
-                showProgressDialog(newProgress);
+                showProgress(newProgress);
             }
         });
 
@@ -100,6 +101,7 @@ public class WebviewPagerFragment extends PagerFragment implements IXoStateListe
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                 super.onReceivedError(view, request, error);
+                applyPlaceholder();
                 LOG.error(error);
             }
 
@@ -140,10 +142,7 @@ public class WebviewPagerFragment extends PagerFragment implements IXoStateListe
     private void updateConnectionStateView(XoClient.State connectionState) {
         switch (connectionState) {
             case DISCONNECTED:
-                PLACEHOLDER.applyToView(getView(), new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {}
-                });
+                applyPlaceholder();
                 break;
             case CONNECTING:
                 webView.reload();
@@ -151,10 +150,18 @@ public class WebviewPagerFragment extends PagerFragment implements IXoStateListe
         }
     }
 
-    private void showProgressDialog(final int progress) {
+    private void applyPlaceholder(){
+        PLACEHOLDER.applyToView(getView(), new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {}
+        });
+    }
+
+    private void showProgress(final int progress) {
         handler.post(new Runnable() {
             @Override
             public void run() {
+                swipeRefreshLayout.setRefreshing(progress < 100);
                 progressBar.setVisibility(progress < 100 ? View.VISIBLE : View.GONE);
                 progressBar.setProgress(progress);
             }

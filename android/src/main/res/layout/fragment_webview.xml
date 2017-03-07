@@ -40,11 +40,12 @@
                     android:layout_alignBottom="@+id/iv_contacts_placeholder" android:layout_marginBottom="50dp"/>
         </RelativeLayout>
         <ProgressBar
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/progressBar_webView"
                 android:layout_centerVertical="true" android:layout_centerHorizontal="true"
-                android:indeterminate="false" android:visibility="gone"/>
+                android:indeterminate="false" android:foreground="#237b0f" android:progressTint="#207b23"
+                style="?android:attr/progressBarStyleLarge"/>
     </RelativeLayout>
 
 
