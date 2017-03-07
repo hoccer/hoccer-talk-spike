@@ -22,7 +22,7 @@ import org.apache.log4j.Logger;
 
 public class WebviewPagerFragment extends PagerFragment implements IXoStateListener {
 
-    private static final Placeholder PLACEHOLDER = new Placeholder(R.drawable.placeholder_student_card, R.string.placeholder_student_card_text);
+    private static final Placeholder PLACEHOLDER = new Placeholder(R.drawable.placeholder_benefits, R.string.placeholder_student_card_text);
     private final Handler handler = new Handler();
 
     protected static final Logger LOG = Logger.getLogger(WebviewPagerFragment.class);
@@ -40,15 +40,7 @@ public class WebviewPagerFragment extends PagerFragment implements IXoStateListe
     @Override
     public void onResume() {
         super.onResume();
-        if (XoApplication.get().getClient().isDisconnected()) {
-            PLACEHOLDER.applyToView(getView(), new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                }
-            });
-        } else {
-            PLACEHOLDER.removeFromView(getView());
-        }
+        updateConnectionStateView(XoApplication.get().getClient().getState());
     }
 
     @Override
@@ -128,14 +120,12 @@ public class WebviewPagerFragment extends PagerFragment implements IXoStateListe
         handler.post(new Runnable() {
             @Override
             public void run() {
-                updateConnectionStateView();
+                updateConnectionStateView(XoApplication.get().getClient().getState());
             }
         });
     }
 
-    private void updateConnectionStateView() {
-        XoClient.State connectionState = XoApplication.get().getClient().getState();
-
+    private void updateConnectionStateView(XoClient.State connectionState) {
         switch (connectionState) {
             case DISCONNECTED:
                 PLACEHOLDER.applyToView(getView(), new View.OnClickListener() {
