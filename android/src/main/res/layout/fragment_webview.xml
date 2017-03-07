@@ -44,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/progressBar_webView"
                 android:layout_centerVertical="true" android:layout_centerHorizontal="true"
-                android:indeterminate="false" android:foreground="#237b0f" android:progressTint="#207b23"
+                android:indeterminate="false"
                 style="?android:attr/progressBarStyleLarge"/>
     </RelativeLayout>
 

@@ -25,11 +25,10 @@ import org.apache.log4j.Logger;
 
 public class WebviewPagerFragment extends PagerFragment implements IXoStateListener {
 
+    protected static final Logger LOG = Logger.getLogger(WebviewPagerFragment.class);
 
     private static final Placeholder PLACEHOLDER = new Placeholder(R.drawable.placeholder_benefits, R.string.placeholder_benefits_offline);
     private final Handler handler = new Handler();
-
-    protected static final Logger LOG = Logger.getLogger(WebviewPagerFragment.class);
 
     private WebView webView;
     private ProgressBar progressBar;
@@ -79,6 +78,7 @@ public class WebviewPagerFragment extends PagerFragment implements IXoStateListe
                 webView.reload();
             }
         });
+
         progressBar = (ProgressBar) view.findViewById(R.id.progressBar_webView);
 
         webView = (WebView) view.findViewById(R.id.webview);
@@ -97,8 +97,8 @@ public class WebviewPagerFragment extends PagerFragment implements IXoStateListe
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 swipeRefreshLayout.setRefreshing(false);
-                if (isConnected() & getView() != null) {
-                    PLACEHOLDER.removeFromView(getView());
+                if (isConnected()) {
+                    removePlaceholder();
                 }
             }
 
@@ -137,31 +137,36 @@ public class WebviewPagerFragment extends PagerFragment implements IXoStateListe
         handler.post(new Runnable() {
             @Override
             public void run() {
-                updateConnectionStateView(XoApplication.get().getClient().getState());
+                updateConnectionState(XoApplication.get().getClient().getState());
             }
         });
     }
 
-    private void updateConnectionStateView(XoClient.State connectionState) {
+    private void updateConnectionState(XoClient.State connectionState) {
         switch (connectionState) {
             case DISCONNECTED:
                 applyPlaceholder();
-                swipeRefreshLayout.setEnabled(false);
                 break;
             case CONNECTING:
                 webView.reload();
-                swipeRefreshLayout.setEnabled(true);
                 break;
         }
     }
 
     private void applyPlaceholder(){
-        if (getView()!=null) {
+        swipeRefreshLayout.setEnabled(false);
+        if (getView() != null) {
             PLACEHOLDER.applyToView(getView(), new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                }
+                public void onClick(View v) { }
             });
+        }
+    }
+
+    private void removePlaceholder() {
+        swipeRefreshLayout.setEnabled(true);
+        if (getView() != null) {
+            PLACEHOLDER.removeFromView(getView());
         }
     }
 
@@ -176,15 +181,10 @@ public class WebviewPagerFragment extends PagerFragment implements IXoStateListe
         });
     }
 
-
     private boolean isConnected(){
-        ConnectivityManager cm =
-                (ConnectivityManager)getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-
+        ConnectivityManager cm = (ConnectivityManager)getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        return activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
-
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
 
 }
