@@ -22,7 +22,7 @@ import org.apache.log4j.Logger;
 
 public class WebviewPagerFragment extends PagerFragment implements IXoStateListener {
 
-    private static final Placeholder PLACEHOLDER = new Placeholder(R.drawable.placeholder_benefits, R.string.placeholder_student_card_text);
+    private static final Placeholder PLACEHOLDER = new Placeholder(R.drawable.placeholder_benefits, R.string.placeholder_benefits_offline);
     private final Handler handler = new Handler();
 
     protected static final Logger LOG = Logger.getLogger(WebviewPagerFragment.class);
