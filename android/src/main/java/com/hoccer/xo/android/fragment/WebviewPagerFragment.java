@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.*;
+import android.widget.ProgressBar;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
@@ -22,12 +23,14 @@ import org.apache.log4j.Logger;
 
 public class WebviewPagerFragment extends PagerFragment implements IXoStateListener {
 
+
     private static final Placeholder PLACEHOLDER = new Placeholder(R.drawable.placeholder_benefits, R.string.placeholder_benefits_offline);
     private final Handler handler = new Handler();
 
     protected static final Logger LOG = Logger.getLogger(WebviewPagerFragment.class);
 
     private WebView webView;
+    private ProgressBar progressBar;
 
     @Override
     public void onPageUnselected() {
@@ -73,9 +76,17 @@ public class WebviewPagerFragment extends PagerFragment implements IXoStateListe
                 webView.reload();
             }
         });
+        progressBar = (ProgressBar) view.findViewById(R.id.progressBar_webView);
 
         webView = (WebView) view.findViewById(R.id.webview);
         webView.getSettings().setJavaScriptEnabled(true);
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onProgressChanged(WebView view, int newProgress) {
+                super.onProgressChanged(view, newProgress);
+                showProgressDialog(newProgress);
+            }
+        });
 
         webView.setWebViewClient(new WebViewClient() {
 
@@ -83,6 +94,7 @@ public class WebviewPagerFragment extends PagerFragment implements IXoStateListe
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 swipeRefreshLayout.setRefreshing(false);
+                PLACEHOLDER.removeFromView(getView());
             }
 
             @Override
@@ -130,15 +142,23 @@ public class WebviewPagerFragment extends PagerFragment implements IXoStateListe
             case DISCONNECTED:
                 PLACEHOLDER.applyToView(getView(), new View.OnClickListener() {
                     @Override
-                    public void onClick(View v) {
-                    }
+                    public void onClick(View v) {}
                 });
                 break;
             case CONNECTING:
                 webView.reload();
-                PLACEHOLDER.removeFromView(getView());
                 break;
         }
+    }
+
+    private void showProgressDialog(final int progress) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setVisibility(progress < 100 ? View.VISIBLE : View.GONE);
+                progressBar.setProgress(progress);
+            }
+        });
     }
 
 }

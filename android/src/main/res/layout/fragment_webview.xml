@@ -7,7 +7,6 @@
         android:layout_height="match_parent">
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                    xmlns:tools="http://schemas.android.com/tools"
                     android:background="@color/background_default"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -40,6 +39,12 @@
                     android:text="@string/placeholder_conversations_text"
                     android:layout_alignBottom="@+id/iv_contacts_placeholder" android:layout_marginBottom="50dp"/>
         </RelativeLayout>
+        <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/progressBar_webView"
+                android:layout_centerVertical="true" android:layout_centerHorizontal="true"
+                android:indeterminate="false" android:visibility="gone"/>
     </RelativeLayout>
 
 
