@@ -3,6 +3,8 @@ package com.hoccer.xo.android.fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -95,13 +97,14 @@ public class WebviewPagerFragment extends PagerFragment implements IXoStateListe
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 swipeRefreshLayout.setRefreshing(false);
-                PLACEHOLDER.removeFromView(getView());
+                if (isConnected() & getView() != null) {
+                    PLACEHOLDER.removeFromView(getView());
+                }
             }
 
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                 super.onReceivedError(view, request, error);
-                applyPlaceholder();
                 LOG.error(error);
             }
 
@@ -143,18 +146,23 @@ public class WebviewPagerFragment extends PagerFragment implements IXoStateListe
         switch (connectionState) {
             case DISCONNECTED:
                 applyPlaceholder();
+                swipeRefreshLayout.setEnabled(false);
                 break;
             case CONNECTING:
                 webView.reload();
+                swipeRefreshLayout.setEnabled(true);
                 break;
         }
     }
 
     private void applyPlaceholder(){
-        PLACEHOLDER.applyToView(getView(), new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {}
-        });
+        if (getView()!=null) {
+            PLACEHOLDER.applyToView(getView(), new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                }
+            });
+        }
     }
 
     private void showProgress(final int progress) {
@@ -166,6 +174,17 @@ public class WebviewPagerFragment extends PagerFragment implements IXoStateListe
                 progressBar.setProgress(progress);
             }
         });
+    }
+
+
+    private boolean isConnected(){
+        ConnectivityManager cm =
+                (ConnectivityManager)getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+
     }
 
 }
