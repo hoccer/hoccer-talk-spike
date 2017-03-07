@@ -38,12 +38,12 @@ public class WebviewPagerFragment extends PagerFragment implements IXoStateListe
 
     @Override
     public void onPageSelected() {
+        updateConnectionStateView(XoApplication.get().getClient().getState());
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        updateConnectionStateView(XoApplication.get().getClient().getState());
     }
 
     @Override
