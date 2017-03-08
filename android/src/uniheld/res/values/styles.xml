@@ -2,7 +2,7 @@
 
     <style name="BaseTheme" parent="@android:style/Theme.Holo.Light.DarkActionBar">
 
-        <item name="android:alertDialogTheme">@style/YourAlertDialogTheme</item>
+        <item name="android:alertDialogTheme">@style/AlertDialogTheme.AppBaseTheme</item>
 
         <item name="android:actionBarItemBackground">@drawable/selectable_background_appbasetheme</item>
 
@@ -14,7 +14,6 @@
         <item name="android:textAppearanceSmallPopupMenu">@style/PopupMenuTextAppearance.AppBaseTheme</item>
 
         <item name="android:dropDownListViewStyle">@style/DropDownListView.AppBaseTheme</item>
-
 
         <item name="android:actionDropDownStyle">@style/DropDownNav.AppBaseTheme</item>
 
@@ -43,11 +42,10 @@
 
     </style>
 
-    <style name="YourAlertDialogTheme" parent="android:Theme.Holo.Light.Dialog" >
+    <style name="AlertDialogTheme.AppBaseTheme" parent="android:Theme.Holo.Light.Dialog" >
         <item name="android:textColor">@color/primary</item>
         <item name="android:windowBackground">@color/transparent</item>
         <item name="android:windowIsFloating">true</item>
-
     </style>
-
+    
   </resources>
