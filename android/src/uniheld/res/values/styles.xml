@@ -45,62 +45,9 @@
 
     <style name="YourAlertDialogTheme" parent="android:Theme.Holo.Light.Dialog" >
         <item name="android:textColor">@color/primary</item>
-        <item name="android:textColorAlertDialogListItem">@color/primary</item>
-        <item name="android:textColorLinkInverse">@color/primary</item>
-        <item name="android:textColorHint">@color/primary</item>
-        <item name="android:textColorHighlight">@color/primary</item>
-        <item name="android:textColorPrimaryInverse">@color/primary</item>
-        <item name="android:textColorSecondary">@color/primary</item>
+        <item name="android:windowBackground">@color/transparent</item>
+        <item name="android:windowIsFloating">true</item>
 
     </style>
 
-    <style name="CheckBoxAppBaseTheme" parent="android:Widget.CompoundButton.CheckBox">
-        <item name="android:button">@drawable/appbasetheme_btn_check_holo_light</item>
-    </style>
-
-    <style name="ButtonAppBaseTheme" parent="android:Widget.Button">
-        <item name="android:background">@drawable/appbasetheme_btn_default_holo_light</item>
-        <item name="android:minHeight">48dip</item>
-        <item name="android:minWidth">64dip</item>
-        <item name="android:textColor">#ffffff</item>
-    </style>
-
-    <style name="ButtonGrayAppBaseTheme" parent="android:Widget.Button">
-        <item name="android:background">@drawable/appbasetheme_btn_default_gray_holo_light</item>
-        <item name="android:minHeight">48dip</item>
-        <item name="android:minWidth">64dip</item>
-    </style>
-
-    <style name="ImageButtonAppBaseTheme" parent="android:Widget.ImageButton">
-        <item name="android:background">@drawable/appbasetheme_btn_default_holo_light</item>
-    </style>
-
-    <style name="ProfileContainerStyle">
-        <item name="android:layout_marginTop">@dimen/profile_container_margin_vertical</item>
-        <item name="android:layout_marginLeft">@dimen/profile_container_margin_horizontal</item>
-        <item name="android:layout_marginRight">@dimen/profile_container_margin_horizontal</item>
-    </style>
-
-    <style name="searchTextHiglight">
-        <item name="android:textColor">#FF33B5E5</item>
-        <item name="android:textStyle">bold</item>
-    </style>
-
-    <style name="PopupMenu.AppBaseTheme" parent="@android:style/Widget.Holo.ListPopupWindow">
-        <item name="android:popupBackground">@drawable/menu_dropdown_panel_appbasetheme</item>
-    </style>
-
-    <style name="PopupMenuTextAppearance.AppBaseTheme" parent="@android:style/TextAppearance.Widget.IconMenu.Item">
-        <item name="android:textColor">@android:color/primary_text_dark</item>
-        <item name="android:textSize">18sp</item>
-    </style>
-
-    <style name="ParagraphText">
-        <item name="android:layout_marginBottom">25dp</item>
-        <item name="android:textAppearance">@android:style/TextAppearance.Medium</item>
-    </style>
-
-    <style name="OverFlow.AppBaseTheme" parent="@android:style/Widget.Holo.ActionButton.Overflow">
-        <item name="android:src">@drawable/ic_action_more</item>
-    </style>
-</resources>
+  </resources>

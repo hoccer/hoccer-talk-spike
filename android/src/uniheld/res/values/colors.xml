@@ -12,4 +12,7 @@
 
     <color name="message_incoming_text">#FFFFFF</color>
     <color name="message_outgoing_text">#FFFFFF</color>
+
+    <color name="transparent">#00000000</color>
+
 </resources>
