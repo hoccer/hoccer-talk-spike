@@ -16,6 +16,7 @@
     <string name="placeholder_groups_text"><![CDATA[<a href="http://faq.uniheld.com/tutorial/#groups">Create groups</a>]]> to chat with many friends at once.</string>
     <string name="placeholder_nearby_text">Nobody <![CDATA[<a href="http://faq.uniheld.com/tutorial/#nearby">nearby</a>]]> for chatting :-(</string>
     <string name="placeholder_student_card_text">Take a picture of your <![CDATA[<a href="http://faq.uniheld.com/en/tutorial/#StudentID">student card</a>]]>…</string>
+    <string name="placeholder_benefits_offline">Go online to see your benefits…</string>
 
     <string name="chats_tab_name">CHATS</string>
     <string name="benefits_tab_name">BENEFITS</string>
