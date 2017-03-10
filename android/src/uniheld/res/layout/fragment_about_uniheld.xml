@@ -11,6 +11,4 @@
                 android:layout_height="match_parent"
                 android:src="@drawable/about_uniheld" android:cropToPadding="false" android:scaleType="centerCrop"
                 android:adjustViewBounds="false" android:layout_centerInParent="true"/>
-
-
 </RelativeLayout>
