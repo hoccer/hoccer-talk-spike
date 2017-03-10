@@ -18,8 +18,8 @@
 
     <string name="placeholder_conversations_text"><![CDATA[<a href="http://faq.hoccer.com/uniheld/de/tutorial/#freunde-einladen">Lade deine Freunde</a>]]> zum Chatten ein!</string>
     <string name="placeholder_groups_text"><![CDATA[<a href="http://faq.hoccer.com/uniheld/de/tutorial/#gruppen">Lege Gruppen an</a>]]> um mit vielen Freunden gleichzeitig zu chatten.</string>
-    <string name="placeholder_nearby_text">Warten auf Kontakte <![CDATA[<a href="http://faq.hoccer.com/uniheld/de/tutorial/#in-der-naehe">in der Nähe</a>]]>…</string>
-    <string name="placeholder_student_card_text">Fotografiere deinen <![CDATA[<a href="http://faq.hoccer.com/uniheld/de/tutorial/#StudentID">Studentenausweis</a>]]>…</string>
+    <string name="placeholder_nearby_text">Keine Kontakte <![CDATA[<a href="http://faq.hoccer.com/uniheld/de/tutorial/#in-der-naehe">in der Nähe</a>]]> zum Schnacken :-(</string>
+    <string name="placeholder_student_card_text">Fotografiere deinen <![CDATA[<a href="http://faq.hoccer.com/uniheld/tutorial/#studentcard">Studentenausweis</a>]]>…</string>
 
     <!-- Tutorial and FAQ links -->
     <string name="link_tutorial">http://faq.hoccer.com/uniheld/de/tutorial/</string>
