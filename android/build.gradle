@@ -31,6 +31,9 @@ android {
             "google.maps.api.key": "AIzaSyBpFzzIcVtJj0eUZSghPY8qg4cAnEV1ZgA"
         ]
         resValue "string", "google_app_id", "1894273085"
+        ndk {
+            abiFilters "armeabi-v7a", "armeabi"
+        }
     }
 
     productFlavors {
