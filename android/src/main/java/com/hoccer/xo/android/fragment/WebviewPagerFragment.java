@@ -108,15 +108,15 @@ public class WebviewPagerFragment extends PagerFragment  {
             @Override
             public void onPageCommitVisible(WebView view, String url) {
                 super.onPageCommitVisible(view, url);
-                swipeRefreshLayout.setRefreshing(false);
-                if (isConnected()) {
-                    removePlaceholder();
-                }
             }
 
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
+                swipeRefreshLayout.setRefreshing(false);
+                if (isConnected()) {
+                    removePlaceholder();
+                }
             }
 
             @Override
@@ -143,6 +143,7 @@ public class WebviewPagerFragment extends PagerFragment  {
             }
         });
 
+        applyPlaceholder();
         url = getArguments().getString("url");
         webView.loadUrl(url);
         return view;
