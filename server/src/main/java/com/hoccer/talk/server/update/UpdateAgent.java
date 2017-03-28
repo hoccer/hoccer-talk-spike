@@ -669,23 +669,19 @@ public class UpdateAgent extends NotificationDeferrer {
                         membership.setLastChanged(now);
                         mDatabase.saveGroupMembership(membership);
                         // now perform a groupMemberUpdate for the affected client so he gets the new key
-                        // but only if it is not the member we got the key from
-                        if (!membership.getClientId().equals(fromClientId)) {
-                            // Note: we notify the client directly from this thread, we are the UpdateAgent anyway
-                            // and we have all the information fresh and right here
-                            TalkRpcConnection memberConnection = mServer.getClientConnection(forClientIds[i]);
-                            if (memberConnection != null && memberConnection.isLoggedIn()) {
-                                ITalkRpcClient mrpc = memberConnection.getClientRpc();
-                                // we send updates only to those members whose key has changed, so we always send the full update
-                                try {
-                                    mrpc.groupMemberUpdated(membership);
-                                    mrpc.groupUpdated(groupPresence);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
+                        // Note: we notify the client directly from this thread, we are the UpdateAgent anyway
+                        // and we have all the information fresh and right here
+                        TalkRpcConnection memberConnection = mServer.getClientConnection(forClientIds[i]);
+                        if (memberConnection != null && memberConnection.isLoggedIn()) {
+                            ITalkRpcClient mrpc = memberConnection.getClientRpc();
+                            // we send updates only to those members whose key has changed, so we always send the full update
+                            try {
+                                mrpc.groupMemberUpdated(membership);
+                                mrpc.groupUpdated(groupPresence);
+                            } catch (Exception e) {
+                                e.printStackTrace();
                             }
                         }
-
                     }
                 } else {
                     LOG.error("requestGroupKeys, bad number of keys returned for group " + forGroupId);
