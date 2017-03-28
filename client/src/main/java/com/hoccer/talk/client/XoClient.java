@@ -1769,10 +1769,22 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
             // do we have a public key for each group member?
             List<TalkClientContact> clientsInGroup = new ArrayList<TalkClientContact>();
-            for (String clientId : clientIds) {
+            for (int i = 0; i < clientIds.length; ++i) {
+                String clientId = clientIds[i];
+
                 try {
                     TalkClientContact clientContact = mDatabase.findContactByClientId(clientId, false);
-                    if (clientContact == null || clientContact.getPublicKey() == null) {
+                    if (clientContact == null) {
+                        LOG.info("getEncryptedGroupKeys: Can't do it, don't know a contact with id: " + clientId);
+                        break;
+                    }
+                    TalkKey publicKey = clientContact.getPublicKey();
+                    if (publicKey == null) {
+                        LOG.info("getEncryptedGroupKeys: Can't do it, I have no public key for a contact with id: " + clientId);
+                        break;
+                    }
+                    if (publicKey.getKeyId() != publicKeyIds[i]) {
+                        LOG.info("getEncryptedGroupKeys: Can't do it, I do not have the public key with id '"+publicKeyIds[i]+"' for a contact with id: " + clientId);
                         break;
                     }
                     clientsInGroup.add(clientContact);
