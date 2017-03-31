@@ -28,7 +28,7 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 22 // when updating 'targetSdkVersion' be aware of issues with the xzing library and Android 6.+
-        versionCode 426
+        versionCode 427
         versionName "3.2.15-SNAPSHOT"
         multiDexEnabled true
         manifestPlaceholders = [
