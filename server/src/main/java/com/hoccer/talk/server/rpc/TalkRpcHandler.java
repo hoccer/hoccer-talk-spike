@@ -3005,7 +3005,8 @@ public class TalkRpcHandler implements ITalkRpcServer {
                         StaticSystemMessage.Message.WORLD_WIDE_DEACTIVATED);
                 mConnection.didWorldwideNagging = true;
             }
-            throw new RuntimeException("worldwide environment is no longer supported");
+            return "00000000-0000-0000-0000-000000000000";
+            //throw new RuntimeException("worldwide environment is no longer supported");
         }
 
         if (environment.isWorldwide() && (environment.getTag() == null || environment.getTag().length() < 2)) {
