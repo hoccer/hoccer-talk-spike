@@ -20,6 +20,10 @@ public class StaticSystemMessage {
         UPDATE_SETTING_ENABLE_MP_MEDIA_ACCESS(
                 "Zugriff auf die Musikbibliothek wurde aktiviert",
                 "Music Library Access has been enabled"
+        ),
+        WORLD_WIDE_DEACTIVATED (
+                "Um eine belästigungsfreie Nutzung insbesondere für Kinder und Jugendliche zu gewährleisten, bieten wir 'Weltweit' nicht mehr an. Bitte aktualisieren deine App.",
+                "We are sorry, but in order to make Hoccer entirely safe for children we do no longer support 'Worldwide'. Please update your app."
         );
         public final String de;
         public final String en;

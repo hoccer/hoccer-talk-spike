@@ -99,6 +99,8 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     private boolean deleted =false;
     private String mOriginalClientId;
 
+    public boolean didWorldwideNagging = false;
+
     public Object deliveryLock = new Object();
     public Object keyRequestLock = new Object();
 

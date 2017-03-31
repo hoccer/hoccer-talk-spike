@@ -2997,6 +2997,17 @@ public class TalkRpcHandler implements ITalkRpcServer {
             LOG.warn("updateEnvironment: no environment type, defaulting to nearby. Please fix client");
             environment.setType(TalkEnvironment.TYPE_NEARBY);
         }
+
+        if (environment.isWorldwide()) {
+            if (!mConnection.didWorldwideNagging) {
+                mServer.getUpdateAgent().requestUserAlert(
+                        mConnection.getClientId(),
+                        StaticSystemMessage.Message.WORLD_WIDE_DEACTIVATED);
+                mConnection.didWorldwideNagging = true;
+            }
+            throw new RuntimeException("worldwide environment is no longer supported");
+        }
+
         if (environment.isWorldwide() && (environment.getTag() == null || environment.getTag().length() < 2)) {
             Date now = new Date();
             long day = now.getTime() / 1000 / 60 / 60 / 24;
