@@ -50,7 +50,6 @@ public class XoPreferenceActivity extends PreferenceActivity
     private Dialog mWaitingDialog;
     private BackupController mBackupController;
     private SharedPreferences mDefaultSharedPreferences;
-    private PreferenceCategory worldWidePreferenceCategory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +75,6 @@ public class XoPreferenceActivity extends PreferenceActivity
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 boolean oldValue = mDefaultSharedPreferences.getBoolean(getString(R.string.preference_key_activate_passcode), false);
-                // causing problems with Java 1.8
                 if (oldValue != (Boolean)newValue) {
                     boolean activatePassword = (Boolean) newValue;
                     if (activatePassword && !isPasswordSet()) {
