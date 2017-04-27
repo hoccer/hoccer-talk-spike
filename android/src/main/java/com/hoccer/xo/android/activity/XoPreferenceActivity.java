@@ -77,7 +77,7 @@ public class XoPreferenceActivity extends PreferenceActivity
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 boolean oldValue = mDefaultSharedPreferences.getBoolean(getString(R.string.preference_key_activate_passcode), false);
                 // causing problems with Java 1.8
-                if (oldValue != newValue) {
+                if (oldValue != (Boolean)newValue) {
                     boolean activatePassword = (Boolean) newValue;
                     if (activatePassword && !isPasswordSet()) {
                         startSetPasswordActivityForResult();
