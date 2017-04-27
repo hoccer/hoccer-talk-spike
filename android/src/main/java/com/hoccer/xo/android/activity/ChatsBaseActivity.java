@@ -2,7 +2,9 @@ package com.hoccer.xo.android.activity;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -72,6 +74,8 @@ public abstract class ChatsBaseActivity extends ComposableActivity implements IX
 
         startXoClientService();
 
+        deactivateWorldWide();
+
         XoApplication.get().getClient().connect();
 
         mContactsMenuItemActionProvider = new ContactsMenuItemActionProvider(this);
@@ -85,6 +89,13 @@ public abstract class ChatsBaseActivity extends ComposableActivity implements IX
         FeaturePromoter.cleanupForSelectWorldwidePageOnFirstStart(this);
 
         showGooglePlayServicesErrorDialog();
+    }
+
+    private void deactivateWorldWide() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean(getString(R.string.preference_key_enable_worldwide), false);
+        editor.commit();
     }
 
     private void registerCrashManager() {
