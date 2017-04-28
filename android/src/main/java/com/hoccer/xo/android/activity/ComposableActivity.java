@@ -28,6 +28,7 @@ public abstract class ComposableActivity extends FlavorBaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Hier wird createOptionsMenu aufgerufen!
         mComponents = createComponents();
 
         for (ActivityComponent component : mComponents) {
@@ -59,7 +60,7 @@ public abstract class ComposableActivity extends FlavorBaseActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         boolean result = super.onCreateOptionsMenu(menu);
 
-        if (result) {
+        if (result & mComponents != null) {
             for (ActivityComponent component : mComponents) {
                 if (!component.onCreateOptionsMenu(menu)) {
                     return false;
