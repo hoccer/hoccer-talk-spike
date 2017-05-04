@@ -52,7 +52,7 @@
                 android:autoLink="all"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
-                android:text="@string/message_text"/>
+                android:text="@string/message_text" android:layout_below="@+id/rl_attachment_container"/>
 
         <RelativeLayout android:id="@+id/rl_attachment_container"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
