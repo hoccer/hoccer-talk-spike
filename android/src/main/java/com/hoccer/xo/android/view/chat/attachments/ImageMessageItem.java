@@ -68,8 +68,8 @@ public class ImageMessageItem extends MessageItem {
         int height = boundImageSize.y;
 
         RelativeLayout rootView = (RelativeLayout) mAttachmentContentContainer.findViewById(R.id.rl_root);
-        rootView.getLayoutParams().width = width;
-        rootView.getLayoutParams().height = height;
+        rootView.getLayoutParams().width = (int) (width*0.9f);
+        rootView.getLayoutParams().height = (int) (height*0.9f);
 
         boolean hasText = !mMessage.getText().isEmpty();
         if (hasText) {
