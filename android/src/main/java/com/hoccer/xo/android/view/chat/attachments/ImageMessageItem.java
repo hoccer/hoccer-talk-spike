@@ -87,7 +87,7 @@ public class ImageMessageItem extends MessageItem {
             overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(hasText ? R.drawable.image_bubble_inverted_incoming :  R.drawable.chat_bubble_inverted_incoming ));
         } else {
             mAttachmentContentContainer.setGravity(Gravity.RIGHT);
-            overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_outgoing));
+            overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(hasText ? R.drawable.image_bubble_inverted_outgoing : R.drawable.chat_bubble_inverted_outgoing));
         }
 
 
