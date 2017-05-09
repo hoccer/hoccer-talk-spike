@@ -107,6 +107,7 @@ public class VideoMessageItem extends MessageItem {
         boolean hasText = !mMessage.getText().isEmpty();
         if (hasText) {
             mMessageText.setVisibility(View.VISIBLE);
+            mMessageText.setPadding(0, 5, 0, 0);
         } else {
             mMessageContainer.setBackgroundDrawable(null);
             mMessageContainer.setPadding(0, 0, 0, 0);
@@ -122,10 +123,7 @@ public class VideoMessageItem extends MessageItem {
             mAttachmentContentContainer.setGravity(Gravity.RIGHT);
             overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(hasText ? R.drawable.image_bubble_inverted_outgoing : R.drawable.chat_bubble_inverted_outgoing));
         }
-
-        //mMessageContainer.setBackgroundDrawable(null);
-        //mMessageContainer.setPadding(0, 0, 0, 0);
-
+        
         // load thumbnail with picasso
         mTargetView = (ImageView) rootView.findViewById(R.id.iv_picture);
         Picasso.with(mContext).setLoggingEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());

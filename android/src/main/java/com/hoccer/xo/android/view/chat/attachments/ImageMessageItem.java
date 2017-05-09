@@ -74,6 +74,7 @@ public class ImageMessageItem extends MessageItem {
         boolean hasText = !mMessage.getText().isEmpty();
         if (hasText) {
             mMessageText.setVisibility(View.VISIBLE);
+            mMessageText.setPadding(0, 5, 0, 0);
         } else {
             mMessageContainer.setBackgroundDrawable(null);
             mMessageContainer.setPadding(0, 0, 0, 0);
