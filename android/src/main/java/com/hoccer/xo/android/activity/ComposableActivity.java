@@ -58,17 +58,14 @@ public abstract class ComposableActivity extends FlavorBaseActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         boolean result = super.onCreateOptionsMenu(menu);
-
-        if (result) {
+        if (result && mComponents != null) {
             for (ActivityComponent component : mComponents) {
                 if (!component.onCreateOptionsMenu(menu)) {
                     return false;
                 }
             }
-            return true;
         }
-
-        return false;
+        return result;
     }
 
     @Override
