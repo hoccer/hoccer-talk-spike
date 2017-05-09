@@ -1653,12 +1653,13 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
     public List<TalkClientMessage> composeClientMessage(TalkClientContact contact, String messageText, List<TalkClientUpload> uploads) {
         ArrayList<TalkClientMessage> messages = new ArrayList<TalkClientMessage>();
-        if (messageText != null && !"".equals(messageText)) {
-            messages.add(createClientMessage(contact, messageText, null));
-        }
 
         for (TalkClientUpload upload : uploads) {
             messages.add(createClientMessage(contact, "", upload));
+        }
+
+        if (messageText != null && !"".equals(messageText)) {
+            messages.add(createClientMessage(contact, messageText, null));
         }
 
         return messages;

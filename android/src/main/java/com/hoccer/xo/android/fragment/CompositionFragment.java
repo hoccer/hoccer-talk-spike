@@ -514,7 +514,14 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
 
     private void sendMessageWithAttachments(List<TalkClientUpload> uploads) {
         String messageText = mTextField.getText().toString();
-        List<TalkClientMessage> messages = XoApplication.get().getClient().composeClientMessage(mContact, messageText, uploads);
+        List<TalkClientMessage> messages;
+
+        if (uploads.size()==1){
+            messages = new ArrayList<>();
+            messages.add(XoApplication.get().getClient().composeClientMessage(mContact, messageText, uploads.get(0)));
+        } else {
+            messages = XoApplication.get().getClient().composeClientMessage(mContact, messageText, uploads);
+        }
         List<String> messageTags = new ArrayList<String>();
 
         for (TalkClientMessage message : messages) {
