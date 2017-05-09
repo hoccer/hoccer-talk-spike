@@ -52,7 +52,6 @@ public class VideoMessageItem extends MessageItem {
     protected void displayAttachment() {
         super.displayAttachment();
 
-        // add view lazily
         if (mAttachmentContentContainer.getChildCount() == 0) {
             LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             RelativeLayout videoLayout = (RelativeLayout) inflater.inflate(R.layout.content_video, null);
@@ -105,19 +104,26 @@ public class VideoMessageItem extends MessageItem {
         rootView.getLayoutParams().width = width;
         rootView.getLayoutParams().height = height;
 
+        boolean hasText = !mMessage.getText().isEmpty();
+        if (hasText) {
+            mMessageText.setVisibility(View.VISIBLE);
+            mMessageText.setPadding(0, 5, 0, 0);
+        } else {
+            mMessageContainer.setBackgroundDrawable(null);
+            mMessageContainer.setPadding(0, 0, 0, 0);
+            mMessageText.setVisibility(View.GONE);
+        }
+
         // set gravity and message bubble mask
         ImageView overlayView = (ImageView) mAttachmentContentContainer.findViewById(R.id.iv_picture_overlay);
         if (mMessage.isIncoming()) {
             mAttachmentContentContainer.setGravity(Gravity.LEFT);
-            overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_incoming));
+            overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(hasText ? R.drawable.image_bubble_inverted_incoming :  R.drawable.chat_bubble_inverted_incoming ));
         } else {
             mAttachmentContentContainer.setGravity(Gravity.RIGHT);
-            overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_outgoing));
+            overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(hasText ? R.drawable.image_bubble_inverted_outgoing : R.drawable.chat_bubble_inverted_outgoing));
         }
-
-        mMessageContainer.setBackgroundDrawable(null);
-        mMessageContainer.setPadding(0, 0, 0, 0);
-
+        
         // load thumbnail with picasso
         mTargetView = (ImageView) rootView.findViewById(R.id.iv_picture);
         Picasso.with(mContext).setLoggingEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
