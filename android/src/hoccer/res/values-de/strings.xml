@@ -9,7 +9,7 @@
     <string name="email_invitation_subject">Triff mich bei Hoccer!</string>
     <string name="email_invitation_text">Hey! Ich nutze jetzt die Gratis-App Hoccer zum sicheren Chatten! Jetzt herunterladen und mich als Kontakt hinzufügen:\n%1$s%2$s\n%3$s</string>
     <string name="actionbar_default_title">Hoccer</string>
-    <string name="about_advert_text">Hoccer \n- dein sicherer Multimedia Messenger\n\nWir legen größten Wert auf Sicherheit, Datenschutz und Privatsphäre. Dank modernster Verschlüsselungs- und Übertragungstechnologien setzt Hoccer neue Standards in der mobilen Datenübertragung und definiert Privatsphäre im mobilen Messaging Sektor neu. Hoccer ermöglicht einen einfachen und unbegrenzten Datenaustausch zwischen Smartphones und Tablets ohne vorherige Eingabe von vertraulichen Nutzerdaten.\n\nShare hugs \u0026 kisses</string>
+    <string name="about_advert_text">Hoccer \n- dein sicherer Multimedia Messenger\n\nWir legen größten Wert auf Sicherheit, Datenschutz und Privatsphäre. Dank modernster Verschlüsselungs- und Übertragungstechnologien setzt Hoccer neue Standards in der mobilen Datenübertragung und definiert Privatsphäre im mobilen Messaging Sektor neu. Hoccer ermöglicht einen einfachen und unbegrenzten Datenaustausch zwischen Smartphones und Tablets ohne vorherige Eingabe von vertraulichen Nutzerdaten.\n\nShare hugs \u0026 kisses\n\n<b>Schutzrechtshinweis</b>\nU.S. Patent No. 9.008.579\nU.S. Patent No. 9.369.442\nAU Patent No. 2012311701</string>
     <string name="restore_restart_hoccer">Bitte Hoccer neu starten, um die Wiederherstellung zu beenden.</string>
     <string name="restore_no_backups_found_message">Bitte bestehendes Backup nach\n%1$s\nkopieren um früheren Hoccer Account wiederherstellen zu können.</string>
 </resources>
