@@ -1,6 +1,6 @@
 
 Hoccer
-Copyright 2015 Hoccer Betriebs GmbH
+Copyright 2017 Hoccer Betriebs GmbH
 All rights reserved except as stated below.
 
 THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
