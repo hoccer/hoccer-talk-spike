@@ -535,13 +535,11 @@ public class CompositionFragment extends Fragment implements MotionGestureListen
 
     private boolean sizeExceedsUploadLimit(long attachmentSize) {
         int transferLimit = XoApplication.get().getClient().getUploadLimit();
-        if (transferLimit < 0) {
-            if (transferLimit == -1) {
-                return false;
-            }
-            if (transferLimit == -2) {
-                return true;
-            }
+        if (transferLimit == -1) {
+            return false;
+        }
+        if (transferLimit == -2) {
+            return true;
         }
         return attachmentSize >= transferLimit;
     }
