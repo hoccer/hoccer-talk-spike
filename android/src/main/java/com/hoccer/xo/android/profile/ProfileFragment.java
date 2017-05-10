@@ -81,6 +81,7 @@ public abstract class ProfileFragment extends Fragment {
         LOG.debug("onActivityResult(" + requestCode + "," + resultCode + ")");
         super.onActivityResult(requestCode, resultCode, intent);
 
+        //TODO check resultCode!
         if (intent == null) {
             return;
         }
@@ -93,7 +94,7 @@ public abstract class ProfileFragment extends Fragment {
                     @Override
                     public void run() {
                         BackgroundManager.get().ignoreNextBackgroundPhase();
-                        startActivityForResult(ImageSelector.createCropIntent(finalIntent.getData()), REQUEST_CROP_AVATAR);
+                        startActivityForResult(Intent.createChooser(ImageSelector.createCropIntent(finalIntent.getData()),"Choose application"), REQUEST_CROP_AVATAR);
                     }
                 });
             }
