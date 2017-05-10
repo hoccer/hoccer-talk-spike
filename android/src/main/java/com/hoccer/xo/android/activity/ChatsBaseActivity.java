@@ -96,6 +96,9 @@ public abstract class ChatsBaseActivity extends ComposableActivity implements IX
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean(getString(R.string.preference_key_enable_worldwide), false);
         editor.commit();
+        if ( WorldwideController.INSTANCE.isWorldwideActive()) {
+            WorldwideController.INSTANCE.stopWorldWideNow();
+        }
     }
 
     private void registerCrashManager() {
