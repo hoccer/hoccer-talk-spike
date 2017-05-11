@@ -1,9 +1,12 @@
 package com.hoccer.xo.android;
 
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.support.multidex.MultiDexApplication;
+import com.artcom.hoccer.R;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hoccer.talk.client.IXoClientHost;
 import com.hoccer.talk.client.model.TalkClientDownload;
@@ -347,5 +350,15 @@ public class XoApplication extends MultiDexApplication {
                 }
             }
         }
+    }
+
+    public void deactivateWorldWide() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean(getString(R.string.preference_key_enable_worldwide), false);
+        editor.putBoolean(getString(R.string.preference_key_worldwide_enable_notifications), false);
+        editor.putString(getString(R.string.preference_key_worldwide_timetolive), "0");
+        editor.apply();
+        editor.commit();
     }
 }
