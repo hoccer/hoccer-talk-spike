@@ -242,20 +242,18 @@ public class XoPreferenceActivity extends PreferenceActivity
             createDialog();
             regenerateKeys();
         } else if (getString(R.string.preference_key_worldwide_timetolive).equals(key) || getString(R.string.preference_key_worldwide_enable_notifications).equals(key)) {
-            updateWorldwideEnvironmentParameters();
+            WorldwideController.INSTANCE.updateWorldwideEnvironmentParameters();
         } else if (getString(R.string.preference_key_enable_polling).equals(key) || getString(R.string.preference_key_polling_interval).equals(key)) {
             Polling.update(this);
         } else if (getString(R.string.preference_key_enable_worldwide).equals(key)) {
             boolean worldwideFeatureEnabled = ((XoAndroidClientConfiguration)(XoApplication.get().getClient().getConfiguration())).isWorldwideFeatureEnabled();
             if ((!worldwideFeatureEnabled) && WorldwideController.INSTANCE.isWorldwideActive()) {
+                XoApplication.get().deactivateWorldWide();
                 WorldwideController.INSTANCE.stopWorldWideNow();
             }
         }
     }
 
-    private void updateWorldwideEnvironmentParameters() {
-        WorldwideController.INSTANCE.updateWorldwideEnvironmentParameters();
-    }
 
     private void regenerateKeys() {
         Thread t = new Thread(new Runnable() {
