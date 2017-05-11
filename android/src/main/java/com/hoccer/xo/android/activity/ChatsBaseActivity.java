@@ -208,6 +208,9 @@ public abstract class ChatsBaseActivity extends ComposableActivity implements IX
             performTokenPairing(mPairingToken);
             mPairingToken = null;
         }
+        if (client.isReady() & WorldwideController.INSTANCE.isWorldwideActive()){
+            WorldwideController.INSTANCE.stopWorldWideNow();
+        }
     }
 
     private void showProfileIfClientIsNotRegistered() {
