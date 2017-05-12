@@ -18,6 +18,7 @@
     </declare-styleable>
     <declare-styleable name="SimpleAvatarView">
         <attr name="defaultAvatarImageUrl" format="string"/>
+        <attr name="errorAvatarImageUrl" format="string"/>
         <attr name="cornerRadius" format="float"/>
     </declare-styleable>
 </resources>

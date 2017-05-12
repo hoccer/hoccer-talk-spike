@@ -3,6 +3,7 @@ package com.hoccer.xo.android.view.avatar;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -21,6 +23,8 @@ import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.AspectImageView;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.assist.ImageLoadingListener;
 import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
 import org.apache.log4j.Logger;
 
@@ -29,6 +33,8 @@ public abstract class AvatarView extends LinearLayout {
     private static final Logger LOG = Logger.getLogger(AvatarView.class);
 
     private Uri mDefaultAvatarImageUri;
+    private Uri mErrorAvatarImageUri;
+
     private DisplayImageOptions mDefaultOptions;
     private float mCornerRadius;
     private AspectImageView mAvatarImage;
@@ -46,6 +52,8 @@ public abstract class AvatarView extends LinearLayout {
                 .obtainStyledAttributes(attributes, R.styleable.SimpleAvatarView, 0, 0);
         try {
             mDefaultAvatarImageUri = Uri.parse("drawable://" + a.getResourceId(R.styleable.SimpleAvatarView_defaultAvatarImageUrl, R.drawable.avatar_contact));
+            mErrorAvatarImageUri = Uri.parse("drawable://" + a.getResourceId(R.styleable.SimpleAvatarView_errorAvatarImageUrl, R.drawable.avatar_world));
+
             mCornerRadius = a.getFloat(R.styleable.SimpleAvatarView_cornerRadius, 0.0f);
         } finally {
             a.recycle();
@@ -183,7 +191,27 @@ public abstract class AvatarView extends LinearLayout {
             mAvatarImage.setVisibility(View.VISIBLE);
             if (avatarImageUri != null) {
                 ImageLoader.getInstance()
-                        .displayImage(avatarImageUri.toString(), mAvatarImage, mDefaultOptions, null);
+                        .displayImage(avatarImageUri.toString(), mAvatarImage, mDefaultOptions, new ImageLoadingListener() {
+                            @Override
+                            public void onLoadingStarted(String imageUri, View view) {
+                            }
+
+                            @Override
+                            public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+                                if (mErrorAvatarImageUri != null) {
+                                    ImageLoader.getInstance().displayImage(mErrorAvatarImageUri.toString(), mAvatarImage, mDefaultOptions, null);
+                                }
+                            }
+
+                            @Override
+                            public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                            }
+
+                            @Override
+                            public void onLoadingCancelled(String imageUri, View view) {
+
+                            }
+                        });
             } else if (mDefaultAvatarImageUri != null) {
                 ImageLoader.getInstance()
                         .displayImage(mDefaultAvatarImageUri.toString(), mAvatarImage, mDefaultOptions,

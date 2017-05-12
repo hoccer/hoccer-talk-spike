@@ -10,4 +10,5 @@
         android:layout_height="match_parent"
         custom:cornerRadius="180"
         custom:defaultAvatarImageUrl="@drawable/avatar_contact"
+        custom:errorAvatarImageUrl="@drawable/avatar_world"
         tools:showIn="@layout/item_chat_client"/>
