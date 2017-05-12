@@ -1,8 +1,7 @@
 package com.hoccer.xo.android;
 
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.Toast;
 import org.apache.log4j.*;
 import org.apache.log4j.spi.LoggingEvent;
 
@@ -77,12 +76,17 @@ public class XoLogging {
     }
 
     private static void configureLogSd(boolean enabled) {
-        Log.i(sLogTag, "[logging] " + (enabled ? "enabling" : "disabling") + " logging to SD card");
-        if(enabled) {
-            XoApplication.ensureDirectory(getLogDirectory());
-            sRootLogger.addAppender(sFileAppender);
-        } else {
-            sRootLogger.removeAppender(sFileAppender);
+        try {
+            Log.i(sLogTag, "[logging] " + (enabled ? "enabling" : "disabling") + " logging to SD card");
+            if (enabled) {
+                XoApplication.ensureDirectory(getLogDirectory());
+                sRootLogger.addAppender(sFileAppender);
+            } else {
+                sRootLogger.removeAppender(sFileAppender);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(XoApplication.get().getBaseContext(),"Logging to SD card not possible.\nPlease check permissions and SD-Card.", Toast.LENGTH_LONG).show();
         }
     }
 
