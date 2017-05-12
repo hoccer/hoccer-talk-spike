@@ -14,8 +14,10 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.profile.client.ClientProfileActivity;
 import com.hoccer.xo.android.profile.group.GroupProfileActivity;
@@ -109,9 +111,12 @@ public abstract class AvatarView extends LinearLayout {
             resetAvatar();
             return;
         }
+        
         XoTransfer avatar = mContact.getAvatar();
-
-        if (avatar == null || avatar.getFilePath() == null) {
+        TalkClientDownload.State state = mContact.getAvatarDownload().getState();
+        if (state == TalkClientDownload.State.RETRYING || state == TalkClientDownload.State.FAILED) {
+            setAvatarImage(mErrorAvatarImageUri);
+        } else if (avatar == null || avatar.getFilePath() == null) {
             if (mContact.isGroup()) {
                 if (mContact.getGroupPresence() != null && mContact.getGroupPresence().isTypeNearby()) {
                     setAvatarImage(R.drawable.avatar_location);
