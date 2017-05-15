@@ -88,13 +88,31 @@ public class ImageMessageItem extends MessageItem {
         Picasso.with(mContext).setLoggingEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
 
         Uri imageUri = UriUtils.getAbsoluteFileUri(mAttachment.getFilePath());
-        Picasso.with(mContext).load(imageUri)
+        Picasso.Builder builder = new Picasso.Builder(mContext);
+        builder.listener(new Picasso.Listener()
+        {
+            @Override
+            public void onImageLoadFailed(Picasso picasso, Uri uri, Exception exception)
+            {
+                exception.printStackTrace();
+            }
+
+        });
+
+        builder.build().load(imageUri)
                 .placeholder(R.drawable.ic_img_placeholder)
                 .error(R.drawable.ic_img_placeholder)
                 .resize((int) (width * IMAGE_SCALE_FACTOR), (int) (height * IMAGE_SCALE_FACTOR))
                 .centerInside()
                 .into(mTargetView);
-        LOG.trace(Picasso.with(mContext).getSnapshot().toString());
+
+    /*    Picasso.with(mContext).load(imageUri)
+                .placeholder(R.drawable.ic_img_placeholder)
+                .error(R.drawable.ic_img_placeholder)
+                .resize((int) (width * IMAGE_SCALE_FACTOR), (int) (height * IMAGE_SCALE_FACTOR))
+                .centerInside()
+                .into(mTargetView);
+        LOG.trace(Picasso.with(mContext).getSnapshot().toString());*/
     }
 
     @Override
