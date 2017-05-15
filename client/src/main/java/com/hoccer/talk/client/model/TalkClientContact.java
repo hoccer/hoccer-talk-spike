@@ -123,6 +123,7 @@ public class TalkClientContact implements Serializable {
     }
 
     public XoTransfer getAvatar() {
+        // Es kann nicht unterschieden werden, warum der Content nicht kommt.
         if (avatarDownload != null && avatarDownload.isContentAvailable()) {
             return avatarDownload;
         } else if (avatarUpload != null && avatarUpload.isContentAvailable()) {
