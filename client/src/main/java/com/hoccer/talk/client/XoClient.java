@@ -1783,7 +1783,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                         LOG.info("getEncryptedGroupKeys: Can't do it, I have no public key for a contact with id: " + clientId);
                         break;
                     }
-                    if (publicKey.getKeyId() != publicKeyIds[i]) {
+                    if (!publicKey.getKeyId().equals(publicKeyIds[i])) {
                         LOG.info("getEncryptedGroupKeys: Can't do it, I do not have the public key with id '"+publicKeyIds[i]+"' for a contact with id: " + clientId);
                         break;
                     }
