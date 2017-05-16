@@ -1732,6 +1732,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
         @Override
         public String[] getEncryptedGroupKeys(String groupId, String sharedKeyId, String sharedKeyIdSalt, String[] clientIds, String[] publicKeyIds) {
+            // The whole method asks for proper Exceptions instead of all these return statemens
             LOG.debug("server: getEncryptedGroupKeys()");
             String[] failed = new String[0];
 
@@ -1768,6 +1769,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             }
 
             // do we have a public key for each group member?
+            // Can we extract that?
             List<TalkClientContact> clientsInGroup = new ArrayList<TalkClientContact>();
             for (int i = 0; i < clientIds.length; ++i) {
                 String clientId = clientIds[i];
@@ -1795,6 +1797,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 }
             }
 
+            // Will that ever happen?
             if (clientsInGroup.size() != clientIds.length) {
                 return failed;
             }
@@ -1815,10 +1818,12 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 }
             }
 
+            // Will that ever happen?
             if (encryptedGroupKeys.size() != clientsInGroup.size()) {
                 return failed;
             }
 
+            // Why can't we return a proper object/struct instead of adding KeyID and salt to a List of encrypted keys?
             if (isRenewGroupKey) {
                 encryptedGroupKeys.add(presence.getSharedKeyId());
                 encryptedGroupKeys.add(presence.getSharedKeyIdSalt());
