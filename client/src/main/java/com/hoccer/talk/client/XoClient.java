@@ -1732,6 +1732,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
 
         @Override
         public String[] getEncryptedGroupKeys(String groupId, String sharedKeyId, String sharedKeyIdSalt, String[] clientIds, String[] publicKeyIds) {
+            // The whole method asks for proper Exceptions instead of all these return statemens
             LOG.debug("server: getEncryptedGroupKeys()");
             String[] failed = new String[0];
 
@@ -1768,6 +1769,7 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
             }
 
             // do we have a public key for each group member?
+            // Can we extract that?
             List<TalkClientContact> clientsInGroup = new ArrayList<TalkClientContact>();
             for (int i = 0; i < clientIds.length; ++i) {
                 String clientId = clientIds[i];
@@ -1775,26 +1777,27 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 try {
                     TalkClientContact clientContact = mDatabase.findContactByClientId(clientId, false);
                     if (clientContact == null) {
-                        LOG.info("getEncryptedGroupKeys: Can't do it, don't know a contact with id: " + clientId);
-                        break;
+                        LOG.error("getEncryptedGroupKeys: Can't do it, don't know a contact with id: " + clientId);
+                        return failed;
                     }
                     TalkKey publicKey = clientContact.getPublicKey();
                     if (publicKey == null) {
-                        LOG.info("getEncryptedGroupKeys: Can't do it, I have no public key for a contact with id: " + clientId);
-                        break;
+                        LOG.error("getEncryptedGroupKeys: Can't do it, I have no public key for a contact with id: " + clientId);
+                        return failed;
                     }
-                    if (publicKey.getKeyId() != publicKeyIds[i]) {
-                        LOG.info("getEncryptedGroupKeys: Can't do it, I do not have the public key with id '"+publicKeyIds[i]+"' for a contact with id: " + clientId);
-                        break;
+                    if (!publicKey.getKeyId().equals(publicKeyIds[i])) {
+                        LOG.error("getEncryptedGroupKeys: Can't do it, I do not have the public key with id '"+publicKeyIds[i]+"' for a contact with id: " + clientId);
+                        return failed;
                     }
                     clientsInGroup.add(clientContact);
 
                 } catch (SQLException e) {
                     LOG.error("Error while retrieving client contact with id: " + clientId, e);
-                    break;
+                    return failed;
                 }
             }
 
+            // Will that ever happen?
             if (clientsInGroup.size() != clientIds.length) {
                 return failed;
             }
@@ -1808,17 +1811,18 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     byte[] encryptedGroupKey = RSACryptor.encryptRSA(publicKey, rawGroupKey);
                     String encryptedGroupKeyString = new String(Base64.encodeBase64(encryptedGroupKey));
                     encryptedGroupKeys.add(encryptedGroupKeyString);
-
                 } catch (GeneralSecurityException e) {
                     LOG.error("Error while encrypting group key with client's public key", e);
-                    break;
+                    return failed;
                 }
             }
 
+            // Will that ever happen?
             if (encryptedGroupKeys.size() != clientsInGroup.size()) {
                 return failed;
             }
 
+            // Why can't we return a proper object/struct instead of adding KeyID and salt to a List of encrypted keys?
             if (isRenewGroupKey) {
                 encryptedGroupKeys.add(presence.getSharedKeyId());
                 encryptedGroupKeys.add(presence.getSharedKeyIdSalt());
