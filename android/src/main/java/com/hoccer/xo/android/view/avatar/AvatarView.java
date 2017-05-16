@@ -54,7 +54,7 @@ public abstract class AvatarView extends LinearLayout {
                 .obtainStyledAttributes(attributes, R.styleable.SimpleAvatarView, 0, 0);
         try {
             mDefaultAvatarImageUri = Uri.parse("drawable://" + a.getResourceId(R.styleable.SimpleAvatarView_defaultAvatarImageUrl, R.drawable.avatar_contact));
-            mErrorAvatarImageUri = Uri.parse("drawable://" + a.getResourceId(R.styleable.SimpleAvatarView_errorAvatarImageUrl, R.drawable.avatar_default_contact_error));
+            mErrorAvatarImageUri = Uri.parse("drawable://" + a.getResourceId(R.styleable.SimpleAvatarView_errorAvatarImageUrl, R.drawable.avatar_contact_error));
 
             mCornerRadius = a.getFloat(R.styleable.SimpleAvatarView_cornerRadius, 0.0f);
         } finally {
