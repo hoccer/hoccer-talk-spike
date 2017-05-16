@@ -2,7 +2,9 @@ package com.hoccer.xo.android.activity;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -85,6 +87,15 @@ public abstract class ChatsBaseActivity extends ComposableActivity implements IX
         FeaturePromoter.cleanupForSelectWorldwidePageOnFirstStart(this);
 
         showGooglePlayServicesErrorDialog();
+
+        checkGrantedPermissions();
+    }
+
+    private void checkGrantedPermissions() {
+        String permission = "android.permission.WRITE_EXTERNAL_STORAGE";
+        int res = XoApplication.get().checkSelfPermission(permission);
+        boolean write = (res == PackageManager.PERMISSION_GRANTED);
+        LOG.debug("Permissons");
     }
 
     private void registerCrashManager() {
@@ -139,6 +150,7 @@ public abstract class ChatsBaseActivity extends ComposableActivity implements IX
         showProfileIfClientIsNotRegistered();
         registerListeners();
         mContactsMenuItemActionProvider.updateNotificationBadge();
+        checkGrantedPermissions();
     }
 
     @Override
