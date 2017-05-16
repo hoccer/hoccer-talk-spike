@@ -1777,23 +1777,23 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                 try {
                     TalkClientContact clientContact = mDatabase.findContactByClientId(clientId, false);
                     if (clientContact == null) {
-                        LOG.info("getEncryptedGroupKeys: Can't do it, don't know a contact with id: " + clientId);
-                        break;
+                        LOG.error("getEncryptedGroupKeys: Can't do it, don't know a contact with id: " + clientId);
+                        return failed;
                     }
                     TalkKey publicKey = clientContact.getPublicKey();
                     if (publicKey == null) {
-                        LOG.info("getEncryptedGroupKeys: Can't do it, I have no public key for a contact with id: " + clientId);
-                        break;
+                        LOG.error("getEncryptedGroupKeys: Can't do it, I have no public key for a contact with id: " + clientId);
+                        return failed;
                     }
                     if (!publicKey.getKeyId().equals(publicKeyIds[i])) {
-                        LOG.info("getEncryptedGroupKeys: Can't do it, I do not have the public key with id '"+publicKeyIds[i]+"' for a contact with id: " + clientId);
-                        break;
+                        LOG.error("getEncryptedGroupKeys: Can't do it, I do not have the public key with id '"+publicKeyIds[i]+"' for a contact with id: " + clientId);
+                        return failed;
                     }
                     clientsInGroup.add(clientContact);
 
                 } catch (SQLException e) {
                     LOG.error("Error while retrieving client contact with id: " + clientId, e);
-                    break;
+                    return failed;
                 }
             }
 
@@ -1811,10 +1811,9 @@ public class XoClient implements JsonRpcConnection.Listener, TransferListener {
                     byte[] encryptedGroupKey = RSACryptor.encryptRSA(publicKey, rawGroupKey);
                     String encryptedGroupKeyString = new String(Base64.encodeBase64(encryptedGroupKey));
                     encryptedGroupKeys.add(encryptedGroupKeyString);
-
                 } catch (GeneralSecurityException e) {
                     LOG.error("Error while encrypting group key with client's public key", e);
-                    break;
+                    return failed;
                 }
             }
 
