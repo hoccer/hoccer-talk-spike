@@ -457,6 +457,8 @@
     <string name="pref_title_polling_interval">Polling Intervall</string>
     <string name="polling_summary">Nachrichten direkt beim Server abrufen.</string>
     <string name="show_worldwide">Anzeigen</string>
+    <string name="missing_permissions_title">Fehlende Berechtigungen</string>
+    <string name="missing_permissions_message">Es fehlen folgende Berechtigungen, die für die fehlerfreie Nutzung von Hoccer notwendig sind:</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Kontakt</item>

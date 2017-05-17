@@ -2,8 +2,10 @@ package com.hoccer.xo.android.activity;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.content.PermissionChecker;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,6 +30,9 @@ import net.hockeyapp.android.CrashManager;
 import net.hockeyapp.android.CrashManagerListener;
 import net.hockeyapp.android.Strings;
 import org.apache.log4j.Logger;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class ChatsBaseActivity extends ComposableActivity implements IXoStateListener, IXoPairingListener {
 
@@ -88,14 +93,35 @@ public abstract class ChatsBaseActivity extends ComposableActivity implements IX
 
         showGooglePlayServicesErrorDialog();
 
-        checkGrantedPermissions();
+        checkDeniedPermssions();
     }
 
-    private void checkGrantedPermissions() {
-        String permission = "android.permission.WRITE_EXTERNAL_STORAGE";
-        int res = XoApplication.get().checkSelfPermission(permission);
-        boolean write = (res == PackageManager.PERMISSION_GRANTED);
-        LOG.debug("Permissons");
+    private void checkDeniedPermssions() {
+        List<String> deniedPermissions = getDeniedPermissions();
+
+        if (deniedPermissions.size() > 0) {
+            StringBuilder permissions = new StringBuilder();
+            for (String permission:deniedPermissions) {
+                String firstCapital = permission.substring(0, 1).toUpperCase() + permission.substring(1);
+                permissions.append("- "+firstCapital+"\n");
+            }
+            XoDialogs.showOkDialog("ChatBaseActivity", getString(R.string.missing_permissions_title), getString(R.string.missing_permissions_message)+"\n\n"+permissions, this);
+        }
+    }
+
+    List<String> getDeniedPermissions() {
+        List<String> denied = new ArrayList<String>();
+        try {
+            PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_PERMISSIONS);
+            for (int i = 0; i < pi.requestedPermissions.length; i++) {
+                if (PermissionChecker.checkSelfPermission(XoApplication.get(), pi.requestedPermissions[i]) != PermissionChecker.PERMISSION_GRANTED) {
+                    denied.add(getPackageManager().getPermissionInfo(pi.requestedPermissions[i],0).loadLabel(getPackageManager()).toString());
+                }
+            }
+        } catch (Exception e) {
+            LOG.error("Could not get denied permissions.", e);
+        }
+        return denied;
     }
 
     private void registerCrashManager() {
@@ -146,11 +172,9 @@ public abstract class ChatsBaseActivity extends ComposableActivity implements IX
         super.onResume();
 
         CrashManager.execute(ChatsBaseActivity.this, mCrashManagerListener);
-
         showProfileIfClientIsNotRegistered();
         registerListeners();
         mContactsMenuItemActionProvider.updateNotificationBadge();
-        checkGrantedPermissions();
     }
 
     @Override

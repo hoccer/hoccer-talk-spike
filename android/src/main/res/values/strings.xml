@@ -469,6 +469,9 @@
     <string name="polling_summary">Poll server directly for new messages.</string>
     <string name="show_worldwide">Show</string>
 
+    <string name="missing_permissions_title">Missing permissions</string>
+    <string name="missing_permissions_message">"The following permissions were denied. This can prevent Hoccer from working properly.</string>
+
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>
         <item quantity="other">%d Contacts</item>
