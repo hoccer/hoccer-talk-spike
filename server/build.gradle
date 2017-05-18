@@ -1,5 +1,37 @@
-
 description = 'Hoccer Talk Server'
+
+apply plugin: 'java'
+//apply plugin: 'eclipse'
+
+version = '3.4.3'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+//create a single Jar with all dependencies
+task fatJar(type: Jar) {
+  manifest {
+    attributes 'Implementation-Title': 'Hoccer Server',
+            'Implementation-Version': version,
+            'Main-Class': 'com.hoccer.talk.server.TalkServerMain'
+  }
+  baseName = project.name + '-all'
+  from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } } {
+      exclude "META-INF/*.SF"
+      exclude "META-INF/*.DSA"
+      exclude "META-INF/*.RSA"
+  }
+  with jar
+}
+
+//Get dependencies from Maven central repository
+repositories {
+  mavenCentral()
+}
+
+artifacts {
+    archives fatJar
+}
+
 dependencies {
   compile project(':hoccer-talk-common')
   compile project(':hoccer-talk-srp')
@@ -17,7 +49,7 @@ dependencies {
     compile group: 'com.codahale.metrics', name: 'metrics-core', version:'3.0.2'
     compile group: 'com.codahale.metrics', name: 'metrics-servlets', version:'3.0.2'
     compile group: 'com.googlecode.json-simple', name: 'json-simple', version:'1.1.1'
-    compile group: 'com.notnoop.apns', name: 'apns', version:'0.2.1-SNAPSHOT'
+    compile group: 'com.notnoop.apns', name: 'apns', version:'0.2.3'
     compile group: 'org.mongodb', name: 'mongo-java-driver', version:'2.10.1'
     compile group: 'org.jongo', name: 'jongo', version:'0.4'
     compile group: 'com.j256.ormlite', name: 'ormlite-jdbc', version:'4.43'

@@ -687,19 +687,17 @@ public class UpdateAgent extends NotificationDeferrer {
                     LOG.error("requestGroupKeys, bad number of keys returned for group " + forGroupId);
                     connection.penalizePriorization(300L); // penalize this client in selection
                     sleepForMillis(2000); // TODO: schedule with delay instead of sleep
-                    checkAndRequestGroupMemberKeys(forGroupId); // try again
                 }
             } else {
                 LOG.error("requestGroupKeys, no keys returned for group " + forGroupId);
                 connection.penalizePriorization(300L); // penalize this client in selection
                 sleepForMillis(2000);  // TODO: schedule with delay instead of sleep
-                checkAndRequestGroupMemberKeys(forGroupId); // try again
             }
         } else {
             sleepForMillis(2000); // TODO: schedule with delay instead of sleep
             LOG.error("requestGroupKeys, no presence for any outdated member of group " + forGroupId);
-            checkAndRequestGroupMemberKeys(forGroupId); // try again
         }
+        checkAndRequestGroupMemberKeys(forGroupId); // try again even when succeeded, a key renewal might have invalidated other member data
     }
 
     private void sleepForMillis(long millis) {
