@@ -7,7 +7,7 @@
     <string name="dialog_report_errors_message">Error information available. We kindly ask you to send this information to UNIHELD developers and help us improving our service.</string>
     <string name="sms_invitation_text">Hey dude, download now the new UNIHELD App. Just register, verify as a student and get awesome student benefits.\n%1$s%2$s\n%3$s</string>
     <string name="email_invitation_subject">Join me at UNIHELD!</string>
-    <string name="email_invitation_text"> Hey dude, download now the new UNIHELD App. Just register, verify as a student and get awesome student benefits. \n%1$s%2$s\n%3$s</string>
+    <string name="email_invitation_text">Hey dude, download now the new UNIHELD App. Just register, verify as a student and get awesome student benefits. \n%1$s%2$s\n%3$s</string>
     <string name="actionbar_default_title">UNIHELD</string>
     <string name="about_advert_text"></string>
     <string name="restore_restart_hoccer">Please re-start UNIHELD to complete restoring your account. </string>
