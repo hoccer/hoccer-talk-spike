@@ -5,9 +5,9 @@
     <string name="pref_report_crashes_summary">Unterstütze UNIHELD bei der Weiterentwicklung indem du deine Abstürze meldest. Welche Informationen an UNIHELD geschickt werden, kannst du in den FAQ einsehen.</string>
     <string name="dialog_report_crash_message">Es wurde eine Aufzeichnung des letzten Crashs gefunden. Bitte schicke diesen Bericht an UNIHELD, damit wir den Fehler schnellst möglich beheben können.</string>
     <string name="dialog_report_errors_message">Bei der letzten Ausführung sind Fehler aufgetreten. Bitte schicke diesen Bericht an UNIHELD, damit wir diese schnellst möglich beheben können.</string>
-    <string name="sms_invitation_text">Ich möchte mit Ihnen in der UNIHELD App in Kontakt treten. Jetzt herunterladen und mich als Kontakt hinzufügen: %1$s%2$s\n%3$s</string>
+    <string name="sms_invitation_text">Moin, lad dir mal die UNIHELD-App runter! Anmelden, als Student verifizieren und dir die geilsten Studentenangebote gönnen: %1$s%2$s\n%3$s</string>
     <string name="email_invitation_subject">Triff mich bei UNIHELD!</string>
-    <string name="email_invitation_text">Ich möchte mit Ihnen in der UNIHELD App in Kontakt treten. Jetzt herunterladen und mich als Kontakt hinzufügen: \n%1$s%2$s\n%3$s</string>
+    <string name="email_invitation_text">Moin, lad dir mal schnell die UNIHELD App runter, dein neuer digitaler Studentenausweis! Einfach Anmelden, als Student verifizieren und dir die geilsten Studentenangebote gönnen! \n%1$s%2$s\n%3$s</string>
     <string name="actionbar_default_title">UNIHELD</string>
     <string name="about_advert_text"></string>
     <string name="restore_restart_hoccer">Bitte UNIHELD neu starten, um die Wiederherstellung zu beenden.</string>
