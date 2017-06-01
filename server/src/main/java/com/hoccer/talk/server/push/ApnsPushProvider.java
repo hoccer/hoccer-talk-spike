@@ -74,20 +74,34 @@ public class ApnsPushProvider extends PushProvider {
         return connection != null && connection.isConnected();
     }
 
+    public static PushAgent.APNS_SERVICE_TYPE apnsServiceType(TalkClient client, TalkClientHostInfo hostInfo) {
+        PushAgent.APNS_SERVICE_TYPE type = PushAgent.APNS_SERVICE_TYPE.PRODUCTION;
+        String clientName = "unknown";
+        if (hostInfo != null) {
+            clientName = hostInfo.getClientName();
+
+            if ("production".equals(hostInfo.getEnvironment())) {
+                type = PushAgent.APNS_SERVICE_TYPE.PRODUCTION;
+            } else if ("development".equals(hostInfo.getEnvironment())) {
+                type = PushAgent.APNS_SERVICE_TYPE.SANDBOX;
+            } else if ("debug".equals(hostInfo.getClientBuildVariant())) {
+                type = PushAgent.APNS_SERVICE_TYPE.SANDBOX;
+            }
+            LOG.debug("APNS target based environment for client = "+client.getClientId()+" is "+ hostInfo.getEnvironment() + ", build variant is "+hostInfo.getClientBuildVariant());
+        }
+        LOG.debug("APNS target for client "+client.getClientId()+" name "+ clientName + " is "+type);
+        return type;
+    }
+
     private Target getTarget(TalkClient client) {
         TalkClientHostInfo hostInfo = mServer.getDatabase().findClientHostInfoForClient(client.getClientId());
 
         String clientName = mDefaultClientName;
-        PushAgent.APNS_SERVICE_TYPE type = PushAgent.APNS_SERVICE_TYPE.PRODUCTION;
+        PushAgent.APNS_SERVICE_TYPE type = apnsServiceType(client, hostInfo);
 
         if (hostInfo != null) {
             clientName = hostInfo.getClientName();
-
-            if ("debug".equals(hostInfo.getClientBuildVariant())) {
-                type = PushAgent.APNS_SERVICE_TYPE.SANDBOX;
-            }
         }
-
         return new Target(clientName, type);
     }
 

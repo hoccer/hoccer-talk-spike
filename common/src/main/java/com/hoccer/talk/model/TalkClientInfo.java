@@ -49,6 +49,9 @@ public class TalkClientInfo {
     /** uncleanShutdown is set to 1 if last connection has been terminated with an error on the client side */
     // boolean uncleanShutdown;
 
+    /** An optional string determining the environment, typically 'production' or 'development' */
+    String environment;
+
     public TalkClientInfo() {
     }
 
@@ -138,5 +141,13 @@ public class TalkClientInfo {
 
     public void setSupportTag(String supportTag) {
         this.supportTag = supportTag;
+    }
+
+    public String getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(String environment) {
+        this.environment = environment;
     }
 }

@@ -136,21 +136,17 @@ public class PushRequest {
     // return true if push should wake up client
     private boolean performApns(int deliveringCount) {
         String clientName = mConfig.getApnsDefaultClientName();
-        PushAgent.APNS_SERVICE_TYPE type = PushAgent.APNS_SERVICE_TYPE.PRODUCTION;
 
+        PushAgent.APNS_SERVICE_TYPE type = ApnsPushProvider.apnsServiceType(mClient, mClientHostInfo);
         boolean backgroundPush = false;
         if (mClientHostInfo != null) {
             clientName = mClientHostInfo.getClientName();
-
-            if ("debug".equals(mClientHostInfo.getClientBuildVariant())) {
-                type = PushAgent.APNS_SERVICE_TYPE.SANDBOX;
-            }
         }
 
         ApnsService apnsService = mAgent.getApnsService(clientName, type);
 
         if (apnsService != null) {
-            LOG.debug("APNS push for " + mClientId + " using " + type + " type");
+            LOG.debug("APNS push for " + mClientId + " using " + type + " type, token "+mClient.getApnsToken());
 
             PayloadBuilder b = APNS.newPayload();
 
@@ -158,11 +154,12 @@ public class PushRequest {
 
             if (TalkClient.APNS_MODE_BACKGROUND.equals(mClient.getApnsMode())) {
                 // background message
-                LOG.debug("APNS background push configured for clientName '" + clientName + "' and type '" + type + "'");
+                LOG.debug("Performing APNS background push configured for "+mClientId + " clientName '" + clientName + "' and type '" + type + "'");
                 b.badge(messageCount);
                 b.forNewsstand();
                 backgroundPush = true;
             }  else {
+                LOG.debug("Performing APNS foreground push for "+mClientId + " clientName '" + clientName + "' and type '" + type + "'");
                 // default message
                 if (messageCount > 1) {
                     b.localizedKey("apn_new_messages");

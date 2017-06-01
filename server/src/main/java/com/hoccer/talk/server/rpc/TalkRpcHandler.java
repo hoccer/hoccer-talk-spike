@@ -1492,7 +1492,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                     }
                 }
             } else {
-                delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NONE);
+                delivery.setAttachmentStateUnchecked(TalkDelivery.ATTACHMENT_STATE_NONE);
             }
 
             Vector<TalkDelivery> processedDeliveries;
@@ -2997,7 +2997,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
             LOG.warn("updateEnvironment: no environment type, defaulting to nearby. Please fix client");
             environment.setType(TalkEnvironment.TYPE_NEARBY);
         }
-
+/*
         if (environment.isWorldwide()) {
             if (!mConnection.didWorldwideNagging) {
                 mServer.getUpdateAgent().requestUserAlert(
@@ -3008,7 +3008,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
             return "00000000-0000-0000-0000-000000000000";
             //throw new RuntimeException("worldwide environment is no longer supported");
         }
-
+*/
         if (environment.isWorldwide() && (environment.getTag() == null || environment.getTag().length() < 2)) {
             Date now = new Date();
             long day = now.getTime() / 1000 / 60 / 60 / 24;

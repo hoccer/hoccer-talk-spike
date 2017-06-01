@@ -884,8 +884,11 @@ public class TalkDelivery {
 
     public void setAttachmentState(String attachmentState) {
         if (!nextAttachmentStateAllowed(attachmentState)) {
-            throw new RuntimeException("Delivery: state change from ‘" + this.attachmentState + "‘ -> '" + attachmentState + "' not allowed");
+            throw new RuntimeException("Delivery: attachment state change from '" + this.attachmentState + "' -> '" + attachmentState + "' not allowed");
         }
+        this.attachmentState = attachmentState;
+    }
+    public void setAttachmentStateUnchecked(String attachmentState) {
         this.attachmentState = attachmentState;
     }
 

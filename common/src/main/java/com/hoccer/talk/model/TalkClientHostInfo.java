@@ -45,6 +45,9 @@ public class TalkClientHostInfo {
     /** A hardware device name identifier, e.g. 'iPhone6,1' */
     String deviceModel;
 
+    /** An optional string determining the environment, typically 'production' or 'development' */
+    String environment;
+
     /** clientCrashed is set to 1 if the client has crashed since the last connection */
     // boolean clientCrashed;
 
@@ -69,6 +72,7 @@ public class TalkClientHostInfo {
         this.systemVersion     = clientInfo.getSystemVersion();
         this.systemLanguage    = clientInfo.getSystemLanguage();
         this.systemName        = clientInfo.getSystemName();
+        this.environment = clientInfo.getEnvironment();
     }
 
     public String info() {
@@ -171,6 +175,14 @@ public class TalkClientHostInfo {
         this.serverTime = serverTime;
     }
 
+    public String getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(String environment) {
+        this.environment = environment;
+    }
+
     public void updateWith(TalkClientInfo clientInfo) {
         this.clientBuildNumber = clientInfo.getClientBuildNumber();
         this.clientBuildVariant = clientInfo.getClientBuildVariant();
@@ -182,5 +194,6 @@ public class TalkClientHostInfo {
         this.systemLanguage = clientInfo.getSystemLanguage();
         this.systemName = clientInfo.getSystemName();
         this.systemVersion = clientInfo.getSystemVersion();
+        this.environment = clientInfo.getEnvironment();
     }
 }
