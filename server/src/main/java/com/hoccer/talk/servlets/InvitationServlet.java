@@ -32,7 +32,8 @@ public class InvitationServlet extends HttpServlet {
         SIMSME,
         STROEER,
         STARMEO,
-        HELIOS
+        HELIOS,
+        UNIHELD
     }
 
     private static final HashMap<String, Label> LABELS = new HashMap<String, Label>();
@@ -50,7 +51,8 @@ public class InvitationServlet extends HttpServlet {
         LABELS.put("starmeod", Label.STARMEO);
         LABELS.put("helid", Label.HELIOS);
         LABELS.put("heli", Label.HELIOS);
-
+        LABELS.put("unhld", Label.UNIHELD);
+        LABELS.put("unhldd", Label.UNIHELD);
     }
 
     private final Engine mEngine = new Engine();
