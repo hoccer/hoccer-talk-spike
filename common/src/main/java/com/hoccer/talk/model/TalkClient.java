@@ -19,6 +19,7 @@ public class TalkClient {
     public static final String FIELD_CLIENT_ID            = "clientId";
     public static final String FIELD_SRP_SALT             = "srpSalt";
     public static final String FIELD_SRP_VERIFIER         = "srpVerifier";
+    public static final String FIELD_SRP_SAVED_VERIFIER   = "srpSavedVerifier";
     public static final String FIELD_SRP_SECRET           = "srpSecret";
     public static final String FIELD_GCM_REGISTRATION     = "gcmRegistration";
     public static final String FIELD_GCM_PACKAGE          = "gcmPackage";
@@ -37,6 +38,8 @@ public class TalkClient {
     public static final String FIELD_PUSH_RETRY_COUNT     = "pushRetryCount";
     public static final String FIELD_RESCUE_CODE          = "rescueCode";
     public static final String FIELD_RESCUE_CODE_FAILS    = "rescueCodeFails";
+    public static final String FIELD_TIME_SUSPENDED       = "timeSuspended";
+    public static final String FIELD_DURATION_SUSPENDED   = "durationSuspended";
 
     public static final String APNS_MODE_DEFAULT          = "default";
     public static final String APNS_MODE_BACKGROUND       = "background";
@@ -55,6 +58,10 @@ public class TalkClient {
     /** SRP verifier */
     @DatabaseField(columnName = FIELD_SRP_VERIFIER, width = 512)
     String srpVerifier;
+
+    /** saved SRP verifier after deletion*/
+    @DatabaseField(columnName = FIELD_SRP_SAVED_VERIFIER, width = 512)
+    String srpSavedVerifier;
 
     /** SRP secret (CLIENT ONLY) */ // XXX needed?
     @DatabaseField(columnName = FIELD_SRP_SECRET, canBeNull = true)
@@ -128,6 +135,14 @@ public class TalkClient {
     @DatabaseField(columnName = FIELD_RESCUE_CODE_FAILS)
     int rescueCodeFails;
 
+    /** Time of account suspension */
+    @DatabaseField(columnName = FIELD_TIME_SUSPENDED, canBeNull = true)
+    Date timeSuspended;
+
+    /** Duration of account suspension */
+    @DatabaseField(columnName = FIELD_DURATION_SUSPENDED, canBeNull = true)
+    long durationSuspended;
+
     public TalkClient() {
     }
 
@@ -159,6 +174,11 @@ public class TalkClient {
     @JsonIgnore
     public boolean isConnected() {
         return timeLastLogin != null && (timeLastDisconnect == null || timeLastLogin.getTime() > timeLastDisconnect.getTime());
+    }
+
+    @JsonIgnore
+    public boolean isSuspended(Date when) {
+        return timeSuspended != null && (timeSuspended.getTime() + durationSuspended > when.getTime());
     }
 
     public String getClientId() {
@@ -327,5 +347,29 @@ public class TalkClient {
 
     public void setRescueCodeFails(int rescueCodeFails) {
         this.rescueCodeFails = rescueCodeFails;
+    }
+
+    public Date getTimeSuspended() {
+        return timeSuspended;
+    }
+
+    public void setTimeSuspended(Date timeSuspended) {
+        this.timeSuspended = timeSuspended;
+    }
+
+    public long getDurationSuspended() {
+        return durationSuspended;
+    }
+
+    public void setDurationSuspended(long durationSuspended) {
+        this.durationSuspended = durationSuspended;
+    }
+
+    public String getSrpSavedVerifier() {
+        return srpSavedVerifier;
+    }
+
+    public void setSrpSavedVerifier(String srpSavedVerifier) {
+        this.srpSavedVerifier = srpSavedVerifier;
     }
 }

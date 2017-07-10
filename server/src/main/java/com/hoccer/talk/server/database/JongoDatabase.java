@@ -276,13 +276,29 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
-    public void markClientDeleted(@NotNull TalkClient client) {
+    public void markClientDeleted(@NotNull TalkClient client, @NotNull String reason) {
         if (!isDeletedClient(client.getClientId())) {
+            client.setSrpSavedVerifier(client.getSrpVerifier());
+            client.setSrpVerifier("");
+            client.setReasonDeleted(reason);
             client.setClientId(client.getClientId()+"-DELETED");
             client.setTimeDeleted(new Date());
             mClients.save(client);
         }
     }
+
+    @Override
+    public void suspendClient(@NotNull TalkClient client, @Nullable Date when, long duration) {
+        client.setTimeSuspended(when);
+        client.setDurationSuspended(duration);
+        mClients.save(client);
+    }
+
+    @Override
+    public void unsuspendClient(TalkClient client) {
+        suspendClient(client, null, 0);
+    }
+
 
     @Override
     public void deleteClient(@NotNull TalkClient client) {

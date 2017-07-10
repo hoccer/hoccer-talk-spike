@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Client ${clientId}</title>
+</head>
+<body>
+<h2>Info for client ${clientId}</h2>
+<h3>Client</h3>
+<div><pre>${clientInfo}</pre></div>
+<h3>Client Host Info</h3>
+<div><pre>${clientHostInfo}</pre></div>
+<h3>Client Presence</h3>
+<div><pre>${clientPresence}</pre></div>
+<div>
+    <form action="${suspendLink}">
+        <button type="submit" name="time" value="86400" ${suspend_disabled}>Suspend User for 1 day</button>
+        <button type="submit" name="time" value="604800" ${suspend_disabled}>Suspend User for 1 week</button>
+    </form>
+    <form action="${unsuspendLink}">
+        <button type="submit" ${unspend_disabled}>Unsuspend User</button>
+    </form>
+    <form action="${deleteLink}">
+        <button type="submit" id="delete" ${delete_disabled}>Delete User</button>
+    </form>
+    <form action="${undeleteLink}">
+        <button type="submit" class="button" ${undelete_disabled}>Undelete User</button>
+    </form>
+</div>
+</body>
+</html>

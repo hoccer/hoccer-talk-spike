@@ -32,7 +32,11 @@ public interface ITalkServerDatabase {
 
     public void saveClient(TalkClient client);
 
-    public void markClientDeleted(TalkClient client);
+    public void markClientDeleted(TalkClient client, String reason);
+
+    public void suspendClient(TalkClient client, Date when, long duration);
+
+    public void unsuspendClient(TalkClient client);
 
     public void deleteClient(TalkClient client);
 

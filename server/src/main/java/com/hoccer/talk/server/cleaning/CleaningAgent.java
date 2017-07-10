@@ -171,9 +171,7 @@ public class CleaningAgent {
                 if (timeAgo(lastLogin, UNUSED_CLIENT_LIFE_TIME)) {
                     // delete client that has not been active for UNUSED_CLIENT_LIFE_TIME months
                     LOG.debug("deleting unused client id '" + clientId + "'");
-                    client.setSrpVerifier("");
-                    client.setReasonDeleted("unused-lifetime-expired");
-                    mDatabase.markClientDeleted(client);
+                    mDatabase.markClientDeleted(client, "unused-lifetime-expired");
                     mServer.getUpdateAgent().performAccountDeletion(clientId);
                 } else {
                     LOG.debug("keeping used client id '" + clientId + "', just cleaning keys and tokens");

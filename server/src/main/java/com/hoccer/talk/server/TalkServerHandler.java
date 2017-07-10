@@ -19,6 +19,7 @@ public class TalkServerHandler extends HandlerCollection {
         addHandler(createInvitationHandler());
         addHandler(createStaticResourceHandler());
         addHandler(new TalkRpcConnectionHandler(talkServer));
+        addHandler(createAdminHandler(talkServer));
     }
 
     private ServletContextHandler createMetricsHandler(TalkServer talkServer) {
@@ -49,6 +50,17 @@ public class TalkServerHandler extends HandlerCollection {
 
         return serverInfoContextHandler;
     }
+
+    private ServletContextHandler createAdminHandler(TalkServer talkServer) {
+        ServletContextHandler adminHandler = new ServletContextHandler();
+
+        adminHandler.setContextPath("/admin");
+        adminHandler.setAttribute("server", talkServer);
+        adminHandler.addServlet(UserAdminServlet.class, "/*");
+
+        return adminHandler;
+    }
+
 
     private ServletContextHandler createInvitationHandler() {
         ServletContextHandler invitationContextHandler = new ServletContextHandler();
