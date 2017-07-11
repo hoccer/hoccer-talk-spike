@@ -3,29 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <title>Client ${clientId}</title>
-</head>
+    <meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />
+    <style type="text/css">
+        ${stylesheet}
+    </style></head>
 <body>
-<h2>Info for client ${clientId}</h2>
-<h3>Client</h3>
-<div><pre>${clientInfo}</pre></div>
-<h3>Client Host Info</h3>
-<div><pre>${clientHostInfo}</pre></div>
-<h3>Client Presence</h3>
-<div><pre>${clientPresence}</pre></div>
+<div id="tfheader">
+    <form id="tfnewsearch" method="get" action="${search_action_url}">
+        <input type="text" class="tftextinput" name="clientId" size="50" maxlength="50">
+        <input type="submit" value="search for client-id" class="tfbutton">
+        <h4>${ErrorMessage}</h4>
+    </form>
+    <div class="tfclear"></div>
+    <h2>Hoccer Admin Console</h2>
+</div>
 <div>
-    <form action="${suspendLink}">
-        <button type="submit" name="time" value="86400" ${suspend_disabled}>Suspend User for 1 day</button>
-        <button type="submit" name="time" value="604800" ${suspend_disabled}>Suspend User for 1 week</button>
-    </form>
-    <form action="${unsuspendLink}">
-        <button type="submit" ${unspend_disabled}>Unsuspend User</button>
-    </form>
-    <form action="${deleteLink}">
-        <button type="submit" id="delete" ${delete_disabled}>Delete User</button>
-    </form>
-    <form action="${undeleteLink}">
-        <button type="submit" class="button" ${undelete_disabled}>Undelete User</button>
-    </form>
+    <h2>Client ${clientId}</h2>
+    <div>
+        <form action="${suspendLink}" method="POST">
+            <button class="actbutton" type="submit" name="time" value="86400" ${suspend_disabled}>Suspend User for 1 day</button>
+            <button class="actbutton"type="submit" name="time" value="604800" ${suspend_disabled}>Suspend User for 1 week</button>
+        </form>
+        <p></p>
+        <form action="${unsuspendLink}" method="POST">
+            <button class="actbutton" type="submit" ${unspend_disabled}>Unsuspend User</button>
+        </form>
+        <p></p>
+        <p></p>
+        <form action="${deleteLink}" method="POST">
+            <button class="actbutton" type="submit" id="delete" ${delete_disabled}>Delete User</button>
+        </form>
+        <!--
+        <form action="${undeleteLink}" method="POST">
+            <button class="actbutton" type="submit" class="button" ${undelete_disabled}>Undelete User</button>
+        </form>
+        -->
+    </div>
+    <h3>Client</h3>
+    <div><pre>${clientInfo}</pre></div>
+    <h3>Client Host Info</h3>
+    <div><pre>${clientHostInfo}</pre></div>
+    <h3>Client Presence</h3>
+    <div><pre>${clientPresence}</pre></div>
 </div>
 </body>
 </html>

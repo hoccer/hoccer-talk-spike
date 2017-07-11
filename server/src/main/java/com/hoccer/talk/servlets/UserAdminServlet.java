@@ -1,14 +1,12 @@
 package com.hoccer.talk.servlets;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.floreysoft.jmte.DefaultModelAdaptor;
 import com.floreysoft.jmte.Engine;
 import com.hoccer.talk.model.TalkClient;
 import com.hoccer.talk.model.TalkClientHostInfo;
-import com.hoccer.talk.model.TalkClientInfo;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServer;
@@ -33,6 +31,8 @@ public class UserAdminServlet extends HttpServlet {
     private final Engine mEngine = new Engine();
     private final String mSearchboxTemplate = loadTemplate("/admin/searchbox.html");
     private final String mClientTemplate = loadTemplate("/admin/client.html");
+    private final String mConfirmTemplate = loadTemplate("/admin/confirmdelete.html");
+    private final String mStyleSheet = loadTemplate("/admin/admin.css");
 
     private static String loadTemplate(String path) {
         InputStream stream = UserAdminServlet.class.getResourceAsStream(path);
@@ -89,24 +89,19 @@ public class UserAdminServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
     }
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        LOG.info("POST:");
-        LOG.info("servletPath:"+request.getServletPath());
-        LOG.info("pathInfo:"+request.getPathInfo());
-        LOG.info("contextPath:"+request.getContextPath());
-        LOG.info("requestURI:"+request.getRequestURI());
-        LOG.info("parameterMap:"+request.getParameterMap());
-    }
 
     String showClientInfo(String clientId) throws JsonProcessingException {
         if (clientId != null) {
             TalkClient client = db.findClientById(clientId);
             TalkClient deletedClient = db.findDeletedClientById(clientId);
             boolean deleted = false;
+            boolean recoverable = false;
             if (client == null && deletedClient != null) {
                 deleted = true;
                 client = deletedClient;
+                if (client.getSrpSavedVerifier() != null) {
+                    recoverable = true;
+                }
             }
             if (client != null) {
                 TalkClientHostInfo clientHostInfo = db.findClientHostInfoForClient(clientId);
@@ -115,16 +110,22 @@ public class UserAdminServlet extends HttpServlet {
                 ObjectMapper mapper = server.getJsonMapper();
                 mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
+                model.put("stylesheet", mStyleSheet);
                 model.put("clientId", clientId);
                 model.put("clientInfo", mapper.writeValueAsString(client));
                 model.put("clientHostInfo", mapper.writeValueAsString(clientHostInfo));
                 model.put("clientPresence", mapper.writeValueAsString(clientPresence));
+                model.put("search_action_url", "/admin/cidbyid");
 
                 boolean suspended = client.isSuspended(new Date());
 
                 if (deleted) {
                     model.put("delete_disabled", "disabled");
-                    model.put("undelete_disabled", "");
+                    if (recoverable) {
+                        model.put("undelete_disabled", "");
+                    } else {
+                        model.put("undelete_disabled", "disabled");
+                    }
                     model.put("suspend_disabled", "disabled");
                     model.put("unspend_disabled", "disabled");
                 } else {
@@ -148,7 +149,93 @@ public class UserAdminServlet extends HttpServlet {
                 return mEngine.transform(mClientTemplate, model);
             }
         }
-        return "Client not found";
+        HashMap<String, Object> model = new HashMap<String, Object>();
+        model.put("search_action_url", "/admin/cidbyid");
+        model.put("stylesheet", mStyleSheet);
+        model.put("ErrorMessage", "Error: Client with this id not found");
+
+        return mEngine.transform(mSearchboxTemplate, model);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        LOG.info("POST:");
+        LOG.info("servletPath:"+request.getServletPath());
+        LOG.info("pathInfo:"+request.getPathInfo());
+        LOG.info("contextPath:"+request.getContextPath());
+        LOG.info("requestURI:"+request.getRequestURI());
+        LOG.info("parameterMap:"+request.getParameterMap());
+
+        String auth = request.getHeader("Authorization");
+        // Do we allow that user?
+        if (!allowUser(auth)) {
+            // Not allowed, so report he's unauthorized
+            response.setHeader("WWW-Authenticate", "BASIC realm=\"Hoccer Server Admin\"");
+            response.sendError(response.SC_UNAUTHORIZED);
+            return;
+        }
+
+        server = (TalkServer)getServletContext().getAttribute("server");
+        db = server.getDatabase();
+
+        String pathInfo = request.getPathInfo();
+        String body = "Error";
+
+        if (pathInfo != null && pathInfo.startsWith("/suspend/")) {
+            LOG.info("-> suspend");
+            String[] components = pathInfo.split("/");
+            String clientId = components[2];
+            String durationString = request.getParameter("time");
+            long duration = Long.parseLong(durationString) * 1000;
+            LOG.info("suspend "+clientId+", duration="+duration);
+
+            TalkClient client = db.findClientById(clientId);
+            if (client != null) {
+                db.suspendClient(client, new Date(), duration);
+            }
+            body = showClientInfo(clientId);
+        } else if (pathInfo != null && pathInfo.startsWith("/unsuspend/")) {
+            LOG.info("-> unsuspend");
+            String[] components = pathInfo.split("/");
+            String clientId = components[2];
+
+            TalkClient client = db.findClientById(clientId);
+            if (client != null) {
+                db.unsuspendClient(client);
+            }
+            body = showClientInfo(clientId);
+        } else if (pathInfo != null && pathInfo.startsWith("/delete/")) {
+            LOG.info("-> delete");
+            String[] components = pathInfo.split("/");
+            String clientId = components[2];
+
+            TalkClient client = db.findClientById(clientId);
+            if (client != null) {
+                String confirmation = request.getParameter("confirm");
+                if ("yes".equals(confirmation)) {
+                    LOG.info("!!! deleting client:" + clientId);
+                    db.markClientDeleted(client, "Admin action");
+                    server.getUpdateAgent().requestAccountDeletion(clientId);
+                    body = showClientInfo(clientId);
+                } else {
+                    HashMap<String, Object> model = new HashMap<String, Object>();
+                    model.put("stylesheet", mStyleSheet);
+                    model.put("deleteLink", "/admin/delete/"+clientId);
+                    model.put("cancelLink", "/admin/idsearchbox");
+                    model.put("clientId", clientId);
+                    LOG.info("Map:"+model);
+                    body = mEngine.transform(mConfirmTemplate, model);
+                }
+            }
+        } else {
+            LOG.info("-> notfound");
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.getWriter().println("Not found");
+            return;
+        }
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType("text/html; charset=UTF-8");
+        response.getWriter().println(body);
     }
 
     @Override
@@ -178,33 +265,11 @@ public class UserAdminServlet extends HttpServlet {
             LOG.info("-> idsearchbox");
             HashMap<String, Object> model = new HashMap<String, Object>();
             model.put("search_action_url", "cidbyid");
+            model.put("stylesheet", mStyleSheet);
             body = mEngine.transform(mSearchboxTemplate, model);
         } else if (pathInfo != null && pathInfo.startsWith("/cidbyid")) {
             LOG.info("-> cidbyid");
             String clientId = request.getParameter("clientId");
-            body = showClientInfo(clientId);
-        } else if (pathInfo != null && pathInfo.startsWith("/suspend/")) {
-            LOG.info("-> suspend");
-            String[] components = pathInfo.split("/");
-            String clientId = components[2];
-            String durationString = request.getParameter("time");
-            long duration = Long.parseLong(durationString) * 1000;
-            LOG.info("suspend "+clientId+", duration="+duration);
-
-            TalkClient client = db.findClientById(clientId);
-            if (client != null) {
-                db.suspendClient(client, new Date(), duration);
-            }
-            body = showClientInfo(clientId);
-        } else if (pathInfo != null && pathInfo.startsWith("/unsuspend/")) {
-            LOG.info("-> unsuspend");
-            String[] components = pathInfo.split("/");
-            String clientId = components[2];
-
-            TalkClient client = db.findClientById(clientId);
-            if (client != null) {
-                db.unsuspendClient(client);
-            }
             body = showClientInfo(clientId);
         } else {
             LOG.info("-> notfound");

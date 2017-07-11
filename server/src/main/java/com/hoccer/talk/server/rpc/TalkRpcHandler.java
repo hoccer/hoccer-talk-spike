@@ -444,6 +444,11 @@ public class TalkRpcHandler implements ITalkRpcServer {
                     } else {
                         throw new RuntimeException("No such client");  // must not change this string, is checked on client side
                     }
+                } else {
+                    if (mSrpClient.isSuspended(new Date())) {
+                        Date until = new Date(mSrpClient.getTimeSuspended().getTime() + mSrpClient.getDurationSuspended());
+                        throw new RuntimeException("Client temporarily suspended until "+until);  // must not change this string, is checked on client side
+                    }
                 }
 
                 // verify SRP registration

@@ -34,6 +34,8 @@ public interface ITalkServerDatabase {
 
     public void markClientDeleted(TalkClient client, String reason);
 
+    public void unmarkClientDeleted(TalkClient client);
+
     public void suspendClient(TalkClient client, Date when, long duration);
 
     public void unsuspendClient(TalkClient client);
