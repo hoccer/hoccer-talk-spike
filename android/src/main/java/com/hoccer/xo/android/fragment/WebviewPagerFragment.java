@@ -83,7 +83,7 @@ public class WebviewPagerFragment extends PagerFragment {
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                if (url.startsWith(getString(R.string.link_benefits))){
+                if (url.startsWith(getString(R.string.link_benefits)) || url.contains("http://uniheld.cdemo.me")) {
                     return false;
                 }
 
