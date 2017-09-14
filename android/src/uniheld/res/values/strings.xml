@@ -23,7 +23,7 @@
     <!-- Tutorial and FAQ links -->
     <string name="link_tutorial">http://faq.hoccer.com/uniheld/tutorial/</string>
     <string name="link_faq">http://faq.hoccer.com/uniheld/</string>
-    <string name="link_benefits">"https://uniheld.campusbenefits.de/"</string>
+    <string name="link_benefits">"http://benefits.uniheld.com/"</string>
 
     <string name="menu_student_card">Student ID</string>
     <string name="title_activity_student_card">Student ID</string>
