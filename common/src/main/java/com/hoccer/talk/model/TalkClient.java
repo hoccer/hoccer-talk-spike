@@ -33,6 +33,7 @@ public class TalkClient {
     public static final String FIELD_TIME_DELETED         = "timeDeleted";
     public static final String FIELD_REASON_DELETED       = "reasonDeleted";
     public static final String FIELD_LAST_PUSH_MESSAGE    = "lastPushMessage";
+    public static final String FIELD_LATEST_PUSH_MESSAGE_TIME  = "latestPushMessageTime";
     public static final String FIELD_PUSH_ALERT_MESSAGE   = "pushAlertMessage";
     public static final String FIELD_APNS_MODE            = "apnsMode";
     public static final String FIELD_PUSH_RETRY_COUNT     = "pushRetryCount";
@@ -43,6 +44,7 @@ public class TalkClient {
 
     public static final String APNS_MODE_DEFAULT          = "default";
     public static final String APNS_MODE_BACKGROUND       = "background";
+    public static final String APNS_MODE_DIRECT           = "direct";
 
     /** Object ID for jongo */
     private String _id;
@@ -142,6 +144,10 @@ public class TalkClient {
     /** Duration of account suspension */
     @DatabaseField(columnName = FIELD_DURATION_SUSPENDED, canBeNull = true)
     long durationSuspended;
+
+    /** Time of last push notification */
+    @DatabaseField(columnName = FIELD_LATEST_PUSH_MESSAGE_TIME, canBeNull = true)
+    Date latestPushMessageTime;
 
     public TalkClient() {
     }
@@ -371,5 +377,13 @@ public class TalkClient {
 
     public void setSrpSavedVerifier(String srpSavedVerifier) {
         this.srpSavedVerifier = srpSavedVerifier;
+    }
+
+    public Date getLatestPushMessageTime() {
+        return latestPushMessageTime;
+    }
+
+    public void setLatestPushMessageTime(Date latestPushMessageTime) {
+        this.latestPushMessageTime = latestPushMessageTime;
     }
 }

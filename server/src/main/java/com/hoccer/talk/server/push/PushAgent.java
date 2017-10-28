@@ -5,6 +5,7 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.android.gcm.server.Sender;
 import com.hoccer.talk.model.TalkClient;
+import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServer;
 import com.hoccer.talk.server.TalkServerConfiguration;
@@ -135,7 +136,7 @@ public class PushAgent {
         }, 0, TimeUnit.MILLISECONDS);
     }
 
-    public void submitRequest(TalkClient client, boolean isRetry) {
+    public void submitRequest(TalkClient client, boolean isRetry, List<TalkDelivery> deliveries) {
         LOG.debug("submitRequest for client: " + client.getClientId() + ", lastPushMessage=" + client.getLastPushMessage()+", isRetry="+isRetry);
 
         if (isRetry) {
@@ -184,7 +185,7 @@ public class PushAgent {
                 pushBatchedMeter.mark();
             } else {
                 // schedule the request
-                final PushRequest request = new PushRequest(this, clientId, mDatabase.findClientHostInfoForClient(client.getClientId()));
+                final PushRequest request = new PushRequest(this, clientId, mDatabase.findClientHostInfoForClient(client.getClientId()), deliveries);
                 mExecutor.schedule(new Runnable() {
                     @Override
                     public void run() {
@@ -395,7 +396,7 @@ public class PushAgent {
                                     long limitPeriod = limitFactor * MIN_RETRY_PERIOD_IN_SECONDS * 1000;
                                     Date limit = new Date(new Date().getTime() - limitPeriod);
                                     if (request.getCreatedTime().before(limit)) {
-                                        submitRequest(client, true);
+                                        submitRequest(client, true, null);
                                         mNotAnswered.remove(clientId);
                                         LOG.info("expireMonitorTables: Expiring push monitor for client " + clientId + ", has not answered push after " + (new Date().getTime() - request.getCreatedTime().getTime()) / 1000 + " s");
                                         ++retriedPushes;

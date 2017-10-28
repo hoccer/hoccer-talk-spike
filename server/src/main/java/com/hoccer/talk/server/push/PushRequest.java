@@ -6,14 +6,17 @@ import com.google.android.gcm.server.Sender;
 import com.hoccer.talk.model.TalkClient;
 import com.hoccer.talk.model.TalkClientHostInfo;
 import com.hoccer.talk.model.TalkDelivery;
+import com.hoccer.talk.model.TalkMessage;
 import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServerConfiguration;
 import com.notnoop.apns.APNS;
 import com.notnoop.apns.ApnsService;
 import com.notnoop.apns.PayloadBuilder;
 import org.apache.log4j.Logger;
+import org.apache.log4j.filter.StringMatchFilter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -33,16 +36,19 @@ public class PushRequest {
     private final TalkServerConfiguration mConfig;
 
     private final Date mCreatedTime = new Date();
+    private final List<TalkDelivery> mDeliveries;
+    private List<TalkDelivery> mNewDeliveries;
 
     public Date getCreatedTime() {
         return mCreatedTime;
     }
 
-    public PushRequest(PushAgent agent, String clientId, TalkClientHostInfo clientHostInfo) {
+    public PushRequest(PushAgent agent, String clientId, TalkClientHostInfo clientHostInfo, List<TalkDelivery> deliveries) {
         mAgent = agent;
         mConfig = mAgent.getConfiguration();
         mClientId = clientId;
         mClientHostInfo = clientHostInfo;
+        mDeliveries = deliveries;
     }
 
     public String getClientId() {
@@ -55,6 +61,10 @@ public class PushRequest {
 
     public TalkClientHostInfo getClientHostInfo() {
         return mClientHostInfo;
+    }
+
+    public List<TalkDelivery> getDeliveries() {
+        return mDeliveries;
     }
 
     public boolean perform() {
@@ -80,7 +90,22 @@ public class PushRequest {
             return false;
         }
 
-        String messageInfo = "undelivered:"+deliveringCount;
+        mNewDeliveries = new ArrayList<TalkDelivery>();
+        Date latest = new Date(0);
+        Date lastLatest = new Date(0);
+        if (mClient.getLatestPushMessageTime() != null) {
+            lastLatest = mClient.getLatestPushMessageTime();
+        }
+        for (TalkDelivery delivery : deliveries) {
+            if (delivery.getTimeAccepted().after(lastLatest)) {
+                mNewDeliveries.add(delivery);
+                if (delivery.getTimeAccepted().after(latest)) {
+                    latest = delivery.getTimeAccepted();
+                }
+            }
+        }
+
+        String messageInfo = "undelivered:"+deliveringCount+":"+ String.valueOf(latest.getTime());
         LOG.debug("push messageInfo='" + messageInfo + "', last info='"+mClient.getLastPushMessage()+"'");
 
         if (messageInfo.equals(mClient.getLastPushMessage())) {
@@ -104,6 +129,7 @@ public class PushRequest {
             return false;
         }
         mClient.setLastPushMessage(messageInfo);
+        mClient.setLatestPushMessageTime(latest);
         database.saveClient(mClient);
         return didWakeupPush;
     }
@@ -146,6 +172,8 @@ public class PushRequest {
         ApnsService apnsService = mAgent.getApnsService(clientName, type);
 
         if (apnsService != null) {
+
+            boolean done = false;
             LOG.debug("APNS push for " + mClientId + " using " + type + " type, token "+mClient.getApnsToken());
 
             PayloadBuilder b = APNS.newPayload();
@@ -158,7 +186,42 @@ public class PushRequest {
                 b.badge(messageCount);
                 b.forNewsstand();
                 backgroundPush = true;
-            }  else {
+            } else if (TalkClient.APNS_MODE_DIRECT.equals(mClient.getApnsMode()) && mDeliveries != null) {
+                ITalkServerDatabase database = mAgent.getDatabase();
+                for (TalkDelivery delivery : mNewDeliveries) {
+                    TalkMessage message = database.findMessageById(delivery.getMessageId());
+                    if (message == null) {
+                        LOG.warn("APNS push: message not found: " + delivery.getMessageId());
+                    } else {
+                        String cipherText = delivery.getKeyCiphertext();
+                        String keyId = delivery.getKeyId();
+                        String body = message.getBody();
+                        String salt = message.getSalt();
+                        // TODO: send group and sender as hashes
+                        String sender = message.getSenderId();
+                        String group = delivery.getGroupId();
+                        String saltAttr = "";
+                        if (salt != null) {
+                            saltAttr = ", \"salt\":\"" + salt +"\"";
+                        }
+                        String groupAttr = "";
+                        if (group != null) {
+                            groupAttr = ", \"group\":\"" + group +"\"";
+                        }
+                        String apnMessage = "{\"aps\":{\"badge\":" + String.valueOf(messageCount) +
+                                ",\"alert\":{\"title\":\"Message\",\"body\":\"has arrived\"},\"sound\":\"default\",\"mutable-content\":1},\"keyCiphertext\":\"" +
+                                cipherText + "\", \"keyId\":\"" + keyId + "\", \"body\":\"" + body + "\", \"sender\":\""+sender+"\""+groupAttr+saltAttr+"}";
+                        if (apnMessage.length() < 4096) {
+                            LOG.debug("APNS direct push for " + mClientId + ", message:" + apnMessage);
+                            apnsService.push(mClient.getApnsToken(), apnMessage);
+                            done = true;
+                        } else {
+                            LOG.debug("APNS message too long for direct push for client " + mClientId + ", message:" + apnMessage);
+                        }
+                    }
+                }
+            }
+            if (!done && !backgroundPush) {
                 LOG.debug("Performing APNS foreground push for "+mClientId + " clientName '" + clientName + "' and type '" + type + "'");
                 // default message
                 if (messageCount > 1) {
@@ -167,11 +230,15 @@ public class PushRequest {
                 } else {
                     b.localizedKey("apn_one_new_message");
                 }
-
                 b.badge(messageCount);
                 b.sound("default");
             }
-            apnsService.push(mClient.getApnsToken(), b.build());
+            if (!done) {
+                String message = b.build();
+                LOG.debug("APNS push for " + mClientId + "message:" + message);
+                apnsService.push(mClient.getApnsToken(), message);
+            }
+
             return backgroundPush;
         } else {
             LOG.error("APNS push skipped, no service configured for clientName '" + clientName + "' and type '" + type + "'");

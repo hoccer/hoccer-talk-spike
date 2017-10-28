@@ -288,7 +288,7 @@ public class DeliveryRequest {
             }
             if (needToNotify) {
                 LOG.debug("pushing " + mClientId);
-                performPush();
+                performPush(inDeliveries);
             }
         }
         if (currentlyConnected && inDeliveries.isEmpty()) {
@@ -296,14 +296,14 @@ public class DeliveryRequest {
         }
     }
 
-    private void performPush() {
+    private void performPush(List<TalkDelivery> deliveries) {
         // find client in database
         TalkClient client = mDatabase.findClientById(mClientId);
         // send push request
         if (client.isPushCapable()) {
-            mServer.getPushAgent().submitRequest(client, false);
+            mServer.getPushAgent().submitRequest(client, false, deliveries);
         } else {
-            mServer.getPushAgent().submitRequest(client, false); // try push anyway to get push incapable stats
+            mServer.getPushAgent().submitRequest(client, false, deliveries); // try push anyway to get push incapable stats
             LOG.warn("push unconfigured for " + mClientId);
         }
     }

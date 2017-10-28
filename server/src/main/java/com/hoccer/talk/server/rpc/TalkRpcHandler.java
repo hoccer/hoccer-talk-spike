@@ -622,7 +622,9 @@ public class TalkRpcHandler implements ITalkRpcServer {
     public void setApnsMode(String mode) {
         requireIdentification(true);
         logCall("setApnsMode('" + mode + "')");
-        if (TalkClient.APNS_MODE_DEFAULT.equals(mode) || TalkClient.APNS_MODE_BACKGROUND.equals(mode)) {
+        if (TalkClient.APNS_MODE_DEFAULT.equals(mode) ||
+                TalkClient.APNS_MODE_BACKGROUND.equals(mode) ||
+                TalkClient.APNS_MODE_DIRECT.equals(mode)) {
             TalkClient client = mConnection.getClient();
             client.setApnsMode(mode);
             mDatabase.saveClient(client);

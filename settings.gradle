@@ -12,7 +12,7 @@ include ':hoccer-talk-client'
 include ':hoccer-talk-server'
 include ':hoccer-talk-filecache'
 include ':hoccer-talk-tool'
-include ':hoccer-talk-android'
+//include ':hoccer-talk-android'
 include ':integration-tests'
 include ':webclient-backend'
 include ':drag-sort-listview'
@@ -26,11 +26,11 @@ project(':better-jsonrpc-websocket-java').projectDir = "$rootDir/jsonrpc-websock
 project(':better-jsonrpc-websocket-jetty').projectDir = "$rootDir/jsonrpc-websocket-jetty" as File
 project(':hoccer-talk-srp').projectDir = "$rootDir/srp" as File
 project(':hoccer-talk-common').projectDir = "$rootDir/common" as File
-project(':hoccer-talk-client').projectDir = "$rootDir/client" as File
+//project(':hoccer-talk-client').projectDir = "$rootDir/client" as File
 project(':hoccer-talk-server').projectDir = "$rootDir/server" as File
-project(':hoccer-talk-filecache').projectDir = "$rootDir/filecache" as File
-project(':hoccer-talk-tool').projectDir = "$rootDir/tool" as File
-project(':hoccer-talk-android').projectDir = "$rootDir/android" as File
-project(':integration-tests').projectDir = "$rootDir/integration-tests" as File
-project(':webclient-backend').projectDir = "$rootDir/webclient-backend" as File
-project(':drag-sort-listview').projectDir = "$rootDir/library" as File
+//project(':hoccer-talk-filecache').projectDir = "$rootDir/filecache" as File
+//project(':hoccer-talk-tool').projectDir = "$rootDir/tool" as File
+//project(':hoccer-talk-android').projectDir = "$rootDir/android" as File
+//project(':integration-tests').projectDir = "$rootDir/integration-tests" as File
+//project(':webclient-backend').projectDir = "$rootDir/webclient-backend" as File
+//project(':drag-sort-listview').projectDir = "$rootDir/library" as File
