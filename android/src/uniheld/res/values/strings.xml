@@ -25,7 +25,7 @@
     <string name="link_tutorial">http://faq.uniheld.com/tutorial/</string>
     <string name="link_faq">http://faq.uniheld.com/</string>
     <string name="link_faq_id">http://faq.uniheld.com/2017/02/21/the-uniheld-student-id/</string>
-    <string name="link_benefits">"http://benefits.uniheld.com/"</string>
+    <string name="link_benefits">"https://benefits.uniheld.com/"</string>
 
     <string name="menu_student_card">Student ID</string>
     <string name="title_activity_student_card">Student ID</string>
