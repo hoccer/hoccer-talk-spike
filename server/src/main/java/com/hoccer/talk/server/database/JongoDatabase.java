@@ -570,6 +570,11 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public void updateDeliveryTimeClientNotified(TalkDelivery delivery) {
+        mDeliveries.update("{ _id:# }", delivery.getId()).with("{$set: { timeClientNotified:# }}", delivery.getTimeClientNotified());
+    }
+
+    @Override
     @NotNull
     public List<TalkToken> findTokensByClient(String clientId) {
         Iterator<TalkToken> it = mTokens

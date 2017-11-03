@@ -252,43 +252,49 @@ public class DeliveryRequest {
             }
             mForceAll = false;
         } else {
-            inDeliveries = mDatabase.findDeliveriesForClientInState(mClientId, TalkDelivery.STATE_DELIVERING);
-            LOG.debug("unconnected clientId: '" + mClientId + "' has " + inDeliveries.size() + " incoming deliveries");
-          }
 
-        // initiate push delivery if needed
-        if (!inDeliveries.isEmpty() && !currentlyConnected) {
-            LOG.debug("check if push-notify " + mClientId);
+            synchronized (mServer.idLock(mClientId)) {
+                inDeliveries = mDatabase.findDeliveriesForClientInState(mClientId, TalkDelivery.STATE_DELIVERING);
+                LOG.debug("unconnected clientId: '" + mClientId + "' has " + inDeliveries.size() + " incoming deliveries");
 
-            boolean needToNotify = false;
+                List<TalkDelivery> notifyDeliveries = new ArrayList<TalkDelivery>();
+                // initiate push delivery if needed
+                if (!inDeliveries.isEmpty() && !currentlyConnected) {
+                    LOG.debug("check if push-notify " + mClientId);
 
-            for (TalkDelivery delivery : inDeliveries) {
-                TalkRelationship relationship = mDatabase.findRelationshipBetween(delivery.getReceiverId(), delivery.getSenderId());
-                if (relationship != null && TalkRelationship.NOTIFICATIONS_DISABLED.equals(relationship.getNotificationPreference())) {
-                    LOG.debug("notifications disabled for sender "+delivery.getSenderId()+ " by " + mClientId);
-                } else if (delivery.getGroupId() != null) {
-                     TalkGroupMembership membership = mDatabase.findGroupMembershipForClient(delivery.getGroupId(), mClientId);
-                    if (membership == null) {
-                        LOG.debug("notifications: no membership for group " + delivery.getGroupId() + " by " + mClientId);
-                    } else {
-                        LOG.debug("notifications: preferences are '"+membership.getNotificationPreference()+"' for group " + delivery.getGroupId() + " by " + mClientId);
+                    TalkClient client = mDatabase.findClientById(mClientId);
+
+                    for (TalkDelivery delivery : inDeliveries) {
+                        if (TalkClient.APNS_MODE_DIRECT.equals(client.getApnsMode()) && delivery.getTimeClientNotified() != null) {
+                            LOG.debug("direct notication already sent for message " + delivery.getMessageId() + " for client " + mClientId);
+                        } else {
+                            TalkRelationship relationship = mDatabase.findRelationshipBetween(delivery.getReceiverId(), delivery.getSenderId());
+                            if (relationship != null && TalkRelationship.NOTIFICATIONS_DISABLED.equals(relationship.getNotificationPreference())) {
+                                LOG.debug("notifications disabled for sender " + delivery.getSenderId() + " by " + mClientId);
+                            } else if (delivery.getGroupId() != null) {
+                                TalkGroupMembership membership = mDatabase.findGroupMembershipForClient(delivery.getGroupId(), mClientId);
+                                if (membership == null) {
+                                    LOG.debug("notifications: no membership for group " + delivery.getGroupId() + " by " + mClientId);
+                                } else {
+                                    LOG.debug("notifications: preferences are '" + membership.getNotificationPreference() + "' for group " + delivery.getGroupId() + " by " + mClientId);
+                                }
+                                if (membership == null || TalkGroupMembership.NOTIFICATIONS_DISABLED.equals(membership.getNotificationPreference())) {
+                                    LOG.debug("notifications disabled for group " + delivery.getGroupId() + " by " + mClientId);
+                                } else {
+                                    LOG.debug("notifications not disabled for group " + delivery.getGroupId() + " by " + mClientId);
+                                    notifyDeliveries.add(delivery);
+                                }
+                            } else {
+                                LOG.debug("notifications not disabled for sender " + delivery.getSenderId() + " by " + mClientId);
+                                notifyDeliveries.add(delivery);
+                            }
+                        }
                     }
-                     if (membership == null || TalkGroupMembership.NOTIFICATIONS_DISABLED.equals(membership.getNotificationPreference())) {
-                         LOG.debug("notifications disabled for group "+delivery.getGroupId()+ " by " + mClientId);
-                     } else {
-                         LOG.debug("notifications not disabled for group "+delivery.getGroupId()+ " by " + mClientId);
-                         needToNotify = true;
-                         break;
-                     }
-                 } else {
-                    LOG.debug("notifications not disabled for sender "+delivery.getSenderId()+ " by " + mClientId);
-                    needToNotify = true;
-                    break;
+                    if (notifyDeliveries.size() > 0) {
+                        LOG.debug("pushing " + mClientId);
+                        performPush(client, inDeliveries, notifyDeliveries);
+                    }
                 }
-            }
-            if (needToNotify) {
-                LOG.debug("pushing " + mClientId);
-                performPush(inDeliveries);
             }
         }
         if (currentlyConnected && inDeliveries.isEmpty()) {
@@ -296,14 +302,12 @@ public class DeliveryRequest {
         }
     }
 
-    private void performPush(List<TalkDelivery> deliveries) {
-        // find client in database
-        TalkClient client = mDatabase.findClientById(mClientId);
+    private void performPush(TalkClient client, List<TalkDelivery> deliveries, List<TalkDelivery> notifyDeliveries) {
         // send push request
         if (client.isPushCapable()) {
-            mServer.getPushAgent().submitRequest(client, false, deliveries);
+            mServer.getPushAgent().submitRequest(client, false, deliveries, notifyDeliveries);
         } else {
-            mServer.getPushAgent().submitRequest(client, false, deliveries); // try push anyway to get push incapable stats
+            mServer.getPushAgent().submitRequest(client, false, deliveries, notifyDeliveries); // try push anyway to get push incapable stats
             LOG.warn("push unconfigured for " + mClientId);
         }
     }

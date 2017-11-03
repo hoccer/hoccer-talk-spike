@@ -9,9 +9,12 @@ import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServer;
 import com.hoccer.talk.server.TalkServerConfiguration;
+import com.hoccer.talk.util.MapUtil;
 import com.hoccer.talk.util.NamedThreadFactory;
 import com.notnoop.apns.APNS;
 import com.notnoop.apns.ApnsService;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 
 import java.util.*;
@@ -136,8 +139,25 @@ public class PushAgent {
         }, 0, TimeUnit.MILLISECONDS);
     }
 
-    public void submitRequest(TalkClient client, boolean isRetry, List<TalkDelivery> deliveries) {
-        LOG.debug("submitRequest for client: " + client.getClientId() + ", lastPushMessage=" + client.getLastPushMessage()+", isRetry="+isRetry);
+    private List<TalkDelivery> deliveriesSortedByAcceptedTime(List<TalkDelivery> deliveries) {
+        Map<Integer, Long> accteptedTimeByIndex = new HashMap<Integer, Long>();
+        for (int i = 0; i < deliveries.size(); ++i) {
+            accteptedTimeByIndex.put(i, deliveries.get(i).getTimeAccepted().getTime());
+        }
+        accteptedTimeByIndex = MapUtil.sortByValueDescending(accteptedTimeByIndex);
+
+        ArrayList<TalkDelivery> result = new ArrayList<TalkDelivery>();
+        for (Map.Entry<Integer, Long> entry : accteptedTimeByIndex.entrySet()) {
+            result.add(deliveries.get(entry.getKey()));
+        }
+        return result;
+    }
+
+    // TODO: remove isRetry as it is no longer used
+    public void submitRequest(TalkClient client, boolean isRetry, List<TalkDelivery> deliveries, List<TalkDelivery> notifyDeliveries) {
+        LOG.debug("submitRequest for client: " + client.getClientId() +
+                ", lastPushMessage=" + client.getLastPushMessage()+", isRetry="+isRetry+
+                ", deliveries="+ deliveries.size()+", notifyDeliveries="+notifyDeliveries.size());
 
         if (isRetry) {
             client.setPushRetryCount(client.getPushRetryCount()+1);
@@ -166,14 +186,15 @@ public class PushAgent {
         long delta = Math.max(0, now - lastPush.getTime());
         long delay = 0;
         int limit = mConfig.getPushRateLimit();
-        if (delta < limit) {
+        if (delta < limit && !TalkClient.APNS_MODE_DIRECT.equals(client.getApnsMode())) {
             mPushDelayed.incrementAndGet();
             pushDelayedMeter.mark();
             delay = Math.max(0, limit - delta);
         }
 
         // update timestamp
-        client.setTimeLastPush(new Date());
+        Date pushTime = new Date();
+        client.setTimeLastPush(pushTime);
         mDatabase.saveClient(client);
 
         // only perform push when we aren't doing so already
@@ -184,8 +205,14 @@ public class PushAgent {
                 mPushBatched.incrementAndGet();
                 pushBatchedMeter.mark();
             } else {
+                List<TalkDelivery> newDeliveries = deliveriesSortedByAcceptedTime(notifyDeliveries);
+
                 // schedule the request
-                final PushRequest request = new PushRequest(this, clientId, mDatabase.findClientHostInfoForClient(client.getClientId()), deliveries);
+                final PushRequest request = new PushRequest(this,
+                        clientId,
+                        mDatabase.findClientHostInfoForClient(clientId),
+                        deliveries.size(),
+                        newDeliveries);
                 mExecutor.schedule(new Runnable() {
                     @Override
                     public void run() {
@@ -374,6 +401,7 @@ public class PushAgent {
             }
         }, 0, TimeUnit.MILLISECONDS);
     }
+    /*
     public void performPushRetries() {
         mExecutor.schedule(new Runnable() {
             @Override
@@ -414,5 +442,6 @@ public class PushAgent {
             }
         }, 0, TimeUnit.MILLISECONDS);
     }
+    */
 
 }

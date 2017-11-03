@@ -95,6 +95,8 @@ public interface ITalkServerDatabase {
 
     public void saveDelivery(TalkDelivery delivery);
 
+    public void updateDeliveryTimeClientNotified(TalkDelivery delivery);
+
     public List<TalkToken> findTokensByClient(String clientId);
 
     public TalkToken findTokenByPurposeAndSecret(String purpose, String secret);

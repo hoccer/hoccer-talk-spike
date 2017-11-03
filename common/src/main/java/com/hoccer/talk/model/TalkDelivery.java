@@ -36,6 +36,8 @@ public class TalkDelivery {
     public static final String FIELD_ATTACHMENT_STATE = "attachmentState";
     public static final String FIELD_TIME_ATTACHMENT_RECEIVED = "timeAttachmentReceived";
     public static final String FIELD_REASON = "reason";
+    public static final String FIELD_TIME_CLIENT_NOTIFIED = "timeClientNotified";
+
 
     public static final String[] REQUIRED_OUT_RESULT_FIELDS = {FIELD_DELIVERY_ID, FIELD_MESSAGE_ID, FIELD_MESSAGE_TAG,
             FIELD_SENDER_ID, FIELD_RECEIVER_ID, FIELD_GROUP_ID, FIELD_STATE, FIELD_TIME_ACCEPTED, FIELD_TIME_CHANGED,
@@ -703,6 +705,9 @@ public class TalkDelivery {
     @DatabaseField(columnName = FIELD_REASON, canBeNull = true)
     String reason;
 
+    @DatabaseField(columnName = FIELD_TIME_CLIENT_NOTIFIED, canBeNull = true)
+    Date timeClientNotified;
+
     public TalkDelivery() {
     }
 
@@ -900,6 +905,14 @@ public class TalkDelivery {
         this.reason = reason;
     }
 
+    public Date getTimeClientNotified() {
+        return timeClientNotified;
+    }
+
+    public void setTimeClientNotified(Date timeClientNotified) {
+        this.timeClientNotified = timeClientNotified;
+    }
+
     @JsonIgnore
     public String getId() {
         return _id;
@@ -923,6 +936,7 @@ public class TalkDelivery {
         this.timeAttachmentReceived = delivery.getTimeAttachmentReceived();
         this.attachmentState = delivery.getAttachmentState();
         this.reason = delivery.getReason();
+        this.timeClientNotified = delivery.getTimeClientNotified();
     }
 
     @JsonIgnore
@@ -972,6 +986,9 @@ public class TalkDelivery {
         }
         if (this.reason != null) {
             result.add(TalkDelivery.FIELD_REASON);
+        }
+        if (this.timeClientNotified != null) {
+            result.add(TalkDelivery.FIELD_TIME_CLIENT_NOTIFIED);
         }
 
         return result;
@@ -1024,6 +1041,9 @@ public class TalkDelivery {
         if (fields == null || fields.contains(TalkDelivery.FIELD_REASON)) {
             this.reason = delivery.getReason();
         }
+        if (fields == null || fields.contains(TalkDelivery.FIELD_TIME_CLIENT_NOTIFIED)) {
+            this.timeClientNotified = delivery.getTimeClientNotified();
+        }
     }
     public String dump() {
         String delim = "\n";
@@ -1043,6 +1063,7 @@ public class TalkDelivery {
                 delim+FIELD_TIME_UPDATED_IN + delim2 + timeUpdatedIn +
                 delim+FIELD_TIME_ATTACHMENT_RECEIVED + delim2 + timeAttachmentReceived +
                 delim+FIELD_ATTACHMENT_STATE + delim2 + attachmentState +
-                delim+FIELD_REASON + delim2 + reason);
+                delim+FIELD_REASON + delim2 + reason +
+                delim+FIELD_TIME_CLIENT_NOTIFIED + delim2 + timeClientNotified);
     }
 }

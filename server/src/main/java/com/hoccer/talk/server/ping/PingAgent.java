@@ -70,7 +70,7 @@ public class PingAgent {
                     pingReadyClients();
                     disconnectStaleClients();
                     mServer.getPushAgent().expireMonitorTables();
-                    mServer.getPushAgent().performPushRetries();
+                    //mServer.getPushAgent().performPushRetries(); // push retries have not improved notification delivery
                 } catch (Throwable t) {
                     LOG.error("caught and swallowed exception escaping runnable", t);
                 }
