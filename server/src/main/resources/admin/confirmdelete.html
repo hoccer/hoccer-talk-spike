@@ -2,9 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />
+
+    <title>Really delete Client ${clientId}?</title>
+    <style type="text/css">
+        ${stylesheet}
+    </style>
 </head>
 <body>
+<div id="tfheader">
 
+    <h3>Do you really want to delete client ${clientId}?</h3>
+    <div>All friends and group memberships will be gone forever.</div>
+    <form  action="${deleteLink}" method="POST">
+        <button class="actbutton" type="submit" id="delete" name="confirm" value="yes">Delete User</button>
+    </form>
+    <p></p>
+    <form  action="${cancelLink}">
+        <button class="actbutton" type="submit" class="button">Cancel</button>
+    </form>
+</div>
+</div>
 </body>
 </html>
