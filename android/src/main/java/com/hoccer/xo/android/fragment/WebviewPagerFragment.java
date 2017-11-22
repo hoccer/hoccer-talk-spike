@@ -105,6 +105,39 @@ public class WebviewPagerFragment extends PagerFragment  {
         webView = (WebView) view.findViewById(R.id.webview);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.setWebChromeClient(new WebChromeClient() {
+
+            // file upload callback (Android 3.0 (API level 11) -- Android 4.0 (API level 15)) (hidden method)
+            public void openFileChooser(ValueCallback filePathCallback, String acceptType) {
+
+            }
+
+            // file upload callback (Android 4.1 (API level 16) -- Android 4.3 (API level 18)) (hidden method)
+            public void openFileChooser(final ValueCallback<Uri> filePathCallback, final String acceptType, String capture) {
+                ValueCallback<Uri[]> callBack = new ValueCallback<Uri[]>(){
+                    @Override
+                    public void onReceiveValue(Uri[] uris) {
+                        filePathCallback.onReceiveValue(uris[0]);
+                    }
+                };
+
+                Intent contentSelectionIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                contentSelectionIntent.addCategory(Intent.CATEGORY_OPENABLE);
+                contentSelectionIntent.setType("image/*");
+                WebviewPagerFragment.this.filePathCallback = callBack;
+
+                Intent chooserIntent = new Intent(Intent.ACTION_CHOOSER);
+                chooserIntent.putExtra(Intent.EXTRA_INTENT, contentSelectionIntent);
+                chooserIntent.putExtra(Intent.EXTRA_TITLE, R.string.title_profile_upload);
+                outputFile = new File(XoApplication.getAttachmentDirectory(),"uniheldID.jpg");
+
+                Intent camIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                camIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(outputFile));
+                Intent[] intentArray = {camIntent};
+                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, intentArray);
+
+                startActivityForResult(chooserIntent, REQUEST_UPLOAD_IMAGE);
+            }
+
             @Override
             public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
                 Intent contentSelectionIntent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -124,7 +157,6 @@ public class WebviewPagerFragment extends PagerFragment  {
 
                 startActivityForResult(chooserIntent, REQUEST_UPLOAD_IMAGE);
                 return true;
-
             }
         });
 
