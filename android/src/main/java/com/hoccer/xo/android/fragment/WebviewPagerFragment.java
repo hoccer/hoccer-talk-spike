@@ -110,7 +110,7 @@ public class WebviewPagerFragment extends PagerFragment  {
                 Intent contentSelectionIntent = new Intent(Intent.ACTION_GET_CONTENT);
                 contentSelectionIntent.addCategory(Intent.CATEGORY_OPENABLE);
                 contentSelectionIntent.setType("image/*");
-                this.filePathCallback = filePathCallback;
+                WebviewPagerFragment.this.filePathCallback = filePathCallback;
 
                 Intent chooserIntent = new Intent(Intent.ACTION_CHOOSER);
                 chooserIntent.putExtra(Intent.EXTRA_INTENT, contentSelectionIntent);
