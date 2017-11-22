@@ -32,5 +32,7 @@
     <string name="action_take_picture">Ausweis fotografieren</string>
     <string name="action_student_card_faq">Studentenausweis FAQ</string>
 
+    <string name="title_profile_upload">Wähle dein Profilbild</string>
+
     <string name="student_card_description">Fotografiere deinen Studentenausweis</string>
 </resources>

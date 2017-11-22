@@ -114,7 +114,7 @@ public class WebviewPagerFragment extends PagerFragment  {
 
                 Intent chooserIntent = new Intent(Intent.ACTION_CHOOSER);
                 chooserIntent.putExtra(Intent.EXTRA_INTENT, contentSelectionIntent);
-                chooserIntent.putExtra(Intent.EXTRA_TITLE, "Upload");
+                chooserIntent.putExtra(Intent.EXTRA_TITLE, R.string.title_profile_upload);
                 outputFile = new File(XoApplication.getAttachmentDirectory(),"uniheldID.jpg");
 
                 Intent camIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
