@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.fragment;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -10,28 +11,34 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.*;
 import com.artcom.hoccer.R;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.PagerFragment;
 import com.hoccer.xo.android.view.Placeholder;
 import org.apache.log4j.Logger;
+
+import java.io.File;
 
 public class WebviewPagerFragment extends PagerFragment  {
 
     protected static final Logger LOG = Logger.getLogger(WebviewPagerFragment.class);
 
     private static final Placeholder PLACEHOLDER = new Placeholder(R.drawable.placeholder_benefits, R.string.placeholder_benefits_offline);
+    private static final int REQUEST_UPLOAD_IMAGE = 1;
     private final ConnectivityReceiver connectivityReceiver = new ConnectivityReceiver();
     private  ConnectivityManager connectivityManager;
-
+    private ValueCallback<Uri[]> filePathCallback;
     private WebView webView;
     private SwipeRefreshLayout swipeRefreshLayout;
 
     private String url;
+    private File outputFile;
 
     private class ConnectivityReceiver extends BroadcastReceiver {
 
@@ -97,6 +104,30 @@ public class WebviewPagerFragment extends PagerFragment  {
 
         webView = (WebView) view.findViewById(R.id.webview);
         webView.getSettings().setJavaScriptEnabled(true);
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
+                Intent contentSelectionIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                contentSelectionIntent.addCategory(Intent.CATEGORY_OPENABLE);
+                contentSelectionIntent.setType("image/*");
+                this.filePathCallback = filePathCallback;
+
+                Intent chooserIntent = new Intent(Intent.ACTION_CHOOSER);
+                chooserIntent.putExtra(Intent.EXTRA_INTENT, contentSelectionIntent);
+                chooserIntent.putExtra(Intent.EXTRA_TITLE, "Upload");
+                outputFile = new File(XoApplication.getAttachmentDirectory(),"uniheldID.jpg");
+
+                Intent camIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                camIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(outputFile));
+                Intent[] intentArray = {camIntent};
+                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, intentArray);
+
+                startActivityForResult(chooserIntent, REQUEST_UPLOAD_IMAGE);
+                return true;
+
+            }
+        });
+
         webView.setWebViewClient(new WebViewClient() {
 
             @Override
@@ -147,6 +178,24 @@ public class WebviewPagerFragment extends PagerFragment  {
         url = getArguments().getString("url");
         webView.loadUrl(url);
         return view;
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Uri[] results = null;
+        if (requestCode == REQUEST_UPLOAD_IMAGE && resultCode == Activity.RESULT_OK) {
+            if (data == null) {
+                results = new Uri[]{Uri.fromFile(outputFile)};
+            } else {
+                String dataString = data.getDataString();
+                if (dataString != null) {
+                    results = new Uri[]{Uri.parse(dataString)};
+                } else {
+                    results = new Uri[]{Uri.fromFile(outputFile)};
+                }
+            }
+        }
+        filePathCallback.onReceiveValue(results);
+        filePathCallback = null;
     }
 
     public WebView getWebView() {
