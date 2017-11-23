@@ -221,8 +221,9 @@ public class WebviewPagerFragment extends PagerFragment  {
                     results = new Uri[]{Uri.fromFile(outputFile)};
                 }
             }
-            filePathCallback.onReceiveValue(results);
-
+            if (results!=null) {
+                filePathCallback.onReceiveValue(results);
+            }
         }
         filePathCallback = null;
     }
