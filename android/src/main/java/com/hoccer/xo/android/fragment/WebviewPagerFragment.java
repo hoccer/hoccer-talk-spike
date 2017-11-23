@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -108,7 +109,7 @@ public class WebviewPagerFragment extends PagerFragment  {
 
             // file upload callback (Android 3.0 (API level 11) -- Android 4.0 (API level 15)) (hidden method)
             public void openFileChooser(ValueCallback filePathCallback, String acceptType) {
-
+                openFileChooser(filePathCallback, acceptType, "Upload");
             }
 
             // file upload callback (Android 4.1 (API level 16) -- Android 4.3 (API level 18)) (hidden method)
@@ -120,42 +121,12 @@ public class WebviewPagerFragment extends PagerFragment  {
                     }
                 };
 
-                Intent contentSelectionIntent = new Intent(Intent.ACTION_GET_CONTENT);
-                contentSelectionIntent.addCategory(Intent.CATEGORY_OPENABLE);
-                contentSelectionIntent.setType("image/*");
-                WebviewPagerFragment.this.filePathCallback = callBack;
-
-                Intent chooserIntent = new Intent(Intent.ACTION_CHOOSER);
-                chooserIntent.putExtra(Intent.EXTRA_INTENT, contentSelectionIntent);
-                chooserIntent.putExtra(Intent.EXTRA_TITLE, R.string.title_profile_upload);
-                outputFile = new File(XoApplication.getAttachmentDirectory(),"uniheldID.jpg");
-
-                Intent camIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                camIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(outputFile));
-                Intent[] intentArray = {camIntent};
-                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, intentArray);
-
-                startActivityForResult(chooserIntent, REQUEST_UPLOAD_IMAGE);
+                startFileUploadActivity(callBack);
             }
 
             @Override
             public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
-                Intent contentSelectionIntent = new Intent(Intent.ACTION_GET_CONTENT);
-                contentSelectionIntent.addCategory(Intent.CATEGORY_OPENABLE);
-                contentSelectionIntent.setType("image/*");
-                WebviewPagerFragment.this.filePathCallback = filePathCallback;
-
-                Intent chooserIntent = new Intent(Intent.ACTION_CHOOSER);
-                chooserIntent.putExtra(Intent.EXTRA_INTENT, contentSelectionIntent);
-                chooserIntent.putExtra(Intent.EXTRA_TITLE, R.string.title_profile_upload);
-                outputFile = new File(XoApplication.getAttachmentDirectory(),"uniheldID.jpg");
-
-                Intent camIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                camIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(outputFile));
-                Intent[] intentArray = {camIntent};
-                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, intentArray);
-
-                startActivityForResult(chooserIntent, REQUEST_UPLOAD_IMAGE);
+                startFileUploadActivity(filePathCallback);
                 return true;
             }
         });
@@ -212,22 +183,63 @@ public class WebviewPagerFragment extends PagerFragment  {
         return view;
     }
 
+    private void startFileUploadActivity(ValueCallback<Uri[]> callBack){
+        Intent contentSelectionIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        contentSelectionIntent.addCategory(Intent.CATEGORY_OPENABLE);
+        contentSelectionIntent.setType("image/*");
+        this.filePathCallback = callBack;
+
+        Intent chooserIntent = new Intent(Intent.ACTION_CHOOSER);
+        chooserIntent.putExtra(Intent.EXTRA_INTENT, contentSelectionIntent);
+        chooserIntent.putExtra(Intent.EXTRA_TITLE, R.string.title_profile_upload);
+        outputFile = new File(XoApplication.getAttachmentDirectory(),"uniheldID.jpg");
+
+        Intent camIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        camIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(outputFile));
+        Intent[] intentArray = {camIntent};
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, intentArray);
+
+        startActivityForResult(chooserIntent, REQUEST_UPLOAD_IMAGE);
+    }
+
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Uri[] results = null;
+        Uri[] results;
         if (requestCode == REQUEST_UPLOAD_IMAGE && resultCode == Activity.RESULT_OK) {
             if (data == null) {
                 results = new Uri[]{Uri.fromFile(outputFile)};
             } else {
                 String dataString = data.getDataString();
                 if (dataString != null) {
+                    if (dataString.startsWith("content")) {
+                        String filePath = getRealPathFromUri(webView.getContext(), Uri.parse(dataString));
+                        if (filePath!=null) {
+                            dataString = Uri.fromFile(new File(filePath)).toString();
+                        }
+                    }
                     results = new Uri[]{Uri.parse(dataString)};
                 } else {
                     results = new Uri[]{Uri.fromFile(outputFile)};
                 }
             }
+            filePathCallback.onReceiveValue(results);
+
         }
-        filePathCallback.onReceiveValue(results);
         filePathCallback = null;
+    }
+
+    public static String getRealPathFromUri(Context context, Uri contentUri) {
+        Cursor cursor = null;
+        try {
+            String[] proj = { MediaStore.Images.Media.DATA };
+            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
     }
 
     public WebView getWebView() {
