@@ -20,6 +20,7 @@
 
     <string name="chats_tab_name">CHATS</string>
     <string name="benefits_tab_name">BENEFITS</string>
+    <string name="title_profile_upload">Choose your profile picture</string>
 
     <!-- Tutorial and FAQ links -->
     <string name="link_tutorial">http://faq.uniheld.com/tutorial/</string>
