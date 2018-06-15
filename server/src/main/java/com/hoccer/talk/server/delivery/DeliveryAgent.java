@@ -42,7 +42,7 @@ public class DeliveryAgent extends NotificationDeferrer {
             @Override
             public void run() {
                 long ngstart = new Date().getTime();
-                LOG.info("requestDelivery: notificationGenerator started for client:'" + deliveryRequest.mClientId + ", force=" + String.valueOf(deliveryRequest.mForceAll));
+                LOG.debug("requestDelivery: notificationGenerator started for client:'" + deliveryRequest.mClientId + ", force=" + String.valueOf(deliveryRequest.mForceAll));
 
                 try {
                     TalkClient client = mServer.getDatabase().findClientById(deliveryRequest.mClientId);
@@ -50,45 +50,45 @@ public class DeliveryAgent extends NotificationDeferrer {
                         throw new RuntimeException("requestDelivery: client "+deliveryRequest.mClientId+" not found");
                     }
                     if (client.isConnected() &&  !client.isReady()) {
-                        LOG.info("requestDelivery: client connected but not ready:'" + deliveryRequest.mClientId + ", not performing delivery");
+                        LOG.debug("requestDelivery: client connected but not ready:'" + deliveryRequest.mClientId + ", not performing delivery");
                         return;
                     }
 
                     TalkServer.NonReentrantLock lock = mServer.idLockNonReentrant("deliveryRequest-"+deliveryRequest.mClientId);
 
                     boolean acquired = lock.tryLock();
-                    LOG.info("requestDelivery trylock for mClientId: '" + deliveryRequest.mClientId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread()+"acquired="+acquired+" waiting="+lock.getWaiting()+" withNoForce="+lock.getWaiting(NO_FORCE)+" withForceAll="+lock.getWaiting(FORCE_ALL));
+                    LOG.debug("requestDelivery trylock for mClientId: '" + deliveryRequest.mClientId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread()+"acquired="+acquired+" waiting="+lock.getWaiting()+" withNoForce="+lock.getWaiting(NO_FORCE)+" withForceAll="+lock.getWaiting(FORCE_ALL));
 
                     if (!acquired && lock.getWaiting(FORCE_ALL) > 0) {
                         // we are sure that that there are other threads waiting to be performed
                         // with a forceAll so we can just throw away this request
-                        LOG.info("requestDelivery enough forceAll waiters, throwing away request for mClientId: '" + deliveryRequest.mClientId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread()+"acquired="+acquired+" waiting withForceAll="+lock.getWaiting(FORCE_ALL));
+                        LOG.debug("requestDelivery enough forceAll waiters, throwing away request for mClientId: '" + deliveryRequest.mClientId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread()+"acquired="+acquired+" waiting withForceAll="+lock.getWaiting(FORCE_ALL));
                         return;
                     }
 
                     if (!deliveryRequest.mForceAll && !acquired && lock.getWaiting(NO_FORCE) > 0) {
                         // we are sure that that there are other threads waiting to be performed
                         // so we can just throw away this request
-                        LOG.info("requestDelivery enough waiters, throwing away request for mClientId: '" + deliveryRequest.mClientId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread()+"acquired="+acquired+" waiting withNoForce="+lock.getWaiting(NO_FORCE));
+                        LOG.debug("requestDelivery enough waiters, throwing away request for mClientId: '" + deliveryRequest.mClientId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread()+"acquired="+acquired+" waiting withNoForce="+lock.getWaiting(NO_FORCE));
                         return;
                     }
 
                     try {
                         String waiterType = deliveryRequest.mForceAll ? FORCE_ALL : NO_FORCE;
-                        LOG.info("requestDelivery will lock mClientId: '" + deliveryRequest.mClientId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread()+", waiterType="+waiterType);
+                        LOG.debug("requestDelivery will lock mClientId: '" + deliveryRequest.mClientId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread()+", waiterType="+waiterType);
                         if (!acquired) {
                             lock.lock(waiterType);
                         }
                         long start = new Date().getTime();
 
-                        LOG.info("requestDelivery acquired lock for mClientId: '" + deliveryRequest.mClientId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread()+", waiterType="+waiterType);
+                        LOG.debug("requestDelivery acquired lock for mClientId: '" + deliveryRequest.mClientId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread()+", waiterType="+waiterType);
                         deliveryRequest.perform();
                         long stop = new Date().getTime();
-                        LOG.info("requestDelivery ready after "+(stop-start)+" msec for mClientId: '" + deliveryRequest.mClientId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread()+", waiterType="+waiterType);
+                        LOG.debug("requestDelivery ready after "+(stop-start)+" msec for mClientId: '" + deliveryRequest.mClientId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread()+", waiterType="+waiterType);
                     } catch (InterruptedException e) {
-                        LOG.info("requestDelivery: interrupted" + e);
+                        LOG.debug("requestDelivery: interrupted" + e);
                     } finally {
-                        LOG.info("requestDelivery releasing lock for mClientId: '" + deliveryRequest.mClientId + "' with id "+lock+", hash="+lock.hashCode()+",thread="+Thread.currentThread());
+                        LOG.debug("requestDelivery releasing lock for mClientId: '" + deliveryRequest.mClientId + "' with id "+lock+", hash="+lock.hashCode()+",thread="+Thread.currentThread());
                         lock.unlock();
                     }
 
@@ -97,7 +97,7 @@ public class DeliveryAgent extends NotificationDeferrer {
                 }
                 long ngstop = new Date().getTime();
 
-                LOG.info("requestDelivery: notificationGenerator finished in "+(ngstop-ngstart)+" msec for client:'" + deliveryRequest.mClientId + ", force=" + String.valueOf(deliveryRequest.mForceAll));
+                LOG.debug("requestDelivery: notificationGenerator finished in "+(ngstop-ngstart)+" msec for client:'" + deliveryRequest.mClientId + ", force=" + String.valueOf(deliveryRequest.mForceAll));
 
             }
         };
