@@ -286,12 +286,35 @@ public class TalkServer {
         }
     }
 
+    private String mMonitorId;
+    private String mMonitorCLientId;
+
+    public void monitorLock(String monitorId, String clientId) {
+        mMonitorId = monitorId;
+        mMonitorCLientId = clientId;
+        LOG.info("monitoring idLock:"+monitorId+" for client "+clientId);
+
+    }
+
     public String idLock(String id) {
+        if (id == null || id.length() == 0) {
+            LOG.error("idLock: null id");
+            for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
+                LOG.error("idLock: null id:"+id+":"+ste);
+            }
+            throw new RuntimeException("idlock null");
+        }
         synchronized (mIdLocks) {
             String lock = mIdLocks.get(id);
             if (lock == null) {
                 lock = new String(id);
                 mIdLocks.put(id, lock);
+            }
+            if (id.equals(mMonitorId)) {
+                LOG.info(">>>>>>> Accessing idLock:"+id+" for client "+ mMonitorCLientId + " from:");
+                for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
+                   LOG.info("idLock:"+id+":"+ste);
+                }
             }
             return lock;
         }

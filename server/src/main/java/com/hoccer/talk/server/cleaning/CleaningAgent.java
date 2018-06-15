@@ -46,7 +46,7 @@ public class CleaningAgent {
     private static final long UNUSED_KEY_LIFE_TIME = 2 * MONTHS;
     private static final long NO_RELATIONSHIP_LIFE_TIME = 2 * MONTHS;
     private static final long DELETED_CLIENT_LIFE_TIME = 2 * MONTHS;
-    private static final long UNUSED_CLIENT_LIFE_TIME = 6 * MONTHS;
+    private static final long UNUSED_CLIENT_LIFE_TIME = 24 * MONTHS;
 
     private static final long DELETED_GROUP_MEMBER_LIFE_TIME = 2 * MONTHS;
     private static final long DELETED_GROUP_PRESENCE_LIFE_TIME = 2 * MONTHS;

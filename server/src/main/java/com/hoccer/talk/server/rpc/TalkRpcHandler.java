@@ -1439,6 +1439,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         if (clientId == null) {
             LOG.error("outDeliveryRequest null clientId on connection: '" + mConnection.getConnectionId() + "', address " + mConnection.getRemoteAddress());
         }
+
         boolean attachmentError = false;
         String attachmentErrorReason = "no error";
 
@@ -1470,6 +1471,10 @@ public class TalkRpcHandler implements ITalkRpcServer {
             delivery.ensureDates();
             delivery.setMessageId(message.getMessageId());
             delivery.setSenderId(clientId);
+
+            //if ("185bc899-0b1f-4fdb-b2d6-095d7e4fa404".equals(delivery.getReceiverId())) {
+            //    mServer.monitorLock(messageId, delivery.getReceiverId());
+            //}
 
             boolean hasAttachmentState = delivery.getAttachmentState() != null && !TalkDelivery.ATTACHMENT_STATE_NONE.equals(delivery.getAttachmentState());
 
@@ -1787,6 +1792,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 }
                 TalkDelivery result = new TalkDelivery();
                 result.updateWith(delivery, TalkDelivery.REQUIRED_IN_UPDATE_FIELDS_SET);
+                LOG.debug("Done inDeliveryConfirm for messageId "+messageId);
                 return result;
             } else {
                 throw new RuntimeException("inDeliveryConfirm '"+confirmationState+"': no delivery found for message with id '" + messageId + "' for client with id '" + clientId + "'");
@@ -1832,6 +1838,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 LOG.error("outDeliveryAcknowledge '"+acknowledgeState+"' : no delivery found for message with id '" + messageId + "' for recipient with id '" + recipientId + "'");
                 throw new RuntimeException("outDeliveryAcknowledge '"+acknowledgeState+"' : no delivery found for message with id '" + messageId + "' for recipient with id '" + recipientId + "'");
             }
+            LOG.debug("Done outDeliveryAcknowledge for messageId "+messageId);
             return result;
         }
     }
@@ -1890,6 +1897,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 }
                 TalkDelivery result = new TalkDelivery();
                 result.updateWith(delivery, TalkDelivery.REQUIRED_OUT_UPDATE_FIELDS_SET);
+                LOG.debug("Done deliverySenderChangeState for messageId "+messageId);
                 return result;
             } else {
                 throw new RuntimeException("no delivery found for message with id '" + messageId + "' for recipient with id '" + recipientId + "'");
@@ -1940,6 +1948,8 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 LOG.warn("no delivery found for message with id '" + messageId + "' for recipient with id '" + recipientId + "', probably already also deleted on server");
             }
         }
+        LOG.debug("Done outDeliveryUnknown for messageId "+messageId);
+
     }
 
     @Override
@@ -1981,6 +1991,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 LOG.warn("no delivery found for message with id '" + messageId + "' for recipient with id '" + clientId + "', probably already also deleted on server");
             }
         }
+        LOG.debug("Done inDeliveryUnknown for messageId "+messageId);
     }
 
 
@@ -2009,6 +2020,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 setDeliveryState(delivery, TalkDelivery.STATE_REJECTED, true, false);
                 TalkDelivery result = new TalkDelivery();
                 result.updateWith(delivery, TalkDelivery.REQUIRED_OUT_UPDATE_FIELDS_SET);
+                LOG.debug("Done inDeliveryReject for messageId "+messageId);
                 return result;
             } else {
                 throw new RuntimeException("deliveryReject(): no delivery found for message with id '" + messageId + "' for recipient with id '" + clientId + "'");

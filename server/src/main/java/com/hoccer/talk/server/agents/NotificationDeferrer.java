@@ -25,10 +25,10 @@ public class NotificationDeferrer {
 
         if (context.get() != null) {
             ArrayList<Runnable> queue = context.get();
-            LOG.trace("context is currently set (" + queue.size() + " items). Queueing notification generator.");
+            LOG.debug("NotificationDeferrer: context is currently set (" + queue.size() + " items). Queueing notification generator.");
             queue.add(notificationGenerator);
         } else {
-            LOG.trace("context is currently NOT set. Immediately executing notification generators");
+            LOG.debug("NotificationDeferrer: context is currently NOT set. Immediately executing notification generators");
             mExecutor.execute(notificationGenerator);
         }
     }
