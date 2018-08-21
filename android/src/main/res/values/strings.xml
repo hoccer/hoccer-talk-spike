@@ -469,6 +469,9 @@
     <string name="polling_summary">Poll server directly for new messages.</string>
     <string name="show_worldwide">Show</string>
 
+    <string name="accept_eula">Accept</string>
+    <string name="decline_eula">Decline</string>
+
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>
         <item quantity="other">%d Contacts</item>
@@ -483,4 +486,6 @@
         <item quantity="one">1 Attachment</item>
         <item quantity="other">%d Attachments</item>
     </plurals>
+
+
 </resources>

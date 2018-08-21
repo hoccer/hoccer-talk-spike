@@ -16,6 +16,7 @@ import com.hoccer.xo.android.*;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.activity.component.ViewPagerActivityComponent;
+import com.hoccer.xo.android.eulaprompt.EulaPrompt;
 import com.hoccer.xo.android.fragment.ChatListFragment;
 import com.hoccer.xo.android.fragment.NearbyChatListFragment;
 import com.hoccer.xo.android.passwordprotection.PasswordProtection;
@@ -69,6 +70,8 @@ public abstract class ChatsBaseActivity extends ComposableActivity implements IX
         super.onCreate(savedInstanceState);
 
         registerCrashManager();
+
+        EulaPrompt.get();
 
         startXoClientService();
 

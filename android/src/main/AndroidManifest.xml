@@ -269,6 +269,10 @@
                   android:label="@string/set_password"
                   android:windowSoftInputMode="stateAlwaysVisible|adjustResize"/>
 
+        <activity android:name="com.hoccer.xo.android.eulaprompt.EulaPromptActivity"
+                  android:theme="@android:style/Theme.Holo.Light.NoActionBar"
+                  android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
+
         <service android:name="com.hoccer.xo.android.credentialtransfer.CredentialExportService"/>
 
         <service android:name="com.hoccer.xo.android.credentialtransfer.DisconnectService"/>
