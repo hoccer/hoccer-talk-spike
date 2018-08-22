@@ -271,7 +271,7 @@
 
         <activity android:name="com.hoccer.xo.android.eulaprompt.EulaPromptActivity"
                   android:theme="@android:style/Theme.Holo.Light.NoActionBar"
-                  android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
+                  android:windowSoftInputMode="stateAlwaysHidden" />
 
         <service android:name="com.hoccer.xo.android.credentialtransfer.CredentialExportService"/>
 
