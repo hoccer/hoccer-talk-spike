@@ -190,7 +190,7 @@ public abstract class ChatsBaseActivity extends ComposableActivity implements IX
             handlePushMessageIntent(intent);
         } else if (intent.getBooleanExtra(INTENT_EXTRA_EXIT, false)) {
             finish();
-            XoApplication.restartApplication();
+            XoApplication.killProcess();
         }
     }
 

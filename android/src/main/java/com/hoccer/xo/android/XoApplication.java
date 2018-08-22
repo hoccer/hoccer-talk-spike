@@ -333,7 +333,7 @@ public class XoApplication extends MultiDexApplication {
         return sIncomingExecutor;
     }
 
-    public static void restartApplication() {
+    public static void killProcess() {
         android.os.Process.killProcess(android.os.Process.myPid());
     }
 
