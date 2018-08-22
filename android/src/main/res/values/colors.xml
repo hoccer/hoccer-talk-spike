@@ -4,6 +4,8 @@
     <color name="secondary">#ffc8c8c8</color>
     <color name="tertiary">#004ce5</color>
 
+    <color name="very_light_gray">#fff0f0</color>
+
     <color name="text_secondary">#8e8e93</color>
 
     <color name="black_transparency_50_percent">#77000000</color>

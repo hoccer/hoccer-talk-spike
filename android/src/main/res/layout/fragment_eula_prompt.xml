@@ -1,41 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="top|center_vertical"
+                android:orientation="vertical"
+                android:padding="20dp"
+                android:background="@color/very_light_gray">
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="horizontal"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:gravity="center_vertical"
-              android:background="@color/background_default">
+    <TextView
+            android:id="@+id/eulaHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/eulaHeader"
+            android:textAlignment="center"
+            android:textSize="24sp"
+            android:textStyle="bold" />
 
-    <LinearLayout android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:orientation="vertical">
+    <Button
+            android:id="@+id/btn_accept_eula"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/btn_decline_eula"
+            android:layout_alignBottom="@+id/btn_decline_eula"
+            android:layout_alignParentEnd="true"
+            android:text="@string/accept_eula"
+            style="@style/ButtonAppBaseTheme"/>
 
-        <ImageView android:layout_width="136dp"
-                   android:layout_height="136dp"
-                   android:src="@drawable/about_icon"
-                   android:layout_gravity="center_horizontal"/>
+    <Button
+            android:id="@+id/btn_decline_eula"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:text="@string/decline_eula"
+            style="@style/ButtonAppBaseTheme"/>
 
-        <LinearLayout android:layout_width="match_parent"
-                      android:layout_height="match_parent"
-                      android:layout_marginTop="40dp"
-                      android:paddingLeft="40dp"
-                      android:paddingRight="40dp">
+    <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/btn_accept_eula"
+            android:layout_below="@+id/eulaHeader"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="20dp"
+            android:layout_marginTop="20dp"
+            android:background="@color/background_default">
 
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-            <Button android:id="@+id/btn_eula_accept"
-                    android:layout_width="wrap_content"
+            <TextView
+                    android:id="@+id/eulaText"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/accept_eula"
-                    android:enabled="true"
-                    style="@style/ButtonAppBaseTheme"/>
-
-            <Button android:id="@+id/btn_eula_decline"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/decline_eula"
-                    android:enabled="true"
-                    style="@style/ButtonAppBaseTheme"/>
+                    android:text="@string/eulaText"
+                    android:textSize="18sp" />
         </LinearLayout>
-    </LinearLayout>
-</LinearLayout>
+    </ScrollView>
+
+</RelativeLayout>
