@@ -2,8 +2,10 @@ package com.hoccer.xo.android.eulaprompt;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import com.artcom.hoccer.R;
 import com.hoccer.xo.android.BackgroundManager;
 import com.hoccer.xo.android.XoApplication;
@@ -11,10 +13,9 @@ import com.hoccer.xo.android.passwordprotection.activity.PasswordPromptActivity;
 
 public class EulaPrompt implements Application.ActivityLifecycleCallbacks, BackgroundManager.Listener {
 
-    public static final String EULA_PREFERENCES = "eulaprompt_preferences";
-
     private static EulaPrompt sInstance;
     private boolean accepted;
+    private int eulaVersion = 1;
 
     public static EulaPrompt get() {
         if (sInstance == null) {
@@ -26,6 +27,7 @@ public class EulaPrompt implements Application.ActivityLifecycleCallbacks, Backg
     private EulaPrompt() {
         XoApplication.get().registerActivityLifecycleCallbacks(this);
         BackgroundManager.get().registerListener(this);
+        accepted = isAccepted(XoApplication.get().getBaseContext());
     }
 
     @Override
@@ -48,10 +50,16 @@ public class EulaPrompt implements Application.ActivityLifecycleCallbacks, Backg
         activity.startActivity(intent);
     }
 
-    public void accept() {
-        accepted = true;    
+    public void accept(Activity activity) {
+        accepted = true;
+        PreferenceManager.getDefaultSharedPreferences(activity).edit().putInt(activity.getString(R.string.preference_key_eula_version), eulaVersion).apply();
     }
-    
+
+    private boolean isAccepted(Context context){
+        int version = PreferenceManager.getDefaultSharedPreferences(context).getInt(context.getString(R.string.preference_key_eula_version), 0);
+        return eulaVersion == version;
+    }
+
     @Override
     public void onActivityPaused(Activity activity) {}
 

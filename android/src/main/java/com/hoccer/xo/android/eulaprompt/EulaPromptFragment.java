@@ -14,8 +14,8 @@ public class EulaPromptFragment extends Fragment {
     public static final String ARG_HINT_STRING_ID = "ARG_HINT_STRING_ID";
 
     EulaPromptListener mListener;
-
-    private Button mUnlockButton;
+    private Button mAcceptButton;
+    private Button mDeclineButton;
 
     public interface EulaPromptListener {
         void onEulaAccepted();
@@ -36,19 +36,20 @@ public class EulaPromptFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        mUnlockButton = (Button) view.findViewById(R.id.btn_eula_accept);
-        mUnlockButton.setOnClickListener(new View.OnClickListener() {
+        mAcceptButton = (Button) view.findViewById(R.id.btn_accept_eula);
+        mAcceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                verifyPassword();
+                mListener.onEulaAccepted();
             }
         });
-
-    }
-
-    private void verifyPassword() {
-         mListener.onEulaAccepted();
+        mDeclineButton = (Button) view.findViewById(R.id.btn_decline_eula);
+        mDeclineButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mListener.onEulaDeclined();
+            }
+        });
     }
 
 }

@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import com.artcom.hoccer.R;
+import com.hoccer.xo.android.activity.ChatsActivity;
+import com.hoccer.xo.android.activity.ChatsBaseActivity;
 
 public class EulaPromptActivity extends FragmentActivity implements EulaPromptFragment.EulaPromptListener {
 
@@ -31,21 +33,23 @@ public class EulaPromptActivity extends FragmentActivity implements EulaPromptFr
 
     @Override
     public void onEulaAccepted() {
-        EulaPrompt.get().accept();
+        EulaPrompt.get().accept(this);
         setResult(RESULT_OK);
         finish();
     }
 
     @Override
     public void onEulaDeclined() {
-        setResult(RESULT_CANCELED);
+        Intent intent = new Intent(this, ChatsActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra(ChatsBaseActivity.INTENT_EXTRA_EXIT, true);
+        startActivity(intent);
         finish();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        // avoid transition animation when the activity is resumed->paused->resumed, when it was already on top
         overridePendingTransition(0, 0);
     }
 
