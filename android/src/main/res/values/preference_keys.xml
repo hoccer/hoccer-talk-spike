@@ -12,4 +12,5 @@
     <string name="preference_key_worldwide_category">preference_key_worldwide_category</string>
     <string name="preference_key_preference_screen">preference_key_preference_screen</string>
     <string name="preference_key_enable_worldwide">preference_key_enable_worldwide</string>
+    <string name="preference_key_eula_version">preference_key_eula_version</string>
 </resources>

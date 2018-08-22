@@ -472,6 +472,9 @@
     <string name="accept_eula">Accept</string>
     <string name="decline_eula">Decline</string>
 
+    <string name="eulaHeader">End User Licence Agreement (EULA)</string>
+    <string name="eulaText">We do not tolerate abusive behaviour or the dissemination of objectionable content via this App. While we are not able to see what you transmit, the receiver can flag and report content he or she considers offensive. We might temporarily or permanently suspend your user account when you engage in abusive behaviour.\n\nYou also agree not use the App to prepare a war of aggression, acts of terrorism, the violent removal of an elected government, high treason, indiscriminate bombardment of civilian populations, targeted killings using drone strikes, ignition of non-peaceful nuclear or non-nuclear explosive devices or to solely terminate your relationship via online messaging.</string>
+
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>
         <item quantity="other">%d Contacts</item>

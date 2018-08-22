@@ -458,6 +458,9 @@
     <string name="polling_summary">Nachrichten direkt beim Server abrufen.</string>
     <string name="show_worldwide">Anzeigen</string>
 
+    <string name="eulaHeader">Endnutzerlizenzvereinbarung</string>
+    <string name="eulaText">Wir tolerieren keinen Missbrauch der App, insbesondere zur Verbreitung anstössiger Inhalte. Obwohl wir keinen Einblick in die übermittelten Inhalte haben, kann der Empfänger uns Nachrichten übermitteln, die er oder sie als anstössig empfindet. In Fällen missbräuchlicher Nutzung behalten wir uns vor, den Zugang zum Messenger vorübergehend oder dauerhaft zu sperren.\n\n Sie stimmen zudem zu, die App nicht zu benutzen, um einen Angriffskrieg vorzubereiten, Terrorakte zu begehen, gewaltsam eine gewählte Regierung zu beseitigen, Hochverrat zu begehen, Zivilbevölkerungen zu bombardieren, gezielte Tötungen mittels Drohnen durchzuführen, nukleare Explosionen herbeizuführen oder in einer Beziehung allein mittels einer Chat-Nachricht Schluß zu machen.</string>
+
     <plurals name="contact_count">
         <item quantity="one">1 Kontakt</item>
         <item quantity="other">%d Kontakte</item>
