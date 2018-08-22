@@ -15,6 +15,15 @@
             </intent>
         </Preference>
         <Preference
+                android:title="@string/eulaHeader"
+                android:key="preference_eula">
+            <intent android:targetClass="com.hoccer.xo.android.activity.LegalImprintActivity"
+                    android:targetPackage="@string/package_name"
+                    android:action="android.intent.action.VIEW">
+                <extra android:name="xo_legal_imprint_display_mode" android:value="EULA"></extra>
+            </intent>
+        </Preference>
+        <Preference
                 android:title="@string/menu_faq"
                 android:key="preference_faq">
             <intent android:targetClass="com.hoccer.xo.android.activity.FaqTutorialActivity"
